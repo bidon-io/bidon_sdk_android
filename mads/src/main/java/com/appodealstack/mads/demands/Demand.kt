@@ -23,8 +23,6 @@ interface RewardedProvider {
 
 interface Demand {
     val demandId: DemandId
-    val adTypes: Set<AdType>
 
-    fun getAdUnit(adType: AdType): AdUnit
     suspend fun init(context: Context, configParams: Bundle)
 }
