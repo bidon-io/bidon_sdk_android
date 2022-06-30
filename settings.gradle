@@ -14,5 +14,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Mediation of Mediations"
 include ':app'
-include ':mads'
-include ':adapter:admob'
+include ':bidon'
+include ':adapter:applovin'
