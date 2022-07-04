@@ -3,15 +3,14 @@ package com.appodealstack.mads
 import android.os.Bundle
 import com.appodealstack.mads.analytics.AnalyticsSource
 import com.appodealstack.mads.analytics.AnalyticsSourceImpl
+import com.appodealstack.mads.auctions.*
+import com.appodealstack.mads.auctions.AuctionImpl
 import com.appodealstack.mads.auctions.AuctionResultsHolder
 import com.appodealstack.mads.auctions.AuctionResultsHolderImpl
-import com.appodealstack.mads.auctions.AuctionService
-import com.appodealstack.mads.auctions.AuctionServiceImpl
-import com.appodealstack.mads.base.AdType
 import com.appodealstack.mads.base.ext.logInternal
 import com.appodealstack.mads.demands.*
-import com.appodealstack.mads.demands.listeners.ListenersHolder
-import com.appodealstack.mads.demands.listeners.ListenersHolderImpl
+import com.appodealstack.mads.demands.ListenersHolder
+import com.appodealstack.mads.demands.ListenersHolderImpl
 
 val SdkCore: Core by lazy {
     CoreImpl()
@@ -42,7 +41,7 @@ internal class CoreImpl(
     DemandsSource by DemandsSourceImpl(),
     AnalyticsSource by AnalyticsSourceImpl(),
     ListenersHolder by ListenersHolderImpl(),
-    AuctionService by AuctionServiceImpl() {
+    Auction by AuctionImpl() {
 
     override fun loadAd(demandAd: DemandAd) {
         auctionResultsHolder.clearResults(demandAd)

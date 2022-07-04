@@ -9,8 +9,8 @@ import com.appodealstack.mads.analytics.AnalyticsSource
 import com.appodealstack.mads.base.ContextProvider
 import com.appodealstack.mads.base.ext.logInternal
 import com.appodealstack.mads.config.Configuration
-import com.appodealstack.mads.config.MadsConfigurator
-import com.appodealstack.mads.config.MadsConfiguratorInstance
+import com.appodealstack.mads.config.BidonConfigurator
+import com.appodealstack.mads.config.BidonConfiguratorInstance
 import com.appodealstack.mads.config.StaticJsonConfiguration
 import com.appodealstack.mads.demands.Demand
 import com.appodealstack.mads.demands.DemandsSource
@@ -27,7 +27,7 @@ internal class BidOnInitializationImpl : BidOnInitialization {
     private val analytics = mutableMapOf<Class<out Analytic>, Analytic>()
     private val scope: CoroutineScope get() = CoroutineScope(Dispatchers.Default)
 
-    private val madsConfigurator: MadsConfigurator get() = MadsConfiguratorInstance
+    private val bidonConfigurator: BidonConfigurator get() = BidonConfiguratorInstance
 
     override fun withContext(context: Context): BidOnInitialization {
         ContextProvider.setContext(context)
@@ -35,7 +35,7 @@ internal class BidOnInitializationImpl : BidOnInitialization {
     }
 
     override fun withConfigurations(vararg configurations: Configuration): BidOnInitialization {
-        madsConfigurator.addConfigurations(*configurations)
+        bidonConfigurator.addConfigurations(*configurations)
         return this
     }
 
@@ -75,7 +75,7 @@ internal class BidOnInitializationImpl : BidOnInitialization {
             logInternal("Demands", "Demand is initializing: $demand")
             demand.init(
                 context = contextProvider.requiredContext,
-                configParams = madsConfigurator.getDemandConfig(demand.demandId)
+                configParams = bidonConfigurator.getDemandConfig(demand.demandId)
             )
             logInternal("Demands", "Demand is initialized: $demand")
             sdkCore.addDemands(demand)
@@ -87,7 +87,7 @@ internal class BidOnInitializationImpl : BidOnInitialization {
         analytics.forEach { (_, analytics) ->
             analytics.init(
                 context = contextProvider.requiredContext,
-                configParams = madsConfigurator.getServiceConfig(analytics.analyticsId)
+                configParams = bidonConfigurator.getServiceConfig(analytics.analyticsId)
             )
             sdkCore.addAnalytics(analytics)
         }

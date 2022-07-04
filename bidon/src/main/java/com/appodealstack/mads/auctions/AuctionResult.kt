@@ -27,5 +27,3 @@ sealed interface AuctionData {
         }
     }
 }
-
-

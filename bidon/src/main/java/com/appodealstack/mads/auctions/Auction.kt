@@ -2,32 +2,56 @@ package com.appodealstack.mads.auctions
 
 import com.appodealstack.mads.base.ext.logInternal
 import com.appodealstack.mads.demands.DemandError
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
 import kotlin.math.roundToInt
 
 internal interface Auction {
 
     fun withComparator(comparator: Comparator<AuctionData.Success>): Auction
 
-    suspend fun runAuction(
+    fun startAuction(
         mediationRequests: Set<AuctionRequest.Mediation>,
         postBidRequests: Set<AuctionRequest.PostBid>,
         onDemandLoaded: (intermediateResult: AuctionData.Success) -> Unit,
         onDemandLoadFailed: (intermediateResult: AuctionData.Failure) -> Unit,
-    ): Result<List<AuctionData.Success>>
+        onAuctionFinished: (allResults: List<AuctionData.Success>) -> Unit,
+        onAuctionFailed: (cause: Throwable) -> Unit,
+    )
 }
 
 internal class AuctionImpl : Auction {
     private var comparator: Comparator<AuctionData.Success> = DefaultPriceFloorComparator
+    private val scope get() = CoroutineScope(Dispatchers.Default)
 
     override fun withComparator(comparator: Comparator<AuctionData.Success>): Auction {
         this.comparator = comparator
         return this
     }
 
-    override suspend fun runAuction(
+    override fun startAuction(
+        mediationRequests: Set<AuctionRequest.Mediation>,
+        postBidRequests: Set<AuctionRequest.PostBid>,
+        onDemandLoaded: (intermediateResult: AuctionData.Success) -> Unit,
+        onDemandLoadFailed: (intermediateResult: AuctionData.Failure) -> Unit,
+        onAuctionFinished: (allResults: List<AuctionData.Success>) -> Unit,
+        onAuctionFailed: (cause: Throwable) -> Unit,
+    ) {
+        scope.launch {
+            runAuction(
+                mediationRequests = mediationRequests,
+                postBidRequests = postBidRequests,
+                onDemandLoaded = onDemandLoaded,
+                onDemandLoadFailed = onDemandLoadFailed
+            ).onSuccess {
+                onAuctionFinished.invoke(it)
+            }.onFailure {
+                // no one demand has loaded Ad
+                onAuctionFailed.invoke(it)
+            }
+        }
+    }
+
+    private suspend fun runAuction(
         mediationRequests: Set<AuctionRequest.Mediation>,
         postBidRequests: Set<AuctionRequest.PostBid>,
         onDemandLoaded: (intermediateResult: AuctionData.Success) -> Unit,

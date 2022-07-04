@@ -1,11 +1,8 @@
 package com.appodealstack.mads.demands
 
-/**
- * BidOn Errors
- */
-sealed class BidOnError : Throwable()
+sealed class BidonError : Throwable()
 
-sealed class DemandError : BidOnError() {
+sealed class DemandError : BidonError() {
     object Unspecified : DemandError()
     object NoFill : DemandError()
     object AdLoadFailed : DemandError()
@@ -17,6 +14,4 @@ sealed class DemandError : BidOnError() {
     object Expired : DemandError()
 }
 
-sealed class AnalyticsError : BidOnError() {
-
-}
+sealed class AnalyticsError : BidonError()

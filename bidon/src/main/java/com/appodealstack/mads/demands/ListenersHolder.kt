@@ -1,11 +1,9 @@
-package com.appodealstack.mads.demands.listeners
+package com.appodealstack.mads.demands
 
 import com.appodealstack.mads.auctions.AuctionData
 import com.appodealstack.mads.auctions.AuctionListener
 import com.appodealstack.mads.base.AdType
 import com.appodealstack.mads.base.ext.addOrRemoveIfNull
-import com.appodealstack.mads.demands.AdListener
-import com.appodealstack.mads.demands.DemandAd
 
 internal interface ListenersHolder {
     val auctionListener: AuctionListener

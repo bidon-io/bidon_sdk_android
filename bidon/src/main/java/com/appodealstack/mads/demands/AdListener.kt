@@ -32,6 +32,3 @@ interface ExtendedListener {
     fun onWinnerFound(ads: List<AuctionData.Success>) {}
 }
 
-interface AdRevenueListener {
-    fun onAdRevenuePaid(ad: AuctionData.Success)
-}

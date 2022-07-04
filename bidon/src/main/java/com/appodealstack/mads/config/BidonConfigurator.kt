@@ -3,16 +3,16 @@ package com.appodealstack.mads.config
 import android.os.Bundle
 import com.appodealstack.mads.demands.DemandId
 
-internal object MadsConfiguratorInstance : MadsConfigurator by MadsConfiguratorImpl()
+internal object BidonConfiguratorInstance : BidonConfigurator by BidonConfiguratorImpl()
 
-internal interface MadsConfigurator {
+internal interface BidonConfigurator {
     suspend fun getDemandConfig(demandId: DemandId): Bundle
     suspend fun getServiceConfig(demandId: DemandId): Bundle
     suspend fun getAuctionConfig(): Bundle
     fun addConfigurations(vararg configurations: Configuration)
 }
 
-internal class MadsConfiguratorImpl : MadsConfigurator {
+internal class BidonConfiguratorImpl : BidonConfigurator {
 
     private val emptyConfig
         get() = Config.Demand {
