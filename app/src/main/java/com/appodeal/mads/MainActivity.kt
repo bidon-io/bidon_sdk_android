@@ -5,9 +5,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.appodeal.mads.databinding.ActivityMainBinding
 import com.appodealstack.applovin.AppLovinSdkWrapper
+import com.appodealstack.applovin.ApplovinMaxDemand
 import com.appodealstack.applovin.interstitial.MaxInterstitialAdWrapper
+import com.appodealstack.bidmachine.BidMachineDemand
+import com.appodealstack.bidmachine.BidMachineDemandId
+import com.appodealstack.mads.BidOnInitializer
 import com.appodealstack.mads.auctions.AuctionData
 import com.appodealstack.mads.demands.AdListener
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -97,9 +104,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun initApplovin() {
         AppLovinSdkWrapper.getInstance(this).mediationProvider = "max"
-        AppLovinSdkWrapper.initializeSdk(this) { appLovinSdkConfiguration ->
-            println(appLovinSdkConfiguration)
-            binding.initButton.isVisible = false
-        }
+        AppLovinSdkWrapper
+            .registerPostBidDemands(
+                BidMachineDemand::class.java
+            ).initializeSdk(this) { appLovinSdkConfiguration ->
+                println(appLovinSdkConfiguration)
+                binding.initButton.isVisible = false
+            }
+
     }
 }

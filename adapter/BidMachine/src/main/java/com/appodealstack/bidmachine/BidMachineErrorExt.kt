@@ -1,9 +1,9 @@
-package com.appodealstack.mads.postbid.bidmachine
+package com.appodealstack.bidmachine
 
 import com.appodealstack.mads.demands.DemandError
 import io.bidmachine.utils.BMError
 
-internal fun BMError.asBidonError(): DemandError = when(this){
+internal fun BMError.asBidonError(): DemandError = when (this) {
     BMError.Request,
     BMError.Server,
     BMError.NoConnection -> DemandError.NetworkError

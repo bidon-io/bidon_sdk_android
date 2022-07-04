@@ -8,6 +8,7 @@ import com.appodealstack.mads.auctions.AuctionResultsHolderImpl
 import com.appodealstack.mads.auctions.AuctionService
 import com.appodealstack.mads.auctions.AuctionServiceImpl
 import com.appodealstack.mads.base.AdType
+import com.appodealstack.mads.base.ext.logInternal
 import com.appodealstack.mads.demands.*
 import com.appodealstack.mads.demands.listeners.ListenersHolder
 import com.appodealstack.mads.demands.listeners.ListenersHolderImpl
@@ -70,8 +71,8 @@ internal class CoreImpl(
     }
 
     override fun showAd(demandAd: DemandAd, adParams: Bundle) {
-        auctionResultsHolder.getTopResultOrNull(demandAd)?.objRequest?.showAd()
-            ?: println("Not loaded Ad for: $demandAd")
+        auctionResultsHolder.getTopResultOrNull(demandAd)?.objRequest?.showAd(adParams)
+            ?: logInternal(Tag, "Not loaded Ad for: $demandAd")
     }
 
     override fun canShow(demandAd: DemandAd): Boolean {

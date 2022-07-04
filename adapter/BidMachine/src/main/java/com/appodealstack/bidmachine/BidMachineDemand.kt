@@ -1,4 +1,4 @@
-package com.appodealstack.mads.postbid
+package com.appodealstack.bidmachine
 
 import android.content.Context
 import android.os.Bundle
@@ -7,11 +7,9 @@ import com.appodealstack.mads.auctions.AuctionData
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.ObjRequest
 import com.appodealstack.mads.base.AdType
-import com.appodealstack.mads.base.ContextProvider
 import com.appodealstack.mads.demands.Demand
 import com.appodealstack.mads.demands.DemandError
 import com.appodealstack.mads.demands.DemandId
-import com.appodealstack.mads.postbid.bidmachine.asBidonError
 import io.bidmachine.BidMachine
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.interstitial.InterstitialAd
@@ -24,17 +22,17 @@ import kotlin.coroutines.suspendCoroutine
 
 val BidMachineDemandId = DemandId("bidmachine")
 
-internal class BidMachineDemand : Demand.PostBid {
-    private val contextProvider = ContextProvider
+class BidMachineDemand : Demand.PostBid {
+    private lateinit var context: Context
 
     override val demandId = BidMachineDemandId
 
     override suspend fun init(context: Context, configParams: Bundle): Unit = suspendCoroutine { continuation ->
+        this.context = context
         val sourceId = configParams.getString(SourceIdKey) ?: "1" // TODO remove 1
         BidMachine.initialize(context, sourceId) {
-            // TODO seems like init callback does not work
+            continuation.resume(Unit)
         }
-        continuation.resume(Unit)
     }
 
     override fun createActionRequest(): AuctionRequest.PostBid {
@@ -63,7 +61,7 @@ internal class BidMachineDemand : Demand.PostBid {
                         auctionResult: io.bidmachine.models.AuctionResult
                     ) {
                         if (!isFinished.getAndSet(true)) {
-                            val interstitialAd = InterstitialAd(contextProvider.requiredContext)
+                            val interstitialAd = InterstitialAd(context)
                             interstitialAd.load(
                                 requireNotNull(interstitialRequest)
                             )
@@ -109,7 +107,7 @@ internal class BidMachineDemand : Demand.PostBid {
                 }
             )
             interstitialRequest = interstitialRequestBuilder.build()
-            interstitialRequest.request(contextProvider.requiredContext)
+            interstitialRequest.request(context)
         }
 
     private fun setCoreListener(interstitialAd: InterstitialAd, price: Double) {
@@ -176,7 +174,7 @@ internal class BidMachineDemand : Demand.PostBid {
             return interstitialAd.canShow()
         }
 
-        override fun showAd() {
+        override fun showAd(adParams: Bundle) {
             interstitialAd.show()
         }
     }

@@ -17,7 +17,6 @@ import com.appodealstack.mads.demands.Demand
 import com.appodealstack.mads.demands.DemandsSource
 import com.appodealstack.mads.initializing.InitializationCallback
 import com.appodealstack.mads.initializing.InitializationResult
-import com.appodealstack.mads.postbid.BidMachineDemand
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -71,7 +70,7 @@ internal class BidOnInitializationImpl : BidOnInitialization {
     }
 
     override suspend fun build(): InitializationResult {
-        registerPostBidDemands()
+        registerPostBidConfiguration()
         logInternal("Demands", "Demands: $demands")
 
         // Init Demands
@@ -108,12 +107,9 @@ internal class BidOnInitializationImpl : BidOnInitialization {
         }
     }
 
-    private fun registerPostBidDemands() {
+    private fun registerPostBidConfiguration() {
         withConfigurations(
             StaticJsonConfiguration()
-        )
-        registerDemands(
-            BidMachineDemand::class.java
         )
     }
 }

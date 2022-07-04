@@ -20,3 +20,4 @@ rootProject.name = "Mediation of Mediations"
 include ':app'
 include ':bidon'
 include ':adapter:applovin'
+include ':adapter:BidMachine'

@@ -35,7 +35,6 @@ class ApplovinMaxDemand : Demand.Mediation {
             override suspend fun execute(): AuctionData {
                 return executeRequest(demandAd)
             }
-
         }
     }
 
@@ -101,8 +100,10 @@ class ApplovinMaxDemand : Demand.Mediation {
             return objRequest.isReady
         }
 
-        override fun showAd() {
-            objRequest.showAd()
+        override fun showAd(adParams: Bundle) {
+            val placement = adParams.getString(placementKey)
+            val customData = adParams.getString(customDataKey)
+            objRequest.showAd(placement, customData)
         }
     }
 
