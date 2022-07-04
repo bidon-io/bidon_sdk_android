@@ -2,17 +2,12 @@ package com.appodeal.mads
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.applovin.mediation.MaxError
 import com.applovin.mediation.ads.MaxInterstitialAd
 import com.appodeal.mads.databinding.ActivityMainBinding
 import com.appodealstack.applovin.AppLovinSdkWrapper
 import com.appodealstack.applovin.interstitial.MaxInterstitialAdWrapper
 import com.appodealstack.mads.auctions.AuctionData
 import com.appodealstack.mads.demands.AdListener
-import com.appodealstack.mads.demands.DemandError
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,13 +29,15 @@ class MainActivity : AppCompatActivity() {
 //        initViewsForApplovin(binding)
 //        wannaApplovinInterstitial()
 
-        initApplovin()
         initViewsForBidon(binding)
-        wannaBidonInterstitial()
     }
 
     private fun initViewsForBidon(binding: ActivityMainBinding) {
         with(binding) {
+            initButton.setOnClickListener {
+                initApplovin()
+                setBidonInterstitialListener()
+            }
             loadButton.setOnClickListener {
                 println("Interstitial: loadAd clicked")
                 maxInterstitialAdWrapper.loadAd()
@@ -56,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun wannaBidonInterstitial() {
+    private fun setBidonInterstitialListener() {
         maxInterstitialAdWrapper.setListener(object : AdListener {
             override fun onDemandAdLoaded(ad: AuctionData.Success) {
                 super.onDemandAdLoaded(ad)
@@ -76,7 +73,7 @@ class MainActivity : AppCompatActivity() {
             override fun onAdLoaded(ad: AuctionData.Success) {
                 // Interstitial ad is ready to be shown. interstitialAd.isReady() will now return 'true'
                 println("MainActivity Interstitial: onAdLoaded($ad)")
-                ad.objResponse
+                ad.objRequest.showAd()
             }
 
             override fun onAdDisplayed(ad: AuctionData.Success) {
@@ -84,13 +81,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onAdDisplayFailed(ad: AuctionData.Failure) {
-                maxInterstitialAd.loadAd()
+                println("MainActivity Interstitial: onAdDisplayed($ad)")
             }
 
             override fun onAdHidden(ad: AuctionData.Success) {
                 // Interstitial ad is hidden. Pre-load the next ad
                 println("MainActivity Interstitial: onAdHidden($ad)")
-                maxInterstitialAd.loadAd()
             }
 
             override fun onAdClicked(ad: AuctionData.Success) {

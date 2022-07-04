@@ -14,6 +14,8 @@ import com.appodealstack.mads.demands.DemandId
 import com.appodealstack.mads.postbid.bidmachine.asBidonError
 import io.bidmachine.BidMachine
 import io.bidmachine.PriceFloorParams
+import io.bidmachine.interstitial.InterstitialAd
+import io.bidmachine.interstitial.InterstitialListener
 import io.bidmachine.interstitial.InterstitialRequest
 import io.bidmachine.utils.BMError
 import java.util.concurrent.atomic.AtomicBoolean
@@ -46,12 +48,14 @@ internal class BidMachineDemand : Demand.PostBid {
     private suspend fun executeRequest(additionalData: AuctionRequest.AdditionalData?): AuctionData =
         suspendCoroutine { continuation ->
             val isFinished = AtomicBoolean(false)
+            var interstitialRequest: InterstitialRequest? = null
             val interstitialRequestBuilder = InterstitialRequest.Builder()
             additionalData?.let {
                 interstitialRequestBuilder.setPriceFloorParams(
                     PriceFloorParams().addPriceFloor(it.priceFloor)
                 )
             }
+
             interstitialRequestBuilder.setListener(
                 object : InterstitialRequest.AdRequestListener {
                     override fun onRequestSuccess(
@@ -59,16 +63,17 @@ internal class BidMachineDemand : Demand.PostBid {
                         auctionResult: io.bidmachine.models.AuctionResult
                     ) {
                         if (!isFinished.getAndSet(true)) {
-                            setCoreListener(interstitialRequestBuilder)
+                            val interstitialAd = InterstitialAd(contextProvider.requiredContext)
+                            interstitialAd.load(
+                                requireNotNull(interstitialRequest)
+                            )
+                            interstitialRequest?.removeListener(this)
+                            setCoreListener(interstitialAd, auctionResult.price)
                             continuation.resume(
                                 AuctionData.Success(
                                     demandId = demandId,
                                     price = auctionResult.price,
-                                    objRequest = object : ObjRequest(interstitialRequestBuilder) {
-                                        override fun showAd() {
-                                            TODO()
-                                        }
-                                    },
+                                    objRequest = createObjRequest(interstitialAd),
                                     objResponse = auctionResult,
                                     adType = AdType.Interstitial,
                                 )
@@ -78,7 +83,7 @@ internal class BidMachineDemand : Demand.PostBid {
 
                     override fun onRequestFailed(request: InterstitialRequest, bmError: BMError) {
                         if (!isFinished.getAndSet(true)) {
-                            setCoreListener(interstitialRequestBuilder)
+                            interstitialRequest?.removeListener(this)
                             val failure = AuctionData.Failure(
                                 demandId = demandId,
                                 adType = AdType.Interstitial,
@@ -91,7 +96,7 @@ internal class BidMachineDemand : Demand.PostBid {
 
                     override fun onRequestExpired(request: InterstitialRequest) {
                         if (!isFinished.getAndSet(true)) {
-                            setCoreListener(interstitialRequestBuilder)
+                            interstitialRequest?.removeListener(this)
                             val failure = AuctionData.Failure(
                                 demandId = demandId,
                                 adType = AdType.Interstitial,
@@ -103,15 +108,77 @@ internal class BidMachineDemand : Demand.PostBid {
                     }
                 }
             )
-            interstitialRequestBuilder
-                .build()
-                .request(contextProvider.requiredContext)
+            interstitialRequest = interstitialRequestBuilder.build()
+            interstitialRequest.request(contextProvider.requiredContext)
         }
 
-    private fun setCoreListener(interstitialRequestBuilder: InterstitialRequest.Builder) {
-        interstitialRequestBuilder.setListener(
-            SdkCore.getListenerForDemand(AdType.Interstitial).wrapToBidMachineListener()
+    private fun setCoreListener(interstitialAd: InterstitialAd, price: Double) {
+        val coreListener = SdkCore.getListenerForDemand(AdType.Interstitial)
+        val success = AuctionData.Success(
+            objRequest = createObjRequest(interstitialAd),
+            demandId = demandId,
+            adType = AdType.Interstitial,
+            objResponse = interstitialAd,
+            price = price
         )
+        interstitialAd.setListener(
+            object : InterstitialListener {
+                override fun onAdLoaded(ad: InterstitialAd) {
+                    coreListener.onAdLoaded(success)
+                }
+
+                override fun onAdLoadFailed(ad: InterstitialAd, bmError: BMError) {
+                    coreListener.onAdDisplayFailed(
+                        AuctionData.Failure(
+                            objRequest = createObjRequest(ad),
+                            demandId = demandId,
+                            adType = AdType.Interstitial,
+                            cause = bmError.asBidonError()
+                        )
+                    )
+                }
+
+                override fun onAdShown(ad: InterstitialAd) {
+                    coreListener.onAdDisplayed(success)
+                }
+
+                override fun onAdImpression(ad: InterstitialAd) {
+                    coreListener.onAdLoaded(success)
+                }
+
+                override fun onAdClicked(ad: InterstitialAd) {
+                    coreListener.onAdClicked(success)
+                }
+
+                override fun onAdExpired(ad: InterstitialAd) {
+                }
+
+                override fun onAdShowFailed(ad: InterstitialAd, bmError: BMError) {
+                    coreListener.onAdDisplayFailed(
+                        AuctionData.Failure(
+                            objRequest = createObjRequest(ad),
+                            demandId = demandId,
+                            adType = AdType.Interstitial,
+                            cause = bmError.asBidonError()
+                        )
+                    )
+                }
+
+                override fun onAdClosed(ad: InterstitialAd, bmError: Boolean) {
+                    coreListener.onAdHidden(success)
+                }
+            }
+        )
+    }
+
+    private fun createObjRequest(interstitialAd: InterstitialAd): ObjRequest = object : ObjRequest(interstitialAd) {
+        override fun canShowAd(): Boolean {
+            return interstitialAd.canShow()
+        }
+
+        override fun showAd() {
+            interstitialAd.show()
+        }
     }
 }
 

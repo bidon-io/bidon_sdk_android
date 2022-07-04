@@ -32,6 +32,10 @@ sealed interface AuctionData {
 open class ObjRequest(
     val objRequest: Any
 ) {
+    open fun canShowAd(): Boolean {
+        error("Not implemented for $objRequest")
+    }
+
     open fun showAd() {
         error("Not implemented for $objRequest")
     }
