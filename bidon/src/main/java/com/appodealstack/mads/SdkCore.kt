@@ -58,6 +58,7 @@ internal class CoreImpl(
                 auctionListener.onDemandAdLoadFailed(demandAd.adType, failure)
             },
             onAuctionFinished = {
+                auctionResultsHolder.updateResults(demandAd, it)
                 auctionListener.onWinnerFound(demandAd.adType, it)
                 auctionListener.onAdLoaded(demandAd.adType, it.first())
             },
@@ -78,7 +79,7 @@ internal class CoreImpl(
     }
 
     override fun destroyAd(demandAd: DemandAd, adParams: Bundle) {
-        TODO("Not yet implemented")
+        return auctionResultsHolder.clearResults(demandAd)
     }
 
     override fun setExtras(demandAd: DemandAd, adParams: Bundle) {
