@@ -14,6 +14,6 @@ sealed interface Demand {
     }
 
     interface PostBid : Demand {
-        fun createActionRequest(): AuctionRequest.PostBid
+        fun createActionRequest(ownerDemandAd: DemandAd): AuctionRequest.PostBid
     }
 }

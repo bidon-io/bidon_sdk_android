@@ -2,7 +2,7 @@ package com.appodealstack.mads.demands
 
 import com.appodealstack.mads.auctions.AuctionData
 
-interface AdListener: ExtendedListener {
+interface AdListener : ExtendedListener {
 
     /**
      * Callback invokes after auction completed and winner is selected.
@@ -20,10 +20,6 @@ interface AdListener: ExtendedListener {
     fun onAdHidden(ad: AuctionData.Success)
 }
 
-interface AdRevenueListener {
-    fun onAdRevenuePaid(ad: AuctionData.Success)
-}
-
 interface ExtendedListener {
     fun onDemandAdLoaded(ad: AuctionData.Success) {}
     fun onDemandAdLoadFailed(ad: AuctionData.Failure) {}
@@ -34,4 +30,8 @@ interface ExtendedListener {
      * Calls immediately before [AdListener.onAdLoaded]
      */
     fun onWinnerFound(ads: List<AuctionData.Success>) {}
+}
+
+interface AdRevenueListener {
+    fun onAdRevenuePaid(ad: AuctionData.Success)
 }

@@ -3,108 +3,75 @@ package com.appodealstack.mads.demands.listeners
 import com.appodealstack.mads.auctions.AuctionData
 import com.appodealstack.mads.auctions.AuctionListener
 import com.appodealstack.mads.base.AdType
-import com.appodealstack.mads.base.ext.addOrRemoveNull
+import com.appodealstack.mads.base.ext.addOrRemoveIfNull
 import com.appodealstack.mads.demands.AdListener
+import com.appodealstack.mads.demands.DemandAd
 
 internal interface ListenersHolder {
     val auctionListener: AuctionListener
 
-    fun addUserListener(adType: AdType, adListener: AdListener?)
-    fun registerDemandListener(adType: AdType, adListener: AdListener)
-    fun registerSdkCoreListener(adType: AdType, adListener: AdListener)
-
-    fun getListenerForDemand(adType: AdType): AdListener
+    fun addUserListener(demandAd: DemandAd, adListener: AdListener?)
+    fun getListenerForDemand(demandAd: DemandAd): AdListener
 }
 
 internal class ListenersHolderImpl : ListenersHolder {
-    private val userListeners = mutableMapOf<AdType, AdListener>()
+    private val userListeners = mutableMapOf<DemandAd, AdListener>()
 
     override val auctionListener: AuctionListener by lazy {
         object : AuctionListener {
-            override fun onDemandAdLoaded(adType: AdType, ad: AuctionData.Success) {
-                userListeners[adType]?.onDemandAdLoaded(ad)
+            override fun onDemandAdLoaded(demandAd: DemandAd, ad: AuctionData.Success) {
+                userListeners[demandAd]?.onDemandAdLoaded(ad)
             }
 
-            override fun onDemandAdLoadFailed(adType: AdType, ad: AuctionData.Failure) {
-                userListeners[adType]?.onDemandAdLoadFailed(ad)
+            override fun onDemandAdLoadFailed(demandAd: DemandAd, ad: AuctionData.Failure) {
+                userListeners[demandAd]?.onDemandAdLoadFailed(ad)
             }
 
-            override fun onWinnerFound(adType: AdType, ads: List<AuctionData.Success>) {
-                userListeners[adType]?.onWinnerFound(ads)
+            override fun onWinnerFound(demandAd: DemandAd, ads: List<AuctionData.Success>) {
+                userListeners[demandAd]?.onWinnerFound(ads)
             }
 
-            override fun onAdLoaded(adType: AdType, ad: AuctionData.Success) {
-                userListeners[adType]?.onAdLoaded(ad)
+            override fun onAdLoaded(demandAd: DemandAd, ad: AuctionData.Success) {
+                userListeners[demandAd]?.onAdLoaded(ad)
             }
 
-            override fun onAdLoadFailed(adType: AdType, cause: Throwable) {
-                userListeners[adType]?.onAdLoadFailed(cause)
+            override fun onAdLoadFailed(demandAd: DemandAd, cause: Throwable) {
+                userListeners[demandAd]?.onAdLoadFailed(cause)
             }
         }
     }
 
-    private val coreListeners: Map<AdType, AdListener> = AdType.values().mapNotNull { adType ->
-        createAdListenerFor(adType)?.let { listener -> adType to listener }
-    }.toMap()
-
-    override fun addUserListener(adType: AdType, adListener: AdListener?) {
-        userListeners.addOrRemoveNull(adType, adListener)
+    override fun addUserListener(demandAd: DemandAd, adListener: AdListener?) {
+        userListeners.addOrRemoveIfNull(demandAd, adListener)
     }
 
-    override fun registerDemandListener(adType: AdType, adListener: AdListener) {
-    }
-
-    override fun registerSdkCoreListener(adType: AdType, adListener: AdListener) {
-    }
-
-    override fun getListenerForDemand(adType: AdType): AdListener {
-        return requireNotNull(coreListeners[adType]) {
-            "Core AdCallback was not found for $adType"
-        }
-    }
-
-    private fun createAdListenerFor(adType: AdType): AdListener? {
-        return when (adType) {
-            AdType.Interstitial -> object : AdListener {
-                override fun onAdDisplayFailed(ad: AuctionData.Failure) {
-                    userListeners[adType]?.onAdDisplayFailed(ad)
-                }
-
-                override fun onAdDisplayed(ad: AuctionData.Success) {
-                    userListeners[adType]?.onAdDisplayed(ad)
-                }
-
-                override fun onAdClicked(ad: AuctionData.Success) {
-                    userListeners[adType]?.onAdClicked(ad)
-                }
-
-                override fun onAdHidden(ad: AuctionData.Success) {
-                    userListeners[adType]?.onAdHidden(ad)
-                }
-
-                override fun onAdLoaded(ad: AuctionData.Success) {
-                    userListeners[adType]?.onAdLoaded(ad)
-                }
-
-                override fun onAdLoadFailed(cause: Throwable) {
-                    userListeners[adType]?.onAdLoadFailed(cause)
-                }
-
-                override fun onDemandAdLoaded(ad: AuctionData.Success) {
-                    userListeners[adType]?.onDemandAdLoaded(ad)
-                }
-
-                override fun onDemandAdLoadFailed(ad: AuctionData.Failure) {
-                    userListeners[adType]?.onDemandAdLoadFailed(ad)
-                }
-
-                override fun onWinnerFound(ads: List<AuctionData.Success>) {
-                    userListeners[adType]?.onWinnerFound(ads)
-                }
+    override fun getListenerForDemand(demandAd: DemandAd): AdListener = when (demandAd.adType) {
+        AdType.Interstitial -> object : AdListener {
+            override fun onAdDisplayFailed(ad: AuctionData.Failure) {
+                userListeners[demandAd]?.onAdDisplayFailed(ad)
             }
-            AdType.Banner -> null
-            AdType.Rewarded -> null
-            AdType.Native -> null
+
+            override fun onAdDisplayed(ad: AuctionData.Success) {
+                userListeners[demandAd]?.onAdDisplayed(ad)
+            }
+
+            override fun onAdClicked(ad: AuctionData.Success) {
+                userListeners[demandAd]?.onAdClicked(ad)
+            }
+
+            override fun onAdHidden(ad: AuctionData.Success) {
+                userListeners[demandAd]?.onAdHidden(ad)
+            }
+
+            /** Next callbacks implemented in [auctionListener] */
+            override fun onAdLoaded(ad: AuctionData.Success) {}
+            override fun onAdLoadFailed(cause: Throwable) {}
+            override fun onDemandAdLoaded(ad: AuctionData.Success) {}
+            override fun onDemandAdLoadFailed(ad: AuctionData.Failure) {}
+            override fun onWinnerFound(ads: List<AuctionData.Success>) {}
         }
+        AdType.Banner,
+        AdType.Rewarded,
+        AdType.Native -> TODO("Not implemented")
     }
 }

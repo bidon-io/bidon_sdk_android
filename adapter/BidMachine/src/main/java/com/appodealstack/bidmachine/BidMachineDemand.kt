@@ -8,6 +8,7 @@ import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.ObjRequest
 import com.appodealstack.mads.base.AdType
 import com.appodealstack.mads.demands.Demand
+import com.appodealstack.mads.demands.DemandAd
 import com.appodealstack.mads.demands.DemandId
 import io.bidmachine.BidMachine
 import io.bidmachine.PriceFloorParams
@@ -34,15 +35,15 @@ class BidMachineDemand : Demand.PostBid {
         }
     }
 
-    override fun createActionRequest(): AuctionRequest.PostBid {
+    override fun createActionRequest(ownerDemandAd: DemandAd): AuctionRequest.PostBid {
         return object : AuctionRequest.PostBid {
             override suspend fun execute(additionalData: AuctionRequest.AdditionalData?): AuctionData {
-                return executeRequest(additionalData)
+                return executeRequest(additionalData, ownerDemandAd)
             }
         }
     }
 
-    private suspend fun executeRequest(additionalData: AuctionRequest.AdditionalData?): AuctionData =
+    private suspend fun executeRequest(additionalData: AuctionRequest.AdditionalData?, ownerDemandAd: DemandAd): AuctionData =
         suspendCoroutine { continuation ->
             val isFinished = AtomicBoolean(false)
             val interstitialRequest = InterstitialRequest.Builder().apply {
@@ -54,7 +55,7 @@ class BidMachineDemand : Demand.PostBid {
                 .setListener(object : InterstitialListener {
                     override fun onAdLoaded(interstitialAd: InterstitialAd) {
                         if (!isFinished.getAndSet(true)) {
-                            setCoreListener(interstitialAd, interstitialAd.auctionResult?.price ?: 0.0)
+                            setCoreListener(interstitialAd, interstitialAd.auctionResult?.price ?: 0.0, ownerDemandAd)
                             continuation.resume(
                                 AuctionData.Success(
                                     demandId = demandId,
@@ -75,7 +76,7 @@ class BidMachineDemand : Demand.PostBid {
                                 objRequest = interstitialAd,
                                 cause = bmError.asBidonError()
                             )
-                            setCoreListener(interstitialAd, interstitialAd.auctionResult?.price ?: 0.0)
+                            setCoreListener(interstitialAd, interstitialAd.auctionResult?.price ?: 0.0, ownerDemandAd)
                             continuation.resume(failure)
                         }
                     }
@@ -101,12 +102,12 @@ class BidMachineDemand : Demand.PostBid {
                 }).load(interstitialRequest)
         }
 
-    private fun setCoreListener(interstitialAd: InterstitialAd, price: Double) {
-        val coreListener = SdkCore.getListenerForDemand(AdType.Interstitial)
+    private fun setCoreListener(interstitialAd: InterstitialAd, price: Double, ownerDemandAd: DemandAd) {
+        val coreListener = SdkCore.getListenerForDemand(ownerDemandAd)
         val success = AuctionData.Success(
             objRequest = createObjRequest(interstitialAd),
             demandId = demandId,
-            adType = AdType.Interstitial,
+            adType = ownerDemandAd.adType,
             objResponse = interstitialAd,
             price = price
         )
@@ -121,7 +122,7 @@ class BidMachineDemand : Demand.PostBid {
                         AuctionData.Failure(
                             objRequest = createObjRequest(ad),
                             demandId = demandId,
-                            adType = AdType.Interstitial,
+                            adType = ownerDemandAd.adType,
                             cause = bmError.asBidonError()
                         )
                     )

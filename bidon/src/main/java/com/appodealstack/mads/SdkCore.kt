@@ -24,12 +24,16 @@ interface Core {
         adParams: Bundle,
     )
 
-    fun getListenerForDemand(adType: AdType): AdListener
     fun canShow(demandAd: DemandAd): Boolean
     fun destroyAd(demandAd: DemandAd, adParams: Bundle)
     fun setExtras(demandAd: DemandAd, adParams: Bundle)
     fun setListener(demandAd: DemandAd, adListener: AdListener)
     fun setRevenueListener(demandAd: DemandAd, adRevenueListener: AdRevenueListener)
+
+    /**
+     * implemented at [ListenersHolderImpl]
+     */
+    fun getListenerForDemand(demandAd: DemandAd): AdListener
 }
 
 internal class CoreImpl(
@@ -49,23 +53,23 @@ internal class CoreImpl(
                 .toSet(),
             postBidRequests = demands
                 .filterIsInstance<Demand.PostBid>()
-                .map { it.createActionRequest() }
+                .map { it.createActionRequest(ownerDemandAd = demandAd) }
                 .toSet(),
             onDemandLoaded = { success ->
                 auctionResultsHolder.addResult(demandAd, success)
-                auctionListener.onDemandAdLoaded(demandAd.adType, success)
+                auctionListener.onDemandAdLoaded(demandAd, success)
             },
             onDemandLoadFailed = { failure ->
-                auctionListener.onDemandAdLoadFailed(demandAd.adType, failure)
+                auctionListener.onDemandAdLoadFailed(demandAd, failure)
             },
             onAuctionFinished = {
                 auctionResultsHolder.updateResults(demandAd, it)
-                auctionListener.onWinnerFound(demandAd.adType, it)
-                auctionListener.onAdLoaded(demandAd.adType, it.first())
+                auctionListener.onWinnerFound(demandAd, it)
+                auctionListener.onAdLoaded(demandAd, it.first())
             },
             onAuctionFailed = {
                 auctionResultsHolder.clearResults(demandAd)
-                auctionListener.onAdLoadFailed(demandAd.adType, it)
+                auctionListener.onAdLoadFailed(demandAd, it)
             }
         )
     }
@@ -80,6 +84,7 @@ internal class CoreImpl(
     }
 
     override fun destroyAd(demandAd: DemandAd, adParams: Bundle) {
+        addUserListener(demandAd, null)
         return auctionResultsHolder.clearResults(demandAd)
     }
 
@@ -88,7 +93,7 @@ internal class CoreImpl(
     }
 
     override fun setListener(demandAd: DemandAd, adListener: AdListener) {
-        addUserListener(demandAd.adType, adListener)
+        addUserListener(demandAd, adListener)
     }
 
     override fun setRevenueListener(demandAd: DemandAd, adRevenueListener: AdRevenueListener) {

@@ -13,7 +13,6 @@ import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.auctions.AuctionData
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.ObjRequest
-import com.appodealstack.mads.base.AdType
 import com.appodealstack.mads.demands.Demand
 import com.appodealstack.mads.demands.DemandAd
 import com.appodealstack.mads.demands.DemandId
@@ -40,14 +39,24 @@ class ApplovinMaxDemand : Demand.Mediation {
 
     private suspend fun executeRequest(demandAd: DemandAd): AuctionData = suspendCoroutine { continuation ->
         val isFinished = AtomicBoolean(false)
-        when (val sourceAd = demandAd.objRequest) {
-            is MaxInterstitialAd -> {
+        when {
+            demandAd.demandId != demandId -> {
+                val failure = AuctionData.Failure(
+                    demandId = demandAd.demandId,
+                    adType = demandAd.adType,
+                    objRequest = demandAd.objRequest,
+                    cause = Throwable("Skip it. Demand is not valid. It's OK :)")
+                )
+                continuation.resume(failure)
+            }
+            demandAd.objRequest is MaxInterstitialAd -> {
+                val sourceAd = demandAd.objRequest as MaxInterstitialAd
                 val objRequest = createObjRequest(sourceAd)
                 sourceAd.setListener(
                     object : MaxAdListener {
                         override fun onAdLoaded(ad: MaxAd) {
                             if (!isFinished.getAndSet(true)) {
-                                setCoreListener(sourceAd, objRequest)
+                                setCoreListener(sourceAd, objRequest, demandAd)
                                 continuation.resume(
                                     AuctionData.Success(
                                         demandId = demandId,
@@ -62,7 +71,7 @@ class ApplovinMaxDemand : Demand.Mediation {
 
                         override fun onAdLoadFailed(adUnitId: String?, error: MaxError) {
                             if (!isFinished.getAndSet(true)) {
-                                setCoreListener(sourceAd, objRequest)
+                                setCoreListener(sourceAd, objRequest, demandAd)
                                 val failure = AuctionData.Failure(
                                     demandId = demandAd.demandId,
                                     adType = demandAd.adType,
@@ -107,9 +116,9 @@ class ApplovinMaxDemand : Demand.Mediation {
         }
     }
 
-    private fun setCoreListener(maxInterstitialAd: MaxInterstitialAd, objRequest: ObjRequest) {
+    private fun setCoreListener(maxInterstitialAd: MaxInterstitialAd, objRequest: ObjRequest, demandAd: DemandAd) {
         maxInterstitialAd.setListener(
-            SdkCore.getListenerForDemand(AdType.Interstitial).wrapToMaxAdListener(objRequest)
+            SdkCore.getListenerForDemand(demandAd).wrapToMaxAdListener(objRequest)
         )
     }
 }
