@@ -53,7 +53,7 @@ class ApplovinMaxDemand : Demand.Mediation {
                                         demandId = demandId,
                                         price = ad.revenue,
                                         adType = demandAd.adType,
-                                        objRequest = ObjRequest(demandAd.objRequest),
+                                        objRequest = createObjRequest(sourceAd),
                                         objResponse = ad,
                                     )
                                 )
@@ -92,6 +92,16 @@ class ApplovinMaxDemand : Demand.Mediation {
                 )
                 continuation.resume(failure)
             }
+        }
+    }
+
+    private fun createObjRequest(objRequest: MaxInterstitialAd): ObjRequest = object : ObjRequest(objRequest) {
+        override fun canShowAd(): Boolean {
+            return objRequest.isReady
+        }
+
+        override fun showAd() {
+            objRequest.showAd()
         }
     }
 

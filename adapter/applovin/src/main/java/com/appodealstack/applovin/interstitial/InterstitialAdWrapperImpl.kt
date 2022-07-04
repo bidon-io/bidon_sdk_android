@@ -46,9 +46,6 @@ internal class InterstitialAdWrapperImpl(
         SdkCore.showAd(
             demandAd = demandAd,
             adParams = bundleOf(adUnitIdKey to adUnitId, placementKey to placement, customDataKey to customData),
-            showItself = {
-                maxInterstitialAd.showAd(placement, customData, containerView, lifecycle)
-            }
         )
     }
 

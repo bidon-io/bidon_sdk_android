@@ -3,6 +3,9 @@ package com.appodealstack.applovin
 import android.content.Context
 import com.applovin.sdk.AppLovinSdk
 import com.appodealstack.mads.BidOnInitializer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 object AppLovinSdkWrapper {
     fun getInstance(context: Context): AppLovinSdk {
@@ -15,7 +18,9 @@ object AppLovinSdkWrapper {
             BidOnInitializer.withContext(context)
                 .registerDemands(ApplovinMaxDemand::class.java)
                 .build {
-                    listener?.onSdkInitialized(appLovinSdkConfiguration)
+                    CoroutineScope(Dispatchers.Main).launch {
+                        listener?.onSdkInitialized(appLovinSdkConfiguration)
+                    }
                 }
         }
     }

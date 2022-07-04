@@ -2,7 +2,7 @@ package com.appodeal.mads
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.applovin.mediation.ads.MaxInterstitialAd
+import androidx.core.view.isVisible
 import com.appodeal.mads.databinding.ActivityMainBinding
 import com.appodealstack.applovin.AppLovinSdkWrapper
 import com.appodealstack.applovin.interstitial.MaxInterstitialAdWrapper
@@ -12,10 +12,6 @@ import com.appodealstack.mads.demands.AdListener
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-
-    private val maxInterstitialAd: MaxInterstitialAd by lazy {
-        MaxInterstitialAd("c7c5f664e60b9bfb", this)
-    }
 
     private val maxInterstitialAdWrapper: MaxInterstitialAdWrapper by lazy {
         MaxInterstitialAdWrapper("c7c5f664e60b9bfb", this)
@@ -73,7 +69,6 @@ class MainActivity : AppCompatActivity() {
             override fun onAdLoaded(ad: AuctionData.Success) {
                 // Interstitial ad is ready to be shown. interstitialAd.isReady() will now return 'true'
                 println("MainActivity Interstitial: onAdLoaded($ad)")
-                ad.objRequest.showAd()
             }
 
             override fun onAdDisplayed(ad: AuctionData.Success) {
@@ -104,6 +99,7 @@ class MainActivity : AppCompatActivity() {
         AppLovinSdkWrapper.getInstance(this).mediationProvider = "max"
         AppLovinSdkWrapper.initializeSdk(this) { appLovinSdkConfiguration ->
             println(appLovinSdkConfiguration)
+            binding.initButton.isVisible = false
         }
     }
 }

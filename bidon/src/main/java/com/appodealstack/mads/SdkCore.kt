@@ -3,6 +3,8 @@ package com.appodealstack.mads
 import android.os.Bundle
 import com.appodealstack.mads.analytics.AnalyticsSource
 import com.appodealstack.mads.analytics.AnalyticsSourceImpl
+import com.appodealstack.mads.auctions.AuctionResultsHolder
+import com.appodealstack.mads.auctions.AuctionResultsHolderImpl
 import com.appodealstack.mads.auctions.AuctionService
 import com.appodealstack.mads.auctions.AuctionServiceImpl
 import com.appodealstack.mads.base.AdType
@@ -19,7 +21,6 @@ interface Core {
     fun showAd(
         demandAd: DemandAd,
         adParams: Bundle,
-        showItself: () -> Unit
     )
 
     fun getListenerForDemand(adType: AdType): AdListener
@@ -30,12 +31,16 @@ interface Core {
     fun setRevenueListener(demandAd: DemandAd, adRevenueListener: AdRevenueListener)
 }
 
-internal class CoreImpl : Core,
+internal class CoreImpl(
+    private val auctionResultsHolder: AuctionResultsHolder = AuctionResultsHolderImpl()
+) : Core,
     DemandsSource by DemandsSourceImpl(),
     AnalyticsSource by AnalyticsSourceImpl(),
     ListenersHolder by ListenersHolderImpl(),
     AuctionService by AuctionServiceImpl() {
+
     override fun loadAd(demandAd: DemandAd) {
+        auctionResultsHolder.clearResults(demandAd)
         startAuction(
             mediationRequests = demands
                 .filterIsInstance<Demand.Mediation>()
@@ -46,6 +51,7 @@ internal class CoreImpl : Core,
                 .map { it.createActionRequest() }
                 .toSet(),
             onDemandLoaded = { success ->
+                auctionResultsHolder.addResult(demandAd, success)
                 auctionListener.onDemandAdLoaded(demandAd.adType, success)
             },
             onDemandLoadFailed = { failure ->
@@ -56,17 +62,19 @@ internal class CoreImpl : Core,
                 auctionListener.onAdLoaded(demandAd.adType, it.first())
             },
             onAuctionFailed = {
+                auctionResultsHolder.clearResults(demandAd)
                 auctionListener.onAdLoadFailed(demandAd.adType, it)
             }
         )
     }
 
-    override fun showAd(demandAd: DemandAd, adParams: Bundle, showItself: () -> Unit) {
-        TODO("Not yet implemented")
+    override fun showAd(demandAd: DemandAd, adParams: Bundle) {
+        auctionResultsHolder.getTopResultOrNull(demandAd)?.objRequest?.showAd()
+            ?: println("Not loaded Ad for: $demandAd")
     }
 
     override fun canShow(demandAd: DemandAd): Boolean {
-        TODO("Not yet implemented")
+        return auctionResultsHolder.getTopResultOrNull(demandAd)?.objRequest?.canShowAd() ?: false
     }
 
     override fun destroyAd(demandAd: DemandAd, adParams: Bundle) {
