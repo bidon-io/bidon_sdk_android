@@ -43,17 +43,18 @@ class ApplovinMaxDemand : Demand.Mediation {
         val isFinished = AtomicBoolean(false)
         when (val sourceAd = demandAd.objRequest) {
             is MaxInterstitialAd -> {
+                val objRequest = createObjRequest(sourceAd)
                 sourceAd.setListener(
                     object : MaxAdListener {
                         override fun onAdLoaded(ad: MaxAd) {
                             if (!isFinished.getAndSet(true)) {
-                                setCoreListener(sourceAd)
+                                setCoreListener(sourceAd, objRequest)
                                 continuation.resume(
                                     AuctionData.Success(
                                         demandId = demandId,
                                         price = ad.revenue,
                                         adType = demandAd.adType,
-                                        objRequest = createObjRequest(sourceAd),
+                                        objRequest = objRequest,
                                         objResponse = ad,
                                     )
                                 )
@@ -62,7 +63,7 @@ class ApplovinMaxDemand : Demand.Mediation {
 
                         override fun onAdLoadFailed(adUnitId: String?, error: MaxError) {
                             if (!isFinished.getAndSet(true)) {
-                                setCoreListener(sourceAd)
+                                setCoreListener(sourceAd, objRequest)
                                 val failure = AuctionData.Failure(
                                     demandId = demandAd.demandId,
                                     adType = demandAd.adType,
@@ -95,7 +96,7 @@ class ApplovinMaxDemand : Demand.Mediation {
         }
     }
 
-    private fun createObjRequest(objRequest: MaxInterstitialAd): ObjRequest = object : ObjRequest(objRequest) {
+    private fun createObjRequest(objRequest: MaxInterstitialAd): ObjRequest = object : ObjRequest {
         override fun canShowAd(): Boolean {
             return objRequest.isReady
         }
@@ -105,9 +106,9 @@ class ApplovinMaxDemand : Demand.Mediation {
         }
     }
 
-    private fun setCoreListener(requestAd: MaxInterstitialAd) {
-        requestAd.setListener(
-            SdkCore.getListenerForDemand(AdType.Interstitial).wrapToMaxAdListener(requestAd)
+    private fun setCoreListener(maxInterstitialAd: MaxInterstitialAd, objRequest: ObjRequest) {
+        maxInterstitialAd.setListener(
+            SdkCore.getListenerForDemand(AdType.Interstitial).wrapToMaxAdListener(objRequest)
         )
     }
 }

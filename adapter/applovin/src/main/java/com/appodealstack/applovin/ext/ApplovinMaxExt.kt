@@ -3,7 +3,6 @@ package com.appodealstack.applovin.ext
 import com.applovin.mediation.MaxAd
 import com.applovin.mediation.MaxAdListener
 import com.applovin.mediation.MaxError
-import com.applovin.mediation.ads.MaxInterstitialAd
 import com.appodealstack.applovin.ApplovinMaxDemandId
 import com.appodealstack.applovin.base.asBidonError
 import com.appodealstack.mads.auctions.AuctionData
@@ -11,7 +10,7 @@ import com.appodealstack.mads.auctions.ObjRequest
 import com.appodealstack.mads.base.AdType
 import com.appodealstack.mads.demands.AdListener
 
-fun AdListener.wrapToMaxAdListener(sourceAd: MaxInterstitialAd): MaxAdListener {
+fun AdListener.wrapToMaxAdListener(objRequest: ObjRequest): MaxAdListener {
     val commonListener = this
     return object : MaxAdListener {
         override fun onAdLoaded(ad: MaxAd) {
@@ -42,18 +41,14 @@ fun AdListener.wrapToMaxAdListener(sourceAd: MaxInterstitialAd): MaxAdListener {
             demandId = ApplovinMaxDemandId,
             adType = AdType.Interstitial,
             price = this.revenue,
-            objRequest = object : ObjRequest(sourceAd) {
-                override fun showAd() {
-                    TODO()
-                }
-            },
+            objRequest = objRequest,
             objResponse = this,
         )
 
         private fun MaxError?.asAuctionDataFailure() = AuctionData.Failure(
             demandId = ApplovinMaxDemandId,
             adType = AdType.Interstitial,
-            objRequest = sourceAd,
+            objRequest = objRequest,
             cause = this?.asBidonError()
         )
     }

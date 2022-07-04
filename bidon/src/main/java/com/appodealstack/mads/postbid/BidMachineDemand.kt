@@ -171,7 +171,7 @@ internal class BidMachineDemand : Demand.PostBid {
         )
     }
 
-    private fun createObjRequest(interstitialAd: InterstitialAd): ObjRequest = object : ObjRequest(interstitialAd) {
+    private fun createObjRequest(interstitialAd: InterstitialAd): ObjRequest = object : ObjRequest {
         override fun canShowAd(): Boolean {
             return interstitialAd.canShow()
         }
