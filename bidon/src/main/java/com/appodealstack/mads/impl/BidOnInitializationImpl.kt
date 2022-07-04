@@ -1,6 +1,5 @@
 package com.appodealstack.mads.impl
 
-import android.annotation.SuppressLint
 import android.content.Context
 import com.appodealstack.mads.BidOnInitialization
 import com.appodealstack.mads.Core
@@ -21,15 +20,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@SuppressLint("StaticFieldLeak")
 internal class BidOnInitializationImpl : BidOnInitialization {
     private val sdkCore: Core = SdkCore
     private val contextProvider = ContextProvider
     private val demands = mutableMapOf<Class<out Demand>, Demand>()
     private val analytics = mutableMapOf<Class<out Analytic>, Analytic>()
     private val scope: CoroutineScope get() = CoroutineScope(Dispatchers.Default)
-    private val requiredContext: Context
-        get() = contextProvider.requiredContext
 
     private val madsConfigurator: MadsConfigurator get() = MadsConfiguratorInstance
 
@@ -78,7 +74,7 @@ internal class BidOnInitializationImpl : BidOnInitialization {
         demands.forEach { (_, demand) ->
             logInternal("Demands", "Demand is initializing: $demand")
             demand.init(
-                context = requiredContext,
+                context = contextProvider.requiredContext,
                 configParams = madsConfigurator.getDemandConfig(demand.demandId)
             )
             logInternal("Demands", "Demand is initialized: $demand")
@@ -90,7 +86,7 @@ internal class BidOnInitializationImpl : BidOnInitialization {
         require(sdkCore is AnalyticsSource)
         analytics.forEach { (_, analytics) ->
             analytics.init(
-                context = requiredContext,
+                context = contextProvider.requiredContext,
                 configParams = madsConfigurator.getServiceConfig(analytics.analyticsId)
             )
             sdkCore.addAnalytics(analytics)
