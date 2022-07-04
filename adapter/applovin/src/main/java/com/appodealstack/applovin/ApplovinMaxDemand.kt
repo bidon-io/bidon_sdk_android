@@ -1,95 +1,104 @@
 package com.appodealstack.applovin
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import com.applovin.mediation.MaxAd
+import com.applovin.mediation.MaxAdListener
+import com.applovin.mediation.MaxError
 import com.applovin.mediation.ads.MaxInterstitialAd
 import com.applovin.sdk.AppLovinSdk
+import com.appodealstack.applovin.base.asBidonError
 import com.appodealstack.applovin.ext.wrapToMaxAdListener
 import com.appodealstack.mads.SdkCore
+import com.appodealstack.mads.auctions.AuctionData
+import com.appodealstack.mads.auctions.AuctionRequest
+import com.appodealstack.mads.auctions.ObjRequest
 import com.appodealstack.mads.base.AdType
-import com.appodealstack.mads.demands.AdListener
 import com.appodealstack.mads.demands.Demand
+import com.appodealstack.mads.demands.DemandAd
 import com.appodealstack.mads.demands.DemandId
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
-class ApplovinMaxDemand : Demand {
-    private val interstitials = mutableMapOf<String, MaxInterstitialAd>()
+val ApplovinMaxDemandId = DemandId("applovin")
 
-    override val demandId: DemandId = DemandId("Applovin Max")
+class ApplovinMaxDemand : Demand.Mediation {
+    override val demandId: DemandId = ApplovinMaxDemandId
 
     override suspend fun init(context: Context, configParams: Bundle) {
-        require(AppLovinSdk.getInstance(context).isInitialized) {
-            "Finish ApplovinSdk's initialization before BidOnInitializer.build()"
+        require(AppLovinSdk.getInstance(context).isInitialized)
+    }
+
+    override fun createAuctionRequest(demandAd: DemandAd): AuctionRequest.Mediation {
+        return object : AuctionRequest.Mediation {
+            override suspend fun execute(): AuctionData {
+                return executeRequest(demandAd)
+            }
+
         }
     }
 
-    override fun loadAd(activity: Activity, adType: AdType, adParams: Bundle) {
-        val adUnitId = adParams.getString(adUnitIdKey) ?: ""
-        when (adType) {
-            AdType.Banner -> TODO()
-            AdType.Interstitial -> {
-                val maxInterstitialAd = interstitials[adUnitId]
-                    ?: MaxInterstitialAd(adUnitId, activity).apply {
-                        this.setListener(getCoreListener(adType).wrapToMaxAdListener())
-                    }.also {
-                        interstitials[adUnitId] = it
+    private suspend fun executeRequest(demandAd: DemandAd): AuctionData = suspendCoroutine { continuation ->
+        val isFinished = AtomicBoolean(false)
+        when (val sourceAd = demandAd.objRequest) {
+            is MaxInterstitialAd -> {
+                sourceAd.setListener(
+                    object : MaxAdListener {
+                        override fun onAdLoaded(ad: MaxAd) {
+                            if (!isFinished.getAndSet(true)) {
+                                setCoreListener(sourceAd)
+                                continuation.resume(
+                                    AuctionData.Success(
+                                        demandId = demandId,
+                                        price = ad.revenue,
+                                        adType = demandAd.adType,
+                                        objRequest = ObjRequest(demandAd.objRequest),
+                                        objResponse = ad,
+                                    )
+                                )
+                            }
+                        }
+
+                        override fun onAdLoadFailed(adUnitId: String?, error: MaxError) {
+                            if (!isFinished.getAndSet(true)) {
+                                setCoreListener(sourceAd)
+                                val failure = AuctionData.Failure(
+                                    demandId = demandAd.demandId,
+                                    adType = demandAd.adType,
+                                    objRequest = demandAd.objRequest,
+                                    cause = error.asBidonError()
+                                )
+                                continuation.resume(failure)
+                            }
+                        }
+
+                        override fun onAdDisplayed(ad: MaxAd?) {}
+                        override fun onAdHidden(ad: MaxAd?) {}
+                        override fun onAdClicked(ad: MaxAd?) {}
+                        override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError?) {}
                     }
-                maxInterstitialAd.loadAd()
+                )
+                sourceAd.loadAd()
             }
-            AdType.Rewarded -> TODO()
-            AdType.Native -> TODO()
+            else -> {
+                isFinished.set(true)
+                val error = Exception("$demandAd. Not implemented executeRequest() for ${demandAd.objRequest::class.java}")
+                val failure = AuctionData.Failure(
+                    demandId = demandAd.demandId,
+                    adType = demandAd.adType,
+                    objRequest = demandAd.objRequest,
+                    cause = error
+                )
+                continuation.resume(failure)
+            }
         }
     }
 
-    override fun destroyAd(adType: AdType, bundle: Bundle): Boolean {
-        val adUnitId = bundle.getString(adUnitIdKey) ?: return false
-        return when (adType) {
-            AdType.Banner -> TODO()
-            AdType.Interstitial -> {
-                interstitials.remove(adUnitId)?.destroy() != null
-            }
-            AdType.Rewarded -> TODO()
-            AdType.Native -> TODO()
-        }
-    }
-
-    override fun showAd(adType: AdType, bundle: Bundle): Boolean {
-        val adUnitId = bundle.getString(adUnitIdKey) ?: ""
-        return when (adType) {
-            AdType.Banner -> TODO()
-            AdType.Interstitial -> {
-                interstitials[adUnitId]?.let { interstitialAd ->
-                    val placement = bundle.getString(placementKey)
-                    val customData = bundle.getString(customDataKey)
-                    interstitialAd.showAd(placement, customData)
-                } != null
-            }
-            AdType.Rewarded -> TODO()
-            AdType.Native -> TODO()
-        }
-    }
-
-    override fun canShow(adType: AdType, adParams: Bundle): Boolean {
-        val adUnitId = adParams.getString(adUnitIdKey) ?: ""
-        return when (adType) {
-            AdType.Banner -> TODO()
-            AdType.Interstitial -> {
-                interstitials[adUnitId]?.isReady ?: false
-            }
-            AdType.Rewarded -> TODO()
-            AdType.Native -> TODO()
-        }
-    }
-
-    override fun setExtras(bundle: Bundle) {
-        val adUnitId = bundle.getString(adUnitIdKey) ?: return
-        val key = bundle.getString(keyKey) ?: return
-        val value = bundle.getString(valueKey)
-        interstitials[adUnitId]?.setExtraParameter(key, value)
-    }
-
-    private fun getCoreListener(adType: AdType): AdListener {
-        return SdkCore.getListenerForDemand(adType)
+    private fun setCoreListener(requestAd: MaxInterstitialAd) {
+        requestAd.setListener(
+            SdkCore.getListenerForDemand(AdType.Interstitial).wrapToMaxAdListener(requestAd)
+        )
     }
 }
 

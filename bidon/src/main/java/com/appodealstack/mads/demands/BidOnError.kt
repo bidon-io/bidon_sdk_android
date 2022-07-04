@@ -14,6 +14,7 @@ sealed class DemandError : BidOnError() {
     object FullscreenAdAlreadyShowing : DemandError()
     object FullscreenAdNotReady : DemandError()
     object NoActivity : DemandError()
+    object Expired : DemandError()
 }
 
 sealed class AnalyticsError : BidOnError() {

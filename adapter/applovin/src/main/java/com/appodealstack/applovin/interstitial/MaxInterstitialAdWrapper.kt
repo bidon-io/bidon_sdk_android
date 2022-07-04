@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
 import com.appodealstack.mads.demands.AdListener
 import com.appodealstack.mads.demands.AdRevenueListener
+import com.appodealstack.mads.demands.DemandAd
 
 /**
  * Full screen Interstitial Advertising
@@ -18,6 +19,9 @@ class MaxInterstitialAdWrapper(
  * [MaxInterstitialAdWrapper] class description
  */
 interface InterstitialAdWrapper {
+
+    val demandAd: DemandAd
+
     val isReady: Boolean
 
     fun loadAd()

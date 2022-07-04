@@ -10,6 +10,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            name "BidMachine Ads maven repository"
+            url "https://artifactory.bidmachine.io/bidmachine"
+        }
     }
 }
 rootProject.name = "Mediation of Mediations"

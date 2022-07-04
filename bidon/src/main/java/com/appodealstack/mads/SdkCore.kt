@@ -1,69 +1,91 @@
 package com.appodealstack.mads
 
-import android.app.Activity
 import android.os.Bundle
 import com.appodealstack.mads.analytics.AnalyticsSource
 import com.appodealstack.mads.analytics.AnalyticsSourceImpl
+import com.appodealstack.mads.auctions.AuctionService
+import com.appodealstack.mads.auctions.AuctionServiceImpl
 import com.appodealstack.mads.base.AdType
-import com.appodealstack.mads.demands.AdListener
-import com.appodealstack.mads.demands.DemandsSource
-import com.appodealstack.mads.demands.DemandsSourceImpl
+import com.appodealstack.mads.demands.*
 import com.appodealstack.mads.demands.listeners.ListenersHolder
 import com.appodealstack.mads.demands.listeners.ListenersHolderImpl
 
-val SdkCore: BidOnCore by lazy {
-    BidOnCoreImpl()
+val SdkCore: Core by lazy {
+    CoreImpl()
 }
 
-interface BidOnCore {
-    fun loadAd(activity: Activity, adType: AdType, adParams: Bundle)
-    fun setListener(adType: AdType, adListener: AdListener?)
-    fun destroyAd(adType: AdType, bundle: Bundle)
-    fun showAd(adType: AdType, bundle: Bundle)
-    fun setExtras(bundle: Bundle)
-    fun canShow(adType: AdType, adParams: Bundle): Boolean
+interface Core {
+    fun loadAd(demandAd: DemandAd)
+    fun showAd(
+        demandAd: DemandAd,
+        adParams: Bundle,
+        showItself: () -> Unit
+    )
 
     fun getListenerForDemand(adType: AdType): AdListener
+    fun canShow(demandAd: DemandAd): Boolean
+    fun destroyAd(demandAd: DemandAd, adParams: Bundle)
+    fun setExtras(demandAd: DemandAd, adParams: Bundle)
+    fun setListener(demandAd: DemandAd, adListener: AdListener)
+    fun setRevenueListener(demandAd: DemandAd, adRevenueListener: AdRevenueListener)
 }
 
-internal class BidOnCoreImpl : BidOnCore,
+internal class CoreImpl : Core,
     DemandsSource by DemandsSourceImpl(),
     AnalyticsSource by AnalyticsSourceImpl(),
-    ListenersHolder by ListenersHolderImpl() {
-
-    private var publisherListener: AdListener? = null
-
-    override fun loadAd(activity: Activity, adType: AdType, adParams: Bundle) {
-        demands.forEach { demand ->
-            demand.loadAd(activity, adType, adParams)
-        }
+    ListenersHolder by ListenersHolderImpl(),
+    AuctionService by AuctionServiceImpl() {
+    override fun loadAd(demandAd: DemandAd) {
+        startAuction(
+            mediationRequests = demands
+                .filterIsInstance<Demand.Mediation>()
+                .map { it.createAuctionRequest(demandAd) }
+                .toSet(),
+            postBidRequests = demands
+                .filterIsInstance<Demand.PostBid>()
+                .map { it.createActionRequest() }
+                .toSet(),
+            onDemandLoaded = { success ->
+                auctionListener.onDemandAdLoaded(demandAd.adType, success)
+            },
+            onDemandLoadFailed = { failure ->
+                auctionListener.onDemandAdLoadFailed(demandAd.adType, failure)
+            },
+            onAuctionFinished = {
+                auctionListener.onWinnerFound(demandAd.adType, it)
+                auctionListener.onAdLoaded(demandAd.adType, it.first())
+            },
+            onAuctionFailed = {
+                auctionListener.onAdLoadFailed(demandAd.adType, it)
+            }
+        )
     }
 
-    override fun setListener(adType: AdType, adListener: AdListener?) {
-        publisherListener = adListener
+    override fun showAd(demandAd: DemandAd, adParams: Bundle, showItself: () -> Unit) {
+        TODO("Not yet implemented")
     }
 
-    override fun destroyAd(adType: AdType, bundle: Bundle) {
-        demands.any { demand ->
-            demand.destroyAd(adType, bundle)
-        }
+    override fun canShow(demandAd: DemandAd): Boolean {
+        TODO("Not yet implemented")
     }
 
-    override fun showAd(adType: AdType, bundle: Bundle) {
-        demands.any { demand ->
-            demand.showAd(adType, bundle)
-        }
+    override fun destroyAd(demandAd: DemandAd, adParams: Bundle) {
+        TODO("Not yet implemented")
     }
 
-    override fun setExtras(bundle: Bundle) {
-        demands.forEach { demand ->
-            demand.setExtras(bundle)
-        }
+    override fun setExtras(demandAd: DemandAd, adParams: Bundle) {
+        TODO("Not yet implemented")
     }
 
-    override fun canShow(adType: AdType, adParams: Bundle): Boolean {
-        return demands.any { demand ->
-            demand.canShow(adType, adParams)
-        }
+    override fun setListener(demandAd: DemandAd, adListener: AdListener) {
+        addUserListener(demandAd.adType, adListener)
     }
+
+    override fun setRevenueListener(demandAd: DemandAd, adRevenueListener: AdRevenueListener) {
+        TODO("Not yet implemented")
+    }
+
+
 }
+
+private const val Tag = "SdkCore"

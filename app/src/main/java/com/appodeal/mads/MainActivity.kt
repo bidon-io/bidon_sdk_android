@@ -8,8 +8,8 @@ import com.applovin.mediation.ads.MaxInterstitialAd
 import com.appodeal.mads.databinding.ActivityMainBinding
 import com.appodealstack.applovin.AppLovinSdkWrapper
 import com.appodealstack.applovin.interstitial.MaxInterstitialAdWrapper
+import com.appodealstack.mads.auctions.AuctionData
 import com.appodealstack.mads.demands.AdListener
-import com.appodealstack.mads.demands.BidOnAd
 import com.appodealstack.mads.demands.DemandError
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -58,41 +58,48 @@ class MainActivity : AppCompatActivity() {
 
     private fun wannaBidonInterstitial() {
         maxInterstitialAdWrapper.setListener(object : AdListener {
-            override fun onAdLoaded(ad: BidOnAd?) {
+            override fun onDemandAdLoaded(ad: AuctionData.Success) {
+                super.onDemandAdLoaded(ad)
+                println("MainActivity Interstitial: onDemandAdLoaded($ad)")
+            }
+
+            override fun onDemandAdLoadFailed(ad: AuctionData.Failure) {
+                super.onDemandAdLoadFailed(ad)
+                println("MainActivity Interstitial: onDemandAdLoadFailed(${ad.cause})")
+            }
+
+            override fun onWinnerFound(ads: List<AuctionData.Success>) {
+                super.onWinnerFound(ads)
+                println("MainActivity Interstitial: onWinnerFound($ads)")
+            }
+
+            override fun onAdLoaded(ad: AuctionData.Success) {
                 // Interstitial ad is ready to be shown. interstitialAd.isReady() will now return 'true'
-                println("Interstitial: onAdLoaded($ad)")
+                println("MainActivity Interstitial: onAdLoaded($ad)")
+                ad.objResponse
             }
 
-            override fun onAdDisplayed(ad: BidOnAd?) {
-                println("Interstitial: onAdDisplayed($ad)")
+            override fun onAdDisplayed(ad: AuctionData.Success) {
+                println("MainActivity Interstitial: onAdDisplayed($ad)")
             }
 
-            override fun onAdHidden(ad: BidOnAd?) {
+            override fun onAdDisplayFailed(ad: AuctionData.Failure) {
+                maxInterstitialAd.loadAd()
+            }
+
+            override fun onAdHidden(ad: AuctionData.Success) {
                 // Interstitial ad is hidden. Pre-load the next ad
-                println("Interstitial: onAdHidden($ad)")
+                println("MainActivity Interstitial: onAdHidden($ad)")
                 maxInterstitialAd.loadAd()
             }
 
-            override fun onAdClicked(ad: BidOnAd?) {
-                println("Interstitial: onAdClicked($ad)")
+            override fun onAdClicked(ad: AuctionData.Success) {
+                println("MainActivity Interstitial: onAdClicked($ad)")
             }
 
-            override fun onAdLoadFailed(adUnitId: String?, error: DemandError?) {
+            override fun onAdLoadFailed(cause: Throwable) {
                 // Interstitial ad failed to load
-
-                if (error is MaxError) {
-                    // AppLovin recommends that you retry with exponentially higher delays up to a maximum delay (in this case 64 seconds)
-                    println("Interstitial: onAdLoadFailed($adUnitId). Error: ${error.message}")
-                }
-
-                lifecycleScope.launch {
-                    delay(5000)
-                    maxInterstitialAd.loadAd()
-                }
-            }
-
-            override fun onAdDisplayFailed(ad: BidOnAd?, error: DemandError?) {
-                maxInterstitialAd.loadAd()
+                println("MainActivity Interstitial: onAdLoadFailed($cause)")
             }
         })
     }

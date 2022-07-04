@@ -9,6 +9,6 @@ internal class DemandsSourceImpl : DemandsSource {
     override val demands = mutableListOf<Demand>()
 
     override fun addDemands(demand: Demand) {
-        this.demands.addAll(demands)
+        this.demands.add(demand)
     }
 }

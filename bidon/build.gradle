@@ -32,13 +32,9 @@ android {
 dependencies {
 
     // Post-Bid
-    implementation('com.google.android.gms:play-services-ads:21.0.0')
-    implementation('com.explorestack:iab:0.9.8')
-    implementation('io.bidmachine:ads:1.9.4')
-    implementation('io.bidmachine:ads.networks.criteo:1.9.4.10')
-    implementation('io.bidmachine:ads.networks.pangle:1.9.4.3')
-    implementation('io.bidmachine:ads.networks.amazon:1.9.4.6')
-
+    implementation("io.bidmachine:ads:1.9.4")
+    implementation "io.bidmachine:ads.adapters.admob:1.9.4.22"
+    implementation "com.google.android.gms:play-services-ads:21.0.0"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
     implementation 'androidx.core:core-ktx:1.8.0'

@@ -4,7 +4,7 @@ import com.applovin.mediation.MaxError
 import com.applovin.mediation.MaxErrorCode
 import com.appodealstack.mads.demands.DemandError
 
-internal fun MaxError.asBidOnError(): DemandError = when (this.code) {
+internal fun MaxError.asBidonError(): DemandError = when (this.code) {
     MaxErrorCode.UNSPECIFIED -> DemandError.Unspecified
     MaxErrorCode.NO_FILL -> DemandError.NoFill
     MaxErrorCode.AD_LOAD_FAILED -> DemandError.AdLoadFailed
