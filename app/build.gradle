@@ -39,7 +39,6 @@ android {
 }
 
 dependencies {
-//    implementation 'com.applovin:applovin-sdk:+'
     implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
 
     implementation(project(":adapter:applovin"))
