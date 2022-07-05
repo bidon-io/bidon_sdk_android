@@ -10,6 +10,7 @@ import com.appodealstack.mads.auctions.ObjRequest
 import com.appodealstack.mads.base.AdType
 import com.appodealstack.mads.demands.Demand
 import com.appodealstack.mads.demands.DemandAd
+import com.appodealstack.mads.demands.DemandError
 import com.appodealstack.mads.demands.DemandId
 import io.bidmachine.BidMachine
 import io.bidmachine.PriceFloorParams
@@ -93,6 +94,17 @@ class BidMachineDemand : Demand.PostBid {
                     }
 
                     override fun onAdExpired(interstitialAd: InterstitialAd) {
+                        if (!isFinished.getAndSet(true)) {
+                            val failure = AuctionData.Failure(
+                                demandId = demandId,
+                                adType = AdType.Interstitial,
+                                objRequest = interstitialAd,
+                                cause = DemandError.Expired
+                            )
+                            // remove listener
+                            interstitialAd.setListener(null)
+                            continuation.resume(failure)
+                        }
                     }
 
                     override fun onAdShowFailed(interstitialAd: InterstitialAd, p1: BMError) {
