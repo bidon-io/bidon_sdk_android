@@ -1,4 +1,4 @@
-package com.appodealstack.mads.auctions
+package com.appodealstack.mads.demands
 
 import android.app.Activity
 import android.os.Bundle

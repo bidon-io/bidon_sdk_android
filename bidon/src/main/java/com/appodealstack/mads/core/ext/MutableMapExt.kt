@@ -1,4 +1,4 @@
-package com.appodealstack.mads.base.ext
+package com.appodealstack.mads.core.ext
 
 internal fun <K, V> MutableMap<K, V>.addOrRemoveIfNull(key: K, value: V?) {
     if (value != null) {

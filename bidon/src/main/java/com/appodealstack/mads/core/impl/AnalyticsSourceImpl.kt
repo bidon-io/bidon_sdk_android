@@ -1,9 +1,7 @@
-package com.appodealstack.mads.analytics
+package com.appodealstack.mads.core.impl
 
-internal interface AnalyticsSource {
-    val analytics: List<Analytic>
-    fun addAnalytics(analytics: Analytic)
-}
+import com.appodealstack.mads.analytics.Analytic
+import com.appodealstack.mads.core.AnalyticsSource
 
 internal class AnalyticsSourceImpl : AnalyticsSource {
     override val analytics = mutableListOf<Analytic>()

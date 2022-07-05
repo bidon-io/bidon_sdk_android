@@ -11,9 +11,9 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/adapter" />
-            <option value="$PROJECT_DIR$/adapter/BidMachine" />
             <option value="$PROJECT_DIR$/adapter/admob" />
             <option value="$PROJECT_DIR$/adapter/applovin" />
+            <option value="$PROJECT_DIR$/adapter/bidmachine" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/bidon" />
           </set>

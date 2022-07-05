@@ -1,26 +1,26 @@
-package com.appodealstack.mads.impl
+package com.appodealstack.mads.core.impl
 
 import android.content.Context
-import com.appodealstack.mads.BidOnInitialization
+import com.appodealstack.mads.SdkInitialization
 import com.appodealstack.mads.Core
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.analytics.Analytic
-import com.appodealstack.mads.analytics.AnalyticsSource
-import com.appodealstack.mads.base.ContextProvider
-import com.appodealstack.mads.base.ext.logInternal
+import com.appodealstack.mads.core.AnalyticsSource
+import com.appodealstack.mads.core.ContextProvider
+import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.config.Configuration
 import com.appodealstack.mads.config.BidonConfigurator
 import com.appodealstack.mads.config.BidonConfiguratorInstance
 import com.appodealstack.mads.config.StaticJsonConfiguration
 import com.appodealstack.mads.demands.Demand
-import com.appodealstack.mads.demands.DemandsSource
-import com.appodealstack.mads.initializing.InitializationCallback
-import com.appodealstack.mads.initializing.InitializationResult
+import com.appodealstack.mads.core.DemandsSource
+import com.appodealstack.mads.core.InitializationCallback
+import com.appodealstack.mads.core.InitializationResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-internal class BidOnInitializationImpl : BidOnInitialization {
+internal class SdkInitializationImpl : SdkInitialization {
     private val sdkCore: Core = SdkCore
     private val contextProvider = ContextProvider
     private val demands = mutableMapOf<Class<out Demand>, Demand>()
@@ -29,17 +29,17 @@ internal class BidOnInitializationImpl : BidOnInitialization {
 
     private val bidonConfigurator: BidonConfigurator get() = BidonConfiguratorInstance
 
-    override fun withContext(context: Context): BidOnInitialization {
+    override fun withContext(context: Context): SdkInitialization {
         ContextProvider.setContext(context)
         return this
     }
 
-    override fun withConfigurations(vararg configurations: Configuration): BidOnInitialization {
+    override fun withConfigurations(vararg configurations: Configuration): SdkInitialization {
         bidonConfigurator.addConfigurations(*configurations)
         return this
     }
 
-    override fun registerDemands(vararg demandClasses: Class<out Demand>): BidOnInitialization {
+    override fun registerDemands(vararg demandClasses: Class<out Demand>): SdkInitialization {
         demandClasses.forEach { demandClass ->
             logInternal("Initializer", "Creating instance for: $demandClass")
             try {
@@ -53,7 +53,7 @@ internal class BidOnInitializationImpl : BidOnInitialization {
         return this
     }
 
-    override fun registerAnalytics(vararg analyticsClasses: Class<out Analytic>): BidOnInitialization {
+    override fun registerAnalytics(vararg analyticsClasses: Class<out Analytic>): SdkInitialization {
         analyticsClasses.forEach { analyticsClass ->
             try {
                 val instance = analyticsClass.newInstance()

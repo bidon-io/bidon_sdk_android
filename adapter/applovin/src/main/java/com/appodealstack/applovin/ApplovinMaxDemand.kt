@@ -8,12 +8,12 @@ import com.applovin.mediation.MaxAdListener
 import com.applovin.mediation.MaxError
 import com.applovin.mediation.ads.MaxInterstitialAd
 import com.applovin.sdk.AppLovinSdk
-import com.appodealstack.applovin.base.asBidonError
+import com.appodealstack.applovin.ext.asBidonError
 import com.appodealstack.applovin.ext.wrapToMaxAdListener
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.auctions.AuctionData
 import com.appodealstack.mads.auctions.AuctionRequest
-import com.appodealstack.mads.auctions.ObjRequest
+import com.appodealstack.mads.demands.ObjRequest
 import com.appodealstack.mads.demands.Demand
 import com.appodealstack.mads.demands.DemandAd
 import com.appodealstack.mads.demands.DemandId

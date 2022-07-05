@@ -1,7 +1,8 @@
 package com.appodealstack.mads.auctions
 
-import com.appodealstack.mads.base.AdType
+import com.appodealstack.mads.demands.AdType
 import com.appodealstack.mads.demands.DemandId
+import com.appodealstack.mads.demands.ObjRequest
 
 sealed interface AuctionData {
     class Success(

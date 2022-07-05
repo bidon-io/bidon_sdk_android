@@ -7,7 +7,7 @@ import androidx.lifecycle.Lifecycle
 import com.applovin.mediation.ads.MaxInterstitialAd
 import com.appodealstack.applovin.*
 import com.appodealstack.mads.SdkCore
-import com.appodealstack.mads.base.AdType
+import com.appodealstack.mads.demands.AdType
 import com.appodealstack.mads.demands.AdListener
 import com.appodealstack.mads.demands.AdRevenueListener
 import com.appodealstack.mads.demands.DemandAd

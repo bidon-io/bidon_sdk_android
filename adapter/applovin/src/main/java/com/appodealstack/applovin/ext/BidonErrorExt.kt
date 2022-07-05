@@ -1,4 +1,4 @@
-package com.appodealstack.applovin.base
+package com.appodealstack.applovin.ext
 
 import com.applovin.mediation.MaxError
 import com.applovin.mediation.MaxErrorCode

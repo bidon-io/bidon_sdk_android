@@ -1,4 +1,4 @@
-package com.appodealstack.mads.base.ext
+package com.appodealstack.mads.core.ext
 
 import android.util.Log
 import com.appodealstack.mads.BuildConfig

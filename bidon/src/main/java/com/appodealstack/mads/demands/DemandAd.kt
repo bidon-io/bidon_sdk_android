@@ -1,7 +1,5 @@
 package com.appodealstack.mads.demands
 
-import com.appodealstack.mads.base.AdType
-
 class DemandAd(
     val demandId: DemandId,
     val adType: AdType,

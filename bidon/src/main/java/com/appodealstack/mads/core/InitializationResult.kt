@@ -1,4 +1,4 @@
-package com.appodealstack.mads.initializing
+package com.appodealstack.mads.core
 
 sealed interface InitializationResult {
     object Success : InitializationResult

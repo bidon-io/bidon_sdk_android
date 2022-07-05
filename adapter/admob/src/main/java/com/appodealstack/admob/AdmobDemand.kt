@@ -6,8 +6,8 @@ import android.os.Bundle
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.auctions.AuctionData
 import com.appodealstack.mads.auctions.AuctionRequest
-import com.appodealstack.mads.auctions.ObjRequest
-import com.appodealstack.mads.base.ext.logInternal
+import com.appodealstack.mads.demands.ObjRequest
+import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.Demand
 import com.appodealstack.mads.demands.DemandAd
 import com.appodealstack.mads.demands.DemandId

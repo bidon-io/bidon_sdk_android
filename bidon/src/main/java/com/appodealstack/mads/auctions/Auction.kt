@@ -1,6 +1,6 @@
 package com.appodealstack.mads.auctions
 
-import com.appodealstack.mads.base.ext.logInternal
+import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.DemandError
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -40,9 +40,10 @@ android {
 
 dependencies {
     implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
+    implementation 'com.applovin:applovin-sdk:11.4.4'
 
     implementation(project(":adapter:applovin"))
-    implementation(project(":adapter:BidMachine"))
+    implementation(project(":adapter:bidmachine"))
     implementation(project(":adapter:admob"))
 
     implementation 'androidx.core:core-ktx:1.8.0'

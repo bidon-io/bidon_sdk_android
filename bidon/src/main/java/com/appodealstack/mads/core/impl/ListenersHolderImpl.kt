@@ -1,19 +1,15 @@
-package com.appodealstack.mads.demands
+package com.appodealstack.mads.core.impl
 
 import com.appodealstack.mads.auctions.AuctionData
 import com.appodealstack.mads.auctions.AuctionListener
-import com.appodealstack.mads.base.AdType
-import com.appodealstack.mads.base.ext.addOrRemoveIfNull
+import com.appodealstack.mads.demands.AdType
+import com.appodealstack.mads.core.ListenersHolder
+import com.appodealstack.mads.core.ext.addOrRemoveIfNull
+import com.appodealstack.mads.demands.AdListener
+import com.appodealstack.mads.demands.DemandAd
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
-internal interface ListenersHolder {
-    val auctionListener: AuctionListener
-
-    fun addUserListener(demandAd: DemandAd, adListener: AdListener?)
-    fun getListenerForDemand(demandAd: DemandAd): AdListener
-}
 
 internal class ListenersHolderImpl : ListenersHolder {
     private val userListeners = mutableMapOf<DemandAd, AdListener>()
@@ -21,31 +17,31 @@ internal class ListenersHolderImpl : ListenersHolder {
 
     override val auctionListener: AuctionListener by lazy {
         object : AuctionListener {
-            override fun onDemandAdLoaded(demandAd: DemandAd, ad: AuctionData.Success) {
+            override fun demandAuctionSucceed(demandAd: DemandAd, ad: AuctionData.Success) {
                 mainScope.launch {
                     userListeners[demandAd]?.onDemandAdLoaded(ad)
                 }
             }
 
-            override fun onDemandAdLoadFailed(demandAd: DemandAd, ad: AuctionData.Failure) {
+            override fun demandAuctionFailed(demandAd: DemandAd, ad: AuctionData.Failure) {
                 mainScope.launch {
                     userListeners[demandAd]?.onDemandAdLoadFailed(ad)
                 }
             }
 
-            override fun onWinnerFound(demandAd: DemandAd, ads: List<AuctionData.Success>) {
+            override fun winnerFound(demandAd: DemandAd, ads: List<AuctionData.Success>) {
                 mainScope.launch {
                     userListeners[demandAd]?.onWinnerFound(ads)
                 }
             }
 
-            override fun onAdLoaded(demandAd: DemandAd, ad: AuctionData.Success) {
+            override fun auctionSucceed(demandAd: DemandAd, ad: AuctionData.Success) {
                 mainScope.launch {
                     userListeners[demandAd]?.onAdLoaded(ad)
                 }
             }
 
-            override fun onAdLoadFailed(demandAd: DemandAd, cause: Throwable) {
+            override fun auctionFailed(demandAd: DemandAd, cause: Throwable) {
                 mainScope.launch {
                     userListeners[demandAd]?.onAdLoadFailed(cause)
                 }
