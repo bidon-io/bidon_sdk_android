@@ -85,7 +85,7 @@ class AdmobDemand : Demand.PostBid {
                                     }
                                 }.first()
                             )
-                            setCoreListener(interstitialAd, ownerDemandAd, auctionData)
+                            interstitialAd.setCoreListener(ownerDemandAd, auctionData)
                             continuation.resume(auctionData)
                         }
                     }
@@ -93,9 +93,9 @@ class AdmobDemand : Demand.PostBid {
             }
         }
 
-    private fun setCoreListener(interstitialAd: InterstitialAd, ownerDemandAd: DemandAd, auctionData: AuctionData.Success) {
+    private fun InterstitialAd.setCoreListener(ownerDemandAd: DemandAd, auctionData: AuctionData.Success) {
         val coreListener = SdkCore.getListenerForDemand(ownerDemandAd)
-        interstitialAd.fullScreenContentCallback = object : FullScreenContentCallback() {
+        this.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdClicked() {
                 coreListener.onAdClicked(auctionData)
             }

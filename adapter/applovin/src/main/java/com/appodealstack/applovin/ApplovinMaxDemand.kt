@@ -72,13 +72,14 @@ class ApplovinMaxDemand : Demand.Mediation {
 
                         override fun onAdLoadFailed(adUnitId: String?, error: MaxError) {
                             if (!isFinished.getAndSet(true)) {
-                                setCoreListener(sourceAd, objRequest, demandAd)
                                 val failure = AuctionData.Failure(
                                     demandId = demandAd.demandId,
                                     adType = demandAd.adType,
                                     objRequest = demandAd.objRequest,
                                     cause = error.asBidonError()
                                 )
+                                // remove listener
+                                sourceAd.setListener(null)
                                 continuation.resume(failure)
                             }
                         }

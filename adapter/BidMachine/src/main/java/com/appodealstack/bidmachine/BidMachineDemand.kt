@@ -77,7 +77,8 @@ class BidMachineDemand : Demand.PostBid {
                                 objRequest = interstitialAd,
                                 cause = bmError.asBidonError()
                             )
-                            setCoreListener(interstitialAd, interstitialAd.auctionResult?.price ?: 0.0, ownerDemandAd)
+                            // remove listener
+                            interstitialAd.setListener(null)
                             continuation.resume(failure)
                         }
                     }
