@@ -31,7 +31,7 @@ android {
 
 dependencies {
 
-    compileOnly 'com.applovin:applovin-sdk:+'
+    implementation 'com.applovin:applovin-sdk:11.4.4'
     api(project(':bidon'))
 
     implementation 'androidx.core:core-ktx:1.8.0'
