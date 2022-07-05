@@ -11,15 +11,19 @@ import com.appodealstack.mads.base.AdType
 import com.appodealstack.mads.demands.AdListener
 import com.appodealstack.mads.demands.AdRevenueListener
 import com.appodealstack.mads.demands.DemandAd
+import java.lang.ref.WeakReference
 
 internal class InterstitialAdWrapperImpl(
     private val adUnitId: String,
-    private val activity: Activity
+    activity: Activity
 ) : InterstitialAdWrapper {
 
     private val maxInterstitialAd: MaxInterstitialAd by lazy {
         MaxInterstitialAd(adUnitId, activity)
     }
+
+    private val activityRef = WeakReference(activity)
+
     override val demandAd: DemandAd by lazy {
         DemandAd(
             demandId = ApplovinMaxDemandId,
@@ -45,6 +49,7 @@ internal class InterstitialAdWrapperImpl(
     ) {
         SdkCore.showAd(
             demandAd = demandAd,
+            activity = activityRef.get(),
             adParams = bundleOf(adUnitIdKey to adUnitId, placementKey to placement, customDataKey to customData),
         )
     }

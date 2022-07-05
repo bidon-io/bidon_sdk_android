@@ -89,9 +89,9 @@ internal class AuctionImpl : Auction {
         /**
          * First round - Mediation
          */
-        val mediationResults = mediationRequests.mapNotNull { mediation ->
-            withTimeoutOrNull(RequestTimeout) {
-                async {
+        val mediationResults = mediationRequests.map { mediation ->
+            async {
+                withTimeoutOrNull(RequestTimeout) {
                     when (val auctionResult = mediation.execute()) {
                         is AuctionData.Success -> {
                             auctionResults.update {
@@ -115,9 +115,9 @@ internal class AuctionImpl : Auction {
         /**
          * Second round - PostBid
          */
-        val postBidResults = postBidRequests.mapNotNull { postBid ->
-            withTimeoutOrNull(RequestTimeout) {
-                async {
+        val postBidResults = postBidRequests.map { postBid ->
+            async {
+                withTimeoutOrNull(RequestTimeout) {
                     val auctionResult = postBid.execute(
                         mediationWinner?.price?.let {
                             AuctionRequest.AdditionalData(priceFloor = it)

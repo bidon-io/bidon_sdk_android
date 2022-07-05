@@ -1,5 +1,6 @@
 package com.appodealstack.bidmachine
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import com.appodealstack.mads.SdkCore
@@ -166,7 +167,7 @@ class BidMachineDemand : Demand.PostBid {
             return interstitialAd.canShow()
         }
 
-        override fun showAd(adParams: Bundle) {
+        override fun showAd(activity: Activity?, adParams: Bundle) {
             interstitialAd.show()
         }
     }

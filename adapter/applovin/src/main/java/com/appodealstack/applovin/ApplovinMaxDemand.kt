@@ -1,5 +1,6 @@
 package com.appodealstack.applovin
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import com.applovin.mediation.MaxAd
@@ -109,7 +110,7 @@ class ApplovinMaxDemand : Demand.Mediation {
             return objRequest.isReady
         }
 
-        override fun showAd(adParams: Bundle) {
+        override fun showAd(activity: Activity?, adParams: Bundle) {
             val placement = adParams.getString(placementKey)
             val customData = adParams.getString(customDataKey)
             objRequest.showAd(placement, customData)

@@ -1,5 +1,6 @@
 package com.appodealstack.mads
 
+import android.app.Activity
 import android.os.Bundle
 import com.appodealstack.mads.analytics.AnalyticsSource
 import com.appodealstack.mads.analytics.AnalyticsSourceImpl
@@ -17,10 +18,7 @@ val SdkCore: Core by lazy {
 
 interface Core {
     fun loadAd(demandAd: DemandAd)
-    fun showAd(
-        demandAd: DemandAd,
-        adParams: Bundle,
-    )
+    fun showAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle)
 
     fun canShow(demandAd: DemandAd): Boolean
     fun destroyAd(demandAd: DemandAd, adParams: Bundle)
@@ -69,11 +67,13 @@ internal class CoreImpl(
                     auctionListener.onAdLoadFailed(demandAd, it)
                 }
             )
+        } else {
+            logInternal(Tag, "Auction is in progress for $demandAd")
         }
     }
 
-    override fun showAd(demandAd: DemandAd, adParams: Bundle) {
-        auctionsHolder.getTopResultOrNull(demandAd)?.objRequest?.showAd(adParams)
+    override fun showAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle) {
+        auctionsHolder.getTopResultOrNull(demandAd)?.objRequest?.showAd(activity, adParams)
             ?: logInternal(Tag, "Not loaded Ad for: $demandAd")
     }
 

@@ -4,6 +4,9 @@ import com.appodealstack.mads.auctions.AuctionData
 import com.appodealstack.mads.auctions.AuctionListener
 import com.appodealstack.mads.base.AdType
 import com.appodealstack.mads.base.ext.addOrRemoveIfNull
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 internal interface ListenersHolder {
     val auctionListener: AuctionListener
@@ -14,27 +17,38 @@ internal interface ListenersHolder {
 
 internal class ListenersHolderImpl : ListenersHolder {
     private val userListeners = mutableMapOf<DemandAd, AdListener>()
+    private val mainScope by lazy { CoroutineScope(Dispatchers.Main) }
 
     override val auctionListener: AuctionListener by lazy {
         object : AuctionListener {
             override fun onDemandAdLoaded(demandAd: DemandAd, ad: AuctionData.Success) {
-                userListeners[demandAd]?.onDemandAdLoaded(ad)
+                mainScope.launch {
+                    userListeners[demandAd]?.onDemandAdLoaded(ad)
+                }
             }
 
             override fun onDemandAdLoadFailed(demandAd: DemandAd, ad: AuctionData.Failure) {
-                userListeners[demandAd]?.onDemandAdLoadFailed(ad)
+                mainScope.launch {
+                    userListeners[demandAd]?.onDemandAdLoadFailed(ad)
+                }
             }
 
             override fun onWinnerFound(demandAd: DemandAd, ads: List<AuctionData.Success>) {
-                userListeners[demandAd]?.onWinnerFound(ads)
+                mainScope.launch {
+                    userListeners[demandAd]?.onWinnerFound(ads)
+                }
             }
 
             override fun onAdLoaded(demandAd: DemandAd, ad: AuctionData.Success) {
-                userListeners[demandAd]?.onAdLoaded(ad)
+                mainScope.launch {
+                    userListeners[demandAd]?.onAdLoaded(ad)
+                }
             }
 
             override fun onAdLoadFailed(demandAd: DemandAd, cause: Throwable) {
-                userListeners[demandAd]?.onAdLoadFailed(cause)
+                mainScope.launch {
+                    userListeners[demandAd]?.onAdLoadFailed(cause)
+                }
             }
         }
     }
@@ -46,19 +60,27 @@ internal class ListenersHolderImpl : ListenersHolder {
     override fun getListenerForDemand(demandAd: DemandAd): AdListener = when (demandAd.adType) {
         AdType.Interstitial -> object : AdListener {
             override fun onAdDisplayFailed(ad: AuctionData.Failure) {
-                userListeners[demandAd]?.onAdDisplayFailed(ad)
+                mainScope.launch {
+                    userListeners[demandAd]?.onAdDisplayFailed(ad)
+                }
             }
 
             override fun onAdDisplayed(ad: AuctionData.Success) {
-                userListeners[demandAd]?.onAdDisplayed(ad)
+                mainScope.launch {
+                    userListeners[demandAd]?.onAdDisplayed(ad)
+                }
             }
 
             override fun onAdClicked(ad: AuctionData.Success) {
-                userListeners[demandAd]?.onAdClicked(ad)
+                mainScope.launch {
+                    userListeners[demandAd]?.onAdClicked(ad)
+                }
             }
 
             override fun onAdHidden(ad: AuctionData.Success) {
-                userListeners[demandAd]?.onAdHidden(ad)
+                mainScope.launch {
+                    userListeners[demandAd]?.onAdHidden(ad)
+                }
             }
 
             /** Next callbacks implemented in [auctionListener] */
