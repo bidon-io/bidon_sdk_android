@@ -36,7 +36,7 @@ class AdmobDemand : Demand.PostBid {
         this.context = context
         val adUnitId = configParams.getString(AdUnitIdKey)
             ?: "ca-app-pub-3940256099942544/1033173712" // TODO remove "ca-app-pub-3940256099942544/1033173712"
-        val price = configParams.getDouble(PriceKey, 13.0)
+        val price = configParams.getDouble(PriceKey, 0.14)
         adUnits[price] = AdUnitId(adUnitId)
         MobileAds.initialize(context) {
             continuation.resume(Unit)
