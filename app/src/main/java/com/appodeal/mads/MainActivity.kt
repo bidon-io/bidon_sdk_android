@@ -7,10 +7,10 @@ import androidx.core.view.isVisible
 import com.appodeal.mads.databinding.ActivityMainBinding
 import com.appodealstack.admob.AdmobAdapter
 import com.appodealstack.applovin.AppLovinDecorator
+import com.appodealstack.applovin.interstitial.BNInterstitialListener
 import com.appodealstack.applovin.interstitial.BNMaxInterstitialAd
 import com.appodealstack.bidmachine.BidMachineAdapter
 import com.appodealstack.mads.demands.Ad
-import com.appodealstack.mads.demands.AdListener
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,17 +49,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setBidonInterstitialListener() {
-        interstitialAd.setListener(object : AdListener {
+        interstitialAd.setListener(object : BNInterstitialListener {
             override fun onDemandAdLoaded(ad: Ad) {
                 super.onDemandAdLoaded(ad)
                 log(line = "onDemandAdLoaded: ${ad.demandId.demandId}, price=${ad.price}")
                 println("MainActivity Interstitial: onDemandAdLoaded($ad)")
             }
 
-            override fun onDemandAdLoadFailed(throwable: Throwable) {
-                super.onDemandAdLoadFailed(throwable)
-                log(line = "onDemandAdLoadFailed: $throwable")
-                println("MainActivity Interstitial: onDemandAdLoadFailed($throwable)")
+            override fun onDemandAdLoadFailed(cause: Throwable) {
+                super.onDemandAdLoadFailed(cause)
+                log(line = "onDemandAdLoadFailed: $cause")
+                println("MainActivity Interstitial: onDemandAdLoadFailed($cause)")
             }
 
             override fun onAuctionFinished(ads: List<Ad>) {
@@ -84,9 +84,9 @@ class MainActivity : AppCompatActivity() {
                 println("MainActivity Interstitial: onAdDisplayed($ad)")
             }
 
-            override fun onAdDisplayFailed(throwable: Throwable) {
-                log(line = "onAdDisplayFailed: $throwable")
-                println("MainActivity Interstitial: onAdDisplayed($throwable)")
+            override fun onAdDisplayFailed(cause: Throwable) {
+                log(line = "onAdDisplayFailed: $cause")
+                println("MainActivity Interstitial: onAdDisplayed($cause)")
             }
 
             override fun onAdHidden(ad: Ad) {

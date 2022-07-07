@@ -27,4 +27,3 @@ sealed interface AdSource {
         fun banner(demandAd: DemandAd): AuctionRequest
     }
 }
-

@@ -78,7 +78,18 @@ internal class CoreImpl(
     }
 
     override fun setExtras(demandAd: DemandAd, adParams: Bundle) {
-        TODO("Not yet implemented")
+        /**
+         * Set extras for all new Ad objects
+         */
+        adapters.filterIsInstance<ExtrasSource>().forEach { extrasSource ->
+            extrasSource.setExtras(demandAd, adParams)
+        }
+        /**
+         * Set extras for all existing Ad objects
+         */
+        adsRepository.getResults(demandAd).forEach { auctionResult ->
+            (auctionResult.adProvider as? ExtrasProvider)?.setExtras(adParams)
+        }
     }
 
     override fun setListener(demandAd: DemandAd, adListener: AdListener) {
@@ -86,7 +97,18 @@ internal class CoreImpl(
     }
 
     override fun setRevenueListener(demandAd: DemandAd, adRevenueListener: AdRevenueListener) {
-        TODO("Not yet implemented")
+        /**
+         * Set listener for all new Ad objects
+         */
+        adapters.filterIsInstance<AdRevenueSource>().forEach { adRevenueSource ->
+            adRevenueSource.setAdRevenueListener(demandAd, adRevenueListener)
+        }
+        /**
+         * Set listener for all existing Ad objects
+         */
+        adsRepository.getResults(demandAd).forEach { auctionResult ->
+            (auctionResult.adProvider as? AdRevenueProvider)?.setAdRevenueListener(adRevenueListener)
+        }
     }
 
 }

@@ -19,7 +19,10 @@ import kotlin.coroutines.resume
 
 val ApplovinMaxDemandId = DemandId("applovin")
 
-class ApplovinMaxAdapter : Adapter.Mediation, AdSource.Interstitial {
+class ApplovinMaxAdapter : Adapter.Mediation, AdSource.Interstitial, AdRevenueSource, ExtrasSource {
+    private val adRevenueListeners = mutableMapOf<DemandAd, AdRevenueListener>()
+    private val extras = mutableMapOf<DemandAd, Bundle>()
+
     override val demandId: DemandId = ApplovinMaxDemandId
 
     override suspend fun init(context: Context, configParams: Bundle) {
@@ -36,16 +39,17 @@ class ApplovinMaxAdapter : Adapter.Mediation, AdSource.Interstitial {
                 val isFinished = AtomicBoolean(false)
                 maxInterstitialAd.setListener(
                     object : MaxAdListener {
-                        override fun onAdLoaded(ad: MaxAd) {
+                        override fun onAdLoaded(maxAd: MaxAd) {
                             if (!isFinished.getAndSet(true)) {
+                                val ad = Ad(
+                                    demandId = ApplovinMaxDemandId,
+                                    demandAd = demandAd,
+                                    price = maxAd.revenue,
+                                    sourceAd = maxAd
+                                )
                                 val auctionResult = AuctionResult(
-                                    ad = Ad(
-                                        demandId = ApplovinMaxDemandId,
-                                        demandAd = demandAd,
-                                        price = ad.revenue,
-                                        sourceAd = ad
-                                    ),
-                                    adProvider = object : AdProvider {
+                                    ad = ad,
+                                    adProvider = object : AdProvider, AdRevenueProvider, ExtrasProvider {
                                         override fun canShow(): Boolean {
                                             return maxInterstitialAd.isReady
                                         }
@@ -58,8 +62,34 @@ class ApplovinMaxAdapter : Adapter.Mediation, AdSource.Interstitial {
 
                                         override fun destroy() = maxInterstitialAd.destroy()
 
+                                        override fun setAdRevenueListener(adRevenueListener: AdRevenueListener) {
+                                            maxInterstitialAd.setRevenueListener {
+                                                adRevenueListener.onAdRevenuePaid(ad)
+                                            }
+                                        }
+
+                                        override fun setExtras(adParams: Bundle) {
+                                            adParams.keySet().forEach { key ->
+                                                if (adParams.get(key) is String) {
+                                                    maxInterstitialAd.setExtraParameter(key, adParams.getString(key))
+                                                }
+                                            }
+                                        }
+
                                     }
                                 )
+                                adRevenueListeners[demandAd]?.let { adRevenueListener ->
+                                    maxInterstitialAd.setRevenueListener {
+                                        adRevenueListener.onAdRevenuePaid(ad)
+                                    }
+                                }
+                                extras[demandAd]?.let { bundle ->
+                                    bundle.keySet().forEach { key ->
+                                        if (bundle.get(key) is String) {
+                                            maxInterstitialAd.setExtraParameter(key, bundle.getString(key))
+                                        }
+                                    }
+                                }
                                 maxInterstitialAd.setCoreListener(auctionResult)
                                 continuation.resume(Result.success(auctionResult))
                             }
@@ -124,6 +154,14 @@ class ApplovinMaxAdapter : Adapter.Mediation, AdSource.Interstitial {
                 }
             }
         )
+    }
+
+    override fun setAdRevenueListener(demandAd: DemandAd, adRevenueListener: AdRevenueListener) {
+        adRevenueListeners[demandAd] = adRevenueListener
+    }
+
+    override fun setExtras(demandAd: DemandAd, adParams: Bundle) {
+        extras[demandAd] = adParams
     }
 }
 

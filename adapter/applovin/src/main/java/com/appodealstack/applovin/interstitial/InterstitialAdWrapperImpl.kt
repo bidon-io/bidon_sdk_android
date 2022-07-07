@@ -6,10 +6,7 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
 import com.appodealstack.applovin.*
 import com.appodealstack.mads.SdkCore
-import com.appodealstack.mads.demands.AdListener
-import com.appodealstack.mads.demands.AdRevenueListener
-import com.appodealstack.mads.demands.AdType
-import com.appodealstack.mads.demands.DemandAd
+import com.appodealstack.mads.demands.*
 import java.lang.ref.WeakReference
 
 internal class InterstitialAdWrapperImpl(
@@ -47,8 +44,8 @@ internal class InterstitialAdWrapperImpl(
         )
     }
 
-    override fun setListener(adListener: AdListener) {
-        SdkCore.setListener(demandAd, adListener)
+    override fun setListener(bnInterstitialListener: BNInterstitialListener) {
+        SdkCore.setListener(demandAd, bnInterstitialListener.asAdListener())
     }
 
     override fun setRevenueListener(adRevenueListener: AdRevenueListener) {
@@ -69,5 +66,45 @@ internal class InterstitialAdWrapperImpl(
                 adUnitIdKey to adUnitId
             )
         )
+    }
+}
+
+private fun BNInterstitialListener.asAdListener(): AdListener {
+    return object : AdListener {
+        override fun onAdLoaded(ad: Ad) {
+            this@asAdListener.onAdLoaded(ad)
+        }
+
+        override fun onAdLoadFailed(cause: Throwable) {
+            this@asAdListener.onAdLoadFailed(cause)
+        }
+
+        override fun onAdDisplayed(ad: Ad) {
+            this@asAdListener.onAdDisplayed(ad)
+        }
+
+        override fun onAdDisplayFailed(cause: Throwable) {
+            this@asAdListener.onAdDisplayFailed(cause)
+        }
+
+        override fun onAdClicked(ad: Ad) {
+            this@asAdListener.onAdClicked(ad)
+        }
+
+        override fun onAdHidden(ad: Ad) {
+            this@asAdListener.onAdHidden(ad)
+        }
+
+        override fun onDemandAdLoaded(ad: Ad) {
+            this@asAdListener.onDemandAdLoaded(ad)
+        }
+
+        override fun onDemandAdLoadFailed(cause: Throwable) {
+            this@asAdListener.onDemandAdLoadFailed(cause)
+        }
+
+        override fun onAuctionFinished(ads: List<Ad>) {
+            this@asAdListener.onAuctionFinished(ads)
+        }
     }
 }

@@ -34,7 +34,7 @@ interface InterstitialAdWrapper {
     )
 
     fun getAdUnitId(): String
-    fun setListener(adListener: AdListener)
+    fun setListener(bnInterstitialListener: BNInterstitialListener)
     fun setRevenueListener(adRevenueListener: AdRevenueListener)
 
     fun setExtraParameter(key: String, value: String?)
