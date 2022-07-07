@@ -3,19 +3,19 @@ package com.appodealstack.applovin
 import android.content.Context
 import com.applovin.sdk.AppLovinSdk
 import com.appodealstack.mads.BidOnInitializer
-import com.appodealstack.mads.demands.Demand
+import com.appodealstack.mads.demands.Adapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-object AppLovinSdkWrapper {
+object AppLovinDecorator {
 
     fun getInstance(context: Context): AppLovinSdk {
         return AppLovinSdk.getInstance(context)
     }
 
-    fun registerPostBidDemands(vararg demandClasses: Class<out Demand>): AppLovinSdkWrapper {
-        BidOnInitializer.registerDemands(*demandClasses)
+    fun register(vararg adapterClasses: Class<out Adapter>): AppLovinDecorator {
+        BidOnInitializer.registerDemands(*adapterClasses)
         return this
     }
 
@@ -24,7 +24,7 @@ object AppLovinSdkWrapper {
         AppLovinSdk.initializeSdk(context) { appLovinSdkConfiguration ->
             BidOnInitializer.withContext(context)
                 .registerDemands(
-                    ApplovinMaxDemand::class.java,
+                    ApplovinMaxAdapter::class.java,
                 )
                 .build {
                     CoroutineScope(Dispatchers.Main).launch {

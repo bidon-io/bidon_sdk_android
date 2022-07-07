@@ -3,51 +3,51 @@ package com.appodealstack.mads.core.impl
 import android.app.Activity
 import android.os.Bundle
 import com.appodealstack.mads.Core
-import com.appodealstack.mads.auctions.AuctionsHolder
-import com.appodealstack.mads.auctions.AuctionsHolderImpl
+import com.appodealstack.mads.auctions.AdsRepository
+import com.appodealstack.mads.auctions.AdsRepositoryImpl
 import com.appodealstack.mads.auctions.NewAuction
 import com.appodealstack.mads.core.AnalyticsSource
 import com.appodealstack.mads.core.DemandsSource
 import com.appodealstack.mads.core.ListenersHolder
 import com.appodealstack.mads.core.ext.logInternal
-import com.appodealstack.mads.demands.AdListener
-import com.appodealstack.mads.demands.AdRevenueListener
-import com.appodealstack.mads.demands.Demand
-import com.appodealstack.mads.demands.DemandAd
+import com.appodealstack.mads.core.ext.retrieveAuctionRequests
+import com.appodealstack.mads.demands.*
 
 internal class CoreImpl(
-    private val auctionsHolder: AuctionsHolder = AuctionsHolderImpl()
+    private val adsRepository: AdsRepository = AdsRepositoryImpl()
 ) : Core,
     DemandsSource by DemandsSourceImpl(),
     AnalyticsSource by AnalyticsSourceImpl(),
     ListenersHolder by ListenersHolderImpl() {
 
-    override fun loadAd(demandAd: DemandAd) {
-        if (!auctionsHolder.isAuctionActive(demandAd)) {
+    override fun loadAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle) {
+        if (!adsRepository.isAuctionActive(demandAd)) {
             val auction = NewAuction
-            auctionsHolder.addAuction(demandAd, auction)
+            adsRepository.addAuction(demandAd, auction)
             auction.start(
-                mediationRequests = demands
-                    .filterIsInstance<Demand.Mediation>()
-                    .map { it.createAuctionRequest(demandAd) }
+                mediationRequests = adapters
+                    .filterIsInstance<Adapter.Mediation>()
+                    .retrieveAuctionRequests(activity, demandAd, adParams)
                     .toSet(),
-                postBidRequests = demands
-                    .filterIsInstance<Demand.PostBid>()
-                    .map { it.createActionRequest(ownerDemandAd = demandAd) }
+                postBidRequests = adapters
+                    .filterIsInstance<Adapter.PostBid>()
+                    .retrieveAuctionRequests(activity, demandAd, adParams)
                     .toSet(),
-                onDemandLoaded = { success ->
-                    auctionListener.demandAuctionSucceed(demandAd, success)
+                onDemandLoaded = { auctionResult ->
+                    auctionListener.demandAuctionSucceed(auctionResult)
                 },
-                onDemandLoadFailed = { failure ->
-                    auctionListener.demandAuctionFailed(demandAd, failure)
-                },
-                onAuctionFinished = {
-                    auctionListener.winnerFound(demandAd, it)
-                    auctionListener.auctionSucceed(demandAd, it.first())
+                onDemandLoadFailed = { throwable ->
+                    auctionListener.demandAuctionFailed(demandAd, throwable)
                 },
                 onAuctionFailed = {
-                    auctionsHolder.clearResults(demandAd)
+                    adsRepository.clearResults(demandAd)
                     auctionListener.auctionFailed(demandAd, it)
+                },
+                onAuctionFinished = {
+                    auctionListener.auctionSucceed(demandAd, it)
+                },
+                onWinnerFound = {
+                    auctionListener.winnerFound(it)
                 }
             )
         } else {
@@ -56,17 +56,25 @@ internal class CoreImpl(
     }
 
     override fun showAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle) {
-        auctionsHolder.getTopResultOrNull(demandAd)?.objRequest?.showAd(activity, adParams)
-            ?: logInternal(Tag, "Not loaded Ad for: $demandAd")
+        adsRepository.getWinnerOrNull(
+            demandAd = demandAd,
+            onWinnerFound = { auctionData ->
+                if (auctionData != null) {
+                    auctionData.adProvider.showAd(activity, adParams)
+                } else {
+                    logInternal(Tag, "Not loaded Ad for: $demandAd")
+                }
+            }
+        )
     }
 
     override fun canShow(demandAd: DemandAd): Boolean {
-        return auctionsHolder.getTopResultOrNull(demandAd)?.objRequest?.canShowAd() ?: false
+        return adsRepository.getResults(demandAd).firstOrNull()?.adProvider?.canShow() ?: false
     }
 
     override fun destroyAd(demandAd: DemandAd, adParams: Bundle) {
         addUserListener(demandAd, null)
-        return auctionsHolder.clearResults(demandAd)
+        return adsRepository.clearResults(demandAd)
     }
 
     override fun setExtras(demandAd: DemandAd, adParams: Bundle) {

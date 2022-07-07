@@ -4,12 +4,11 @@ import android.app.Activity
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
-import com.applovin.mediation.ads.MaxInterstitialAd
 import com.appodealstack.applovin.*
 import com.appodealstack.mads.SdkCore
-import com.appodealstack.mads.demands.AdType
 import com.appodealstack.mads.demands.AdListener
 import com.appodealstack.mads.demands.AdRevenueListener
+import com.appodealstack.mads.demands.AdType
 import com.appodealstack.mads.demands.DemandAd
 import java.lang.ref.WeakReference
 
@@ -18,17 +17,11 @@ internal class InterstitialAdWrapperImpl(
     activity: Activity
 ) : InterstitialAdWrapper {
 
-    private val maxInterstitialAd: MaxInterstitialAd by lazy {
-        MaxInterstitialAd(adUnitId, activity)
-    }
-
     private val activityRef = WeakReference(activity)
 
     override val demandAd: DemandAd by lazy {
         DemandAd(
-            demandId = ApplovinMaxDemandId,
             adType = AdType.Interstitial,
-            objRequest = maxInterstitialAd
         )
     }
 
@@ -36,7 +29,7 @@ internal class InterstitialAdWrapperImpl(
         get() = SdkCore.canShow(demandAd)
 
     override fun loadAd() {
-        SdkCore.loadAd(demandAd)
+        SdkCore.loadAd(activityRef.get(), demandAd, bundleOf(adUnitIdKey to adUnitId))
     }
 
     override fun getAdUnitId(): String = adUnitId
@@ -50,7 +43,7 @@ internal class InterstitialAdWrapperImpl(
         SdkCore.showAd(
             demandAd = demandAd,
             activity = activityRef.get(),
-            adParams = bundleOf(adUnitIdKey to adUnitId, placementKey to placement, customDataKey to customData),
+            adParams = bundleOf(placementKey to placement, customDataKey to customData),
         )
     }
 

@@ -1,34 +1,31 @@
 package com.appodealstack.mads.demands
 
-import com.appodealstack.mads.auctions.AuctionData
-
 interface AdListener : ExtendedListener {
 
     /**
      * Callback invokes after auction completed and winner is selected.
-     * Calls immediately after [ExtendedListener.onWinnerFound]
+     * Calls immediately after [ExtendedListener.onAuctionFinished]
      */
-    fun onAdLoaded(ad: AuctionData.Success)
+    fun onAdLoaded(ad: Ad)
 
     /**
      * Callback invokes after auction completed, but no winner found.
      */
     fun onAdLoadFailed(cause: Throwable)
-    fun onAdDisplayed(ad: AuctionData.Success)
-    fun onAdDisplayFailed(ad: AuctionData.Failure)
-    fun onAdClicked(ad: AuctionData.Success)
-    fun onAdHidden(ad: AuctionData.Success)
+    fun onAdDisplayed(ad: Ad)
+    fun onAdDisplayFailed(cause: Throwable)
+    fun onAdClicked(ad: Ad)
+    fun onAdHidden(ad: Ad)
 }
 
 interface ExtendedListener {
-    fun onDemandAdLoaded(ad: AuctionData.Success) {}
-    fun onDemandAdLoadFailed(ad: AuctionData.Failure) {}
+    fun onDemandAdLoaded(ad: Ad) {}
+    fun onDemandAdLoadFailed(cause: Throwable) {}
 
     /**
-     * Callback invokes after auction completed and winner is selected.
-     * Exposes sorted list of loaded Ad.
+     * Callback invokes after auction completed.
      * Calls immediately before [AdListener.onAdLoaded]
      */
-    fun onWinnerFound(ads: List<AuctionData.Success>) {}
+    fun onAuctionFinished(ads: List<Ad>) {}
 }
 

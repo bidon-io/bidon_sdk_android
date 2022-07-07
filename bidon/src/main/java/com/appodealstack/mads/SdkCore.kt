@@ -11,7 +11,7 @@ import com.appodealstack.mads.demands.DemandAd
 val SdkCore: Core by lazy { CoreImpl() }
 
 interface Core {
-    fun loadAd(demandAd: DemandAd)
+    fun loadAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle)
     fun showAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle)
 
     fun canShow(demandAd: DemandAd): Boolean

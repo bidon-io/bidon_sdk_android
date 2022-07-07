@@ -10,13 +10,13 @@ import com.appodealstack.mads.demands.DemandAd
 /**
  * Full screen Interstitial Advertising
  */
-class MaxInterstitialAdWrapper(
+class BNMaxInterstitialAd(
     adUnitId: String,
     activity: Activity
 ) : InterstitialAdWrapper by InterstitialAdWrapperImpl(adUnitId, activity)
 
 /**
- * [MaxInterstitialAdWrapper] class description
+ * [BNMaxInterstitialAd] class description
  */
 interface InterstitialAdWrapper {
 

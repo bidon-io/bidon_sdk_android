@@ -1,9 +1,9 @@
 package com.appodealstack.mads.core
 
-import com.appodealstack.mads.demands.Demand
+import com.appodealstack.mads.demands.Adapter
 
 internal interface DemandsSource {
-    val demands: List<Demand>
-    fun addDemands(demand: Demand)
+    val adapters: List<Adapter>
+    fun addDemands(adapter: Adapter)
 }
 

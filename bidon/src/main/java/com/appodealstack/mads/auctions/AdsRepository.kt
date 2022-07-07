@@ -2,23 +2,26 @@ package com.appodealstack.mads.auctions
 
 import com.appodealstack.mads.demands.DemandAd
 
-internal interface AuctionsHolder {
+internal interface AdsRepository {
     fun clearResults(demandAd: DemandAd)
-    fun getTopResultOrNull(demandAd: DemandAd): AuctionData.Success?
+    fun getWinnerOrNull(demandAd: DemandAd, onWinnerFound: (AuctionResult?) -> Unit)
 
     fun addAuction(demandAd: DemandAd, auction: Auction)
     fun isAuctionActive(demandAd: DemandAd): Boolean
+    fun getResults(demandAd: DemandAd): List<AuctionResult>
 }
 
-internal class AuctionsHolderImpl : AuctionsHolder {
+internal class AdsRepositoryImpl : AdsRepository {
     private val auctionMap = mutableMapOf<DemandAd, Auction>()
 
     override fun clearResults(demandAd: DemandAd) {
         auctionMap.remove(demandAd)
     }
 
-    override fun getTopResultOrNull(demandAd: DemandAd): AuctionData.Success? {
-        return auctionMap[demandAd]?.getTopResultOrNull()
+    override fun getWinnerOrNull(demandAd: DemandAd, onWinnerFound: (AuctionResult?) -> Unit) {
+        auctionMap[demandAd]?.getWinnerOrNull(
+            onWinnerFound = onWinnerFound
+        )
     }
 
     override fun addAuction(demandAd: DemandAd, auction: Auction) {
@@ -27,5 +30,9 @@ internal class AuctionsHolderImpl : AuctionsHolder {
 
     override fun isAuctionActive(demandAd: DemandAd): Boolean {
         return auctionMap[demandAd]?.isAuctionActive() ?: false
+    }
+
+    override fun getResults(demandAd: DemandAd): List<AuctionResult> {
+        return auctionMap[demandAd]?.getResults() ?: emptyList()
     }
 }

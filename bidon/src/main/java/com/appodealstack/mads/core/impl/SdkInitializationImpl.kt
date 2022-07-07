@@ -12,7 +12,7 @@ import com.appodealstack.mads.config.Configuration
 import com.appodealstack.mads.config.BidonConfigurator
 import com.appodealstack.mads.config.BidonConfiguratorInstance
 import com.appodealstack.mads.config.StaticJsonConfiguration
-import com.appodealstack.mads.demands.Demand
+import com.appodealstack.mads.demands.Adapter
 import com.appodealstack.mads.core.DemandsSource
 import com.appodealstack.mads.core.InitializationCallback
 import com.appodealstack.mads.core.InitializationResult
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 internal class SdkInitializationImpl : SdkInitialization {
     private val sdkCore: Core = SdkCore
     private val contextProvider = ContextProvider
-    private val demands = mutableMapOf<Class<out Demand>, Demand>()
+    private val demands = mutableMapOf<Class<out Adapter>, Adapter>()
     private val analytics = mutableMapOf<Class<out Analytic>, Analytic>()
     private val scope: CoroutineScope get() = CoroutineScope(Dispatchers.Default)
 
@@ -39,8 +39,8 @@ internal class SdkInitializationImpl : SdkInitialization {
         return this
     }
 
-    override fun registerDemands(vararg demandClasses: Class<out Demand>): SdkInitialization {
-        demandClasses.forEach { demandClass ->
+    override fun registerDemands(vararg adapterClasses: Class<out Adapter>): SdkInitialization {
+        adapterClasses.forEach { demandClass ->
             logInternal("Initializer", "Creating instance for: $demandClass")
             try {
                 val instance = demandClass.newInstance()

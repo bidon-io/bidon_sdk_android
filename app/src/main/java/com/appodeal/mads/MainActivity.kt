@@ -5,19 +5,19 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.appodeal.mads.databinding.ActivityMainBinding
-import com.appodealstack.admob.AdmobDemand
-import com.appodealstack.applovin.AppLovinSdkWrapper
-import com.appodealstack.applovin.interstitial.MaxInterstitialAdWrapper
-import com.appodealstack.bidmachine.BidMachineDemand
-import com.appodealstack.mads.auctions.AuctionData
+import com.appodealstack.admob.AdmobAdapter
+import com.appodealstack.applovin.AppLovinDecorator
+import com.appodealstack.applovin.interstitial.BNMaxInterstitialAd
+import com.appodealstack.bidmachine.BidMachineAdapter
+import com.appodealstack.mads.demands.Ad
 import com.appodealstack.mads.demands.AdListener
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val maxInterstitialAdWrapper: MaxInterstitialAdWrapper by lazy {
-        MaxInterstitialAdWrapper("c7c5f664e60b9bfb", this)
+    private val interstitialAd: BNMaxInterstitialAd by lazy {
+        BNMaxInterstitialAd("c7c5f664e60b9bfb", this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,35 +35,35 @@ class MainActivity : AppCompatActivity() {
             }
             loadButton.setOnClickListener {
                 println("Interstitial: loadAd clicked")
-                maxInterstitialAdWrapper.loadAd()
+                interstitialAd.loadAd()
             }
             showButton.setOnClickListener {
-                if (maxInterstitialAdWrapper.isReady) {
+                if (interstitialAd.isReady) {
                     println("Interstitial: showAd clicked")
-                    maxInterstitialAdWrapper.showAd()
+                    interstitialAd.showAd()
                 } else {
-                    println("Interstitial: showAd impossible. $maxInterstitialAdWrapper not ready.")
+                    println("Interstitial: showAd impossible. $interstitialAd not ready.")
                 }
             }
         }
     }
 
     private fun setBidonInterstitialListener() {
-        maxInterstitialAdWrapper.setListener(object : AdListener {
-            override fun onDemandAdLoaded(ad: AuctionData.Success) {
+        interstitialAd.setListener(object : AdListener {
+            override fun onDemandAdLoaded(ad: Ad) {
                 super.onDemandAdLoaded(ad)
                 log(line = "onDemandAdLoaded: ${ad.demandId.demandId}, price=${ad.price}")
                 println("MainActivity Interstitial: onDemandAdLoaded($ad)")
             }
 
-            override fun onDemandAdLoadFailed(ad: AuctionData.Failure) {
-                super.onDemandAdLoadFailed(ad)
-                log(line = "onDemandAdLoadFailed: ${ad.demandId.demandId}")
-                println("MainActivity Interstitial: onDemandAdLoadFailed(${ad.cause})")
+            override fun onDemandAdLoadFailed(throwable: Throwable) {
+                super.onDemandAdLoadFailed(throwable)
+                log(line = "onDemandAdLoadFailed: $throwable")
+                println("MainActivity Interstitial: onDemandAdLoadFailed($throwable)")
             }
 
-            override fun onWinnerFound(ads: List<AuctionData.Success>) {
-                super.onWinnerFound(ads)
+            override fun onAuctionFinished(ads: List<Ad>) {
+                super.onAuctionFinished(ads)
                 val str = StringBuilder()
                 str.appendLine("onWinnerFound")
                 ads.forEachIndexed { i, ad ->
@@ -73,29 +73,29 @@ class MainActivity : AppCompatActivity() {
                 println("MainActivity Interstitial: onWinnerFound($ads)")
             }
 
-            override fun onAdLoaded(ad: AuctionData.Success) {
+            override fun onAdLoaded(ad: Ad) {
                 // Interstitial ad is ready to be shown. interstitialAd.isReady() will now return 'true'
                 log(line = "onAdLoaded: ${ad.demandId.demandId}, price=${ad.price}")
                 println("MainActivity Interstitial: onAdLoaded($ad)")
             }
 
-            override fun onAdDisplayed(ad: AuctionData.Success) {
+            override fun onAdDisplayed(ad: Ad) {
                 log(line = "onAdDisplayed: ${ad.demandId.demandId}, price=${ad.price}")
                 println("MainActivity Interstitial: onAdDisplayed($ad)")
             }
 
-            override fun onAdDisplayFailed(ad: AuctionData.Failure) {
-                log(line = "onAdDisplayFailed: $ad")
-                println("MainActivity Interstitial: onAdDisplayed($ad)")
+            override fun onAdDisplayFailed(throwable: Throwable) {
+                log(line = "onAdDisplayFailed: $throwable")
+                println("MainActivity Interstitial: onAdDisplayed($throwable)")
             }
 
-            override fun onAdHidden(ad: AuctionData.Success) {
+            override fun onAdHidden(ad: Ad) {
                 log(line = "onAdHidden: ${ad.demandId.demandId}, price=${ad.price}")
                 // Interstitial ad is hidden. Pre-load the next ad
                 println("MainActivity Interstitial: onAdHidden($ad)")
             }
 
-            override fun onAdClicked(ad: AuctionData.Success) {
+            override fun onAdClicked(ad: Ad) {
                 log(line = "onAdClicked: ${ad.demandId.demandId}, price=${ad.price}")
                 println("MainActivity Interstitial: onAdClicked($ad)")
             }
@@ -108,11 +108,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initApplovin() {
-        AppLovinSdkWrapper.getInstance(this).mediationProvider = "max"
-        AppLovinSdkWrapper
-            .registerPostBidDemands(
-                BidMachineDemand::class.java,
-                AdmobDemand::class.java
+        AppLovinDecorator.getInstance(this).mediationProvider = "max"
+        AppLovinDecorator
+            .register(
+                BidMachineAdapter::class.java,
+                AdmobAdapter::class.java
             ).initializeSdk(this) { appLovinSdkConfiguration ->
                 println(appLovinSdkConfiguration)
                 binding.initButton.isVisible = false

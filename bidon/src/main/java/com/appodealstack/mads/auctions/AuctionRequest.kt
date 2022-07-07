@@ -1,14 +1,15 @@
 package com.appodealstack.mads.auctions
 
-sealed interface AuctionRequest {
-    interface Mediation : AuctionRequest {
-        suspend fun execute(): AuctionData
-    }
+import com.appodealstack.mads.demands.Ad
+import com.appodealstack.mads.demands.AdProvider
 
-    interface PostBid : AuctionRequest {
-        suspend fun execute(additionalData: AdditionalData?): AuctionData
-    }
+fun interface AuctionRequest {
+    suspend fun execute(data: Data?): Result<AuctionResult>
 
-    data class AdditionalData(val priceFloor: Double)
+    data class Data(val priceFloor: Double)
 }
 
+class AuctionResult(
+    val ad: Ad,
+    val adProvider: AdProvider
+)

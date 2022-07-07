@@ -3,7 +3,8 @@ package com.appodealstack.mads.demands
 import android.app.Activity
 import android.os.Bundle
 
-interface ObjRequest {
-    fun canShowAd(): Boolean
+interface AdProvider {
+    fun canShow(): Boolean
     fun showAd(activity: Activity?, adParams: Bundle)
+    fun destroy()
 }
