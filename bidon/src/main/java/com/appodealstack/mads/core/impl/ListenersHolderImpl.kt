@@ -130,6 +130,34 @@ internal class ListenersHolderImpl : ListenersHolder {
             }
 
         }
-        AdType.Banner -> TODO("Not implemented")
+        AdType.Banner -> {
+            object : AdListener {
+                override fun onAdDisplayed(ad: Ad) {
+                    mainScope.launch {
+                        userListeners[demandAd]?.onAdDisplayed(ad)
+                    }
+                }
+
+                override fun onAdDisplayFailed(cause: Throwable) {
+                    mainScope.launch {
+                        userListeners[demandAd]?.onAdDisplayFailed(cause)
+                    }
+                }
+
+                override fun onAdClicked(ad: Ad) {
+                    mainScope.launch {
+                        userListeners[demandAd]?.onAdClicked(ad)
+                    }
+                }
+
+                override fun onAdHidden(ad: Ad) {
+                    mainScope.launch {
+                        userListeners[demandAd]?.onAdHidden(ad)
+                    }
+                }
+                override fun onAdLoaded(ad: Ad) {}
+                override fun onAdLoadFailed(cause: Throwable) {}
+            }
+        }
     }
 }

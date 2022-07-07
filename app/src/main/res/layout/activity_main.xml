@@ -7,16 +7,50 @@
     android:padding="24dp"
     tools:context=".MainActivity">
 
+    <FrameLayout
+        android:id="@+id/adBannerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/initButton"
+        app:layout_constraintTop_toTopOf="parent" />
+    <!--    <com.appodealstack.applovin.banner.BNMaxAdView-->
+    <!--        android:id="@+id/adBannerView"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        app:layout_constraintBottom_toTopOf="@id/initButton"-->
+    <!--        app:layout_constraintTop_toTopOf="parent" />-->
+
     <Button
         android:id="@+id/initButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Init SDK"
-        app:layout_constraintBottom_toTopOf="@+id/interstitialLayout"
+        app:layout_constraintBottom_toTopOf="@+id/bannerLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/adBannerView"
         app:layout_constraintVertical_chainStyle="packed" />
+
+    <LinearLayout
+        android:id="@+id/bannerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/interstitialLayout"
+        app:layout_constraintTop_toBottomOf="@id/initButton">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Banner" />
+
+        <Button
+            android:id="@+id/loadBannerButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="Load" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/interstitialLayout"
@@ -24,7 +58,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@id/rewardedLayout"
-        app:layout_constraintTop_toBottomOf="@id/initButton">
+        app:layout_constraintTop_toBottomOf="@id/interstitialLayout">
 
         <TextView
             android:layout_width="wrap_content"

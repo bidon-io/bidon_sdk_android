@@ -1,7 +1,9 @@
 package com.appodealstack.mads.core.impl
 
 import android.app.Activity
+import android.content.Context
 import android.os.Bundle
+import android.view.View
 import com.appodealstack.mads.Core
 import com.appodealstack.mads.auctions.AdsRepository
 import com.appodealstack.mads.auctions.AdsRepositoryImpl
@@ -48,6 +50,49 @@ internal class CoreImpl(
                 },
                 onWinnerFound = {
                     auctionListener.winnerFound(it)
+                }
+            )
+        } else {
+            logInternal(Tag, "Auction is in progress for $demandAd")
+        }
+    }
+
+    override fun loadAd(
+        context: Context,
+        demandAd: DemandAd,
+        adParams: Bundle,
+        onViewReady: (View) -> Unit
+    ) {
+        if (!adsRepository.isAuctionActive(demandAd)) {
+            val auction = NewAuction
+            adsRepository.addAuction(demandAd, auction)
+            auction.start(
+                mediationRequests = adapters
+                    .filterIsInstance<Adapter.Mediation>()
+                    .filterIsInstance<AdSource.Banner>()
+                    .retrieveAuctionRequests(context, demandAd, adParams)
+                    .toSet(),
+                postBidRequests = adapters
+                    .filterIsInstance<Adapter.PostBid>()
+                    .filterIsInstance<AdSource.Banner>()
+                    .retrieveAuctionRequests(context, demandAd, adParams)
+                    .toSet(),
+                onDemandLoaded = { auctionResult ->
+                    auctionListener.demandAuctionSucceed(auctionResult)
+                },
+                onDemandLoadFailed = { throwable ->
+                    auctionListener.demandAuctionFailed(demandAd, throwable)
+                },
+                onAuctionFailed = {
+                    adsRepository.clearResults(demandAd)
+                    auctionListener.auctionFailed(demandAd, it)
+                },
+                onAuctionFinished = {
+                    auctionListener.auctionSucceed(demandAd, it)
+                },
+                onWinnerFound = {
+                    auctionListener.winnerFound(it)
+                    onViewReady.invoke((it.adProvider as AdViewProvider).getAdView())
                 }
             )
         } else {
@@ -109,6 +154,14 @@ internal class CoreImpl(
         adsRepository.getResults(demandAd).forEach { auctionResult ->
             (auctionResult.adProvider as? AdRevenueProvider)?.setAdRevenueListener(adRevenueListener)
         }
+    }
+
+    override fun getPlacement(): String? {
+        TODO("Not yet implemented")
+    }
+
+    override fun setPlacement(placement: String?) {
+        TODO("Not yet implemented")
     }
 
 }

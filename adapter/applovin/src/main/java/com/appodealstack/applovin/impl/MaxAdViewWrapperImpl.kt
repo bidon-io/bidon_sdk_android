@@ -1,21 +1,24 @@
-package com.appodealstack.applovin.ext
+package com.appodealstack.applovin.impl
 
 import android.content.Context
+import android.util.AttributeSet
+import android.widget.FrameLayout
 import androidx.core.os.bundleOf
 import com.applovin.mediation.MaxAdFormat
-import com.applovin.mediation.ads.MaxAdView
+import com.appodealstack.applovin.adUnitIdKey
 import com.appodealstack.applovin.banner.MaxAdViewWrapper
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.demands.*
 
-internal class MaxAdViewWrapperImpl(
+internal class MaxAdViewWrapperImpl constructor(
     private val adUnitId: String,
-    context: Context
-) : MaxAdViewWrapper {
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : FrameLayout(context, attrs, defStyleAttr), MaxAdViewWrapper {
 
-    private val adView by lazy {
-        MaxAdView(adUnitId, context)
-    }
+    constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+            this("", context, attrs, defStyleAttr)
 
     private val demandAd = DemandAd(AdType.Banner)
 
@@ -24,19 +27,19 @@ internal class MaxAdViewWrapperImpl(
     }
 
     override fun setRevenueListener(listener: AdRevenueListener) {
-        TODO("Not yet implemented")
+        SdkCore.setRevenueListener(demandAd, listener)
     }
 
     override fun loadAd() {
-        TODO("Not yet implemented")
-    }
-
-    override fun setBackgroundColor(color: Int) {
-        adView.setBackgroundColor(color)
-    }
-
-    override fun setAlpha(alpha: Float) {
-        adView.alpha = alpha
+        SdkCore.loadAd(
+            context = context,
+            demandAd = demandAd,
+            adParams = bundleOf(adUnitIdKey to adUnitId),
+            onViewReady = { view ->
+                this.removeAllViews()
+                this.addView(view)
+            }
+        )
     }
 
     override fun destroy() {
@@ -45,7 +48,7 @@ internal class MaxAdViewWrapperImpl(
 
     override fun getAdUnitId(): String = adUnitId
 
-    override fun getAdFormat(): MaxAdFormat = adView.adFormat
+    override fun getAdFormat(): MaxAdFormat = MaxAdFormat.BANNER
 
     override fun setCustomData(value: String) {
         TODO("Not yet implemented")
@@ -64,10 +67,10 @@ internal class MaxAdViewWrapperImpl(
     }
 
     override fun setPlacement(placement: String?) {
-        TODO("Not yet implemented")
+        SdkCore.setPlacement(placement)
     }
 
-    override fun getPlacement(): String? = adView.placement
+    override fun getPlacement(): String? = SdkCore.getPlacement()
 }
 
 private fun BNMaxAdViewAdListener.asAdListener(adUnitId: String): AdListener {

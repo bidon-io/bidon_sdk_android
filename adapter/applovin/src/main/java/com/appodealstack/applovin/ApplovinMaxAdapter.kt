@@ -3,12 +3,14 @@ package com.appodealstack.applovin
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.view.View
 import com.applovin.mediation.*
+import com.applovin.mediation.ads.MaxAdView
 import com.applovin.mediation.ads.MaxInterstitialAd
 import com.applovin.mediation.ads.MaxRewardedAd
 import com.applovin.sdk.AppLovinSdk
-import com.appodealstack.applovin.ext.asBidonError
-import com.appodealstack.mads.SdkCore
+import com.appodealstack.applovin.impl.asBidonError
+import com.appodealstack.applovin.impl.setCoreListener
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
 import com.appodealstack.mads.demands.*
@@ -19,7 +21,7 @@ import kotlin.coroutines.resume
 val ApplovinMaxDemandId = DemandId("applovin")
 
 class ApplovinMaxAdapter : Adapter.Mediation,
-    AdSource.Interstitial, AdSource.Rewarded,
+    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner,
     AdRevenueSource, ExtrasSource {
     private val adRevenueListeners = mutableMapOf<DemandAd, AdRevenueListener>()
     private val extras = mutableMapOf<DemandAd, Bundle>()
@@ -28,6 +30,99 @@ class ApplovinMaxAdapter : Adapter.Mediation,
 
     override suspend fun init(context: Context, configParams: Bundle) {
         require(AppLovinSdk.getInstance(context).isInitialized)
+    }
+
+    override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
+        return AuctionRequest {
+            suspendCancellableCoroutine { continuation ->
+                val adUnitId = adParams.getString(adUnitIdKey)
+                val maxAdView = MaxAdView(adUnitId, context)
+                val isFinished = AtomicBoolean(false)
+                maxAdView.setListener(object : MaxAdViewAdListener {
+                    override fun onAdLoaded(maxAd: MaxAd) {
+                        if (!isFinished.getAndSet(true)) {
+                            val ad = Ad(
+                                demandId = ApplovinMaxDemandId,
+                                demandAd = demandAd,
+                                price = maxAd.revenue,
+                                sourceAd = maxAd
+                            )
+                            val auctionResult = AuctionResult(
+                                ad = ad,
+                                adProvider = object : AdProvider, AdRevenueProvider, ExtrasProvider, AdViewProvider {
+                                    override fun canShow(): Boolean = true
+                                    override fun showAd(activity: Activity?, adParams: Bundle) {}
+                                    override fun destroy() = maxAdView.destroy()
+                                    override fun getAdView(): View = maxAdView
+
+                                    override fun setAdRevenueListener(adRevenueListener: AdRevenueListener) {
+                                        maxAdView.setRevenueListener {
+                                            adRevenueListener.onAdRevenuePaid(ad)
+                                        }
+                                    }
+
+                                    override fun setExtras(adParams: Bundle) {
+                                        adParams.keySet().forEach { key ->
+                                            if (adParams.get(key) is String) {
+                                                maxAdView.setExtraParameter(key, adParams.getString(key))
+                                            }
+                                        }
+                                    }
+                                }
+                            )
+                            adRevenueListeners[demandAd]?.let { adRevenueListener ->
+                                maxAdView.setRevenueListener {
+                                    adRevenueListener.onAdRevenuePaid(ad)
+                                }
+                            }
+                            extras[demandAd]?.let { bundle ->
+                                bundle.keySet().forEach { key ->
+                                    if (bundle.get(key) is String) {
+                                        maxAdView.setExtraParameter(key, bundle.getString(key))
+                                    }
+                                }
+                            }
+                            maxAdView.setCoreListener(auctionResult)
+                            continuation.resume(Result.success(auctionResult))
+                        }
+                    }
+
+                    override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
+                        if (!isFinished.getAndSet(true)) {
+                            // remove listener
+                            maxAdView.setListener(null)
+                            continuation.resume(Result.failure(error.asBidonError()))
+                        }
+                    }
+
+                    override fun onAdDisplayed(ad: MaxAd?) {
+                        error("unexpected state. remove on release a28.")
+                    }
+
+                    override fun onAdHidden(ad: MaxAd?) {
+                        error("unexpected state. remove on release a28.")
+                    }
+
+                    override fun onAdClicked(ad: MaxAd?) {
+                        error("unexpected state. remove on release a28.")
+                    }
+
+                    override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError?) {
+                        error("unexpected state. remove on release a28.")
+                    }
+
+                    override fun onAdExpanded(ad: MaxAd?) {
+                        error("unexpected state. remove on release a28.")
+                    }
+
+                    override fun onAdCollapsed(ad: MaxAd?) {
+                        error("unexpected state. remove on release a28.")
+                    }
+
+                })
+                maxAdView.loadAd()
+            }
+        }
     }
 
     override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
@@ -237,89 +332,6 @@ class ApplovinMaxAdapter : Adapter.Mediation,
             }
         }
     }
-
-
-    private fun MaxInterstitialAd.setCoreListener(auctionResult: AuctionResult) {
-        val core = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)
-        this.setListener(
-            object : MaxAdListener {
-                override fun onAdLoaded(ad: MaxAd?) {
-                    core.onAdClicked(auctionResult.ad)
-                }
-
-                override fun onAdDisplayed(ad: MaxAd?) {
-                    core.onAdDisplayed(auctionResult.ad)
-                }
-
-                override fun onAdHidden(ad: MaxAd?) {
-                    core.onAdHidden(auctionResult.ad)
-                }
-
-                override fun onAdClicked(ad: MaxAd?) {
-                    core.onAdClicked(auctionResult.ad)
-                }
-
-                override fun onAdLoadFailed(adUnitId: String?, error: MaxError) {
-                    core.onAdLoadFailed(error.asBidonError())
-                }
-
-                override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError) {
-                    core.onAdDisplayFailed(error.asBidonError())
-                }
-            }
-        )
-    }
-
-    private fun MaxRewardedAd.setCoreListener(auctionResult: AuctionResult) {
-        val core = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)
-        this.setListener(
-            object : MaxRewardedAdListener {
-                override fun onAdLoaded(ad: MaxAd?) {
-                    core.onAdClicked(auctionResult.ad)
-                }
-
-                override fun onAdDisplayed(ad: MaxAd?) {
-                    core.onAdDisplayed(auctionResult.ad)
-                }
-
-                override fun onAdHidden(ad: MaxAd?) {
-                    core.onAdHidden(auctionResult.ad)
-                }
-
-                override fun onAdClicked(ad: MaxAd?) {
-                    core.onAdClicked(auctionResult.ad)
-                }
-
-                override fun onAdLoadFailed(adUnitId: String?, error: MaxError) {
-                    core.onAdLoadFailed(error.asBidonError())
-                }
-
-                override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError) {
-                    core.onAdDisplayFailed(error.asBidonError())
-                }
-
-                override fun onRewardedVideoStarted(ad: MaxAd?) {
-                    core.onRewardedStarted(auctionResult.ad)
-                }
-
-                override fun onRewardedVideoCompleted(ad: MaxAd?) {
-                    core.onRewardedCompleted(auctionResult.ad)
-                }
-
-                override fun onUserRewarded(ad: MaxAd?, reward: MaxReward?) {
-                    core.onUserRewarded(
-                        auctionResult.ad, reward?.let {
-                            RewardedAdListener.Reward(
-                                label = reward.label ?: "",
-                                amount = reward.amount
-                            )
-                        }
-                    )
-                }
-            }
-        )
-    }
-
 }
 
 internal const val adUnitIdKey = "adUnitId"

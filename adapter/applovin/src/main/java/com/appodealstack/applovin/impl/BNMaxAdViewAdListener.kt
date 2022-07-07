@@ -1,4 +1,4 @@
-package com.appodealstack.applovin.ext
+package com.appodealstack.applovin.impl
 
 import com.appodealstack.mads.demands.Ad
 import com.appodealstack.mads.demands.AdListener

@@ -24,6 +24,6 @@ sealed interface AdSource {
     }
 
     interface Banner : AdSource {
-        fun banner(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest
+        fun banner(context: Context, demandAd: DemandAd, adParams: Bundle): AuctionRequest
     }
 }

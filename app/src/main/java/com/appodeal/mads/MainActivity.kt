@@ -7,6 +7,8 @@ import androidx.core.view.isVisible
 import com.appodeal.mads.databinding.ActivityMainBinding
 import com.appodealstack.admob.AdmobAdapter
 import com.appodealstack.applovin.AppLovinDecorator
+import com.appodealstack.applovin.banner.BNMaxAdView
+import com.appodealstack.applovin.impl.BNMaxAdViewAdListener
 import com.appodealstack.applovin.interstitial.BNInterstitialListener
 import com.appodealstack.applovin.interstitial.BNMaxInterstitialAd
 import com.appodealstack.applovin.rewarded.BNMaxRewardedAd
@@ -17,6 +19,10 @@ import com.appodealstack.mads.demands.RewardedAdListener
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+
+    private val bannerAd: BNMaxAdView by lazy {
+        BNMaxAdView("c7c5f664e60b9bfb", this)
+    }
 
     private val interstitialAd: BNMaxInterstitialAd by lazy {
         BNMaxInterstitialAd("c7c5f664e60b9bfb", this)
@@ -33,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         initViewsForBidon(binding)
         setInterstitialListener()
         setRewardedListener()
+        setBannerListener()
     }
 
     private fun setRewardedListener() {
@@ -136,6 +143,10 @@ class MainActivity : AppCompatActivity() {
                     println("Rewarded: showAd impossible. $rewardedAd not ready.")
                 }
             }
+            loadBannerButton.setOnClickListener {
+                bannerAd.loadAd()
+            }
+            adBannerView.addView(bannerAd)
         }
     }
 
@@ -194,6 +205,55 @@ class MainActivity : AppCompatActivity() {
             override fun onAdLoadFailed(cause: Throwable) {
                 // Interstitial ad failed to load
                 println("MainActivity Interstitial: onAdLoadFailed($cause)")
+            }
+        })
+    }
+
+    private fun setBannerListener() {
+        bannerAd.setListener(object : BNMaxAdViewAdListener {
+            override fun onDemandAdLoaded(ad: Ad) {
+                super.onDemandAdLoaded(ad)
+                log(line = "onDemandAdLoaded: ${ad.demandId.demandId}, price=${ad.price}")
+                println("MainActivity Banner: onDemandAdLoaded($ad)")
+            }
+
+            override fun onDemandAdLoadFailed(cause: Throwable) {
+                super.onDemandAdLoadFailed(cause)
+                log(line = "onDemandAdLoadFailed: $cause")
+                println("MainActivity Banner: onDemandAdLoadFailed($cause)")
+            }
+
+            override fun onAuctionFinished(ads: List<Ad>) {
+                super.onAuctionFinished(ads)
+                val str = StringBuilder()
+                str.appendLine("onWinnerFound")
+                ads.forEachIndexed { i, ad ->
+                    str.appendLine("#${i + 1} > ${ad.demandId.demandId}, price=${ad.price}")
+                }
+                log(line = str.toString())
+                println("MainActivity Banner: onWinnerFound($ads)")
+            }
+
+            override fun onAdExpanded(ad: Ad) {
+            }
+
+            override fun onAdCollapsed(ad: Ad) {
+            }
+
+            override fun onAdLoaded(ad: Ad) {
+                // Interstitial ad is ready to be shown. interstitialAd.isReady() will now return 'true'
+                log(line = "onAdLoaded: ${ad.demandId.demandId}, price=${ad.price}")
+                println("MainActivity Banner: onAdLoaded($ad)")
+            }
+
+            override fun onAdDisplayFailed(error: Throwable) {
+                log(line = "onAdDisplayFailed: $error")
+                println("MainActivity Banner: onAdDisplayed($error)")
+            }
+
+            override fun onAdClicked(ad: Ad) {
+                log(line = "onAdClicked: ${ad.demandId.demandId}, price=${ad.price}")
+                println("MainActivity Banner: onAdClicked($ad)")
             }
         })
     }

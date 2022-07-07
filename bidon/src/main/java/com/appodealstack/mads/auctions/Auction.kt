@@ -152,11 +152,13 @@ internal class AuctionImpl : Auction {
 
         val winner = auctionResolver.findWinner(auctionResults.value)
 
-        if (winner != null) {
-            onAuctionFinished(auctionResults.value)
-            onWinnerFound(winner)
-        } else {
-            onAuctionFailed(DemandError.NoFill)
+        withContext(Dispatchers.Main) {
+            if (winner != null) {
+                onAuctionFinished(auctionResults.value)
+                onWinnerFound(winner)
+            } else {
+                onAuctionFailed(DemandError.NoFill)
+            }
         }
     }
 }
