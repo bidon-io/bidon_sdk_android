@@ -20,10 +20,10 @@ sealed interface AdSource {
     }
 
     interface Rewarded : AdSource {
-        fun rewarded(demandAd: DemandAd): AuctionRequest
+        fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest
     }
 
     interface Banner : AdSource {
-        fun banner(demandAd: DemandAd): AuctionRequest
+        fun banner(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest
     }
 }

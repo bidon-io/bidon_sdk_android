@@ -5,4 +5,8 @@ class Ad(
     val demandAd: DemandAd,
     val price: Double,
     val sourceAd: Any,
-)
+) {
+    override fun toString(): String {
+        return "Ad(demandId=${demandId.demandId}, adType=${demandAd.adType}, price=$price, $sourceAd)"
+    }
+}

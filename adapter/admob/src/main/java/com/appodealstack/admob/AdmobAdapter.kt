@@ -11,6 +11,8 @@ import com.appodealstack.mads.demands.*
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -23,19 +25,22 @@ val AdmobDemandId = DemandId("admob")
 @JvmInline
 private value class AdUnitId(val value: String)
 
-class AdmobAdapter : Adapter.PostBid, AdSource.Interstitial {
+class AdmobAdapter : Adapter.PostBid,
+    AdSource.Interstitial, AdSource.Rewarded {
     private lateinit var context: Context
 
     override val demandId = AdmobDemandId
 
-    private val adUnits = mutableMapOf<Double, AdUnitId>()
+    private val interstitialAdUnits = mutableMapOf<Double, AdUnitId>()
+    private val rewardedAdUnits = mutableMapOf<Double, AdUnitId>()
 
     override suspend fun init(context: Context, configParams: Bundle): Unit = suspendCoroutine { continuation ->
         this.context = context
         val adUnitId = configParams.getString(AdUnitIdKey)
             ?: "ca-app-pub-3940256099942544/1033173712" // TODO remove "ca-app-pub-3940256099942544/1033173712"
         val price = configParams.getDouble(PriceKey, 0.14)
-        adUnits[price] = AdUnitId(adUnitId)
+        interstitialAdUnits[price] = AdUnitId(adUnitId)
+        rewardedAdUnits[price] = AdUnitId("ca-app-pub-3940256099942544/5224354917")
         MobileAds.initialize(context) {
             continuation.resume(Unit)
         }
@@ -60,13 +65,7 @@ class AdmobAdapter : Adapter.PostBid, AdSource.Interstitial {
                                     ad = Ad(
                                         demandId = AdmobDemandId,
                                         demandAd = demandAd,
-                                        price = adUnits.mapNotNull { (price, adUnitId) ->
-                                            if (interstitialAd.adUnitId == adUnitId.value) {
-                                                price
-                                            } else {
-                                                null
-                                            }
-                                        }.first(),
+                                        price = interstitialAdUnits.getPrice(unitId = interstitialAd.adUnitId),
                                         sourceAd = interstitialAd
                                     ),
                                     adProvider = object : AdProvider {
@@ -95,6 +94,70 @@ class AdmobAdapter : Adapter.PostBid, AdSource.Interstitial {
         }
     }
 
+    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
+        return AuctionRequest {
+            withContext(Dispatchers.Main) {
+                suspendCancellableCoroutine { continuation ->
+                    val isFinished = AtomicBoolean(false)
+                    val adRequest = AdRequest.Builder().build()
+                    // todo remove "ca-app-pub-3940256099942544/5224354917"
+                    RewardedAd.load(
+                        context,
+                        "ca-app-pub-3940256099942544/5224354917" ?: getUnitId().value,
+                        adRequest,
+                        object : RewardedAdLoadCallback() {
+                            override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                                if (!isFinished.getAndSet(true)) {
+                                    continuation.resume(Result.failure(loadAdError.asBidonError()))
+                                }
+                            }
+
+                            override fun onAdLoaded(rewardedAd: RewardedAd) {
+                                if (!isFinished.getAndSet(true)) {
+                                    val ad = Ad(
+                                        demandId = AdmobDemandId,
+                                        demandAd = demandAd,
+                                        price = rewardedAdUnits.getPrice(unitId = rewardedAd.adUnitId),
+                                        sourceAd = rewardedAd
+                                    )
+                                    val auctionResult = AuctionResult(
+                                        ad = ad,
+                                        adProvider = object : AdProvider {
+                                            override fun canShow(): Boolean = true
+                                            override fun destroy() {}
+
+                                            override fun showAd(activity: Activity?, adParams: Bundle) {
+                                                if (activity == null) {
+                                                    logInternal(
+                                                        "AdmobDemand",
+                                                        "Error while showing RewardedAd: activity is null."
+                                                    )
+                                                } else {
+                                                    logInternal("rew", "rewardedAd.show(activity)")
+                                                    rewardedAd.show(activity) { rewardItem ->
+                                                        logInternal("rew", "rewardedAd.show(activity) $rewardItem")
+                                                        SdkCore.getListenerForDemand(demandAd).onUserRewarded(
+                                                            ad = ad,
+                                                            reward = RewardedAdListener.Reward(
+                                                                label = rewardItem.type,
+                                                                amount = rewardItem.amount
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    )
+                                    rewardedAd.setCoreListener(demandAd, auctionResult)
+                                    continuation.resume(Result.success(auctionResult))
+                                }
+                            }
+                        })
+                }
+            }
+        }
+    }
+
     private fun InterstitialAd.setCoreListener(ownerDemandAd: DemandAd, auctionData: AuctionResult) {
         val coreListener = SdkCore.getListenerForDemand(ownerDemandAd)
         this.fullScreenContentCallback = object : FullScreenContentCallback() {
@@ -116,8 +179,35 @@ class AdmobAdapter : Adapter.PostBid, AdSource.Interstitial {
         }
     }
 
+    private fun RewardedAd.setCoreListener(ownerDemandAd: DemandAd, auctionData: AuctionResult) {
+        val coreListener = SdkCore.getListenerForDemand(ownerDemandAd)
+        this.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdClicked() {
+                coreListener.onAdClicked(auctionData.ad)
+            }
+
+            override fun onAdDismissedFullScreenContent() {
+                coreListener.onAdHidden(auctionData.ad)
+            }
+
+            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                coreListener.onAdDisplayFailed(adError.asBidonError())
+            }
+
+            override fun onAdShowedFullScreenContent() {
+                coreListener.onAdDisplayed(auctionData.ad)
+            }
+        }
+    }
+
     private fun getUnitId(): AdUnitId {
-        return adUnits.maxBy { it.key }.value
+        return interstitialAdUnits.maxBy { it.key }.value
+    }
+
+    private fun Map<Double, AdUnitId>.getPrice(unitId: String): Double {
+        return this.mapNotNull { (price, adUnitId) ->
+            price.takeIf { unitId == adUnitId.value }
+        }.first()
     }
 }
 

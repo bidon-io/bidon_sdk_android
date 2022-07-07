@@ -1,10 +1,16 @@
-package com.appodealstack.mads.demands
+package com.appodealstack.applovin.rewarded
 
-interface AdListener : ExtendedListener, RewardedAdListener {
+import com.appodealstack.mads.demands.Ad
+import com.appodealstack.mads.demands.RewardedAdListener
+
+interface BNRewardedListener {
+    fun onRewardedStarted(ad: Ad)
+    fun onRewardedCompleted(ad: Ad)
+    fun onUserRewarded(ad: Ad, reward: RewardedAdListener.Reward?)
 
     /**
      * Callback invokes after auction completed and winner is selected.
-     * Calls immediately after [ExtendedListener.onAuctionFinished]
+     * Calls immediately after [onAuctionFinished]
      */
     fun onAdLoaded(ad: Ad)
 
@@ -16,27 +22,16 @@ interface AdListener : ExtendedListener, RewardedAdListener {
     fun onAdDisplayFailed(cause: Throwable)
     fun onAdClicked(ad: Ad)
     fun onAdHidden(ad: Ad)
-}
 
-interface ExtendedListener {
+    /**
+     * Additional callbacks
+     */
     fun onDemandAdLoaded(ad: Ad) {}
     fun onDemandAdLoadFailed(cause: Throwable) {}
 
     /**
      * Callback invokes after auction completed.
-     * Calls immediately before [AdListener.onAdLoaded]
+     * Calls immediately before [onAdLoaded]
      */
     fun onAuctionFinished(ads: List<Ad>) {}
 }
-
-interface RewardedAdListener {
-    fun onRewardedStarted(ad: Ad) {}
-    fun onRewardedCompleted(ad: Ad) {}
-    fun onUserRewarded(ad: Ad, reward: Reward?) {}
-
-    data class Reward(
-        val label: String,
-        val amount: Int
-    )
-}
-

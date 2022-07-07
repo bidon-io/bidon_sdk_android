@@ -4,10 +4,7 @@ import com.appodealstack.mads.auctions.AuctionListener
 import com.appodealstack.mads.auctions.AuctionResult
 import com.appodealstack.mads.core.ListenersHolder
 import com.appodealstack.mads.core.ext.addOrRemoveIfNull
-import com.appodealstack.mads.demands.Ad
-import com.appodealstack.mads.demands.AdListener
-import com.appodealstack.mads.demands.AdType
-import com.appodealstack.mads.demands.DemandAd
+import com.appodealstack.mads.demands.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -83,11 +80,56 @@ internal class ListenersHolderImpl : ListenersHolder {
             /** Next callbacks implemented in [auctionListener] */
             override fun onAdLoaded(ad: Ad) {}
             override fun onAdLoadFailed(cause: Throwable) {}
-            override fun onDemandAdLoaded(ad: Ad) {}
-            override fun onDemandAdLoadFailed(cause: Throwable) {}
-            override fun onAuctionFinished(ads: List<Ad>) {}
         }
-        AdType.Banner,
-        AdType.Rewarded -> TODO("Not implemented")
+        AdType.Rewarded -> {
+            object : AdListener {
+                override fun onAdDisplayed(ad: Ad) {
+                    mainScope.launch {
+                        userListeners[demandAd]?.onAdDisplayed(ad)
+                    }
+                }
+
+                override fun onAdDisplayFailed(cause: Throwable) {
+                    mainScope.launch {
+                        userListeners[demandAd]?.onAdDisplayFailed(cause)
+                    }
+                }
+
+                override fun onAdClicked(ad: Ad) {
+                    mainScope.launch {
+                        userListeners[demandAd]?.onAdClicked(ad)
+                    }
+                }
+
+                override fun onAdHidden(ad: Ad) {
+                    mainScope.launch {
+                        userListeners[demandAd]?.onAdHidden(ad)
+                    }
+                }
+
+                override fun onRewardedStarted(ad: Ad) {
+                    mainScope.launch {
+                        userListeners[demandAd]?.onRewardedStarted(ad)
+                    }
+                }
+
+                override fun onRewardedCompleted(ad: Ad) {
+                    mainScope.launch {
+                        userListeners[demandAd]?.onRewardedCompleted(ad)
+                    }
+                }
+
+                override fun onUserRewarded(ad: Ad, reward: RewardedAdListener.Reward?) {
+                    mainScope.launch {
+                        userListeners[demandAd]?.onUserRewarded(ad, reward)
+                    }
+                }
+
+                override fun onAdLoaded(ad: Ad) {}
+                override fun onAdLoadFailed(cause: Throwable) {}
+            }
+
+        }
+        AdType.Banner -> TODO("Not implemented")
     }
 }

@@ -12,4 +12,8 @@ fun interface AuctionRequest {
 class AuctionResult(
     val ad: Ad,
     val adProvider: AdProvider
-)
+) {
+    override fun toString(): String {
+        return "AuctionResult($ad)"
+    }
+}

@@ -19,9 +19,9 @@ internal fun <K, V> MutableMap<K, V>.addOrRemoveIfNull(key: K, value: V?) {
 internal fun List<Adapter>.retrieveAuctionRequests(activity: Activity?, demandAd: DemandAd, adParams: Bundle): List<AuctionRequest> {
     return this.mapNotNull {
         when (demandAd.adType) {
-            AdType.Banner -> (it as? AdSource.Banner)?.banner(demandAd)
+            AdType.Banner -> (it as? AdSource.Banner)?.banner(activity, demandAd, adParams)
             AdType.Interstitial -> (it as? AdSource.Interstitial)?.interstitial(activity, demandAd, adParams)
-            AdType.Rewarded -> (it as? AdSource.Rewarded)?.rewarded(demandAd)
+            AdType.Rewarded -> (it as? AdSource.Rewarded)?.rewarded(activity, demandAd, adParams)
         }
     }
 }
