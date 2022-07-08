@@ -30,9 +30,8 @@ class ApplovinMaxAdapter : Adapter.Mediation,
     AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner,
     BannerAutoRefreshSource,
     PlacementSource by PlacementSourceImpl(),
-    AdRevenueSource,
+    AdRevenueSource by AdRevenueSourceImpl(),
     ExtrasSource by ExtrasSourceImpl() {
-    private val adRevenueListeners = mutableMapOf<DemandAd, AdRevenueListener>()
     private var autoRefresh: Boolean = true
     private lateinit var context: Context
 
@@ -117,7 +116,7 @@ class ApplovinMaxAdapter : Adapter.Mediation,
                                     override fun getPlacement(): String? = maxAdView.placement
                                 }
                             )
-                            adRevenueListeners[demandAd]?.let { adRevenueListener ->
+                            getAdRevenueListener(demandAd)?.let { adRevenueListener ->
                                 maxAdView.setRevenueListener {
                                     adRevenueListener.onAdRevenuePaid(ad)
                                 }
@@ -218,7 +217,7 @@ class ApplovinMaxAdapter : Adapter.Mediation,
 
                                     }
                                 )
-                                adRevenueListeners[demandAd]?.let { adRevenueListener ->
+                                getAdRevenueListener(demandAd)?.let { adRevenueListener ->
                                     maxInterstitialAd.setRevenueListener {
                                         adRevenueListener.onAdRevenuePaid(ad)
                                     }
@@ -263,10 +262,6 @@ class ApplovinMaxAdapter : Adapter.Mediation,
                 maxInterstitialAd.loadAd()
             }
         }
-    }
-
-    override fun setAdRevenueListener(demandAd: DemandAd, adRevenueListener: AdRevenueListener) {
-        adRevenueListeners[demandAd] = adRevenueListener
     }
 
     override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
@@ -314,7 +309,7 @@ class ApplovinMaxAdapter : Adapter.Mediation,
 
                                 }
                             )
-                            adRevenueListeners[demandAd]?.let { adRevenueListener ->
+                            getAdRevenueListener(demandAd)?.let { adRevenueListener ->
                                 rewardedAd.setRevenueListener {
                                     adRevenueListener.onAdRevenuePaid(ad)
                                 }
