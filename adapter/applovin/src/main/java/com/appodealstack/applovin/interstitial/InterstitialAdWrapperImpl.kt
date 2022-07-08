@@ -26,7 +26,7 @@ internal class InterstitialAdWrapperImpl(
         get() = SdkCore.canShow(demandAd)
 
     override fun loadAd() {
-        SdkCore.loadAd(activityRef.get(), demandAd, bundleOf(adUnitIdKey to adUnitId))
+        SdkCore.loadAd(activityRef.get(), demandAd, bundleOf(AdUnitIdKey to adUnitId))
     }
 
     override fun getAdUnitId(): String = adUnitId
@@ -40,7 +40,7 @@ internal class InterstitialAdWrapperImpl(
         SdkCore.showAd(
             demandAd = demandAd,
             activity = activityRef.get(),
-            adParams = bundleOf(placementKey to placement, customDataKey to customData),
+            adParams = bundleOf(PlacementKey to placement, CustomDataKey to customData),
         )
     }
 
@@ -54,16 +54,16 @@ internal class InterstitialAdWrapperImpl(
     }
 
     override fun destroy() {
-        SdkCore.destroyAd(demandAd, bundleOf(adUnitIdKey to adUnitId))
+        SdkCore.destroyAd(demandAd, bundleOf(AdUnitIdKey to adUnitId))
     }
 
     override fun setExtraParameter(key: String, value: String?) {
         SdkCore.setExtras(
             demandAd,
             bundleOf(
-                keyKey to key,
-                valueKey to value,
-                adUnitIdKey to adUnitId
+                KeyKey to key,
+                ValueKey to value,
+                AdUnitIdKey to adUnitId
             )
         )
     }

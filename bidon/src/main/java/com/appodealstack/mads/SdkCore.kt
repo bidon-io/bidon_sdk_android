@@ -13,8 +13,13 @@ import com.appodealstack.mads.demands.DemandAd
 val SdkCore: Core by lazy { CoreImpl() }
 
 interface Core {
+    /**
+     * Should be changed only in [SdkInitialization]
+     */
+    var isInitialized: Boolean
+
     fun loadAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle)
-    fun loadAd(context: Context, demandAd: DemandAd, adParams: Bundle, onViewReady: (View) -> Unit)
+    fun loadAdView(context: Context, demandAd: DemandAd, adParams: Bundle, onViewReady: (View) -> Unit)
     fun showAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle)
 
     fun canShow(demandAd: DemandAd): Boolean
@@ -23,8 +28,8 @@ interface Core {
     fun setListener(demandAd: DemandAd, adListener: AdListener)
     fun setRevenueListener(demandAd: DemandAd, adRevenueListener: AdRevenueListener)
 
-    fun getPlacement(): String?
-    fun setPlacement(placement: String?)
+    fun getPlacement(demandAd: DemandAd): String?
+    fun setPlacement(demandAd: DemandAd, placement: String?)
     fun setAutoRefresh(demandAd: DemandAd, autoRefresh: Boolean)
 
     /**

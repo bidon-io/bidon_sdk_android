@@ -9,6 +9,8 @@ import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
 import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.*
+import com.appodealstack.mads.demands.banners.BannerSize
+import com.appodealstack.mads.demands.banners.BannerSizeKey
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -28,7 +30,7 @@ val AdmobDemandId = DemandId("admob")
 private value class AdUnitId(val value: String)
 
 class AdmobAdapter : Adapter.PostBid,
-    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner, BannerAutoRefreshSource {
+    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner {
     private lateinit var context: Context
 
     override val demandId = AdmobDemandId
@@ -36,7 +38,6 @@ class AdmobAdapter : Adapter.PostBid,
     private val bannersAdUnits = mutableMapOf<Double, AdUnitId>()
     private val interstitialAdUnits = mutableMapOf<Double, AdUnitId>()
     private val rewardedAdUnits = mutableMapOf<Double, AdUnitId>()
-    private var autoRefresh: Boolean = true
 
     override suspend fun init(context: Context, configParams: Bundle): Unit = suspendCoroutine { continuation ->
         this.context = context
@@ -138,7 +139,6 @@ class AdmobAdapter : Adapter.PostBid,
                                                         "Error while showing RewardedAd: activity is null."
                                                     )
                                                 } else {
-                                                    logInternal("rew", "rewardedAd.show(activity)")
                                                     rewardedAd.show(activity) { rewardItem ->
                                                         logInternal("rew", "rewardedAd.show(activity) $rewardItem")
                                                         SdkCore.getListenerForDemand(demandAd).onUserRewarded(
@@ -170,18 +170,19 @@ class AdmobAdapter : Adapter.PostBid,
                     val isFinished = AtomicBoolean(false)
                     val adRequest = AdRequest.Builder().build()
                     val adView = AdView(context)
-                    adView.setAdSize(AdSize.BANNER) // todo move to adParams
+                    val bannerSize = adParams.getInt(BannerSizeKey, BannerSize.Banner.ordinal).let {
+                        BannerSize.values()[it]
+                    }
+                    adView.setAdSize(bannerSize.asAdmobAdSize())
                     adView.adUnitId = bannersAdUnits.values.first().value
                     adView.adListener = object : AdListener() {
                         override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                            logInternal("banner", "onAdFailedToLoad")
                             if (!isFinished.getAndSet(true)) {
                                 continuation.resume(Result.failure(loadAdError.asBidonError()))
                             }
                         }
 
                         override fun onAdLoaded() {
-                            logInternal("banner", "onAdLoaded")
                             val ad = Ad(
                                 demandId = AdmobDemandId,
                                 demandAd = demandAd,
@@ -208,10 +209,6 @@ class AdmobAdapter : Adapter.PostBid,
                 }
             }
         }
-    }
-
-    override fun setAutoRefresh(autoRefresh: Boolean) {
-        this.autoRefresh = autoRefresh
     }
 
     private fun InterstitialAd.setCoreListener(ownerDemandAd: DemandAd, auctionData: AuctionResult) {
@@ -281,6 +278,12 @@ class AdmobAdapter : Adapter.PostBid,
         return this.mapNotNull { (price, adUnitId) ->
             price.takeIf { unitId == adUnitId.value }
         }.first()
+    }
+
+    private fun BannerSize.asAdmobAdSize() = when (this) {
+        BannerSize.Banner -> AdSize.BANNER
+        BannerSize.LeaderBoard -> AdSize.LEADERBOARD
+        BannerSize.MRec -> AdSize.MEDIUM_RECTANGLE
     }
 }
 

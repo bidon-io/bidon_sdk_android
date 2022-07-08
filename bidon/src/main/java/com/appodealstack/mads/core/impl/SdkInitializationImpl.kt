@@ -92,6 +92,7 @@ internal class SdkInitializationImpl : SdkInitialization {
             sdkCore.addAnalytics(analytics)
         }
         analytics.clear()
+        sdkCore.isInitialized = true
         return InitializationResult.Success
     }
 

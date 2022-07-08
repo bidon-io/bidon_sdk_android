@@ -8,11 +8,12 @@ import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
 import com.appodealstack.mads.demands.*
+import com.appodealstack.mads.demands.banners.BannerSize
+import com.appodealstack.mads.demands.banners.BannerSizeKey
 import io.bidmachine.BidMachine
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.banner.BannerListener
 import io.bidmachine.banner.BannerRequest
-import io.bidmachine.banner.BannerSize
 import io.bidmachine.banner.BannerView
 import io.bidmachine.interstitial.InterstitialAd
 import io.bidmachine.interstitial.InterstitialListener
@@ -28,8 +29,11 @@ import kotlin.coroutines.suspendCoroutine
 
 val BidMachineDemandId = DemandId("bidmachine")
 
+typealias BidMachineBannerSize = io.bidmachine.banner.BannerSize
+
 class BidMachineAdapter : Adapter.PostBid,
-    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner {
+    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner,
+    PlacementSource by PlacementSourceImpl() {
     private lateinit var context: Context
 
     override val demandId = BidMachineDemandId
@@ -202,23 +206,19 @@ class BidMachineAdapter : Adapter.PostBid,
         return AuctionRequest { data ->
             suspendCancellableCoroutine { continuation ->
                 val isFinished = AtomicBoolean(false)
-                val placement = adParams.getString(PlacementKey)
-                val bannerSize = adParams.getString(BannerAdSizeKey).let {
-                    when (it) {
-                        "Size_300x250" -> BannerSize.Size_300x250
-                        "Size_728x90" -> BannerSize.Size_728x90
-                        "Size_320x50" -> BannerSize.Size_320x50
-                        else -> BannerSize.Size_320x50
-                    }
+                val bannerSize = adParams.getInt(BannerSizeKey, BannerSize.Banner.ordinal).let {
+                    BannerSize.values()[it]
                 }
-                val request = BannerRequest.Builder().apply {
-                    data?.let {
-                        setPriceFloorParams(PriceFloorParams().addPriceFloor(it.priceFloor))
-                    }
-                    placement?.let {
-                        setPlacementId(placement)
-                    }
-                }.setSize(bannerSize).build()
+                val request = BannerRequest.Builder()
+                    .setSize(bannerSize.asBidMachineBannerSize())
+                    .apply {
+                        data?.let {
+                            setPriceFloorParams(PriceFloorParams().addPriceFloor(it.priceFloor))
+                        }
+                        getPlacement(demandAd)?.let {
+                            setPlacementId(it)
+                        }
+                    }.build()
                 val bannerView = BannerView(context)
                 bannerView.setListener(object : BannerListener {
                     override fun onAdLoaded(view: BannerView) {
@@ -380,8 +380,14 @@ class BidMachineAdapter : Adapter.PostBid,
             }
         )
     }
+
+    private fun BannerSize.asBidMachineBannerSize() = when (this) {
+        BannerSize.Banner -> BidMachineBannerSize.Size_320x50
+        BannerSize.LeaderBoard -> BidMachineBannerSize.Size_728x90
+        BannerSize.MRec -> BidMachineBannerSize.Size_300x250
+        else -> BidMachineBannerSize.Size_320x50
+    }
 }
 
 private const val SourceIdKey = "SourceId"
-private const val BannerAdSizeKey = "BannerAdSizeKey"
 private const val PlacementKey = "placement"

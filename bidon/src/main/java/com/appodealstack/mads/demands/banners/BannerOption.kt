@@ -1,4 +1,4 @@
-package com.appodealstack.mads.demands
+package com.appodealstack.mads.demands.banners
 
 /**
  * For banner ad views

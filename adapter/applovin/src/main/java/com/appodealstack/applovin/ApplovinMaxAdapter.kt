@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import com.applovin.mediation.*
 import com.applovin.mediation.ads.MaxAdView
 import com.applovin.mediation.ads.MaxInterstitialAd
@@ -14,6 +16,10 @@ import com.appodealstack.applovin.impl.setCoreListener
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
 import com.appodealstack.mads.demands.*
+import com.appodealstack.mads.demands.banners.BannerAutoRefreshProvider
+import com.appodealstack.mads.demands.banners.BannerAutoRefreshSource
+import com.appodealstack.mads.demands.banners.BannerSize
+import com.appodealstack.mads.demands.banners.BannerSizeKey
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
@@ -23,22 +29,46 @@ val ApplovinMaxDemandId = DemandId("applovin")
 class ApplovinMaxAdapter : Adapter.Mediation,
     AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner,
     BannerAutoRefreshSource,
-    AdRevenueSource, ExtrasSource {
+    PlacementSource by PlacementSourceImpl(),
+    AdRevenueSource,
+    ExtrasSource by ExtrasSourceImpl() {
     private val adRevenueListeners = mutableMapOf<DemandAd, AdRevenueListener>()
-    private val extras = mutableMapOf<DemandAd, Bundle>()
     private var autoRefresh: Boolean = true
+    private lateinit var context: Context
 
     override val demandId: DemandId = ApplovinMaxDemandId
 
     override suspend fun init(context: Context, configParams: Bundle) {
         require(AppLovinSdk.getInstance(context).isInitialized)
+        this.context = context.applicationContext
     }
 
     override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
+        val adUnitId = adParams.getString(AdUnitIdKey)
+        val bannerSize = adParams.getInt(BannerSizeKey, BannerSize.Banner.ordinal).let {
+            BannerSize.values()[it]
+        }
+        val maxAdView = MaxAdView(adUnitId, bannerSize.asMaxAdFormat(), context).apply {
+            val isAdaptive = getExtras(demandAd)?.getString(AdaptiveBannerKey, "-")
+            if (isAdaptive == "true") {
+                val width = ViewGroup.LayoutParams.MATCH_PARENT
+                // Height calculating should be done on application side and passed with extras[AdaptiveBannerHeightKey]
+                val heightPx = adParams.getInt(AdaptiveBannerHeightKey, ViewGroup.LayoutParams.WRAP_CONTENT)
+                layoutParams = FrameLayout.LayoutParams(width, heightPx)
+            }
+            getExtras(demandAd)?.let { bundle ->
+                bundle.keySet().forEach { key ->
+                    if (bundle.get(key) is String) {
+                        setExtraParameter(key, bundle.getString(key))
+                    }
+                }
+            }
+            getPlacement(demandAd)?.let {
+                placement = it
+            }
+        }
         return AuctionRequest {
             suspendCancellableCoroutine { continuation ->
-                val adUnitId = adParams.getString(adUnitIdKey)
-                val maxAdView = MaxAdView(adUnitId, context)
                 val isFinished = AtomicBoolean(false)
                 maxAdView.setListener(object : MaxAdViewAdListener {
                     override fun onAdLoaded(maxAd: MaxAd) {
@@ -51,7 +81,7 @@ class ApplovinMaxAdapter : Adapter.Mediation,
                             )
                             val auctionResult = AuctionResult(
                                 ad = ad,
-                                adProvider = object : AdProvider, AdRevenueProvider, ExtrasProvider,
+                                adProvider = object : AdProvider, AdRevenueProvider, ExtrasProvider, PlacementProvider,
                                     AdViewProvider, BannerAutoRefreshProvider {
                                     override fun canShow(): Boolean = true
                                     override fun showAd(activity: Activity?, adParams: Bundle) {}
@@ -79,18 +109,17 @@ class ApplovinMaxAdapter : Adapter.Mediation,
                                             maxAdView.stopAutoRefresh()
                                         }
                                     }
+
+                                    override fun setPlacement(placement: String?) {
+                                        maxAdView.placement = placement
+                                    }
+
+                                    override fun getPlacement(): String? = maxAdView.placement
                                 }
                             )
                             adRevenueListeners[demandAd]?.let { adRevenueListener ->
                                 maxAdView.setRevenueListener {
                                     adRevenueListener.onAdRevenuePaid(ad)
-                                }
-                            }
-                            extras[demandAd]?.let { bundle ->
-                                bundle.keySet().forEach { key ->
-                                    if (bundle.get(key) is String) {
-                                        maxAdView.setExtraParameter(key, bundle.getString(key))
-                                    }
                                 }
                             }
                             maxAdView.setCoreListener(auctionResult)
@@ -142,7 +171,7 @@ class ApplovinMaxAdapter : Adapter.Mediation,
 
     override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
         if (activity == null) return AuctionRequest { Result.failure(DemandError.NoActivity) }
-        val adUnitId = adParams.getString(adUnitIdKey)
+        val adUnitId = adParams.getString(AdUnitIdKey)
         val maxInterstitialAd = MaxInterstitialAd(adUnitId, activity)
 
         return AuctionRequest {
@@ -166,8 +195,8 @@ class ApplovinMaxAdapter : Adapter.Mediation,
                                         }
 
                                         override fun showAd(activity: Activity?, adParams: Bundle) {
-                                            val placement = adParams.getString(placementKey)
-                                            val customData = adParams.getString(customDataKey)
+                                            val placement = adParams.getString(PlacementKey)
+                                            val customData = adParams.getString(CustomDataKey)
                                             maxInterstitialAd.showAd(placement, customData)
                                         }
 
@@ -194,7 +223,7 @@ class ApplovinMaxAdapter : Adapter.Mediation,
                                         adRevenueListener.onAdRevenuePaid(ad)
                                     }
                                 }
-                                extras[demandAd]?.let { bundle ->
+                                getExtras(demandAd)?.let { bundle ->
                                     bundle.keySet().forEach { key ->
                                         if (bundle.get(key) is String) {
                                             maxInterstitialAd.setExtraParameter(key, bundle.getString(key))
@@ -240,13 +269,9 @@ class ApplovinMaxAdapter : Adapter.Mediation,
         adRevenueListeners[demandAd] = adRevenueListener
     }
 
-    override fun setExtras(demandAd: DemandAd, adParams: Bundle) {
-        extras[demandAd] = adParams
-    }
-
     override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
         if (activity == null) return AuctionRequest { Result.failure(DemandError.NoActivity) }
-        val adUnitId = adParams.getString(adUnitIdKey)
+        val adUnitId = adParams.getString(AdUnitIdKey)
         val rewardedAd = MaxRewardedAd.getInstance(adUnitId, activity)
         return AuctionRequest {
             suspendCancellableCoroutine { continuation ->
@@ -266,8 +291,8 @@ class ApplovinMaxAdapter : Adapter.Mediation,
                                     override fun canShow(): Boolean = rewardedAd.isReady
 
                                     override fun showAd(activity: Activity?, adParams: Bundle) {
-                                        val placement = adParams.getString(placementKey)
-                                        val customData = adParams.getString(customDataKey)
+                                        val placement = adParams.getString(PlacementKey)
+                                        val customData = adParams.getString(CustomDataKey)
                                         rewardedAd.showAd(placement, customData)
                                     }
 
@@ -294,7 +319,7 @@ class ApplovinMaxAdapter : Adapter.Mediation,
                                     adRevenueListener.onAdRevenuePaid(ad)
                                 }
                             }
-                            extras[demandAd]?.let { bundle ->
+                            getExtras(demandAd)?.let { bundle ->
                                 bundle.keySet().forEach { key ->
                                     if (bundle.get(key) is String) {
                                         rewardedAd.setExtraParameter(key, bundle.getString(key))
@@ -347,10 +372,19 @@ class ApplovinMaxAdapter : Adapter.Mediation,
             }
         }
     }
+
+    private fun BannerSize.asMaxAdFormat() = when (this) {
+        BannerSize.Banner -> MaxAdFormat.BANNER
+        BannerSize.LeaderBoard -> MaxAdFormat.LEADER
+        BannerSize.MRec -> MaxAdFormat.MREC
+    }
+
 }
 
-internal const val adUnitIdKey = "adUnitId"
-internal const val placementKey = "placement"
-internal const val customDataKey = "customData"
-internal const val keyKey = "key"
-internal const val valueKey = "valueKey"
+internal const val AdUnitIdKey = "adUnitId"
+internal const val PlacementKey = "placement"
+internal const val CustomDataKey = "customData"
+internal const val KeyKey = "key"
+internal const val ValueKey = "valueKey"
+internal const val AdaptiveBannerKey = "adaptive_banner"
+internal const val AdaptiveBannerHeightKey = "AdaptiveBannerHeightKey"

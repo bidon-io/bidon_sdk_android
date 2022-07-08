@@ -2,8 +2,12 @@ package com.appodeal.mads
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import com.applovin.mediation.MaxAdFormat
+import com.applovin.sdk.AppLovinSdkUtils
 import com.appodeal.mads.databinding.ActivityMainBinding
 import com.appodealstack.admob.AdmobAdapter
 import com.appodealstack.applovin.AppLovinDecorator
@@ -11,13 +15,19 @@ import com.appodealstack.applovin.banner.BNMaxAdView
 import com.appodealstack.applovin.interstitial.BNMaxInterstitialAd
 import com.appodealstack.applovin.rewarded.BNMaxRewardedAd
 import com.appodealstack.bidmachine.BidMachineAdapter
+import com.appodealstack.mads.core.ext.logInternal
+import com.appodealstack.mads.demands.banners.BannerSize
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
     private val adBannerProgrammatically: BNMaxAdView by lazy {
-        BNMaxAdView("c7c5f664e60b9bfb", this)
+        BNMaxAdView(
+            adUnitId = "c7c5f664e60b9bfb",
+            adFormat = BannerSize.Banner,
+            context = this
+        )
     }
 
     private val interstitialAd: BNMaxInterstitialAd by lazy {
@@ -70,7 +80,16 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             loadBannerButton.setOnClickListener {
-                adBannerProgrammatically.stopAutoRefresh()
+//                adBannerProgrammatically.apply {
+//                    // Stretch to the width of the screen for banners to be fully functional
+//                    val width = ViewGroup.LayoutParams.MATCH_PARENT
+//                    // Get the adaptive banner height.
+//                    val heightDp = MaxAdFormat.BANNER.getAdaptiveSize(this@MainActivity).height
+//                    val heightPx = AppLovinSdkUtils.dpToPx(this@MainActivity, heightDp)
+//                    this.layoutParams = FrameLayout.LayoutParams(width, heightPx)
+//                    this.setExtraParameter("adaptive_banner", "true")
+//                }
+//                adBannerProgrammatically.stopAutoRefresh()
                 adBannerProgrammatically.loadAd()
             }
             loadBannerXmlButton.setOnClickListener {
@@ -89,7 +108,7 @@ class MainActivity : AppCompatActivity() {
         AppLovinDecorator
             .register(
                 BidMachineAdapter::class.java,
-                AdmobAdapter::class.java
+//                AdmobAdapter::class.java
             ).initializeSdk(this) { appLovinSdkConfiguration ->
                 println(appLovinSdkConfiguration)
                 binding.initButton.isVisible = false

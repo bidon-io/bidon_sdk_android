@@ -6,14 +6,15 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.children
-import com.applovin.mediation.MaxAdFormat
 import com.applovin.mediation.ads.MaxAdView
+import com.appodealstack.applovin.AdUnitIdKey
+import com.appodealstack.applovin.AdaptiveBannerHeightKey
 import com.appodealstack.applovin.R
-import com.appodealstack.applovin.adUnitIdKey
 import com.appodealstack.applovin.impl.BNMaxAdViewAdListener
 import com.appodealstack.mads.SdkCore
-import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.*
+import com.appodealstack.mads.demands.banners.BannerSize
+import com.appodealstack.mads.demands.banners.BannerSizeKey
 
 internal interface MaxAdViewWrapper {
     fun setListener(listener: BNMaxAdViewAdListener)
@@ -21,7 +22,7 @@ internal interface MaxAdViewWrapper {
     fun loadAd()
     fun destroy()
     fun getAdUnitId(): String
-    fun getAdFormat(): MaxAdFormat
+    fun getAdFormat(): BannerSize
     fun setCustomData(value: String)
     fun setExtraParameter(key: String, value: String)
     fun startAutoRefresh()
@@ -37,12 +38,19 @@ class BNMaxAdView constructor(
 ) : FrameLayout(context, attrs, defStyleAttr), MaxAdViewWrapper {
 
     private var adUnitId: String = ""
+    private var adFormat: BannerSize = BannerSize.Banner
+    private val extras = mutableMapOf<String, String>()
 
     constructor(context: Context) : this(context, null, 0)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    constructor(adUnitId: String, context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
-            this(context, attrs, defStyleAttr) {
+
+    constructor(adUnitId: String, context: Context) : this(context) {
         this.adUnitId = adUnitId
+    }
+
+    constructor(adUnitId: String, adFormat: BannerSize, context: Context) : this(context) {
+        this.adUnitId = adUnitId
+        this.adFormat = adFormat
     }
 
     private val demandAd = DemandAd(AdType.Banner)
@@ -53,6 +61,14 @@ class BNMaxAdView constructor(
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.BNMaxAdView)
         typedArray.getString(R.styleable.BNMaxAdView_adUnitId)?.let {
             this.adUnitId = it
+        }
+        typedArray.getInt(R.styleable.BNMaxAdView_adFormat, -1).let {
+            when (it) {
+                1 -> adFormat = BannerSize.Banner
+                2 -> adFormat = BannerSize.MRec
+                3 -> adFormat = BannerSize.LeaderBoard
+                else -> null
+            }
         }
         typedArray.recycle()
     }
@@ -66,21 +82,28 @@ class BNMaxAdView constructor(
     }
 
     override fun loadAd() {
-        SdkCore.loadAd(
-            context = context,
-            demandAd = demandAd,
-            adParams = bundleOf(adUnitIdKey to adUnitId),
-            onViewReady = { view ->
-                setAutoRefresh(view, autoRefresh)
-                (view as? MaxAdView)?.setCustomData(customData)
-                view.layoutParams = LayoutParams(
-                    LayoutParams.MATCH_PARENT,
-                    LayoutParams.WRAP_CONTENT,
-                )
-                this.removeAllViews()
-                this.addView(view)
-            }
-        )
+        this.post {
+            val height = layoutParams.height
+            SdkCore.loadAdView(
+                context = context,
+                demandAd = demandAd,
+                adParams = bundleOf(
+                    AdUnitIdKey to adUnitId,
+                    BannerSizeKey to adFormat.ordinal,
+                    AdaptiveBannerHeightKey to height
+                ),
+                onViewReady = { view ->
+                    setAutoRefresh(view, autoRefresh)
+                    (view as? MaxAdView)?.setCustomData(customData)
+                    view.layoutParams = LayoutParams(
+                        LayoutParams.MATCH_PARENT,
+                        LayoutParams.WRAP_CONTENT,
+                    )
+                    this.removeAllViews()
+                    this.addView(view)
+                }
+            )
+        }
     }
 
     override fun destroy() {
@@ -90,7 +113,7 @@ class BNMaxAdView constructor(
 
     override fun getAdUnitId(): String = adUnitId
 
-    override fun getAdFormat(): MaxAdFormat = MaxAdFormat.BANNER
+    override fun getAdFormat(): BannerSize = BannerSize.Banner
 
     override fun setCustomData(value: String) {
         customData = value
@@ -98,6 +121,7 @@ class BNMaxAdView constructor(
     }
 
     override fun setExtraParameter(key: String, value: String) {
+        extras[key] = value
         SdkCore.setExtras(demandAd, bundleOf(key to value))
     }
 
@@ -113,10 +137,10 @@ class BNMaxAdView constructor(
     }
 
     override fun setPlacement(placement: String?) {
-        SdkCore.setPlacement(placement)
+        SdkCore.setPlacement(demandAd, placement)
     }
 
-    override fun getPlacement(): String? = SdkCore.getPlacement()
+    override fun getPlacement(): String? = SdkCore.getPlacement(demandAd)
 
     private fun setAutoRefresh(view: View?, isOn: Boolean?) {
         if (view is MaxAdView) {

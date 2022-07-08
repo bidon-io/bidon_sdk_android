@@ -6,7 +6,7 @@ internal interface AdsRepository {
     fun clearResults(demandAd: DemandAd)
     fun getWinnerOrNull(demandAd: DemandAd, onWinnerFound: (AuctionResult?) -> Unit)
 
-    fun addAuction(demandAd: DemandAd, auction: Auction)
+    fun saveAuction(demandAd: DemandAd, auction: Auction)
     fun isAuctionActive(demandAd: DemandAd): Boolean
     fun getResults(demandAd: DemandAd): List<AuctionResult>
 }
@@ -24,7 +24,7 @@ internal class AdsRepositoryImpl : AdsRepository {
         )
     }
 
-    override fun addAuction(demandAd: DemandAd, auction: Auction) {
+    override fun saveAuction(demandAd: DemandAd, auction: Auction) {
         auctionMap[demandAd] = auction
     }
 

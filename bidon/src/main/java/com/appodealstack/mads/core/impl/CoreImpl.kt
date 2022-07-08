@@ -14,6 +14,8 @@ import com.appodealstack.mads.core.ListenersHolder
 import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.core.ext.retrieveAuctionRequests
 import com.appodealstack.mads.demands.*
+import com.appodealstack.mads.demands.banners.BannerAutoRefreshProvider
+import com.appodealstack.mads.demands.banners.BannerAutoRefreshSource
 
 internal class CoreImpl(
     private val adsRepository: AdsRepository = AdsRepositoryImpl()
@@ -22,10 +24,16 @@ internal class CoreImpl(
     AnalyticsSource by AnalyticsSourceImpl(),
     ListenersHolder by ListenersHolderImpl() {
 
+    override var isInitialized: Boolean = false
+
     override fun loadAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle) {
+        if (!isInitialized) {
+            logInternal(Tag, "Initialize Sdk before loading ad")
+            return
+        }
         if (!adsRepository.isAuctionActive(demandAd)) {
             val auction = NewAuction
-            adsRepository.addAuction(demandAd, auction)
+            adsRepository.saveAuction(demandAd, auction)
             auction.start(
                 mediationRequests = adapters
                     .filterIsInstance<Adapter.Mediation>()
@@ -57,15 +65,19 @@ internal class CoreImpl(
         }
     }
 
-    override fun loadAd(
+    override fun loadAdView(
         context: Context,
         demandAd: DemandAd,
         adParams: Bundle,
         onViewReady: (View) -> Unit
     ) {
+        if (!isInitialized) {
+            logInternal(Tag, "Initialize Sdk before loading ad")
+            return
+        }
         if (!adsRepository.isAuctionActive(demandAd)) {
             val auction = NewAuction
-            adsRepository.addAuction(demandAd, auction)
+            adsRepository.saveAuction(demandAd, auction)
             auction.start(
                 mediationRequests = adapters
                     .filterIsInstance<Adapter.Mediation>()
@@ -101,14 +113,18 @@ internal class CoreImpl(
     }
 
     override fun setAutoRefresh(demandAd: DemandAd, autoRefresh: Boolean) {
+        if (!isInitialized) {
+            logInternal(Tag, "Set auto refresh cannot be set before Sdk is not initialized")
+            return
+        }
         /**
-         * Set extras for all new Ad objects
+         * Set auto-refresh for all new Ad objects
          */
         adapters.filterIsInstance<BannerAutoRefreshSource>().forEach { bannerAutoRefreshProvider ->
             bannerAutoRefreshProvider.setAutoRefresh(autoRefresh)
         }
         /**
-         * Set extras for all existing Ad objects
+         * Set auto-refresh for all existing Ad objects
          */
         adsRepository.getResults(demandAd).forEach { auctionResult ->
             (auctionResult.adProvider as? BannerAutoRefreshProvider)?.setAutoRefresh(autoRefresh)
@@ -138,6 +154,10 @@ internal class CoreImpl(
     }
 
     override fun setExtras(demandAd: DemandAd, adParams: Bundle) {
+        if (!isInitialized) {
+            logInternal(Tag, "Extra data cannot be set before Sdk is not initialized")
+            return
+        }
         /**
          * Set extras for all new Ad objects
          */
@@ -157,6 +177,10 @@ internal class CoreImpl(
     }
 
     override fun setRevenueListener(demandAd: DemandAd, adRevenueListener: AdRevenueListener) {
+        if (!isInitialized) {
+            logInternal(Tag, "RevenueListener cannot be set before Sdk is not initialized")
+            return
+        }
         /**
          * Set listener for all new Ad objects
          */
@@ -171,12 +195,35 @@ internal class CoreImpl(
         }
     }
 
-    override fun getPlacement(): String? {
-        TODO("Not yet implemented")
+    override fun getPlacement(demandAd: DemandAd): String? {
+        val loadedAdPlacement = adsRepository.getResults(demandAd)
+            .map { it.adProvider }.filterIsInstance<PlacementProvider>().firstOrNull()
+            ?.getPlacement()
+        if (loadedAdPlacement != null) return loadedAdPlacement
+        @Suppress("UnnecessaryVariable")
+        val savedPlacement = adapters
+            .filterIsInstance<PlacementSource>().firstOrNull()
+            ?.getPlacement(demandAd)
+        return savedPlacement
     }
 
-    override fun setPlacement(placement: String?) {
-        TODO("Not yet implemented")
+    override fun setPlacement(demandAd: DemandAd, placement: String?) {
+        if (!isInitialized) {
+            logInternal(Tag, "Placement cannot be saved before Sdk is not initialized")
+            return
+        }
+        /**
+         * Set placement for all new Ad objects
+         */
+        adapters.filterIsInstance<PlacementSource>().forEach { placementSource ->
+            placementSource.setPlacement(demandAd, placement)
+        }
+        /**
+         * Set placement for all existing Ad objects
+         */
+        adsRepository.getResults(demandAd).forEach { auctionResult ->
+            (auctionResult.adProvider as? PlacementProvider)?.setPlacement(placement)
+        }
     }
 
 }
