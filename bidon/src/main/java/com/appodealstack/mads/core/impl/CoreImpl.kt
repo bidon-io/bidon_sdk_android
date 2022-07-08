@@ -100,6 +100,21 @@ internal class CoreImpl(
         }
     }
 
+    override fun setAutoRefresh(demandAd: DemandAd, autoRefresh: Boolean) {
+        /**
+         * Set extras for all new Ad objects
+         */
+        adapters.filterIsInstance<BannerAutoRefreshSource>().forEach { bannerAutoRefreshProvider ->
+            bannerAutoRefreshProvider.setAutoRefresh(autoRefresh)
+        }
+        /**
+         * Set extras for all existing Ad objects
+         */
+        adsRepository.getResults(demandAd).forEach { auctionResult ->
+            (auctionResult.adProvider as? BannerAutoRefreshProvider)?.setAutoRefresh(autoRefresh)
+        }
+    }
+
     override fun showAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle) {
         adsRepository.getWinnerOrNull(
             demandAd = demandAd,

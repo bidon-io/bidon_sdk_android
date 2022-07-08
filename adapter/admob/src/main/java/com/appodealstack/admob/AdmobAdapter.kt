@@ -28,7 +28,7 @@ val AdmobDemandId = DemandId("admob")
 private value class AdUnitId(val value: String)
 
 class AdmobAdapter : Adapter.PostBid,
-    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner {
+    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner, BannerAutoRefreshSource {
     private lateinit var context: Context
 
     override val demandId = AdmobDemandId
@@ -36,6 +36,7 @@ class AdmobAdapter : Adapter.PostBid,
     private val bannersAdUnits = mutableMapOf<Double, AdUnitId>()
     private val interstitialAdUnits = mutableMapOf<Double, AdUnitId>()
     private val rewardedAdUnits = mutableMapOf<Double, AdUnitId>()
+    private var autoRefresh: Boolean = true
 
     override suspend fun init(context: Context, configParams: Bundle): Unit = suspendCoroutine { continuation ->
         this.context = context
@@ -207,6 +208,10 @@ class AdmobAdapter : Adapter.PostBid,
                 }
             }
         }
+    }
+
+    override fun setAutoRefresh(autoRefresh: Boolean) {
+        this.autoRefresh = autoRefresh
     }
 
     private fun InterstitialAd.setCoreListener(ownerDemandAd: DemandAd, auctionData: AuctionResult) {

@@ -104,6 +104,7 @@ class BNMaxAdView constructor(
     override fun startAutoRefresh() {
         autoRefresh = true
         setAutoRefresh(this.children.firstOrNull(), autoRefresh)
+        SdkCore.setAutoRefresh(demandAd, autoRefresh = true)
     }
 
     override fun stopAutoRefresh() {

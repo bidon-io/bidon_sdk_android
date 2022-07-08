@@ -25,6 +25,7 @@ interface Core {
 
     fun getPlacement(): String?
     fun setPlacement(placement: String?)
+    fun setAutoRefresh(demandAd: DemandAd, autoRefresh: Boolean)
 
     /**
      * implemented at [ListenersHolderImpl]

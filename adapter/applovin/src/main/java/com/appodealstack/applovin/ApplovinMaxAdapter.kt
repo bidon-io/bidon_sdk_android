@@ -22,9 +22,11 @@ val ApplovinMaxDemandId = DemandId("applovin")
 
 class ApplovinMaxAdapter : Adapter.Mediation,
     AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner,
+    BannerAutoRefreshSource,
     AdRevenueSource, ExtrasSource {
     private val adRevenueListeners = mutableMapOf<DemandAd, AdRevenueListener>()
     private val extras = mutableMapOf<DemandAd, Bundle>()
+    private var autoRefresh: Boolean = true
 
     override val demandId: DemandId = ApplovinMaxDemandId
 
@@ -49,7 +51,8 @@ class ApplovinMaxAdapter : Adapter.Mediation,
                             )
                             val auctionResult = AuctionResult(
                                 ad = ad,
-                                adProvider = object : AdProvider, AdRevenueProvider, ExtrasProvider, AdViewProvider {
+                                adProvider = object : AdProvider, AdRevenueProvider, ExtrasProvider,
+                                    AdViewProvider, BannerAutoRefreshProvider {
                                     override fun canShow(): Boolean = true
                                     override fun showAd(activity: Activity?, adParams: Bundle) {}
                                     override fun destroy() = maxAdView.destroy()
@@ -66,6 +69,14 @@ class ApplovinMaxAdapter : Adapter.Mediation,
                                             if (adParams.get(key) is String) {
                                                 maxAdView.setExtraParameter(key, adParams.getString(key))
                                             }
+                                        }
+                                    }
+
+                                    override fun setAutoRefresh(autoRefresh: Boolean) {
+                                        if (autoRefresh) {
+                                            maxAdView.startAutoRefresh()
+                                        } else {
+                                            maxAdView.stopAutoRefresh()
                                         }
                                     }
                                 }
@@ -123,6 +134,10 @@ class ApplovinMaxAdapter : Adapter.Mediation,
                 maxAdView.loadAd()
             }
         }
+    }
+
+    override fun setAutoRefresh(autoRefresh: Boolean) {
+        this.autoRefresh = autoRefresh
     }
 
     override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
