@@ -2,14 +2,18 @@ package com.appodealstack.applovin.banner
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.widget.FrameLayout
 import androidx.core.os.bundleOf
+import androidx.core.view.children
 import com.applovin.mediation.MaxAdFormat
+import com.applovin.mediation.ads.MaxAdView
+import com.appodealstack.applovin.R
 import com.appodealstack.applovin.adUnitIdKey
 import com.appodealstack.applovin.impl.BNMaxAdViewAdListener
 import com.appodealstack.mads.SdkCore
+import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.*
-
 
 internal interface MaxAdViewWrapper {
     fun setListener(listener: BNMaxAdViewAdListener)
@@ -27,16 +31,33 @@ internal interface MaxAdViewWrapper {
 }
 
 class BNMaxAdView constructor(
-    private val adUnitId: String,
     context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    attrs: AttributeSet?,
+    defStyleAttr: Int
 ) : FrameLayout(context, attrs, defStyleAttr), MaxAdViewWrapper {
 
-    constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
-            this("", context, attrs, defStyleAttr)
+    private var adUnitId: String = ""
+
+    constructor(context: Context) : this(context, null, 0)
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+    constructor(adUnitId: String, context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+            this(context, attrs, defStyleAttr) {
+        this.adUnitId = adUnitId
+    }
 
     private val demandAd = DemandAd(AdType.Banner)
+    private var autoRefresh: Boolean? = null
+    private var customData: String? = null
+
+    init {
+        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.BNMaxAdView)
+        typedArray.getString(R.styleable.BNMaxAdView_adUnitId)?.let {
+            this.adUnitId = it
+            logInternal("+++", "typedArray banner adUnitId: $it")
+        }
+        typedArray.recycle()
+        logInternal("BNMaxAdView", "DemandAd = $demandAd")
+    }
 
     override fun setListener(listener: BNMaxAdViewAdListener) {
         SdkCore.setListener(demandAd, listener.asAdListener(adUnitId))
@@ -52,6 +73,12 @@ class BNMaxAdView constructor(
             demandAd = demandAd,
             adParams = bundleOf(adUnitIdKey to adUnitId),
             onViewReady = { view ->
+                setAutoRefresh(view, autoRefresh)
+                (view as? MaxAdView)?.setCustomData(customData)
+                view.layoutParams = LayoutParams(
+                    LayoutParams.MATCH_PARENT,
+                    LayoutParams.WRAP_CONTENT,
+                )
                 this.removeAllViews()
                 this.addView(view)
             }
@@ -59,6 +86,7 @@ class BNMaxAdView constructor(
     }
 
     override fun destroy() {
+        this.removeAllViews()
         SdkCore.destroyAd(demandAd, bundleOf())
     }
 
@@ -67,7 +95,8 @@ class BNMaxAdView constructor(
     override fun getAdFormat(): MaxAdFormat = MaxAdFormat.BANNER
 
     override fun setCustomData(value: String) {
-        TODO("Not yet implemented")
+        customData = value
+        (this.children.firstOrNull() as? MaxAdView)?.setCustomData(value)
     }
 
     override fun setExtraParameter(key: String, value: String) {
@@ -75,11 +104,13 @@ class BNMaxAdView constructor(
     }
 
     override fun startAutoRefresh() {
-        TODO("Not yet implemented")
+        autoRefresh = true
+        setAutoRefresh(this.children.firstOrNull(), autoRefresh)
     }
 
     override fun stopAutoRefresh() {
-        TODO("Not yet implemented")
+        autoRefresh = false
+        setAutoRefresh(this.children.firstOrNull(), autoRefresh)
     }
 
     override fun setPlacement(placement: String?) {
@@ -87,6 +118,16 @@ class BNMaxAdView constructor(
     }
 
     override fun getPlacement(): String? = SdkCore.getPlacement()
+
+    private fun setAutoRefresh(view: View?, isOn: Boolean?) {
+        if (view is MaxAdView) {
+            when (isOn) {
+                true -> view.startAutoRefresh()
+                false -> view.stopAutoRefresh()
+                null -> {}
+            }
+        }
+    }
 }
 
 private fun BNMaxAdViewAdListener.asAdListener(adUnitId: String): AdListener {

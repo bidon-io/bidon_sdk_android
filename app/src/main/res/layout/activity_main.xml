@@ -4,123 +4,154 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
     tools:context=".MainActivity">
 
     <FrameLayout
+        android:id="@+id/adLayout"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#445522"
+        app:layout_constraintBottom_toTopOf="@id/contentLayout"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </FrameLayout>
+
+    <com.appodealstack.applovin.banner.BNMaxAdView
         android:id="@+id/adBannerView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@id/initButton"
-        app:layout_constraintTop_toTopOf="parent" />
-    <!--    <com.appodealstack.applovin.banner.BNMaxAdView-->
-    <!--        android:id="@+id/adBannerView"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        app:layout_constraintBottom_toTopOf="@id/initButton"-->
-    <!--        app:layout_constraintTop_toTopOf="parent" />-->
+        android:layout_height="50dp"
+        android:background="#775522"
+        app:adUnitId="c7c5f664e60b9bfb"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/contentLayout" />
 
-    <Button
-        android:id="@+id/initButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Init SDK"
-        app:layout_constraintBottom_toTopOf="@+id/bannerLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/adBannerView"
-        app:layout_constraintVertical_chainStyle="packed" />
-
-    <LinearLayout
-        android:id="@+id/bannerLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@id/interstitialLayout"
-        app:layout_constraintTop_toBottomOf="@id/initButton">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Banner" />
-
-        <Button
-            android:id="@+id/loadBannerButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="Load" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/interstitialLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@id/rewardedLayout"
-        app:layout_constraintTop_toBottomOf="@id/interstitialLayout">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Interstitial" />
-
-        <Button
-            android:id="@+id/loadButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="Load" />
-
-        <Button
-            android:id="@+id/showButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="Show" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/rewardedLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/scrollView"
-
-        app:layout_constraintTop_toBottomOf="@id/interstitialLayout">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rewarded" />
-
-        <Button
-            android:id="@+id/loadRewardedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="Load" />
-
-        <Button
-            android:id="@+id/showRewardedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="Show" />
-    </LinearLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/scrollView"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/contentLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rewardedLayout">
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/adBannerView"
+        app:layout_constraintTop_toBottomOf="@id/adLayout">
 
-        <TextView
-            android:id="@+id/logTextView"
+        <Button
+            android:id="@+id/initButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Init SDK"
+            app:layout_constraintBottom_toTopOf="@+id/bannerLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <LinearLayout
+            android:id="@+id/bannerLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:text="@tools:sample/lorem/random" />
-    </androidx.core.widget.NestedScrollView>
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@id/interstitialLayout"
+            app:layout_constraintTop_toBottomOf="@id/initButton">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Banner" />
+
+            <Button
+                android:id="@+id/loadBannerButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:backgroundTint="#445522"
+                android:text="LoadView" />
+
+            <Button
+                android:id="@+id/loadBannerXmlButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:backgroundTint="#775522"
+                android:text="LoadXml" />
+
+            <Button
+                android:id="@+id/hideBannerButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:backgroundTint="#775522"
+                android:text="Hide" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/interstitialLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@id/rewardedLayout"
+            app:layout_constraintTop_toBottomOf="@id/interstitialLayout">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Interstitial" />
+
+            <Button
+                android:id="@+id/loadButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Load" />
+
+            <Button
+                android:id="@+id/showButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Show" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/rewardedLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@+id/scrollView"
+
+            app:layout_constraintTop_toBottomOf="@id/interstitialLayout">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rewarded" />
+
+            <Button
+                android:id="@+id/loadRewardedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Load" />
+
+            <Button
+                android:id="@+id/showRewardedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Show" />
+        </LinearLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rewardedLayout">
+
+            <TextView
+                android:id="@+id/logTextView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:text="@tools:sample/lorem/random" />
+        </androidx.core.widget.NestedScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

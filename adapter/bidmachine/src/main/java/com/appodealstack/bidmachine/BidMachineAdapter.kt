@@ -3,12 +3,17 @@ package com.appodealstack.bidmachine
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.view.View
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
 import com.appodealstack.mads.demands.*
 import io.bidmachine.BidMachine
 import io.bidmachine.PriceFloorParams
+import io.bidmachine.banner.BannerListener
+import io.bidmachine.banner.BannerRequest
+import io.bidmachine.banner.BannerSize
+import io.bidmachine.banner.BannerView
 import io.bidmachine.interstitial.InterstitialAd
 import io.bidmachine.interstitial.InterstitialListener
 import io.bidmachine.interstitial.InterstitialRequest
@@ -24,7 +29,7 @@ import kotlin.coroutines.suspendCoroutine
 val BidMachineDemandId = DemandId("bidmachine")
 
 class BidMachineAdapter : Adapter.PostBid,
-    AdSource.Interstitial, AdSource.Rewarded {
+    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner {
     private lateinit var context: Context
 
     override val demandId = BidMachineDemandId
@@ -41,9 +46,13 @@ class BidMachineAdapter : Adapter.PostBid,
         return AuctionRequest { data ->
             suspendCancellableCoroutine { continuation ->
                 val isFinished = AtomicBoolean(false)
+                val placement = adParams.getString(PlacementKey)
                 val interstitialRequest = InterstitialRequest.Builder().apply {
                     data?.let {
                         setPriceFloorParams(PriceFloorParams().addPriceFloor(it.priceFloor))
+                    }
+                    placement?.let {
+                        setPlacementId(placement)
                     }
                 }.build()
                 InterstitialAd(context)
@@ -112,9 +121,13 @@ class BidMachineAdapter : Adapter.PostBid,
         return AuctionRequest { data ->
             suspendCancellableCoroutine { continuation ->
                 val isFinished = AtomicBoolean(false)
+                val placement = adParams.getString(PlacementKey)
                 val request = RewardedRequest.Builder().apply {
                     data?.let {
                         setPriceFloorParams(PriceFloorParams().addPriceFloor(it.priceFloor))
+                    }
+                    placement?.let {
+                        setPlacementId(placement)
                     }
                 }.build()
                 RewardedAd(context)
@@ -185,6 +198,84 @@ class BidMachineAdapter : Adapter.PostBid,
         }
     }
 
+    override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
+        return AuctionRequest { data ->
+            suspendCancellableCoroutine { continuation ->
+                val isFinished = AtomicBoolean(false)
+                val placement = adParams.getString(PlacementKey)
+                val bannerSize = adParams.getString(BannerAdSizeKey).let {
+                    when (it) {
+                        "Size_300x250" -> BannerSize.Size_300x250
+                        "Size_728x90" -> BannerSize.Size_728x90
+                        "Size_320x50" -> BannerSize.Size_320x50
+                        else -> BannerSize.Size_320x50
+                    }
+                }
+                val request = BannerRequest.Builder().apply {
+                    data?.let {
+                        setPriceFloorParams(PriceFloorParams().addPriceFloor(it.priceFloor))
+                    }
+                    placement?.let {
+                        setPlacementId(placement)
+                    }
+                }.setSize(bannerSize).build()
+                val bannerView = BannerView(context)
+                bannerView.setListener(object : BannerListener {
+                    override fun onAdLoaded(view: BannerView) {
+                        if (!isFinished.getAndSet(true)) {
+                            val auctionResult = AuctionResult(
+                                ad = Ad(
+                                    demandId = BidMachineDemandId,
+                                    demandAd = demandAd,
+                                    price = view.auctionResult?.price ?: 0.0,
+                                    sourceAd = bannerView
+                                ),
+                                adProvider = object : AdProvider, AdViewProvider {
+                                    override fun canShow(): Boolean = view.canShow()
+                                    override fun showAd(activity: Activity?, adParams: Bundle) {}
+                                    override fun destroy() = view.destroy()
+                                    override fun getAdView(): View = view
+                                }
+                            )
+                            view.setCoreListener(auctionResult)
+                            continuation.resume(Result.success(auctionResult))
+                        }
+                    }
+
+                    override fun onAdLoadFailed(view: BannerView, bmError: BMError) {
+                        if (!isFinished.getAndSet(true)) {
+                            // remove listener
+                            view.setListener(null)
+                            continuation.resume(Result.failure(bmError.asBidonError()))
+                        }
+                    }
+
+                    override fun onAdExpired(view: BannerView) {
+                        if (!isFinished.getAndSet(true)) {
+                            // remove listener
+                            view.setListener(null)
+                            continuation.resume(Result.failure(DemandError.Expired))
+                        }
+                    }
+
+                    override fun onAdShown(p0: BannerView) {
+                        error("unexpected state. remove on release a28.")
+                    }
+
+                    override fun onAdImpression(p0: BannerView) {
+                        error("unexpected state. remove on release a28.")
+                    }
+
+                    override fun onAdClicked(p0: BannerView) {
+                        error("unexpected state. remove on release a28.")
+                    }
+
+                })
+                bannerView.load(request)
+            }
+        }
+    }
+
     private fun InterstitialAd.setCoreListener(auctionResult: AuctionResult) {
         val coreListener = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)
         this.setListener(
@@ -221,6 +312,31 @@ class BidMachineAdapter : Adapter.PostBid,
                 }
             }
         )
+    }
+
+    private fun BannerView.setCoreListener(auctionResult: AuctionResult) {
+        val coreListener = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)
+        this.setListener(object : BannerListener {
+            override fun onAdLoaded(bannerView: BannerView) {
+                coreListener.onAdLoaded(auctionResult.ad)
+            }
+
+            override fun onAdLoadFailed(bannerView: BannerView, bmError: BMError) {
+                coreListener.onAdLoadFailed(bmError.asBidonError())
+            }
+
+            override fun onAdShown(bannerView: BannerView) {
+                coreListener.onAdDisplayed(auctionResult.ad)
+            }
+
+            override fun onAdImpression(bannerView: BannerView) {}
+
+            override fun onAdClicked(bannerView: BannerView) {
+                coreListener.onAdClicked(auctionResult.ad)
+            }
+
+            override fun onAdExpired(bannerView: BannerView) {}
+        })
     }
 
     private fun RewardedAd.setCoreListener(auctionResult: AuctionResult) {
@@ -264,7 +380,8 @@ class BidMachineAdapter : Adapter.PostBid,
             }
         )
     }
-
 }
 
 private const val SourceIdKey = "SourceId"
+private const val BannerAdSizeKey = "BannerAdSizeKey"
+private const val PlacementKey = "placement"
