@@ -53,10 +53,8 @@ class BNMaxAdView constructor(
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.BNMaxAdView)
         typedArray.getString(R.styleable.BNMaxAdView_adUnitId)?.let {
             this.adUnitId = it
-            logInternal("+++", "typedArray banner adUnitId: $it")
         }
         typedArray.recycle()
-        logInternal("BNMaxAdView", "DemandAd = $demandAd")
     }
 
     override fun setListener(listener: BNMaxAdViewAdListener) {
