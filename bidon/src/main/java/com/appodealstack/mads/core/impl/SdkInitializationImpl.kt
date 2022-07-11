@@ -16,6 +16,7 @@ import com.appodealstack.mads.demands.Adapter
 import com.appodealstack.mads.core.DemandsSource
 import com.appodealstack.mads.core.InitializationCallback
 import com.appodealstack.mads.core.InitializationResult
+import com.appodealstack.mads.demands.AdapterParameters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,7 +24,7 @@ import kotlinx.coroutines.launch
 internal class SdkInitializationImpl : SdkInitialization {
     private val sdkCore: Core = SdkCore
     private val contextProvider = ContextProvider
-    private val demands = mutableMapOf<Class<out Adapter>, Adapter>()
+    private val demands = mutableMapOf<Class<Adapter<AdapterParameters>>, Pair<Adapter<AdapterParameters>, AdapterParameters>>()
     private val analytics = mutableMapOf<Class<out Analytic>, Analytic>()
     private val scope: CoroutineScope get() = CoroutineScope(Dispatchers.Default)
 
@@ -34,48 +35,32 @@ internal class SdkInitializationImpl : SdkInitialization {
         return this
     }
 
-    override fun withConfigurations(vararg configurations: Configuration): SdkInitialization {
-        bidonConfigurator.addConfigurations(*configurations)
-        return this
-    }
-
-    override fun registerDemands(vararg adapterClasses: Class<out Adapter>): SdkInitialization {
-        adapterClasses.forEach { demandClass ->
-            logInternal("Initializer", "Creating instance for: $demandClass")
-            try {
-                val instance = demandClass.newInstance()
-                demands[demandClass] = instance
-                logInternal("Initializer", "Instance created: $instance")
-            } catch (e: Exception) {
-                logInternal("Initializer", "Instance creating failed", e)
-            }
-        }
-        return this
-    }
-
-    override fun registerAnalytics(vararg analyticsClasses: Class<out Analytic>): SdkInitialization {
-        analyticsClasses.forEach { analyticsClass ->
-            try {
-                val instance = analyticsClass.newInstance()
-                analytics[analyticsClass] = instance
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+    override fun registerAdapter(
+        adapterClass: Class<out Adapter<*>>,
+        parameters: AdapterParameters
+    ): SdkInitialization {
+        logInternal("Initializer", "Creating instance for: $adapterClass")
+        try {
+            val instance = adapterClass.newInstance()
+            demands[adapterClass as Class<Adapter<AdapterParameters>>] = (instance as Adapter<AdapterParameters>) to parameters
+            logInternal("Initializer", "Instance created: $instance")
+        } catch (e: Exception) {
+            logInternal("Initializer", "Instance creating failed", e)
         }
         return this
     }
 
     override suspend fun build(): InitializationResult {
-        registerPostBidConfiguration()
         logInternal("Demands", "Demands: $demands")
 
         // Init Demands
         require(sdkCore is DemandsSource)
-        demands.forEach { (_, demand) ->
+        demands.forEach { (_, pair) ->
+            val (demand, params ) = pair
             logInternal("Demands", "Demand is initializing: $demand")
             demand.init(
                 context = contextProvider.requiredContext,
-                configParams = bidonConfigurator.getDemandConfig(demand.demandId)
+                configParams = params
             )
             logInternal("Demands", "Demand is initialized: $demand")
             sdkCore.addDemands(demand)
@@ -102,11 +87,5 @@ internal class SdkInitializationImpl : SdkInitialization {
                 result = build()
             )
         }
-    }
-
-    private fun registerPostBidConfiguration() {
-        withConfigurations(
-            StaticJsonConfiguration()
-        )
     }
 }

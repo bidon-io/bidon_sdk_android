@@ -5,14 +5,16 @@ import android.content.Context
 import android.os.Bundle
 import com.appodealstack.mads.auctions.AuctionRequest
 
-sealed interface Adapter {
+sealed interface Adapter<T: AdapterParameters> {
     val demandId: DemandId
 
-    suspend fun init(context: Context, configParams: Bundle)
+    suspend fun init(context: Context, configParams: T)
 
-    interface Mediation : Adapter
-    interface PostBid : Adapter
+    interface Mediation<T: AdapterParameters> : Adapter<T>
+    interface PostBid<T: AdapterParameters> : Adapter<T>
 }
+
+interface AdapterParameters
 
 sealed interface AdSource {
     interface Interstitial : AdSource {

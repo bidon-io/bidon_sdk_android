@@ -29,7 +29,7 @@ val AdmobDemandId = DemandId("admob")
 @JvmInline
 private value class AdUnitId(val value: String)
 
-class AdmobAdapter : Adapter.PostBid,
+class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
     AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner {
     private lateinit var context: Context
 
@@ -39,81 +39,87 @@ class AdmobAdapter : Adapter.PostBid,
     private val interstitialAdUnits = mutableMapOf<Double, AdUnitId>()
     private val rewardedAdUnits = mutableMapOf<Double, AdUnitId>()
 
-    override suspend fun init(context: Context, configParams: Bundle): Unit = suspendCoroutine { continuation ->
+    override suspend fun init(context: Context, configParams: AdmobParameters): Unit = suspendCoroutine { continuation ->
         this.context = context
         /**
-         * Don't forget set Automatic refresh is Disabled for each unit.
-         * Manager refresh rate with [AutoRefresher.setAutoRefresh()].
+         * Don't forget set Automatic refresh is Disabled for each AdUnit.
+         * Manage refresh rate with [AutoRefresher.setAutoRefresh].
          */
-        val adUnitId = configParams.getString(AdUnitIdKey)
-            ?: "ca-app-pub-3940256099942544/1033173712" // TODO remove "ca-app-pub-3940256099942544/1033173712"
-        val price = configParams.getDouble(PriceKey, 0.14)
-        interstitialAdUnits[price] = AdUnitId(adUnitId)
-        rewardedAdUnits[price] = AdUnitId("ca-app-pub-3940256099942544/5224354917")
-        bannersAdUnits[price] = AdUnitId("ca-app-pub-3940256099942544/6300978111")
+        interstitialAdUnits.putAll(configParams.interstitials.map { (price, adUnit) ->
+            price to AdUnitId(adUnit)
+        })
+        rewardedAdUnits.putAll(configParams.rewarded.map { (price, adUnit) ->
+            price to AdUnitId(adUnit)
+        })
+        bannersAdUnits.putAll(configParams.banners.map { (price, adUnit) ->
+            price to AdUnitId(adUnit)
+        })
         MobileAds.initialize(context) {
             continuation.resume(Unit)
         }
     }
 
     override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
-        return AuctionRequest {
+        return AuctionRequest { data ->
             withContext(Dispatchers.Main) {
                 suspendCancellableCoroutine { continuation ->
                     val isFinished = AtomicBoolean(false)
                     val adRequest = AdRequest.Builder().build()
-                    InterstitialAd.load(context, getUnitId().value, adRequest, object : InterstitialAdLoadCallback() {
-                        override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                            if (!isFinished.getAndSet(true)) {
-                                continuation.resume(Result.failure(loadAdError.asBidonError()))
+                    InterstitialAd.load(
+                        context,
+                        interstitialAdUnits.getUnitId(data?.priceFloor ?: 0.0).value,
+                        adRequest,
+                        object : InterstitialAdLoadCallback() {
+                            override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                                if (!isFinished.getAndSet(true)) {
+                                    continuation.resume(Result.failure(loadAdError.asBidonError()))
+                                }
                             }
-                        }
 
-                        override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                            if (!isFinished.getAndSet(true)) {
-                                val auctionResult = AuctionResult(
-                                    ad = Ad(
-                                        demandId = AdmobDemandId,
-                                        demandAd = demandAd,
-                                        price = interstitialAdUnits.getPrice(unitId = interstitialAd.adUnitId),
-                                        sourceAd = interstitialAd
-                                    ),
-                                    adProvider = object : AdProvider {
-                                        override fun canShow(): Boolean = true
-                                        override fun destroy() {}
+                            override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                                if (!isFinished.getAndSet(true)) {
+                                    val auctionResult = AuctionResult(
+                                        ad = Ad(
+                                            demandId = AdmobDemandId,
+                                            demandAd = demandAd,
+                                            price = interstitialAdUnits.getPrice(unitId = interstitialAd.adUnitId),
+                                            sourceAd = interstitialAd
+                                        ),
+                                        adProvider = object : AdProvider {
+                                            override fun canShow(): Boolean = true
+                                            override fun destroy() {}
 
-                                        override fun showAd(activity: Activity?, adParams: Bundle) {
-                                            if (activity == null) {
-                                                logInternal(
-                                                    "AdmobDemand",
-                                                    "Error while showing InterstitialAd: activity is null."
-                                                )
-                                            } else {
-                                                interstitialAd.show(activity)
+                                            override fun showAd(activity: Activity?, adParams: Bundle) {
+                                                if (activity == null) {
+                                                    logInternal(
+                                                        "AdmobDemand",
+                                                        "Error while showing InterstitialAd: activity is null."
+                                                    )
+                                                } else {
+                                                    interstitialAd.show(activity)
+                                                }
                                             }
                                         }
-                                    }
-                                )
-                                interstitialAd.setCoreListener(demandAd, auctionResult)
-                                continuation.resume(Result.success(auctionResult))
+                                    )
+                                    interstitialAd.setCoreListener(demandAd, auctionResult)
+                                    continuation.resume(Result.success(auctionResult))
+                                }
                             }
-                        }
-                    })
+                        })
                 }
             }
         }
     }
 
     override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
-        return AuctionRequest {
+        return AuctionRequest { data ->
             withContext(Dispatchers.Main) {
                 suspendCancellableCoroutine { continuation ->
                     val isFinished = AtomicBoolean(false)
                     val adRequest = AdRequest.Builder().build()
-                    // todo remove "ca-app-pub-3940256099942544/5224354917"
                     RewardedAd.load(
                         context,
-                        "ca-app-pub-3940256099942544/5224354917" ?: getUnitId().value,
+                        rewardedAdUnits.getUnitId(data?.priceFloor ?: 0.0).value,
                         adRequest,
                         object : RewardedAdLoadCallback() {
                             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
@@ -168,7 +174,7 @@ class AdmobAdapter : Adapter.PostBid,
     }
 
     override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
-        return AuctionRequest {
+        return AuctionRequest { data ->
             withContext(Dispatchers.Main) {
                 suspendCancellableCoroutine { continuation ->
                     val isFinished = AtomicBoolean(false)
@@ -178,7 +184,7 @@ class AdmobAdapter : Adapter.PostBid,
                         BannerSize.values()[it]
                     }
                     adView.setAdSize(bannerSize.asAdmobAdSize())
-                    adView.adUnitId = bannersAdUnits.values.first().value
+                    adView.adUnitId = bannersAdUnits.getUnitId(data?.priceFloor ?: 0.0).value
                     adView.adListener = object : AdListener() {
                         override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                             if (!isFinished.getAndSet(true)) {
@@ -274,8 +280,10 @@ class AdmobAdapter : Adapter.PostBid,
         }
     }
 
-    private fun getUnitId(): AdUnitId {
-        return interstitialAdUnits.maxBy { it.key }.value
+    private fun Map<Double, AdUnitId>.getUnitId(price: Double): AdUnitId {
+        val sortedKeys = this.keys.sorted()
+        val priceFloor = sortedKeys.firstOrNull { it > price } ?: sortedKeys.last()
+        return this.getValue(priceFloor)
     }
 
     private fun Map<Double, AdUnitId>.getPrice(unitId: String): Double {
@@ -290,6 +298,3 @@ class AdmobAdapter : Adapter.PostBid,
         BannerSize.MRec -> AdSize.MEDIUM_RECTANGLE
     }
 }
-
-private const val AdUnitIdKey = "AdUnitIdKey"
-private const val PriceKey = "PriceKey"

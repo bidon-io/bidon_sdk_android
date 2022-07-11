@@ -24,7 +24,7 @@ import kotlin.coroutines.resume
 
 val ApplovinMaxDemandId = DemandId("applovin")
 
-class ApplovinMaxAdapter : Adapter.Mediation,
+class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
     AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner,
     PlacementSource by PlacementSourceImpl(),
     AdRevenueSource by AdRevenueSourceImpl(),
@@ -33,7 +33,7 @@ class ApplovinMaxAdapter : Adapter.Mediation,
 
     override val demandId: DemandId = ApplovinMaxDemandId
 
-    override suspend fun init(context: Context, configParams: Bundle) {
+    override suspend fun init(context: Context, configParams: ApplovinParameters) {
         require(AppLovinSdk.getInstance(context).isInitialized)
         this.context = context.applicationContext
     }

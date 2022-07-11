@@ -7,15 +7,17 @@ import com.appodealstack.mads.core.InitializationCallback
 import com.appodealstack.mads.core.InitializationResult
 import com.appodealstack.mads.demands.Adapter
 import com.appodealstack.mads.core.impl.SdkInitializationImpl
+import com.appodealstack.mads.demands.AdapterParameters
 
 val BidOnInitializer: SdkInitialization by lazy { SdkInitializationImpl() }
 
 interface SdkInitialization {
     fun withContext(context: Context): SdkInitialization
-    fun withConfigurations(vararg configurations: Configuration): SdkInitialization
 
-    fun registerAnalytics(vararg analyticsClasses: Class<out Analytic>): SdkInitialization
-    fun registerDemands(vararg adapterClasses: Class<out Adapter>): SdkInitialization
+    fun registerAdapter(
+        adapterClass: Class<out Adapter<*>>,
+        parameters: AdapterParameters
+    ): SdkInitialization
 
     suspend fun build(): InitializationResult
     fun build(initCallback: InitializationCallback)

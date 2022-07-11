@@ -31,16 +31,16 @@ val BidMachineDemandId = DemandId("bidmachine")
 
 typealias BidMachineBannerSize = io.bidmachine.banner.BannerSize
 
-class BidMachineAdapter : Adapter.PostBid,
+class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
     AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner,
     PlacementSource by PlacementSourceImpl() {
     private lateinit var context: Context
 
     override val demandId = BidMachineDemandId
 
-    override suspend fun init(context: Context, configParams: Bundle): Unit = suspendCoroutine { continuation ->
+    override suspend fun init(context: Context, configParams: BidMachineParameters): Unit = suspendCoroutine { continuation ->
         this.context = context
-        val sourceId = configParams.getString(SourceIdKey) ?: "1" // TODO remove 1
+        val sourceId = configParams.sourceId
         BidMachine.initialize(context, sourceId) {
             continuation.resume(Unit)
         }

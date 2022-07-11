@@ -34,11 +34,11 @@ internal class CoreImpl(
             adsRepository.saveAuction(demandAd, auction)
             auction.start(
                 mediationRequests = adapters
-                    .filterIsInstance<Adapter.Mediation>()
+                    .filterIsInstance<Adapter.Mediation<*>>()
                     .retrieveAuctionRequests(activity, demandAd, adParams)
                     .toSet(),
                 postBidRequests = adapters
-                    .filterIsInstance<Adapter.PostBid>()
+                    .filterIsInstance<Adapter.PostBid<*>>()
                     .retrieveAuctionRequests(activity, demandAd, adParams)
                     .toSet(),
                 onDemandLoaded = { auctionResult ->

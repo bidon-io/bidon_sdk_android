@@ -2,20 +2,17 @@ package com.appodeal.mads
 
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import com.applovin.mediation.MaxAdFormat
-import com.applovin.sdk.AppLovinSdkUtils
 import com.appodeal.mads.databinding.ActivityMainBinding
 import com.appodealstack.admob.AdmobAdapter
+import com.appodealstack.admob.AdmobParameters
 import com.appodealstack.applovin.AppLovinDecorator
 import com.appodealstack.applovin.banner.BNMaxAdView
 import com.appodealstack.applovin.interstitial.BNMaxInterstitialAd
 import com.appodealstack.applovin.rewarded.BNMaxRewardedAd
 import com.appodealstack.bidmachine.BidMachineAdapter
-import com.appodealstack.mads.core.ext.logInternal
+import com.appodealstack.bidmachine.BidMachineParameters
 import com.appodealstack.mads.demands.banners.BannerSize
 
 class MainActivity : AppCompatActivity() {
@@ -108,9 +105,30 @@ class MainActivity : AppCompatActivity() {
         AppLovinDecorator.getInstance(this).mediationProvider = "max"
         AppLovinDecorator
             .register(
+                AdmobAdapter::class.java,
+                AdmobParameters(
+                    interstitials = mapOf(
+                        0.1 to "ca-app-pub-3940256099942544/1033173712",
+                        1.0 to "ca-app-pub-3940256099942544/1033173712",
+                        2.0 to "ca-app-pub-3940256099942544/1033173712",
+                    ),
+                    rewarded = mapOf(
+                        0.1 to "ca-app-pub-3940256099942544/5224354917",
+                        1.0 to "ca-app-pub-3940256099942544/5224354917",
+                        2.0 to "ca-app-pub-3940256099942544/5224354917",
+                    ),
+                    banners = mapOf(
+                        0.1 to "ca-app-pub-3940256099942544/6300978111",
+                        1.0 to "ca-app-pub-3940256099942544/6300978111",
+                        2.0 to "ca-app-pub-3940256099942544/6300978111",
+                    ),
+                )
+            )
+            .register(
                 BidMachineAdapter::class.java,
-                AdmobAdapter::class.java
-            ).initializeSdk(this) { appLovinSdkConfiguration ->
+                BidMachineParameters(sourceId = "1")
+            )
+            .initializeSdk(this) { appLovinSdkConfiguration ->
                 println(appLovinSdkConfiguration)
                 binding.initButton.isVisible = false
                 log("Initialized")

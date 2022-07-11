@@ -22,7 +22,7 @@ internal interface AutoRefresher {
         adParams: Bundle,
         autoRefresh: AutoRefresh,
         onViewReady: (View) -> Unit,
-        adapters: List<Adapter>,
+        adapters: List<Adapter<*>>,
         auctionListener: AuctionListener
     )
 
@@ -44,7 +44,7 @@ internal class AutoRefresherImpl(
         adParams: Bundle,
         autoRefresh: AutoRefresh,
         onViewReady: (View) -> Unit,
-        adapters: List<Adapter>,
+        adapters: List<Adapter<*>>,
         auctionListener: AuctionListener
     ) {
         jobs[demandAd]?.cancel()
@@ -79,12 +79,12 @@ internal class AutoRefresherImpl(
                 adsRepository.saveAuction(demandAd, auction)
                 auction.start(
                     mediationRequests = adapters
-                        .filterIsInstance<Adapter.Mediation>()
+                        .filterIsInstance<Adapter.Mediation<*>>()
                         .filterIsInstance<AdSource.Banner>()
                         .retrieveAuctionRequests(context, demandAd, adParams)
                         .toSet(),
                     postBidRequests = adapters
-                        .filterIsInstance<Adapter.PostBid>()
+                        .filterIsInstance<Adapter.PostBid<*>>()
                         .filterIsInstance<AdSource.Banner>()
                         .retrieveAuctionRequests(context, demandAd, adParams)
                         .toSet(),
