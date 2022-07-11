@@ -8,21 +8,19 @@ import com.appodealstack.mads.Core
 import com.appodealstack.mads.auctions.AdsRepository
 import com.appodealstack.mads.auctions.AdsRepositoryImpl
 import com.appodealstack.mads.auctions.NewAuction
-import com.appodealstack.mads.core.AnalyticsSource
-import com.appodealstack.mads.core.DemandsSource
-import com.appodealstack.mads.core.ListenersHolder
+import com.appodealstack.mads.core.*
 import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.core.ext.retrieveAuctionRequests
 import com.appodealstack.mads.demands.*
-import com.appodealstack.mads.demands.banners.BannerAutoRefreshProvider
-import com.appodealstack.mads.demands.banners.BannerAutoRefreshSource
+import com.appodealstack.mads.demands.banners.AutoRefresh
 
 internal class CoreImpl(
     private val adsRepository: AdsRepository = AdsRepositoryImpl()
 ) : Core,
     DemandsSource by DemandsSourceImpl(),
     AnalyticsSource by AnalyticsSourceImpl(),
-    ListenersHolder by ListenersHolderImpl() {
+    ListenersHolder by ListenersHolderImpl(),
+    AutoRefresher by AutoRefresherImpl(adsRepository) {
 
     override var isInitialized: Boolean = false
 
@@ -69,66 +67,22 @@ internal class CoreImpl(
         context: Context,
         demandAd: DemandAd,
         adParams: Bundle,
+        autoRefresh: AutoRefresh,
         onViewReady: (View) -> Unit
     ) {
         if (!isInitialized) {
             logInternal(Tag, "Initialize Sdk before loading ad")
             return
         }
-        if (!adsRepository.isAuctionActive(demandAd)) {
-            val auction = NewAuction
-            adsRepository.saveAuction(demandAd, auction)
-            auction.start(
-                mediationRequests = adapters
-                    .filterIsInstance<Adapter.Mediation>()
-                    .filterIsInstance<AdSource.Banner>()
-                    .retrieveAuctionRequests(context, demandAd, adParams)
-                    .toSet(),
-                postBidRequests = adapters
-                    .filterIsInstance<Adapter.PostBid>()
-                    .filterIsInstance<AdSource.Banner>()
-                    .retrieveAuctionRequests(context, demandAd, adParams)
-                    .toSet(),
-                onDemandLoaded = { auctionResult ->
-                    auctionListener.demandAuctionSucceed(auctionResult)
-                },
-                onDemandLoadFailed = { throwable ->
-                    auctionListener.demandAuctionFailed(demandAd, throwable)
-                },
-                onAuctionFailed = {
-                    adsRepository.clearResults(demandAd)
-                    auctionListener.auctionFailed(demandAd, it)
-                },
-                onAuctionFinished = {
-                    auctionListener.auctionSucceed(demandAd, it)
-                },
-                onWinnerFound = {
-                    auctionListener.winnerFound(it)
-                    onViewReady.invoke((it.adProvider as AdViewProvider).getAdView())
-                }
-            )
-        } else {
-            logInternal(Tag, "Auction is in progress for $demandAd")
-        }
-    }
-
-    override fun setAutoRefresh(demandAd: DemandAd, autoRefresh: Boolean) {
-        if (!isInitialized) {
-            logInternal(Tag, "Set auto refresh cannot be set before Sdk is not initialized")
-            return
-        }
-        /**
-         * Set auto-refresh for all new Ad objects
-         */
-        adapters.filterIsInstance<BannerAutoRefreshSource>().forEach { bannerAutoRefreshProvider ->
-            bannerAutoRefreshProvider.setAutoRefresh(autoRefresh)
-        }
-        /**
-         * Set auto-refresh for all existing Ad objects
-         */
-        adsRepository.getResults(demandAd).forEach { auctionResult ->
-            (auctionResult.adProvider as? BannerAutoRefreshProvider)?.setAutoRefresh(autoRefresh)
-        }
+        delegateLoadingAdView(
+            context = context,
+            demandAd = demandAd,
+            adParams = adParams,
+            autoRefresh = autoRefresh,
+            onViewReady = onViewReady,
+            adapters = adapters,
+            auctionListener = auctionListener
+        )
     }
 
     override fun showAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle) {
@@ -150,6 +104,7 @@ internal class CoreImpl(
 
     override fun destroyAd(demandAd: DemandAd, adParams: Bundle) {
         addUserListener(demandAd, null)
+        cancelAutoRefresh(demandAd)
         return adsRepository.clearResults(demandAd)
     }
 

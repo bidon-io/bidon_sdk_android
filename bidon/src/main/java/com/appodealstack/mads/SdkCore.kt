@@ -9,6 +9,7 @@ import com.appodealstack.mads.core.impl.ListenersHolderImpl
 import com.appodealstack.mads.demands.AdListener
 import com.appodealstack.mads.demands.AdRevenueListener
 import com.appodealstack.mads.demands.DemandAd
+import com.appodealstack.mads.demands.banners.AutoRefresh
 
 val SdkCore: Core by lazy { CoreImpl() }
 
@@ -19,7 +20,13 @@ interface Core {
     var isInitialized: Boolean
 
     fun loadAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle)
-    fun loadAdView(context: Context, demandAd: DemandAd, adParams: Bundle, onViewReady: (View) -> Unit)
+    fun loadAdView(
+        context: Context,
+        demandAd: DemandAd,
+        adParams: Bundle,
+        autoRefresh: AutoRefresh,
+        onViewReady: (View) -> Unit
+    )
     fun showAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle)
 
     fun canShow(demandAd: DemandAd): Boolean
@@ -30,10 +37,12 @@ interface Core {
 
     fun getPlacement(demandAd: DemandAd): String?
     fun setPlacement(demandAd: DemandAd, placement: String?)
-    fun setAutoRefresh(demandAd: DemandAd, autoRefresh: Boolean)
-
     /**
-     * implemented at [ListenersHolderImpl]
+     * implemented in [AutoRefresherImpl]
+     */
+    fun setAutoRefresh(demandAd: DemandAd, autoRefresh: AutoRefresh)
+    /**
+     * implemented in [ListenersHolderImpl]
      */
     fun getListenerForDemand(demandAd: DemandAd): AdListener
 }

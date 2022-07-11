@@ -2,7 +2,6 @@ package com.appodealstack.applovin.banner
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
 import android.widget.FrameLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.children
@@ -12,7 +11,9 @@ import com.appodealstack.applovin.AdaptiveBannerHeightKey
 import com.appodealstack.applovin.R
 import com.appodealstack.applovin.impl.BNMaxAdViewAdListener
 import com.appodealstack.mads.SdkCore
+import com.appodealstack.mads.core.DefaultAutoRefreshTimeoutMs
 import com.appodealstack.mads.demands.*
+import com.appodealstack.mads.demands.banners.AutoRefresh
 import com.appodealstack.mads.demands.banners.BannerSize
 import com.appodealstack.mads.demands.banners.BannerSizeKey
 
@@ -27,6 +28,7 @@ internal interface MaxAdViewWrapper {
     fun setExtraParameter(key: String, value: String)
     fun startAutoRefresh()
     fun stopAutoRefresh()
+    fun setAutoRefreshTimeout(timeoutMs: Long)
     fun setPlacement(placement: String?)
     fun getPlacement(): String?
 }
@@ -54,7 +56,7 @@ class BNMaxAdView constructor(
     }
 
     private val demandAd = DemandAd(AdType.Banner)
-    private var autoRefresh: Boolean? = null
+    private var autoRefresh: AutoRefresh = AutoRefresh.On(timeoutMs = DefaultAutoRefreshTimeoutMs)
     private var customData: String? = null
 
     init {
@@ -92,8 +94,8 @@ class BNMaxAdView constructor(
                     BannerSizeKey to adFormat.ordinal,
                     AdaptiveBannerHeightKey to height
                 ),
+                autoRefresh = autoRefresh,
                 onViewReady = { view ->
-                    setAutoRefresh(view, autoRefresh)
                     (view as? MaxAdView)?.setCustomData(customData)
                     view.layoutParams = LayoutParams(
                         LayoutParams.MATCH_PARENT,
@@ -101,7 +103,7 @@ class BNMaxAdView constructor(
                     )
                     this.removeAllViews()
                     this.addView(view)
-                }
+                },
             )
         }
     }
@@ -126,14 +128,18 @@ class BNMaxAdView constructor(
     }
 
     override fun startAutoRefresh() {
-        autoRefresh = true
-        setAutoRefresh(this.children.firstOrNull(), autoRefresh)
-        SdkCore.setAutoRefresh(demandAd, autoRefresh = true)
+        autoRefresh = AutoRefresh.On(DefaultAutoRefreshTimeoutMs)
+        SdkCore.setAutoRefresh(demandAd, autoRefresh)
     }
 
     override fun stopAutoRefresh() {
-        autoRefresh = false
-        setAutoRefresh(this.children.firstOrNull(), autoRefresh)
+        autoRefresh = AutoRefresh.Off
+        SdkCore.setAutoRefresh(demandAd, autoRefresh)
+    }
+
+    override fun setAutoRefreshTimeout(timeoutMs: Long) {
+        autoRefresh = AutoRefresh.On(timeoutMs)
+        SdkCore.setAutoRefresh(demandAd, autoRefresh)
     }
 
     override fun setPlacement(placement: String?) {
@@ -141,16 +147,6 @@ class BNMaxAdView constructor(
     }
 
     override fun getPlacement(): String? = SdkCore.getPlacement(demandAd)
-
-    private fun setAutoRefresh(view: View?, isOn: Boolean?) {
-        if (view is MaxAdView) {
-            when (isOn) {
-                true -> view.startAutoRefresh()
-                false -> view.stopAutoRefresh()
-                null -> {}
-            }
-        }
-    }
 }
 
 private fun BNMaxAdViewAdListener.asAdListener(adUnitId: String): AdListener {

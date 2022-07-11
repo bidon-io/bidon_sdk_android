@@ -41,6 +41,10 @@ class AdmobAdapter : Adapter.PostBid,
 
     override suspend fun init(context: Context, configParams: Bundle): Unit = suspendCoroutine { continuation ->
         this.context = context
+        /**
+         * Don't forget set Automatic refresh is Disabled for each unit.
+         * Manager refresh rate with [AutoRefresher.setAutoRefresh()].
+         */
         val adUnitId = configParams.getString(AdUnitIdKey)
             ?: "ca-app-pub-3940256099942544/1033173712" // TODO remove "ca-app-pub-3940256099942544/1033173712"
         val price = configParams.getDouble(PriceKey, 0.14)

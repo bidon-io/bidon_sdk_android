@@ -16,7 +16,8 @@ import com.appodealstack.applovin.impl.setCoreListener
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
 import com.appodealstack.mads.demands.*
-import com.appodealstack.mads.demands.banners.*
+import com.appodealstack.mads.demands.banners.BannerSize
+import com.appodealstack.mads.demands.banners.BannerSizeKey
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
@@ -25,7 +26,6 @@ val ApplovinMaxDemandId = DemandId("applovin")
 
 class ApplovinMaxAdapter : Adapter.Mediation,
     AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner,
-    BannerAutoRefreshSource by BannerAutoRefreshSourceImpl(),
     PlacementSource by PlacementSourceImpl(),
     AdRevenueSource by AdRevenueSourceImpl(),
     ExtrasSource by ExtrasSourceImpl() {
@@ -61,11 +61,10 @@ class ApplovinMaxAdapter : Adapter.Mediation,
             getPlacement(demandAd)?.let {
                 placement = it
             }
-            if (isAutoRefresh()) {
-                this.startAutoRefresh()
-            } else {
-                this.stopAutoRefresh()
-            }
+            /**
+             * [AutoRefresher] provides auto-refresh
+             */
+            stopAutoRefresh()
         }
         return AuctionRequest {
             suspendCancellableCoroutine { continuation ->
@@ -82,7 +81,7 @@ class ApplovinMaxAdapter : Adapter.Mediation,
                             val auctionResult = AuctionResult(
                                 ad = ad,
                                 adProvider = object : AdProvider, AdRevenueProvider, ExtrasProvider, PlacementProvider,
-                                    AdViewProvider, BannerAutoRefreshProvider {
+                                    AdViewProvider {
                                     override fun canShow(): Boolean = true
                                     override fun showAd(activity: Activity?, adParams: Bundle) {}
                                     override fun destroy() = maxAdView.destroy()
@@ -99,14 +98,6 @@ class ApplovinMaxAdapter : Adapter.Mediation,
                                             if (adParams.get(key) is String) {
                                                 maxAdView.setExtraParameter(key, adParams.getString(key))
                                             }
-                                        }
-                                    }
-
-                                    override fun setAutoRefresh(autoRefresh: Boolean) {
-                                        if (autoRefresh) {
-                                            maxAdView.startAutoRefresh()
-                                        } else {
-                                            maxAdView.stopAutoRefresh()
                                         }
                                     }
 

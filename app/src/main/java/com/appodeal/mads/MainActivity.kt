@@ -90,6 +90,7 @@ class MainActivity : AppCompatActivity() {
 //                    this.setExtraParameter("adaptive_banner", "true")
 //                }
 //                adBannerProgrammatically.stopAutoRefresh()
+                adBannerProgrammatically.startAutoRefresh()
                 adBannerProgrammatically.loadAd()
             }
             loadBannerXmlButton.setOnClickListener {
@@ -108,7 +109,7 @@ class MainActivity : AppCompatActivity() {
         AppLovinDecorator
             .register(
                 BidMachineAdapter::class.java,
-//                AdmobAdapter::class.java
+                AdmobAdapter::class.java
             ).initializeSdk(this) { appLovinSdkConfiguration ->
                 println(appLovinSdkConfiguration)
                 binding.initButton.isVisible = false
