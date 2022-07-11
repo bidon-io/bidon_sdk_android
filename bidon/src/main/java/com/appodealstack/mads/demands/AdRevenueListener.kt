@@ -29,5 +29,4 @@ class AdRevenueSourceImpl : AdRevenueSource {
     override fun setAdRevenueListener(demandAd: DemandAd, adRevenueListener: AdRevenueListener) {
         adRevenueListeners[demandAd] = adRevenueListener
     }
-
 }

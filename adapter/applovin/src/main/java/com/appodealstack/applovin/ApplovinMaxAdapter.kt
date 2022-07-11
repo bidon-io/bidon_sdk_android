@@ -16,10 +16,7 @@ import com.appodealstack.applovin.impl.setCoreListener
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
 import com.appodealstack.mads.demands.*
-import com.appodealstack.mads.demands.banners.BannerAutoRefreshProvider
-import com.appodealstack.mads.demands.banners.BannerAutoRefreshSource
-import com.appodealstack.mads.demands.banners.BannerSize
-import com.appodealstack.mads.demands.banners.BannerSizeKey
+import com.appodealstack.mads.demands.banners.*
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
@@ -28,11 +25,10 @@ val ApplovinMaxDemandId = DemandId("applovin")
 
 class ApplovinMaxAdapter : Adapter.Mediation,
     AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner,
-    BannerAutoRefreshSource,
+    BannerAutoRefreshSource by BannerAutoRefreshSourceImpl(),
     PlacementSource by PlacementSourceImpl(),
     AdRevenueSource by AdRevenueSourceImpl(),
     ExtrasSource by ExtrasSourceImpl() {
-    private var autoRefresh: Boolean = true
     private lateinit var context: Context
 
     override val demandId: DemandId = ApplovinMaxDemandId
@@ -64,6 +60,11 @@ class ApplovinMaxAdapter : Adapter.Mediation,
             }
             getPlacement(demandAd)?.let {
                 placement = it
+            }
+            if (isAutoRefresh()) {
+                this.startAutoRefresh()
+            } else {
+                this.stopAutoRefresh()
             }
         }
         return AuctionRequest {
@@ -162,10 +163,6 @@ class ApplovinMaxAdapter : Adapter.Mediation,
                 maxAdView.loadAd()
             }
         }
-    }
-
-    override fun setAutoRefresh(autoRefresh: Boolean) {
-        this.autoRefresh = autoRefresh
     }
 
     override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
