@@ -10,7 +10,7 @@ internal fun AppTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colors = if (darkTheme) DarkColors else LightColors,
+        colors = DarkColors, //if (darkTheme) DarkColors else LightColors,
         typography = AppTypography,
         shapes = AppShapes,
         content = content

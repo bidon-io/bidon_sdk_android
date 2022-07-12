@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -22,7 +23,10 @@ import com.appodealstack.bidmachine.BidMachineAdapter
 import com.appodealstack.bidmachine.BidMachineParameters
 
 @Composable
-fun MainScreen(navController: NavHostController) {
+fun MainScreen(
+    navController: NavHostController,
+    initState: MutableState<Boolean>
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -31,18 +35,14 @@ fun MainScreen(navController: NavHostController) {
         verticalArrangement = Arrangement.Center
     ) {
         val context = LocalContext.current
-        val initState = remember {
-            mutableStateOf(false)
-        }
         if (!initState.value) {
-            AppButton(text = "Init SDK") {
+            AppButton(text = "Init Applovin+BidOn SDK") {
                 initSdk(context,
                     onInitialized = {
                         initState.value = true
                     })
             }
-        }
-        if (initState.value) {
+        } else {
             AppButton(text = "Interstitial") {
                 navController.navigate(Screen.Interstitial.route)
             }
