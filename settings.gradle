@@ -17,8 +17,10 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Mediation of Mediations"
+
 include ':app'
 include ':bidon'
 include ':adapter:applovin'
 include ':adapter:bidmachine'
 include ':adapter:admob'
+include ':adapter:fyber'
