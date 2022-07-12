@@ -20,6 +20,7 @@ import com.appodealstack.mads.demands.AdapterParameters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 internal class SdkInitializationImpl : SdkInitialization {
     private val sdkCore: Core = SdkCore
@@ -58,12 +59,16 @@ internal class SdkInitializationImpl : SdkInitialization {
         demands.forEach { (_, pair) ->
             val (demand, params ) = pair
             logInternal("Demands", "Demand is initializing: $demand")
-            demand.init(
-                context = contextProvider.requiredContext,
-                configParams = params
-            )
-            logInternal("Demands", "Demand is initialized: $demand")
-            sdkCore.addDemands(demand)
+            withTimeoutOrNull(InitializationTimeoutMs) {
+                demand.init(
+                    context = contextProvider.requiredContext,
+                    configParams = params
+                )
+                logInternal("Demands", "Demand is initialized: $demand")
+                sdkCore.addDemands(demand)
+            } ?: run {
+                logInternal("Demands", "Demand not initialized: $demand")
+            }
         }
         demands.clear()
 
@@ -89,3 +94,5 @@ internal class SdkInitializationImpl : SdkInitialization {
         }
     }
 }
+
+private const val InitializationTimeoutMs = 5000L
