@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 @Composable
-fun BannerScreen(navController: NavHostController, viewModel: BannerViewModel) {
+fun BannerScreen(navController: NavHostController, viewModel: BannerViewModel, value: MediationSdk) {
     val context = LocalContext.current
 
     val state = viewModel.stateFlow.collectAsState()

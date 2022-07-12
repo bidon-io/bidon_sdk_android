@@ -12,6 +12,9 @@ import com.appodeal.mads.ui.*
 fun NavigationGraph(
     navController: NavHostController,
 ) {
+    val initMediation = remember {
+        mutableStateOf(MediationSdk.None)
+    }
     val initState = remember {
         mutableStateOf(false)
     }
@@ -21,16 +24,16 @@ fun NavigationGraph(
 
     NavHost(navController = navController, startDestination = Screen.Main.route) {
         composable(Screen.Main.route) {
-            MainScreen(navController, initState)
+            MainScreen(navController, initState, initMediation)
         }
         composable(Screen.Interstitial.route) {
-            InterstitialScreen(navController, interstitialViewModel)
+            InterstitialScreen(navController, interstitialViewModel, initMediation.value)
         }
         composable(Screen.Rewarded.route) {
-            RewardedScreen(navController, rewardedViewModel)
+            RewardedScreen(navController, rewardedViewModel, initMediation.value)
         }
         composable(Screen.Banners.route) {
-            BannerScreen(navController, bannerViewModel)
+            BannerScreen(navController, bannerViewModel, initMediation.value)
         }
     }
 }

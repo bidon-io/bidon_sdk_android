@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'com.fyber.fairbid-sdk-plugin' version("3.28.1")
 }
 //apply plugin: 'applovin-quality-service'
 //applovin {
@@ -46,6 +47,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
     implementation 'com.applovin:applovin-sdk:11.4.4'
 
+    implementation(project(":adapter:fyber"))
     implementation(project(":adapter:applovin"))
     implementation(project(":adapter:bidmachine"))
     implementation(project(":adapter:admob"))
@@ -75,5 +77,5 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.1.1")
-
+    implementation 'androidx.multidex:multidex:2.0.1'
 }

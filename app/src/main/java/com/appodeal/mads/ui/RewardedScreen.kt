@@ -8,11 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -20,22 +18,25 @@ import androidx.navigation.NavHostController
 import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.component.Body2Text
-import com.appodeal.mads.component.H5Text
-import com.appodeal.mads.setInterstitialListener
 import com.appodeal.mads.setRewardedListener
-import com.appodealstack.applovin.interstitial.BNMaxInterstitialAd
+import com.appodeal.mads.ui.listener.createFyberRewardedListener
 import com.appodealstack.applovin.rewarded.BNMaxRewardedAd
+import com.appodealstack.fyber.rewarded.BNFyberRewarded
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 @Composable
-fun RewardedScreen(navController: NavHostController, viewModel: RewardedViewModel) {
+fun RewardedScreen(
+    navController: NavHostController,
+    viewModel: RewardedViewModel,
+    sdk: MediationSdk
+) {
     val activity = LocalContext.current as Activity
 
     LaunchedEffect(key1 = Unit, block = {
-        viewModel.createAd(activity)
+        viewModel.createAd(activity, sdk)
     })
 
     val logState = viewModel.logFlow.collectAsState()
@@ -81,27 +82,59 @@ fun RewardedScreen(navController: NavHostController, viewModel: RewardedViewMode
 class RewardedViewModel {
     private lateinit var rewardedAd: BNMaxRewardedAd
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private lateinit var sdk: MediationSdk
+    private var placementId = "197406"
+    private var activity: Activity? = null
 
     val logFlow = MutableStateFlow(listOf("Log"))
 
-    fun createAd(activity: Activity) {
-        rewardedAd = BNMaxRewardedAd("c7c5f664e60b9bfb", activity)
-        setListener()
-    }
-
-    private fun setListener() {
-        rewardedAd.setRewardedListener { log ->
-            coroutineScope.launch {
-                logFlow.emit(logFlow.value + log)
+    fun createAd(activity: Activity, sdk: MediationSdk) {
+        this.activity = activity
+        this.sdk = sdk
+        when (sdk) {
+            MediationSdk.None -> Unit
+            MediationSdk.Applovin -> {
+                rewardedAd = BNMaxRewardedAd("c7c5f664e60b9bfb", activity)
+                rewardedAd.setRewardedListener { log ->
+                    coroutineScope.launch {
+                        logFlow.emit(logFlow.value + log)
+                    }
+                }
+            }
+            MediationSdk.Fyber -> {
+                BNFyberRewarded.setRewardedListener(
+                    createFyberRewardedListener { log ->
+                        coroutineScope.launch {
+                            logFlow.emit(logFlow.value + log)
+                        }
+                    })
             }
         }
     }
 
     fun loadAd() {
-        rewardedAd.loadAd()
+        when (sdk) {
+            MediationSdk.None -> Unit
+            MediationSdk.Applovin -> {
+                rewardedAd.loadAd()
+            }
+            MediationSdk.Fyber -> {
+                BNFyberRewarded.request(placementId)
+            }
+        }
     }
 
     fun showAd() {
-        rewardedAd.showAd()
+        when (sdk) {
+            MediationSdk.None -> Unit
+            MediationSdk.Applovin -> {
+                rewardedAd.showAd()
+            }
+            MediationSdk.Fyber -> {
+                activity?.let {
+                    BNFyberRewarded.show(placementId, it)
+                }
+            }
+        }
     }
 }
