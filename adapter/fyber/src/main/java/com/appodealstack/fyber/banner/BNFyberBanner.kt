@@ -2,9 +2,6 @@ package com.appodealstack.fyber.banner
 
 import android.app.Activity
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.widget.FrameLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import com.appodealstack.fyber.PlacementKey
@@ -42,18 +39,15 @@ class FyberBannerImpl : FyberBanner {
     }
 
     override fun show(placementId: String, showOptions: BNFyberBannerOption, activity: Activity) {
-        (showOptions.getPosition() as? Position.InViewGroup)?.viewGroup?.let {
-            it.isVisible = false
-            bannerViews[placementId] = it
+        val position = showOptions.getPosition()
+        require(position is Position.InViewGroup) {
+            "Top/Bottom position is not implement at the moment"
         }
-        val adContainer = bannerViews[placementId]
-            ?: run {
-                val adContainer = FrameLayout(activity).apply {
-                    layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
-                }
-                bannerViews[placementId] = adContainer
-                adContainer
-            }
+        position.viewGroup.isVisible = false
+        bannerViews[placementId] = position.viewGroup
+
+        val adContainer = position.viewGroup
+
         val demandAd = getDemandAd(placementId)
         positions[placementId] = showOptions.getPosition()
         fyberBannerListener?.let {
@@ -71,11 +65,16 @@ class FyberBannerImpl : FyberBanner {
             autoRefresh = AutoRefresh.Off,
             onViewReady = { adView ->
                 if (adView != bannerViews[placementId]) {
+                    // Winner is not Fyber, so we have to cancel Fyber FairBid banner.
+                    Banner.destroy(placementId)
                     bannerViews[placementId]?.let { adContainer ->
                         adContainer.removeAllViews()
                         adContainer.addView(adView)
                         adContainer.isVisible = true
                     }
+                } else {
+                    // Winner is Fyber FairBid banner.
+                    adView.isVisible = true
                 }
             }
         )

@@ -30,16 +30,29 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
     AdRevenueSource by AdRevenueSourceImpl(),
     ExtrasSource by ExtrasSourceImpl() {
     private lateinit var context: Context
+    private val bannerAdUnitIds = mutableListOf<String>()
+    private val interstitialAdUnitIds = mutableListOf<String>()
+    private val rewardedAdUnitIds = mutableListOf<String>()
 
     override val demandId: DemandId = ApplovinMaxDemandId
 
-    override suspend fun init(context: Context, configParams: ApplovinParameters) {
-        require(AppLovinSdk.getInstance(context).isInitialized)
-        this.context = context.applicationContext
-    }
+    override suspend fun init(context: Context, configParams: ApplovinParameters): Unit =
+        suspendCancellableCoroutine { continuation ->
+            bannerAdUnitIds.addAll(configParams.bannerAdUnitIds)
+            interstitialAdUnitIds.addAll(configParams.interstitialAdUnitIds)
+            rewardedAdUnitIds.addAll(configParams.rewardedAdUnitIds)
+            this.context = context.applicationContext
+            if (!AppLovinSdk.getInstance(context).isInitialized) {
+                AppLovinSdk.initializeSdk(context) { appLovinSdkConfiguration ->
+                    continuation.resume(Unit)
+                }
+            } else {
+                continuation.resume(Unit)
+            }
+        }
 
     override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle, adContainer: ViewGroup?): AuctionRequest {
-        val adUnitId = adParams.getString(AdUnitIdKey)
+        val adUnitId = adParams.getString(AdUnitIdKey) ?: bannerAdUnitIds.first()
         val bannerSize = adParams.getInt(BannerSizeKey, BannerSize.Banner.ordinal).let {
             BannerSize.values()[it]
         }
@@ -126,29 +139,12 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
                         }
                     }
 
-                    override fun onAdDisplayed(ad: MaxAd?) {
-                        error("unexpected state. remove on release a28.")
-                    }
-
-                    override fun onAdHidden(ad: MaxAd?) {
-                        error("unexpected state. remove on release a28.")
-                    }
-
-                    override fun onAdClicked(ad: MaxAd?) {
-                        error("unexpected state. remove on release a28.")
-                    }
-
-                    override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError?) {
-                        error("unexpected state. remove on release a28.")
-                    }
-
-                    override fun onAdExpanded(ad: MaxAd?) {
-                        error("unexpected state. remove on release a28.")
-                    }
-
-                    override fun onAdCollapsed(ad: MaxAd?) {
-                        error("unexpected state. remove on release a28.")
-                    }
+                    override fun onAdDisplayed(ad: MaxAd?) {}
+                    override fun onAdHidden(ad: MaxAd?) {}
+                    override fun onAdClicked(ad: MaxAd?) {}
+                    override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError?) {}
+                    override fun onAdExpanded(ad: MaxAd?) {}
+                    override fun onAdCollapsed(ad: MaxAd?) {}
 
                 })
                 maxAdView.loadAd()
@@ -158,9 +154,8 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
 
     override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
         if (activity == null) return AuctionRequest { Result.failure(DemandError.NoActivity) }
-        val adUnitId = adParams.getString(AdUnitIdKey)
+        val adUnitId = adParams.getString(AdUnitIdKey) ?: interstitialAdUnitIds.first()
         val maxInterstitialAd = MaxInterstitialAd(adUnitId, activity)
-
         return AuctionRequest {
             suspendCancellableCoroutine { continuation ->
                 val isFinished = AtomicBoolean(false)
@@ -230,21 +225,10 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
                             }
                         }
 
-                        override fun onAdDisplayed(ad: MaxAd?) {
-                            error("unexpected state. remove on release a28.")
-                        }
-
-                        override fun onAdHidden(ad: MaxAd?) {
-                            error("unexpected state. remove on release a28.")
-                        }
-
-                        override fun onAdClicked(ad: MaxAd?) {
-                            error("unexpected state. remove on release a28.")
-                        }
-
-                        override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError?) {
-                            error("unexpected state. remove on release a28.")
-                        }
+                        override fun onAdDisplayed(ad: MaxAd?) {}
+                        override fun onAdHidden(ad: MaxAd?) {}
+                        override fun onAdClicked(ad: MaxAd?) {}
+                        override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError?) {}
                     }
                 )
                 maxInterstitialAd.loadAd()
@@ -254,7 +238,7 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
 
     override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
         if (activity == null) return AuctionRequest { Result.failure(DemandError.NoActivity) }
-        val adUnitId = adParams.getString(AdUnitIdKey)
+        val adUnitId = adParams.getString(AdUnitIdKey) ?: rewardedAdUnitIds.first()
         val rewardedAd = MaxRewardedAd.getInstance(adUnitId, activity)
         return AuctionRequest {
             suspendCancellableCoroutine { continuation ->
@@ -323,33 +307,13 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
                         }
                     }
 
-                    override fun onAdDisplayed(ad: MaxAd?) {
-                        error("unexpected state. remove on release a28.")
-                    }
-
-                    override fun onAdHidden(ad: MaxAd?) {
-                        error("unexpected state. remove on release a28.")
-                    }
-
-                    override fun onAdClicked(ad: MaxAd?) {
-                        error("unexpected state. remove on release a28.")
-                    }
-
-                    override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError?) {
-                        error("unexpected state. remove on release a28.")
-                    }
-
-                    override fun onRewardedVideoStarted(ad: MaxAd?) {
-                        error("unexpected state. remove on release a28.")
-                    }
-
-                    override fun onRewardedVideoCompleted(ad: MaxAd?) {
-                        error("unexpected state. remove on release a28.")
-                    }
-
-                    override fun onUserRewarded(ad: MaxAd?, reward: MaxReward?) {
-                        error("unexpected state. remove on release a28.")
-                    }
+                    override fun onAdDisplayed(ad: MaxAd?) {}
+                    override fun onAdHidden(ad: MaxAd?) {}
+                    override fun onAdClicked(ad: MaxAd?) {}
+                    override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError?) {}
+                    override fun onRewardedVideoStarted(ad: MaxAd?) {}
+                    override fun onRewardedVideoCompleted(ad: MaxAd?) {}
+                    override fun onUserRewarded(ad: MaxAd?, reward: MaxReward?) {}
                 })
                 rewardedAd.loadAd()
             }

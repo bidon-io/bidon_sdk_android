@@ -24,7 +24,7 @@ object AppLovinDecorator {
     fun initializeSdk(context: Context, listener: AppLovinSdk.SdkInitializationListener? = null) {
         AppLovinSdk.initializeSdk(context) { appLovinSdkConfiguration ->
             BidOnInitializer.withContext(context)
-                .registerAdapter(ApplovinMaxAdapter::class.java, ApplovinParameters)
+                .registerAdapter(ApplovinMaxAdapter::class.java, ApplovinParameters())
                 .build {
                     CoroutineScope(Dispatchers.Main).launch {
                         listener?.onSdkInitialized(appLovinSdkConfiguration)

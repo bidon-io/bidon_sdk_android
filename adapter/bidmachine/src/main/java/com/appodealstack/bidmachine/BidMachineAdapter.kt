@@ -165,18 +165,6 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                             }
                         }
 
-                        override fun onAdShown(p0: RewardedAd) {
-                            error("unexpected state. remove on release a28.")
-                        }
-
-                        override fun onAdImpression(p0: RewardedAd) {
-                            error("unexpected state. remove on release a28.")
-                        }
-
-                        override fun onAdClicked(p0: RewardedAd) {
-                            error("unexpected state. remove on release a28.")
-                        }
-
                         override fun onAdExpired(rewardedAd: RewardedAd) {
                             if (!isFinished.getAndSet(true)) {
                                 // remove listener
@@ -185,17 +173,12 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                             }
                         }
 
-                        override fun onAdShowFailed(p0: RewardedAd, p1: BMError) {
-                            error("unexpected state. remove on release a28.")
-                        }
-
-                        override fun onAdClosed(p0: RewardedAd, p1: Boolean) {
-                            error("unexpected state. remove on release a28.")
-                        }
-
-                        override fun onAdRewarded(p0: RewardedAd) {
-                            error("unexpected state. remove on release a28.")
-                        }
+                        override fun onAdShown(p0: RewardedAd) {}
+                        override fun onAdImpression(p0: RewardedAd) {}
+                        override fun onAdClicked(p0: RewardedAd) {}
+                        override fun onAdShowFailed(p0: RewardedAd, p1: BMError) {}
+                        override fun onAdClosed(p0: RewardedAd, p1: Boolean) {}
+                        override fun onAdRewarded(p0: RewardedAd) {}
 
                     })
                     .load(request)
@@ -259,17 +242,9 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                         }
                     }
 
-                    override fun onAdShown(p0: BannerView) {
-                        error("unexpected state. remove on release a28.")
-                    }
-
-                    override fun onAdImpression(p0: BannerView) {
-                        error("unexpected state. remove on release a28.")
-                    }
-
-                    override fun onAdClicked(p0: BannerView) {
-                        error("unexpected state. remove on release a28.")
-                    }
+                    override fun onAdShown(p0: BannerView) {}
+                    override fun onAdImpression(p0: BannerView) {}
+                    override fun onAdClicked(p0: BannerView) {}
 
                 })
                 bannerView.load(request)
@@ -390,5 +365,4 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
     }
 }
 
-private const val SourceIdKey = "SourceId"
 private const val PlacementKey = "placement"

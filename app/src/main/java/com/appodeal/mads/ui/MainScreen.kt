@@ -21,6 +21,8 @@ import com.appodeal.mads.navigation.Screen
 import com.appodealstack.admob.AdmobAdapter
 import com.appodealstack.admob.AdmobParameters
 import com.appodealstack.applovin.AppLovinDecorator
+import com.appodealstack.applovin.ApplovinMaxAdapter
+import com.appodealstack.applovin.ApplovinParameters
 import com.appodealstack.bidmachine.BidMachineAdapter
 import com.appodealstack.bidmachine.BidMachineParameters
 import com.appodealstack.fyber.FairBidDecorator
@@ -147,6 +149,14 @@ private fun initFyberSdk(
         .register(
             BidMachineAdapter::class.java,
             BidMachineParameters(sourceId = "1")
+        )
+        .register(
+            ApplovinMaxAdapter::class.java,
+            ApplovinParameters(
+                bannerAdUnitIds = listOf("c7c5f664e60b9bfb"),
+                interstitialAdUnitIds = listOf("c7c5f664e60b9bfb"),
+                rewardedAdUnitIds = listOf("c7c5f664e60b9bfb")
+            )
         )
         .start(
             appId = "109613",
