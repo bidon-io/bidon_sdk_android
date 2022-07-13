@@ -19,6 +19,7 @@ object BNFyberInterstitial : FyberInterstitial by FyberInterstitialImpl()
 
 interface FyberInterstitial {
     fun request(placementId: String)
+    fun request(placementId: String, activity: Activity?)
     fun setInterstitialListener(fyberInterstitialListener: FyberInterstitialListener)
     fun show(placementId: String, activity: Activity)
     fun show(placementId: String, showOptions: ShowOptions, activity: Activity)
@@ -35,6 +36,10 @@ class FyberInterstitialImpl : FyberInterstitial {
     private var fyberInterstitialListener: FyberInterstitialListener? = null
 
     override fun request(placementId: String) {
+        request(placementId, null)
+    }
+
+    override fun request(placementId: String, activity: Activity?) {
         val demandAd = getDemandAd(placementId)
         fyberInterstitialListener?.let {
             setInterstitialListener(
@@ -43,7 +48,7 @@ class FyberInterstitialImpl : FyberInterstitial {
                 placementId = placementId
             )
         }
-        SdkCore.loadAd(null, demandAd, bundleOf(PlacementKey to placementId))
+        SdkCore.loadAd(activity, demandAd, bundleOf(PlacementKey to placementId))
     }
 
     override fun setInterstitialListener(fyberInterstitialListener: FyberInterstitialListener) {

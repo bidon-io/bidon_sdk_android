@@ -48,14 +48,18 @@ fun MainScreen(
     ) {
         val context = LocalContext.current
         if (!initState.value) {
-            AppButton(text = "Init Applovin+BidOn SDK") {
+            H5Text(
+                modifier = Modifier.padding(bottom = 24.dp),
+                text = "Initialization"
+            )
+            AppButton(text = "Applovin only") {
                 initApplovinSdk(context,
                     onInitialized = {
                         initState.value = true
                         initMediation.value = MediationSdk.Applovin
                     })
             }
-            AppButton(text = "Init Fyber+BidOn SDK") {
+            AppButton(text = "Fyber + Applovin") {
                 initFyberSdk(context,
                     onInitialized = {
                         initState.value = true
@@ -68,8 +72,8 @@ fun MainScreen(
                 modifier = Modifier.padding(bottom = 24.dp),
                 text = when (initMediation.value) {
                     MediationSdk.None -> ""
-                    MediationSdk.Applovin -> "Applovin MAX"
-                    MediationSdk.Fyber -> "Fyber FairBid"
+                    MediationSdk.Applovin -> "Applovin MAX API"
+                    MediationSdk.Fyber -> "Fyber FairBid API"
                 }
             )
             AppButton(text = "Interstitial") {
@@ -132,17 +136,14 @@ private fun initFyberSdk(
                 interstitials = mapOf(
                     0.1 to "ca-app-pub-3940256099942544/1033173712",
                     1.0 to "ca-app-pub-3940256099942544/1033173712",
-                    2.0 to "ca-app-pub-3940256099942544/1033173712",
                 ),
                 rewarded = mapOf(
                     0.1 to "ca-app-pub-3940256099942544/5224354917",
                     1.0 to "ca-app-pub-3940256099942544/5224354917",
-                    2.0 to "ca-app-pub-3940256099942544/5224354917",
                 ),
                 banners = mapOf(
                     0.1 to "ca-app-pub-3940256099942544/6300978111",
                     1.0 to "ca-app-pub-3940256099942544/6300978111",
-                    2.0 to "ca-app-pub-3940256099942544/6300978111",
                 ),
             )
         )

@@ -5,9 +5,9 @@ import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.LoadAdError
 
 internal fun LoadAdError.asBidonError(): DemandError = when (this) {
-    else -> DemandError.Unspecified
+    else -> DemandError.Unspecified(AdmobDemandId)
 }
 
 internal fun AdError.asBidonError(): DemandError = when (this) {
-    else -> DemandError.Unspecified
+    else -> DemandError.Unspecified(AdmobDemandId)
 }

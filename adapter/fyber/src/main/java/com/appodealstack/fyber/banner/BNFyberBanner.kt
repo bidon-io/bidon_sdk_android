@@ -41,7 +41,7 @@ class FyberBannerImpl : FyberBanner {
     override fun show(placementId: String, showOptions: BNFyberBannerOption, activity: Activity) {
         val position = showOptions.getPosition()
         require(position is Position.InViewGroup) {
-            "Top/Bottom position is not implement at the moment"
+            "Top/Bottom position is not implemented at the moment"
         }
         position.viewGroup.isVisible = false
         bannerViews[placementId] = position.viewGroup

@@ -115,7 +115,7 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
                     )
                 }
                 is InterstitialInterceptor.LoadFailed -> {
-                    Result.failure(DemandError.NoFill)
+                    Result.failure(DemandError.NoFill(demandId))
                 }
                 else -> error("Unexpected state: $loadingResult")
             }
@@ -165,7 +165,7 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
                     )
                 }
                 is RewardedInterceptor.LoadFailed -> {
-                    Result.failure(DemandError.NoFill)
+                    Result.failure(DemandError.NoFill(demandId))
                 }
                 else -> error("Unexpected state: $loadingResult")
             }
@@ -229,7 +229,7 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
             }
             is InterstitialInterceptor.ShowFailed -> {
                 val (listener, ad) = getCoreListener(interceptor.placementId)
-                listener.onAdDisplayFailed(DemandError.Unspecified)
+                listener.onAdDisplayFailed(DemandError.Unspecified(demandId))
             }
             is InterstitialInterceptor.Shown -> {
                 val (listener, ad) = getCoreListener(interceptor.placementId)
@@ -257,7 +257,7 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
             }
             is RewardedInterceptor.ShowFailed -> {
                 val (listener, ad) = getCoreListener(interceptor.placementId)
-                listener.onAdDisplayFailed(DemandError.Unspecified)
+                listener.onAdDisplayFailed(DemandError.Unspecified(demandId))
             }
             is RewardedInterceptor.Shown -> {
                 val (listener, ad) = getCoreListener(interceptor.placementId)

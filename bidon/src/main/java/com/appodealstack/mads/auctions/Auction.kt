@@ -101,7 +101,7 @@ internal class AuctionImpl : Auction {
             async {
                 withTimeoutOrNull(RequestTimeout) {
                     mediation.execute(data = null)
-                } ?: Result.failure(DemandError.NetworkTimeout)
+                } ?: Result.failure(DemandError.NetworkTimeout(null))
             }
         }
         mediationResults.forEach { deferred ->
@@ -129,7 +129,7 @@ internal class AuctionImpl : Auction {
                             AuctionRequest.Data(priceFloor = it)
                         }
                     )
-                } ?: Result.failure(DemandError.NetworkTimeout)
+                } ?: Result.failure(DemandError.NetworkTimeout(null))
             }
         }
         postBidResults.forEach { deferred ->
@@ -157,7 +157,7 @@ internal class AuctionImpl : Auction {
                 onAuctionFinished(auctionResults.value)
                 onWinnerFound(winner)
             } else {
-                onAuctionFailed(DemandError.NoFill)
+                onAuctionFailed(DemandError.NoFill(null))
             }
         }
     }

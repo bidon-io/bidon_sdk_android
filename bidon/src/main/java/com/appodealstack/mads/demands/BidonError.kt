@@ -2,17 +2,17 @@ package com.appodealstack.mads.demands
 
 sealed class BidonError : Throwable()
 
-sealed class DemandError : BidonError() {
-    object Unspecified : DemandError()
-    object NoFill : DemandError()
-    object AdLoadFailed : DemandError()
-    object NetworkError : DemandError()
-    object NetworkTimeout : DemandError()
-    object BadCredential : DemandError()
-    object FullscreenAdAlreadyShowing : DemandError()
-    object FullscreenAdNotReady : DemandError()
-    object NoActivity : DemandError()
-    object Expired : DemandError()
+sealed class DemandError(val demandId: DemandId? = null) : BidonError() {
+    class Unspecified(demandId: DemandId?) : DemandError(demandId)
+    class NoFill(demandId: DemandId?) : DemandError(demandId)
+    class AdLoadFailed(demandId: DemandId?) : DemandError(demandId)
+    class NetworkError(demandId: DemandId?) : DemandError(demandId)
+    class NetworkTimeout(demandId: DemandId?) : DemandError(demandId)
+    class BadCredential(demandId: DemandId?) : DemandError(demandId)
+    class FullscreenAdAlreadyShowing(demandId: DemandId?) : DemandError(demandId)
+    class FullscreenAdNotReady(demandId: DemandId?) : DemandError(demandId)
+    class NoActivity(demandId: DemandId?) : DemandError(demandId)
+    class Expired(demandId: DemandId?) : DemandError(demandId)
 }
 
 sealed class AnalyticsError : BidonError()

@@ -121,7 +121,7 @@ class InterstitialViewModel {
                 interstitialAd.loadAd()
             }
             MediationSdk.Fyber -> {
-                BNFyberInterstitial.request(placementId)
+                BNFyberInterstitial.request(placementId, activity)
             }
         }
     }

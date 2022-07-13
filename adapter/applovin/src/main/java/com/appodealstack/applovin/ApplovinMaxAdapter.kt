@@ -153,7 +153,7 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
     }
 
     override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
-        if (activity == null) return AuctionRequest { Result.failure(DemandError.NoActivity) }
+        if (activity == null) return AuctionRequest { Result.failure(DemandError.NoActivity(demandId)) }
         val adUnitId = adParams.getString(AdUnitIdKey) ?: interstitialAdUnitIds.first()
         val maxInterstitialAd = MaxInterstitialAd(adUnitId, activity)
         return AuctionRequest {
@@ -237,7 +237,7 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
     }
 
     override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
-        if (activity == null) return AuctionRequest { Result.failure(DemandError.NoActivity) }
+        if (activity == null) return AuctionRequest { Result.failure(DemandError.NoActivity(demandId)) }
         val adUnitId = adParams.getString(AdUnitIdKey) ?: rewardedAdUnitIds.first()
         val rewardedAd = MaxRewardedAd.getInstance(adUnitId, activity)
         return AuctionRequest {

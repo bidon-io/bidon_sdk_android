@@ -26,7 +26,6 @@ import io.bidmachine.utils.BMError
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 val BidMachineDemandId = DemandId("bidmachine")
 
@@ -39,13 +38,14 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
 
     override val demandId = BidMachineDemandId
 
-    override suspend fun init(context: Context, configParams: BidMachineParameters): Unit = suspendCancellableCoroutine { continuation ->
-        this.context = context
-        val sourceId = configParams.sourceId
-        BidMachine.initialize(context, sourceId) {
-            continuation.resume(Unit)
+    override suspend fun init(context: Context, configParams: BidMachineParameters): Unit =
+        suspendCancellableCoroutine { continuation ->
+            this.context = context
+            val sourceId = configParams.sourceId
+            BidMachine.initialize(context, sourceId) {
+                continuation.resume(Unit)
+            }
         }
-    }
 
     override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
         return AuctionRequest { data ->
@@ -86,37 +86,23 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                             if (!isFinished.getAndSet(true)) {
                                 // remove listener
                                 interstitialAd.setListener(null)
-                                continuation.resume(Result.failure(bmError.asBidonError()))
+                                continuation.resume(Result.failure(bmError.asBidonError(demandId)))
                             }
-                        }
-
-                        override fun onAdShown(interstitialAd: InterstitialAd) {
-                            error("unexpected state. remove on release a28.")
-                        }
-
-                        override fun onAdImpression(interstitialAd: InterstitialAd) {
-                            error("unexpected state. remove on release a28.")
-                        }
-
-                        override fun onAdClicked(interstitialAd: InterstitialAd) {
-                            error("unexpected state. remove on release a28.")
                         }
 
                         override fun onAdExpired(interstitialAd: InterstitialAd) {
                             if (!isFinished.getAndSet(true)) {
                                 // remove listener
                                 interstitialAd.setListener(null)
-                                continuation.resume(Result.failure(DemandError.Expired))
+                                continuation.resume(Result.failure(DemandError.Expired(demandId)))
                             }
                         }
 
-                        override fun onAdShowFailed(interstitialAd: InterstitialAd, p1: BMError) {
-                            error("unexpected state. remove on release a28.")
-                        }
-
-                        override fun onAdClosed(interstitialAd: InterstitialAd, p1: Boolean) {
-                            error("unexpected state. remove on release a28.")
-                        }
+                        override fun onAdShown(interstitialAd: InterstitialAd) {}
+                        override fun onAdImpression(interstitialAd: InterstitialAd) {}
+                        override fun onAdClicked(interstitialAd: InterstitialAd) {}
+                        override fun onAdShowFailed(interstitialAd: InterstitialAd, p1: BMError) {}
+                        override fun onAdClosed(interstitialAd: InterstitialAd, p1: Boolean) {}
                     }).load(interstitialRequest)
             }
         }
@@ -161,7 +147,7 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                             if (!isFinished.getAndSet(true)) {
                                 // remove listener
                                 rewardedAd.setListener(null)
-                                continuation.resume(Result.failure(bmError.asBidonError()))
+                                continuation.resume(Result.failure(bmError.asBidonError(demandId)))
                             }
                         }
 
@@ -169,7 +155,7 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                             if (!isFinished.getAndSet(true)) {
                                 // remove listener
                                 rewardedAd.setListener(null)
-                                continuation.resume(Result.failure(DemandError.Expired))
+                                continuation.resume(Result.failure(DemandError.Expired(demandId)))
                             }
                         }
 
@@ -230,7 +216,7 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                         if (!isFinished.getAndSet(true)) {
                             // remove listener
                             view.setListener(null)
-                            continuation.resume(Result.failure(bmError.asBidonError()))
+                            continuation.resume(Result.failure(bmError.asBidonError(demandId)))
                         }
                     }
 
@@ -238,7 +224,7 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                         if (!isFinished.getAndSet(true)) {
                             // remove listener
                             view.setListener(null)
-                            continuation.resume(Result.failure(DemandError.Expired))
+                            continuation.resume(Result.failure(DemandError.Expired(demandId)))
                         }
                     }
 
@@ -261,7 +247,7 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                 }
 
                 override fun onAdLoadFailed(ad: InterstitialAd, bmError: BMError) {
-                    coreListener.onAdDisplayFailed(bmError.asBidonError())
+                    coreListener.onAdDisplayFailed(bmError.asBidonError(demandId))
                 }
 
                 override fun onAdShown(ad: InterstitialAd) {
@@ -280,7 +266,7 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                 }
 
                 override fun onAdShowFailed(ad: InterstitialAd, bmError: BMError) {
-                    coreListener.onAdDisplayFailed(bmError.asBidonError())
+                    coreListener.onAdDisplayFailed(bmError.asBidonError(demandId))
                 }
 
                 override fun onAdClosed(ad: InterstitialAd, bmError: Boolean) {
@@ -298,7 +284,7 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
             }
 
             override fun onAdLoadFailed(bannerView: BannerView, bmError: BMError) {
-                coreListener.onAdLoadFailed(bmError.asBidonError())
+                coreListener.onAdLoadFailed(bmError.asBidonError(demandId))
             }
 
             override fun onAdShown(bannerView: BannerView) {
@@ -324,7 +310,7 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                 }
 
                 override fun onAdLoadFailed(ad: RewardedAd, bmError: BMError) {
-                    coreListener.onAdDisplayFailed(bmError.asBidonError())
+                    coreListener.onAdDisplayFailed(bmError.asBidonError(demandId))
                 }
 
                 override fun onAdShown(ad: RewardedAd) {
@@ -343,7 +329,7 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                 }
 
                 override fun onAdShowFailed(ad: RewardedAd, bmError: BMError) {
-                    coreListener.onAdDisplayFailed(bmError.asBidonError())
+                    coreListener.onAdDisplayFailed(bmError.asBidonError(demandId))
                 }
 
                 override fun onAdClosed(ad: RewardedAd, bmError: Boolean) {

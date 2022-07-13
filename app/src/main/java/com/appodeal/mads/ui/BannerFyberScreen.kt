@@ -145,7 +145,7 @@ class BannerFyberViewModel {
 
             override fun onAuctionFinished(placementId: String, ads: List<Ad>) {
                 val str = StringBuilder()
-                str.appendLine("onWinnerFound")
+                str.appendLine("onAuctionFinished")
                 ads.forEachIndexed { i, ad ->
                     str.appendLine("#${i + 1} > ${ad.demandId.demandId}, price=${ad.price}")
                 }
