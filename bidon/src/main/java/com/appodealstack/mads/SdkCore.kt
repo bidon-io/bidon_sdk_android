@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import com.appodealstack.mads.core.impl.CoreImpl
 import com.appodealstack.mads.core.impl.ListenersHolderImpl
 import com.appodealstack.mads.demands.AdListener
@@ -25,8 +26,10 @@ interface Core {
         demandAd: DemandAd,
         adParams: Bundle,
         autoRefresh: AutoRefresh,
-        onViewReady: (View) -> Unit
+        onViewReady: (View) -> Unit,
+        adContainer: ViewGroup? = null,
     )
+
     fun showAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle)
 
     fun canShow(demandAd: DemandAd): Boolean
@@ -37,10 +40,12 @@ interface Core {
 
     fun getPlacement(demandAd: DemandAd): String?
     fun setPlacement(demandAd: DemandAd, placement: String?)
+
     /**
      * implemented in [AutoRefresherImpl]
      */
     fun setAutoRefresh(demandAd: DemandAd, autoRefresh: AutoRefresh)
+
     /**
      * implemented in [ListenersHolderImpl]
      */

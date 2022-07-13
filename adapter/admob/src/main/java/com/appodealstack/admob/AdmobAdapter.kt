@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
@@ -173,7 +174,7 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
         }
     }
 
-    override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
+    override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle, adContainer: ViewGroup?): AuctionRequest {
         return AuctionRequest { data ->
             withContext(Dispatchers.Main) {
                 suspendCancellableCoroutine { continuation ->

@@ -8,10 +8,7 @@ import com.appodealstack.mads.demands.AdapterParameters
 import com.fyber.FairBid
 import com.fyber.fairbid.ads.mediation.MediatedNetwork
 import com.fyber.fairbid.ads.mediation.MediationStartedListener
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 object FairBidDecorator {
     fun register(adapterClass: Class<out Adapter<*>>, parameters: AdapterParameters): FairBidDecorator {
@@ -34,11 +31,14 @@ object FairBidDecorator {
                 }
             })
             .start(activity)
-        BidOnInitializer
-            .withContext(activity.applicationContext)
-            .registerAdapter(FairBidAdapter::class.java, FairBidParameters)
-            .build {
-                onInitialized.invoke()
-            }
+        GlobalScope.launch {
+            delay(1500)
+            BidOnInitializer
+                .withContext(activity.applicationContext)
+                .registerAdapter(FairBidAdapter::class.java, FairBidParameters)
+                .build {
+                    onInitialized.invoke()
+                }
+        }
     }
 }

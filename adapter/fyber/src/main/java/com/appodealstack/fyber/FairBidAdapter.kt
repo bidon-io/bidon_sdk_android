@@ -3,16 +3,27 @@ package com.appodealstack.fyber
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
+import com.appodealstack.fyber.banner.BannerInterceptor
+import com.appodealstack.fyber.banner.initBannerListener
+import com.appodealstack.fyber.interstitial.InterstitialInterceptor
+import com.appodealstack.fyber.interstitial.initInterstitialListener
+import com.appodealstack.fyber.rewarded.RewardedInterceptor
+import com.appodealstack.fyber.rewarded.initRewardedListener
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
+import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.*
-import com.fyber.fairbid.ads.ImpressionData
+import com.fyber.fairbid.ads.Banner
 import com.fyber.fairbid.ads.Interstitial
 import com.fyber.fairbid.ads.Rewarded
 import com.fyber.fairbid.ads.ShowOptions
-import com.fyber.fairbid.ads.interstitial.InterstitialListener
-import com.fyber.fairbid.ads.rewarded.RewardedListener
+import com.fyber.fairbid.ads.banner.BannerOptions
+import com.fyber.fairbid.ads.banner.internal.BannerView
+import com.fyber.fairbid.mediation.MediationManager
+import com.fyber.fairbid.sdk.extensions.unity3d.UnityHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -22,14 +33,20 @@ import kotlinx.coroutines.launch
 val FairBidDemandId = DemandId("fair_bid")
 
 class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
-    AdSource.Interstitial, AdSource.Rewarded {
+    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner {
     override val demandId: DemandId = FairBidDemandId
     private lateinit var context: Context
+
     private val interstitialInterceptorFlow = MutableSharedFlow<InterstitialInterceptor>(extraBufferCapacity = Int.MAX_VALUE)
     private val interstitialPlacementsDemandAd = mutableMapOf<String, DemandAd>()
 
     private val rewardedInterceptorFlow = MutableSharedFlow<RewardedInterceptor>(extraBufferCapacity = Int.MAX_VALUE)
     private val rewardedPlacementsDemandAd = mutableMapOf<String, DemandAd>()
+
+    private val bannerInterceptorFlow = MutableSharedFlow<BannerInterceptor>(extraBufferCapacity = Int.MAX_VALUE)
+    private val bannerPlacementsDemandAd = mutableMapOf<String, DemandAd>()
+    private val bannerPlacementsRevenue = mutableMapOf<String, Double>()
+    private val placements = mutableListOf<String>()
 
     init {
         CoroutineScope(Dispatchers.Default).launch {
@@ -42,12 +59,18 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
                 proceedRewardedCallbacks(interceptor)
             }
         }
+        CoroutineScope(Dispatchers.Default).launch {
+            bannerInterceptorFlow.collect { interceptor ->
+                proceedBannerCallbacks(interceptor)
+            }
+        }
     }
 
     override suspend fun init(context: Context, configParams: FairBidParameters) {
         this.context = context
-        initInterstitialListener()
-        initRewardedListener()
+        bannerInterceptorFlow.initBannerListener()
+        interstitialInterceptorFlow.initInterstitialListener()
+        rewardedInterceptorFlow.initRewardedListener()
     }
 
     override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
@@ -104,6 +127,7 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
             val placementId = requireNotNull(adParams.getString(PlacementKey)) {
                 "PlacementId should be provided"
             }
+            placements.addIfAbsent(placementId)
             rewardedPlacementsDemandAd[placementId] = demandAd
             Rewarded.request(placementId)
             val loadingResult = rewardedInterceptorFlow.first {
@@ -148,6 +172,51 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
         }
     }
 
+    override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle, adContainer: ViewGroup?): AuctionRequest {
+        return AuctionRequest {
+            val placementId = requireNotNull(adParams.getString(PlacementKey)) {
+                "PlacementId should be provided"
+            }
+            bannerPlacementsRevenue.remove(placementId)
+            logInternal("+++", "banner started: $adParams")
+            Banner.show(placementId, BannerOptions().placeInContainer(adContainer), context as Activity)
+            val loadingResult = bannerInterceptorFlow.first {
+                (it as? BannerInterceptor.Loaded)?.placementId == placementId ||
+                        (it as? BannerInterceptor.Error)?.placementId == placementId
+            }
+            logInternal("+++", "banner finished: $loadingResult")
+            return@AuctionRequest when (loadingResult) {
+                is BannerInterceptor.Error -> {
+                    Result.failure(loadingResult.cause)
+                }
+                is BannerInterceptor.Loaded -> {
+                    Result.success(
+                        AuctionResult(
+                            ad = Ad(
+                                demandId = demandId,
+                                demandAd = demandAd,
+                                price = 0.0, // unknown until shown
+                                sourceAd = placementId
+                            ),
+                            adProvider = object : AdProvider, AdViewProvider {
+                                override fun getAdView(): View = requireNotNull(adContainer)
+                                override fun canShow(): Boolean = true
+                                override fun showAd(activity: Activity?, adParams: Bundle) {}
+
+                                override fun destroy() {
+                                    Banner.destroy(placementId)
+                                }
+                            }
+                        )
+                    )
+                }
+                is BannerInterceptor.Clicked,
+                is BannerInterceptor.RequestStarted,
+                is BannerInterceptor.Shown -> error("Unexpected state: $loadingResult")
+            }
+        }
+    }
+
     private fun proceedInterstitialCallbacks(interceptor: InterstitialInterceptor) {
         when (interceptor) {
             is InterstitialInterceptor.Clicked -> {
@@ -168,7 +237,7 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
             }
             is InterstitialInterceptor.LoadFailed,
             is InterstitialInterceptor.Loaded -> {
-                // do nothing. Use only for [fun interstitial()]
+                // do nothing. Use only in [fun interstitial()]
             }
             is InterstitialInterceptor.RequestStarted -> {
                 // do nothing again
@@ -196,7 +265,7 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
             }
             is RewardedInterceptor.LoadFailed,
             is RewardedInterceptor.Loaded -> {
-                // do nothing. Use only for [fun rewarded()]
+                // do nothing. Use only in [fun rewarded()]
             }
             is RewardedInterceptor.RequestStarted -> {
                 // do nothing again
@@ -208,7 +277,28 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
         }
     }
 
-    private fun getCoreListener(placementId: String): Pair<AdListener, Ad> {
+    private fun proceedBannerCallbacks(interceptor: BannerInterceptor) {
+        when (interceptor) {
+            is BannerInterceptor.Clicked -> {
+                val (listener, ad) = getCoreListener(interceptor.placementId)
+                listener.onAdClicked(ad)
+            }
+            is BannerInterceptor.Error,
+            is BannerInterceptor.Loaded -> {
+                // do nothing. Use only in [fun banner()]
+            }
+            is BannerInterceptor.RequestStarted -> {
+            }
+            is BannerInterceptor.Shown -> {
+                val revenue = interceptor.impressionData.netPayout
+                bannerPlacementsRevenue[interceptor.placementId] = revenue
+                val (listener, ad) = getCoreListener(interceptor.placementId, revenue)
+                listener.onAdDisplayed(ad)
+            }
+        }
+    }
+
+    private fun getCoreListener(placementId: String, revenue: Double? = null): Pair<AdListener, Ad> {
         interstitialPlacementsDemandAd[placementId]?.let { demandAd ->
             return SdkCore.getListenerForDemand(demandAd) to Ad(
                 demandId = demandId,
@@ -225,123 +315,22 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
                 sourceAd = placementId // Cause FairBid is a Singleton
             )
         }
+        bannerPlacementsDemandAd[placementId]?.let { demandAd ->
+            return SdkCore.getListenerForDemand(demandAd) to Ad(
+                demandId = demandId,
+                demandAd = demandAd,
+                price = revenue ?: bannerPlacementsRevenue[placementId] ?: 0.0,
+                sourceAd = placementId // Cause FairBid is a Singleton
+            )
+        }
         error("Unknown DemandAd for placementId=$placementId")
     }
 
-    private fun initInterstitialListener() {
-        Interstitial.setInterstitialListener(object : InterstitialListener {
-            override fun onShow(placementId: String, impressionData: ImpressionData) {
-                interstitialInterceptorFlow.tryEmit(
-                    InterstitialInterceptor.Shown(placementId, impressionData)
-                )
-            }
-
-            override fun onClick(placementId: String) {
-                interstitialInterceptorFlow.tryEmit(
-                    InterstitialInterceptor.Clicked(placementId)
-                )
-            }
-
-            override fun onHide(placementId: String) {
-                interstitialInterceptorFlow.tryEmit(
-                    InterstitialInterceptor.Hidden(placementId)
-                )
-            }
-
-            override fun onShowFailure(placementId: String, impressionData: ImpressionData) {
-                interstitialInterceptorFlow.tryEmit(
-                    InterstitialInterceptor.ShowFailed(placementId)
-                )
-
-            }
-
-            override fun onAvailable(placementId: String) {
-                interstitialInterceptorFlow.tryEmit(
-                    InterstitialInterceptor.Loaded(placementId)
-                )
-
-            }
-
-            override fun onUnavailable(placementId: String) {
-                interstitialInterceptorFlow.tryEmit(
-                    InterstitialInterceptor.LoadFailed(placementId)
-                )
-            }
-
-            override fun onRequestStart(placementId: String) {}
-        })
+    private fun MutableList<String>.addIfAbsent(placementId: String) {
+        if (this.indexOf(placementId) == -1) {
+            this.add(placementId)
+        }
     }
-
-    private fun initRewardedListener() {
-        Rewarded.setRewardedListener(object : RewardedListener {
-            override fun onShow(placementId: String, impressionData: ImpressionData) {
-                rewardedInterceptorFlow.tryEmit(
-                    RewardedInterceptor.Shown(placementId, impressionData)
-                )
-            }
-
-            override fun onClick(placementId: String) {
-                rewardedInterceptorFlow.tryEmit(
-                    RewardedInterceptor.Clicked(placementId)
-                )
-            }
-
-            override fun onHide(placementId: String) {
-                rewardedInterceptorFlow.tryEmit(
-                    RewardedInterceptor.Hidden(placementId)
-                )
-            }
-
-            override fun onShowFailure(placementId: String, impressionData: ImpressionData) {
-                rewardedInterceptorFlow.tryEmit(
-                    RewardedInterceptor.ShowFailed(placementId)
-                )
-
-            }
-
-            override fun onAvailable(placementId: String) {
-                rewardedInterceptorFlow.tryEmit(
-                    RewardedInterceptor.Loaded(placementId)
-                )
-
-            }
-
-            override fun onUnavailable(placementId: String) {
-                rewardedInterceptorFlow.tryEmit(
-                    RewardedInterceptor.LoadFailed(placementId)
-                )
-            }
-
-            override fun onCompletion(placementId: String, userRewarded: Boolean) {
-                rewardedInterceptorFlow.tryEmit(
-                    RewardedInterceptor.Completion(placementId, userRewarded)
-                )
-            }
-
-            override fun onRequestStart(placementId: String) {}
-        })
-    }
-}
-
-sealed interface InterstitialInterceptor {
-    class Shown(val placementId: String, val impressionData: ImpressionData) : InterstitialInterceptor
-    data class Clicked(val placementId: String) : InterstitialInterceptor
-    data class Hidden(val placementId: String) : InterstitialInterceptor
-    data class ShowFailed(val placementId: String) : InterstitialInterceptor
-    data class Loaded(val placementId: String) : InterstitialInterceptor
-    data class LoadFailed(val placementId: String) : InterstitialInterceptor
-    data class RequestStarted(val placementId: String) : InterstitialInterceptor
-}
-
-sealed interface RewardedInterceptor {
-    class Shown(val placementId: String, val impressionData: ImpressionData) : RewardedInterceptor
-    data class Clicked(val placementId: String) : RewardedInterceptor
-    data class Hidden(val placementId: String) : RewardedInterceptor
-    data class ShowFailed(val placementId: String) : RewardedInterceptor
-    data class Loaded(val placementId: String) : RewardedInterceptor
-    data class LoadFailed(val placementId: String) : RewardedInterceptor
-    data class RequestStarted(val placementId: String) : RewardedInterceptor
-    data class Completion(val placementId: String, val userRewarded: Boolean) : RewardedInterceptor
 }
 
 const val PlacementKey = "placement"

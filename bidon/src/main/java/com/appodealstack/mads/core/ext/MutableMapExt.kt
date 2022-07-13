@@ -3,6 +3,7 @@ package com.appodealstack.mads.core.ext
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.view.ViewGroup
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.demands.AdSource
 import com.appodealstack.mads.demands.AdType
@@ -34,10 +35,11 @@ internal fun List<Adapter<*>>.retrieveAuctionRequests(
 internal fun List<AdSource.Banner>.retrieveAuctionRequests(
     context: Context,
     demandAd: DemandAd,
-    adParams: Bundle
+    adParams: Bundle,
+    adContainer: ViewGroup?
 ): List<AuctionRequest> {
     require(demandAd.adType == AdType.Banner)
     return this.map {
-        it.banner(context, demandAd, adParams)
+        it.banner(context, demandAd, adParams, adContainer)
     }
 }

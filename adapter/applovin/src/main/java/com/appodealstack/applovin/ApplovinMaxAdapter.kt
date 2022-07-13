@@ -38,7 +38,7 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
         this.context = context.applicationContext
     }
 
-    override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
+    override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle, adContainer: ViewGroup?): AuctionRequest {
         val adUnitId = adParams.getString(AdUnitIdKey)
         val bannerSize = adParams.getInt(BannerSizeKey, BannerSize.Banner.ordinal).let {
             BannerSize.values()[it]

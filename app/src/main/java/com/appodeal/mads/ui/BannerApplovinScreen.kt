@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 @Composable
-fun BannerScreen(navController: NavHostController, viewModel: BannerViewModel, value: MediationSdk) {
+fun BannerApplovinScreen(navController: NavHostController, viewModel: BannerApplovinViewModel) {
     val context = LocalContext.current
 
     val state = viewModel.stateFlow.collectAsState()
@@ -55,9 +55,17 @@ fun BannerScreen(navController: NavHostController, viewModel: BannerViewModel, v
         ) {
             val bannerView = state.value.bannerAdView
             if (bannerView != null) {
-                AndroidView(factory = {
-                    bannerView
-                })
+                AndroidView(
+                    modifier = Modifier.height(
+                        when (state.value.adFormat) {
+                            BannerSize.Banner -> 50.dp
+                            BannerSize.LeaderBoard -> 90.dp
+                            BannerSize.MRec -> 250.dp
+                        }
+                    ),
+                    factory = {
+                        bannerView
+                    })
             } else {
                 Subtitle1Text(text = "Place for Banner")
             }
@@ -115,13 +123,13 @@ fun BannerScreen(navController: NavHostController, viewModel: BannerViewModel, v
     }
 }
 
-class State(
-    val logs: List<String>,
-    val bannerAdView: BNMaxAdView?,
-    val adFormat: BannerSize
-)
+class BannerApplovinViewModel {
+    class State(
+        val logs: List<String>,
+        val bannerAdView: BNMaxAdView?,
+        val adFormat: BannerSize
+    )
 
-class BannerViewModel {
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     val stateFlow = MutableStateFlow(

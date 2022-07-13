@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import com.appodealstack.mads.Core
 import com.appodealstack.mads.auctions.AdsRepository
 import com.appodealstack.mads.auctions.AdsRepositoryImpl
@@ -68,7 +69,8 @@ internal class CoreImpl(
         demandAd: DemandAd,
         adParams: Bundle,
         autoRefresh: AutoRefresh,
-        onViewReady: (View) -> Unit
+        onViewReady: (View) -> Unit,
+        adContainer: ViewGroup?,
     ) {
         if (!isInitialized) {
             logInternal(Tag, "Initialize Sdk before loading ad")
@@ -81,7 +83,8 @@ internal class CoreImpl(
             autoRefresh = autoRefresh,
             onViewReady = onViewReady,
             adapters = adapters,
-            auctionListener = auctionListener
+            auctionListener = auctionListener,
+            adContainer = adContainer
         )
     }
 

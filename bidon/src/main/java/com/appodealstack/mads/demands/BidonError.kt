@@ -8,6 +8,7 @@ sealed class DemandError : BidonError() {
     object AdLoadFailed : DemandError()
     object NetworkError : DemandError()
     object NetworkTimeout : DemandError()
+    object BadCredential : DemandError()
     object FullscreenAdAlreadyShowing : DemandError()
     object FullscreenAdNotReady : DemandError()
     object NoActivity : DemandError()

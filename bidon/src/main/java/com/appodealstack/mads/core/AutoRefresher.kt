@@ -3,6 +3,7 @@ package com.appodealstack.mads.core
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import com.appodealstack.mads.auctions.AdsRepository
 import com.appodealstack.mads.auctions.AuctionListener
 import com.appodealstack.mads.auctions.NewAuction
@@ -23,7 +24,8 @@ internal interface AutoRefresher {
         autoRefresh: AutoRefresh,
         onViewReady: (View) -> Unit,
         adapters: List<Adapter<*>>,
-        auctionListener: AuctionListener
+        auctionListener: AuctionListener,
+        adContainer: ViewGroup?,
     )
 
     fun setAutoRefresh(demandAd: DemandAd, autoRefresh: AutoRefresh)
@@ -45,7 +47,8 @@ internal class AutoRefresherImpl(
         autoRefresh: AutoRefresh,
         onViewReady: (View) -> Unit,
         adapters: List<Adapter<*>>,
-        auctionListener: AuctionListener
+        auctionListener: AuctionListener,
+        adContainer: ViewGroup?,
     ) {
         jobs[demandAd]?.cancel()
 
@@ -65,7 +68,8 @@ internal class AutoRefresherImpl(
                                 autoRefresh = it,
                                 onViewReady = onViewReady,
                                 adapters = adapters,
-                                auctionListener = auctionListener
+                                auctionListener = auctionListener,
+                                adContainer = adContainer,
                             )
                         }
                     }
@@ -81,12 +85,12 @@ internal class AutoRefresherImpl(
                     mediationRequests = adapters
                         .filterIsInstance<Adapter.Mediation<*>>()
                         .filterIsInstance<AdSource.Banner>()
-                        .retrieveAuctionRequests(context, demandAd, adParams)
+                        .retrieveAuctionRequests(context, demandAd, adParams, adContainer)
                         .toSet(),
                     postBidRequests = adapters
                         .filterIsInstance<Adapter.PostBid<*>>()
                         .filterIsInstance<AdSource.Banner>()
-                        .retrieveAuctionRequests(context, demandAd, adParams)
+                        .retrieveAuctionRequests(context, demandAd, adParams, adContainer)
                         .toSet(),
                     onDemandLoaded = { auctionResult ->
                         auctionListener.demandAuctionSucceed(auctionResult)
