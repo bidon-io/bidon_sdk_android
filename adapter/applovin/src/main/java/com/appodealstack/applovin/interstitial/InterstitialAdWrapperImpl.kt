@@ -87,6 +87,9 @@ private fun BNInterstitialListener.asAdListener(): AdListener {
             this@asAdListener.onAdDisplayFailed(cause)
         }
 
+        override fun onAdImpression(ad: Ad) {
+        }
+
         override fun onAdClicked(ad: Ad) {
             this@asAdListener.onAdClicked(ad)
         }

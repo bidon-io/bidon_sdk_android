@@ -119,7 +119,7 @@ class RewardedViewModel {
                 rewardedAd.loadAd()
             }
             MediationSdk.Fyber -> {
-                BNFyberRewarded.request(placementId)
+                BNFyberRewarded.request(placementId, activity)
             }
         }
     }

@@ -264,8 +264,8 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
         }
     }
 
-    private fun AdView.setCoreListener(ownerDemandAd: DemandAd, auctionData: AuctionResult) {
-        val coreListener = SdkCore.getListenerForDemand(ownerDemandAd)
+    private fun AdView.setCoreListener(demandAd: DemandAd, auctionData: AuctionResult) {
+        val coreListener = SdkCore.getListenerForDemand(demandAd)
         this.adListener = object : AdListener() {
             override fun onAdClicked() {
                 coreListener.onAdClicked(auctionData.ad)

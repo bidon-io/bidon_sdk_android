@@ -255,7 +255,7 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                 }
 
                 override fun onAdImpression(ad: InterstitialAd) {
-                    coreListener.onAdLoaded(auctionResult.ad)
+                    coreListener.onAdImpression(auctionResult.ad)
                 }
 
                 override fun onAdClicked(ad: InterstitialAd) {
@@ -291,7 +291,9 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                 coreListener.onAdDisplayed(auctionResult.ad)
             }
 
-            override fun onAdImpression(bannerView: BannerView) {}
+            override fun onAdImpression(bannerView: BannerView) {
+                coreListener.onAdImpression(auctionResult.ad)
+            }
 
             override fun onAdClicked(bannerView: BannerView) {
                 coreListener.onAdClicked(auctionResult.ad)
@@ -318,7 +320,7 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                 }
 
                 override fun onAdImpression(ad: RewardedAd) {
-                    coreListener.onAdLoaded(auctionResult.ad)
+                    coreListener.onAdImpression(auctionResult.ad)
                 }
 
                 override fun onAdClicked(ad: RewardedAd) {

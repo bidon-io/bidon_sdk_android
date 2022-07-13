@@ -14,6 +14,7 @@ interface AdListener : ExtendedListener, RewardedAdListener {
     fun onAdLoadFailed(cause: Throwable)
     fun onAdDisplayed(ad: Ad)
     fun onAdDisplayFailed(cause: Throwable)
+    fun onAdImpression(ad: Ad)
     fun onAdClicked(ad: Ad)
     fun onAdHidden(ad: Ad)
 }

@@ -178,13 +178,11 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
                 "PlacementId should be provided"
             }
             bannerPlacementsRevenue.remove(placementId)
-            logInternal("+++", "banner started: $adParams")
             Banner.show(placementId, BannerOptions().placeInContainer(adContainer), context as Activity)
             val loadingResult = bannerInterceptorFlow.first {
                 (it as? BannerInterceptor.Loaded)?.placementId == placementId ||
                         (it as? BannerInterceptor.Error)?.placementId == placementId
             }
-            logInternal("+++", "banner finished: $loadingResult")
             return@AuctionRequest when (loadingResult) {
                 is BannerInterceptor.Error -> {
                     Result.failure(loadingResult.cause)

@@ -32,7 +32,7 @@ object FairBidDecorator {
             })
             .start(activity)
         GlobalScope.launch {
-            delay(1500)
+            delay(500)
             BidOnInitializer
                 .withContext(activity.applicationContext)
                 .registerAdapter(FairBidAdapter::class.java, FairBidParameters)

@@ -16,6 +16,7 @@ object BNFyberRewarded : FyberRewarded by FyberRewardedImpl()
 
 interface FyberRewarded {
     fun request(placementId: String)
+    fun request(placementId: String, activity: Activity?)
     fun setRewardedListener(fyberRewardedListener: FyberRewardedListener)
     fun show(placementId: String, activity: Activity)
     fun show(placementId: String, showOptions: ShowOptions, activity: Activity)
@@ -32,6 +33,10 @@ class FyberRewardedImpl : FyberRewarded {
     private var fyberRewardedListener: FyberRewardedListener? = null
 
     override fun request(placementId: String) {
+        request(placementId, null)
+    }
+
+    override fun request(placementId: String, activity: Activity?) {
         val demandAd = getDemandAd(placementId)
         fyberRewardedListener?.let {
             setInterstitialListener(
@@ -40,7 +45,7 @@ class FyberRewardedImpl : FyberRewarded {
                 placementId = placementId
             )
         }
-        SdkCore.loadAd(null, demandAd, bundleOf(PlacementKey to placementId))
+        SdkCore.loadAd(activity, demandAd, bundleOf(PlacementKey to placementId))
     }
 
     override fun setRewardedListener(fyberRewardedListener: FyberRewardedListener) {
@@ -115,6 +120,9 @@ class FyberRewardedImpl : FyberRewarded {
 
             override fun onAdDisplayFailed(cause: Throwable) {
                 fyberRewardedListener.onShowFailure(placementId, cause)
+            }
+
+            override fun onAdImpression(ad: Ad) {
             }
 
             override fun onAdClicked(ad: Ad) {

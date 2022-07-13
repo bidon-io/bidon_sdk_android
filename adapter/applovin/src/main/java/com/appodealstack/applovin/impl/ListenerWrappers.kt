@@ -6,6 +6,7 @@ import com.applovin.mediation.ads.MaxInterstitialAd
 import com.applovin.mediation.ads.MaxRewardedAd
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.auctions.AuctionResult
+import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.Ad
 import com.appodealstack.mads.demands.AdListener
 import com.appodealstack.mads.demands.RewardedAdListener
@@ -15,7 +16,7 @@ internal fun MaxRewardedAd.setCoreListener(auctionResult: AuctionResult) {
     this.setListener(
         object : MaxRewardedAdListener {
             override fun onAdLoaded(ad: MaxAd?) {
-                core.onAdClicked(auctionResult.ad)
+                core.onAdLoaded(auctionResult.ad)
             }
 
             override fun onAdDisplayed(ad: MaxAd?) {
@@ -102,7 +103,7 @@ internal fun MaxInterstitialAd.setCoreListener(auctionResult: AuctionResult) {
     this.setListener(
         object : MaxAdListener {
             override fun onAdLoaded(ad: MaxAd?) {
-                core.onAdClicked(auctionResult.ad)
+                core.onAdLoaded(auctionResult.ad)
             }
 
             override fun onAdDisplayed(ad: MaxAd?) {

@@ -77,6 +77,7 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
             /**
              * [AutoRefresher] provides auto-refresh
              */
+            setExtraParameter( "allow_pause_auto_refresh_immediately", "true" )
             stopAutoRefresh()
         }
         return AuctionRequest {
@@ -137,6 +138,7 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
                             maxAdView.setListener(null)
                             continuation.resume(Result.failure(error.asBidonError()))
                         }
+                        maxAdView.destroy()
                     }
 
                     override fun onAdDisplayed(ad: MaxAd?) {}

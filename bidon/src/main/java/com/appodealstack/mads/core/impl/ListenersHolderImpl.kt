@@ -59,6 +59,12 @@ internal class ListenersHolderImpl : ListenersHolder {
                 }
             }
 
+            override fun onAdImpression(ad: Ad) {
+                mainScope.launch {
+                    userListeners[demandAd]?.onAdImpression(ad)
+                }
+            }
+
             override fun onAdDisplayed(ad: Ad) {
                 mainScope.launch {
                     userListeners[demandAd]?.onAdDisplayed(ad)
@@ -86,6 +92,12 @@ internal class ListenersHolderImpl : ListenersHolder {
                 override fun onAdDisplayed(ad: Ad) {
                     mainScope.launch {
                         userListeners[demandAd]?.onAdDisplayed(ad)
+                    }
+                }
+
+                override fun onAdImpression(ad: Ad) {
+                    mainScope.launch {
+                        userListeners[demandAd]?.onAdImpression(ad)
                     }
                 }
 
@@ -138,6 +150,12 @@ internal class ListenersHolderImpl : ListenersHolder {
                     }
                 }
 
+                override fun onAdImpression(ad: Ad) {
+                    mainScope.launch {
+                        userListeners[demandAd]?.onAdImpression(ad)
+                    }
+                }
+
                 override fun onAdDisplayFailed(cause: Throwable) {
                     mainScope.launch {
                         userListeners[demandAd]?.onAdDisplayFailed(cause)
@@ -155,6 +173,7 @@ internal class ListenersHolderImpl : ListenersHolder {
                         userListeners[demandAd]?.onAdHidden(ad)
                     }
                 }
+
                 override fun onAdLoaded(ad: Ad) {}
                 override fun onAdLoadFailed(cause: Throwable) {}
             }

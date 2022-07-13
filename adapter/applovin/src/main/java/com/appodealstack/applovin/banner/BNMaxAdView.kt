@@ -166,6 +166,9 @@ private fun BNMaxAdViewAdListener.asAdListener(adUnitId: String): AdListener {
             this@asAdListener.onAdDisplayFailed(cause)
         }
 
+        override fun onAdImpression(ad: Ad) {
+        }
+
         override fun onAdClicked(ad: Ad) {
             this@asAdListener.onAdClicked(ad)
         }

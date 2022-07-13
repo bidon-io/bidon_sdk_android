@@ -20,10 +20,9 @@ import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.component.Body2Text
 import com.appodeal.mads.component.Subtitle1Text
+import com.appodeal.mads.ui.listener.createFyberBannerListener
 import com.appodealstack.fyber.banner.BNFyberBanner
 import com.appodealstack.fyber.banner.BNFyberBannerOption
-import com.appodealstack.fyber.banner.FyberBannerListener
-import com.appodealstack.mads.demands.Ad
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -75,7 +74,7 @@ fun BannerFyberScreen(navController: NavHostController, viewModel: BannerFyberVi
             }
             if (state.value.adContainer != null) {
                 AppButton(text = "Destroy") {
-                    viewModel.destroyAd()
+                    viewModel.destroyAd(placementId)
                 }
             }
             LazyColumn(
@@ -114,44 +113,8 @@ class BannerFyberViewModel {
     )
 
     init {
-        BNFyberBanner.setBannerListener(object : FyberBannerListener{
-            override fun onError(placementId: String, cause: Throwable) {
-                logMe("OnError. Cause: $cause")
-            }
-
-            override fun onLoad(placementId: String, ad: Ad) {
-                logMe("onLoad. ${ad.demandId.demandId}, price=${ad.price}")
-            }
-
-            override fun onShow(placementId: String, ad: Ad) {
-                logMe("onShow. ${ad.demandId.demandId}, price=${ad.price}")
-            }
-
-            override fun onClick(placementId: String, ad: Ad) {
-                logMe("onClick. ${ad.demandId.demandId}, price=${ad.price}")
-            }
-
-            override fun onRequestStart(placementId: String, ad: Ad) {
-                logMe("onRequestStart. ${ad.demandId.demandId}, price=${ad.price}")
-            }
-
-            override fun onDemandAdLoaded(placementId: String, ad: Ad) {
-                logMe("onDemandAdLoaded. ${ad.demandId.demandId}, price=${ad.price}")
-            }
-
-            override fun onDemandAdLoadFailed(placementId: String, cause: Throwable) {
-                logMe("onDemandAdLoadFailed. $cause")
-            }
-
-            override fun onAuctionFinished(placementId: String, ads: List<Ad>) {
-                val str = StringBuilder()
-                str.appendLine("onAuctionFinished")
-                ads.forEachIndexed { i, ad ->
-                    str.appendLine("#${i + 1} > ${ad.demandId.demandId}, price=${ad.price}")
-                }
-                logMe(str.toString())
-            }
-
+        BNFyberBanner.setBannerListener(createFyberBannerListener {
+            logMe(it)
         })
     }
 
@@ -165,8 +128,8 @@ class BannerFyberViewModel {
         )
     }
 
-    fun destroyAd() {
-
+    fun destroyAd(placementId: String) {
+        BNFyberBanner.destroy(placementId)
     }
 
     private fun logMe(log: String) {

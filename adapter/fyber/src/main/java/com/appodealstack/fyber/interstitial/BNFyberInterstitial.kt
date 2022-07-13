@@ -125,6 +125,9 @@ class FyberInterstitialImpl : FyberInterstitial {
                 fyberInterstitialListener.onShowFailure(placementId, cause)
             }
 
+            override fun onAdImpression(ad: Ad) {
+            }
+
             override fun onAdClicked(ad: Ad) {
                 fyberInterstitialListener.onClick(placementId, ad)
             }
