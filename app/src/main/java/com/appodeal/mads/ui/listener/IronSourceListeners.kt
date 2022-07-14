@@ -1,11 +1,11 @@
 package com.appodeal.mads.ui.listener
 
-import com.appodealstack.ironsource.interstitial.BNIronSourceLevelPlayInterstitialListener
+import com.appodealstack.ironsource.interstitial.IronSourceLevelPlayInterstitialListener
 import com.appodealstack.mads.demands.Ad
 import com.appodealstack.mads.demands.DemandError
 
-internal fun createIronSourceInterstitialListener(log: (String) -> Unit): BNIronSourceLevelPlayInterstitialListener {
-    return object : BNIronSourceLevelPlayInterstitialListener {
+internal fun createIronSourceInterstitialListener(log: (String) -> Unit): IronSourceLevelPlayInterstitialListener {
+    return object : IronSourceLevelPlayInterstitialListener {
         override fun onAdReady(ad: Ad) {
             log("onAdReady: ${ad.demandId.demandId}, price=${ad.price}")
         }

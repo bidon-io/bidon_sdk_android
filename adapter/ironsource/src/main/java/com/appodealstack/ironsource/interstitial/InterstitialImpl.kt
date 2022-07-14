@@ -6,9 +6,9 @@ import com.appodealstack.ironsource.PlacementKey
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.demands.*
 
-internal class ISInterstitialImpl : ISDecorator.Interstitial {
-    private var userListener: BNIronSourceInterstitialListener? = null
-    private var userLevelPlayListener: BNIronSourceLevelPlayInterstitialListener? = null
+internal class InterstitialImpl : ISDecorator.Interstitial {
+    private var userListener: IronSourceInterstitialListener? = null
+    private var userLevelPlayListener: IronSourceLevelPlayInterstitialListener? = null
     private val demandAd by lazy { DemandAd(AdType.Interstitial) }
 
     init {
@@ -67,11 +67,11 @@ internal class ISInterstitialImpl : ISDecorator.Interstitial {
         })
     }
 
-    override fun setInterstitialListener(interstitialListener: BNIronSourceInterstitialListener) {
+    override fun setInterstitialListener(interstitialListener: IronSourceInterstitialListener) {
         this.userListener = interstitialListener
     }
 
-    override fun setLevelPlayInterstitialListener(levelPlayInterstitialListener: BNIronSourceLevelPlayInterstitialListener) {
+    override fun setLevelPlayInterstitialListener(levelPlayInterstitialListener: IronSourceLevelPlayInterstitialListener) {
         this.userLevelPlayListener = levelPlayInterstitialListener
     }
 

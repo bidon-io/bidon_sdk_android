@@ -3,7 +3,7 @@ package com.appodealstack.ironsource.interstitial
 import com.appodealstack.mads.demands.Ad
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
 
-interface BNIronSourceInterstitialListener {
+interface IronSourceInterstitialListener {
     fun onInterstitialAdReady()
     fun onInterstitialAdLoadFailed(cause: Throwable)
     fun onInterstitialAdOpened()
@@ -22,7 +22,7 @@ interface BNIronSourceInterstitialListener {
  *
  * val adInfo: AdInfo? = Ad.sourceAd as? AdInfo
  */
-interface BNIronSourceLevelPlayInterstitialListener {
+interface IronSourceLevelPlayInterstitialListener {
     fun onAdReady(ad: Ad)
     fun onAdLoadFailed(cause: Throwable)
     fun onAdOpened(ad: Ad)

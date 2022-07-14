@@ -3,9 +3,9 @@ package com.appodealstack.ironsource
 import android.app.Activity
 import com.appodealstack.ironsource.impl.ISDecoratorInitializerImpl
 import com.appodealstack.ironsource.impl.ImpressionsHolder
-import com.appodealstack.ironsource.interstitial.BNIronSourceInterstitialListener
-import com.appodealstack.ironsource.interstitial.BNIronSourceLevelPlayInterstitialListener
-import com.appodealstack.ironsource.interstitial.ISInterstitialImpl
+import com.appodealstack.ironsource.interstitial.IronSourceInterstitialListener
+import com.appodealstack.ironsource.interstitial.IronSourceLevelPlayInterstitialListener
+import com.appodealstack.ironsource.interstitial.InterstitialImpl
 import com.appodealstack.mads.demands.Adapter
 import com.appodealstack.mads.demands.AdapterParameters
 import com.ironsource.mediationsdk.ISBannerSize
@@ -22,7 +22,8 @@ import kotlinx.coroutines.flow.Flow
 object IronSourceDecorator :
     ISDecorator.Initializer by ISDecoratorInitializerImpl(),
     ISDecorator.Impressions by ImpressionsHolder(),
-    ISDecorator.Interstitial by ISInterstitialImpl()
+    ISDecorator.Interstitial by InterstitialImpl(),
+    ISDecorator.Rewarded by RewardedImpl()
 
 sealed interface ISDecorator {
     interface Initializer : ISDecorator {
@@ -42,8 +43,8 @@ sealed interface ISDecorator {
     }
 
     interface Interstitial : ISDecorator {
-        fun setInterstitialListener(interstitialListener: BNIronSourceInterstitialListener)
-        fun setLevelPlayInterstitialListener(levelPlayInterstitialListener: BNIronSourceLevelPlayInterstitialListener)
+        fun setInterstitialListener(interstitialListener: IronSourceInterstitialListener)
+        fun setLevelPlayInterstitialListener(levelPlayInterstitialListener: IronSourceLevelPlayInterstitialListener)
         fun removeInterstitialListener()
         fun loadInterstitial()
         fun showInterstitial(placementName: String? = null)
@@ -53,7 +54,7 @@ sealed interface ISDecorator {
         fun setRewardedVideoListener(rewardedVideoListener: RewardedVideoListener)
         fun removeRewardedVideoListener()
         fun loadRewardedVideo()
-        fun showRewardedVideo(placementName: String?)
+        fun showRewardedVideo(placementName: String? = null)
     }
 
     interface Banner : ISDecorator {
@@ -69,3 +70,22 @@ object ISBannerSizeDecorator {
     }
 }
 
+
+internal class RewardedImpl : ISDecorator.Rewarded {
+    override fun setRewardedVideoListener(rewardedVideoListener: RewardedVideoListener) {
+        TODO("Not yet implemented")
+    }
+
+    override fun removeRewardedVideoListener() {
+        TODO("Not yet implemented")
+    }
+
+    override fun loadRewardedVideo() {
+        TODO("Not yet implemented")
+    }
+
+    override fun showRewardedVideo(placementName: String?) {
+        TODO("Not yet implemented")
+    }
+
+}

@@ -22,6 +22,7 @@ import com.appodeal.mads.setRewardedListener
 import com.appodeal.mads.ui.listener.createFyberRewardedListener
 import com.appodealstack.applovin.rewarded.BNMaxRewardedAd
 import com.appodealstack.fyber.rewarded.BNFyberRewarded
+import com.appodealstack.ironsource.IronSourceDecorator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -109,7 +110,8 @@ class RewardedViewModel {
                         }
                     })
             }
-        }
+            MediationSdk.IronSource -> TODO()
+        }.let { }
     }
 
     fun loadAd() {
@@ -121,7 +123,9 @@ class RewardedViewModel {
             MediationSdk.Fyber -> {
                 BNFyberRewarded.request(placementId, activity)
             }
-            MediationSdk.IronSource -> TODO()
+            MediationSdk.IronSource -> {
+                IronSourceDecorator.loadRewardedVideo()
+            }
         }.apply { }
     }
 
@@ -136,7 +140,9 @@ class RewardedViewModel {
                     BNFyberRewarded.show(placementId, it)
                 }
             }
-            MediationSdk.IronSource -> TODO()
+            MediationSdk.IronSource -> {
+                IronSourceDecorator.showRewardedVideo()
+            }
         }.let { }
     }
 }
