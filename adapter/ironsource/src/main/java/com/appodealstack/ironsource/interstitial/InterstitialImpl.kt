@@ -19,7 +19,6 @@ internal class InterstitialImpl : ISDecorator.Interstitial {
             }
 
             override fun onAdLoadFailed(cause: Throwable) {
-                require(cause is DemandError)
                 userListener?.onInterstitialAdLoadFailed(cause)
                 userLevelPlayListener?.onAdLoadFailed(cause)
             }
@@ -30,7 +29,6 @@ internal class InterstitialImpl : ISDecorator.Interstitial {
             }
 
             override fun onAdDisplayFailed(cause: Throwable) {
-                require(cause is DemandError)
                 userListener?.onInterstitialAdShowFailed(cause)
                 userLevelPlayListener?.onAdShowFailed(cause)
             }

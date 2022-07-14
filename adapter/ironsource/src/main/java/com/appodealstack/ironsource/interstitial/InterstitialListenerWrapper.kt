@@ -7,7 +7,7 @@ import com.ironsource.mediationsdk.logger.IronSourceError
 import com.ironsource.mediationsdk.sdk.LevelPlayInterstitialListener
 import kotlinx.coroutines.flow.MutableSharedFlow
 
-internal fun MutableSharedFlow<InterstitialInterceptor>.addLevelPlayInterstitialListener() {
+internal fun MutableSharedFlow<InterstitialInterceptor>.addInterstitialListener() {
     val interstitialFlow = this
     IronSource.setLevelPlayInterstitialListener(object : LevelPlayInterstitialListener {
         override fun onAdReady(adInfo: AdInfo?) {

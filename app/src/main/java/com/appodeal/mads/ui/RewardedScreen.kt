@@ -20,6 +20,7 @@ import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.component.Body2Text
 import com.appodeal.mads.setRewardedListener
 import com.appodeal.mads.ui.listener.createFyberRewardedListener
+import com.appodeal.mads.ui.listener.createIronSourceRewardedListener
 import com.appodealstack.applovin.rewarded.BNMaxRewardedAd
 import com.appodealstack.fyber.rewarded.BNFyberRewarded
 import com.appodealstack.ironsource.IronSourceDecorator
@@ -110,7 +111,15 @@ class RewardedViewModel {
                         }
                     })
             }
-            MediationSdk.IronSource -> TODO()
+            MediationSdk.IronSource -> {
+                IronSourceDecorator.setLevelPlayRewardedVideoListener(
+                    createIronSourceRewardedListener { log ->
+                        coroutineScope.launch {
+                            logFlow.emit(logFlow.value + log)
+                        }
+                    }
+                )
+            }
         }.let { }
     }
 
