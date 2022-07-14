@@ -121,7 +121,8 @@ class RewardedViewModel {
             MediationSdk.Fyber -> {
                 BNFyberRewarded.request(placementId, activity)
             }
-        }
+            MediationSdk.IronSource -> TODO()
+        }.apply { }
     }
 
     fun showAd() {
@@ -135,6 +136,7 @@ class RewardedViewModel {
                     BNFyberRewarded.show(placementId, it)
                 }
             }
-        }
+            MediationSdk.IronSource -> TODO()
+        }.let { }
     }
 }

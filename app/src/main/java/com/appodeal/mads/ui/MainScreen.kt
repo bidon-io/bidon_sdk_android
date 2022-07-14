@@ -26,11 +26,13 @@ import com.appodealstack.applovin.ApplovinParameters
 import com.appodealstack.bidmachine.BidMachineAdapter
 import com.appodealstack.bidmachine.BidMachineParameters
 import com.appodealstack.fyber.FairBidDecorator
+import com.appodealstack.ironsource.IronSourceDecorator
 
 enum class MediationSdk {
     None,
     Applovin,
-    Fyber
+    Fyber,
+    IronSource,
 }
 
 @Composable
@@ -66,6 +68,13 @@ fun MainScreen(
                         initMediation.value = MediationSdk.Fyber
                     })
             }
+            AppButton(text = "IronSource") {
+                initIronSourceSdk(context,
+                    onInitialized = {
+                        initState.value = true
+                        initMediation.value = MediationSdk.IronSource
+                    })
+            }
         } else {
 
             H5Text(
@@ -74,6 +83,7 @@ fun MainScreen(
                     MediationSdk.None -> ""
                     MediationSdk.Applovin -> "Applovin MAX API"
                     MediationSdk.Fyber -> "Fyber FairBid API"
+                    MediationSdk.IronSource -> "IronSource API"
                 }
             )
             AppButton(text = "Interstitial") {
@@ -119,11 +129,10 @@ private fun initApplovinSdk(
             BidMachineAdapter::class.java,
             BidMachineParameters(sourceId = "1")
         )
-        .initializeSdk(context) { appLovinSdkConfiguration ->
+        .initializeSdk(context) {
             onInitialized()
         }
 }
-
 
 private fun initFyberSdk(
     context: Context,
@@ -165,5 +174,48 @@ private fun initFyberSdk(
             onInitialized = {
                 onInitialized.invoke()
             }
+        )
+}
+
+private fun initIronSourceSdk(
+    context: Context,
+    onInitialized: () -> Unit
+) {
+    IronSourceDecorator
+//        .register(
+//            AdmobAdapter::class.java,
+//            AdmobParameters(
+//                interstitials = mapOf(
+//                    0.1 to "ca-app-pub-3940256099942544/1033173712",
+//                    1.0 to "ca-app-pub-3940256099942544/1033173712",
+//                ),
+//                rewarded = mapOf(
+//                    0.1 to "ca-app-pub-3940256099942544/5224354917",
+//                    1.0 to "ca-app-pub-3940256099942544/5224354917",
+//                ),
+//                banners = mapOf(
+//                    0.1 to "ca-app-pub-3940256099942544/6300978111",
+//                    1.0 to "ca-app-pub-3940256099942544/6300978111",
+//                ),
+//            )
+//        )
+//        .register(
+//            BidMachineAdapter::class.java,
+//            BidMachineParameters(sourceId = "1")
+//        )
+//        .register(
+//            ApplovinMaxAdapter::class.java,
+//            ApplovinParameters(
+//                bannerAdUnitIds = listOf("c7c5f664e60b9bfb"),
+//                interstitialAdUnitIds = listOf("c7c5f664e60b9bfb"),
+//                rewardedAdUnitIds = listOf("c7c5f664e60b9bfb")
+//            )
+//        )
+        .init(
+            activity = context as Activity,
+            appKey = "8545d445",
+            listener = {
+                onInitialized.invoke()
+            },
         )
 }

@@ -11,9 +11,11 @@ fun AppButton(
     text: String,
     onClick: () -> Unit,
 ) {
-    Button(onClick = {
-        onClick.invoke()
-    }) {
+    Button(
+        modifier = modifier,
+        onClick = {
+            onClick.invoke()
+        }) {
         Text(text = text)
     }
 }

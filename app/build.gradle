@@ -46,7 +46,9 @@ android {
 dependencies {
     implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
     implementation 'com.applovin:applovin-sdk:11.4.4'
+    implementation 'com.ironsource.sdk:mediationsdk:7.2.3.1'
 
+    implementation(project(":adapter:ironsource"))
     implementation(project(":adapter:fyber"))
     implementation(project(":adapter:applovin"))
     implementation(project(":adapter:bidmachine"))

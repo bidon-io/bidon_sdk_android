@@ -14,16 +14,12 @@ import com.appodealstack.fyber.rewarded.initRewardedListener
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
-import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.*
 import com.fyber.fairbid.ads.Banner
 import com.fyber.fairbid.ads.Interstitial
 import com.fyber.fairbid.ads.Rewarded
 import com.fyber.fairbid.ads.ShowOptions
 import com.fyber.fairbid.ads.banner.BannerOptions
-import com.fyber.fairbid.ads.banner.internal.BannerView
-import com.fyber.fairbid.mediation.MediationManager
-import com.fyber.fairbid.sdk.extensions.unity3d.UnityHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -36,6 +32,8 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
     AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner {
     override val demandId: DemandId = FairBidDemandId
     private lateinit var context: Context
+    private val scope: CoroutineScope
+        get() = CoroutineScope(Dispatchers.Default)
 
     private val interstitialInterceptorFlow = MutableSharedFlow<InterstitialInterceptor>(extraBufferCapacity = Int.MAX_VALUE)
     private val interstitialPlacementsDemandAd = mutableMapOf<String, DemandAd>()
@@ -49,17 +47,17 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
     private val placements = mutableListOf<String>()
 
     init {
-        CoroutineScope(Dispatchers.Default).launch {
+        scope.launch {
             interstitialInterceptorFlow.collect { interceptor ->
                 proceedInterstitialCallbacks(interceptor)
             }
         }
-        CoroutineScope(Dispatchers.Default).launch {
+        scope.launch {
             rewardedInterceptorFlow.collect { interceptor ->
                 proceedRewardedCallbacks(interceptor)
             }
         }
-        CoroutineScope(Dispatchers.Default).launch {
+        scope.launch {
             bannerInterceptorFlow.collect { interceptor ->
                 proceedBannerCallbacks(interceptor)
             }
@@ -227,7 +225,7 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
             }
             is InterstitialInterceptor.ShowFailed -> {
                 val (listener, ad) = getCoreListener(interceptor.placementId)
-                listener.onAdDisplayFailed(DemandError.Unspecified(demandId))
+                listener.onAdDisplayFailed(DemandError.Unspecified(ad.demandId))
             }
             is InterstitialInterceptor.Shown -> {
                 val (listener, ad) = getCoreListener(interceptor.placementId)
@@ -255,7 +253,7 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
             }
             is RewardedInterceptor.ShowFailed -> {
                 val (listener, ad) = getCoreListener(interceptor.placementId)
-                listener.onAdDisplayFailed(DemandError.Unspecified(demandId))
+                listener.onAdDisplayFailed(DemandError.Unspecified(ad.demandId))
             }
             is RewardedInterceptor.Shown -> {
                 val (listener, ad) = getCoreListener(interceptor.placementId)

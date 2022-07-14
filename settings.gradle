@@ -14,6 +14,9 @@ dependencyResolutionManagement {
             name "BidMachine Ads maven repository"
             url "https://artifactory.bidmachine.io/bidmachine"
         }
+        maven {
+            url 'https://android-sdk.is.com/'
+        }
     }
 }
 rootProject.name = "Mediation of Mediations"
@@ -24,3 +27,4 @@ include ':adapter:applovin'
 include ':adapter:bidmachine'
 include ':adapter:admob'
 include ':adapter:fyber'
+include ':adapter:ironsource'

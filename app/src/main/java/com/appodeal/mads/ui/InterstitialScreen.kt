@@ -19,8 +19,10 @@ import com.appodeal.mads.component.*
 import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.setInterstitialListener
 import com.appodeal.mads.ui.listener.createFyberInterstitialListener
+import com.appodeal.mads.ui.listener.createIronSourceInterstitialListener
 import com.appodealstack.applovin.interstitial.BNMaxInterstitialAd
 import com.appodealstack.fyber.interstitial.BNFyberInterstitial
+import com.appodealstack.ironsource.IronSourceDecorator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,7 +85,7 @@ class InterstitialViewModel {
     private lateinit var interstitialAd: BNMaxInterstitialAd
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private lateinit var sdk: MediationSdk
-    private var placementId = "197405"
+    private var fyberPlacementId = "197405"
     private var activity: Activity? = null
 
     val logFlow = MutableStateFlow(listOf("Log"))
@@ -111,7 +113,16 @@ class InterstitialViewModel {
                     }
                 )
             }
-        }
+            MediationSdk.IronSource -> {
+                IronSourceDecorator.setLevelPlayInterstitialListener(
+                    createIronSourceInterstitialListener { log ->
+                        coroutineScope.launch {
+                            logFlow.emit(logFlow.value + log)
+                        }
+                    }
+                )
+            }
+        }.let { }
     }
 
     fun loadAd() {
@@ -121,9 +132,12 @@ class InterstitialViewModel {
                 interstitialAd.loadAd()
             }
             MediationSdk.Fyber -> {
-                BNFyberInterstitial.request(placementId, activity)
+                BNFyberInterstitial.request(fyberPlacementId, activity)
             }
-        }
+            MediationSdk.IronSource -> {
+                IronSourceDecorator.loadInterstitial()
+            }
+        }.let { }
     }
 
     fun showAd() {
@@ -134,9 +148,12 @@ class InterstitialViewModel {
             }
             MediationSdk.Fyber -> {
                 activity?.let {
-                    BNFyberInterstitial.show(placementId, it)
+                    BNFyberInterstitial.show(fyberPlacementId, it)
                 }
             }
-        }
+            MediationSdk.IronSource -> {
+                IronSourceDecorator.showInterstitial()
+            }
+        }.let { }
     }
 }

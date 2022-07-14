@@ -43,7 +43,7 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
             rewardedAdUnitIds.addAll(configParams.rewardedAdUnitIds)
             this.context = context.applicationContext
             if (!AppLovinSdk.getInstance(context).isInitialized) {
-                AppLovinSdk.initializeSdk(context) { appLovinSdkConfiguration ->
+                AppLovinSdk.initializeSdk(context) {
                     continuation.resume(Unit)
                 }
             } else {

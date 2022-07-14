@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.navigation.compose.rememberNavController
 import com.appodeal.mads.navigation.NavigationGraph
 import com.appodeal.mads.theme.AppTheme
+import com.ironsource.mediationsdk.IronSource
 
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,5 +20,15 @@ class MainActivity : FragmentActivity() {
                 )
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        IronSource.onResume(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        IronSource.onPause(this)
     }
 }

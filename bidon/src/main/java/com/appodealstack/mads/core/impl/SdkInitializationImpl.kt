@@ -1,27 +1,22 @@
 package com.appodealstack.mads.core.impl
 
 import android.content.Context
-import com.appodealstack.mads.SdkInitialization
 import com.appodealstack.mads.Core
 import com.appodealstack.mads.SdkCore
+import com.appodealstack.mads.SdkInitialization
 import com.appodealstack.mads.analytics.Analytic
-import com.appodealstack.mads.core.AnalyticsSource
-import com.appodealstack.mads.core.ContextProvider
-import com.appodealstack.mads.core.ext.logInternal
-import com.appodealstack.mads.config.Configuration
 import com.appodealstack.mads.config.BidonConfigurator
 import com.appodealstack.mads.config.BidonConfiguratorInstance
-import com.appodealstack.mads.config.StaticJsonConfiguration
+import com.appodealstack.mads.core.*
+import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.Adapter
-import com.appodealstack.mads.core.DemandsSource
-import com.appodealstack.mads.core.InitializationCallback
-import com.appodealstack.mads.core.InitializationResult
 import com.appodealstack.mads.demands.AdapterParameters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
+@Suppress("UNCHECKED_CAST")
 internal class SdkInitializationImpl : SdkInitialization {
     private val sdkCore: Core = SdkCore
     private val contextProvider = ContextProvider

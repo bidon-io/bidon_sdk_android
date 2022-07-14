@@ -34,12 +34,13 @@ fun NavigationGraph(
             RewardedScreen(navController, rewardedViewModel, initMediation.value)
         }
         composable(Screen.Banners.route) {
-            when(initMediation.value){
+            when (initMediation.value) {
                 MediationSdk.None -> {
                 }
                 MediationSdk.Applovin -> BannerApplovinScreen(navController, bannerApplovinViewModel)
                 MediationSdk.Fyber -> BannerFyberScreen(navController, bannerFyberBanner)
-            }
+                MediationSdk.IronSource -> TODO()
+            }.let { }
         }
     }
 }
