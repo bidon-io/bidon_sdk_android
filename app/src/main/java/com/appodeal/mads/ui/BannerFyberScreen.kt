@@ -43,7 +43,7 @@ fun BannerFyberScreen(navController: NavHostController, viewModel: BannerFyberVi
             .background(MaterialTheme.colors.background)
     ) {
         AppToolbar(
-            title = "Banner",
+            title = "Banner (FairBid API)",
             onNavigationButtonClicked = { navController.popBackStack() }
         )
         Box(
@@ -130,16 +130,25 @@ class BannerFyberViewModel {
 
     fun destroyAd(placementId: String) {
         BNFyberBanner.destroy(placementId)
-    }
-
-    private fun logMe(log: String) {
         val state = stateFlow.value
         updateState(
             State(
-                logs = state.logs + log,
-                adContainer = state.adContainer
+                logs = state.logs,
+                adContainer = null
             )
         )
+    }
+
+    private fun logMe(log: String) {
+        synchronized(this) {
+            val state = stateFlow.value
+            updateState(
+                State(
+                    logs = state.logs + log,
+                    adContainer = state.adContainer
+                )
+            )
+        }
     }
 
     private fun updateState(newState: State) {

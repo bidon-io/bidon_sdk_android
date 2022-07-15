@@ -150,7 +150,7 @@ class RewardedViewModel {
                 }
             }
             MediationSdk.IronSource -> {
-                IronSourceDecorator.showRewardedVideo()
+                IronSourceDecorator.showRewardedVideo(activity)
             }
         }.let { }
     }

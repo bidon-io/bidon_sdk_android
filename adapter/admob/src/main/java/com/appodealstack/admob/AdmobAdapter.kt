@@ -40,8 +40,8 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
     private val interstitialAdUnits = mutableMapOf<Double, AdUnitId>()
     private val rewardedAdUnits = mutableMapOf<Double, AdUnitId>()
 
-    override suspend fun init(context: Context, configParams: AdmobParameters): Unit = suspendCoroutine { continuation ->
-        this.context = context
+    override suspend fun init(activity: Activity, configParams: AdmobParameters): Unit = suspendCoroutine { continuation ->
+        this.context = activity.applicationContext
         /**
          * Don't forget set Automatic refresh is Disabled for each AdUnit.
          * Manage refresh rate with [AutoRefresher.setAutoRefresh].

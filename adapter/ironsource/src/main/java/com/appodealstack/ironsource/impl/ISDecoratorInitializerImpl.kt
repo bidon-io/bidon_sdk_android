@@ -22,18 +22,11 @@ internal class ISDecoratorInitializerImpl : ISDecorator.Initializer {
         listener: InitializationListener,
         adUnit: IronSource.AD_UNIT?
     ) {
-        val initializationListener = InitializationListener {
-            BidOnInitializer
-                .withContext(activity)
-                .registerAdapter(IronSourceAdapter::class.java, IronSourceParameters)
-                .build {
-                    listener.onInitializationComplete()
-                }
-        }
-        if (adUnit == null) {
-            IronSource.init(activity, appKey, initializationListener)
-        } else {
-            IronSource.init(activity, appKey, initializationListener, adUnit)
-        }
+        BidOnInitializer
+            .withContext(activity)
+            .registerAdapter(IronSourceAdapter::class.java, IronSourceParameters(appKey))
+            .build {
+                listener.onInitializationComplete()
+            }
     }
 }

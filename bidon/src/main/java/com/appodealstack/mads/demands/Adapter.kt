@@ -9,7 +9,7 @@ import com.appodealstack.mads.auctions.AuctionRequest
 sealed interface Adapter<T : AdapterParameters> {
     val demandId: DemandId
 
-    suspend fun init(context: Context, configParams: T)
+    suspend fun init(activity: Activity, configParams: T)
 
     interface Mediation<T : AdapterParameters> : Adapter<T>
     interface PostBid<T : AdapterParameters> : Adapter<T>

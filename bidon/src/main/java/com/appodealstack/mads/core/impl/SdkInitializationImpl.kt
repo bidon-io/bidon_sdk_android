@@ -1,6 +1,6 @@
 package com.appodealstack.mads.core.impl
 
-import android.content.Context
+import android.app.Activity
 import com.appodealstack.mads.Core
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.SdkInitialization
@@ -26,8 +26,8 @@ internal class SdkInitializationImpl : SdkInitialization {
 
     private val bidonConfigurator: BidonConfigurator get() = BidonConfiguratorInstance
 
-    override fun withContext(context: Context): SdkInitialization {
-        ContextProvider.setContext(context)
+    override fun withContext(activity: Activity): SdkInitialization {
+        ContextProvider.setContext(activity)
         return this
     }
 
@@ -56,7 +56,7 @@ internal class SdkInitializationImpl : SdkInitialization {
             logInternal("Demands", "Demand is initializing: $demand")
             withTimeoutOrNull(InitializationTimeoutMs) {
                 demand.init(
-                    context = contextProvider.requiredContext,
+                    activity = requireNotNull(contextProvider.activity),
                     configParams = params
                 )
                 logInternal("Demands", "Demand is initialized: $demand")

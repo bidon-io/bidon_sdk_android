@@ -18,27 +18,11 @@ object FairBidDecorator {
 
     fun start(appId: String, activity: Activity, onInitialized: () -> Unit) {
         logInternal("FairBidDecorator", "started")
-        FairBid.configureForAppId(appId)
-            .enableLogs()
-            .disableAutoRequesting()
-            .withMediationStartedListener(object : MediationStartedListener {
-                override fun onNetworkFailedToStart(network: MediatedNetwork, errorMessage: String) {
-                    logInternal("FairBidDecorator", "Failure. Network: $network. errorMessage: $errorMessage")
-                }
-
-                override fun onNetworkStarted(network: MediatedNetwork) {
-                    logInternal("FairBidDecorator", "Success. Network: $network")
-                }
-            })
-            .start(activity)
-        GlobalScope.launch {
-            delay(500)
-            BidOnInitializer
-                .withContext(activity.applicationContext)
-                .registerAdapter(FairBidAdapter::class.java, FairBidParameters)
-                .build {
-                    onInitialized.invoke()
-                }
-        }
+        BidOnInitializer
+            .withContext(activity)
+            .registerAdapter(FairBidAdapter::class.java, FairBidParameters(appId))
+            .build {
+                onInitialized.invoke()
+            }
     }
 }

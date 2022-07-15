@@ -38,9 +38,9 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
 
     override val demandId = BidMachineDemandId
 
-    override suspend fun init(context: Context, configParams: BidMachineParameters): Unit =
+    override suspend fun init(activity: Activity, configParams: BidMachineParameters): Unit =
         suspendCancellableCoroutine { continuation ->
-            this.context = context
+            this.context = activity.applicationContext
             val sourceId = configParams.sourceId
             BidMachine.initialize(context, sourceId) {
                 continuation.resume(Unit)

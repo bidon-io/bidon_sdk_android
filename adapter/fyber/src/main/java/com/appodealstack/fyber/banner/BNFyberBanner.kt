@@ -81,9 +81,9 @@ class FyberBannerImpl : FyberBanner {
     }
 
     override fun destroy(placementId: String) {
-        SdkCore.destroyAd(getDemandAd(placementId), bundleOf())
         bannerViews[placementId]?.removeAllViews()
         bannerViews.remove(placementId)
+        SdkCore.destroyAd(getDemandAd(placementId), bundleOf())
     }
 
     override fun getImpressionDepth(): Int {

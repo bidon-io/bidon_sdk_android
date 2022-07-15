@@ -42,7 +42,7 @@ fun BannerApplovinScreen(navController: NavHostController, viewModel: BannerAppl
             .background(MaterialTheme.colors.background)
     ) {
         AppToolbar(
-            title = "Banner",
+            title = "Banner (Applovin API)",
             onNavigationButtonClicked = { navController.popBackStack() }
         )
         Box(
@@ -153,14 +153,16 @@ class BannerApplovinViewModel {
                     context = context
                 ).also {
                     it.setBannerListener { log ->
-                        val state1 = stateFlow.value
-                        updateState(
-                            State(
-                                adFormat = state1.adFormat,
-                                logs = state1.logs + log,
-                                bannerAdView = state1.bannerAdView
+                        synchronized(this) {
+                            val state1 = stateFlow.value
+                            updateState(
+                                State(
+                                    adFormat = state1.adFormat,
+                                    logs = state1.logs + log,
+                                    bannerAdView = state1.bannerAdView
+                                )
                             )
-                        )
+                        }
                     }
                 },
                 logs = state.logs,

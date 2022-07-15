@@ -83,3 +83,16 @@ fun Body2Text(
         color = Color.White
     )
 }
+
+@Composable
+fun CaptionText(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        modifier = modifier,
+        text = text,
+        style = AppTypography.caption,
+        color = Color.White
+    )
+}

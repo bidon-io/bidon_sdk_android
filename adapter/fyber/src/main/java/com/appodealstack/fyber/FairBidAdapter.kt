@@ -15,11 +15,14 @@ import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
 import com.appodealstack.mads.demands.*
+import com.fyber.FairBid
 import com.fyber.fairbid.ads.Banner
 import com.fyber.fairbid.ads.Interstitial
 import com.fyber.fairbid.ads.Rewarded
 import com.fyber.fairbid.ads.ShowOptions
 import com.fyber.fairbid.ads.banner.BannerOptions
+import com.fyber.fairbid.ads.mediation.MediatedNetwork
+import com.fyber.fairbid.ads.mediation.MediationStartedListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -46,6 +49,8 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
     private val bannerPlacementsRevenue = mutableMapOf<String, Double>()
     private val placements = mutableListOf<String>()
 
+    private var fairBidParameters: FairBidParameters? = null
+
     init {
         scope.launch {
             interstitialInterceptorFlow.collect { interceptor ->
@@ -64,8 +69,13 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
         }
     }
 
-    override suspend fun init(context: Context, configParams: FairBidParameters) {
-        this.context = context
+    override suspend fun init(activity: Activity, configParams: FairBidParameters) {
+        this.context = activity.applicationContext
+        this.fairBidParameters = configParams
+        FairBid.configureForAppId(configParams.appKey)
+            .enableLogs()
+            .disableAutoRequesting()
+            .start(activity)
         bannerInterceptorFlow.initBannerListener()
         interstitialInterceptorFlow.initInterstitialListener()
         rewardedInterceptorFlow.initRewardedListener()
@@ -73,8 +83,9 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
 
     override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
         return AuctionRequest {
-            val placementId = requireNotNull(adParams.getString(PlacementKey)) {
-                "PlacementId should be provided"
+            val placementId = adParams.getString(PlacementKey) ?: fairBidParameters?.interstitialPlacementIds?.first()
+            if (placementId.isNullOrBlank()) {
+                return@AuctionRequest Result.failure(DemandError.NoPlacement(demandId))
             }
             interstitialPlacementsDemandAd[placementId] = demandAd
             Interstitial.request(placementId)
@@ -122,8 +133,9 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
 
     override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
         return AuctionRequest {
-            val placementId = requireNotNull(adParams.getString(PlacementKey)) {
-                "PlacementId should be provided"
+            val placementId = adParams.getString(PlacementKey) ?: fairBidParameters?.rewardedPlacementIds?.first()
+            if (placementId.isNullOrBlank()) {
+                return@AuctionRequest Result.failure(DemandError.NoPlacement(demandId))
             }
             placements.addIfAbsent(placementId)
             rewardedPlacementsDemandAd[placementId] = demandAd
@@ -172,8 +184,9 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
 
     override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle, adContainer: ViewGroup?): AuctionRequest {
         return AuctionRequest {
-            val placementId = requireNotNull(adParams.getString(PlacementKey)) {
-                "PlacementId should be provided"
+            val placementId = adParams.getString(PlacementKey) ?: fairBidParameters?.bannerPlacementIds?.first()
+            if (placementId.isNullOrBlank()) {
+                return@AuctionRequest Result.failure(DemandError.NoPlacement(demandId))
             }
             bannerPlacementsRevenue.remove(placementId)
             Banner.show(placementId, BannerOptions().placeInContainer(adContainer), context as Activity)

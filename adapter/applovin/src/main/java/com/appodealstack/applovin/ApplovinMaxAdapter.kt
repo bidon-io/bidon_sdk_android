@@ -37,12 +37,12 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
 
     override val demandId: DemandId = ApplovinMaxDemandId
 
-    override suspend fun init(context: Context, configParams: ApplovinParameters): Unit =
+    override suspend fun init(activity: Activity, configParams: ApplovinParameters): Unit =
         suspendCancellableCoroutine { continuation ->
             bannerAdUnitIds.addAll(configParams.bannerAdUnitIds)
             interstitialAdUnitIds.addAll(configParams.interstitialAdUnitIds)
             rewardedAdUnitIds.addAll(configParams.rewardedAdUnitIds)
-            this.context = context.applicationContext
+            this.context = activity.applicationContext
             if (!AppLovinSdk.getInstance(context).isInitialized) {
                 AppLovinSdk.getInstance(context).mediationProvider = "max"
                 AppLovinSdk.initializeSdk(context) {

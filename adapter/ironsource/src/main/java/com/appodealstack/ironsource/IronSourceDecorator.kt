@@ -56,6 +56,7 @@ sealed interface ISDecorator {
         fun removeInterstitialListener()
         fun loadInterstitial()
         fun showInterstitial(placementName: String? = null)
+        fun showInterstitial(activity: Activity?, placementName: String? = null)
     }
 
     interface Rewarded : ISDecorator {
@@ -64,6 +65,7 @@ sealed interface ISDecorator {
         fun removeRewardedVideoListener()
         fun loadRewardedVideo()
         fun showRewardedVideo(placementName: String? = null)
+        fun showRewardedVideo(activity: Activity?, placementName: String? = null)
     }
 
     interface Banner : ISDecorator {

@@ -37,7 +37,7 @@ fun BannerIronSourceScreen(navController: NavHostController, viewModel: BannerIr
             .background(MaterialTheme.colors.background)
     ) {
         AppToolbar(
-            title = "Banner",
+            title = "Banner (IronSource API)",
             onNavigationButtonClicked = { navController.popBackStack() }
         )
         Box(
@@ -75,7 +75,7 @@ fun BannerIronSourceScreen(navController: NavHostController, viewModel: BannerIr
         ) {
             ItemSelector(
                 title = "Ad Format",
-                items = listOf(BannerSize.Banner, BannerSize.Large, BannerSize.MRec, BannerSize.Smart),
+                items = listOf(BannerSize.Banner, BannerSize.Large, BannerSize.MRec),// TODO implement - BannerSize.Smart
                 selectedItem = state.value.adFormat,
                 getItemTitle = {
                     when (it) {
@@ -144,14 +144,16 @@ class BannerIronSourceViewModel {
         val banner = IronSourceDecorator.createBanner(context as Activity, stateFlow.value.adFormat)
             .also {
                 it.setLevelPlayBannerListener(createIronSourceBannerListener { log ->
-                    val state = stateFlow.value
-                    updateState(
-                        State(
-                            bannerAdView = state.bannerAdView,
-                            logs = state.logs + log,
-                            adFormat = state.adFormat
+                    synchronized(this) {
+                        val state = stateFlow.value
+                        updateState(
+                            State(
+                                bannerAdView = state.bannerAdView,
+                                logs = state.logs + log,
+                                adFormat = state.adFormat
+                            )
                         )
-                    )
+                    }
                 })
             }
         val state = stateFlow.value

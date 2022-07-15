@@ -1,5 +1,6 @@
 package com.appodealstack.applovin
 
+import android.app.Activity
 import android.content.Context
 import com.applovin.sdk.AppLovinSdk
 import com.appodealstack.mads.BidOnInitializer
@@ -23,7 +24,7 @@ object AppLovinDecorator {
     @JvmOverloads
     fun initializeSdk(context: Context, listener: AppLovinSdk.SdkInitializationListener? = null) {
         AppLovinSdk.initializeSdk(context) { appLovinSdkConfiguration ->
-            BidOnInitializer.withContext(context)
+            BidOnInitializer.withContext(context as Activity)
                 .registerAdapter(ApplovinMaxAdapter::class.java, ApplovinParameters())
                 .build {
                     CoroutineScope(Dispatchers.Main).launch {

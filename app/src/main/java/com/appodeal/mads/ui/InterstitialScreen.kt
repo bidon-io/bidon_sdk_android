@@ -152,7 +152,7 @@ class InterstitialViewModel {
                 }
             }
             MediationSdk.IronSource -> {
-                IronSourceDecorator.showInterstitial()
+                IronSourceDecorator.showInterstitial(activity)
             }
         }.let { }
     }

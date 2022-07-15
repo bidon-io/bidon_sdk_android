@@ -1,5 +1,6 @@
 package com.appodealstack.ironsource.interstitial
 
+import android.app.Activity
 import androidx.core.os.bundleOf
 import com.appodealstack.ironsource.ISDecorator
 import com.appodealstack.ironsource.PlacementKey
@@ -83,8 +84,12 @@ internal class InterstitialImpl : ISDecorator.Interstitial {
     }
 
     override fun showInterstitial(placementName: String?) {
+        showInterstitial(null, placementName)
+    }
+
+    override fun showInterstitial(activity: Activity?, placementName: String?) {
         SdkCore.showAd(
-            activity = null,
+            activity = activity,
             demandAd = demandAd,
             adParams = bundleOf(PlacementKey to placementName)
         )

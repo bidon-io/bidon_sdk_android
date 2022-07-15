@@ -21,6 +21,7 @@ import com.ironsource.mediationsdk.IronSourceBannerLayout
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
 import com.ironsource.mediationsdk.logger.IronSourceError
 import com.ironsource.mediationsdk.model.Placement
+import com.ironsource.mediationsdk.sdk.InitializationListener
 import com.ironsource.mediationsdk.sdk.LevelPlayBannerListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +32,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 
-object IronSourceParameters : AdapterParameters
+data class IronSourceParameters(val appKey: String, val adUnit: IronSource.AD_UNIT? = null) : AdapterParameters
 
 val IronSourceDemandId = DemandId("ironsource")
 
@@ -58,9 +59,17 @@ class IronSourceAdapter : Adapter.Mediation<IronSourceParameters>,
         }
     }
 
-    override suspend fun init(context: Context, configParams: IronSourceParameters) {
-        interstitialFlow.addInterstitialListener()
-        rewardedFlow.addRewardedListener()
+    override suspend fun init(activity: Activity, configParams: IronSourceParameters): Unit = suspendCancellableCoroutine {
+        val initializationListener = InitializationListener {
+            interstitialFlow.addInterstitialListener()
+            rewardedFlow.addRewardedListener()
+            it.resume(Unit)
+        }
+        if (configParams.adUnit == null) {
+            IronSource.init(activity, configParams.appKey, initializationListener)
+        } else {
+            IronSource.init(activity, configParams.appKey, initializationListener, configParams.adUnit)
+        }
     }
 
     override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
