@@ -3,7 +3,7 @@ package com.appodealstack.mads.auctions
 import com.appodealstack.mads.demands.DemandAd
 
 internal interface AdsRepository {
-    fun clearResults(demandAd: DemandAd)
+    fun destroyResults(demandAd: DemandAd)
     fun getWinnerOrNull(demandAd: DemandAd, onWinnerFound: (AuctionResult?) -> Unit)
 
     fun saveAuction(demandAd: DemandAd, auction: Auction)
@@ -14,7 +14,12 @@ internal interface AdsRepository {
 internal class AdsRepositoryImpl : AdsRepository {
     private val auctionMap = mutableMapOf<DemandAd, Auction>()
 
-    override fun clearResults(demandAd: DemandAd) {
+    override fun destroyResults(demandAd: DemandAd) {
+        auctionMap[demandAd]?.let { auction ->
+            auction.getResults().forEach {
+                it.adProvider.destroy()
+            }
+        }
         auctionMap.remove(demandAd)
     }
 

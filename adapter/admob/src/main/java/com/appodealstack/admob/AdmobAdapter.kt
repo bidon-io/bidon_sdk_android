@@ -297,5 +297,6 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
         BannerSize.Banner -> AdSize.BANNER
         BannerSize.LeaderBoard -> AdSize.LEADERBOARD
         BannerSize.MRec -> AdSize.MEDIUM_RECTANGLE
+        else -> error("Not supported")
     }
 }

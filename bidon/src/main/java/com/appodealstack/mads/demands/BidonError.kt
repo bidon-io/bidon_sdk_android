@@ -13,6 +13,7 @@ sealed class DemandError(val demandId: DemandId? = null, val sourceError: Any? =
     class FullscreenAdNotReady(demandId: DemandId?, sourceError: Any? = null) : DemandError(demandId)
     class NoActivity(demandId: DemandId?, sourceError: Any? = null) : DemandError(demandId)
     class Expired(demandId: DemandId?, sourceError: Any? = null) : DemandError(demandId)
+    class BannerSizeNotSupported(demandId: DemandId?, sourceError: Any? = null) : DemandError(demandId)
 }
 
 sealed class AnalyticsError : BidonError()

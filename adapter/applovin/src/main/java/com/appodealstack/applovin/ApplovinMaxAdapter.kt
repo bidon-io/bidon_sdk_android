@@ -15,6 +15,7 @@ import com.appodealstack.applovin.impl.asBidonError
 import com.appodealstack.applovin.impl.setCoreListener
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
+import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.*
 import com.appodealstack.mads.demands.banners.BannerSize
 import com.appodealstack.mads.demands.banners.BannerSizeKey
@@ -43,6 +44,7 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
             rewardedAdUnitIds.addAll(configParams.rewardedAdUnitIds)
             this.context = context.applicationContext
             if (!AppLovinSdk.getInstance(context).isInitialized) {
+                AppLovinSdk.getInstance(context).mediationProvider = "max"
                 AppLovinSdk.initializeSdk(context) {
                     continuation.resume(Unit)
                 }
@@ -56,6 +58,12 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
         val bannerSize = adParams.getInt(BannerSizeKey, BannerSize.Banner.ordinal).let {
             BannerSize.values()[it]
         }
+        if (bannerSize !in arrayOf(BannerSize.Banner, BannerSize.LeaderBoard, BannerSize.MRec)) {
+            return AuctionRequest {
+                Result.failure(DemandError.BannerSizeNotSupported(demandId))
+            }
+        }
+        logInternal("Tag", "1")
         val maxAdView = MaxAdView(adUnitId, bannerSize.asMaxAdFormat(), context).apply {
             val isAdaptive = getExtras(demandAd)?.getString(AdaptiveBannerKey, "-")
             if (isAdaptive == "true") {
@@ -77,14 +85,17 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
             /**
              * [AutoRefresher] provides auto-refresh
              */
-            setExtraParameter( "allow_pause_auto_refresh_immediately", "true" )
+            setExtraParameter("allow_pause_auto_refresh_immediately", "true")
             stopAutoRefresh()
         }
+        logInternal("Tag", "2")
         return AuctionRequest {
+            logInternal("Tag", "3")
             suspendCancellableCoroutine { continuation ->
                 val isFinished = AtomicBoolean(false)
                 maxAdView.setListener(object : MaxAdViewAdListener {
                     override fun onAdLoaded(maxAd: MaxAd) {
+                        logInternal("Tag", "4")
                         if (!isFinished.getAndSet(true)) {
                             val ad = Ad(
                                 demandId = ApplovinMaxDemandId,
@@ -133,6 +144,7 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
                     }
 
                     override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
+                        logInternal("Tag", "5")
                         if (!isFinished.getAndSet(true)) {
                             // remove listener
                             maxAdView.setListener(null)
@@ -326,8 +338,8 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
         BannerSize.Banner -> MaxAdFormat.BANNER
         BannerSize.LeaderBoard -> MaxAdFormat.LEADER
         BannerSize.MRec -> MaxAdFormat.MREC
+        else -> error("Not supported")
     }
-
 }
 
 internal const val AdUnitIdKey = "adUnitId"

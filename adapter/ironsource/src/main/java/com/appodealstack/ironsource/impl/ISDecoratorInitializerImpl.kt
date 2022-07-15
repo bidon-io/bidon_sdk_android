@@ -24,7 +24,7 @@ internal class ISDecoratorInitializerImpl : ISDecorator.Initializer {
     ) {
         val initializationListener = InitializationListener {
             BidOnInitializer
-                .withContext(activity.applicationContext)
+                .withContext(activity)
                 .registerAdapter(IronSourceAdapter::class.java, IronSourceParameters)
                 .build {
                     listener.onInitializationComplete()

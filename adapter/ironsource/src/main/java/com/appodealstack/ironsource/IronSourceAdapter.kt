@@ -3,29 +3,40 @@ package com.appodealstack.ironsource
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
 import com.appodealstack.ironsource.impl.asBidonError
 import com.appodealstack.ironsource.interstitial.addInterstitialListener
 import com.appodealstack.ironsource.rewarded.addRewardedListener
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
+import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.*
+import com.appodealstack.mads.demands.banners.BannerSize
+import com.appodealstack.mads.demands.banners.BannerSizeKey
+import com.ironsource.mediationsdk.ISBannerSize
 import com.ironsource.mediationsdk.IronSource
+import com.ironsource.mediationsdk.IronSourceBannerLayout
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
 import com.ironsource.mediationsdk.logger.IronSourceError
 import com.ironsource.mediationsdk.model.Placement
+import com.ironsource.mediationsdk.sdk.LevelPlayBannerListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.resume
 
 object IronSourceParameters : AdapterParameters
 
 val IronSourceDemandId = DemandId("ironsource")
 
 class IronSourceAdapter : Adapter.Mediation<IronSourceParameters>,
-    AdSource.Interstitial, AdSource.Rewarded {
+    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner {
     override val demandId: DemandId = IronSourceDemandId
 
     private val scope: CoroutineScope get() = CoroutineScope(Dispatchers.Default)
@@ -255,6 +266,94 @@ class IronSourceAdapter : Adapter.Mediation<IronSourceParameters>,
                 is RewardedInterceptor.AdLoadFailed -> {
                     // do nothing
                 }
+            }
+        }
+    }
+
+    override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle, adContainer: ViewGroup?): AuctionRequest {
+        return AuctionRequest {
+            val placementId = adParams.getString(PlacementKey)
+            val bannerSize = adParams.getInt(BannerSizeKey, BannerSize.Banner.ordinal).let {
+                BannerSize.values()[it]
+            }
+            val isBannerSize = when (bannerSize) {
+                BannerSize.Banner -> ISBannerSize.BANNER
+                BannerSize.Large -> ISBannerSize.LARGE
+                BannerSize.MRec -> ISBannerSize.RECTANGLE
+                BannerSize.Smart -> ISBannerSize.SMART
+                BannerSize.LeaderBoard -> error("Not supported")
+            }
+            val bannerView = IronSource.createBanner(context as Activity, isBannerSize)
+            suspendCancellableCoroutine { continuation ->
+                val isFinished = AtomicBoolean(false)
+                bannerView.levelPlayBannerListener = object : LevelPlayBannerListener {
+                    override fun onAdLoaded(adInfo: AdInfo?) {
+                        if (!isFinished.getAndSet(true)) {
+                            val ad = Ad(
+                                demandId = demandId,
+                                demandAd = demandAd,
+                                price = adInfo?.revenue ?: 0.0,
+                                sourceAd = adInfo ?: bannerView
+                            )
+                            bannerView.setCoreListener(ad)
+                            continuation.resume(
+                                Result.success(
+                                    AuctionResult(
+                                        ad = ad,
+                                        adProvider = object : AdProvider, AdViewProvider {
+                                            override fun getAdView(): View = bannerView
+                                            override fun canShow(): Boolean = true
+                                            override fun showAd(activity: Activity?, adParams: Bundle) {}
+                                            override fun destroy() {
+                                                IronSource.destroyBanner(bannerView)
+                                            }
+
+                                        }
+                                    )
+                                )
+                            )
+                        }
+                    }
+
+                    override fun onAdLoadFailed(ironSourceError: IronSourceError?) {
+                        if (!isFinished.getAndSet(true)) {
+                            bannerView.removeBannerListener()
+                            continuation.resume(Result.failure(ironSourceError.asBidonError()))
+                        }
+                    }
+
+                    override fun onAdClicked(adInfo: AdInfo?) {}
+                    override fun onAdLeftApplication(adInfo: AdInfo?) {}
+                    override fun onAdScreenPresented(adInfo: AdInfo?) {}
+                    override fun onAdScreenDismissed(adInfo: AdInfo?) {}
+                }
+                if (placementId.isNullOrBlank()) {
+                    IronSource.loadBanner(bannerView)
+                } else {
+                    IronSource.loadBanner(bannerView, placementId)
+                }
+            }
+        }
+    }
+
+    private fun IronSourceBannerLayout.setCoreListener(ad: Ad) {
+        val bannerView = this
+        val coreListener = SdkCore.getListenerForDemand(ad.demandAd)
+        bannerView.levelPlayBannerListener = object : LevelPlayBannerListener {
+            override fun onAdLoaded(p0: AdInfo?) {}
+            override fun onAdLoadFailed(p0: IronSourceError?) {}
+            override fun onAdLeftApplication(p0: AdInfo?) {}
+
+            override fun onAdClicked(p0: AdInfo?) {
+                coreListener.onAdClicked(ad)
+            }
+
+            override fun onAdScreenPresented(p0: AdInfo?) {
+                coreListener.onAdDisplayed(ad)
+            }
+
+            override fun onAdScreenDismissed(p0: AdInfo?) {
+                coreListener.onAdHidden(ad)
             }
         }
     }

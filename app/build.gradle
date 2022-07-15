@@ -18,6 +18,7 @@ android {
         versionCode 1
         versionName "1.0"
 
+        multiDexEnabled = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -54,6 +55,7 @@ dependencies {
     implementation(project(":adapter:bidmachine"))
     implementation(project(":adapter:admob"))
 
+    implementation "androidx.multidex:multidex:2.0.1"
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.google.android.material:material:1.6.1'

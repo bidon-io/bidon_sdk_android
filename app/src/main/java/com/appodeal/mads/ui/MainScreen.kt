@@ -182,35 +182,35 @@ private fun initIronSourceSdk(
     onInitialized: () -> Unit
 ) {
     IronSourceDecorator
-//        .register(
-//            AdmobAdapter::class.java,
-//            AdmobParameters(
-//                interstitials = mapOf(
-//                    0.1 to "ca-app-pub-3940256099942544/1033173712",
-//                    1.0 to "ca-app-pub-3940256099942544/1033173712",
-//                ),
-//                rewarded = mapOf(
-//                    0.1 to "ca-app-pub-3940256099942544/5224354917",
-//                    1.0 to "ca-app-pub-3940256099942544/5224354917",
-//                ),
-//                banners = mapOf(
-//                    0.1 to "ca-app-pub-3940256099942544/6300978111",
-//                    1.0 to "ca-app-pub-3940256099942544/6300978111",
-//                ),
-//            )
-//        )
-//        .register(
-//            BidMachineAdapter::class.java,
-//            BidMachineParameters(sourceId = "1")
-//        )
-//        .register(
-//            ApplovinMaxAdapter::class.java,
-//            ApplovinParameters(
-//                bannerAdUnitIds = listOf("c7c5f664e60b9bfb"),
-//                interstitialAdUnitIds = listOf("c7c5f664e60b9bfb"),
-//                rewardedAdUnitIds = listOf("c7c5f664e60b9bfb")
-//            )
-//        )
+        .register(
+            AdmobAdapter::class.java,
+            AdmobParameters(
+                interstitials = mapOf(
+                    0.1 to "ca-app-pub-3940256099942544/1033173712",
+                    1.0 to "ca-app-pub-3940256099942544/1033173712",
+                ),
+                rewarded = mapOf(
+                    0.1 to "ca-app-pub-3940256099942544/5224354917",
+                    1.0 to "ca-app-pub-3940256099942544/5224354917",
+                ),
+                banners = mapOf(
+                    0.1 to "ca-app-pub-3940256099942544/6300978111",
+                    1.0 to "ca-app-pub-3940256099942544/6300978111",
+                ),
+            )
+        )
+        .register(
+            BidMachineAdapter::class.java,
+            BidMachineParameters(sourceId = "1")
+        )
+        .register(
+            ApplovinMaxAdapter::class.java,
+            ApplovinParameters(
+                bannerAdUnitIds = listOf("c7c5f664e60b9bfb"),
+                interstitialAdUnitIds = listOf("c7c5f664e60b9bfb"),
+                rewardedAdUnitIds = listOf("c7c5f664e60b9bfb")
+            )
+        )
         .init(
             activity = context as Activity,
             appKey = "8545d445",

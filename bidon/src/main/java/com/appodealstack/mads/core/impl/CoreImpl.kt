@@ -49,7 +49,7 @@ internal class CoreImpl(
                     auctionListener.demandAuctionFailed(demandAd, throwable)
                 },
                 onAuctionFailed = {
-                    adsRepository.clearResults(demandAd)
+                    adsRepository.destroyResults(demandAd)
                     auctionListener.auctionFailed(demandAd, it)
                 },
                 onAuctionFinished = {
@@ -108,7 +108,7 @@ internal class CoreImpl(
     override fun destroyAd(demandAd: DemandAd, adParams: Bundle) {
         addUserListener(demandAd, null)
         cancelAutoRefresh(demandAd)
-        return adsRepository.clearResults(demandAd)
+        return adsRepository.destroyResults(demandAd)
     }
 
     override fun setExtras(demandAd: DemandAd, adParams: Bundle) {

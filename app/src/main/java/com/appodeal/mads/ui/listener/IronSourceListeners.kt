@@ -1,5 +1,6 @@
 package com.appodeal.mads.ui.listener
 
+import com.appodealstack.ironsource.banner.IronSourceLevelPlayBannerListener
 import com.appodealstack.ironsource.interstitial.IronSourceLevelPlayInterstitialListener
 import com.appodealstack.ironsource.rewarded.IronSourceLevelPlayRewardedListener
 import com.appodealstack.mads.demands.Ad
@@ -84,6 +85,52 @@ internal fun createIronSourceRewardedListener(log: (String) -> Unit): IronSource
         override fun onAdClosed(ad: Ad) {
             log("onAdClosed: ${ad.demandId.demandId}, price=${ad.price}")
         }
+
+        override fun onDemandAdLoaded(ad: Ad) {
+            log("onDemandAdLoaded: ${ad.demandId.demandId}, price=${ad.price}")
+        }
+
+        override fun onDemandAdLoadFailed(cause: Throwable) {
+            log("onDemandAdLoadFailed: ${(cause as? DemandError)?.demandId?.demandId} ${cause::class.java.simpleName}")
+        }
+
+        override fun onAuctionFinished(ads: List<Ad>) {
+            val str = StringBuilder()
+            str.appendLine("onAuctionFinished")
+            ads.forEachIndexed { i, ad ->
+                str.appendLine("#${i + 1} > ${ad.demandId.demandId}, price=${ad.price}")
+            }
+            log(str.toString())
+        }
+    }
+}
+
+internal fun createIronSourceBannerListener(log: (String) -> Unit): IronSourceLevelPlayBannerListener {
+    return object : IronSourceLevelPlayBannerListener {
+        override fun onAdLoaded(ad: Ad) {
+            log("onAdLoaded: ${ad.demandId.demandId}, price=${ad.price}")
+        }
+
+        override fun onAdLoadFailed(cause: Throwable) {
+            log("onAdLoadFailed: ${(cause as? DemandError)?.demandId?.demandId} ${cause::class.java.simpleName}")
+        }
+
+        override fun onAdClicked(ad: Ad) {
+            log("onAdClicked: ${ad.demandId.demandId}, price=${ad.price}")
+        }
+
+        override fun onAdLeftApplication(ad: Ad) {
+            log("onAdLeftApplication: ${ad.demandId.demandId}, price=${ad.price}")
+        }
+
+        override fun onAdScreenPresented(ad: Ad) {
+            log("onAdScreenPresented: ${ad.demandId.demandId}, price=${ad.price}")
+        }
+
+        override fun onAdScreenDismissed(ad: Ad) {
+            log("onAdScreenDismissed: ${ad.demandId.demandId}, price=${ad.price}")
+        }
+
 
         override fun onDemandAdLoaded(ad: Ad) {
             log("onDemandAdLoaded: ${ad.demandId.demandId}, price=${ad.price}")

@@ -22,6 +22,7 @@ fun NavigationGraph(
     val rewardedViewModel = RewardedViewModel()
     val bannerApplovinViewModel = BannerApplovinViewModel()
     val bannerFyberBanner = BannerFyberViewModel()
+    val bannerIronSourceViewModel = BannerIronSourceViewModel()
 
     NavHost(navController = navController, startDestination = Screen.Main.route) {
         composable(Screen.Main.route) {
@@ -39,7 +40,7 @@ fun NavigationGraph(
                 }
                 MediationSdk.Applovin -> BannerApplovinScreen(navController, bannerApplovinViewModel)
                 MediationSdk.Fyber -> BannerFyberScreen(navController, bannerFyberBanner)
-                MediationSdk.IronSource -> TODO()
+                MediationSdk.IronSource -> BannerIronSourceScreen(navController, bannerIronSourceViewModel)
             }.let { }
         }
     }

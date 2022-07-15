@@ -99,7 +99,7 @@ internal class AutoRefresherImpl(
                         auctionListener.demandAuctionFailed(demandAd, throwable)
                     },
                     onAuctionFailed = {
-                        adsRepository.clearResults(demandAd)
+                        adsRepository.destroyResults(demandAd)
                         auctionListener.auctionFailed(demandAd, it)
                     },
                     onWinnerFound = {

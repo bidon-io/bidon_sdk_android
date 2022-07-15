@@ -1,5 +1,6 @@
 package com.appodeal.mads.ui
 
+import android.app.Activity
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,31 +11,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.PaintingStyle
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
 import com.appodeal.mads.component.*
-import com.appodeal.mads.component.AppToolbar
-import com.appodeal.mads.setBannerListener
-import com.appodealstack.applovin.banner.BNMaxAdView
+import com.appodeal.mads.ui.listener.createIronSourceBannerListener
+import com.appodealstack.ironsource.IronSourceDecorator
+import com.appodealstack.ironsource.banner.BNIronSourceBannerLayout
 import com.appodealstack.mads.demands.banners.BannerSize
+import com.ironsource.mediationsdk.ISBannerSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 @Composable
-fun BannerApplovinScreen(navController: NavHostController, viewModel: BannerApplovinViewModel) {
+fun BannerIronSourceScreen(navController: NavHostController, viewModel: BannerIronSourceViewModel) {
     val context = LocalContext.current
-
+    val getHeightByWindowsScreen: Int = 90// TODO()
     val state = viewModel.stateFlow.collectAsState()
     Column(
         modifier = Modifier
@@ -59,8 +54,9 @@ fun BannerApplovinScreen(navController: NavHostController, viewModel: BannerAppl
                     modifier = Modifier.height(
                         when (state.value.adFormat) {
                             BannerSize.Banner -> 50.dp
-                            BannerSize.LeaderBoard -> 90.dp
+                            BannerSize.Large -> 90.dp
                             BannerSize.MRec -> 250.dp
+                            BannerSize.Smart -> getHeightByWindowsScreen.dp
                             else -> error("Not supported")
                         }
                     ),
@@ -79,13 +75,14 @@ fun BannerApplovinScreen(navController: NavHostController, viewModel: BannerAppl
         ) {
             ItemSelector(
                 title = "Ad Format",
-                items = listOf(BannerSize.Banner, BannerSize.LeaderBoard, BannerSize.MRec),
+                items = listOf(BannerSize.Banner, BannerSize.Large, BannerSize.MRec, BannerSize.Smart),
                 selectedItem = state.value.adFormat,
                 getItemTitle = {
                     when (it) {
                         BannerSize.Banner -> "Banner 320x50"
-                        BannerSize.LeaderBoard -> "Leader Board 728x90"
-                        BannerSize.MRec -> "MRec 300x250"
+                        BannerSize.MRec -> "Rectangle 300x250"
+                        BannerSize.Large -> "Large 320x90"
+                        BannerSize.Smart -> "Smart 320x50/728x90"
                         else -> error("Not supported")
                     }
                 },
@@ -125,10 +122,10 @@ fun BannerApplovinScreen(navController: NavHostController, viewModel: BannerAppl
     }
 }
 
-class BannerApplovinViewModel {
+class BannerIronSourceViewModel {
     class State(
         val logs: List<String>,
-        val bannerAdView: BNMaxAdView?,
+        val bannerAdView: BNIronSourceBannerLayout?,
         val adFormat: BannerSize
     )
 
@@ -143,26 +140,24 @@ class BannerApplovinViewModel {
     )
 
     fun createAd(context: Context) {
-        val state = stateFlow.value
         destroyAd()
+        val banner = IronSourceDecorator.createBanner(context as Activity, stateFlow.value.adFormat)
+            .also {
+                it.setLevelPlayBannerListener(createIronSourceBannerListener { log ->
+                    val state = stateFlow.value
+                    updateState(
+                        State(
+                            bannerAdView = state.bannerAdView,
+                            logs = state.logs + log,
+                            adFormat = state.adFormat
+                        )
+                    )
+                })
+            }
+        val state = stateFlow.value
         updateState(
             State(
-                bannerAdView = BNMaxAdView(
-                    adUnitId = "c7c5f664e60b9bfb",
-                    adFormat = state.adFormat,
-                    context = context
-                ).also {
-                    it.setBannerListener { log ->
-                        val state1 = stateFlow.value
-                        updateState(
-                            State(
-                                adFormat = state1.adFormat,
-                                logs = state1.logs + log,
-                                bannerAdView = state1.bannerAdView
-                            )
-                        )
-                    }
-                },
+                bannerAdView = banner,
                 logs = state.logs,
                 adFormat = state.adFormat
             )
@@ -170,11 +165,15 @@ class BannerApplovinViewModel {
     }
 
     fun loadAd() {
-        stateFlow.value.bannerAdView?.loadAd()
+        stateFlow.value.bannerAdView?.let {
+            IronSourceDecorator.loadBanner(it)
+        }
     }
 
     fun destroyAd() {
-        stateFlow.value.bannerAdView?.destroy()
+        stateFlow.value.bannerAdView?.let {
+            IronSourceDecorator.destroyBanner(it)
+        }
         val state = stateFlow.value
         updateState(
             State(
@@ -202,25 +201,3 @@ class BannerApplovinViewModel {
         }
     }
 }
-
-fun Modifier.dashedBorder(width: Dp, radius: Dp, color: Color) =
-    drawBehind {
-        drawIntoCanvas {
-            val paint = Paint()
-                .apply {
-                    strokeWidth = width.toPx()
-                    this.color = color
-                    style = PaintingStyle.Stroke
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
-                }
-            it.drawRoundRect(
-                width.toPx(),
-                width.toPx(),
-                size.width - width.toPx(),
-                size.height - width.toPx(),
-                radius.toPx(),
-                radius.toPx(),
-                paint
-            )
-        }
-    }
