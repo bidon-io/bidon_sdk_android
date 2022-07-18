@@ -11,7 +11,6 @@ import com.appodealstack.ironsource.rewarded.addRewardedListener
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
-import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.*
 import com.appodealstack.mads.demands.banners.BannerSize
 import com.appodealstack.mads.demands.banners.BannerSizeKey

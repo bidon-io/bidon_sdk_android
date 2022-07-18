@@ -1,7 +1,6 @@
 package com.appodeal.mads.ui
 
 import android.app.Activity
-import android.content.Context
 import com.appodealstack.admob.AdmobAdapter
 import com.appodealstack.admob.AdmobParameters
 import com.appodealstack.applovin.AppLovinDecorator

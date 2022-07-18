@@ -3,6 +3,7 @@ package com.appodealstack.ironsource.impl
 import android.app.Activity
 import com.appodealstack.ironsource.ISDecorator
 import com.appodealstack.ironsource.IronSourceAdapter
+import com.appodealstack.ironsource.IronSourceDecorator
 import com.appodealstack.ironsource.IronSourceParameters
 import com.appodealstack.mads.BidOnInitializer
 import com.appodealstack.mads.demands.Adapter
@@ -26,6 +27,10 @@ internal class ISDecoratorInitializerImpl : ISDecorator.Initializer {
             .withContext(activity)
             .registerAdapter(IronSourceAdapter::class.java, IronSourceParameters(appKey))
             .build {
+                /**
+                 * Original IronSource starts loading RewardedAd after init.
+                 */
+                IronSourceDecorator.loadRewardedVideo()
                 listener.onInitializationComplete()
             }
     }
