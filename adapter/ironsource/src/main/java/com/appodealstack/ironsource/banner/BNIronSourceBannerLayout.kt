@@ -8,6 +8,7 @@ import androidx.core.os.bundleOf
 import com.appodealstack.ironsource.ISDecorator
 import com.appodealstack.ironsource.PlacementKey
 import com.appodealstack.mads.SdkCore
+import com.appodealstack.mads.core.DefaultAutoRefreshTimeoutMs
 import com.appodealstack.mads.demands.Ad
 import com.appodealstack.mads.demands.AdListener
 import com.appodealstack.mads.demands.AdType
@@ -25,6 +26,7 @@ class BNIronSourceBannerLayout constructor(
     private var bannerSize = BannerSize.Banner
     private var userListener: IronSourceBannerListener? = null
     private var userLevelPlayListener: IronSourceLevelPlayBannerListener? = null
+    private var autoRefresh: AutoRefresh = AutoRefresh.On(timeoutMs = DefaultAutoRefreshTimeoutMs)
 
     constructor(context: Context) : this(context, null, 0)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -89,7 +91,7 @@ class BNIronSourceBannerLayout constructor(
             context = context as Activity,
             demandAd = demandAd,
             adParams = bundleOf(PlacementKey to placementName, BannerSizeKey to bannerSize.ordinal),
-            autoRefresh = AutoRefresh.Off,
+            autoRefresh = autoRefresh,
             adContainer = this,
             onViewReady = { adView ->
                 this.removeAllViews()
@@ -114,5 +116,20 @@ class BNIronSourceBannerLayout constructor(
         SdkCore.destroyAd(demandAd, bundleOf())
         removeBannerListener()
         this.removeAllViews()
+    }
+
+    override fun startAutoRefresh() {
+        autoRefresh = AutoRefresh.On(DefaultAutoRefreshTimeoutMs)
+        SdkCore.setAutoRefresh(demandAd, autoRefresh)
+    }
+
+    override fun stopAutoRefresh() {
+        autoRefresh = AutoRefresh.Off
+        SdkCore.setAutoRefresh(demandAd, autoRefresh)
+    }
+
+    override fun setAutoRefreshTimeout(timeoutMs: Long) {
+        autoRefresh = AutoRefresh.On(timeoutMs)
+        SdkCore.setAutoRefresh(demandAd, autoRefresh)
     }
 }

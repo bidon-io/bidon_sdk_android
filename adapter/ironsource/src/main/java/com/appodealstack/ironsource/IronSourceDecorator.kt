@@ -72,6 +72,9 @@ sealed interface ISDecorator {
         fun createBanner(activity: Activity, bannerSize: BannerSize): BNIronSourceBannerLayout
         fun loadBanner(ironSourceBannerLayout: BNIronSourceBannerLayout, placementName: String? = null)
         fun destroyBanner(ironSourceBannerLayout: BNIronSourceBannerLayout)
+        fun startAutoRefresh(ironSourceBannerLayout: BNIronSourceBannerLayout)
+        fun stopAutoRefresh(ironSourceBannerLayout: BNIronSourceBannerLayout)
+        fun setAutoRefreshTimeout(ironSourceBannerLayout: BNIronSourceBannerLayout, timeout: Long)
 
         interface BannerView {
             fun loadAd(placementName: String? = null)
@@ -79,6 +82,9 @@ sealed interface ISDecorator {
             fun setBannerListener(bannerListener: IronSourceBannerListener)
             fun removeBannerListener()
             fun destroy()
+            fun startAutoRefresh()
+            fun stopAutoRefresh()
+            fun setAutoRefreshTimeout(timeout: Long)
         }
     }
 }

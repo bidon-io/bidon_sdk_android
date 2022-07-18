@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -23,6 +24,7 @@ import com.appodeal.mads.component.Subtitle1Text
 import com.appodeal.mads.ui.listener.createFyberBannerListener
 import com.appodealstack.fyber.banner.BNFyberBanner
 import com.appodealstack.fyber.banner.BNFyberBannerOption
+import com.appodealstack.mads.core.DefaultAutoRefreshTimeoutMs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,6 +71,20 @@ fun BannerFyberScreen(navController: NavHostController, viewModel: BannerFyberVi
                 .fillMaxSize()
                 .padding(24.dp)
         ) {
+            val autoRefreshText = "AutoRefresh " + if (state.value.autoRefreshTtl / 1000 == 0L) {
+                "Off"
+            } else {
+                "each ${state.value.autoRefreshTtl / 1000} sec."
+            }
+            Body2Text(text = autoRefreshText)
+            Slider(
+                value = (state.value.autoRefreshTtl / 1000).toFloat(),
+                onValueChange = {
+                    viewModel.setAutoRefresh((it * 1000).toLong())
+                },
+                steps = 30,
+                valueRange = 0f..30f
+            )
             AppButton(text = "Load & show") {
                 viewModel.show(placementId, BNFyberBannerOption().placeInContainer(adContainer), context as Activity)
             }
@@ -100,7 +116,8 @@ fun BannerFyberScreen(navController: NavHostController, viewModel: BannerFyberVi
 class BannerFyberViewModel {
     class State(
         val logs: List<String>,
-        val adContainer: ViewGroup?
+        val adContainer: ViewGroup?,
+        val autoRefreshTtl: Long,
     )
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
@@ -108,7 +125,8 @@ class BannerFyberViewModel {
     val stateFlow = MutableStateFlow(
         State(
             logs = listOf("Logs"),
-            adContainer = null
+            adContainer = null,
+            autoRefreshTtl = DefaultAutoRefreshTimeoutMs
         )
     )
 
@@ -123,7 +141,8 @@ class BannerFyberViewModel {
         updateState(
             State(
                 logs = stateFlow.value.logs,
-                adContainer = (placeInContainer.getPosition() as? BNFyberBannerOption.Position.InViewGroup)?.viewGroup
+                adContainer = (placeInContainer.getPosition() as? BNFyberBannerOption.Position.InViewGroup)?.viewGroup,
+                autoRefreshTtl = stateFlow.value.autoRefreshTtl,
             )
         )
     }
@@ -134,7 +153,8 @@ class BannerFyberViewModel {
         updateState(
             State(
                 logs = state.logs,
-                adContainer = null
+                adContainer = null,
+                autoRefreshTtl = state.autoRefreshTtl,
             )
         )
     }
@@ -145,7 +165,8 @@ class BannerFyberViewModel {
             updateState(
                 State(
                     logs = state.logs + log,
-                    adContainer = state.adContainer
+                    adContainer = state.adContainer,
+                    autoRefreshTtl = state.autoRefreshTtl,
                 )
             )
         }
@@ -155,5 +176,9 @@ class BannerFyberViewModel {
         coroutineScope.launch {
             stateFlow.emit(newState)
         }
+    }
+
+    fun setAutoRefresh(ttlMs: Long) {
+        TODO("Not yet implemented")
     }
 }

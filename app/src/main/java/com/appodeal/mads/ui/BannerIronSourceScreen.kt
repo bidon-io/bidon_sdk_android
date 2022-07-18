@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -19,8 +20,8 @@ import com.appodeal.mads.component.*
 import com.appodeal.mads.ui.listener.createIronSourceBannerListener
 import com.appodealstack.ironsource.IronSourceDecorator
 import com.appodealstack.ironsource.banner.BNIronSourceBannerLayout
+import com.appodealstack.mads.core.DefaultAutoRefreshTimeoutMs
 import com.appodealstack.mads.demands.banners.BannerSize
-import com.ironsource.mediationsdk.ISBannerSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -91,6 +92,20 @@ fun BannerIronSourceScreen(navController: NavHostController, viewModel: BannerIr
                 }
             )
             Spacer(modifier = Modifier.padding(top = 16.dp))
+            val autoRefreshText = "AutoRefresh " + if (state.value.autoRefreshTtl / 1000 == 0L) {
+                "Off"
+            } else {
+                "each ${state.value.autoRefreshTtl / 1000} sec."
+            }
+            Body2Text(text = autoRefreshText)
+            Slider(
+                value = (state.value.autoRefreshTtl / 1000).toFloat(),
+                onValueChange = {
+                    viewModel.setAutoRefresh((it * 1000).toLong())
+                },
+                steps = 30,
+                valueRange = 0f..30f
+            )
             AppButton(text = "Create banner") {
                 viewModel.createAd(context)
             }
@@ -126,7 +141,8 @@ class BannerIronSourceViewModel {
     class State(
         val logs: List<String>,
         val bannerAdView: BNIronSourceBannerLayout?,
-        val adFormat: BannerSize
+        val adFormat: BannerSize,
+        val autoRefreshTtl: Long,
     )
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
@@ -135,7 +151,8 @@ class BannerIronSourceViewModel {
         State(
             logs = listOf("Logs"),
             bannerAdView = null,
-            adFormat = BannerSize.Banner
+            adFormat = BannerSize.Banner,
+            autoRefreshTtl = DefaultAutoRefreshTimeoutMs
         )
     )
 
@@ -150,7 +167,8 @@ class BannerIronSourceViewModel {
                             State(
                                 bannerAdView = state.bannerAdView,
                                 logs = state.logs + log,
-                                adFormat = state.adFormat
+                                adFormat = state.adFormat,
+                                autoRefreshTtl = state.autoRefreshTtl,
                             )
                         )
                     }
@@ -161,7 +179,8 @@ class BannerIronSourceViewModel {
             State(
                 bannerAdView = banner,
                 logs = state.logs,
-                adFormat = state.adFormat
+                adFormat = state.adFormat,
+                autoRefreshTtl = state.autoRefreshTtl,
             )
         )
     }
@@ -181,7 +200,8 @@ class BannerIronSourceViewModel {
             State(
                 adFormat = state.adFormat,
                 logs = state.logs,
-                bannerAdView = null
+                bannerAdView = null,
+                autoRefreshTtl = state.autoRefreshTtl,
             )
         )
     }
@@ -192,7 +212,8 @@ class BannerIronSourceViewModel {
             State(
                 adFormat = bannerSize,
                 logs = state.logs,
-                bannerAdView = state.bannerAdView
+                bannerAdView = state.bannerAdView,
+                autoRefreshTtl = state.autoRefreshTtl,
             )
         )
     }
@@ -201,5 +222,24 @@ class BannerIronSourceViewModel {
         coroutineScope.launch {
             stateFlow.emit(newState)
         }
+    }
+
+    fun setAutoRefresh(ttlMs: Long) {
+        val state = stateFlow.value
+        stateFlow.value.bannerAdView?.let {
+            if (ttlMs == 0L) {
+                IronSourceDecorator.stopAutoRefresh(it)
+            } else {
+                IronSourceDecorator.setAutoRefreshTimeout(it, ttlMs)
+            }
+        }
+        updateState(
+            State(
+                adFormat = state.adFormat,
+                logs = state.logs,
+                bannerAdView = state.bannerAdView,
+                autoRefreshTtl = ttlMs,
+            )
+        )
     }
 }
