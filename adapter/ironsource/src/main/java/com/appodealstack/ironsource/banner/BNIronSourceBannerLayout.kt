@@ -119,7 +119,9 @@ class BNIronSourceBannerLayout constructor(
     }
 
     override fun startAutoRefresh() {
-        autoRefresh = AutoRefresh.On(DefaultAutoRefreshTimeoutMs)
+        if (autoRefresh == AutoRefresh.Off) {
+            autoRefresh = AutoRefresh.On(DefaultAutoRefreshTimeoutMs)
+        }
         SdkCore.setAutoRefresh(demandAd, autoRefresh)
     }
 
@@ -129,7 +131,8 @@ class BNIronSourceBannerLayout constructor(
     }
 
     override fun setAutoRefreshTimeout(timeoutMs: Long) {
-        autoRefresh = AutoRefresh.On(timeoutMs)
+        if (timeoutMs < 0) return
+        autoRefresh = if (timeoutMs == 0L) AutoRefresh.Off else AutoRefresh.On(timeoutMs)
         SdkCore.setAutoRefresh(demandAd, autoRefresh)
     }
 }

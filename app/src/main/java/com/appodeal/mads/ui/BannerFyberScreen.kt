@@ -80,7 +80,10 @@ fun BannerFyberScreen(navController: NavHostController, viewModel: BannerFyberVi
             Slider(
                 value = (state.value.autoRefreshTtl / 1000).toFloat(),
                 onValueChange = {
-                    viewModel.setAutoRefresh((it * 1000).toLong())
+                    viewModel.setAutoRefresh(
+                        placementId = placementId,
+                        ttlMs = (it * 1000).toLong()
+                    )
                 },
                 steps = 30,
                 valueRange = 0f..30f
@@ -178,7 +181,19 @@ class BannerFyberViewModel {
         }
     }
 
-    fun setAutoRefresh(ttlMs: Long) {
-        TODO("Not yet implemented")
+    fun setAutoRefresh(placementId: String, ttlMs: Long) {
+        val state = stateFlow.value
+        if (ttlMs == 0L) {
+            BNFyberBanner.stopAutoRefresh(placementId)
+        } else {
+            BNFyberBanner.setAutoRefreshTimeout(placementId, timeoutMs = ttlMs)
+        }
+        updateState(
+            State(
+                logs = state.logs,
+                autoRefreshTtl = ttlMs,
+                adContainer = state.adContainer,
+            )
+        )
     }
 }
