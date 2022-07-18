@@ -3,6 +3,7 @@ package com.appodealstack.ironsource.rewarded
 import android.app.Activity
 import androidx.core.os.bundleOf
 import com.appodealstack.ironsource.ISDecorator
+import com.appodealstack.ironsource.IronSourceDecorator
 import com.appodealstack.ironsource.PlacementKey
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.demands.*
@@ -93,12 +94,12 @@ internal class RewardedImpl : ISDecorator.Rewarded {
     }
 
     override fun showRewardedVideo(placementName: String?) {
-        showRewardedVideo(null, placementName)
+        showRewardedVideo(IronSourceDecorator.activity, placementName)
     }
 
     override fun showRewardedVideo(activity: Activity?, placementName: String?) {
         SdkCore.showAd(
-            activity = activity,
+            activity = activity ?: IronSourceDecorator.activity,
             demandAd = demandAd,
             adParams = bundleOf(PlacementKey to placementName)
         )

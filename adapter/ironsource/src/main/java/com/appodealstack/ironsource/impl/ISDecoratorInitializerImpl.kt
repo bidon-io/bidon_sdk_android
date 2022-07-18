@@ -10,8 +10,13 @@ import com.appodealstack.mads.demands.Adapter
 import com.appodealstack.mads.demands.AdapterParameters
 import com.ironsource.mediationsdk.IronSource
 import com.ironsource.mediationsdk.sdk.InitializationListener
+import java.lang.ref.WeakReference
 
 internal class ISDecoratorInitializerImpl : ISDecorator.Initializer {
+    private var activityRef: WeakReference<Activity>? = null
+    override val activity: Activity?
+        get() = activityRef?.get()
+
     override fun register(adapterClass: Class<out Adapter<*>>, parameters: AdapterParameters): ISDecorator.Initializer {
         BidOnInitializer.registerAdapter(adapterClass, parameters)
         return this
@@ -23,6 +28,7 @@ internal class ISDecoratorInitializerImpl : ISDecorator.Initializer {
         listener: InitializationListener,
         adUnit: IronSource.AD_UNIT?
     ) {
+        activityRef = WeakReference(activity)
         BidOnInitializer
             .withContext(activity)
             .registerAdapter(IronSourceAdapter::class.java, IronSourceParameters(appKey))

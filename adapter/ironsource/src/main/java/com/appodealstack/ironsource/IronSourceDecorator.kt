@@ -35,6 +35,8 @@ object IronSourceDecorator :
 
 sealed interface ISDecorator {
     interface Initializer : ISDecorator {
+        val activity: Activity?
+
         fun register(adapterClass: Class<out Adapter<*>>, parameters: AdapterParameters): Initializer
 
         fun init(

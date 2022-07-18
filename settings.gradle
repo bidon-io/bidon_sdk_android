@@ -22,6 +22,8 @@ dependencyResolutionManagement {
 rootProject.name = "Mediation of Mediations"
 
 include ':appApplovin'
+include ':appIronSource'
+
 include ':bidon'
 include ':adapter:applovin'
 include ':adapter:bidmachine'
