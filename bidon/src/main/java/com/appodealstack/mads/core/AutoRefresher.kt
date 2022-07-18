@@ -51,6 +51,7 @@ internal class AutoRefresherImpl(
         adContainer: ViewGroup?,
     ) {
         jobs[demandAd]?.cancel()
+        autoRefreshMap[demandAd] = autoRefresh
 
         val repeat = {
             when (val param = autoRefreshMap[demandAd]) {

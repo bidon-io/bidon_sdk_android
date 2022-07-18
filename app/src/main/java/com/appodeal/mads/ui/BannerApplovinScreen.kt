@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -25,6 +26,7 @@ import com.appodeal.mads.component.*
 import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.setBannerListener
 import com.appodealstack.applovin.banner.BNMaxAdView
+import com.appodealstack.mads.core.DefaultAutoRefreshTimeoutMs
 import com.appodealstack.mads.demands.banners.BannerSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -94,6 +96,23 @@ fun BannerApplovinScreen(navController: NavHostController, viewModel: BannerAppl
                 }
             )
             Spacer(modifier = Modifier.padding(top = 16.dp))
+
+            val autoRefreshText = "AutoRefresh " + if (state.value.autoRefreshTtl / 1000 == 0L) {
+                "Off"
+            } else {
+                "each ${state.value.autoRefreshTtl / 1000} sec."
+            }
+            Body2Text(text = autoRefreshText)
+            Slider(
+                value = (state.value.autoRefreshTtl / 1000).toFloat(),
+                onValueChange = {
+                    viewModel.setAutoRefresh((it * 1000).toLong())
+                },
+                steps = 30,
+                valueRange = 0f..30f
+            )
+
+
             AppButton(text = "Create banner") {
                 viewModel.createAd(context)
             }
@@ -129,7 +148,8 @@ class BannerApplovinViewModel {
     class State(
         val logs: List<String>,
         val bannerAdView: BNMaxAdView?,
-        val adFormat: BannerSize
+        val adFormat: BannerSize,
+        val autoRefreshTtl: Long,
     )
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
@@ -138,7 +158,8 @@ class BannerApplovinViewModel {
         State(
             logs = listOf("Logs"),
             bannerAdView = null,
-            adFormat = BannerSize.Banner
+            adFormat = BannerSize.Banner,
+            autoRefreshTtl = DefaultAutoRefreshTimeoutMs
         )
     )
 
@@ -159,14 +180,16 @@ class BannerApplovinViewModel {
                                 State(
                                     adFormat = state1.adFormat,
                                     logs = state1.logs + log,
-                                    bannerAdView = state1.bannerAdView
+                                    bannerAdView = state1.bannerAdView,
+                                    autoRefreshTtl = state1.autoRefreshTtl,
                                 )
                             )
                         }
                     }
                 },
                 logs = state.logs,
-                adFormat = state.adFormat
+                adFormat = state.adFormat,
+                autoRefreshTtl = state.autoRefreshTtl,
             )
         )
     }
@@ -182,7 +205,8 @@ class BannerApplovinViewModel {
             State(
                 adFormat = state.adFormat,
                 logs = state.logs,
-                bannerAdView = null
+                bannerAdView = null,
+                autoRefreshTtl = state.autoRefreshTtl,
             )
         )
     }
@@ -193,7 +217,27 @@ class BannerApplovinViewModel {
             State(
                 adFormat = bannerSize,
                 logs = state.logs,
-                bannerAdView = state.bannerAdView
+                bannerAdView = state.bannerAdView,
+                autoRefreshTtl = state.autoRefreshTtl,
+            )
+        )
+    }
+
+    fun setAutoRefresh(ttlMs: Long) {
+        val state = stateFlow.value
+        state.bannerAdView?.let {
+            if (ttlMs == 0L) {
+                it.stopAutoRefresh()
+            } else {
+                it.setAutoRefreshTimeout(ttlMs)
+            }
+        }
+        updateState(
+            State(
+                adFormat = state.adFormat,
+                logs = state.logs,
+                bannerAdView = state.bannerAdView,
+                autoRefreshTtl = ttlMs,
             )
         )
     }
