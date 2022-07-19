@@ -3,6 +3,7 @@ package com.appodealstack.mads
 import android.app.Activity
 import android.content.Context
 import com.appodealstack.mads.analytics.Analytic
+import com.appodealstack.mads.analytics.AnalyticParameters
 import com.appodealstack.mads.config.Configuration
 import com.appodealstack.mads.core.InitializationCallback
 import com.appodealstack.mads.core.InitializationResult
@@ -14,6 +15,11 @@ val BidOnInitializer: SdkInitialization by lazy { SdkInitializationImpl() }
 
 interface SdkInitialization {
     fun withContext(activity: Activity): SdkInitialization
+
+    fun registerAnalytics(
+        adapterClass: Class<out Analytic<*>>,
+        parameters: AnalyticParameters
+    ): SdkInitialization
 
     fun registerAdapter(
         adapterClass: Class<out Adapter<*>>,

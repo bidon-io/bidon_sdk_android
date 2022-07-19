@@ -9,45 +9,37 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.appodeal.mads.component.*
+import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppToolbar
+import com.appodeal.mads.component.Body2Text
 import com.appodeal.mads.setInterstitialListener
-import com.appodeal.mads.ui.listener.createFyberInterstitialListener
-import com.appodeal.mads.ui.listener.createIronSourceInterstitialListener
 import com.appodealstack.applovin.interstitial.BNMaxInterstitialAd
-import com.appodealstack.fyber.interstitial.BNFyberInterstitial
-import com.appodealstack.ironsource.IronSourceDecorator
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 
 @Composable
 fun InterstitialScreen(
     navController: NavHostController,
-    viewModel: InterstitialViewModel,
-    sdk: MediationSdk
 ) {
+
     val activity = LocalContext.current as Activity
+    val interstitialAd = BNMaxInterstitialAd("c7c5f664e60b9bfb", activity)
 
-    LaunchedEffect(key1 = Unit, block = {
-        viewModel.createAd(activity, sdk)
-    })
+    val logFlow = remember {
+        mutableStateOf(listOf("Log"))
+    }
 
-    val logState = viewModel.logFlow.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colors.background)
     ) {
         AppToolbar(
-            title = "Interstitial",
+            title = "Max Interstitial",
             onNavigationButtonClicked = { navController.popBackStack() }
         )
         Column(
@@ -56,17 +48,21 @@ fun InterstitialScreen(
                 .padding(24.dp)
         ) {
             AppButton(text = "Load") {
-                viewModel.loadAd()
+                interstitialAd.setInterstitialListener(
+                    log = { log ->
+                        logFlow.value = logFlow.value + log
+                    })
+                interstitialAd.loadAd()
             }
             AppButton(text = "Show") {
-                viewModel.showAd()
+                interstitialAd.showAd()
             }
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(top = 24.dp)
             ) {
-                items(logState.value) { logLine ->
+                items(logFlow.value) { logLine ->
                     Column(
                         modifier = Modifier
                             .padding(bottom = 2.dp)
@@ -78,82 +74,5 @@ fun InterstitialScreen(
                 }
             }
         }
-    }
-}
-
-class InterstitialViewModel {
-    private lateinit var interstitialAd: BNMaxInterstitialAd
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
-    private lateinit var sdk: MediationSdk
-    private var fyberPlacementId = "197405"
-    private var activity: Activity? = null
-
-    val logFlow = MutableStateFlow(listOf("Log"))
-
-    fun createAd(activity: Activity, sdk: MediationSdk) {
-        this.activity = activity
-        this.sdk = sdk
-        when (sdk) {
-            MediationSdk.None -> Unit
-            MediationSdk.Applovin -> {
-                interstitialAd = BNMaxInterstitialAd("c7c5f664e60b9bfb", activity)
-                interstitialAd.setInterstitialListener(
-                    log = { log ->
-                        coroutineScope.launch {
-                            logFlow.emit(logFlow.value + log)
-                        }
-                    })
-            }
-            MediationSdk.Fyber -> {
-                BNFyberInterstitial.setInterstitialListener(
-                    createFyberInterstitialListener { log ->
-                        coroutineScope.launch {
-                            logFlow.emit(logFlow.value + log)
-                        }
-                    }
-                )
-            }
-            MediationSdk.IronSource -> {
-                IronSourceDecorator.setLevelPlayInterstitialListener(
-                    createIronSourceInterstitialListener { log ->
-                        coroutineScope.launch {
-                            logFlow.emit(logFlow.value + log)
-                        }
-                    }
-                )
-            }
-        }.let { }
-    }
-
-    fun loadAd() {
-        when (sdk) {
-            MediationSdk.None -> Unit
-            MediationSdk.Applovin -> {
-                interstitialAd.loadAd()
-            }
-            MediationSdk.Fyber -> {
-                BNFyberInterstitial.request(fyberPlacementId, activity)
-            }
-            MediationSdk.IronSource -> {
-                IronSourceDecorator.loadInterstitial()
-            }
-        }.let { }
-    }
-
-    fun showAd() {
-        when (sdk) {
-            MediationSdk.None -> Unit
-            MediationSdk.Applovin -> {
-                interstitialAd.showAd()
-            }
-            MediationSdk.Fyber -> {
-                activity?.let {
-                    BNFyberInterstitial.show(fyberPlacementId, it)
-                }
-            }
-            MediationSdk.IronSource -> {
-                IronSourceDecorator.showInterstitial(activity)
-            }
-        }.let { }
     }
 }

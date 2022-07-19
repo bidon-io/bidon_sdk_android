@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".ApplovinActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">

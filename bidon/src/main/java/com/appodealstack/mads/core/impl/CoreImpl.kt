@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import com.appodealstack.mads.Core
+import com.appodealstack.mads.analytics.BNMediationNetwork
+import com.appodealstack.mads.analytics.RevenueLogger
 import com.appodealstack.mads.auctions.AdsRepository
 import com.appodealstack.mads.auctions.AdsRepositoryImpl
 import com.appodealstack.mads.auctions.NewAuction
@@ -14,6 +16,7 @@ import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.core.ext.retrieveAuctionRequests
 import com.appodealstack.mads.demands.*
 import com.appodealstack.mads.demands.banners.AutoRefresh
+import java.util.*
 
 internal class CoreImpl(
     private val adsRepository: AdsRepository = AdsRepositoryImpl()
@@ -182,6 +185,33 @@ internal class CoreImpl(
         adsRepository.getResults(demandAd).forEach { auctionResult ->
             (auctionResult.adProvider as? PlacementProvider)?.setPlacement(placement)
         }
+    }
+
+    override fun logAdRevenue(
+        monetizationNetwork: String,
+        mediationNetwork: BNMediationNetwork,
+        eventRevenueCurrency: Currency,
+        eventRevenue: Double,
+        nonMandatory: Map<String, String>
+    ) {
+        if (!isInitialized) {
+            logInternal(Tag, "AdRevenue cannot be logged before Sdk is not initialized")
+            return
+        }
+        if (analytics.isEmpty()) {
+            logInternal(Tag, "AdRevenue's logger not initialized")
+            return
+        }
+        analytics.filterIsInstance<RevenueLogger>()
+            .forEach {
+                it.logAdRevenue(
+                    monetizationNetwork = monetizationNetwork,
+                    mediationNetwork = mediationNetwork,
+                    eventRevenueCurrency = eventRevenueCurrency,
+                    eventRevenue = eventRevenue,
+                    nonMandatory = nonMandatory,
+                )
+            }
     }
 
 }

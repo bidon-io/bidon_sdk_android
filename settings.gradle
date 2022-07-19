@@ -10,6 +10,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://artifacts.applovin.com/android' }
         maven {
             name "BidMachine Ads maven repository"
             url "https://artifactory.bidmachine.io/bidmachine"
@@ -19,7 +20,7 @@ dependencyResolutionManagement {
         }
     }
 }
-rootProject.name = "Mediation of Mediations"
+rootProject.name = "BidOn Decorators"
 
 include ':appApplovin'
 include ':appIronSource'
@@ -31,3 +32,4 @@ include ':adapter:bidmachine'
 include ':adapter:admob'
 include ':adapter:fyber'
 include ':adapter:ironsource'
+include ':adapter:appsflyer'

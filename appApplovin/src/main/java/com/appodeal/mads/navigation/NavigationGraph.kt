@@ -12,36 +12,23 @@ import com.appodeal.mads.ui.*
 fun NavigationGraph(
     navController: NavHostController,
 ) {
-    val initMediation = remember {
-        mutableStateOf(MediationSdk.None)
-    }
     val initState = remember {
         mutableStateOf(false)
     }
-    val interstitialViewModel = InterstitialViewModel()
-    val rewardedViewModel = RewardedViewModel()
     val bannerApplovinViewModel = BannerApplovinViewModel()
-    val bannerFyberBanner = BannerFyberViewModel()
-    val bannerIronSourceViewModel = BannerIronSourceViewModel()
 
     NavHost(navController = navController, startDestination = Screen.Main.route) {
         composable(Screen.Main.route) {
-            MainScreen(navController, initState, initMediation)
+            MainScreen(navController, initState)
         }
         composable(Screen.Interstitial.route) {
-            InterstitialScreen(navController, interstitialViewModel, initMediation.value)
+            InterstitialScreen(navController)
         }
         composable(Screen.Rewarded.route) {
-            RewardedScreen(navController, rewardedViewModel, initMediation.value)
+            RewardedScreen(navController)
         }
         composable(Screen.Banners.route) {
-            when (initMediation.value) {
-                MediationSdk.None -> {
-                }
-                MediationSdk.Applovin -> BannerApplovinScreen(navController, bannerApplovinViewModel)
-                MediationSdk.Fyber -> BannerFyberScreen(navController, bannerFyberBanner)
-                MediationSdk.IronSource -> BannerIronSourceScreen(navController, bannerIronSourceViewModel)
-            }.let { }
+            BannerApplovinScreen(navController, bannerApplovinViewModel)
         }
     }
 }

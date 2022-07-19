@@ -44,7 +44,7 @@ fun BannerApplovinScreen(navController: NavHostController, viewModel: BannerAppl
             .background(MaterialTheme.colors.background)
     ) {
         AppToolbar(
-            title = "Banner (Applovin API)",
+            title = "Max Banner",
             onNavigationButtonClicked = { navController.popBackStack() }
         )
         Box(

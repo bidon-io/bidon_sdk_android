@@ -1,13 +1,37 @@
 package com.appodealstack.mads.analytics
 
 import android.content.Context
-import android.os.Bundle
 import com.appodealstack.mads.demands.DemandId
+import java.util.*
 
-interface Analytic {
+interface AnalyticParameters
+
+interface Analytic<T : AnalyticParameters> {
     val analyticsId: DemandId
 
-    suspend fun init(context: Context, configParams: Bundle)
+    suspend fun init(context: Context, configParams: T)
+}
 
-    fun logEvent(map: Map<String, Any>)
+
+interface RevenueLogger {
+    fun logAdRevenue(
+        monetizationNetwork: String,
+        mediationNetwork: BNMediationNetwork,
+        eventRevenueCurrency: Currency,
+        eventRevenue: Double,
+        nonMandatory: Map<String, String>
+    )
+}
+
+enum class BNMediationNetwork {
+    IronSource,
+    ApplovinMax,
+    GoogleAdmob,
+    Mopub,
+    Fyber,
+    Appodeal,
+    Admost,
+    Topon,
+    Tradplus,
+    Yandex;
 }
