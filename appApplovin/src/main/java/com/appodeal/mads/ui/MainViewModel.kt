@@ -4,6 +4,9 @@ import android.app.Activity
 import com.appodealstack.admob.AdmobAdapter
 import com.appodealstack.admob.AdmobParameters
 import com.appodealstack.applovin.AppLovinDecorator
+import com.appodealstack.appsflyer.AppsflyerAnalytics
+import com.appodealstack.appsflyer.AppsflyerDevKey
+import com.appodealstack.appsflyer.AppsflyerParameters
 import com.appodealstack.bidmachine.BidMachineAdapter
 import com.appodealstack.bidmachine.BidMachineParameters
 
@@ -14,6 +17,10 @@ internal class MainViewModel {
     ) {
         AppLovinDecorator.getInstance(activity).mediationProvider = "max"
         AppLovinDecorator
+            .register(
+                AppsflyerAnalytics::class.java,
+                AppsflyerParameters.DevKey(AppsflyerDevKey)
+            )
             .register(
                 AdmobAdapter::class.java,
                 AdmobParameters(

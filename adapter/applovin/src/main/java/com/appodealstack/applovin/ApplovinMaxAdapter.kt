@@ -13,6 +13,8 @@ import com.applovin.mediation.ads.MaxRewardedAd
 import com.applovin.sdk.AppLovinSdk
 import com.appodealstack.applovin.impl.asBidonError
 import com.appodealstack.applovin.impl.setCoreListener
+import com.appodealstack.mads.SdkCore
+import com.appodealstack.mads.analytics.BNMediationNetwork
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
 import com.appodealstack.mads.core.ext.logInternal
@@ -36,6 +38,7 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
     private val rewardedAdUnitIds = mutableListOf<String>()
 
     override val demandId: DemandId = ApplovinMaxDemandId
+    override val mediationNetwork = BNMediationNetwork.ApplovinMax
 
     override suspend fun init(activity: Activity, configParams: ApplovinParameters): Unit =
         suspendCancellableCoroutine { continuation ->
@@ -97,12 +100,7 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
                     override fun onAdLoaded(maxAd: MaxAd) {
                         logInternal("Tag", "4")
                         if (!isFinished.getAndSet(true)) {
-                            val ad = Ad(
-                                demandId = ApplovinMaxDemandId,
-                                demandAd = demandAd,
-                                price = maxAd.revenue,
-                                sourceAd = maxAd
-                            )
+                            val ad = maxAd.asAd(demandAd)
                             val auctionResult = AuctionResult(
                                 ad = ad,
                                 adProvider = object : AdProvider, AdRevenueProvider, ExtrasProvider, PlacementProvider,
@@ -133,10 +131,9 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
                                     override fun getPlacement(): String? = maxAdView.placement
                                 }
                             )
-                            getAdRevenueListener(demandAd)?.let { adRevenueListener ->
-                                maxAdView.setRevenueListener {
-                                    adRevenueListener.onAdRevenuePaid(ad)
-                                }
+                            maxAdView.setRevenueListener {
+                                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(it.asAd(demandAd))
+                                getUserAdRevenueListener(demandAd)?.onAdRevenuePaid(ad)
                             }
                             maxAdView.setCoreListener(auctionResult)
                             continuation.resume(Result.success(auctionResult))
@@ -177,12 +174,7 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
                     object : MaxAdListener {
                         override fun onAdLoaded(maxAd: MaxAd) {
                             if (!isFinished.getAndSet(true)) {
-                                val ad = Ad(
-                                    demandId = ApplovinMaxDemandId,
-                                    demandAd = demandAd,
-                                    price = maxAd.revenue,
-                                    sourceAd = maxAd
-                                )
+                                val ad = maxAd.asAd(demandAd)
                                 val auctionResult = AuctionResult(
                                     ad = ad,
                                     adProvider = object : AdProvider, AdRevenueProvider, ExtrasProvider {
@@ -214,10 +206,9 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
 
                                     }
                                 )
-                                getAdRevenueListener(demandAd)?.let { adRevenueListener ->
-                                    maxInterstitialAd.setRevenueListener {
-                                        adRevenueListener.onAdRevenuePaid(ad)
-                                    }
+                                maxInterstitialAd.setRevenueListener {
+                                    SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(it.asAd(demandAd))
+                                    getUserAdRevenueListener(demandAd)?.onAdRevenuePaid(ad)
                                 }
                                 getExtras(demandAd)?.let { bundle ->
                                     bundle.keySet().forEach { key ->
@@ -260,12 +251,7 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
                 rewardedAd.setListener(object : MaxRewardedAdListener {
                     override fun onAdLoaded(maxAd: MaxAd) {
                         if (!isFinished.getAndSet(true)) {
-                            val ad = Ad(
-                                demandId = ApplovinMaxDemandId,
-                                demandAd = demandAd,
-                                price = maxAd.revenue,
-                                sourceAd = maxAd
-                            )
+                            val ad = maxAd.asAd(demandAd)
                             val auctionResult = AuctionResult(
                                 ad = ad,
                                 adProvider = object : AdProvider, AdRevenueProvider, ExtrasProvider {
@@ -295,10 +281,10 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
 
                                 }
                             )
-                            getAdRevenueListener(demandAd)?.let { adRevenueListener ->
-                                rewardedAd.setRevenueListener {
-                                    adRevenueListener.onAdRevenuePaid(ad)
-                                }
+
+                            rewardedAd.setRevenueListener {
+                                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(it.asAd(demandAd))
+                                getUserAdRevenueListener(demandAd)?.onAdRevenuePaid(ad)
                             }
                             getExtras(demandAd)?.let { bundle ->
                                 bundle.keySet().forEach { key ->
@@ -340,6 +326,20 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
         BannerSize.MRec -> MaxAdFormat.MREC
         else -> error("Not supported")
     }
+}
+
+internal fun MaxAd?.asAd(demandAd: DemandAd): Ad {
+    val maxAd = this
+    return Ad(
+        demandId = ApplovinMaxDemandId,
+        demandAd = demandAd,
+        price = maxAd?.revenue ?: 0.0,
+        sourceAd = maxAd ?: demandAd,
+        monetizationNetwork = maxAd?.networkName,
+        dsp = maxAd?.dspId,
+        auctionRound = Ad.AuctionRound.Mediation,
+        currency = null
+    )
 }
 
 internal const val AdUnitIdKey = "adUnitId"

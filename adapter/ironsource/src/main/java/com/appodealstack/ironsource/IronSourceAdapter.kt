@@ -9,6 +9,7 @@ import com.appodealstack.ironsource.impl.asBidonError
 import com.appodealstack.ironsource.interstitial.addInterstitialListener
 import com.appodealstack.ironsource.rewarded.addRewardedListener
 import com.appodealstack.mads.SdkCore
+import com.appodealstack.mads.analytics.BNMediationNetwork
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
 import com.appodealstack.mads.demands.*
@@ -38,6 +39,7 @@ val IronSourceDemandId = DemandId("ironsource")
 class IronSourceAdapter : Adapter.Mediation<IronSourceParameters>,
     AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner {
     override val demandId: DemandId = IronSourceDemandId
+    override val mediationNetwork = BNMediationNetwork.IronSource
 
     private val scope: CoroutineScope get() = CoroutineScope(Dispatchers.Default)
     private val interstitialFlow = MutableSharedFlow<InterstitialInterceptor>(Int.MAX_VALUE)
@@ -64,6 +66,20 @@ class IronSourceAdapter : Adapter.Mediation<IronSourceParameters>,
             rewardedFlow.addRewardedListener()
             it.resume(Unit)
         }
+        IronSource.addImpressionDataListener { impressionData ->
+            // TODO add demandAd here
+//            val ad = Ad(
+//                demandId = demandId,
+//                demandAd = demandAd,
+//                price = impressionData.revenue ?: 0.0,
+//                sourceAd = impressionData,
+//                currency = null,
+//                auctionRound = Ad.AuctionRound.Mediation,
+//                dsp = null,
+//                monetizationNetwork = impressionData.adNetwork
+//            )
+//            SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(ad)
+        }
         if (configParams.adUnit == null) {
             IronSource.init(activity, configParams.appKey, initializationListener)
         } else {
@@ -82,11 +98,8 @@ class IronSourceAdapter : Adapter.Mediation<IronSourceParameters>,
                 is InterstitialInterceptor.AdReady -> {
                     Result.success(
                         AuctionResult(
-                            ad = Ad(
-                                demandId = demandId,
+                            ad = loadingResult.adInfo.asAd(
                                 demandAd = demandAd,
-                                price = loadingResult.adInfo?.revenue ?: 0.0,
-                                sourceAd = loadingResult.adInfo ?: demandAd
                             ),
                             adProvider = object : AdProvider {
                                 override fun canShow() = IronSource.isInterstitialReady()
@@ -123,12 +136,7 @@ class IronSourceAdapter : Adapter.Mediation<IronSourceParameters>,
                 is RewardedInterceptor.AdReady -> {
                     Result.success(
                         AuctionResult(
-                            ad = Ad(
-                                demandId = demandId,
-                                demandAd = demandAd,
-                                price = loadingResult.adInfo?.revenue ?: 0.0,
-                                sourceAd = loadingResult.adInfo ?: demandAd
-                            ),
+                            ad = loadingResult.adInfo.asAd(demandAd),
                             adProvider = object : AdProvider {
                                 override fun canShow() = IronSource.isRewardedVideoAvailable()
                                 override fun destroy() {}
@@ -158,43 +166,19 @@ class IronSourceAdapter : Adapter.Mediation<IronSourceParameters>,
             val coreListener = SdkCore.getListenerForDemand(demandAd)
             when (callback) {
                 is InterstitialInterceptor.AdClicked -> {
-                    val ad = Ad(
-                        demandId = demandId,
-                        demandAd = demandAd,
-                        price = callback.adInfo?.revenue ?: 0.0,
-                        sourceAd = callback.adInfo ?: demandAd
-                    )
-                    coreListener.onAdClicked(ad)
+                    coreListener.onAdClicked(callback.adInfo.asAd(demandAd))
                 }
                 is InterstitialInterceptor.AdClosed -> {
-                    val ad = Ad(
-                        demandId = demandId,
-                        demandAd = demandAd,
-                        price = callback.adInfo?.revenue ?: 0.0,
-                        sourceAd = callback.adInfo ?: demandAd
-                    )
-                    coreListener.onAdHidden(ad)
+                    coreListener.onAdHidden(callback.adInfo.asAd(demandAd))
                 }
                 is InterstitialInterceptor.AdOpened -> {
-                    val ad = Ad(
-                        demandId = demandId,
-                        demandAd = demandAd,
-                        price = callback.adInfo?.revenue ?: 0.0,
-                        sourceAd = callback.adInfo ?: demandAd
-                    )
-                    coreListener.onAdImpression(ad)
+                    coreListener.onAdImpression(callback.adInfo.asAd(demandAd))
                 }
                 is InterstitialInterceptor.AdShowFailed -> {
                     coreListener.onAdDisplayFailed(callback.ironSourceError.asBidonError())
                 }
                 is InterstitialInterceptor.AdShowSucceeded -> {
-                    val ad = Ad(
-                        demandId = demandId,
-                        demandAd = demandAd,
-                        price = callback.adInfo?.revenue ?: 0.0,
-                        sourceAd = callback.adInfo ?: demandAd
-                    )
-                    coreListener.onAdDisplayed(ad)
+                    coreListener.onAdDisplayed(callback.adInfo.asAd(demandAd))
                 }
                 is InterstitialInterceptor.AdReady,
                 is InterstitialInterceptor.AdLoadFailed -> {
@@ -209,66 +193,31 @@ class IronSourceAdapter : Adapter.Mediation<IronSourceParameters>,
             val coreListener = SdkCore.getListenerForDemand(demandAd)
             when (callback) {
                 is RewardedInterceptor.AdClicked -> {
-                    val ad = Ad(
-                        demandId = demandId,
-                        demandAd = demandAd,
-                        price = callback.adInfo?.revenue ?: 0.0,
-                        sourceAd = callback.adInfo ?: demandAd
-                    )
-                    coreListener.onAdClicked(ad)
+                    coreListener.onAdClicked(callback.adInfo.asAd(demandAd))
                 }
                 is RewardedInterceptor.AdClosed -> {
-                    val ad = Ad(
-                        demandId = demandId,
-                        demandAd = demandAd,
-                        price = callback.adInfo?.revenue ?: 0.0,
-                        sourceAd = callback.adInfo ?: demandAd
-                    )
-                    coreListener.onAdHidden(ad)
+                    coreListener.onAdHidden(callback.adInfo.asAd(demandAd))
                 }
                 is RewardedInterceptor.AdOpened -> {
-                    val ad = Ad(
-                        demandId = demandId,
-                        demandAd = demandAd,
-                        price = callback.adInfo?.revenue ?: 0.0,
-                        sourceAd = callback.adInfo ?: demandAd
-                    )
-                    coreListener.onAdImpression(ad)
+                    coreListener.onAdImpression(callback.adInfo.asAd(demandAd))
                 }
                 is RewardedInterceptor.AdShowFailed -> {
                     coreListener.onAdDisplayFailed(callback.ironSourceError.asBidonError())
                 }
                 is RewardedInterceptor.Rewarded -> {
-                    val ad = Ad(
-                        demandId = demandId,
-                        demandAd = demandAd,
-                        price = callback.adInfo?.revenue ?: 0.0,
-                        sourceAd = callback.adInfo ?: demandAd
-                    )
                     coreListener.onUserRewarded(
-                        ad, RewardedAdListener.Reward(
+                        ad = callback.adInfo.asAd(demandAd),
+                        reward = RewardedAdListener.Reward(
                             label = callback.placement?.rewardName ?: "",
                             amount = callback.placement?.rewardAmount ?: 0
                         )
                     )
                 }
                 RewardedInterceptor.Started -> {
-                    val ad = Ad(
-                        demandId = demandId,
-                        demandAd = demandAd,
-                        price = 0.0,
-                        sourceAd = demandAd
-                    )
-                    coreListener.onRewardedStarted(ad)
+                    coreListener.onRewardedStarted(null.asAd(demandAd))
                 }
                 RewardedInterceptor.Ended -> {
-                    val ad = Ad(
-                        demandId = demandId,
-                        demandAd = demandAd,
-                        price = 0.0,
-                        sourceAd = demandAd
-                    )
-                    coreListener.onRewardedCompleted(ad)
+                    coreListener.onRewardedCompleted(null.asAd(demandAd))
                 }
                 is RewardedInterceptor.AdReady,
                 is RewardedInterceptor.AdLoadFailed -> {
@@ -297,12 +246,7 @@ class IronSourceAdapter : Adapter.Mediation<IronSourceParameters>,
                 bannerView.levelPlayBannerListener = object : LevelPlayBannerListener {
                     override fun onAdLoaded(adInfo: AdInfo?) {
                         if (!isFinished.getAndSet(true)) {
-                            val ad = Ad(
-                                demandId = demandId,
-                                demandAd = demandAd,
-                                price = adInfo?.revenue ?: 0.0,
-                                sourceAd = adInfo ?: bannerView
-                            )
+                            val ad = adInfo.asAd(demandAd)
                             bannerView.setCoreListener(ad)
                             continuation.resume(
                                 Result.success(
@@ -364,6 +308,20 @@ class IronSourceAdapter : Adapter.Mediation<IronSourceParameters>,
                 coreListener.onAdHidden(ad)
             }
         }
+    }
+
+    private fun AdInfo?.asAd(demandAd: DemandAd): Ad {
+        val adInfo = this
+        return Ad(
+            demandId = demandId,
+            demandAd = demandAd,
+            price = adInfo?.revenue ?: 0.0,
+            sourceAd = adInfo ?: demandAd,
+            currency = null,
+            auctionRound = Ad.AuctionRound.Mediation,
+            dsp = null,
+            monetizationNetwork = adInfo?.adNetwork
+        )
     }
 }
 

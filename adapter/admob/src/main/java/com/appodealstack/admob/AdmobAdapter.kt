@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import com.appodealstack.mads.SdkCore
+import com.appodealstack.mads.analytics.BNMediationNetwork
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
 import com.appodealstack.mads.core.ext.logInternal
@@ -21,6 +22,7 @@ import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -80,8 +82,7 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
                             override fun onAdLoaded(interstitialAd: InterstitialAd) {
                                 if (!isFinished.getAndSet(true)) {
                                     val auctionResult = AuctionResult(
-                                        ad = Ad(
-                                            demandId = AdmobDemandId,
+                                        ad = asAd(
                                             demandAd = demandAd,
                                             price = interstitialAdUnits.getPrice(unitId = interstitialAd.adUnitId),
                                             sourceAd = interstitialAd
@@ -131,8 +132,7 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
 
                             override fun onAdLoaded(rewardedAd: RewardedAd) {
                                 if (!isFinished.getAndSet(true)) {
-                                    val ad = Ad(
-                                        demandId = AdmobDemandId,
+                                    val ad = asAd(
                                         demandAd = demandAd,
                                         price = rewardedAdUnits.getPrice(unitId = rewardedAd.adUnitId),
                                         sourceAd = rewardedAd
@@ -194,8 +194,7 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
                         }
 
                         override fun onAdLoaded() {
-                            val ad = Ad(
-                                demandId = AdmobDemandId,
+                            val ad = asAd(
                                 demandAd = demandAd,
                                 price = bannersAdUnits.getPrice(unitId = adView.adUnitId),
                                 sourceAd = adView
@@ -238,6 +237,7 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
             }
 
             override fun onAdShowedFullScreenContent() {
+                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(auctionData.ad)
                 coreListener.onAdDisplayed(auctionData.ad)
             }
         }
@@ -259,6 +259,7 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
             }
 
             override fun onAdShowedFullScreenContent() {
+                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(auctionData.ad)
                 coreListener.onAdDisplayed(auctionData.ad)
             }
         }
@@ -276,6 +277,7 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
             }
 
             override fun onAdOpened() {
+                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(auctionData.ad)
                 coreListener.onAdDisplayed(auctionData.ad)
             }
         }
@@ -298,5 +300,18 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
         BannerSize.LeaderBoard -> AdSize.LEADERBOARD
         BannerSize.MRec -> AdSize.MEDIUM_RECTANGLE
         else -> error("Not supported")
+    }
+
+    private fun asAd(demandAd: DemandAd, sourceAd: Any, price: Double): Ad {
+        return Ad(
+            demandId = AdmobDemandId,
+            demandAd = demandAd,
+            price = price,
+            sourceAd = sourceAd,
+            monetizationNetwork = BNMediationNetwork.GoogleAdmob.networkName,
+            dsp = null,
+            auctionRound = Ad.AuctionRound.PostBid,
+            currency = Currency.getInstance("USD")
+        )
     }
 }

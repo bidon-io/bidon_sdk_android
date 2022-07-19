@@ -5,8 +5,9 @@ import android.content.Context
 import com.appodealstack.mads.analytics.Analytic
 import com.appodealstack.mads.analytics.AnalyticParameters
 import com.appodealstack.mads.analytics.BNMediationNetwork
-import com.appodealstack.mads.analytics.RevenueLogger
+import com.appodealstack.mads.analytics.AdRevenueLogger
 import com.appodealstack.mads.core.ext.logInternal
+import com.appodealstack.mads.demands.Ad
 import com.appodealstack.mads.demands.DemandId
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.adrevenue.AppsFlyerAdRevenue
@@ -24,21 +25,21 @@ sealed interface AppsflyerParameters : AnalyticParameters {
     data class DevKey(val devKey: String = AppsflyerDevKey) : AppsflyerParameters
 
     /**
-     * [AppsFlyerLib] - initialized by publisher.
+     * [AppsFlyerLib] should be initialized by publisher.
      */
-    object JustRegister : AppsflyerParameters
+    object Register : AppsflyerParameters
 }
 
+const val AppsflyerDevKey = "XXXXXXXXXXXXX"
 private val AppsflyerDemandId = DemandId("appsflyer")
-private const val AppsflyerDevKey = "XXXXXXXXXXXXX"
 
-class AppsflyerAnalytics : Analytic<AppsflyerParameters>, RevenueLogger {
+class AppsflyerAnalytics : Analytic<AppsflyerParameters>, AdRevenueLogger {
     override val analyticsId: DemandId = AppsflyerDemandId
 
     override suspend fun init(context: Context, configParams: AppsflyerParameters) {
         val afRevenueBuilder = AppsFlyerAdRevenue.Builder(context.applicationContext as Application)
         AppsFlyerAdRevenue.initialize(afRevenueBuilder.build())
-        suspendCancellableCoroutine { continuation ->
+        suspendCancellableCoroutine<Unit> { continuation ->
             when (configParams) {
                 is AppsflyerParameters.DevKey -> {
                     AppsFlyerLib.getInstance()
@@ -53,7 +54,7 @@ class AppsflyerAnalytics : Analytic<AppsflyerParameters>, RevenueLogger {
                             }
                         })
                 }
-                AppsflyerParameters.JustRegister -> {
+                AppsflyerParameters.Register -> {
                     AppsFlyerLib.getInstance().start(context)
                     continuation.resume(Unit)
                 }
@@ -61,13 +62,16 @@ class AppsflyerAnalytics : Analytic<AppsflyerParameters>, RevenueLogger {
         }
     }
 
-    override fun logAdRevenue(
-        monetizationNetwork: String,
-        mediationNetwork: BNMediationNetwork,
-        eventRevenueCurrency: Currency,
-        eventRevenue: Double,
-        nonMandatory: Map<String, String>
-    ) {
+    override fun logAdRevenue(mediationNetwork: BNMediationNetwork, ad: Ad) {
+        val nonMandatory = mutableMapOf<String, String>().apply {
+            ad.dsp?.let { this["demand_source_name"] = it }
+            this["ad_type"] = ad.demandAd.adType.adTypeName
+            this["auction_round"] = ad.auctionRound.roundName
+        }
+        val monetizationNetwork = ad.monetizationNetwork ?: "unknown"
+        val eventRevenue = ad.price
+        val eventRevenueCurrency = ad.currency ?: Currency.getInstance("USD")
+
         AppsFlyerAdRevenue.logAdRevenue(
             monetizationNetwork,
             when (mediationNetwork) {
@@ -82,7 +86,9 @@ class AppsflyerAnalytics : Analytic<AppsflyerParameters>, RevenueLogger {
                 BNMediationNetwork.Tradplus -> MediationNetwork.Tradplus
                 BNMediationNetwork.Yandex -> MediationNetwork.Yandex
             },
-            eventRevenueCurrency, eventRevenue, nonMandatory
+            eventRevenueCurrency,
+            eventRevenue,
+            nonMandatory
         )
     }
 

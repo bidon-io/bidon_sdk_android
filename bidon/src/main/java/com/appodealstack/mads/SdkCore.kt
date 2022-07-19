@@ -5,9 +5,11 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import com.appodealstack.mads.analytics.AdRevenueInterceptor
 import com.appodealstack.mads.analytics.BNMediationNetwork
 import com.appodealstack.mads.core.impl.CoreImpl
 import com.appodealstack.mads.core.impl.ListenersHolderImpl
+import com.appodealstack.mads.demands.Ad
 import com.appodealstack.mads.demands.AdListener
 import com.appodealstack.mads.demands.AdRevenueListener
 import com.appodealstack.mads.demands.DemandAd
@@ -53,11 +55,6 @@ interface Core {
      */
     fun getListenerForDemand(demandAd: DemandAd): AdListener
 
-    fun logAdRevenue(
-        monetizationNetwork: String,
-        mediationNetwork: BNMediationNetwork,
-        eventRevenueCurrency: Currency,
-        eventRevenue: Double,
-        nonMandatory: Map<String, String>
-    )
+    fun logAdRevenue(ad: Ad)
+    fun getAdRevenueInterceptor(): AdRevenueInterceptor?
 }

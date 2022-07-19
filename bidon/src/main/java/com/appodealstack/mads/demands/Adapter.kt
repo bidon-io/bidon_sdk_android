@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.ViewGroup
+import com.appodealstack.mads.analytics.BNMediationNetwork
 import com.appodealstack.mads.auctions.AuctionRequest
 
 sealed interface Adapter<T : AdapterParameters> {
@@ -11,7 +12,9 @@ sealed interface Adapter<T : AdapterParameters> {
 
     suspend fun init(activity: Activity, configParams: T)
 
-    interface Mediation<T : AdapterParameters> : Adapter<T>
+    interface Mediation<T : AdapterParameters> : Adapter<T> {
+        val mediationNetwork: BNMediationNetwork
+    }
     interface PostBid<T : AdapterParameters> : Adapter<T>
 }
 

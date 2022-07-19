@@ -15,14 +15,14 @@ interface AdRevenueProvider {
  * Sets AdRevenueListener to New objects (before auction is started)
  */
 interface AdRevenueSource {
-    fun getAdRevenueListener(demandAd: DemandAd): AdRevenueListener?
+    fun getUserAdRevenueListener(demandAd: DemandAd): AdRevenueListener?
     fun setAdRevenueListener(demandAd: DemandAd, adRevenueListener: AdRevenueListener)
 }
 
 class AdRevenueSourceImpl : AdRevenueSource {
     private val adRevenueListeners = mutableMapOf<DemandAd, AdRevenueListener>()
 
-    override fun getAdRevenueListener(demandAd: DemandAd): AdRevenueListener? {
+    override fun getUserAdRevenueListener(demandAd: DemandAd): AdRevenueListener? {
         return adRevenueListeners[demandAd]
     }
 

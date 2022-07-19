@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import com.applovin.sdk.AppLovinSdk
 import com.appodealstack.mads.BidOnInitializer
+import com.appodealstack.mads.analytics.Analytic
+import com.appodealstack.mads.analytics.AnalyticParameters
 import com.appodealstack.mads.demands.Adapter
 import com.appodealstack.mads.demands.AdapterParameters
 import kotlinx.coroutines.CoroutineScope
@@ -14,6 +16,11 @@ object AppLovinDecorator {
 
     fun getInstance(context: Context): AppLovinSdk {
         return AppLovinSdk.getInstance(context)
+    }
+
+    fun register(analyticsClass: Class<out Analytic<*>>, parameters: AnalyticParameters): AppLovinDecorator {
+        BidOnInitializer.registerAnalytics(analyticsClass, parameters)
+        return this
     }
 
     fun register(adapterClass: Class<out Adapter<*>>, parameters: AdapterParameters): AppLovinDecorator {

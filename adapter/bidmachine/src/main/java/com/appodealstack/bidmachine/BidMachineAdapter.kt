@@ -64,13 +64,9 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                     .setListener(object : InterstitialListener {
                         override fun onAdLoaded(interstitialAd: InterstitialAd) {
                             if (!isFinished.getAndSet(true)) {
+                                val bmAuctionResult = interstitialAd.auctionResult
                                 val auctionResult = AuctionResult(
-                                    ad = Ad(
-                                        demandId = BidMachineDemandId,
-                                        demandAd = demandAd,
-                                        price = interstitialAd.auctionResult?.price ?: 0.0,
-                                        sourceAd = interstitialAd
-                                    ),
+                                    ad = bmAuctionResult.asAd(demandAd, interstitialAd),
                                     adProvider = object : AdProvider {
                                         override fun canShow(): Boolean = interstitialAd.canShow()
                                         override fun showAd(activity: Activity?, adParams: Bundle) = interstitialAd.show()
@@ -98,7 +94,10 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                             }
                         }
 
-                        override fun onAdShown(interstitialAd: InterstitialAd) {}
+                        @Deprecated("Deprecated in Java")
+                        override fun onAdShown(interstitialAd: InterstitialAd) {
+                        }
+
                         override fun onAdImpression(interstitialAd: InterstitialAd) {}
                         override fun onAdClicked(interstitialAd: InterstitialAd) {}
                         override fun onAdShowFailed(interstitialAd: InterstitialAd, p1: BMError) {}
@@ -126,12 +125,7 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                         override fun onAdLoaded(rewardedAd: RewardedAd) {
                             if (!isFinished.getAndSet(true)) {
                                 val auctionResult = AuctionResult(
-                                    ad = Ad(
-                                        demandId = BidMachineDemandId,
-                                        demandAd = demandAd,
-                                        price = rewardedAd.auctionResult?.price ?: 0.0,
-                                        sourceAd = rewardedAd
-                                    ),
+                                    ad = rewardedAd.auctionResult.asAd(demandAd, rewardedAd),
                                     adProvider = object : AdProvider {
                                         override fun canShow(): Boolean = rewardedAd.canShow()
                                         override fun showAd(activity: Activity?, adParams: Bundle) = rewardedAd.show()
@@ -159,7 +153,10 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                             }
                         }
 
-                        override fun onAdShown(p0: RewardedAd) {}
+                        @Deprecated("Deprecated in Java")
+                        override fun onAdShown(p0: RewardedAd) {
+                        }
+
                         override fun onAdImpression(p0: RewardedAd) {}
                         override fun onAdClicked(p0: RewardedAd) {}
                         override fun onAdShowFailed(p0: RewardedAd, p1: BMError) {}
@@ -194,12 +191,7 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                     override fun onAdLoaded(view: BannerView) {
                         if (!isFinished.getAndSet(true)) {
                             val auctionResult = AuctionResult(
-                                ad = Ad(
-                                    demandId = BidMachineDemandId,
-                                    demandAd = demandAd,
-                                    price = view.auctionResult?.price ?: 0.0,
-                                    sourceAd = bannerView
-                                ),
+                                ad = view.auctionResult.asAd(demandAd, bannerView),
                                 adProvider = object : AdProvider, AdViewProvider {
                                     override fun canShow(): Boolean = view.canShow()
                                     override fun showAd(activity: Activity?, adParams: Bundle) {}
@@ -228,10 +220,12 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                         }
                     }
 
-                    override fun onAdShown(p0: BannerView) {}
-                    override fun onAdImpression(p0: BannerView) {}
-                    override fun onAdClicked(p0: BannerView) {}
+                    @Deprecated("Deprecated in Java")
+                    override fun onAdShown(p0: BannerView) {
+                    }
 
+                    override fun onAdImpression(view: BannerView) {}
+                    override fun onAdClicked(p0: BannerView) {}
                 })
                 bannerView.load(request)
             }
@@ -240,26 +234,36 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
 
     private fun InterstitialAd.setCoreListener(auctionResult: AuctionResult) {
         val coreListener = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)
+        val demandAd = auctionResult.ad.demandAd
         this.setListener(
             object : InterstitialListener {
-                override fun onAdLoaded(ad: InterstitialAd) {
-                    coreListener.onAdLoaded(auctionResult.ad)
+                override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                    coreListener.onAdLoaded(
+                        interstitialAd.auctionResult.asAd(demandAd, interstitialAd)
+                    )
                 }
 
                 override fun onAdLoadFailed(ad: InterstitialAd, bmError: BMError) {
                     coreListener.onAdDisplayFailed(bmError.asBidonError(demandId))
                 }
 
-                override fun onAdShown(ad: InterstitialAd) {
-                    coreListener.onAdDisplayed(auctionResult.ad)
+                @Deprecated("Deprecated in Java")
+                override fun onAdShown(interstitialAd: InterstitialAd) {
+                    coreListener.onAdDisplayed(
+                        interstitialAd.auctionResult.asAd(demandAd, interstitialAd)
+                    )
                 }
 
-                override fun onAdImpression(ad: InterstitialAd) {
-                    coreListener.onAdImpression(auctionResult.ad)
+                override fun onAdImpression(interstitialAd: InterstitialAd) {
+                    val ad = interstitialAd.auctionResult.asAd(demandAd, interstitialAd)
+                    SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(ad)
+                    coreListener.onAdImpression(ad)
                 }
 
-                override fun onAdClicked(ad: InterstitialAd) {
-                    coreListener.onAdClicked(auctionResult.ad)
+                override fun onAdClicked(interstitialAd: InterstitialAd) {
+                    coreListener.onAdClicked(
+                        interstitialAd.auctionResult.asAd(demandAd, interstitialAd)
+                    )
                 }
 
                 override fun onAdExpired(ad: InterstitialAd) {
@@ -269,8 +273,10 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
                     coreListener.onAdDisplayFailed(bmError.asBidonError(demandId))
                 }
 
-                override fun onAdClosed(ad: InterstitialAd, bmError: Boolean) {
-                    coreListener.onAdHidden(auctionResult.ad)
+                override fun onAdClosed(interstitialAd: InterstitialAd, bmError: Boolean) {
+                    coreListener.onAdHidden(
+                        interstitialAd.auctionResult.asAd(demandAd, interstitialAd)
+                    )
                 }
             }
         )
@@ -278,25 +284,35 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
 
     private fun BannerView.setCoreListener(auctionResult: AuctionResult) {
         val coreListener = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)
+        val demandAd = auctionResult.ad.demandAd
         this.setListener(object : BannerListener {
             override fun onAdLoaded(bannerView: BannerView) {
-                coreListener.onAdLoaded(auctionResult.ad)
+                coreListener.onAdLoaded(
+                    bannerView.auctionResult.asAd(demandAd, bannerView)
+                )
             }
 
             override fun onAdLoadFailed(bannerView: BannerView, bmError: BMError) {
                 coreListener.onAdLoadFailed(bmError.asBidonError(demandId))
             }
 
+            @Deprecated("Deprecated in Java")
             override fun onAdShown(bannerView: BannerView) {
-                coreListener.onAdDisplayed(auctionResult.ad)
+                coreListener.onAdDisplayed(
+                    bannerView.auctionResult.asAd(demandAd, bannerView)
+                )
             }
 
             override fun onAdImpression(bannerView: BannerView) {
-                coreListener.onAdImpression(auctionResult.ad)
+                val ad = bannerView.auctionResult.asAd(demandAd, bannerView)
+                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(ad)
+                coreListener.onAdImpression(ad)
             }
 
             override fun onAdClicked(bannerView: BannerView) {
-                coreListener.onAdClicked(auctionResult.ad)
+                coreListener.onAdClicked(
+                    bannerView.auctionResult.asAd(demandAd, bannerView)
+                )
             }
 
             override fun onAdExpired(bannerView: BannerView) {}
@@ -305,41 +321,56 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
 
     private fun RewardedAd.setCoreListener(auctionResult: AuctionResult) {
         val coreListener = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)
+        val demandAd = auctionResult.ad.demandAd
         this.setListener(
             object : RewardedListener {
-                override fun onAdLoaded(ad: RewardedAd) {
-                    coreListener.onAdLoaded(auctionResult.ad)
+                override fun onAdLoaded(rewardedAd: RewardedAd) {
+                    coreListener.onAdLoaded(
+                        rewardedAd.auctionResult.asAd(demandAd, rewardedAd)
+                    )
                 }
 
                 override fun onAdLoadFailed(ad: RewardedAd, bmError: BMError) {
                     coreListener.onAdDisplayFailed(bmError.asBidonError(demandId))
                 }
 
-                override fun onAdShown(ad: RewardedAd) {
-                    coreListener.onAdDisplayed(auctionResult.ad)
+                @Deprecated("Deprecated in Java")
+                override fun onAdShown(rewardedAd: RewardedAd) {
+                    coreListener.onAdDisplayed(
+                        rewardedAd.auctionResult.asAd(demandAd, rewardedAd)
+                    )
                 }
 
-                override fun onAdImpression(ad: RewardedAd) {
-                    coreListener.onAdImpression(auctionResult.ad)
+                override fun onAdImpression(rewardedAd: RewardedAd) {
+                    val ad = rewardedAd.auctionResult.asAd(demandAd, rewardedAd)
+                    SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(ad)
+                    coreListener.onAdImpression(ad)
                 }
 
-                override fun onAdClicked(ad: RewardedAd) {
-                    coreListener.onAdClicked(auctionResult.ad)
+                override fun onAdClicked(rewardedAd: RewardedAd) {
+                    coreListener.onAdClicked(
+                        rewardedAd.auctionResult.asAd(demandAd, rewardedAd)
+                    )
                 }
 
                 override fun onAdExpired(ad: RewardedAd) {
                 }
 
-                override fun onAdShowFailed(ad: RewardedAd, bmError: BMError) {
+                override fun onAdShowFailed(rewardedAd: RewardedAd, bmError: BMError) {
                     coreListener.onAdDisplayFailed(bmError.asBidonError(demandId))
                 }
 
-                override fun onAdClosed(ad: RewardedAd, bmError: Boolean) {
-                    coreListener.onAdHidden(auctionResult.ad)
+                override fun onAdClosed(rewardedAd: RewardedAd, bmError: Boolean) {
+                    coreListener.onAdHidden(
+                        rewardedAd.auctionResult.asAd(demandAd, rewardedAd)
+                    )
                 }
 
                 override fun onAdRewarded(rewardedAd: RewardedAd) {
-                    coreListener.onUserRewarded(auctionResult.ad, null)
+                    coreListener.onUserRewarded(
+                        ad = rewardedAd.auctionResult.asAd(demandAd, rewardedAd),
+                        reward = null
+                    )
                 }
             }
         )
@@ -350,6 +381,20 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
         BannerSize.LeaderBoard -> BidMachineBannerSize.Size_728x90
         BannerSize.MRec -> BidMachineBannerSize.Size_300x250
         else -> BidMachineBannerSize.Size_320x50
+    }
+
+    private fun io.bidmachine.models.AuctionResult?.asAd(demandAd: DemandAd, sourceAd: Any): Ad {
+        val bmAuctionResult = this
+        return Ad(
+            demandId = demandId,
+            demandAd = demandAd,
+            price = bmAuctionResult?.price ?: 0.0,
+            sourceAd = sourceAd,
+            currency = null,
+            auctionRound = Ad.AuctionRound.PostBid,
+            dsp = bmAuctionResult?.demandSource,
+            monetizationNetwork = demandId.demandId
+        )
     }
 }
 

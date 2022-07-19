@@ -6,8 +6,10 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import com.appodealstack.mads.Core
-import com.appodealstack.mads.analytics.BNMediationNetwork
-import com.appodealstack.mads.analytics.RevenueLogger
+import com.appodealstack.mads.analytics.AdRevenueInterceptor
+import com.appodealstack.mads.analytics.AdRevenueInterceptorHolder
+import com.appodealstack.mads.analytics.AdRevenueInterceptorHolderImpl
+import com.appodealstack.mads.analytics.AdRevenueLogger
 import com.appodealstack.mads.auctions.AdsRepository
 import com.appodealstack.mads.auctions.AdsRepositoryImpl
 import com.appodealstack.mads.auctions.NewAuction
@@ -16,7 +18,6 @@ import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.core.ext.retrieveAuctionRequests
 import com.appodealstack.mads.demands.*
 import com.appodealstack.mads.demands.banners.AutoRefresh
-import java.util.*
 
 internal class CoreImpl(
     private val adsRepository: AdsRepository = AdsRepositoryImpl()
@@ -24,7 +25,8 @@ internal class CoreImpl(
     DemandsSource by DemandsSourceImpl(),
     AnalyticsSource by AnalyticsSourceImpl(),
     ListenersHolder by ListenersHolderImpl(),
-    AutoRefresher by AutoRefresherImpl(adsRepository) {
+    AutoRefresher by AutoRefresherImpl(adsRepository),
+    AdRevenueInterceptorHolder by AdRevenueInterceptorHolderImpl() {
 
     override var isInitialized: Boolean = false
 
@@ -156,6 +158,10 @@ internal class CoreImpl(
         }
     }
 
+    override fun getAdRevenueInterceptor(): AdRevenueInterceptor {
+        return obtainAdRevenueInterceptor()
+    }
+
     override fun getPlacement(demandAd: DemandAd): String? {
         val loadedAdPlacement = adsRepository.getResults(demandAd)
             .map { it.adProvider }.filterIsInstance<PlacementProvider>().firstOrNull()
@@ -187,13 +193,7 @@ internal class CoreImpl(
         }
     }
 
-    override fun logAdRevenue(
-        monetizationNetwork: String,
-        mediationNetwork: BNMediationNetwork,
-        eventRevenueCurrency: Currency,
-        eventRevenue: Double,
-        nonMandatory: Map<String, String>
-    ) {
+    override fun logAdRevenue(ad: Ad) {
         if (!isInitialized) {
             logInternal(Tag, "AdRevenue cannot be logged before Sdk is not initialized")
             return
@@ -202,15 +202,15 @@ internal class CoreImpl(
             logInternal(Tag, "AdRevenue's logger not initialized")
             return
         }
-        analytics.filterIsInstance<RevenueLogger>()
+        val mediationNetwork = adapters.filterIsInstance<Adapter.Mediation<*>>()
+            .lastOrNull()?.mediationNetwork
+        if (mediationNetwork == null) {
+            logInternal(Tag, "Mediation demand not initialized")
+            return
+        }
+        analytics.filterIsInstance<AdRevenueLogger>()
             .forEach {
-                it.logAdRevenue(
-                    monetizationNetwork = monetizationNetwork,
-                    mediationNetwork = mediationNetwork,
-                    eventRevenueCurrency = eventRevenueCurrency,
-                    eventRevenue = eventRevenue,
-                    nonMandatory = nonMandatory,
-                )
+                it.logAdRevenue(mediationNetwork, ad)
             }
     }
 

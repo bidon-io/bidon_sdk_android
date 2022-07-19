@@ -10,4 +10,3 @@ internal interface ListenersHolder {
     fun addUserListener(demandAd: DemandAd, adListener: AdListener?)
     fun getListenerForDemand(demandAd: DemandAd): AdListener
 }
-

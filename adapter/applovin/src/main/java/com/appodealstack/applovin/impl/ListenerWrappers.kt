@@ -4,31 +4,30 @@ import com.applovin.mediation.*
 import com.applovin.mediation.ads.MaxAdView
 import com.applovin.mediation.ads.MaxInterstitialAd
 import com.applovin.mediation.ads.MaxRewardedAd
+import com.appodealstack.applovin.asAd
 import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.auctions.AuctionResult
-import com.appodealstack.mads.core.ext.logInternal
-import com.appodealstack.mads.demands.Ad
-import com.appodealstack.mads.demands.AdListener
 import com.appodealstack.mads.demands.RewardedAdListener
 
 internal fun MaxRewardedAd.setCoreListener(auctionResult: AuctionResult) {
     val core = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)
+    val demandAd = auctionResult.ad.demandAd
     this.setListener(
         object : MaxRewardedAdListener {
-            override fun onAdLoaded(ad: MaxAd?) {
-                core.onAdLoaded(auctionResult.ad)
+            override fun onAdLoaded(maxAd: MaxAd?) {
+                core.onAdLoaded(maxAd.asAd(demandAd))
             }
 
-            override fun onAdDisplayed(ad: MaxAd?) {
-                core.onAdDisplayed(auctionResult.ad)
+            override fun onAdDisplayed(maxAd: MaxAd?) {
+                core.onAdDisplayed(maxAd.asAd(demandAd))
             }
 
-            override fun onAdHidden(ad: MaxAd?) {
-                core.onAdHidden(auctionResult.ad)
+            override fun onAdHidden(maxAd: MaxAd?) {
+                core.onAdHidden(maxAd.asAd(demandAd))
             }
 
-            override fun onAdClicked(ad: MaxAd?) {
-                core.onAdClicked(auctionResult.ad)
+            override fun onAdClicked(maxAd: MaxAd?) {
+                core.onAdClicked(maxAd.asAd(demandAd))
             }
 
             override fun onAdLoadFailed(adUnitId: String?, error: MaxError) {
@@ -39,17 +38,18 @@ internal fun MaxRewardedAd.setCoreListener(auctionResult: AuctionResult) {
                 core.onAdDisplayFailed(error.asBidonError())
             }
 
-            override fun onRewardedVideoStarted(ad: MaxAd?) {
-                core.onRewardedStarted(auctionResult.ad)
+            override fun onRewardedVideoStarted(maxAd: MaxAd?) {
+                core.onRewardedStarted(maxAd.asAd(demandAd))
             }
 
-            override fun onRewardedVideoCompleted(ad: MaxAd?) {
-                core.onRewardedCompleted(auctionResult.ad)
+            override fun onRewardedVideoCompleted(maxAd: MaxAd?) {
+                core.onRewardedCompleted(maxAd.asAd(demandAd))
             }
 
             override fun onUserRewarded(ad: MaxAd?, reward: MaxReward?) {
                 core.onUserRewarded(
-                    auctionResult.ad, reward?.let {
+                    ad = ad.asAd(demandAd),
+                    reward = reward?.let {
                         RewardedAdListener.Reward(
                             label = reward.label ?: "",
                             amount = reward.amount
@@ -63,22 +63,23 @@ internal fun MaxRewardedAd.setCoreListener(auctionResult: AuctionResult) {
 
 internal fun MaxAdView.setCoreListener(auctionResult: AuctionResult) {
     val core = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)
+    val demandAd = auctionResult.ad.demandAd
     this.setListener(
         object : MaxAdViewAdListener {
-            override fun onAdLoaded(ad: MaxAd?) {
-                core.onAdLoaded(auctionResult.ad)
+            override fun onAdLoaded(maxAd: MaxAd?) {
+                core.onAdLoaded(maxAd.asAd(demandAd))
             }
 
-            override fun onAdDisplayed(ad: MaxAd?) {
-                core.onAdDisplayed(auctionResult.ad)
+            override fun onAdDisplayed(maxAd: MaxAd?) {
+                core.onAdDisplayed(maxAd.asAd(demandAd))
             }
 
-            override fun onAdHidden(ad: MaxAd?) {
-                core.onAdHidden(auctionResult.ad)
+            override fun onAdHidden(maxAd: MaxAd?) {
+                core.onAdHidden(maxAd.asAd(demandAd))
             }
 
-            override fun onAdClicked(ad: MaxAd?) {
-                core.onAdClicked(auctionResult.ad)
+            override fun onAdClicked(maxAd: MaxAd?) {
+                core.onAdClicked(maxAd.asAd(demandAd))
             }
 
             override fun onAdLoadFailed(adUnitId: String?, error: MaxError) {
