@@ -16,7 +16,7 @@
 
 ### Dependencies (Recommended)
 
-To integrate the AppLovin Decorator through Dependencies, first add the following lines to your Podfile:
+To integrate the AppLovin Decorator through Dependencies, first add the following lines to your `build.gradle` (:app):
 
 ``` kotlin
 dependencies {
@@ -29,6 +29,8 @@ dependencies {
 
 # For usage of MMP uncomment following lines
     implementation 'com.appodealstack.bidon:appsflyer-adapter:1.0.0'
+   
+    ...
 }
 
 ```
