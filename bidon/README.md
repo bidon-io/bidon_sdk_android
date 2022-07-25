@@ -18,22 +18,22 @@
 
 To integrate the AppLovin Decorator through Dependencies, first add the following lines to your Podfile:
 
-``` ruby
+``` kotlin
 dependencies {
     implementation 'com.appodealstack.bidon:bidon-sdk:1.0.0'
     implementation 'com.appodealstack.bidon:applovin-decorator:1.0.0'
 
 # For usage of Demand Sources uncomment following lines
-#     implementation 'com.appodealstack.bidon:bidmachine-adapter:1.0.0'
-#     implementation 'com.appodealstack.bidon:admob-adapter:1.0.0'
+    implementation 'com.appodealstack.bidon:bidmachine-adapter:1.0.0'
+    implementation 'com.appodealstack.bidon:admob-adapter:1.0.0'
 
 # For usage of MMP uncomment following lines
-#     implementation 'com.appodealstack.bidon:appsflyer-adapter:1.0.0'
+    implementation 'com.appodealstack.bidon:appsflyer-adapter:1.0.0'
 }
 
 ```
 
-Then sync project:
+Then sync project.
 
 
 ### Manual
@@ -43,8 +43,6 @@ Then sync project:
 ## Demand Sources
 
 For using of BidMachine and GoogleMobileAds SDK in postbid you will need to register their's adapters before initialization of the SDK
-
-_Kotlin_ example
 
 ```kotlin
 AppLovinDecorator
@@ -73,8 +71,6 @@ AppLovinDecorator
 
 For using of AppsFlyer as ad revenue tracking partner you will need to register its adapter before initialization of the SDK
 
-_Kotlin_ example
-
 ```kotlin
 AppLovinDecorator
     .register(
@@ -88,8 +84,6 @@ AppLovinDecorator
 
 ## Initialize the SDK
 
-_Kotlin_ example
-
 ```kotlin
 AppLovinDecorator.getInstance(activity).mediationProvider = "max"
 AppLovinDecorator
@@ -99,7 +93,6 @@ AppLovinDecorator
 ```
 
 ## Full initialization code
-_Kotlin_ example
 
 ```kotlin
 AppLovinDecorator.getInstance(activity).mediationProvider = "max"
