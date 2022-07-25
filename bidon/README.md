@@ -261,7 +261,7 @@ data class Reward(
 )
 ```
 
-## Source Applovin Ad objects
+### Source Applovin Ad objects
 
 Callbacks `BNRewardedListener`, `BNInterstitialListener` and `BNMaxAdViewAdListener` return `Ad`-object with parameter `adSource: Any`, which contains a source demand-winner Ad-object.
 
@@ -277,7 +277,7 @@ val maxAdView = ad.sourceAd as? com.applovin.mediation.ads.MaxAdView // for bann
 
 
 ## Banner
-### Adding banner programmatically
+### Loading and Showing Banners programmatically
 
 To load a banner AdView, get an instance of a `BNMaxAdView` class that corresponds to your rewarded ad unit and then call its `loadAd` method. Implement `BNMaxAdViewAdListener` to be notified about banner-related events.
 
@@ -310,7 +310,7 @@ class MainActivity : FragmentActivity() {
 ```
 
 
-### Adding banner using XML-layout
+### Loading and Showing Banners in Layout Editor 
 
 Alternatively, you can add BNMaxAdView banners to your view layout XML. 
 
