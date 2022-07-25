@@ -1,16 +1,15 @@
 package com.appodeal.mads.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 
 @Composable
 internal fun AppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,//isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colors = DarkColors, //if (darkTheme) DarkColors else LightColors,
+        colors = if (darkTheme) DarkColors else LightColors,
         typography = AppTypography,
         shapes = AppShapes,
         content = content

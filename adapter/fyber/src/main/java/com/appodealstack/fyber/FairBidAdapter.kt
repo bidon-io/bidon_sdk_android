@@ -15,7 +15,6 @@ import com.appodealstack.mads.SdkCore
 import com.appodealstack.mads.analytics.BNMediationNetwork
 import com.appodealstack.mads.auctions.AuctionRequest
 import com.appodealstack.mads.auctions.AuctionResult
-import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.*
 import com.fyber.FairBid
 import com.fyber.fairbid.ads.*
@@ -25,7 +24,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.util.*
 
 val FairBidDemandId = DemandId("fair_bid")
 
@@ -81,6 +79,19 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
         rewardedInterceptorFlow.initRewardedListener()
     }
 
+    private fun ImpressionData?.asAd(demandAd: DemandAd, placementId: String): Ad {
+        return Ad(
+            demandId = demandId,
+            demandAd = demandAd,
+            price = this?.netPayout ?: 0.0,
+            sourceAd = placementId, // Cause FairBid is a Singleton
+            monetizationNetwork = this?.networkInstanceId,
+            dsp = this?.demandSource,
+            auctionRound = Ad.AuctionRound.Mediation,
+            currencyCode = this?.currency,
+        )
+    }
+
     override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
         return AuctionRequest {
             val placementId = adParams.getString(PlacementKey) ?: fairBidParameters?.interstitialPlacementIds?.first()
@@ -96,26 +107,9 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
             return@AuctionRequest when (loadingResult) {
                 is InterstitialInterceptor.Loaded -> {
                     val impressionData = Interstitial.getImpressionData(placementId)
-                    val ad = Ad(
-                        demandId = demandId,
-                        demandAd = demandAd,
-                        price = impressionData?.netPayout ?: 0.0,
-                        sourceAd = placementId, // Cause FairBid is a Singleton
-                        monetizationNetwork = impressionData?.networkInstanceId,
-                        dsp = impressionData?.demandSource,
-                        auctionRound = Ad.AuctionRound.Mediation,
-                        currency = impressionData?.currency?.let {
-                            try {
-                                Currency.getInstance(it)
-                            } catch (e: Exception) {
-                                logInternal("FairBidAdapter", "Error retrieving currency from: $it", e)
-                                null
-                            }
-                        },
-                    )
                     Result.success(
                         AuctionResult(
-                            ad = ad,
+                            ad = impressionData.asAd(demandAd, placementId),
                             adProvider = object : AdProvider {
                                 override fun canShow(): Boolean = Interstitial.isAvailable(placementId)
                                 override fun destroy() {}
@@ -159,26 +153,9 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
             return@AuctionRequest when (loadingResult) {
                 is RewardedInterceptor.Loaded -> {
                     val impressionData = Rewarded.getImpressionData(placementId)
-                    val ad = Ad(
-                        demandId = demandId,
-                        demandAd = demandAd,
-                        price = impressionData?.netPayout ?: 0.0,
-                        sourceAd = placementId, // Cause FairBid is a Singleton
-                        monetizationNetwork = impressionData?.networkInstanceId,
-                        dsp = impressionData?.demandSource,
-                        auctionRound = Ad.AuctionRound.Mediation,
-                        currency = impressionData?.currency?.let {
-                            try {
-                                Currency.getInstance(it)
-                            } catch (e: Exception) {
-                                logInternal("FairBidAdapter", "Error retrieving currency from: $it", e)
-                                null
-                            }
-                        },
-                    )
                     Result.success(
                         AuctionResult(
-                            ad = ad,
+                            ad = impressionData.asAd(demandAd, placementId),
                             adProvider = object : AdProvider {
                                 override fun canShow(): Boolean = Interstitial.isAvailable(placementId)
                                 override fun destroy() {}
@@ -225,16 +202,7 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
                 is BannerInterceptor.Loaded -> {
                     Result.success(
                         AuctionResult(
-                            ad = Ad(
-                                demandId = demandId,
-                                demandAd = demandAd,
-                                price = 0.0, // unknown until shown
-                                sourceAd = placementId,
-                                monetizationNetwork = null,
-                                dsp = null,
-                                auctionRound = Ad.AuctionRound.Mediation,
-                                currency = null
-                            ),
+                            ad = null.asAd(demandAd, placementId),
                             adProvider = object : AdProvider, AdViewProvider {
                                 override fun getAdView(): View = requireNotNull(adContainer)
                                 override fun canShow(): Boolean = true
@@ -337,65 +305,15 @@ class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
     private fun getCoreListener(placementId: String): Pair<AdListener, Ad> {
         interstitialPlacementsDemandAd[placementId]?.let { demandAd ->
             val impressionData = Interstitial.getImpressionData(placementId)
-            val ad = Ad(
-                demandId = demandId,
-                demandAd = demandAd,
-                price = impressionData?.netPayout ?: 0.0,
-                sourceAd = placementId, // Cause FairBid is a Singleton
-                monetizationNetwork = impressionData?.networkInstanceId,
-                dsp = impressionData?.demandSource,
-                auctionRound = Ad.AuctionRound.Mediation,
-                currency = impressionData?.currency?.let {
-                    try {
-                        Currency.getInstance(it)
-                    } catch (e: Exception) {
-                        logInternal("FairBidAdapter", "Error retrieving currency from: $it", e)
-                        null
-                    }
-                },
-            )
-            return SdkCore.getListenerForDemand(demandAd) to ad
+            return SdkCore.getListenerForDemand(demandAd) to impressionData.asAd(demandAd, placementId)
         }
         rewardedPlacementsDemandAd[placementId]?.let { demandAd ->
             val impressionData = Rewarded.getImpressionData(placementId)
-            val ad = Ad(
-                demandId = demandId,
-                demandAd = demandAd,
-                price = impressionData?.netPayout ?: 0.0,
-                sourceAd = placementId, // Cause FairBid is a Singleton
-                monetizationNetwork = impressionData?.networkInstanceId,
-                dsp = impressionData?.demandSource,
-                auctionRound = Ad.AuctionRound.Mediation,
-                currency = impressionData?.currency?.let {
-                    try {
-                        Currency.getInstance(it)
-                    } catch (e: Exception) {
-                        logInternal("FairBidAdapter", "Error retrieving currency from: $it", e)
-                        null
-                    }
-                },
-            )
-            return SdkCore.getListenerForDemand(demandAd) to ad
+            return SdkCore.getListenerForDemand(demandAd) to impressionData.asAd(demandAd, placementId)
         }
         bannerPlacementsDemandAd[placementId]?.let { demandAd ->
             val impressionData = bannerPlacementsRevenue[placementId]
-            return SdkCore.getListenerForDemand(demandAd) to Ad(
-                demandId = demandId,
-                demandAd = demandAd,
-                price = impressionData?.netPayout ?: 0.0,
-                sourceAd = placementId, // Cause FairBid is a Singleton
-                monetizationNetwork = impressionData?.networkInstanceId,
-                dsp = impressionData?.demandSource,
-                auctionRound = Ad.AuctionRound.Mediation,
-                currency = impressionData?.currency?.let {
-                    try {
-                        Currency.getInstance(it)
-                    } catch (e: Exception) {
-                        logInternal("FairBidAdapter", "Error retrieving currency from: $it", e)
-                        null
-                    }
-                },
-            )
+            return SdkCore.getListenerForDemand(demandAd) to impressionData.asAd(demandAd, placementId)
         }
         error("Unknown DemandAd for placementId=$placementId")
     }

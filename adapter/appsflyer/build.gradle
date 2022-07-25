@@ -31,8 +31,8 @@ android {
 
 dependencies {
     api(project(':bidon'))
-    implementation 'com.appsflyer:af-android-sdk:6.3.2'
-    implementation 'com.appsflyer:adrevenue:6.4.3'
+    implementation 'com.appsflyer:af-android-sdk:6.7.0'
+    implementation 'com.appsflyer:adrevenue:6.5.4'
 
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")

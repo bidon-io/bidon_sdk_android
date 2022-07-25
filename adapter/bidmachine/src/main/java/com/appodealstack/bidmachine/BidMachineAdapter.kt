@@ -390,7 +390,7 @@ class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
             demandAd = demandAd,
             price = bmAuctionResult?.price ?: 0.0,
             sourceAd = sourceAd,
-            currency = null,
+            currencyCode = null,
             auctionRound = Ad.AuctionRound.PostBid,
             dsp = bmAuctionResult?.demandSource,
             monetizationNetwork = demandId.demandId

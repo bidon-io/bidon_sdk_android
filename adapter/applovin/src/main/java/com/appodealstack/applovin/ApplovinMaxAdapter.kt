@@ -91,14 +91,11 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
             setExtraParameter("allow_pause_auto_refresh_immediately", "true")
             stopAutoRefresh()
         }
-        logInternal("Tag", "2")
         return AuctionRequest {
-            logInternal("Tag", "3")
             suspendCancellableCoroutine { continuation ->
                 val isFinished = AtomicBoolean(false)
                 maxAdView.setListener(object : MaxAdViewAdListener {
                     override fun onAdLoaded(maxAd: MaxAd) {
-                        logInternal("Tag", "4")
                         if (!isFinished.getAndSet(true)) {
                             val ad = maxAd.asAd(demandAd)
                             val auctionResult = AuctionResult(
@@ -141,7 +138,6 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
                     }
 
                     override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
-                        logInternal("Tag", "5")
                         if (!isFinished.getAndSet(true)) {
                             // remove listener
                             maxAdView.setListener(null)
@@ -338,7 +334,7 @@ internal fun MaxAd?.asAd(demandAd: DemandAd): Ad {
         monetizationNetwork = maxAd?.networkName,
         dsp = maxAd?.dspId,
         auctionRound = Ad.AuctionRound.Mediation,
-        currency = null
+        currencyCode = null
     )
 }
 

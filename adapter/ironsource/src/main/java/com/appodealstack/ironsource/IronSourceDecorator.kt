@@ -13,6 +13,8 @@ import com.appodealstack.ironsource.interstitial.IronSourceLevelPlayInterstitial
 import com.appodealstack.ironsource.rewarded.IronSourceLevelPlayRewardedListener
 import com.appodealstack.ironsource.rewarded.IronSourceRewardedListener
 import com.appodealstack.ironsource.rewarded.RewardedImpl
+import com.appodealstack.mads.analytics.Analytic
+import com.appodealstack.mads.analytics.AnalyticParameters
 import com.appodealstack.mads.demands.Adapter
 import com.appodealstack.mads.demands.AdapterParameters
 import com.appodealstack.mads.demands.banners.BannerSize
@@ -37,7 +39,15 @@ sealed interface ISDecorator {
     interface Initializer : ISDecorator {
         val activity: Activity?
 
-        fun register(adapterClass: Class<out Adapter<*>>, parameters: AdapterParameters): Initializer
+        fun register(
+            adapterClass: Class<out Analytic<*>>,
+            parameters: AnalyticParameters
+        ): Initializer
+
+        fun register(
+            adapterClass: Class<out Adapter<*>>,
+            parameters: AdapterParameters
+        ): Initializer
 
         fun init(
             activity: Activity,

@@ -49,7 +49,7 @@ class AppsflyerAnalytics : Analytic<AppsflyerParameters>, AdRevenueLogger {
                             }
 
                             override fun onError(p0: Int, p1: String) {
-                                logInternal("AppsflyerAdapter", "Error while Appsflyer initialization: $p0, $p1.")
+                                logInternal(Tag, "Error while Appsflyer initialization: $p0, $p1.")
                                 continuation.resume(Unit)
                             }
                         })
@@ -63,6 +63,7 @@ class AppsflyerAnalytics : Analytic<AppsflyerParameters>, AdRevenueLogger {
     }
 
     override fun logAdRevenue(mediationNetwork: BNMediationNetwork, ad: Ad) {
+        logInternal(Tag, "AdRevenue logged: $ad, mediationNetwork: $mediationNetwork")
         val nonMandatory = mutableMapOf<String, String>().apply {
             ad.dsp?.let { this["demand_source_name"] = it }
             this["ad_type"] = ad.demandAd.adType.adTypeName
@@ -78,7 +79,6 @@ class AppsflyerAnalytics : Analytic<AppsflyerParameters>, AdRevenueLogger {
                 BNMediationNetwork.IronSource -> MediationNetwork.ironsource
                 BNMediationNetwork.ApplovinMax -> MediationNetwork.applovinmax
                 BNMediationNetwork.GoogleAdmob -> MediationNetwork.googleadmob
-                BNMediationNetwork.Mopub -> MediationNetwork.mopub
                 BNMediationNetwork.Fyber -> MediationNetwork.fyber
                 BNMediationNetwork.Appodeal -> MediationNetwork.appodeal
                 BNMediationNetwork.Admost -> MediationNetwork.Admost
@@ -91,5 +91,6 @@ class AppsflyerAnalytics : Analytic<AppsflyerParameters>, AdRevenueLogger {
             nonMandatory
         )
     }
-
 }
+
+private const val Tag = "AppsflyerAdapter"

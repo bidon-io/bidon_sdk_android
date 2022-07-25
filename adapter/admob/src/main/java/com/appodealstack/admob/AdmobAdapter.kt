@@ -240,6 +240,11 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
                 SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(auctionData.ad)
                 coreListener.onAdDisplayed(auctionData.ad)
             }
+
+            override fun onAdImpression() {
+                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(auctionData.ad)
+                coreListener.onAdImpression(auctionData.ad)
+            }
         }
     }
 
@@ -259,8 +264,12 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
             }
 
             override fun onAdShowedFullScreenContent() {
-                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(auctionData.ad)
                 coreListener.onAdDisplayed(auctionData.ad)
+            }
+
+            override fun onAdImpression() {
+                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(auctionData.ad)
+                coreListener.onAdImpression(auctionData.ad)
             }
         }
     }
@@ -277,8 +286,12 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
             }
 
             override fun onAdOpened() {
-                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(auctionData.ad)
                 coreListener.onAdDisplayed(auctionData.ad)
+            }
+
+            override fun onAdImpression() {
+                coreListener.onAdImpression(auctionData.ad)
+                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(auctionData.ad)
             }
         }
     }
@@ -311,7 +324,7 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
             monetizationNetwork = BNMediationNetwork.GoogleAdmob.networkName,
             dsp = null,
             auctionRound = Ad.AuctionRound.PostBid,
-            currency = Currency.getInstance("USD")
+            currencyCode = null
         )
     }
 }

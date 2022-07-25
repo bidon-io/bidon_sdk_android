@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk 31
 
     defaultConfig {
         applicationId "com.appodealstack.demo.ironsource"
@@ -13,7 +13,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        multiDexEnabled = true
+        multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -31,7 +31,6 @@ android {
         jvmTarget = '1.8'
     }
     buildFeatures {
-        viewBinding true
         compose true
     }
     composeOptions {
@@ -43,6 +42,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
     implementation 'com.ironsource.sdk:mediationsdk:7.2.3.1'
 
+    implementation(project(":adapter:appsflyer"))
     implementation(project(":adapter:ironsource"))
     implementation(project(":adapter:bidmachine"))
     implementation(project(":adapter:admob"))
@@ -67,7 +67,7 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.5.0")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha03")
     implementation("androidx.navigation:navigation-compose:2.5.0")
-    implementation("com.google.accompanist:accompanist-flowlayout:0.23.0")
+    implementation("com.google.accompanist:accompanist-flowlayout:0.23.1")
     // Tests
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

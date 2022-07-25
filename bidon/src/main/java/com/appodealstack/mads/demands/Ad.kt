@@ -10,10 +10,13 @@ class Ad(
     val monetizationNetwork: String?,
     val dsp: String?,
     val sourceAd: Any,
-    val currency: Currency?,
+    val currencyCode: String?,
 ) {
+    val currency: Currency?
+        get() = currencyCode?.let { Currency.getInstance(it) }
+
     override fun toString(): String {
-        return "Ad(demandId=${demandId.demandId}, adType=${demandAd.adType}, price=$price, $sourceAd)"
+        return "Ad(demandId=${demandId.demandId}, adType=${demandAd.adType}, price=$price, auctionRound=$auctionRound, monetizationNetwork=$monetizationNetwork, dsp=$dsp, currency=${currency?.currencyCode}, $sourceAd)"
     }
 
     enum class AuctionRound(val roundName: String) {
@@ -21,3 +24,5 @@ class Ad(
         PostBid("postbid"),
     }
 }
+
+const val DefaultCurrencyCode = "USD"

@@ -3,7 +3,6 @@ package com.appodeal.mads.ui.listener
 import com.appodealstack.fyber.banner.FyberBannerListener
 import com.appodealstack.fyber.interstitial.FyberInterstitialListener
 import com.appodealstack.fyber.rewarded.FyberRewardedListener
-import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.Ad
 import com.appodealstack.mads.demands.DemandError
 
@@ -119,7 +118,6 @@ internal fun createFyberRewardedListener(log: (String) -> Unit): FyberRewardedLi
         }
 
         override fun onShow(placementId: String, ad: Ad) {
-            logInternal("++++",">>>>>>>> ")
             log("onShow: ${ad.demandId.demandId}, price=${ad.price}")
         }
 
