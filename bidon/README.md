@@ -18,16 +18,16 @@
 
 To integrate the AppLovin Decorator through Dependencies, first add the following lines to your `build.gradle` (:app):
 
-``` kotlin
+``` ruby
 dependencies {
     implementation 'com.appodealstack.bidon:bidon-sdk:1.0.0'
     implementation 'com.appodealstack.bidon:applovin-decorator:1.0.0'
 
-# For usage of Demand Sources uncomment following lines
+    # Demand Sources
     implementation 'com.appodealstack.bidon:bidmachine-adapter:1.0.0'
     implementation 'com.appodealstack.bidon:admob-adapter:1.0.0'
 
-# For usage of MMP uncomment following lines
+    # MMP
     implementation 'com.appodealstack.bidon:appsflyer-adapter:1.0.0'
    
     ...
