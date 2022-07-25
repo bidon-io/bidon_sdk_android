@@ -314,13 +314,34 @@ class MainActivity : FragmentActivity() {
 
 Alternatively, you can add BNMaxAdView banners to your view layout XML. 
 
-```kotlin
+```xml
 <com.appodealstack.applovin.banner.BNMaxAdView
     android:id="@+id/bannerAdView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:adUnitId="YOUR_AD_UNIT_ID"
     app:adFormat="banner" />
+```
+
+```kotlin
+class MainActivity : FragmentActivity() {
+    private val bannerListener = object : BNMaxAdViewAdListener {
+        override fun onAdExpanded(ad: Ad) {}
+        override fun onAdCollapsed(ad: Ad) {}
+        override fun onAdLoaded(ad: Ad) {}
+        override fun onAdDisplayFailed(error: Throwable) {}
+        override fun onAdClicked(ad: Ad) {}
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val bnMaxAdView = findViewById<BNMaxAdView>(R.id.bannerAdView)
+        bnMaxAdView.setListener(bannerListener)
+        
+        bnMaxAdView.loadAd()
+    }
+}
 ```
 
 ### Stopping and Starting Auto Refresh
