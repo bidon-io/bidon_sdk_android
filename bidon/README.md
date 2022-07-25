@@ -10,7 +10,7 @@
   - [Rewarded Video](#rewarded-video)
   - [Banner](#banner)
   
->  A project should already has integrated [AppLovin MAX](https://dash.applovin.com/documentation/mediation/ios).
+>  A project should already has integrated [AppLovin MAX](https://dash.applovin.com/documentation/mediation/android/getting-started/integration).
 
 ## Installation
 
