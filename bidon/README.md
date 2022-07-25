@@ -252,7 +252,7 @@ class MainActivity : FragmentActivity() {
 
 ### Accessing the Amount and Label for a Rewarded Ad
 
-If winner-network exposes rewarded data, you will be notified in `onUserRewarded(ad: Ad, reward: Reward?)`-callback.
+If demand-winner exposes rewarded data, you will be notified about it in `onUserRewarded(ad: Ad, reward: Reward?)`-callback.
 
 ```kotlin
 data class Reward(
@@ -263,7 +263,7 @@ data class Reward(
 
 ## Source Applovin Ad objects
 
-Callbacks `BNRewardedListener`, `BNInterstitialListener` and `BNMaxAdViewAdListener` return `Ad`-object with parameter `adSource: Any`, which contains a source winner-demand Ad-object.
+Callbacks `BNRewardedListener`, `BNInterstitialListener` and `BNMaxAdViewAdListener` return `Ad`-object with parameter `adSource: Any`, which contains a source demand-winner Ad-object.
 
 If Applovin wins, you can retrieve its source Ad objects:
 
