@@ -274,6 +274,66 @@ val maxAdView = ad.sourceAd as? com.applovin.mediation.ads.MaxAdView // for bann
 ```
 
 
-## Banner
 
-> // TODO: Add docs for banners
+
+## Banner
+### Adding banner programmatically
+
+To load a banner AdView, get an instance of a `BNMaxAdView` class that corresponds to your rewarded ad unit and then call its `loadAd` method. Implement `BNMaxAdViewAdListener` to be notified about banner-related events.
+
+```kotlin
+import android.os.Bundle
+import androidx.fragment.app.FragmentActivity
+import com.appodealstack.applovin.banner.BNMaxAdView
+import com.appodealstack.applovin.impl.BNMaxAdViewAdListener
+import com.appodealstack.mads.demands.Ad
+
+class MainActivity : FragmentActivity() {
+    private val bannerListener = object : BNMaxAdViewAdListener {
+        override fun onAdExpanded(ad: Ad) {}
+        override fun onAdCollapsed(ad: Ad) {}
+        override fun onAdLoaded(ad: Ad) {}
+        override fun onAdDisplayFailed(error: Throwable) {}
+        override fun onAdClicked(ad: Ad) {}
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val bnMaxAdView = BNMaxAdView("YOUR_AD_UNIT_ID", BannerSize.Banner, this)
+        bnMaxAdView.setListener(bannerListener)
+        rootView.addView(bnMaxAdView)
+
+        bnMaxAdView.loadAd()
+    }
+}
+```
+
+
+### Adding banner using XML-layout
+
+Alternatively, you can add BNMaxAdView banners to your view layout XML. 
+
+```kotlin
+<com.appodealstack.applovin.banner.BNMaxAdView
+    android:id="@+id/bannerAdView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:adUnitId="YOUR_AD_UNIT_ID"
+    app:adFormat="banner" />
+```
+
+### Stopping and Starting Auto Refresh
+
+SDK handles auto refresh. By default auto refresh timeout is 10 sec. You can modify default logic by using these methods:
+
+```kotlin
+// start auto refresh
+bnMaxAdView.startAutoRefresh()
+
+// stop auto refresh
+bnMaxAdView.stopAutoRefresh()
+
+//start auto refresh with timeout
+bnMaxAdView.setAutoRefreshTimeout(TIMEOUT)
+```
