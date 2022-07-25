@@ -341,7 +341,7 @@ class MainActivity : FragmentActivity() {
 
 ### Stopping and Starting Auto Refresh
 
-SDK handles auto refresh. By default auto refresh timeout is 10 sec. You can modify default logic by using these methods:
+SDK handles Auto Refresh. By default auto refresh timeout is 10 sec. You can modify default this logic by using these methods:
 
 ```kotlin
 // start auto refresh
