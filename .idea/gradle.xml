@@ -21,6 +21,7 @@
             <option value="$PROJECT_DIR$/appFyber" />
             <option value="$PROJECT_DIR$/appIronSource" />
             <option value="$PROJECT_DIR$/bidon" />
+            <option value="$PROJECT_DIR$/buildSrc" />
           </set>
         </option>
       </GradleProjectSettings>
