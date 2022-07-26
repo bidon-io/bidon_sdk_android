@@ -378,8 +378,9 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
 
         val bannerViewLayout = IronSourceDecorator.createBanner(this, BannerSize.Banner)
-        bannerViewLayout.setLevelPlayBannerListener(bannerListener)
+        rootView.addView(bannerViewLayout)
 
+        bannerViewLayout.setLevelPlayBannerListener(bannerListener)
         IronSourceDecorator.loadBanner(bannerViewLayout)
     }
 }
