@@ -48,7 +48,7 @@ internal fun MutableSharedFlow<RewardedInterceptor>.addRewardedListener() {
     IronSource.setRewardedVideoListener(object : RewardedVideoListener {
         override fun onRewardedVideoAdOpened() {}
         override fun onRewardedVideoAdClosed() {}
-        override fun onRewardedVideoAvailabilityChanged(p0: Boolean) {}
+        override fun onRewardedVideoAvailabilityChanged(available: Boolean) {}
         override fun onRewardedVideoAdRewarded(p0: Placement?) {}
         override fun onRewardedVideoAdShowFailed(p0: IronSourceError?) {}
         override fun onRewardedVideoAdClicked(p0: Placement?) {}

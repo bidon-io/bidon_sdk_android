@@ -25,4 +25,4 @@ class Ad(
     }
 }
 
-const val DefaultCurrencyCode = "USD"
+const val UsdCurrencyCode = "USD"

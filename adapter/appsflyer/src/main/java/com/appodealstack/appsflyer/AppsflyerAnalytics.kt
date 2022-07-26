@@ -8,6 +8,7 @@ import com.appodealstack.mads.analytics.BNMediationNetwork
 import com.appodealstack.mads.analytics.AdRevenueLogger
 import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.demands.Ad
+import com.appodealstack.mads.demands.UsdCurrencyCode
 import com.appodealstack.mads.demands.DemandId
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.adrevenue.AppsFlyerAdRevenue
@@ -71,7 +72,7 @@ class AppsflyerAnalytics : Analytic<AppsflyerParameters>, AdRevenueLogger {
         }
         val monetizationNetwork = ad.monetizationNetwork ?: "unknown"
         val eventRevenue = ad.price
-        val eventRevenueCurrency = ad.currency ?: Currency.getInstance("USD")
+        val eventRevenueCurrency = ad.currency ?: Currency.getInstance(UsdCurrencyCode)
 
         AppsFlyerAdRevenue.logAdRevenue(
             monetizationNetwork,

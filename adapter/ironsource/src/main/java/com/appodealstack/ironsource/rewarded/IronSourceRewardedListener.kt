@@ -5,6 +5,7 @@ import com.appodealstack.mads.demands.RewardedAdListener
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
 
 interface IronSourceRewardedListener {
+    fun onRewardedVideoAvailabilityChanged(available: Boolean)
     fun onRewardedVideoAdOpened()
     fun onRewardedVideoAdClosed()
     fun onRewardedVideoAdStarted()

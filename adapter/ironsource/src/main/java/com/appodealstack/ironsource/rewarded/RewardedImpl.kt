@@ -17,20 +17,24 @@ internal class RewardedImpl : ISDecorator.Rewarded {
         SdkCore.setListener(demandAd, object : AdListener {
             override fun onAdLoaded(ad: Ad) {
                 userLevelPlayListener?.onAdReady(ad)
+                userListener?.onRewardedVideoAvailabilityChanged(available = true)
             }
 
             override fun onAdLoadFailed(cause: Throwable) {
                 userLevelPlayListener?.onAdLoadFailed(cause)
+                userListener?.onRewardedVideoAvailabilityChanged(available = false)
             }
 
             override fun onAdDisplayed(ad: Ad) {
                 userListener?.onRewardedVideoAdOpened()
                 userLevelPlayListener?.onAdOpened(ad)
+                userListener?.onRewardedVideoAvailabilityChanged(available = false)
             }
 
             override fun onAdDisplayFailed(cause: Throwable) {
                 userListener?.onRewardedVideoAdShowFailed(cause)
                 userLevelPlayListener?.onAdShowFailed(cause)
+                userListener?.onRewardedVideoAvailabilityChanged(available = false)
             }
 
             override fun onAdImpression(ad: Ad) {
