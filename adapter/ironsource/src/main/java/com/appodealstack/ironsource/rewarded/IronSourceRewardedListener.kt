@@ -38,4 +38,3 @@ interface IronSourceLevelPlayRewardedListener {
     fun onDemandAdLoadFailed(cause: Throwable) {}
     fun onAuctionFinished(ads: List<Ad>) {}
 }
-
