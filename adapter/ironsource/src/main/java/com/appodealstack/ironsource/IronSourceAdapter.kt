@@ -32,8 +32,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 
-data class IronSourceParameters(val appKey: String, val adUnit: IronSource.AD_UNIT? = null) : AdapterParameters
-
 val IronSourceDemandId = DemandId("ironsource")
 
 class IronSourceAdapter : Adapter.Mediation<IronSourceParameters>,

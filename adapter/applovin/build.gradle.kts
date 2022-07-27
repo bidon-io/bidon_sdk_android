@@ -4,7 +4,7 @@ plugins {
 }
 
 project.extra.apply {
-    this.set("AdapterArtifactId", "applovin-adapter")
+    this.set("AdapterArtifactId", "applovin-decorator")
     this.set("AdapterVersionName", "0.0.1")
 }
 

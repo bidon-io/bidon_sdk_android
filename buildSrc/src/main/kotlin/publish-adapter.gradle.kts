@@ -1,11 +1,11 @@
 plugins {
     id("maven-publish")
 }
+val githubProperties = java.util.Properties()
+githubProperties.load(java.io.FileInputStream(rootProject.file("github.properties")))
 
 afterEvaluate {
     configure<PublishingExtension> {
-        val githubProperties = java.util.Properties()
-        githubProperties.load(java.io.FileInputStream(rootProject.file("github.properties")))
 
         val getArtifactId = project.getArtifactId()
         val getVersionName = project.getVersionName()
