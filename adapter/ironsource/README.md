@@ -16,7 +16,7 @@
 
 ### Dependencies (Recommended)
 
-Add `BidOn` repository to settings.gradle.kts:
+Add BidOn-repository to `settings.gradle.kts`:
 ```ruby
 dependencyResolutionManagement {
     repositories {
