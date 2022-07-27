@@ -10,9 +10,12 @@ import com.appodealstack.mads.analytics.AdRevenueInterceptor
 import com.appodealstack.mads.analytics.AdRevenueInterceptorHolder
 import com.appodealstack.mads.analytics.AdRevenueInterceptorHolderImpl
 import com.appodealstack.mads.analytics.AdRevenueLogger
+import com.appodealstack.mads.auctions.*
 import com.appodealstack.mads.auctions.AdsRepository
 import com.appodealstack.mads.auctions.AdsRepositoryImpl
+import com.appodealstack.mads.auctions.AuctionResolversHolder
 import com.appodealstack.mads.auctions.NewAuction
+import com.appodealstack.mads.auctions.impl.AuctionResolversHolderImpl
 import com.appodealstack.mads.core.*
 import com.appodealstack.mads.core.ext.logInternal
 import com.appodealstack.mads.core.ext.retrieveAuctionRequests
@@ -26,7 +29,8 @@ internal class CoreImpl(
     AnalyticsSource by AnalyticsSourceImpl(),
     ListenersHolder by ListenersHolderImpl(),
     AutoRefresher by AutoRefresherImpl(adsRepository),
-    AdRevenueInterceptorHolder by AdRevenueInterceptorHolderImpl() {
+    AdRevenueInterceptorHolder by AdRevenueInterceptorHolderImpl(),
+    AuctionResolversHolder by AuctionResolversHolderImpl() {
 
     override var isInitialized: Boolean = false
 
@@ -36,7 +40,7 @@ internal class CoreImpl(
             return
         }
         if (!adsRepository.isAuctionActive(demandAd)) {
-            val auction = NewAuction
+            val auction = NewAuction.withResolver(getAuctionResolver(demandAd))
             adsRepository.saveAuction(demandAd, auction)
             auction.start(
                 mediationRequests = adapters
@@ -191,6 +195,10 @@ internal class CoreImpl(
         adsRepository.getResults(demandAd).forEach { auctionResult ->
             (auctionResult.adProvider as? PlacementProvider)?.setPlacement(placement)
         }
+    }
+
+    override fun saveAuctionResolver(demandAd: DemandAd, auctionResolver: AuctionResolver) {
+        TODO("Not yet implemented")
     }
 
     override fun logAdRevenue(ad: Ad) {

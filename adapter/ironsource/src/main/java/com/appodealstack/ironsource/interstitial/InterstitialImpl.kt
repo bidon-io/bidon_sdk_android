@@ -6,6 +6,7 @@ import com.appodealstack.ironsource.ISDecorator
 import com.appodealstack.ironsource.IronSourceDecorator
 import com.appodealstack.ironsource.PlacementKey
 import com.appodealstack.mads.SdkCore
+import com.appodealstack.mads.auctions.AuctionResolver
 import com.appodealstack.mads.demands.*
 
 internal class InterstitialImpl : ISDecorator.Interstitial {
@@ -94,5 +95,13 @@ internal class InterstitialImpl : ISDecorator.Interstitial {
             demandAd = demandAd,
             adParams = bundleOf(PlacementKey to placementName)
         )
+    }
+
+    override fun hasInterstitial(): Boolean {
+        return SdkCore.canShow(demandAd)
+    }
+
+    override fun setInterstitialAuctionResolver(auctionResolver: AuctionResolver) {
+        SdkCore.saveAuctionResolver(demandAd, auctionResolver)
     }
 }

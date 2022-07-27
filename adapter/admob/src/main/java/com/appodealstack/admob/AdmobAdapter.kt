@@ -184,38 +184,43 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
                     val bannerSize = adParams.getInt(BannerSizeKey, BannerSize.Banner.ordinal).let {
                         BannerSize.values()[it]
                     }
-                    adView.setAdSize(bannerSize.asAdmobAdSize())
-                    adView.adUnitId = bannersAdUnits.getUnitId(data?.priceFloor ?: 0.0).value
-                    adView.adListener = object : AdListener() {
-                        override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                            if (!isFinished.getAndSet(true)) {
-                                continuation.resume(Result.failure(loadAdError.asBidonError()))
+                    val admobBannerSize = bannerSize.asAdmobAdSize()
+                    if (admobBannerSize != null) {
+                        adView.setAdSize(admobBannerSize)
+                        adView.adUnitId = bannersAdUnits.getUnitId(data?.priceFloor ?: 0.0).value
+                        adView.adListener = object : AdListener() {
+                            override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                                if (!isFinished.getAndSet(true)) {
+                                    continuation.resume(Result.failure(loadAdError.asBidonError()))
+                                }
+                            }
+
+                            override fun onAdLoaded() {
+                                val ad = asAd(
+                                    demandAd = demandAd,
+                                    price = bannersAdUnits.getPrice(unitId = adView.adUnitId),
+                                    sourceAd = adView
+                                )
+                                val auctionResult = AuctionResult(
+                                    ad = ad,
+                                    adProvider = object : AdProvider, AdViewProvider {
+                                        override fun canShow(): Boolean = true
+                                        override fun destroy() {
+                                            adView.destroy()
+                                        }
+
+                                        override fun showAd(activity: Activity?, adParams: Bundle) {}
+                                        override fun getAdView(): View = adView
+                                    }
+                                )
+                                adView.setCoreListener(demandAd, auctionResult)
+                                continuation.resume(Result.success(auctionResult))
                             }
                         }
-
-                        override fun onAdLoaded() {
-                            val ad = asAd(
-                                demandAd = demandAd,
-                                price = bannersAdUnits.getPrice(unitId = adView.adUnitId),
-                                sourceAd = adView
-                            )
-                            val auctionResult = AuctionResult(
-                                ad = ad,
-                                adProvider = object : AdProvider, AdViewProvider {
-                                    override fun canShow(): Boolean = true
-                                    override fun destroy() {
-                                        adView.destroy()
-                                    }
-
-                                    override fun showAd(activity: Activity?, adParams: Bundle) {}
-                                    override fun getAdView(): View = adView
-                                }
-                            )
-                            adView.setCoreListener(demandAd, auctionResult)
-                            continuation.resume(Result.success(auctionResult))
-                        }
+                        adView.loadAd(adRequest)
+                    } else {
+                        continuation.resume(Result.failure(DemandError.BannerSizeNotSupported(demandId)))
                     }
-                    adView.loadAd(adRequest)
                 }
             }
         }
@@ -312,7 +317,7 @@ class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
         BannerSize.Banner -> AdSize.BANNER
         BannerSize.LeaderBoard -> AdSize.LEADERBOARD
         BannerSize.MRec -> AdSize.MEDIUM_RECTANGLE
-        else -> error("Not supported")
+        else -> null
     }
 
     private fun asAd(demandAd: DemandAd, sourceAd: Any, price: Double): Ad {

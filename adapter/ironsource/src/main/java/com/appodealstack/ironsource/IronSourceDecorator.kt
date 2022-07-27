@@ -15,10 +15,10 @@ import com.appodealstack.ironsource.rewarded.IronSourceRewardedListener
 import com.appodealstack.ironsource.rewarded.RewardedImpl
 import com.appodealstack.mads.analytics.Analytic
 import com.appodealstack.mads.analytics.AnalyticParameters
+import com.appodealstack.mads.auctions.AuctionResolver
 import com.appodealstack.mads.demands.Adapter
 import com.appodealstack.mads.demands.AdapterParameters
 import com.appodealstack.mads.demands.banners.BannerSize
-import com.ironsource.mediationsdk.ISBannerSize
 import com.ironsource.mediationsdk.IronSource
 import com.ironsource.mediationsdk.impressionData.ImpressionData
 import com.ironsource.mediationsdk.impressionData.ImpressionDataListener
@@ -69,6 +69,9 @@ sealed interface ISDecorator {
         fun loadInterstitial()
         fun showInterstitial(placementName: String? = null)
         fun showInterstitial(activity: Activity?, placementName: String? = null)
+
+        fun hasInterstitial(): Boolean
+        fun setInterstitialAuctionResolver(auctionResolver: AuctionResolver)
     }
 
     interface Rewarded : ISDecorator {
@@ -78,6 +81,9 @@ sealed interface ISDecorator {
         fun loadRewardedVideo()
         fun showRewardedVideo(placementName: String? = null)
         fun showRewardedVideo(activity: Activity?, placementName: String? = null)
+
+        fun hasRewardedVideo(): Boolean
+        fun setRewardedVideoAuctionResolver(auctionResolver: AuctionResolver)
     }
 
     interface Banner : ISDecorator {
@@ -86,7 +92,8 @@ sealed interface ISDecorator {
         fun destroyBanner(ironSourceBannerLayout: BNIronSourceBannerLayout)
         fun startAutoRefresh(ironSourceBannerLayout: BNIronSourceBannerLayout)
         fun stopAutoRefresh(ironSourceBannerLayout: BNIronSourceBannerLayout)
-        fun setAutoRefreshTimeout(ironSourceBannerLayout: BNIronSourceBannerLayout, timeout: Long)
+        fun setAutoRefreshTimeout(ironSourceBannerLayout: BNIronSourceBannerLayout, timeoutMs: Long)
+        fun setBannerAuctionResolver(ironSourceBannerLayout: BNIronSourceBannerLayout, auctionResolver: AuctionResolver)
 
         interface BannerView {
             fun loadAd(placementName: String? = null)
@@ -96,7 +103,8 @@ sealed interface ISDecorator {
             fun destroy()
             fun startAutoRefresh()
             fun stopAutoRefresh()
-            fun setAutoRefreshTimeout(timeout: Long)
+            fun setAutoRefreshTimeout(timeoutMs: Long)
+            fun setAuctionResolver(auctionResolver: AuctionResolver)
         }
     }
 }

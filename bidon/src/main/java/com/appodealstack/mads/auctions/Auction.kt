@@ -31,7 +31,7 @@ internal interface Auction {
 }
 
 internal class AuctionImpl : Auction {
-    private var auctionResolver: AuctionResolver = DefaultAuctionResolver()
+    private var auctionResolver: AuctionResolver = DefaultAuctionResolver
     private val scope get() = CoroutineScope(Dispatchers.Default)
     private val auctionResults = MutableStateFlow(listOf<AuctionResult>())
     private val isAuctionActive = MutableStateFlow(true)
