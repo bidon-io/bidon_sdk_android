@@ -69,68 +69,64 @@ fun BannerIronSourceScreen(navController: NavHostController, viewModel: BannerIr
             }
         }
 
-        Column(
+        LazyColumn(
             modifier = Modifier
+                .padding(horizontal = 24.dp)
                 .fillMaxSize()
-                .padding(24.dp)
         ) {
-            ItemSelector(
-                title = "Ad Format",
-                items = listOf(BannerSize.Banner, BannerSize.Large, BannerSize.MRec),// TODO implement - BannerSize.Smart
-                selectedItem = state.value.adFormat,
-                getItemTitle = {
-                    when (it) {
-                        BannerSize.Banner -> "Banner 320x50"
-                        BannerSize.MRec -> "Rectangle 300x250"
-                        BannerSize.Large -> "Large 320x90"
-                        BannerSize.Smart -> "Smart 320x50/728x90"
-                        else -> error("Not supported")
+            item {
+                ItemSelector(
+                    title = "Ad Format",
+                    items = listOf(BannerSize.Banner, BannerSize.Large, BannerSize.MRec),// TODO implement - BannerSize.Smart
+                    selectedItem = state.value.adFormat,
+                    getItemTitle = {
+                        when (it) {
+                            BannerSize.Banner -> "Banner 320x50"
+                            BannerSize.MRec -> "Rectangle 300x250"
+                            BannerSize.Large -> "Large 320x90"
+                            BannerSize.Smart -> "Smart 320x50/728x90"
+                            else -> error("Not supported")
+                        }
+                    },
+                    onItemClicked = {
+                        viewModel.setBannerSize(bannerSize = it)
                     }
-                },
-                onItemClicked = {
-                    viewModel.setBannerSize(bannerSize = it)
+                )
+                Spacer(modifier = Modifier.padding(top = 16.dp))
+                val autoRefreshText = "AutoRefresh " + if (state.value.autoRefreshTtl / 1000 == 0L) {
+                    "Off"
+                } else {
+                    "each ${state.value.autoRefreshTtl / 1000} sec."
                 }
-            )
-            Spacer(modifier = Modifier.padding(top = 16.dp))
-            val autoRefreshText = "AutoRefresh " + if (state.value.autoRefreshTtl / 1000 == 0L) {
-                "Off"
-            } else {
-                "each ${state.value.autoRefreshTtl / 1000} sec."
-            }
-            Body2Text(text = autoRefreshText)
-            Slider(
-                value = (state.value.autoRefreshTtl / 1000).toFloat(),
-                onValueChange = {
-                    viewModel.setAutoRefresh((it * 1000).toLong())
-                },
-                steps = 30,
-                valueRange = 0f..30f
-            )
-            AppButton(text = "Create banner") {
-                viewModel.createAd(context)
-            }
-            if (state.value.bannerAdView != null) {
-                AppButton(text = "Load") {
-                    viewModel.loadAd()
+                Body2Text(text = autoRefreshText)
+                Slider(
+                    value = (state.value.autoRefreshTtl / 1000).toFloat(),
+                    onValueChange = {
+                        viewModel.setAutoRefresh((it * 1000).toLong())
+                    },
+                    steps = 30,
+                    valueRange = 0f..30f
+                )
+                AppButton(text = "Create banner") {
+                    viewModel.createAd(context)
                 }
-                AppButton(text = "Destroy") {
-                    viewModel.destroyAd()
-                }
-            }
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 24.dp)
-            ) {
-                items(state.value.logs) { logLine ->
-                    Column(
-                        modifier = Modifier
-                            .padding(bottom = 2.dp)
-                            .background(MaterialTheme.colors.secondary, MaterialTheme.shapes.medium)
-                            .padding(4.dp)
-                    ) {
-                        Body2Text(text = logLine)
+                if (state.value.bannerAdView != null) {
+                    AppButton(text = "Load") {
+                        viewModel.loadAd()
                     }
+                    AppButton(text = "Destroy") {
+                        viewModel.destroyAd()
+                    }
+                }
+            }
+            items(state.value.logs) { logLine ->
+                Column(
+                    modifier = Modifier
+                        .padding(bottom = 2.dp)
+                        .background(MaterialTheme.colors.secondary, MaterialTheme.shapes.medium)
+                        .padding(4.dp)
+                ) {
+                    Body2Text(text = logLine)
                 }
             }
         }
