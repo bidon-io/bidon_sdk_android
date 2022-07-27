@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.appodealstack.mads.analytics.AdRevenueInterceptor
 import com.appodealstack.mads.analytics.BNMediationNetwork
+import com.appodealstack.mads.auctions.AuctionResolver
 import com.appodealstack.mads.core.impl.CoreImpl
 import com.appodealstack.mads.core.impl.ListenersHolderImpl
 import com.appodealstack.mads.demands.Ad
@@ -44,6 +45,8 @@ interface Core {
 
     fun getPlacement(demandAd: DemandAd): String?
     fun setPlacement(demandAd: DemandAd, placement: String?)
+
+    fun saveAuctionResolver(demandAd: DemandAd, auctionResolver: AuctionResolver)
 
     /**
      * implemented in [AutoRefresherImpl]

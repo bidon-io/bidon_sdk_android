@@ -4,7 +4,6 @@ import android.app.Activity
 import com.appodealstack.admob.AdmobAdapter
 import com.appodealstack.admob.AdmobParameters
 import com.appodealstack.appsflyer.AppsflyerAnalytics
-import com.appodealstack.appsflyer.AppsflyerDevKey
 import com.appodealstack.appsflyer.AppsflyerParameters
 import com.appodealstack.bidmachine.BidMachineAdapter
 import com.appodealstack.bidmachine.BidMachineParameters
@@ -18,7 +17,7 @@ internal class MainViewModel {
         FairBidDecorator
             .register(
                 AppsflyerAnalytics::class.java,
-                AppsflyerParameters.DevKey(AppsflyerDevKey)
+                AppsflyerParameters.DevKey("XXXXXXXXXXXXX")
             )
             .register(
                 AdmobAdapter::class.java,

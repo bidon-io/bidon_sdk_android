@@ -2,6 +2,7 @@ package com.appodealstack.ironsource.banner
 
 import android.app.Activity
 import com.appodealstack.ironsource.ISDecorator
+import com.appodealstack.mads.auctions.AuctionResolver
 import com.appodealstack.mads.demands.banners.BannerSize
 
 internal class BannerImpl : ISDecorator.Banner {
@@ -19,6 +20,10 @@ internal class BannerImpl : ISDecorator.Banner {
 
     override fun setAutoRefreshTimeout(ironSourceBannerLayout: BNIronSourceBannerLayout, timeoutMs: Long) {
         ironSourceBannerLayout.setAutoRefreshTimeout(timeoutMs)
+    }
+
+    override fun setBannerAuctionResolver(ironSourceBannerLayout: BNIronSourceBannerLayout, auctionResolver: AuctionResolver) {
+        ironSourceBannerLayout.setAuctionResolver(auctionResolver)
     }
 
     override fun loadBanner(ironSourceBannerLayout: BNIronSourceBannerLayout, placementName: String?) {

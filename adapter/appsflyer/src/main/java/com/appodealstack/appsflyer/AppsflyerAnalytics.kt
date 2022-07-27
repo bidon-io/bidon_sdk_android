@@ -23,7 +23,7 @@ sealed interface AppsflyerParameters : AnalyticParameters {
      * [AppsFlyerLib] - will be initialized by BidOn SDK.
      * Provide [devKey].
      */
-    data class DevKey(val devKey: String = AppsflyerDevKey) : AppsflyerParameters
+    data class DevKey(val devKey: String) : AppsflyerParameters
 
     /**
      * [AppsFlyerLib] should be initialized by publisher.
@@ -31,7 +31,6 @@ sealed interface AppsflyerParameters : AnalyticParameters {
     object Register : AppsflyerParameters
 }
 
-const val AppsflyerDevKey = "XXXXXXXXXXXXX"
 private val AppsflyerDemandId = DemandId("appsflyer")
 
 class AppsflyerAnalytics : Analytic<AppsflyerParameters>, AdRevenueLogger {

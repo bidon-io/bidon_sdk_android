@@ -6,6 +6,7 @@ import com.appodealstack.ironsource.ISDecorator
 import com.appodealstack.ironsource.IronSourceDecorator
 import com.appodealstack.ironsource.PlacementKey
 import com.appodealstack.mads.SdkCore
+import com.appodealstack.mads.auctions.AuctionResolver
 import com.appodealstack.mads.demands.*
 
 internal class RewardedImpl : ISDecorator.Rewarded {
@@ -107,5 +108,11 @@ internal class RewardedImpl : ISDecorator.Rewarded {
             demandAd = demandAd,
             adParams = bundleOf(PlacementKey to placementName)
         )
+    }
+
+    override fun hasRewardedVideo(): Boolean = SdkCore.canShow(demandAd)
+
+    override fun setRewardedVideoAuctionResolver(auctionResolver: AuctionResolver) {
+        SdkCore.saveAuctionResolver(demandAd, auctionResolver)
     }
 }

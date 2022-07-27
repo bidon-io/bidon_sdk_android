@@ -38,13 +38,13 @@ internal class ISDecoratorInitializerImpl : ISDecorator.Initializer {
         activityRef = WeakReference(activity)
         BidOnInitializer
             .withContext(activity)
-            .registerAdapter(IronSourceAdapter::class.java, IronSourceParameters(appKey))
+            .registerAdapter(IronSourceAdapter::class.java, IronSourceParameters(appKey, adUnit))
             .build {
+                listener.onInitializationComplete()
                 /**
                  * Original IronSource starts loading RewardedAd after init.
                  */
                 IronSourceDecorator.loadRewardedVideo()
-                listener.onInitializationComplete()
             }
     }
 }

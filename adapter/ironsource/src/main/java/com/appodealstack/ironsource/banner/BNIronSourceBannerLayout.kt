@@ -8,6 +8,7 @@ import androidx.core.os.bundleOf
 import com.appodealstack.ironsource.ISDecorator
 import com.appodealstack.ironsource.PlacementKey
 import com.appodealstack.mads.SdkCore
+import com.appodealstack.mads.auctions.AuctionResolver
 import com.appodealstack.mads.core.DefaultAutoRefreshTimeoutMs
 import com.appodealstack.mads.demands.Ad
 import com.appodealstack.mads.demands.AdListener
@@ -134,5 +135,9 @@ class BNIronSourceBannerLayout constructor(
         if (timeoutMs < 0) return
         autoRefresh = if (timeoutMs == 0L) AutoRefresh.Off else AutoRefresh.On(timeoutMs)
         SdkCore.setAutoRefresh(demandAd, autoRefresh)
+    }
+
+    override fun setAuctionResolver(auctionResolver: AuctionResolver) {
+        SdkCore.saveAuctionResolver(demandAd, auctionResolver)
     }
 }
