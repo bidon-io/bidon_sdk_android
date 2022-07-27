@@ -9,6 +9,6 @@ project.extra.apply {
 }
 
 dependencies {
-    api(project(":bidon"))
+    compileOnly(project(":bidon"))
     implementation("com.applovin:applovin-sdk:11.4.4")
 }

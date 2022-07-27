@@ -22,6 +22,9 @@ afterEvaluate {
 
         publications {
             register<MavenPublication>("gpr") {
+//                afterEvaluate {
+//                    from(components["release"])
+//                }
                 groupId = "com.appodealstack.bidon" // Replace with group ID
                 artifactId = getArtifactId
                 version = getVersionName
@@ -38,6 +41,8 @@ afterEvaluate {
                         }
                     }
                 }
+
+                components["android"]
             }
         }
     }
