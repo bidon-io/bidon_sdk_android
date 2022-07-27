@@ -16,6 +16,18 @@
 
 ### Dependencies (Recommended)
 
+Add BidOn-repository to `settings.gradle.kts`:
+```ruby
+dependencyResolutionManagement {
+    repositories {
+        maven {
+            url = uri("https://maven.pkg.github.com/appodeal/Mads-SDK-Android")
+        }
+        ...
+    }
+}
+```
+
 To integrate the ironSource Decorator through Dependencies, first add the following lines to your `build.gradle` (:app):
 
 ``` ruby
