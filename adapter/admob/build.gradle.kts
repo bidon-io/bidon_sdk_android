@@ -1,6 +1,17 @@
 plugins {
     id("common")
+    id("publish-adapter")
 }
+
+project.extra.apply {
+    this.set("AdapterArtifactId", "admob-adapter")
+    this.set("AdapterVersionName", "0.0.1")
+}
+
+//publishInfo {
+//    versionName = "0.0.1"
+//    artifactId = "admob-adapter"
+//}
 
 dependencies {
     compileOnly(project(":bidon"))

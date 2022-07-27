@@ -1,5 +1,11 @@
 plugins {
     id("common")
+    id("publish-adapter")
+}
+
+project.extra.apply {
+    this.set("AdapterArtifactId", "bidmachine-adapter")
+    this.set("AdapterVersionName", "0.0.1")
 }
 
 dependencies {
