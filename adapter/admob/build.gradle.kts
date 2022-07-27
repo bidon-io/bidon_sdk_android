@@ -5,7 +5,7 @@ plugins {
 
 project.extra.apply {
     this.set("AdapterArtifactId", "admob-adapter")
-    this.set("AdapterVersionName", "0.0.2")
+    this.set("AdapterVersionName", Versions.VersionName)
 }
 
 //publishInfo {

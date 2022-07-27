@@ -5,7 +5,7 @@ plugins {
 
 project.extra.apply {
     this.set("AdapterArtifactId", "bidon-sdk")
-    this.set("AdapterVersionName", "0.0.1")
+    this.set("AdapterVersionName", Versions.VersionName)
 }
 
 dependencies {

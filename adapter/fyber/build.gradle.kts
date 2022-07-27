@@ -1,6 +1,6 @@
 plugins {
     id("common")
-    id("publish-adapter")
+  //  id("publish-adapter")
 }
 
 project.extra.apply {

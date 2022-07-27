@@ -1,11 +1,11 @@
 plugins {
     id("common")
-    id("publish-adapter")
+  //  id("publish-adapter")
 }
 
 project.extra.apply {
     this.set("AdapterArtifactId", "applovin-decorator")
-    this.set("AdapterVersionName", "0.0.1")
+    this.set("AdapterVersionName", Versions.VersionName)
 }
 
 dependencies {
