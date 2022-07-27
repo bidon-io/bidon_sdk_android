@@ -21,7 +21,7 @@ Add BidOn-repository to `settings.gradle.kts`:
 dependencyResolutionManagement {
     repositories {
         maven {
-            url = uri("https://maven.pkg.github.com/appodeal/Mads-SDK-Android")
+            url = uri("https://maven.pkg.github.com/appodeal/BidOn-SDK-Android")
         }
         ...
     }
