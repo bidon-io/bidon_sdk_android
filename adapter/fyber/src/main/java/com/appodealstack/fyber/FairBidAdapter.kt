@@ -11,11 +11,11 @@ import com.appodealstack.fyber.interstitial.InterstitialInterceptor
 import com.appodealstack.fyber.interstitial.initInterstitialListener
 import com.appodealstack.fyber.rewarded.RewardedInterceptor
 import com.appodealstack.fyber.rewarded.initRewardedListener
-import com.appodealstack.mads.SdkCore
-import com.appodealstack.mads.analytics.BNMediationNetwork
-import com.appodealstack.mads.auctions.AuctionRequest
-import com.appodealstack.mads.auctions.AuctionResult
-import com.appodealstack.mads.demands.*
+import com.appodealstack.bidon.SdkCore
+import com.appodealstack.bidon.analytics.BNMediationNetwork
+import com.appodealstack.bidon.auctions.AuctionRequest
+import com.appodealstack.bidon.auctions.AuctionResult
+import com.appodealstack.bidon.demands.*
 import com.fyber.FairBid
 import com.fyber.fairbid.ads.*
 import com.fyber.fairbid.ads.banner.BannerOptions

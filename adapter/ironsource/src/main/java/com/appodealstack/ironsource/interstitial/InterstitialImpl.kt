@@ -5,9 +5,9 @@ import androidx.core.os.bundleOf
 import com.appodealstack.ironsource.ISDecorator
 import com.appodealstack.ironsource.IronSourceDecorator
 import com.appodealstack.ironsource.PlacementKey
-import com.appodealstack.mads.SdkCore
-import com.appodealstack.mads.auctions.AuctionResolver
-import com.appodealstack.mads.demands.*
+import com.appodealstack.bidon.SdkCore
+import com.appodealstack.bidon.auctions.AuctionResolver
+import com.appodealstack.bidon.demands.*
 
 internal class InterstitialImpl : ISDecorator.Interstitial {
     private var userListener: IronSourceInterstitialListener? = null

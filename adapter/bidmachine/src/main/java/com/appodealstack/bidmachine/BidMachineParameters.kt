@@ -1,6 +1,6 @@
 package com.appodealstack.bidmachine
 
-import com.appodealstack.mads.demands.AdapterParameters
+import com.appodealstack.bidon.demands.AdapterParameters
 
 data class BidMachineParameters(
     val sourceId: String

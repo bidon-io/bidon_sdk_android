@@ -2,8 +2,8 @@ package com.appodealstack.ironsource.banner
 
 import android.app.Activity
 import com.appodealstack.ironsource.ISDecorator
-import com.appodealstack.mads.auctions.AuctionResolver
-import com.appodealstack.mads.demands.banners.BannerSize
+import com.appodealstack.bidon.auctions.AuctionResolver
+import com.appodealstack.bidon.demands.banners.BannerSize
 
 internal class BannerImpl : ISDecorator.Banner {
     override fun createBanner(activity: Activity, bannerSize: BannerSize): BNIronSourceBannerLayout {

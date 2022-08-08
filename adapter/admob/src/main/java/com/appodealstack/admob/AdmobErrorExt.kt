@@ -1,6 +1,6 @@
 package com.appodealstack.admob
 
-import com.appodealstack.mads.demands.DemandError
+import com.appodealstack.bidon.demands.DemandError
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.LoadAdError
 

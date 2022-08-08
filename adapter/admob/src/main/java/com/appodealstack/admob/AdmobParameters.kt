@@ -1,6 +1,6 @@
 package com.appodealstack.admob
 
-import com.appodealstack.mads.demands.AdapterParameters
+import com.appodealstack.bidon.demands.AdapterParameters
 
 class AdmobParameters(
     val interstitials: Map<Double, String>,

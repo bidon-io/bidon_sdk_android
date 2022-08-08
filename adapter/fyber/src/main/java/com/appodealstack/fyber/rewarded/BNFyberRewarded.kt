@@ -3,10 +3,10 @@ package com.appodealstack.fyber.rewarded
 import android.app.Activity
 import androidx.core.os.bundleOf
 import com.appodealstack.fyber.PlacementKey
-import com.appodealstack.mads.SdkCore
-import com.appodealstack.mads.core.DefaultAutoRefreshTimeoutMs
-import com.appodealstack.mads.demands.*
-import com.appodealstack.mads.demands.banners.AutoRefresh
+import com.appodealstack.bidon.SdkCore
+import com.appodealstack.bidon.core.DefaultAutoRefreshTimeoutMs
+import com.appodealstack.bidon.demands.*
+import com.appodealstack.bidon.demands.banners.AutoRefresh
 import com.fyber.fairbid.ads.ImpressionData
 import com.fyber.fairbid.ads.Interstitial
 import com.fyber.fairbid.ads.LossNotificationReason

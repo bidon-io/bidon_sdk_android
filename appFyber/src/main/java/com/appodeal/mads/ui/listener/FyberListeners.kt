@@ -3,8 +3,8 @@ package com.appodeal.mads.ui.listener
 import com.appodealstack.fyber.banner.FyberBannerListener
 import com.appodealstack.fyber.interstitial.FyberInterstitialListener
 import com.appodealstack.fyber.rewarded.FyberRewardedListener
-import com.appodealstack.mads.demands.Ad
-import com.appodealstack.mads.demands.DemandError
+import com.appodealstack.bidon.demands.Ad
+import com.appodealstack.bidon.demands.DemandError
 
 internal fun createFyberInterstitialListener(log: (String) -> Unit): FyberInterstitialListener {
     return object : FyberInterstitialListener {

@@ -1,7 +1,7 @@
 package com.appodealstack.applovin.rewarded
 
-import com.appodealstack.mads.demands.Ad
-import com.appodealstack.mads.demands.RewardedAdListener
+import com.appodealstack.bidon.demands.Ad
+import com.appodealstack.bidon.demands.RewardedAdListener
 
 interface BNRewardedListener {
     fun onRewardedStarted(ad: Ad)

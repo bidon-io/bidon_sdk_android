@@ -3,9 +3,9 @@ package com.appodeal.mads.ui.listener
 import com.appodealstack.ironsource.banner.IronSourceLevelPlayBannerListener
 import com.appodealstack.ironsource.interstitial.IronSourceLevelPlayInterstitialListener
 import com.appodealstack.ironsource.rewarded.IronSourceLevelPlayRewardedListener
-import com.appodealstack.mads.demands.Ad
-import com.appodealstack.mads.demands.DemandError
-import com.appodealstack.mads.demands.RewardedAdListener
+import com.appodealstack.bidon.demands.Ad
+import com.appodealstack.bidon.demands.DemandError
+import com.appodealstack.bidon.demands.RewardedAdListener
 
 internal fun createIronSourceInterstitialListener(log: (String) -> Unit): IronSourceLevelPlayInterstitialListener {
     return object : IronSourceLevelPlayInterstitialListener {

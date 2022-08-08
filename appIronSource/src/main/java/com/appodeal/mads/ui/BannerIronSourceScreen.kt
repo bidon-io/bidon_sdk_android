@@ -20,8 +20,8 @@ import com.appodeal.mads.component.*
 import com.appodeal.mads.ui.listener.createIronSourceBannerListener
 import com.appodealstack.ironsource.IronSourceDecorator
 import com.appodealstack.ironsource.banner.BNIronSourceBannerLayout
-import com.appodealstack.mads.core.DefaultAutoRefreshTimeoutMs
-import com.appodealstack.mads.demands.banners.BannerSize
+import com.appodealstack.bidon.core.DefaultAutoRefreshTimeoutMs
+import com.appodealstack.bidon.demands.banners.BannerSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

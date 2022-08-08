@@ -1,6 +1,6 @@
 package com.appodealstack.ironsource.interstitial
 
-import com.appodealstack.mads.demands.Ad
+import com.appodealstack.bidon.demands.Ad
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
 
 interface IronSourceInterstitialListener {

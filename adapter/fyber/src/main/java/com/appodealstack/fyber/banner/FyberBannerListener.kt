@@ -1,6 +1,6 @@
 package com.appodealstack.fyber.banner
 
-import com.appodealstack.mads.demands.Ad
+import com.appodealstack.bidon.demands.Ad
 
 interface FyberBannerListener {
      fun onError(placementId: String, cause: Throwable)

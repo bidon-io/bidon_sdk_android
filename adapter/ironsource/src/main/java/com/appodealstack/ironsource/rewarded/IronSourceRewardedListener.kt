@@ -1,7 +1,7 @@
 package com.appodealstack.ironsource.rewarded
 
-import com.appodealstack.mads.demands.Ad
-import com.appodealstack.mads.demands.RewardedAdListener
+import com.appodealstack.bidon.demands.Ad
+import com.appodealstack.bidon.demands.RewardedAdListener
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
 
 interface IronSourceRewardedListener {

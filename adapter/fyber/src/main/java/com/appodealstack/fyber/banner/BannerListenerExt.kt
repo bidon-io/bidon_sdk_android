@@ -1,12 +1,10 @@
 package com.appodealstack.fyber.banner
 
-import com.appodealstack.mads.core.ext.logInternal
+import com.appodealstack.bidon.core.ext.logInternal
 import com.fyber.fairbid.ads.Banner
 import com.fyber.fairbid.ads.ImpressionData
-import com.fyber.fairbid.ads.Interstitial
 import com.fyber.fairbid.ads.banner.BannerError
 import com.fyber.fairbid.ads.banner.BannerListener
-import com.fyber.fairbid.ads.interstitial.InterstitialListener
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 private const val Tag = "BannerListener"

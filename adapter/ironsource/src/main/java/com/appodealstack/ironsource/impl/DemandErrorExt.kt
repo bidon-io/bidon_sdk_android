@@ -1,7 +1,7 @@
 package com.appodealstack.ironsource.impl
 
 import com.appodealstack.ironsource.IronSourceDemandId
-import com.appodealstack.mads.demands.DemandError
+import com.appodealstack.bidon.demands.DemandError
 import com.ironsource.mediationsdk.logger.IronSourceError
 
 internal fun IronSourceError?.asBidonError(): DemandError = when (this?.errorCode) {

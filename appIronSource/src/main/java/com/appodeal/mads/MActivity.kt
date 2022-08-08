@@ -4,8 +4,8 @@ import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import com.appodealstack.ironsource.IronSourceDecorator
 import com.appodealstack.ironsource.banner.IronSourceLevelPlayBannerListener
-import com.appodealstack.mads.demands.Ad
-import com.appodealstack.mads.demands.banners.BannerSize
+import com.appodealstack.bidon.demands.Ad
+import com.appodealstack.bidon.demands.banners.BannerSize
 
 class MainActivity : FragmentActivity() {
     private val bannerListener = object : IronSourceLevelPlayBannerListener {

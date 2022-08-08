@@ -5,9 +5,9 @@ import com.applovin.mediation.ads.MaxAdView
 import com.applovin.mediation.ads.MaxInterstitialAd
 import com.applovin.mediation.ads.MaxRewardedAd
 import com.appodealstack.applovin.asAd
-import com.appodealstack.mads.SdkCore
-import com.appodealstack.mads.auctions.AuctionResult
-import com.appodealstack.mads.demands.RewardedAdListener
+import com.appodealstack.bidon.SdkCore
+import com.appodealstack.bidon.auctions.AuctionResult
+import com.appodealstack.bidon.demands.RewardedAdListener
 
 internal fun MaxRewardedAd.setCoreListener(auctionResult: AuctionResult) {
     val core = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)

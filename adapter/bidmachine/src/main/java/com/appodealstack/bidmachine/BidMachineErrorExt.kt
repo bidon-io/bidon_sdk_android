@@ -1,7 +1,7 @@
 package com.appodealstack.bidmachine
 
-import com.appodealstack.mads.demands.DemandError
-import com.appodealstack.mads.demands.DemandId
+import com.appodealstack.bidon.demands.DemandError
+import com.appodealstack.bidon.demands.DemandId
 import io.bidmachine.utils.BMError
 
 internal fun BMError.asBidonError(demandId: DemandId): DemandError = when (this) {

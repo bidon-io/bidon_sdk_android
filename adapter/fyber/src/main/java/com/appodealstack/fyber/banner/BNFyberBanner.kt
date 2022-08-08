@@ -6,13 +6,13 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import com.appodealstack.fyber.PlacementKey
 import com.appodealstack.fyber.banner.BNFyberBannerOption.Position
-import com.appodealstack.mads.SdkCore
-import com.appodealstack.mads.core.DefaultAutoRefreshTimeoutMs
-import com.appodealstack.mads.demands.Ad
-import com.appodealstack.mads.demands.AdListener
-import com.appodealstack.mads.demands.AdType
-import com.appodealstack.mads.demands.DemandAd
-import com.appodealstack.mads.demands.banners.AutoRefresh
+import com.appodealstack.bidon.SdkCore
+import com.appodealstack.bidon.core.DefaultAutoRefreshTimeoutMs
+import com.appodealstack.bidon.demands.Ad
+import com.appodealstack.bidon.demands.AdListener
+import com.appodealstack.bidon.demands.AdType
+import com.appodealstack.bidon.demands.DemandAd
+import com.appodealstack.bidon.demands.banners.AutoRefresh
 import com.fyber.fairbid.ads.Banner
 
 object BNFyberBanner : FyberBanner by FyberBannerImpl()

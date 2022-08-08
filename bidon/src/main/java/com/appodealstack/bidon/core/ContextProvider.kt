@@ -1,0 +1,14 @@
+package com.appodealstack.bidon.core
+
+import android.app.Activity
+import android.content.Context
+import com.appodealstack.bidon.core.impl.ContextProviderImpl
+
+internal val ContextProvider: IContextProvider by lazy { ContextProviderImpl() }
+
+internal interface IContextProvider {
+    val activity: Activity?
+    val requiredContext: Context
+    fun setContext(context: Context)
+}
+

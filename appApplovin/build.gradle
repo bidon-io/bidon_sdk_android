@@ -48,6 +48,7 @@ dependencies {
     implementation 'com.appsflyer:af-android-sdk:6.7.0'
     implementation 'com.appsflyer:adrevenue:6.5.4'
 
+    implementation(project(":bidon"))
     implementation(project(":adapter:appsflyer"))
     implementation(project(":adapter:applovin"))
     implementation(project(":adapter:bidmachine"))

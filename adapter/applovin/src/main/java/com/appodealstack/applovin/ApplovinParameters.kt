@@ -1,6 +1,6 @@
 package com.appodealstack.applovin
 
-import com.appodealstack.mads.demands.AdapterParameters
+import com.appodealstack.bidon.demands.AdapterParameters
 
 data class ApplovinParameters(
     val bannerAdUnitIds: List<String> = emptyList(),

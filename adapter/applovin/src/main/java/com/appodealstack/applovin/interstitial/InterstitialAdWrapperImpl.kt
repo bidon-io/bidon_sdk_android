@@ -5,8 +5,8 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
 import com.appodealstack.applovin.*
-import com.appodealstack.mads.SdkCore
-import com.appodealstack.mads.demands.*
+import com.appodealstack.bidon.SdkCore
+import com.appodealstack.bidon.demands.*
 import java.lang.ref.WeakReference
 
 internal class InterstitialAdWrapperImpl(

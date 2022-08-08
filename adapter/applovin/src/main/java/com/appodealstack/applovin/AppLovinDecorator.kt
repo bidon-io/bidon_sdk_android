@@ -3,11 +3,11 @@ package com.appodealstack.applovin
 import android.app.Activity
 import android.content.Context
 import com.applovin.sdk.AppLovinSdk
-import com.appodealstack.mads.BidOnInitializer
-import com.appodealstack.mads.analytics.Analytic
-import com.appodealstack.mads.analytics.AnalyticParameters
-import com.appodealstack.mads.demands.Adapter
-import com.appodealstack.mads.demands.AdapterParameters
+import com.appodealstack.bidon.BidOnInitializer
+import com.appodealstack.bidon.analytics.Analytic
+import com.appodealstack.bidon.analytics.AnalyticParameters
+import com.appodealstack.bidon.demands.Adapter
+import com.appodealstack.bidon.demands.AdapterParameters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

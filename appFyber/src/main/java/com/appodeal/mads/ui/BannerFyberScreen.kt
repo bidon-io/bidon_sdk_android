@@ -22,7 +22,7 @@ import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.ui.listener.createFyberBannerListener
 import com.appodealstack.fyber.banner.BNFyberBanner
 import com.appodealstack.fyber.banner.BNFyberBannerOption
-import com.appodealstack.mads.core.DefaultAutoRefreshTimeoutMs
+import com.appodealstack.bidon.core.DefaultAutoRefreshTimeoutMs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

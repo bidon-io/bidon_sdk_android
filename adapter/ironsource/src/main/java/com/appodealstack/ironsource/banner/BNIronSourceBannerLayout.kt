@@ -7,16 +7,16 @@ import android.widget.FrameLayout
 import androidx.core.os.bundleOf
 import com.appodealstack.ironsource.ISDecorator
 import com.appodealstack.ironsource.PlacementKey
-import com.appodealstack.mads.SdkCore
-import com.appodealstack.mads.auctions.AuctionResolver
-import com.appodealstack.mads.core.DefaultAutoRefreshTimeoutMs
-import com.appodealstack.mads.demands.Ad
-import com.appodealstack.mads.demands.AdListener
-import com.appodealstack.mads.demands.AdType
-import com.appodealstack.mads.demands.DemandAd
-import com.appodealstack.mads.demands.banners.AutoRefresh
-import com.appodealstack.mads.demands.banners.BannerSize
-import com.appodealstack.mads.demands.banners.BannerSizeKey
+import com.appodealstack.bidon.SdkCore
+import com.appodealstack.bidon.auctions.AuctionResolver
+import com.appodealstack.bidon.core.DefaultAutoRefreshTimeoutMs
+import com.appodealstack.bidon.demands.Ad
+import com.appodealstack.bidon.demands.AdListener
+import com.appodealstack.bidon.demands.AdType
+import com.appodealstack.bidon.demands.DemandAd
+import com.appodealstack.bidon.demands.banners.AutoRefresh
+import com.appodealstack.bidon.demands.banners.BannerSize
+import com.appodealstack.bidon.demands.banners.BannerSizeKey
 
 class BNIronSourceBannerLayout constructor(
     context: Context,

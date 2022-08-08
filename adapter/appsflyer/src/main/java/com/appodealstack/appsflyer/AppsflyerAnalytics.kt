@@ -2,14 +2,14 @@ package com.appodealstack.appsflyer
 
 import android.app.Application
 import android.content.Context
-import com.appodealstack.mads.analytics.Analytic
-import com.appodealstack.mads.analytics.AnalyticParameters
-import com.appodealstack.mads.analytics.BNMediationNetwork
-import com.appodealstack.mads.analytics.AdRevenueLogger
-import com.appodealstack.mads.core.ext.logInternal
-import com.appodealstack.mads.demands.Ad
-import com.appodealstack.mads.demands.UsdCurrencyCode
-import com.appodealstack.mads.demands.DemandId
+import com.appodealstack.bidon.analytics.Analytic
+import com.appodealstack.bidon.analytics.AnalyticParameters
+import com.appodealstack.bidon.analytics.BNMediationNetwork
+import com.appodealstack.bidon.analytics.AdRevenueLogger
+import com.appodealstack.bidon.core.ext.logInternal
+import com.appodealstack.bidon.demands.Ad
+import com.appodealstack.bidon.demands.UsdCurrencyCode
+import com.appodealstack.bidon.demands.DemandId
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.adrevenue.AppsFlyerAdRevenue
 import com.appsflyer.adrevenue.adnetworks.generic.MediationNetwork
