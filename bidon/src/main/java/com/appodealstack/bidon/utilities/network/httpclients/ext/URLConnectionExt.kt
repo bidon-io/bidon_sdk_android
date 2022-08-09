@@ -37,6 +37,7 @@ internal fun URLConnection.requestRawData(
             writer = BufferedOutputStream(connection.getOutputStream())
             writer.write(requestBody)
         } catch (e: java.lang.Exception) {
+            logInternal("URLConnection", "Error while requesting", e)
             throw HttpError.RequestError
         } finally {
             writer?.flush()
@@ -68,7 +69,10 @@ internal fun URLConnection.requestRawData(
                 length = inputStream.read(buffer)
             }
             val rawResponse = bytesOutputStream.toByteArray()
-            logInternal("URLConnection", " <-- ${request.method} $responseCode ${connection.url}, raw response(size: ${rawResponse.size}, data: ${rawResponse.toHexString()})")
+            logInternal(
+                "URLConnection",
+                " <-- ${request.method} $responseCode ${connection.url}, raw response(size: ${rawResponse.size}, data: ${rawResponse.toHexString()})"
+            )
             rawResponse
         } catch (e: Exception) {
             null

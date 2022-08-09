@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.navigation.compose.rememberNavController
 import com.appodeal.mads.navigation.NavigationGraph
 import com.appodeal.mads.theme.AppTheme
+import com.appodealstack.bidon.TempApi
 
 class ApplovinActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,5 +20,7 @@ class ApplovinActivity : FragmentActivity() {
                 )
             }
         }
+
+        TempApi.start()
     }
 }

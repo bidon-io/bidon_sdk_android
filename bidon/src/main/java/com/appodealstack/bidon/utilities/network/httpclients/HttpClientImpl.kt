@@ -110,7 +110,7 @@ internal class HttpClientImpl(
                         )
                         val result = try {
                             parser(data)?.also {
-                                logInternal(TAG, "<-- ${rawRequest.method}     ${rawRequest.url}, parsed model: $it")
+                                logInternal(TAG, "<-- ${rawRequest.method}     ${rawRequest.url}, decoded response: $it")
                             }
                         } catch (e: Exception) {
                             null
