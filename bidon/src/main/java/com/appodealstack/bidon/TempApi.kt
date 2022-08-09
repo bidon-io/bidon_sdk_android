@@ -1,22 +1,9 @@
 package com.appodealstack.bidon
 
-import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolder
-import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolderImpl
-import com.appodealstack.bidon.auctions.AdsRepository
-import com.appodealstack.bidon.auctions.AdsRepositoryImpl
-import com.appodealstack.bidon.auctions.AuctionResolversHolder
-import com.appodealstack.bidon.auctions.impl.AuctionResolversHolderImpl
 import com.appodealstack.bidon.config.data.ConfigRequestInteractorImpl
 import com.appodealstack.bidon.config.domain.AdapterInfo
 import com.appodealstack.bidon.config.domain.ConfigRequestBody
 import com.appodealstack.bidon.config.domain.ConfigRequestInteractor
-import com.appodealstack.bidon.core.AutoRefresher
-import com.appodealstack.bidon.core.AutoRefresherImpl
-import com.appodealstack.bidon.core.DemandsSource
-import com.appodealstack.bidon.core.ListenersHolder
-import com.appodealstack.bidon.core.impl.DemandsSourceImpl
-import com.appodealstack.bidon.core.impl.ListenersHolderImpl
-import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.di.inject
 import com.appodealstack.bidon.di.registerDependencyInjection
 import kotlinx.coroutines.GlobalScope
@@ -31,26 +18,6 @@ object TempApi {
         registerDependencyInjection {
             factory<ConfigRequestInteractor> {
                 ConfigRequestInteractorImpl()
-            }
-            factory<DemandsSource> {
-                DemandsSourceImpl()
-            }
-            factory<ListenersHolder> {
-                ListenersHolderImpl()
-            }
-            factory<AdRevenueInterceptorHolder> {
-                AdRevenueInterceptorHolderImpl()
-            }
-            factory<AuctionResolversHolder> {
-                AuctionResolversHolderImpl()
-            }
-            factory<AutoRefresher> {
-                AutoRefresherImpl(
-                    adsRepository = get()
-                )
-            }
-            single<AdsRepository> {
-                AdsRepositoryImpl()
             }
         }
         val interactor by inject<ConfigRequestInteractor>()

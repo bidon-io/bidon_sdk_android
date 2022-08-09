@@ -7,19 +7,18 @@ import android.view.View
 import android.view.ViewGroup
 import com.appodealstack.bidon.analytics.AdRevenueInterceptor
 import com.appodealstack.bidon.auctions.AuctionResolver
-import com.appodealstack.bidon.core.impl.CoreImpl
 import com.appodealstack.bidon.core.impl.ListenersHolderImpl
 import com.appodealstack.bidon.demands.Ad
 import com.appodealstack.bidon.demands.AdListener
 import com.appodealstack.bidon.demands.AdRevenueListener
 import com.appodealstack.bidon.demands.DemandAd
 import com.appodealstack.bidon.demands.banners.AutoRefresh
-import com.appodealstack.bidon.di.SimpleInjectionModule
-import java.util.*
+import com.appodealstack.bidon.di.SimpleInjectionModule.initDependencyInjection
+import com.appodealstack.bidon.di.get
 
 val SdkCore: Core by lazy {
-    SimpleInjectionModule.initDependencyInjection()
-    CoreImpl()
+    initDependencyInjection()
+    get()
 }
 
 interface Core {
@@ -52,7 +51,7 @@ interface Core {
     fun saveAuctionResolver(demandAd: DemandAd, auctionResolver: AuctionResolver)
 
     /**
-     * implemented in [AutoRefresherImpl]
+     * implemented in [AutoRefresh]
      */
     fun setAutoRefresh(demandAd: DemandAd, autoRefresh: AutoRefresh)
 
