@@ -1,4 +1,5 @@
 package com.appodealstack.bidon.di
+import com.appodealstack.bidon.di.SimpleInjection.Scope
 
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KClass
@@ -22,8 +23,8 @@ internal inline fun <reified T : Any> inject(): ReadOnlyProperty<Nothing?, T> =
  *     single<A> { AImpl() } // for register Singleton
  * }
  */
-internal fun registerDependencyInjection(module: SimpleInjectionScope.() -> Unit) {
-    SimpleInjectionScope().apply(module)
+internal fun registerDependencyInjection(module: Scope.() -> Unit) {
+    Scope().apply(module)
 }
 
 internal object SimpleInjection {
@@ -53,14 +54,15 @@ internal object SimpleInjection {
             factory()
         }
     }
+
+    internal class Scope {
+        inline fun <reified T : Any> factory(noinline factory: () -> T) {
+            addFactory(factory)
+        }
+
+        inline fun <reified T : Any> single(noinline singleton: () -> T) {
+            addSingleton(singleton)
+        }
+    }
 }
 
-internal class SimpleInjectionScope {
-    inline fun <reified T : Any> factory(noinline factory: () -> T) {
-        SimpleInjection.addFactory(factory)
-    }
-
-    inline fun <reified T : Any> single(noinline singleton: () -> T) {
-        SimpleInjection.addSingleton(singleton)
-    }
-}

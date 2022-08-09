@@ -15,7 +15,6 @@ internal class ConfigRequestInteractorImpl : ConfigRequestInteractor {
 //    private const val BaseUrl = "https://1e69e7f9-a8f2-4cc2-9d30-5a71dd5d6db2.mock.pstmn.io"
 
     private val httpClient: HttpClient = HttpClient.Zip
-
     private val binders: List<DataBinder> = listOf()
 
     override suspend fun request(body: ConfigRequestBody): Result<ConfigResponse> {

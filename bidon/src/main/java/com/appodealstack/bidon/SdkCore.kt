@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.appodealstack.bidon.analytics.AdRevenueInterceptor
 import com.appodealstack.bidon.auctions.AuctionResolver
+import com.appodealstack.bidon.core.InitializationCallback
 import com.appodealstack.bidon.core.impl.ListenersHolderImpl
 import com.appodealstack.bidon.demands.Ad
 import com.appodealstack.bidon.demands.AdListener
@@ -26,6 +27,12 @@ interface Core {
      * Should be changed only in [SdkInitialization]
      */
     var isInitialized: Boolean
+
+    fun init(
+        activity: Activity,
+        appKey: String,
+        callback: InitializationCallback? = null
+    )
 
     fun loadAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle)
     fun loadAdView(

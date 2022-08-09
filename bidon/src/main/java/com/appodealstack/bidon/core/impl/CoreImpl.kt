@@ -9,8 +9,8 @@ import com.appodealstack.bidon.Core
 import com.appodealstack.bidon.analytics.*
 import com.appodealstack.bidon.auctions.*
 import com.appodealstack.bidon.auctions.impl.AuctionResolversHolderImpl
+import com.appodealstack.bidon.core.*
 import com.appodealstack.bidon.core.AutoRefresher
-import com.appodealstack.bidon.core.AutoRefresherImpl
 import com.appodealstack.bidon.core.DemandsSource
 import com.appodealstack.bidon.core.ListenersHolder
 import com.appodealstack.bidon.core.ext.logInternal
@@ -29,6 +29,10 @@ internal class CoreImpl(
     AuctionResolversHolder by get() {
 
     override var isInitialized: Boolean = false
+
+    override fun init(activity: Activity, appKey: String, callback: InitializationCallback?) {
+        TODO("Not yet implemented")
+    }
 
     override fun loadAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle) {
         if (!isInitialized) {
