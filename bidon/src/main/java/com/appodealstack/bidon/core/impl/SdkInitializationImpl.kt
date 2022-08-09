@@ -42,7 +42,7 @@ internal class SdkInitializationImpl : SdkInitialization {
         return this
     }
 
-    override suspend fun build(): InitializationResult {
+    override suspend fun build() {
         logInternal(Tag, "Demands: $demands")
 
         // Init Demands
@@ -63,14 +63,12 @@ internal class SdkInitializationImpl : SdkInitialization {
         }
         demands.clear()
         sdkCore.isInitialized = true
-        return InitializationResult.Success
     }
 
     override fun build(initCallback: InitializationCallback) {
         scope.launch {
-            initCallback.onFinished(
-                result = build()
-            )
+            build()
+            initCallback.onFinished()
         }
     }
 }

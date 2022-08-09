@@ -1,5 +1,6 @@
 package com.appodealstack.bidon.di
 
+import com.appodealstack.bidon.BidONSdk
 import com.appodealstack.bidon.Core
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolder
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolderImpl
@@ -13,6 +14,7 @@ import com.appodealstack.bidon.core.AutoRefresher
 import com.appodealstack.bidon.core.AutoRefresherImpl
 import com.appodealstack.bidon.core.DemandsSource
 import com.appodealstack.bidon.core.ListenersHolder
+import com.appodealstack.bidon.core.impl.BidONSdkImpl
 import com.appodealstack.bidon.core.impl.CoreImpl
 import com.appodealstack.bidon.core.impl.DemandsSourceImpl
 import com.appodealstack.bidon.core.impl.ListenersHolderImpl
@@ -27,6 +29,9 @@ internal object SimpleInjectionModule {
     fun initDependencyInjection() {
         if (!isInitialized.getAndSet(true)) {
             registerDependencyInjection {
+                single<BidONSdk> { BidONSdkImpl() }
+
+
                 factory<ConfigRequestInteractor> { ConfigRequestInteractorImpl() }
                 factory<DemandsSource> { DemandsSourceImpl() }
                 factory<ListenersHolder> { ListenersHolderImpl() }

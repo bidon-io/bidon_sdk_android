@@ -2,7 +2,6 @@ package com.appodealstack.bidon
 
 import android.app.Activity
 import com.appodealstack.bidon.core.InitializationCallback
-import com.appodealstack.bidon.core.InitializationResult
 import com.appodealstack.bidon.demands.Adapter
 import com.appodealstack.bidon.core.impl.SdkInitializationImpl
 import com.appodealstack.bidon.demands.AdapterParameters
@@ -17,6 +16,6 @@ interface SdkInitialization {
         parameters: AdapterParameters?
     ): SdkInitialization
 
-    suspend fun build(): InitializationResult
+    suspend fun build()
     fun build(initCallback: InitializationCallback)
 }
