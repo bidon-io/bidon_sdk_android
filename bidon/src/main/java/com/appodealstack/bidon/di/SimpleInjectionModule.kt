@@ -2,6 +2,7 @@ package com.appodealstack.bidon.di
 
 import com.appodealstack.bidon.BidONSdk
 import com.appodealstack.bidon.Core
+import com.appodealstack.bidon.config.domain.AdapterRegister
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolder
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolderImpl
 import com.appodealstack.bidon.auctions.AdsRepository
@@ -9,6 +10,9 @@ import com.appodealstack.bidon.auctions.AdsRepositoryImpl
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
 import com.appodealstack.bidon.auctions.impl.AuctionResolversHolderImpl
 import com.appodealstack.bidon.config.data.ConfigRequestInteractorImpl
+import com.appodealstack.bidon.config.data.AdapterRegisterImpl
+import com.appodealstack.bidon.config.data.BidONInitializerImpl
+import com.appodealstack.bidon.config.domain.BidONInitializer
 import com.appodealstack.bidon.config.domain.ConfigRequestInteractor
 import com.appodealstack.bidon.core.AutoRefresher
 import com.appodealstack.bidon.core.AutoRefresherImpl
@@ -29,8 +33,18 @@ internal object SimpleInjectionModule {
     fun initDependencyInjection() {
         if (!isInitialized.getAndSet(true)) {
             registerDependencyInjection {
-                single<BidONSdk> { BidONSdkImpl() }
+                single<BidONSdk> {
+                    BidONSdkImpl(
+                        bidONInitializer = get()
+                    )
+                }
 
+                factory<BidONInitializer> {
+                    BidONInitializerImpl(
+                        adapterRegister = get()
+                    )
+                }
+                factory<AdapterRegister> { AdapterRegisterImpl() }
 
                 factory<ConfigRequestInteractor> { ConfigRequestInteractorImpl() }
                 factory<DemandsSource> { DemandsSourceImpl() }

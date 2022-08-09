@@ -1,28 +1,24 @@
-package com.appodealstack.bidon.core.impl
+package com.appodealstack.bidon.config.data
 
 import android.app.Activity
 import com.appodealstack.bidon.Core
 import com.appodealstack.bidon.SdkCore
-import com.appodealstack.bidon.SdkInitialization
+import com.appodealstack.bidon.config.domain.AdapterRegister
 import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.DemandsSource
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.demands.Adapter
 import com.appodealstack.bidon.demands.AdapterParameters
 import com.appodealstack.bidon.demands.Initializable
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withTimeoutOrNull
 
 @Suppress("UNCHECKED_CAST")
-internal class SdkInitializationImpl : SdkInitialization {
+internal class AdapterRegisterImpl : AdapterRegister {
     private val sdkCore: Core = SdkCore
     private val contextProvider = ContextProvider
     private val demands =
         mutableMapOf<Class<Adapter>, Pair<Adapter, AdapterParameters?>>()
-    private val scope: CoroutineScope get() = CoroutineScope(Dispatchers.Default)
-
-    override fun withContext(activity: Activity): SdkInitialization {
+    override fun withContext(activity: Activity): AdapterRegister {
         ContextProvider.setContext(activity)
         return this
     }
@@ -30,7 +26,7 @@ internal class SdkInitializationImpl : SdkInitialization {
     override fun registerAdapter(
         adapterClass: Class<out Adapter>,
         parameters: AdapterParameters?
-    ): SdkInitialization {
+    ): AdapterRegister {
         logInternal(Tag, "Creating instance for: $adapterClass")
         try {
             val instance = adapterClass.newInstance()
@@ -43,22 +39,22 @@ internal class SdkInitializationImpl : SdkInitialization {
     }
 
     override suspend fun build() {
-        logInternal(Tag, "Demands: $demands")
+        logInternal(Tag, "Adapters: $demands")
 
         // Init Demands
         require(sdkCore is DemandsSource)
         demands.forEach { (_, pair) ->
             val (demand, params) = pair
-            logInternal(Tag, "Demand is initializing: $demand")
+            logInternal(Tag, "Adapter is initializing: $demand")
             withTimeoutOrNull(InitializationTimeoutMs) {
                 (demand as? Initializable<AdapterParameters>)?.init(
                     activity = requireNotNull(contextProvider.activity),
                     configParams = requireNotNull(params)
                 )
-                logInternal(Tag, "Demand is initialized: $demand")
+                logInternal(Tag, "Adapter is initialized: $demand")
                 sdkCore.addDemands(demand)
             } ?: run {
-                logInternal(Tag, "Demand not initialized: $demand")
+                logInternal(Tag, "Adapter not initialized: $demand")
             }
         }
         demands.clear()
