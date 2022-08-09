@@ -17,15 +17,16 @@ import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.core.ext.retrieveAuctionRequests
 import com.appodealstack.bidon.demands.*
 import com.appodealstack.bidon.demands.banners.AutoRefresh
+import com.appodealstack.bidon.di.get
 
 internal class CoreImpl(
-    private val adsRepository: AdsRepository = AdsRepositoryImpl()
+    private val adsRepository: AdsRepository = get()
 ) : Core,
-    DemandsSource by DemandsSourceImpl(),
-    ListenersHolder by ListenersHolderImpl(),
-    AutoRefresher by AutoRefresherImpl(adsRepository),
-    AdRevenueInterceptorHolder by AdRevenueInterceptorHolderImpl(),
-    AuctionResolversHolder by AuctionResolversHolderImpl() {
+    DemandsSource by get(),
+    ListenersHolder by get(),
+    AutoRefresher by get(),
+    AdRevenueInterceptorHolder by get(),
+    AuctionResolversHolder by get() {
 
     override var isInitialized: Boolean = false
 

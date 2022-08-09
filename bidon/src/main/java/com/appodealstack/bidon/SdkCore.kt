@@ -14,9 +14,13 @@ import com.appodealstack.bidon.demands.AdListener
 import com.appodealstack.bidon.demands.AdRevenueListener
 import com.appodealstack.bidon.demands.DemandAd
 import com.appodealstack.bidon.demands.banners.AutoRefresh
+import com.appodealstack.bidon.di.SimpleInjectionModule
 import java.util.*
 
-val SdkCore: Core by lazy { CoreImpl() }
+val SdkCore: Core by lazy {
+    SimpleInjectionModule.initDependencyInjection()
+    CoreImpl()
+}
 
 interface Core {
     /**

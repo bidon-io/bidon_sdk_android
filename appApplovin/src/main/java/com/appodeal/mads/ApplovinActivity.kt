@@ -21,6 +21,6 @@ class ApplovinActivity : FragmentActivity() {
             }
         }
 
-        TempApi.start()
+        // TempApi.start()
     }
 }
