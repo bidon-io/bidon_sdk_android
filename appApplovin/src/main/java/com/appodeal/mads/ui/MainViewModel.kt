@@ -18,7 +18,7 @@ internal class MainViewModel {
         AppLovinDecorator
             .register(
                 AppsflyerAnalytics::class.java,
-                AppsflyerParameters.DevKey("XXXXXXXXXXXXX")
+                AppsflyerParameters("XXXXXXXXXXXXX", "---")
             )
             .register(
                 AdmobAdapter::class.java,

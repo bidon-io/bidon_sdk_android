@@ -5,17 +5,19 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import com.appodealstack.bidon.SdkCore
+import com.appodealstack.bidon.analytics.BNMediationNetwork
+import com.appodealstack.bidon.analytics.MediationNetwork
+import com.appodealstack.bidon.auctions.AuctionRequest
+import com.appodealstack.bidon.auctions.AuctionResult
+import com.appodealstack.bidon.config.domain.AdapterInfo
+import com.appodealstack.bidon.demands.*
 import com.appodealstack.fyber.banner.BannerInterceptor
 import com.appodealstack.fyber.banner.initBannerListener
 import com.appodealstack.fyber.interstitial.InterstitialInterceptor
 import com.appodealstack.fyber.interstitial.initInterstitialListener
 import com.appodealstack.fyber.rewarded.RewardedInterceptor
 import com.appodealstack.fyber.rewarded.initRewardedListener
-import com.appodealstack.bidon.SdkCore
-import com.appodealstack.bidon.analytics.BNMediationNetwork
-import com.appodealstack.bidon.auctions.AuctionRequest
-import com.appodealstack.bidon.auctions.AuctionResult
-import com.appodealstack.bidon.demands.*
 import com.fyber.FairBid
 import com.fyber.fairbid.ads.*
 import com.fyber.fairbid.ads.banner.BannerOptions
@@ -27,10 +29,14 @@ import kotlinx.coroutines.launch
 
 val FairBidDemandId = DemandId("fair_bid")
 
-class FairBidAdapter : Adapter.Mediation<FairBidParameters>,
-    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner {
-    override val demandId: DemandId = FairBidDemandId
+class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
+    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner, MediationNetwork {
     override val mediationNetwork = BNMediationNetwork.Fyber
+    override val demandId: DemandId = FairBidDemandId
+    override val adapterInfo = AdapterInfo(
+        adapterVersion = "3.2.1",
+        bidonSdkVersion = "1.2.3"
+    )
 
     private lateinit var context: Context
     private val scope: CoroutineScope

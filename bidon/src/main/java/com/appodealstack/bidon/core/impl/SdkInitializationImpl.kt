@@ -4,12 +4,11 @@ import android.app.Activity
 import com.appodealstack.bidon.Core
 import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.SdkInitialization
-import com.appodealstack.bidon.analytics.Analytic
-import com.appodealstack.bidon.analytics.AnalyticParameters
 import com.appodealstack.bidon.core.*
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.demands.Adapter
 import com.appodealstack.bidon.demands.AdapterParameters
+import com.appodealstack.bidon.demands.Initializable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,9 +19,7 @@ internal class SdkInitializationImpl : SdkInitialization {
     private val sdkCore: Core = SdkCore
     private val contextProvider = ContextProvider
     private val demands =
-        mutableMapOf<Class<Adapter<AdapterParameters>>, Pair<Adapter<AdapterParameters>, AdapterParameters>>()
-    private val analytics =
-        mutableMapOf<Class<Analytic<AnalyticParameters>>, Pair<Analytic<AnalyticParameters>, AnalyticParameters>>()
+        mutableMapOf<Class<Adapter>, Pair<Adapter, AdapterParameters?>>()
     private val scope: CoroutineScope get() = CoroutineScope(Dispatchers.Default)
 
     override fun withContext(activity: Activity): SdkInitialization {
@@ -31,32 +28,16 @@ internal class SdkInitializationImpl : SdkInitialization {
     }
 
     override fun registerAdapter(
-        adapterClass: Class<out Adapter<*>>,
-        parameters: AdapterParameters
+        adapterClass: Class<out Adapter>,
+        parameters: AdapterParameters?
     ): SdkInitialization {
         logInternal(Tag, "Creating instance for: $adapterClass")
         try {
             val instance = adapterClass.newInstance()
-            demands[adapterClass as Class<Adapter<AdapterParameters>>] = (instance as Adapter<AdapterParameters>) to parameters
+            demands[adapterClass as Class<Adapter>] = (instance as Adapter) to parameters
             logInternal(Tag, "Instance created: $instance")
         } catch (e: Exception) {
             logInternal(Tag, "Instance creating failed", e)
-        }
-        return this
-    }
-
-    override fun registerAnalytics(
-        adapterClass: Class<out Analytic<*>>,
-        parameters: AnalyticParameters
-    ): SdkInitialization {
-        logInternal(Tag, "Creating instance for analytics: $adapterClass")
-        try {
-            val instance = adapterClass.newInstance()
-            analytics[adapterClass as Class<Analytic<AnalyticParameters>>] =
-                (instance as Analytic<AnalyticParameters>) to parameters
-            logInternal(Tag, "Analytics instance created: $instance")
-        } catch (e: Exception) {
-            logInternal(Tag, "Analytics instance creating failed", e)
         }
         return this
     }
@@ -70,9 +51,9 @@ internal class SdkInitializationImpl : SdkInitialization {
             val (demand, params) = pair
             logInternal(Tag, "Demand is initializing: $demand")
             withTimeoutOrNull(InitializationTimeoutMs) {
-                demand.init(
+                (demand as? Initializable<AdapterParameters>)?.init(
                     activity = requireNotNull(contextProvider.activity),
-                    configParams = params
+                    configParams = requireNotNull(params)
                 )
                 logInternal(Tag, "Demand is initialized: $demand")
                 sdkCore.addDemands(demand)
@@ -81,26 +62,6 @@ internal class SdkInitializationImpl : SdkInitialization {
             }
         }
         demands.clear()
-
-        // Init Analytics
-        require(sdkCore is AnalyticsSource)
-        analytics.forEach { (_, pair) ->
-            val analytic = pair.first
-            val params = pair.second
-
-            logInternal(Tag, "Analytics service is initializing: $analytic")
-            withTimeoutOrNull(InitializationTimeoutMs) {
-                analytic.init(
-                    context = contextProvider.requiredContext,
-                    configParams = params
-                )
-                logInternal(Tag, "Analytics service is initialized: $analytic")
-                sdkCore.addAnalytics(analytic)
-            } ?: run {
-                logInternal(Tag, "Analytics service not initialized: $analytic")
-            }
-        }
-        analytics.clear()
         sdkCore.isInitialized = true
         return InitializationResult.Success
     }

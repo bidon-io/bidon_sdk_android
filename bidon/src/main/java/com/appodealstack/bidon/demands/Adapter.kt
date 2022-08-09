@@ -6,19 +6,18 @@ import android.os.Bundle
 import android.view.ViewGroup
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.auctions.AuctionRequest
+import com.appodealstack.bidon.config.domain.AdapterInfo
 
-sealed interface Adapter<T : AdapterParameters> {
+interface Adapter {
     val demandId: DemandId
-
-    suspend fun init(activity: Activity, configParams: T)
-
-    interface Mediation<T : AdapterParameters> : Adapter<T> {
-        val mediationNetwork: BNMediationNetwork
-    }
-    interface PostBid<T : AdapterParameters> : Adapter<T>
+    val adapterInfo: AdapterInfo
 }
 
 interface AdapterParameters
+
+interface Initializable<T : AdapterParameters> {
+    suspend fun init(activity: Activity, configParams: T)
+}
 
 sealed interface AdSource {
     interface Interstitial : AdSource {

@@ -9,6 +9,7 @@ import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.auctions.AuctionRequest
 import com.appodealstack.bidon.auctions.AuctionResult
+import com.appodealstack.bidon.config.domain.AdapterInfo
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.demands.*
 import com.appodealstack.bidon.demands.banners.BannerSize
@@ -32,11 +33,15 @@ val AdmobDemandId = DemandId("admob")
 @JvmInline
 private value class AdUnitId(val value: String)
 
-class AdmobAdapter : Adapter.PostBid<AdmobParameters>,
+class AdmobAdapter : Adapter, Initializable<AdmobParameters>,
     AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner {
     private lateinit var context: Context
 
     override val demandId = AdmobDemandId
+    override val adapterInfo = AdapterInfo(
+        adapterVersion = "3.2.1",
+        bidonSdkVersion = "1.2.3"
+    )
 
     private val bannersAdUnits = mutableMapOf<Double, AdUnitId>()
     private val interstitialAdUnits = mutableMapOf<Double, AdUnitId>()

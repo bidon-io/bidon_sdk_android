@@ -6,17 +6,13 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import com.appodealstack.bidon.Core
-import com.appodealstack.bidon.analytics.AdRevenueInterceptor
-import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolder
-import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolderImpl
-import com.appodealstack.bidon.analytics.AdRevenueLogger
+import com.appodealstack.bidon.analytics.*
 import com.appodealstack.bidon.auctions.*
-import com.appodealstack.bidon.auctions.AdsRepository
-import com.appodealstack.bidon.auctions.AdsRepositoryImpl
-import com.appodealstack.bidon.auctions.AuctionResolversHolder
-import com.appodealstack.bidon.auctions.NewAuction
 import com.appodealstack.bidon.auctions.impl.AuctionResolversHolderImpl
-import com.appodealstack.bidon.core.*
+import com.appodealstack.bidon.core.AutoRefresher
+import com.appodealstack.bidon.core.AutoRefresherImpl
+import com.appodealstack.bidon.core.DemandsSource
+import com.appodealstack.bidon.core.ListenersHolder
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.core.ext.retrieveAuctionRequests
 import com.appodealstack.bidon.demands.*
@@ -26,7 +22,6 @@ internal class CoreImpl(
     private val adsRepository: AdsRepository = AdsRepositoryImpl()
 ) : Core,
     DemandsSource by DemandsSourceImpl(),
-    AnalyticsSource by AnalyticsSourceImpl(),
     ListenersHolder by ListenersHolderImpl(),
     AutoRefresher by AutoRefresherImpl(adsRepository),
     AdRevenueInterceptorHolder by AdRevenueInterceptorHolderImpl(),
@@ -44,11 +39,9 @@ internal class CoreImpl(
             adsRepository.saveAuction(demandAd, auction)
             auction.start(
                 mediationRequests = adapters
-                    .filterIsInstance<Adapter.Mediation<*>>()
                     .retrieveAuctionRequests(activity, demandAd, adParams)
                     .toSet(),
                 postBidRequests = adapters
-                    .filterIsInstance<Adapter.PostBid<*>>()
                     .retrieveAuctionRequests(activity, demandAd, adParams)
                     .toSet(),
                 onDemandLoaded = { auctionResult ->
@@ -206,20 +199,20 @@ internal class CoreImpl(
             logInternal(Tag, "AdRevenue cannot be logged before Sdk is not initialized")
             return
         }
+        val analytics = adapters.filterIsInstance<AdRevenueLogger>()
         if (analytics.isEmpty()) {
             logInternal(Tag, "AdRevenue's logger not initialized")
             return
         }
-        val mediationNetwork = adapters.filterIsInstance<Adapter.Mediation<*>>()
+        val mediationNetwork = adapters.filterIsInstance<MediationNetwork>()
             .lastOrNull()?.mediationNetwork
         if (mediationNetwork == null) {
             logInternal(Tag, "Mediation demand not initialized")
             return
         }
-        analytics.filterIsInstance<AdRevenueLogger>()
-            .forEach {
-                it.logAdRevenue(mediationNetwork, ad)
-            }
+        analytics.forEach {
+            it.logAdRevenue(mediationNetwork, ad)
+        }
     }
 
 }

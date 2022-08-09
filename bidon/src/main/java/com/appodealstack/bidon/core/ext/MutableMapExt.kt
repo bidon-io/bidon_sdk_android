@@ -18,7 +18,7 @@ internal fun <K, V> MutableMap<K, V>.addOrRemoveIfNull(key: K, value: V?) {
     }
 }
 
-internal fun List<Adapter<*>>.retrieveAuctionRequests(
+internal fun List<Adapter>.retrieveAuctionRequests(
     activity: Activity?,
     demandAd: DemandAd,
     adParams: Bundle

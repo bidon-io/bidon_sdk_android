@@ -7,8 +7,10 @@ buildscript {
         maven("https://artifacts.applovin.com/android")
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:7.2.1")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10")
+        classpath("com.android.tools.build:gradle:7.2.2")
+        val kotlinVersion = "1.7.10"
+        classpath(kotlin("gradle-plugin", version = kotlinVersion))
+        classpath(kotlin("serialization", version = kotlinVersion))
         classpath("com.google.gms:google-services:4.3.13")
     }
 }

@@ -5,16 +5,18 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import com.appodealstack.ironsource.impl.asBidonError
-import com.appodealstack.ironsource.interstitial.addInterstitialListener
-import com.appodealstack.ironsource.rewarded.addRewardedListener
 import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.analytics.BNMediationNetwork
+import com.appodealstack.bidon.analytics.MediationNetwork
 import com.appodealstack.bidon.auctions.AuctionRequest
 import com.appodealstack.bidon.auctions.AuctionResult
+import com.appodealstack.bidon.config.domain.AdapterInfo
 import com.appodealstack.bidon.demands.*
 import com.appodealstack.bidon.demands.banners.BannerSize
 import com.appodealstack.bidon.demands.banners.BannerSizeKey
+import com.appodealstack.ironsource.impl.asBidonError
+import com.appodealstack.ironsource.interstitial.addInterstitialListener
+import com.appodealstack.ironsource.rewarded.addRewardedListener
 import com.ironsource.mediationsdk.ISBannerSize
 import com.ironsource.mediationsdk.IronSource
 import com.ironsource.mediationsdk.IronSourceBannerLayout
@@ -34,10 +36,15 @@ import kotlin.coroutines.resume
 
 val IronSourceDemandId = DemandId("ironsource")
 
-class IronSourceAdapter : Adapter.Mediation<IronSourceParameters>,
-    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner {
-    override val demandId: DemandId = IronSourceDemandId
+class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
+    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner, MediationNetwork {
+
     override val mediationNetwork = BNMediationNetwork.IronSource
+    override val demandId: DemandId = IronSourceDemandId
+    override val adapterInfo = AdapterInfo(
+        adapterVersion = "3.2.1",
+        bidonSdkVersion = "1.2.3"
+    )
 
     private val scope: CoroutineScope get() = CoroutineScope(Dispatchers.Default)
     private val interstitialFlow = MutableSharedFlow<InterstitialInterceptor>(Int.MAX_VALUE)

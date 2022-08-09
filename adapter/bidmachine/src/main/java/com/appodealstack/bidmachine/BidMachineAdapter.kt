@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.auctions.AuctionRequest
 import com.appodealstack.bidon.auctions.AuctionResult
+import com.appodealstack.bidon.config.domain.AdapterInfo
 import com.appodealstack.bidon.demands.*
 import com.appodealstack.bidon.demands.banners.BannerSize
 import com.appodealstack.bidon.demands.banners.BannerSizeKey
@@ -31,12 +32,16 @@ val BidMachineDemandId = DemandId("bidmachine")
 
 typealias BidMachineBannerSize = io.bidmachine.banner.BannerSize
 
-class BidMachineAdapter : Adapter.PostBid<BidMachineParameters>,
+class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
     AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner,
     PlacementSource by PlacementSourceImpl() {
     private lateinit var context: Context
 
     override val demandId = BidMachineDemandId
+    override val adapterInfo = AdapterInfo(
+        adapterVersion = "3.2.1",
+        bidonSdkVersion = "1.2.3"
+    )
 
     override suspend fun init(activity: Activity, configParams: BidMachineParameters): Unit =
         suspendCancellableCoroutine { continuation ->

@@ -15,8 +15,10 @@ import com.appodealstack.applovin.impl.asBidonError
 import com.appodealstack.applovin.impl.setCoreListener
 import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.analytics.BNMediationNetwork
+import com.appodealstack.bidon.analytics.MediationNetwork
 import com.appodealstack.bidon.auctions.AuctionRequest
 import com.appodealstack.bidon.auctions.AuctionResult
+import com.appodealstack.bidon.config.domain.AdapterInfo
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.demands.*
 import com.appodealstack.bidon.demands.banners.BannerSize
@@ -27,18 +29,24 @@ import kotlin.coroutines.resume
 
 val ApplovinMaxDemandId = DemandId("applovin")
 
-class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
+class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
     AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner,
     PlacementSource by PlacementSourceImpl(),
     AdRevenueSource by AdRevenueSourceImpl(),
-    ExtrasSource by ExtrasSourceImpl() {
+    ExtrasSource by ExtrasSourceImpl(),
+    MediationNetwork {
+
     private lateinit var context: Context
     private val bannerAdUnitIds = mutableListOf<String>()
     private val interstitialAdUnitIds = mutableListOf<String>()
     private val rewardedAdUnitIds = mutableListOf<String>()
 
-    override val demandId: DemandId = ApplovinMaxDemandId
     override val mediationNetwork = BNMediationNetwork.ApplovinMax
+    override val demandId: DemandId = ApplovinMaxDemandId
+    override val adapterInfo = AdapterInfo(
+        adapterVersion = "3.2.1",
+        bidonSdkVersion = "1.2.3"
+    )
 
     override suspend fun init(activity: Activity, configParams: ApplovinParameters): Unit =
         suspendCancellableCoroutine { continuation ->
@@ -322,6 +330,7 @@ class ApplovinMaxAdapter : Adapter.Mediation<ApplovinParameters>,
         BannerSize.MRec -> MaxAdFormat.MREC
         else -> error("Not supported")
     }
+
 }
 
 internal fun MaxAd?.asAd(demandAd: DemandAd): Ad {

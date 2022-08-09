@@ -13,8 +13,6 @@ import com.appodealstack.ironsource.interstitial.IronSourceLevelPlayInterstitial
 import com.appodealstack.ironsource.rewarded.IronSourceLevelPlayRewardedListener
 import com.appodealstack.ironsource.rewarded.IronSourceRewardedListener
 import com.appodealstack.ironsource.rewarded.RewardedImpl
-import com.appodealstack.bidon.analytics.Analytic
-import com.appodealstack.bidon.analytics.AnalyticParameters
 import com.appodealstack.bidon.auctions.AuctionResolver
 import com.appodealstack.bidon.demands.Adapter
 import com.appodealstack.bidon.demands.AdapterParameters
@@ -40,12 +38,7 @@ sealed interface ISDecorator {
         val activity: Activity?
 
         fun register(
-            adapterClass: Class<out Analytic<*>>,
-            parameters: AnalyticParameters
-        ): Initializer
-
-        fun register(
-            adapterClass: Class<out Adapter<*>>,
+            adapterClass: Class<out Adapter>,
             parameters: AdapterParameters
         ): Initializer
 

@@ -17,7 +17,7 @@ internal class MainViewModel {
         IronSourceDecorator
             .register(
                 AppsflyerAnalytics::class.java,
-                AppsflyerParameters.DevKey("XXXXXXXXXXXXX")
+                AppsflyerParameters("XXXXXXXXXXXXX", appId = "appId")
             )
             .register(
                 AdmobAdapter::class.java,

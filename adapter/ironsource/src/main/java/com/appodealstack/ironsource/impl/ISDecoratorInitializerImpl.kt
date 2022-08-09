@@ -6,8 +6,6 @@ import com.appodealstack.ironsource.IronSourceAdapter
 import com.appodealstack.ironsource.IronSourceDecorator
 import com.appodealstack.ironsource.IronSourceParameters
 import com.appodealstack.bidon.BidOnInitializer
-import com.appodealstack.bidon.analytics.Analytic
-import com.appodealstack.bidon.analytics.AnalyticParameters
 import com.appodealstack.bidon.demands.Adapter
 import com.appodealstack.bidon.demands.AdapterParameters
 import com.ironsource.mediationsdk.IronSource
@@ -19,12 +17,7 @@ internal class ISDecoratorInitializerImpl : ISDecorator.Initializer {
     override val activity: Activity?
         get() = activityRef?.get()
 
-    override fun register(adapterClass: Class<out Analytic<*>>, parameters: AnalyticParameters): ISDecorator.Initializer {
-        BidOnInitializer.registerAnalytics(adapterClass, parameters)
-        return this
-    }
-
-    override fun register(adapterClass: Class<out Adapter<*>>, parameters: AdapterParameters): ISDecorator.Initializer {
+    override fun register(adapterClass: Class<out Adapter>, parameters: AdapterParameters): ISDecorator.Initializer {
         BidOnInitializer.registerAdapter(adapterClass, parameters)
         return this
     }
