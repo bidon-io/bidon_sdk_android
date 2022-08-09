@@ -17,10 +17,7 @@
             <option value="$PROJECT_DIR$/adapter/bidmachine" />
             <option value="$PROJECT_DIR$/adapter/fyber" />
             <option value="$PROJECT_DIR$/adapter/ironsource" />
-            <option value="$PROJECT_DIR$/appApplovin" />
             <option value="$PROJECT_DIR$/appBidON" />
-            <option value="$PROJECT_DIR$/appFyber" />
-            <option value="$PROJECT_DIR$/appIronSource" />
             <option value="$PROJECT_DIR$/bidon" />
             <option value="$PROJECT_DIR$/buildSrc" />
           </set>

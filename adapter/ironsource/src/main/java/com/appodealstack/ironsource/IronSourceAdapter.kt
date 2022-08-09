@@ -15,8 +15,6 @@ import com.appodealstack.bidon.demands.*
 import com.appodealstack.bidon.demands.banners.BannerSize
 import com.appodealstack.bidon.demands.banners.BannerSizeKey
 import com.appodealstack.ironsource.impl.asBidonError
-import com.appodealstack.ironsource.interstitial.addInterstitialListener
-import com.appodealstack.ironsource.rewarded.addRewardedListener
 import com.ironsource.mediationsdk.ISBannerSize
 import com.ironsource.mediationsdk.IronSource
 import com.ironsource.mediationsdk.IronSourceBannerLayout
@@ -67,8 +65,6 @@ class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
 
     override suspend fun init(activity: Activity, configParams: IronSourceParameters): Unit = suspendCancellableCoroutine {
         val initializationListener = InitializationListener {
-            interstitialFlow.addInterstitialListener()
-            rewardedFlow.addRewardedListener()
             it.resume(Unit)
         }
         if (configParams.adUnit == null) {

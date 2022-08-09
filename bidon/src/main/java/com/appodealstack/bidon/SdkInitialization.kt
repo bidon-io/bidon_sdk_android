@@ -6,9 +6,9 @@ import com.appodealstack.bidon.demands.Adapter
 import com.appodealstack.bidon.core.impl.SdkInitializationImpl
 import com.appodealstack.bidon.demands.AdapterParameters
 
-val BidOnInitializer: SdkInitialization by lazy { SdkInitializationImpl() }
+internal val BidOnInitializer: SdkInitialization by lazy { SdkInitializationImpl() }
 
-interface SdkInitialization {
+internal interface SdkInitialization {
     fun withContext(activity: Activity): SdkInitialization
 
     fun registerAdapter(
@@ -17,5 +17,4 @@ interface SdkInitialization {
     ): SdkInitialization
 
     suspend fun build()
-    fun build(initCallback: InitializationCallback)
 }

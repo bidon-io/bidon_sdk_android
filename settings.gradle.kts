@@ -27,9 +27,6 @@ rootProject.name = "BidOn Decorators"
 
 include(
     ":appBidON",
-    ":appApplovin",
-    ":appIronSource",
-    ":appFyber",
 )
 include(
     ":bidon",

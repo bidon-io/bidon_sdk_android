@@ -4,14 +4,14 @@ import android.app.Activity
 import com.appodealstack.bidon.Core
 import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.SdkInitialization
-import com.appodealstack.bidon.core.*
+import com.appodealstack.bidon.core.ContextProvider
+import com.appodealstack.bidon.core.DemandsSource
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.demands.Adapter
 import com.appodealstack.bidon.demands.AdapterParameters
 import com.appodealstack.bidon.demands.Initializable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 @Suppress("UNCHECKED_CAST")
@@ -63,13 +63,6 @@ internal class SdkInitializationImpl : SdkInitialization {
         }
         demands.clear()
         sdkCore.isInitialized = true
-    }
-
-    override fun build(initCallback: InitializationCallback) {
-        scope.launch {
-            build()
-            initCallback.onFinished()
-        }
     }
 }
 
