@@ -1,4 +1,4 @@
-package com.appodealstack.bidon.config.domain
+package com.appodealstack.bidon.config.data.models
 
 import com.appodealstack.bidon.core.BidonJson
 import kotlinx.serialization.SerialName

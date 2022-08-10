@@ -1,6 +1,6 @@
 package com.appodealstack.applovin.interstitial
 
-import com.appodealstack.bidon.demands.Ad
+import com.appodealstack.bidon.adapters.Ad
 
 interface BNInterstitialListener {
 

@@ -3,7 +3,7 @@ package com.appodealstack.applovin.impl
 import com.applovin.mediation.MaxError
 import com.applovin.mediation.MaxErrorCode
 import com.appodealstack.applovin.ApplovinMaxDemandId
-import com.appodealstack.bidon.demands.DemandError
+import com.appodealstack.bidon.adapters.DemandError
 
 internal fun MaxError.asBidonError(): DemandError = when (this.code) {
     MaxErrorCode.UNSPECIFIED -> DemandError.Unspecified(ApplovinMaxDemandId)

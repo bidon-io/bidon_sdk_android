@@ -1,4 +1,4 @@
-package com.appodealstack.bidon.demands
+package com.appodealstack.bidon.adapters
 
 import android.app.Activity
 import android.os.Bundle

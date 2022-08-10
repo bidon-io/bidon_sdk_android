@@ -8,11 +8,11 @@ import com.appodealstack.fyber.PlacementKey
 import com.appodealstack.fyber.banner.BNFyberBannerOption.Position
 import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.core.DefaultAutoRefreshTimeoutMs
-import com.appodealstack.bidon.demands.Ad
-import com.appodealstack.bidon.demands.AdListener
-import com.appodealstack.bidon.demands.AdType
-import com.appodealstack.bidon.demands.DemandAd
-import com.appodealstack.bidon.demands.banners.AutoRefresh
+import com.appodealstack.bidon.adapters.Ad
+import com.appodealstack.bidon.adapters.AdListener
+import com.appodealstack.bidon.adapters.AdType
+import com.appodealstack.bidon.adapters.DemandAd
+import com.appodealstack.bidon.adapters.banners.AutoRefresh
 import com.fyber.fairbid.ads.Banner
 
 object BNFyberBanner : FyberBanner by FyberBannerImpl()

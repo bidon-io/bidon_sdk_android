@@ -1,7 +1,6 @@
 package com.appodealstack.ironsource
 
-import com.appodealstack.bidon.demands.AdapterParameters
-import com.ironsource.mediationsdk.IronSource
+import com.appodealstack.bidon.adapters.AdapterParameters
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

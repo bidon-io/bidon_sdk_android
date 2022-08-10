@@ -1,6 +1,6 @@
 package com.appodealstack.bidon.auctions
 
-import com.appodealstack.bidon.demands.DemandAd
+import com.appodealstack.bidon.adapters.DemandAd
 
 internal interface AdsRepository {
     fun destroyResults(demandAd: DemandAd)

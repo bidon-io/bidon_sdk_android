@@ -6,7 +6,7 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
 import com.appodealstack.applovin.*
 import com.appodealstack.bidon.SdkCore
-import com.appodealstack.bidon.demands.*
+import com.appodealstack.bidon.adapters.*
 import java.lang.ref.WeakReference
 
 internal class InterstitialAdWrapperImpl(

@@ -1,7 +1,7 @@
 package com.appodealstack.applovin.impl
 
-import com.appodealstack.bidon.demands.Ad
-import com.appodealstack.bidon.demands.AdListener
+import com.appodealstack.bidon.adapters.Ad
+import com.appodealstack.bidon.adapters.AdListener
 
 interface BNMaxAdViewAdListener {
 

@@ -9,11 +9,11 @@ import com.appodealstack.bidon.analytics.AdRevenueInterceptor
 import com.appodealstack.bidon.auctions.AuctionResolver
 import com.appodealstack.bidon.core.InitializationCallback
 import com.appodealstack.bidon.core.impl.ListenersHolderImpl
-import com.appodealstack.bidon.demands.Ad
-import com.appodealstack.bidon.demands.AdListener
-import com.appodealstack.bidon.demands.AdRevenueListener
-import com.appodealstack.bidon.demands.DemandAd
-import com.appodealstack.bidon.demands.banners.AutoRefresh
+import com.appodealstack.bidon.adapters.Ad
+import com.appodealstack.bidon.adapters.AdListener
+import com.appodealstack.bidon.adapters.AdRevenueListener
+import com.appodealstack.bidon.adapters.DemandAd
+import com.appodealstack.bidon.adapters.banners.AutoRefresh
 import com.appodealstack.bidon.di.DI.initDependencyInjection
 import com.appodealstack.bidon.di.get
 import kotlinx.coroutines.flow.StateFlow

@@ -11,11 +11,11 @@ import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.auctions.AuctionRequest
 import com.appodealstack.bidon.auctions.AuctionResult
-import com.appodealstack.bidon.config.domain.AdapterInfo
+import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.appodealstack.bidon.core.ext.logInternal
-import com.appodealstack.bidon.demands.*
-import com.appodealstack.bidon.demands.banners.BannerSize
-import com.appodealstack.bidon.demands.banners.BannerSizeKey
+import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.adapters.banners.BannerSize
+import com.appodealstack.bidon.adapters.banners.BannerSizeKey
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.interstitial.InterstitialAd

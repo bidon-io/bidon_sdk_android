@@ -1,11 +1,11 @@
-package com.appodealstack.bidon.demands
+package com.appodealstack.bidon.adapters
 
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.ViewGroup
 import com.appodealstack.bidon.auctions.AuctionRequest
-import com.appodealstack.bidon.config.domain.AdapterInfo
+import com.appodealstack.bidon.config.data.models.AdapterInfo
 import kotlinx.serialization.json.JsonObject
 
 interface Adapter {

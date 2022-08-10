@@ -2,7 +2,7 @@ package com.appodealstack.bidon.auctions
 
 import com.appodealstack.bidon.auctions.impl.DefaultAuctionResolver
 import com.appodealstack.bidon.core.ext.logInternal
-import com.appodealstack.bidon.demands.DemandError
+import com.appodealstack.bidon.adapters.DemandError
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first

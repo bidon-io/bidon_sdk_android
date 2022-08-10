@@ -1,4 +1,4 @@
-package com.appodealstack.bidon.demands
+package com.appodealstack.bidon.adapters
 
 class DemandAd(val adType: AdType) {
     override fun toString(): String {

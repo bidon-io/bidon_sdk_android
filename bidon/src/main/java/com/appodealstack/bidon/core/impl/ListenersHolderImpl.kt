@@ -4,7 +4,7 @@ import com.appodealstack.bidon.auctions.AuctionListener
 import com.appodealstack.bidon.auctions.AuctionResult
 import com.appodealstack.bidon.core.ListenersHolder
 import com.appodealstack.bidon.core.ext.addOrRemoveIfNull
-import com.appodealstack.bidon.demands.*
+import com.appodealstack.bidon.adapters.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

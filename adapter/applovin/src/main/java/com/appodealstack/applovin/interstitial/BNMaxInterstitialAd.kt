@@ -3,8 +3,8 @@ package com.appodealstack.applovin.interstitial
 import android.app.Activity
 import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
-import com.appodealstack.bidon.demands.AdRevenueListener
-import com.appodealstack.bidon.demands.DemandAd
+import com.appodealstack.bidon.adapters.AdRevenueListener
+import com.appodealstack.bidon.adapters.DemandAd
 
 /**
  * Full screen Interstitial Advertising

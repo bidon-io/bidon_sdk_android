@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.auctions
 
-import com.appodealstack.bidon.demands.Ad
-import com.appodealstack.bidon.demands.AdProvider
+import com.appodealstack.bidon.adapters.Ad
+import com.appodealstack.bidon.adapters.AdProvider
 
 fun interface AuctionRequest {
     suspend fun execute(data: Data?): Result<AuctionResult>

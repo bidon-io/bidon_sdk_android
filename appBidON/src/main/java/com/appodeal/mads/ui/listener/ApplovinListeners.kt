@@ -6,9 +6,9 @@ import com.appodealstack.applovin.interstitial.BNInterstitialListener
 import com.appodealstack.applovin.interstitial.BNMaxInterstitialAd
 import com.appodealstack.applovin.rewarded.BNMaxRewardedAd
 import com.appodealstack.applovin.rewarded.BNRewardedListener
-import com.appodealstack.bidon.demands.Ad
-import com.appodealstack.bidon.demands.DemandError
-import com.appodealstack.bidon.demands.RewardedAdListener
+import com.appodealstack.bidon.adapters.Ad
+import com.appodealstack.bidon.adapters.DemandError
+import com.appodealstack.bidon.adapters.RewardedAdListener
 
 internal fun BNMaxRewardedAd.setRewardedListener(log: (String) -> Unit) {
     this.setListener(object : BNRewardedListener {

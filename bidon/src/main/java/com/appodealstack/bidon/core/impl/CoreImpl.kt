@@ -21,8 +21,8 @@ import com.appodealstack.bidon.core.InitializationCallback
 import com.appodealstack.bidon.core.ListenersHolder
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.core.ext.retrieveAuctionRequests
-import com.appodealstack.bidon.demands.*
-import com.appodealstack.bidon.demands.banners.AutoRefresh
+import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.adapters.banners.AutoRefresh
 import com.appodealstack.bidon.di.get
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.getAndUpdate

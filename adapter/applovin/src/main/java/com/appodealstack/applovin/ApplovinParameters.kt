@@ -1,6 +1,6 @@
 package com.appodealstack.applovin
 
-import com.appodealstack.bidon.demands.AdapterParameters
+import com.appodealstack.bidon.adapters.AdapterParameters
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

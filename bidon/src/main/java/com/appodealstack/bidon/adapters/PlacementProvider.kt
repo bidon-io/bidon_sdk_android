@@ -1,4 +1,4 @@
-package com.appodealstack.bidon.demands
+package com.appodealstack.bidon.adapters
 
 interface PlacementProvider {
     fun setPlacement(placement: String?)

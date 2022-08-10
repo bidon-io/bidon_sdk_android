@@ -1,6 +1,6 @@
 package com.appodealstack.bidon.analytics
 
-import com.appodealstack.bidon.demands.Ad
+import com.appodealstack.bidon.adapters.Ad
 
 interface AdRevenueLogger {
     fun logAdRevenue(mediationNetwork: BNMediationNetwork, ad: Ad)

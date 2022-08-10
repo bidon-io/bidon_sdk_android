@@ -27,7 +27,7 @@ import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.setBannerListener
 import com.appodealstack.applovin.banner.BNMaxAdView
 import com.appodealstack.bidon.core.DefaultAutoRefreshTimeoutMs
-import com.appodealstack.bidon.demands.banners.BannerSize
+import com.appodealstack.bidon.adapters.banners.BannerSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

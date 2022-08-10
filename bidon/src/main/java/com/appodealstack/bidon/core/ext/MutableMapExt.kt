@@ -5,10 +5,10 @@ import android.content.Context
 import android.os.Bundle
 import android.view.ViewGroup
 import com.appodealstack.bidon.auctions.AuctionRequest
-import com.appodealstack.bidon.demands.AdSource
-import com.appodealstack.bidon.demands.AdType
-import com.appodealstack.bidon.demands.Adapter
-import com.appodealstack.bidon.demands.DemandAd
+import com.appodealstack.bidon.adapters.AdSource
+import com.appodealstack.bidon.adapters.AdType
+import com.appodealstack.bidon.adapters.Adapter
+import com.appodealstack.bidon.adapters.DemandAd
 
 internal fun <K, V> MutableMap<K, V>.addOrRemoveIfNull(key: K, value: V?) {
     if (value != null) {

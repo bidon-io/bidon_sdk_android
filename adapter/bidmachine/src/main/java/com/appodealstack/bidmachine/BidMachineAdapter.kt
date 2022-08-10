@@ -10,13 +10,12 @@ import com.appodealstack.bidmachine.ext.sdkVersion
 import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.auctions.AuctionRequest
 import com.appodealstack.bidon.auctions.AuctionResult
-import com.appodealstack.bidon.config.domain.AdapterInfo
+import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.appodealstack.bidon.core.parse
-import com.appodealstack.bidon.demands.*
-import com.appodealstack.bidon.demands.banners.BannerSize
-import com.appodealstack.bidon.demands.banners.BannerSizeKey
+import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.adapters.banners.BannerSize
+import com.appodealstack.bidon.adapters.banners.BannerSizeKey
 import io.bidmachine.BidMachine
-import io.bidmachine.NetworkConfig
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.banner.BannerListener
 import io.bidmachine.banner.BannerRequest

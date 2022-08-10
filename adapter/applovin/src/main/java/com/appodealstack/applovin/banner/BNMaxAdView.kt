@@ -12,10 +12,10 @@ import com.appodealstack.applovin.R
 import com.appodealstack.applovin.impl.BNMaxAdViewAdListener
 import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.core.DefaultAutoRefreshTimeoutMs
-import com.appodealstack.bidon.demands.*
-import com.appodealstack.bidon.demands.banners.AutoRefresh
-import com.appodealstack.bidon.demands.banners.BannerSize
-import com.appodealstack.bidon.demands.banners.BannerSizeKey
+import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.adapters.banners.AutoRefresh
+import com.appodealstack.bidon.adapters.banners.BannerSize
+import com.appodealstack.bidon.adapters.banners.BannerSizeKey
 
 internal interface MaxAdViewWrapper {
     fun setListener(listener: BNMaxAdViewAdListener)

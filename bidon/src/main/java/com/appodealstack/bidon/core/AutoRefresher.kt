@@ -9,11 +9,11 @@ import com.appodealstack.bidon.auctions.AuctionListener
 import com.appodealstack.bidon.auctions.NewAuction
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.core.ext.retrieveAuctionRequests
-import com.appodealstack.bidon.demands.AdSource
-import com.appodealstack.bidon.demands.AdViewProvider
-import com.appodealstack.bidon.demands.Adapter
-import com.appodealstack.bidon.demands.DemandAd
-import com.appodealstack.bidon.demands.banners.AutoRefresh
+import com.appodealstack.bidon.adapters.AdSource
+import com.appodealstack.bidon.adapters.AdViewProvider
+import com.appodealstack.bidon.adapters.Adapter
+import com.appodealstack.bidon.adapters.DemandAd
+import com.appodealstack.bidon.adapters.banners.AutoRefresh
 import kotlinx.coroutines.*
 
 internal interface AutoRefresher {

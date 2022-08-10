@@ -1,4 +1,4 @@
-package com.appodealstack.bidon.demands.banners
+package com.appodealstack.bidon.adapters.banners
 
 enum class BannerSize {
     Banner, // 320x50

@@ -1,5 +1,5 @@
 package com.appodealstack.admob
 
-import com.appodealstack.bidon.demands.AdapterParameters
+import com.appodealstack.bidon.adapters.AdapterParameters
 
 object AdmobParameters: AdapterParameters

@@ -1,8 +1,8 @@
 package com.appodealstack.bidon.auctions
 
-import com.appodealstack.bidon.demands.AdListener
-import com.appodealstack.bidon.demands.DemandAd
-import com.appodealstack.bidon.demands.ExtendedListener
+import com.appodealstack.bidon.adapters.AdListener
+import com.appodealstack.bidon.adapters.DemandAd
+import com.appodealstack.bidon.adapters.ExtendedListener
 
 internal interface AuctionListener {
 

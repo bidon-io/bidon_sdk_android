@@ -4,22 +4,20 @@ import android.app.Activity
 import android.app.Application
 import com.appodealstack.appsflyer.ext.adapterVersion
 import com.appodealstack.appsflyer.ext.sdkVersion
+import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.analytics.AdRevenueLogger
 import com.appodealstack.bidon.analytics.BNMediationNetwork
-import com.appodealstack.bidon.config.domain.AdapterInfo
+import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.core.parse
-import com.appodealstack.bidon.demands.*
+import com.appsflyer.AFLogger
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.adrevenue.AppsFlyerAdRevenue
 import com.appsflyer.adrevenue.adnetworks.generic.MediationNetwork
-import com.appsflyer.attribution.AppsFlyerRequestListener
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import java.util.*
-import kotlin.coroutines.resume
 
 @Serializable
 data class AppsflyerParameters(
@@ -44,20 +42,23 @@ class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenu
 
     override suspend fun init(activity: Activity, configParams: AppsflyerParameters) {
         val context = activity.applicationContext
-        val afRevenueBuilder = AppsFlyerAdRevenue.Builder(context as Application)
-        AppsFlyerAdRevenue.initialize(afRevenueBuilder.build())
-        suspendCancellableCoroutine { continuation ->
-            AppsFlyerLib.getInstance()
-                .start(context, configParams.devKey, object : AppsFlyerRequestListener {
-                    override fun onSuccess() {
-                        continuation.resume(Unit)
-                    }
 
-                    override fun onError(p0: Int, p1: String) {
-                        logInternal(Tag, "Error while Appsflyer initialization: $p0, $p1.")
-                        continuation.resume(Unit)
-                    }
-                })
+        /**
+         * Main Lib initializing
+         */
+        val appsFlyer = AppsFlyerLib.getInstance()
+        appsFlyer.setAppId(configParams.appId)
+        appsFlyer.setLogLevel(AFLogger.LogLevel.VERBOSE)
+        appsFlyer.init(configParams.devKey, null, context)
+        appsFlyer.logEvent(context, null, null)
+        appsFlyer.start(context, configParams.devKey)
+
+        /**
+         * AdRevenue Lib initializing
+         */
+        (context as? Application)?.let {
+            val builder = AppsFlyerAdRevenue.Builder(it)
+            AppsFlyerAdRevenue.initialize(builder.build())
         }
     }
 

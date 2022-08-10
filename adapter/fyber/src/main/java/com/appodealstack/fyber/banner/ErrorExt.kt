@@ -1,7 +1,7 @@
 package com.appodealstack.fyber.banner
 
 import com.appodealstack.fyber.FairBidDemandId
-import com.appodealstack.bidon.demands.DemandError
+import com.appodealstack.bidon.adapters.DemandError
 import com.fyber.fairbid.ads.RequestFailure
 
 internal fun RequestFailure?.asDemandError(): DemandError = when(this){

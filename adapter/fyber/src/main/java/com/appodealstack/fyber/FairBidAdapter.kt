@@ -10,9 +10,9 @@ import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.analytics.MediationNetwork
 import com.appodealstack.bidon.auctions.AuctionRequest
 import com.appodealstack.bidon.auctions.AuctionResult
-import com.appodealstack.bidon.config.domain.AdapterInfo
+import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.appodealstack.bidon.core.parse
-import com.appodealstack.bidon.demands.*
+import com.appodealstack.bidon.adapters.*
 import com.appodealstack.fyber.banner.BannerInterceptor
 import com.appodealstack.fyber.banner.initBannerListener
 import com.appodealstack.fyber.ext.adapterVersion

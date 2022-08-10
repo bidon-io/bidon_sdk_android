@@ -10,11 +10,11 @@ import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.analytics.MediationNetwork
 import com.appodealstack.bidon.auctions.AuctionRequest
 import com.appodealstack.bidon.auctions.AuctionResult
-import com.appodealstack.bidon.config.domain.AdapterInfo
+import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.appodealstack.bidon.core.parse
-import com.appodealstack.bidon.demands.*
-import com.appodealstack.bidon.demands.banners.BannerSize
-import com.appodealstack.bidon.demands.banners.BannerSizeKey
+import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.adapters.banners.BannerSize
+import com.appodealstack.bidon.adapters.banners.BannerSizeKey
 import com.appodealstack.ironsource.ext.adapterVersion
 import com.appodealstack.ironsource.ext.sdkVersion
 import com.appodealstack.ironsource.impl.asBidonError
