@@ -2,7 +2,7 @@ package com.appodealstack.bidon.di
 
 import com.appodealstack.bidon.BidONSdk
 import com.appodealstack.bidon.Core
-import com.appodealstack.bidon.config.domain.AdapterRegister
+import com.appodealstack.bidon.config.domain.AdapterRegistry
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolder
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolderImpl
 import com.appodealstack.bidon.auctions.AdsRepository
@@ -10,7 +10,7 @@ import com.appodealstack.bidon.auctions.AdsRepositoryImpl
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
 import com.appodealstack.bidon.auctions.impl.AuctionResolversHolderImpl
 import com.appodealstack.bidon.config.data.ConfigRequestInteractorImpl
-import com.appodealstack.bidon.config.data.AdapterRegisterImpl
+import com.appodealstack.bidon.config.data.AdapterRegistryImpl
 import com.appodealstack.bidon.config.data.BidONInitializerImpl
 import com.appodealstack.bidon.config.domain.BidONInitializer
 import com.appodealstack.bidon.config.domain.ConfigRequestInteractor
@@ -41,10 +41,11 @@ internal object SimpleInjectionModule {
 
                 factory<BidONInitializer> {
                     BidONInitializerImpl(
-                        adapterRegister = get()
+                        adapterRegistry = get(),
+                        configRequestInteractor = get()
                     )
                 }
-                factory<AdapterRegister> { AdapterRegisterImpl() }
+                factory<AdapterRegistry> { AdapterRegistryImpl() }
 
                 factory<ConfigRequestInteractor> { ConfigRequestInteractorImpl() }
                 factory<DemandsSource> { DemandsSourceImpl() }

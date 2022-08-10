@@ -3,7 +3,7 @@ package com.appodealstack.bidon.config.data
 import android.app.Activity
 import com.appodealstack.bidon.Core
 import com.appodealstack.bidon.SdkCore
-import com.appodealstack.bidon.config.domain.AdapterRegister
+import com.appodealstack.bidon.config.domain.AdapterRegistry
 import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.DemandsSource
 import com.appodealstack.bidon.core.ext.logInternal
@@ -13,12 +13,12 @@ import com.appodealstack.bidon.demands.Initializable
 import kotlinx.coroutines.withTimeoutOrNull
 
 @Suppress("UNCHECKED_CAST")
-internal class AdapterRegisterImpl : AdapterRegister {
+internal class AdapterRegistryImpl : AdapterRegistry {
     private val sdkCore: Core = SdkCore
     private val contextProvider = ContextProvider
     private val demands =
         mutableMapOf<Class<Adapter>, Pair<Adapter, AdapterParameters?>>()
-    override fun withContext(activity: Activity): AdapterRegister {
+    override fun withContext(activity: Activity): AdapterRegistry {
         ContextProvider.setContext(activity)
         return this
     }
@@ -26,7 +26,7 @@ internal class AdapterRegisterImpl : AdapterRegister {
     override fun registerAdapter(
         adapterClass: Class<out Adapter>,
         parameters: AdapterParameters?
-    ): AdapterRegister {
+    ): AdapterRegistry {
         logInternal(Tag, "Creating instance for: $adapterClass")
         try {
             val instance = adapterClass.newInstance()

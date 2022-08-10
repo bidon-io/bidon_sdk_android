@@ -4,13 +4,13 @@ import android.app.Activity
 import com.appodealstack.bidon.demands.Adapter
 import com.appodealstack.bidon.demands.AdapterParameters
 
-internal interface AdapterRegister {
-    fun withContext(activity: Activity): AdapterRegister
+internal interface AdapterRegistry {
+    fun withContext(activity: Activity): AdapterRegistry
 
     fun registerAdapter(
         adapterClass: Class<out Adapter>,
         parameters: AdapterParameters?
-    ): AdapterRegister
+    ): AdapterRegistry
 
     suspend fun build()
 }

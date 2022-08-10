@@ -3,8 +3,11 @@ package com.appodealstack.bidon.config.domain
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * Map< AdapterName:String, AdapterInfo >
+ */
 @Serializable
-data class ConfigRequestBody(
+internal data class ConfigRequestBody(
     @SerialName("adapters")
-    val adapters: List<AdapterInfo>
+    val adapters: Map<String, AdapterInfo>
 )
