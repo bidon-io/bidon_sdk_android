@@ -1,7 +1,15 @@
 package com.appodealstack.bidmachine
 
 import com.appodealstack.bidon.demands.AdapterParameters
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class BidMachineParameters(
-    val sourceId: String
+    @SerialName("seller_id")
+    val sellerId: String,
+    @SerialName("endpoint")
+    val endpoint: String?,
+    @SerialName("mediation_config")
+    val mediationConfig: List<String>?,
 ): AdapterParameters

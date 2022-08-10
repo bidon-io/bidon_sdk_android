@@ -1,10 +1,11 @@
 package com.appodealstack.fyber
 
 import com.appodealstack.bidon.demands.AdapterParameters
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class FairBidParameters(
+    @SerialName("app_key")
     val appKey: String,
-    val interstitialPlacementIds: List<String> = emptyList(),
-    val rewardedPlacementIds: List<String> = emptyList(),
-    val bannerPlacementIds: List<String> = emptyList(),
 ) : AdapterParameters

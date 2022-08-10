@@ -2,8 +2,8 @@ package com.appodealstack.bidon.core
 
 import com.appodealstack.bidon.demands.Adapter
 
-internal interface DemandsSource {
+internal interface AdaptersSource {
     val adapters: List<Adapter>
-    fun addDemands(adapter: Adapter)
+    fun add(adapters: List<Adapter>)
 }
 

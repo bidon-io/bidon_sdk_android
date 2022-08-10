@@ -2,29 +2,34 @@ package com.appodealstack.bidon.di
 
 import com.appodealstack.bidon.BidONSdk
 import com.appodealstack.bidon.Core
-import com.appodealstack.bidon.config.domain.AdapterRegistry
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolder
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolderImpl
 import com.appodealstack.bidon.auctions.AdsRepository
 import com.appodealstack.bidon.auctions.AdsRepositoryImpl
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
 import com.appodealstack.bidon.auctions.impl.AuctionResolversHolderImpl
-import com.appodealstack.bidon.config.data.ConfigRequestInteractorImpl
-import com.appodealstack.bidon.config.data.AdapterRegistryImpl
+import com.appodealstack.bidon.config.data.AdapterInstanceCreatorImpl
 import com.appodealstack.bidon.config.data.BidONInitializerImpl
+import com.appodealstack.bidon.config.data.ConfigRequestInteractorImpl
+import com.appodealstack.bidon.config.data.InitAndRegisterAdaptersUseCaseImpl
+import com.appodealstack.bidon.config.domain.AdapterInstanceCreator
 import com.appodealstack.bidon.config.domain.BidONInitializer
 import com.appodealstack.bidon.config.domain.ConfigRequestInteractor
+import com.appodealstack.bidon.config.domain.InitAndRegisterAdaptersUseCase
+import com.appodealstack.bidon.core.AdaptersSource
 import com.appodealstack.bidon.core.AutoRefresher
 import com.appodealstack.bidon.core.AutoRefresherImpl
-import com.appodealstack.bidon.core.DemandsSource
 import com.appodealstack.bidon.core.ListenersHolder
+import com.appodealstack.bidon.core.impl.AdaptersSourceImpl
 import com.appodealstack.bidon.core.impl.BidONSdkImpl
 import com.appodealstack.bidon.core.impl.CoreImpl
-import com.appodealstack.bidon.core.impl.DemandsSourceImpl
 import com.appodealstack.bidon.core.impl.ListenersHolderImpl
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal object SimpleInjectionModule {
+/**
+ * Dependency Injection
+ */
+internal object DI {
     private val isInitialized = AtomicBoolean(false)
 
     /**
@@ -41,14 +46,20 @@ internal object SimpleInjectionModule {
 
                 factory<BidONInitializer> {
                     BidONInitializerImpl(
-                        adapterRegistry = get(),
-                        configRequestInteractor = get()
+                        initAndRegisterAdapters = get(),
+                        configRequestInteractor = get(),
+                        adapterInstanceCreator = get()
                     )
                 }
-                factory<AdapterRegistry> { AdapterRegistryImpl() }
+                factory<InitAndRegisterAdaptersUseCase> {
+                    InitAndRegisterAdaptersUseCaseImpl(
+                        adaptersSource = get<Core>() as AdaptersSource
+                    )
+                }
+                factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
 
                 factory<ConfigRequestInteractor> { ConfigRequestInteractorImpl() }
-                factory<DemandsSource> { DemandsSourceImpl() }
+                factory<AdaptersSource> { AdaptersSourceImpl() }
                 factory<ListenersHolder> { ListenersHolderImpl() }
                 factory<AdRevenueInterceptorHolder> { AdRevenueInterceptorHolderImpl() }
                 factory<AuctionResolversHolder> { AuctionResolversHolderImpl() }

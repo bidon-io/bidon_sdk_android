@@ -19,14 +19,12 @@ internal class BidONSdkImpl(
 
     override fun init(activity: Activity, appKey: String, callback: InitializationCallback?) {
         scope.launch {
-            init(activity, appKey).onFailure {
+            runCatching {
+                bidONInitializer.init(activity, appKey)
+            }.onFailure {
                 logError(message = "Error while initialization", error = it)
             }
             callback?.onFinished()
         }
-    }
-
-    private suspend fun init(activity: Activity, appKey: String): Result<Unit> = runCatching {
-        bidONInitializer.init(activity, appKey)
     }
 }

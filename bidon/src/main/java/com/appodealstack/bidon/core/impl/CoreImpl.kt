@@ -6,32 +6,50 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import com.appodealstack.bidon.Core
-import com.appodealstack.bidon.analytics.*
-import com.appodealstack.bidon.auctions.*
-import com.appodealstack.bidon.auctions.impl.AuctionResolversHolderImpl
-import com.appodealstack.bidon.core.*
+import com.appodealstack.bidon.Core.SdkState
+import com.appodealstack.bidon.analytics.AdRevenueInterceptor
+import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolder
+import com.appodealstack.bidon.analytics.AdRevenueLogger
+import com.appodealstack.bidon.analytics.MediationNetwork
+import com.appodealstack.bidon.auctions.AdsRepository
+import com.appodealstack.bidon.auctions.AuctionResolver
+import com.appodealstack.bidon.auctions.AuctionResolversHolder
+import com.appodealstack.bidon.auctions.NewAuction
 import com.appodealstack.bidon.core.AutoRefresher
-import com.appodealstack.bidon.core.DemandsSource
+import com.appodealstack.bidon.core.AdaptersSource
+import com.appodealstack.bidon.core.InitializationCallback
 import com.appodealstack.bidon.core.ListenersHolder
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.core.ext.retrieveAuctionRequests
 import com.appodealstack.bidon.demands.*
 import com.appodealstack.bidon.demands.banners.AutoRefresh
 import com.appodealstack.bidon.di.get
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
 
 internal class CoreImpl(
     private val adsRepository: AdsRepository = get()
 ) : Core,
-    DemandsSource by get(),
+    AdaptersSource by get(),
     ListenersHolder by get(),
     AutoRefresher by get(),
     AdRevenueInterceptorHolder by get(),
     AuctionResolversHolder by get() {
 
-    override var isInitialized: Boolean = false
+    override val isInitialized: Boolean
+        get() = sdkState.value == SdkState.Initialized
+
+    override val isInitializing: Boolean
+        get() = sdkState.value == SdkState.Initializing
+
+    override val sdkState = MutableStateFlow(SdkState.NotInitialized)
 
     override fun init(activity: Activity, appKey: String, callback: InitializationCallback?) {
-        TODO("Not yet implemented")
+        if (sdkState.getAndUpdate { SdkState.Initializing } == SdkState.NotInitialized) {
+
+
+            sdkState.value = SdkState.Initialized
+        }
     }
 
     override fun loadAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle) {

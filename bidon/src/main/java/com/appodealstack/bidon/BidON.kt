@@ -2,7 +2,7 @@ package com.appodealstack.bidon
 
 import android.app.Activity
 import com.appodealstack.bidon.core.InitializationCallback
-import com.appodealstack.bidon.di.SimpleInjectionModule.initDependencyInjection
+import com.appodealstack.bidon.di.DI.initDependencyInjection
 import com.appodealstack.bidon.di.get
 
 val BidON: BidONSdk by lazy {

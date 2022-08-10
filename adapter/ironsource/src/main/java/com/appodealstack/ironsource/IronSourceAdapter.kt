@@ -11,9 +11,12 @@ import com.appodealstack.bidon.analytics.MediationNetwork
 import com.appodealstack.bidon.auctions.AuctionRequest
 import com.appodealstack.bidon.auctions.AuctionResult
 import com.appodealstack.bidon.config.domain.AdapterInfo
+import com.appodealstack.bidon.core.parse
 import com.appodealstack.bidon.demands.*
 import com.appodealstack.bidon.demands.banners.BannerSize
 import com.appodealstack.bidon.demands.banners.BannerSizeKey
+import com.appodealstack.ironsource.ext.adapterVersion
+import com.appodealstack.ironsource.ext.sdkVersion
 import com.appodealstack.ironsource.impl.asBidonError
 import com.ironsource.mediationsdk.ISBannerSize
 import com.ironsource.mediationsdk.IronSource
@@ -29,6 +32,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.serialization.json.JsonObject
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 
@@ -40,8 +44,8 @@ class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
     override val mediationNetwork = BNMediationNetwork.IronSource
     override val demandId: DemandId = IronSourceDemandId
     override val adapterInfo = AdapterInfo(
-        adapterVersion = "3.2.1",
-        bidonSdkVersion = "1.2.3"
+        adapterVersion = adapterVersion,
+        sdkVersion = sdkVersion
     )
 
     private val scope: CoroutineScope get() = CoroutineScope(Dispatchers.Default)
@@ -67,11 +71,7 @@ class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
         val initializationListener = InitializationListener {
             it.resume(Unit)
         }
-        if (configParams.adUnit == null) {
-            IronSource.init(activity, configParams.appKey, initializationListener)
-        } else {
-            IronSource.init(activity, configParams.appKey, initializationListener, configParams.adUnit)
-        }
+        IronSource.init(activity, configParams.appKey, initializationListener)
     }
 
     override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
@@ -278,6 +278,8 @@ class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
             }
         }
     }
+
+    override fun parseConfigParam(json: JsonObject): IronSourceParameters = json.parse(IronSourceParameters.serializer())
 
     private fun IronSourceBannerLayout.setCoreListener(demandAd: DemandAd) {
         val bannerView = this

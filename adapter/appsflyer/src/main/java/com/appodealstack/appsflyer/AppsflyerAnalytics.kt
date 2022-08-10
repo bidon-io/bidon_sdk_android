@@ -2,10 +2,13 @@ package com.appodealstack.appsflyer
 
 import android.app.Activity
 import android.app.Application
+import com.appodealstack.appsflyer.ext.adapterVersion
+import com.appodealstack.appsflyer.ext.sdkVersion
 import com.appodealstack.bidon.analytics.AdRevenueLogger
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.config.domain.AdapterInfo
 import com.appodealstack.bidon.core.ext.logInternal
+import com.appodealstack.bidon.core.parse
 import com.appodealstack.bidon.demands.*
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.adrevenue.AppsFlyerAdRevenue
@@ -14,6 +17,7 @@ import com.appsflyer.attribution.AppsFlyerRequestListener
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 import java.util.*
 import kotlin.coroutines.resume
 
@@ -31,10 +35,12 @@ private val AppsflyerDemandId = DemandId("appsflyer")
 class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenueLogger {
     override val demandId: DemandId = AppsflyerDemandId
 
-    override val adapterInfo = AdapterInfo(
-        adapterVersion = "3.2.1",
-        bidonSdkVersion = "1.2.3"
-    )
+    override val adapterInfo by lazy {
+        AdapterInfo(
+            adapterVersion = adapterVersion,
+            sdkVersion = sdkVersion
+        )
+    }
 
     override suspend fun init(activity: Activity, configParams: AppsflyerParameters) {
         val context = activity.applicationContext
@@ -84,6 +90,9 @@ class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenu
             nonMandatory
         )
     }
+
+    override fun parseConfigParam(json: JsonObject): AppsflyerParameters = json.parse(AppsflyerParameters.serializer())
+
 }
 
 private const val Tag = "AppsflyerAdapter"

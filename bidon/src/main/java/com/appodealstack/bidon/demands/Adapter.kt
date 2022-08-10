@@ -4,19 +4,18 @@ import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.ViewGroup
-import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.auctions.AuctionRequest
 import com.appodealstack.bidon.config.domain.AdapterInfo
+import kotlinx.serialization.json.JsonObject
 
 interface Adapter {
     val demandId: DemandId
     val adapterInfo: AdapterInfo
 }
 
-interface AdapterParameters
-
 interface Initializable<T : AdapterParameters> {
     suspend fun init(activity: Activity, configParams: T)
+    fun parseConfigParam(json: JsonObject): T
 }
 
 sealed interface AdSource {

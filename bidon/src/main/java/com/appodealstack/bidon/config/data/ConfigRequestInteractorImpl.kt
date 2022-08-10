@@ -3,6 +3,7 @@ package com.appodealstack.bidon.config.data
 import com.appodealstack.bidon.config.domain.ConfigRequestBody
 import com.appodealstack.bidon.config.domain.ConfigRequestInteractor
 import com.appodealstack.bidon.config.domain.ConfigResponse
+import com.appodealstack.bidon.core.BidonJson
 import com.appodealstack.bidon.utilities.network.AppodealEndpoints
 import com.appodealstack.bidon.utilities.network.HttpClient
 import kotlinx.serialization.decodeFromString
@@ -19,7 +20,7 @@ internal class ConfigRequestInteractorImpl : ConfigRequestInteractor {
 
     override suspend fun request(body: ConfigRequestBody): Result<ConfigResponse> {
         val jsonObject = buildJsonObject {
-            put("adapters", Json.encodeToJsonElement(body.adapters))
+            put("adapters", BidonJson.encodeToJsonElement(body.adapters))
             binders.forEach { dataBinder ->
                 put(dataBinder.fieldName, dataBinder.getJsonElement())
             }
@@ -32,13 +33,13 @@ internal class ConfigRequestInteractorImpl : ConfigRequestInteractor {
                 requireNotNull(response) {
                     "Response is null /config"
                 }
-                Json.decodeFromString<JsonObject>(String(response))
+                BidonJson.decodeFromString<JsonObject>(String(response))
             },
-            body = Json.encodeToString(jsonObject).toByteArray()
+            body = BidonJson.encodeToString(jsonObject).toByteArray()
         ).mapCatching { jsonResponse ->
             requireNotNull(jsonResponse)
             val config = jsonResponse.getValue("init")
-            Json.decodeFromJsonElement<ConfigResponse>(config)
+            BidonJson.decodeFromJsonElement<ConfigResponse>(config)
         }
     }
 }

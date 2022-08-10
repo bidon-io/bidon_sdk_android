@@ -2,9 +2,9 @@ package com.appodealstack.bidon.core.impl
 
 import android.app.Activity
 import android.content.Context
-import com.appodealstack.bidon.core.IContextProvider
+import com.appodealstack.bidon.core.ContextProvider
 
-internal class ContextProviderImpl : IContextProvider {
+internal class ContextProviderImpl : ContextProvider {
     private var context: Context? = null
 
     override val activity: Activity?

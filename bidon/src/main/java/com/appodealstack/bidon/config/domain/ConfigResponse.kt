@@ -1,8 +1,8 @@
 package com.appodealstack.bidon.config.domain
 
+import com.appodealstack.bidon.core.BidonJson
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 
@@ -15,7 +15,7 @@ data class ConfigResponse(
 ) {
     inline fun <reified T : AdapterInitializationInfo> getConfig(adapterName: String): T? {
         return adapters[adapterName]?.let { jsonObject ->
-            Json.decodeFromJsonElement<T>(jsonObject)
+            BidonJson.decodeFromJsonElement<T>(jsonObject)
         }
     }
 }

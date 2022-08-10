@@ -7,5 +7,5 @@ data class AdapterInfo(
     @SerialName("version")
     val adapterVersion: String,
     @SerialName("sdk_version")
-    val bidonSdkVersion: String
+    val sdkVersion: String
 )

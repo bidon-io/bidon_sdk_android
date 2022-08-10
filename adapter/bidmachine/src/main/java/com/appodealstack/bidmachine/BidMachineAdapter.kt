@@ -5,14 +5,18 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import com.appodealstack.bidmachine.ext.adapterVersion
+import com.appodealstack.bidmachine.ext.sdkVersion
 import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.auctions.AuctionRequest
 import com.appodealstack.bidon.auctions.AuctionResult
 import com.appodealstack.bidon.config.domain.AdapterInfo
+import com.appodealstack.bidon.core.parse
 import com.appodealstack.bidon.demands.*
 import com.appodealstack.bidon.demands.banners.BannerSize
 import com.appodealstack.bidon.demands.banners.BannerSizeKey
 import io.bidmachine.BidMachine
+import io.bidmachine.NetworkConfig
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.banner.BannerListener
 import io.bidmachine.banner.BannerRequest
@@ -25,6 +29,7 @@ import io.bidmachine.rewarded.RewardedListener
 import io.bidmachine.rewarded.RewardedRequest
 import io.bidmachine.utils.BMError
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.serialization.json.JsonObject
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 
@@ -39,14 +44,14 @@ class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
 
     override val demandId = BidMachineDemandId
     override val adapterInfo = AdapterInfo(
-        adapterVersion = "3.2.1",
-        bidonSdkVersion = "1.2.3"
+        adapterVersion = adapterVersion,
+        sdkVersion = sdkVersion
     )
 
     override suspend fun init(activity: Activity, configParams: BidMachineParameters): Unit =
         suspendCancellableCoroutine { continuation ->
             this.context = activity.applicationContext
-            val sourceId = configParams.sourceId
+            val sourceId = configParams.sellerId
             BidMachine.initialize(context, sourceId) {
                 continuation.resume(Unit)
             }
@@ -236,6 +241,9 @@ class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
             }
         }
     }
+
+    override fun parseConfigParam(json: JsonObject): BidMachineParameters = json.parse(BidMachineParameters.serializer())
+
 
     private fun InterstitialAd.setCoreListener(auctionResult: AuctionResult) {
         val coreListener = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)

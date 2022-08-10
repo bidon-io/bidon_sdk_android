@@ -5,6 +5,8 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import com.appodealstack.admob.ext.adapterVersion
+import com.appodealstack.admob.ext.sdkVersion
 import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.auctions.AuctionRequest
@@ -23,6 +25,7 @@ import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonObject
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
@@ -39,8 +42,8 @@ class AdmobAdapter : Adapter, Initializable<AdmobParameters>,
 
     override val demandId = AdmobDemandId
     override val adapterInfo = AdapterInfo(
-        adapterVersion = "3.2.1",
-        bidonSdkVersion = "1.2.3"
+        adapterVersion = adapterVersion,
+        sdkVersion = sdkVersion
     )
 
     private val bannersAdUnits = mutableMapOf<Double, AdUnitId>()
@@ -53,15 +56,15 @@ class AdmobAdapter : Adapter, Initializable<AdmobParameters>,
          * Don't forget set Automatic refresh is Disabled for each AdUnit.
          * Manage refresh rate with [AutoRefresher.setAutoRefresh].
          */
-        interstitialAdUnits.putAll(configParams.interstitials.map { (price, adUnit) ->
-            price to AdUnitId(adUnit)
-        })
-        rewardedAdUnits.putAll(configParams.rewarded.map { (price, adUnit) ->
-            price to AdUnitId(adUnit)
-        })
-        bannersAdUnits.putAll(configParams.banners.map { (price, adUnit) ->
-            price to AdUnitId(adUnit)
-        })
+//        interstitialAdUnits.putAll(configParams.interstitials.map { (price, adUnit) ->
+//            price to AdUnitId(adUnit)
+//        })
+//        rewardedAdUnits.putAll(configParams.rewarded.map { (price, adUnit) ->
+//            price to AdUnitId(adUnit)
+//        })
+//        bannersAdUnits.putAll(configParams.banners.map { (price, adUnit) ->
+//            price to AdUnitId(adUnit)
+//        })
         MobileAds.initialize(context) {
             continuation.resume(Unit)
         }
@@ -230,6 +233,8 @@ class AdmobAdapter : Adapter, Initializable<AdmobParameters>,
             }
         }
     }
+
+    override fun parseConfigParam(json: JsonObject): AdmobParameters = AdmobParameters
 
     private fun InterstitialAd.setCoreListener(ownerDemandAd: DemandAd, auctionData: AuctionResult) {
         val coreListener = SdkCore.getListenerForDemand(ownerDemandAd)

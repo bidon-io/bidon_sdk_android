@@ -1,3 +1,5 @@
+import ext.ADAPTER_VERSION
+
 plugins {
     id("common")
     id("publish-adapter")
@@ -5,7 +7,13 @@ plugins {
 
 project.extra.apply {
     this.set("AdapterArtifactId", "admob-adapter")
-    this.set("AdapterVersionName", Versions.VersionName)
+    this.set("AdapterVersionName", Versions.Adapters.Admob)
+}
+
+android {
+    defaultConfig{
+        ADAPTER_VERSION = Versions.Adapters.Admob
+    }
 }
 
 //publishInfo {
@@ -14,6 +22,6 @@ project.extra.apply {
 //}
 
 dependencies {
-    compileOnly(project(":bidon"))
-    implementation("com.google.android.gms:play-services-ads:21.1.0")
+    implementation(project(":bidon"))
+    implementation(Dependencies.Library.PlayServicesAds)
 }

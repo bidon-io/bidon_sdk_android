@@ -11,9 +11,12 @@ import com.appodealstack.bidon.analytics.MediationNetwork
 import com.appodealstack.bidon.auctions.AuctionRequest
 import com.appodealstack.bidon.auctions.AuctionResult
 import com.appodealstack.bidon.config.domain.AdapterInfo
+import com.appodealstack.bidon.core.parse
 import com.appodealstack.bidon.demands.*
 import com.appodealstack.fyber.banner.BannerInterceptor
 import com.appodealstack.fyber.banner.initBannerListener
+import com.appodealstack.fyber.ext.adapterVersion
+import com.appodealstack.fyber.ext.sdkVersion
 import com.appodealstack.fyber.interstitial.InterstitialInterceptor
 import com.appodealstack.fyber.interstitial.initInterstitialListener
 import com.appodealstack.fyber.rewarded.RewardedInterceptor
@@ -26,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonObject
 
 val FairBidDemandId = DemandId("fair_bid")
 
@@ -34,8 +38,8 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
     override val mediationNetwork = BNMediationNetwork.Fyber
     override val demandId: DemandId = FairBidDemandId
     override val adapterInfo = AdapterInfo(
-        adapterVersion = "3.2.1",
-        bidonSdkVersion = "1.2.3"
+        adapterVersion = adapterVersion,
+        sdkVersion = sdkVersion
     )
 
     private lateinit var context: Context
@@ -52,8 +56,6 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
     private val bannerPlacementsDemandAd = mutableMapOf<String, DemandAd>()
     private val bannerPlacementsRevenue = mutableMapOf<String, ImpressionData>()
     private val placements = mutableListOf<String>()
-
-    private var fairBidParameters: FairBidParameters? = null
 
     init {
         scope.launch {
@@ -75,7 +77,6 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
 
     override suspend fun init(activity: Activity, configParams: FairBidParameters) {
         this.context = activity.applicationContext
-        this.fairBidParameters = configParams
         FairBid.configureForAppId(configParams.appKey)
             .enableLogs()
             .disableAutoRequesting()
@@ -100,7 +101,7 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
 
     override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
         return AuctionRequest {
-            val placementId = adParams.getString(PlacementKey) ?: fairBidParameters?.interstitialPlacementIds?.first()
+            val placementId = adParams.getString(PlacementKey)
             if (placementId.isNullOrBlank()) {
                 return@AuctionRequest Result.failure(DemandError.NoPlacement(demandId))
             }
@@ -145,7 +146,7 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
 
     override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
         return AuctionRequest {
-            val placementId = adParams.getString(PlacementKey) ?: fairBidParameters?.rewardedPlacementIds?.first()
+            val placementId = adParams.getString(PlacementKey)
             if (placementId.isNullOrBlank()) {
                 return@AuctionRequest Result.failure(DemandError.NoPlacement(demandId))
             }
@@ -191,7 +192,7 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
 
     override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle, adContainer: ViewGroup?): AuctionRequest {
         return AuctionRequest {
-            val placementId = adParams.getString(PlacementKey) ?: fairBidParameters?.bannerPlacementIds?.first()
+            val placementId = adParams.getString(PlacementKey)
             if (placementId.isNullOrBlank()) {
                 return@AuctionRequest Result.failure(DemandError.NoPlacement(demandId))
             }
@@ -329,6 +330,10 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
             this.add(placementId)
         }
     }
+
+    override fun parseConfigParam(json: JsonObject): FairBidParameters =
+        requireNotNull(json[demandId.demandId]).parse(FairBidParameters.serializer())
+
 }
 
 const val PlacementKey = "placement"

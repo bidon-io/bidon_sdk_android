@@ -11,6 +11,8 @@ import com.applovin.mediation.ads.MaxAdView
 import com.applovin.mediation.ads.MaxInterstitialAd
 import com.applovin.mediation.ads.MaxRewardedAd
 import com.applovin.sdk.AppLovinSdk
+import com.appodealstack.applovin.ext.adapterVersion
+import com.appodealstack.applovin.ext.sdkVersion
 import com.appodealstack.applovin.impl.asBidonError
 import com.appodealstack.applovin.impl.setCoreListener
 import com.appodealstack.bidon.SdkCore
@@ -20,10 +22,12 @@ import com.appodealstack.bidon.auctions.AuctionRequest
 import com.appodealstack.bidon.auctions.AuctionResult
 import com.appodealstack.bidon.config.domain.AdapterInfo
 import com.appodealstack.bidon.core.ext.logInternal
+import com.appodealstack.bidon.core.parse
 import com.appodealstack.bidon.demands.*
 import com.appodealstack.bidon.demands.banners.BannerSize
 import com.appodealstack.bidon.demands.banners.BannerSizeKey
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.serialization.json.JsonObject
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 
@@ -44,15 +48,15 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
     override val mediationNetwork = BNMediationNetwork.ApplovinMax
     override val demandId: DemandId = ApplovinMaxDemandId
     override val adapterInfo = AdapterInfo(
-        adapterVersion = "3.2.1",
-        bidonSdkVersion = "1.2.3"
+        adapterVersion = adapterVersion,
+        sdkVersion = sdkVersion
     )
 
     override suspend fun init(activity: Activity, configParams: ApplovinParameters): Unit =
         suspendCancellableCoroutine { continuation ->
-            bannerAdUnitIds.addAll(configParams.bannerAdUnitIds)
-            interstitialAdUnitIds.addAll(configParams.interstitialAdUnitIds)
-            rewardedAdUnitIds.addAll(configParams.rewardedAdUnitIds)
+//            bannerAdUnitIds.addAll(configParams.bannerAdUnitIds)
+//            interstitialAdUnitIds.addAll(configParams.interstitialAdUnitIds)
+//            rewardedAdUnitIds.addAll(configParams.rewardedAdUnitIds)
             this.context = activity.applicationContext
             if (!AppLovinSdk.getInstance(context).isInitialized) {
                 AppLovinSdk.getInstance(context).mediationProvider = "max"
@@ -63,6 +67,8 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
                 continuation.resume(Unit)
             }
         }
+
+    override fun parseConfigParam(json: JsonObject): ApplovinParameters = json.parse(ApplovinParameters.serializer())
 
     override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle, adContainer: ViewGroup?): AuctionRequest {
         val adUnitId = adParams.getString(AdUnitIdKey) ?: bannerAdUnitIds.first()

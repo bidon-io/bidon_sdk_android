@@ -1,3 +1,6 @@
+import ext.ADAPTER_SDK_VERSION
+import ext.ADAPTER_VERSION
+
 plugins {
     id("common")
     id("publish-adapter")
@@ -5,11 +8,19 @@ plugins {
 
 project.extra.apply {
     this.set("AdapterArtifactId", "appsflyer-adapter")
-    this.set("AdapterVersionName", Versions.VersionName)
+    this.set("AdapterVersionName", Versions.Adapters.Appsflyer)
+}
+
+android {
+    defaultConfig {
+        ADAPTER_VERSION = Versions.Adapters.Appsflyer
+        ADAPTER_SDK_VERSION = Dependencies.SdkAdapter.AppsflyerVersion
+    }
 }
 
 dependencies {
-    compileOnly(project(":bidon"))
-    implementation("com.appsflyer:af-android-sdk:6.7.0")
-    implementation("com.appsflyer:adrevenue:6.5.4")
+    implementation(project(":bidon"))
+
+    implementation(Dependencies.SdkAdapter.Appsflyer)
+    implementation(Dependencies.SdkAdapter.AppsflyerAdRevenue)
 }

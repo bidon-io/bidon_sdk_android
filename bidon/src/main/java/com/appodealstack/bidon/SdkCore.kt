@@ -14,8 +14,9 @@ import com.appodealstack.bidon.demands.AdListener
 import com.appodealstack.bidon.demands.AdRevenueListener
 import com.appodealstack.bidon.demands.DemandAd
 import com.appodealstack.bidon.demands.banners.AutoRefresh
-import com.appodealstack.bidon.di.SimpleInjectionModule.initDependencyInjection
+import com.appodealstack.bidon.di.DI.initDependencyInjection
 import com.appodealstack.bidon.di.get
+import kotlinx.coroutines.flow.StateFlow
 
 val SdkCore: Core by lazy {
     initDependencyInjection()
@@ -26,7 +27,9 @@ interface Core {
     /**
      * Should be changed only in [SdkInitialization]
      */
-    var isInitialized: Boolean
+    val isInitialized: Boolean
+    val isInitializing: Boolean
+    val sdkState: StateFlow<SdkState>
 
     fun init(
         activity: Activity,
@@ -69,4 +72,10 @@ interface Core {
 
     fun logAdRevenue(ad: Ad)
     fun getAdRevenueInterceptor(): AdRevenueInterceptor?
+
+    enum class SdkState {
+        NotInitialized,
+        Initializing,
+        Initialized
+    }
 }

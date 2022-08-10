@@ -1,9 +1,11 @@
 package com.appodealstack.applovin
 
 import com.appodealstack.bidon.demands.AdapterParameters
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ApplovinParameters(
-    val bannerAdUnitIds: List<String> = emptyList(),
-    val interstitialAdUnitIds: List<String> = emptyList(),
-    val rewardedAdUnitIds: List<String> = emptyList(),
+    @SerialName("applovin_key")
+    val key: String
 ): AdapterParameters
