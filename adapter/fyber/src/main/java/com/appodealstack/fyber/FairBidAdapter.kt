@@ -6,13 +6,15 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import com.appodealstack.bidon.SdkCore
+import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.analytics.MediationNetwork
-import com.appodealstack.bidon.auctions.AuctionRequest
-import com.appodealstack.bidon.auctions.AuctionResult
+import com.appodealstack.bidon.auctions.domain.AuctionRequest
+import com.appodealstack.bidon.auctions.data.models.AuctionResult
+import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.appodealstack.bidon.core.parse
-import com.appodealstack.bidon.adapters.*
 import com.appodealstack.fyber.banner.BannerInterceptor
 import com.appodealstack.fyber.banner.initBannerListener
 import com.appodealstack.fyber.ext.adapterVersion
@@ -34,7 +36,8 @@ import kotlinx.serialization.json.JsonObject
 val FairBidDemandId = DemandId("fair_bid")
 
 class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
-    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner, MediationNetwork {
+    AdSource.Interstitial<AdSource.AdParams>, AdSource.Rewarded<AdSource.AdParams>, AdSource.Banner<FairBidBannerParams>,
+    MediationNetwork {
     override val mediationNetwork = BNMediationNetwork.Fyber
     override val demandId: DemandId = FairBidDemandId
     override val adapterInfo = AdapterInfo(
@@ -99,9 +102,9 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
         )
     }
 
-    override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
+    override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: AdSource.AdParams): AuctionRequest {
         return AuctionRequest {
-            val placementId = adParams.getString(PlacementKey)
+            val placementId = demandAd.placement
             if (placementId.isNullOrBlank()) {
                 return@AuctionRequest Result.failure(DemandError.NoPlacement(demandId))
             }
@@ -144,9 +147,9 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
         }
     }
 
-    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
+    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: AdSource.AdParams): AuctionRequest {
         return AuctionRequest {
-            val placementId = adParams.getString(PlacementKey)
+            val placementId = demandAd.placement
             if (placementId.isNullOrBlank()) {
                 return@AuctionRequest Result.failure(DemandError.NoPlacement(demandId))
             }
@@ -190,14 +193,14 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
         }
     }
 
-    override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle, adContainer: ViewGroup?): AuctionRequest {
+    override fun banner(context: Context, demandAd: DemandAd, adParams: FairBidBannerParams): AuctionRequest {
         return AuctionRequest {
-            val placementId = adParams.getString(PlacementKey)
+            val placementId = demandAd.placement
             if (placementId.isNullOrBlank()) {
                 return@AuctionRequest Result.failure(DemandError.NoPlacement(demandId))
             }
             bannerPlacementsRevenue.remove(placementId)
-            Banner.show(placementId, BannerOptions().placeInContainer(adContainer), context as Activity)
+            Banner.show(placementId, BannerOptions().placeInContainer(adParams.adContainer), context as Activity)
             val loadingResult = bannerInterceptorFlow.first {
                 (it as? BannerInterceptor.Loaded)?.placementId == placementId ||
                         (it as? BannerInterceptor.Error)?.placementId == placementId
@@ -211,7 +214,7 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
                         AuctionResult(
                             ad = null.asAd(demandAd, placementId),
                             adProvider = object : AdProvider, AdViewProvider {
-                                override fun getAdView(): View = requireNotNull(adContainer)
+                                override fun getAdView(): View = adParams.adContainer
                                 override fun canShow(): Boolean = true
                                 override fun showAd(activity: Activity?, adParams: Bundle) {}
 
@@ -228,6 +231,21 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
             }
         }
     }
+
+    override fun interstitialParams(priceFloor: Double, lineItems: List<LineItem>): AdSource.AdParams {
+        error("No additional params for FairBid interstitial")
+    }
+
+    override fun rewardedParams(priceFloor: Double, lineItems: List<LineItem>): AdSource.AdParams {
+        error("No additional params for FairBid rewarded")
+    }
+
+    override fun bannerParams(
+        priceFloor: Double,
+        lineItems: List<LineItem>,
+        bannerSize: BannerSize,
+        adContainer: ViewGroup?
+    ): AdSource.AdParams = FairBidBannerParams(requireNotNull(adContainer))
 
     private fun proceedInterstitialCallbacks(interceptor: InterstitialInterceptor) {
         when (interceptor) {

@@ -3,7 +3,9 @@ package com.appodealstack.bidon.auctions
 import com.appodealstack.bidon.adapters.AdListener
 import com.appodealstack.bidon.adapters.DemandAd
 import com.appodealstack.bidon.adapters.ExtendedListener
+import com.appodealstack.bidon.auctions.data.models.AuctionResult
 
+@Deprecated("")
 internal interface AuctionListener {
 
     /**

@@ -4,10 +4,10 @@ import com.appodealstack.bidon.BidONSdk
 import com.appodealstack.bidon.Core
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolder
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolderImpl
-import com.appodealstack.bidon.auctions.AdsRepository
-import com.appodealstack.bidon.auctions.AdsRepositoryImpl
+import com.appodealstack.bidon.auctions.domain.AdsRepository
+import com.appodealstack.bidon.auctions.domain.impl.AdsRepositoryImpl
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
-import com.appodealstack.bidon.auctions.impl.AuctionResolversHolderImpl
+import com.appodealstack.bidon.auctions.domain.impl.AuctionResolversHolderImpl
 import com.appodealstack.bidon.config.data.impl.AdapterInstanceCreatorImpl
 import com.appodealstack.bidon.config.data.impl.ConfigRequestInteractorImpl
 import com.appodealstack.bidon.config.domain.*

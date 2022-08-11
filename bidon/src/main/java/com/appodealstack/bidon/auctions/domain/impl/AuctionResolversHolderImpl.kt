@@ -1,6 +1,6 @@
-package com.appodealstack.bidon.auctions.impl
+package com.appodealstack.bidon.auctions.domain.impl
 
-import com.appodealstack.bidon.auctions.AuctionResolver
+import com.appodealstack.bidon.auctions.domain.AuctionResolver
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
 import com.appodealstack.bidon.adapters.DemandAd
 

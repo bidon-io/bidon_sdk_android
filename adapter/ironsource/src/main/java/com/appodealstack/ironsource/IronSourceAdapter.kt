@@ -6,15 +6,15 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import com.appodealstack.bidon.SdkCore
-import com.appodealstack.bidon.analytics.BNMediationNetwork
-import com.appodealstack.bidon.analytics.MediationNetwork
-import com.appodealstack.bidon.auctions.AuctionRequest
-import com.appodealstack.bidon.auctions.AuctionResult
-import com.appodealstack.bidon.config.data.models.AdapterInfo
-import com.appodealstack.bidon.core.parse
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
-import com.appodealstack.bidon.adapters.banners.BannerSizeKey
+import com.appodealstack.bidon.analytics.BNMediationNetwork
+import com.appodealstack.bidon.analytics.MediationNetwork
+import com.appodealstack.bidon.auctions.domain.AuctionRequest
+import com.appodealstack.bidon.auctions.data.models.AuctionResult
+import com.appodealstack.bidon.auctions.data.models.LineItem
+import com.appodealstack.bidon.config.data.models.AdapterInfo
+import com.appodealstack.bidon.core.parse
 import com.appodealstack.ironsource.ext.adapterVersion
 import com.appodealstack.ironsource.ext.sdkVersion
 import com.appodealstack.ironsource.impl.asBidonError
@@ -39,7 +39,8 @@ import kotlin.coroutines.resume
 val IronSourceDemandId = DemandId("ironsource")
 
 class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
-    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner, MediationNetwork {
+    AdSource.Interstitial<AdSource.AdParams>, AdSource.Rewarded<AdSource.AdParams>, AdSource.Banner<ISBannerParams>,
+    MediationNetwork {
 
     override val mediationNetwork = BNMediationNetwork.IronSource
     override val demandId: DemandId = IronSourceDemandId
@@ -74,7 +75,7 @@ class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
         IronSource.init(activity, configParams.appKey, initializationListener)
     }
 
-    override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
+    override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: AdSource.AdParams): AuctionRequest {
         return AuctionRequest {
             interstitialDemandAd = demandAd
             IronSource.loadInterstitial()
@@ -112,7 +113,7 @@ class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
         }
     }
 
-    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
+    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: AdSource.AdParams): AuctionRequest {
         return AuctionRequest {
             rewardedDemandAd = demandAd
             IronSource.loadRewardedVideo()
@@ -147,6 +148,120 @@ class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
             }
         }
     }
+
+    override fun banner(context: Context, demandAd: DemandAd, adParams: ISBannerParams): AuctionRequest {
+        return AuctionRequest {
+            val placementId = demandAd.placement
+            val isBannerSize = when (adParams.bannerSize) {
+                BannerSize.Banner -> ISBannerSize.BANNER
+                BannerSize.Large -> ISBannerSize.LARGE
+                BannerSize.MRec -> ISBannerSize.RECTANGLE
+                BannerSize.Smart -> ISBannerSize.SMART
+                BannerSize.LeaderBoard -> error("Not supported")
+            }
+            val bannerView = IronSource.createBanner(context as Activity, isBannerSize)
+            suspendCancellableCoroutine { continuation ->
+                val isFinished = AtomicBoolean(false)
+                bannerView.levelPlayBannerListener = object : LevelPlayBannerListener {
+                    override fun onAdLoaded(adInfo: AdInfo?) {
+                        if (!isFinished.getAndSet(true)) {
+                            val ad = adInfo.asAd(demandAd)
+                            bannerView.setCoreListener(demandAd)
+                            continuation.resume(
+                                Result.success(
+                                    AuctionResult(
+                                        ad = ad,
+                                        adProvider = object : AdProvider, AdViewProvider {
+                                            override fun getAdView(): View = bannerView
+                                            override fun canShow(): Boolean = true
+                                            override fun showAd(activity: Activity?, adParams: Bundle) {}
+                                            override fun destroy() {
+                                                IronSource.destroyBanner(bannerView)
+                                            }
+
+                                        }
+                                    )
+                                )
+                            )
+                        }
+                    }
+
+                    override fun onAdLoadFailed(ironSourceError: IronSourceError?) {
+                        if (!isFinished.getAndSet(true)) {
+                            bannerView.removeBannerListener()
+                            continuation.resume(Result.failure(ironSourceError.asBidonError()))
+                        }
+                    }
+
+                    override fun onAdClicked(adInfo: AdInfo?) {}
+                    override fun onAdLeftApplication(adInfo: AdInfo?) {}
+                    override fun onAdScreenPresented(adInfo: AdInfo?) {}
+                    override fun onAdScreenDismissed(adInfo: AdInfo?) {}
+                }
+                if (placementId.isNullOrBlank()) {
+                    IronSource.loadBanner(bannerView)
+                } else {
+                    IronSource.loadBanner(bannerView, placementId)
+                }
+            }
+        }
+    }
+
+    override fun parseConfigParam(json: JsonObject): IronSourceParameters = json.parse(IronSourceParameters.serializer())
+
+    override fun interstitialParams(priceFloor: Double, lineItems: List<LineItem>): AdSource.AdParams {
+        error("No additional params for IronSource interstitial")
+    }
+
+    override fun rewardedParams(priceFloor: Double, lineItems: List<LineItem>): AdSource.AdParams {
+        error("No additional params for IronSource rewarded")
+    }
+
+    override fun bannerParams(
+        priceFloor: Double,
+        lineItems: List<LineItem>,
+        bannerSize: BannerSize,
+        adContainer: ViewGroup?
+    ): AdSource.AdParams = ISBannerParams(bannerSize)
+
+    private fun IronSourceBannerLayout.setCoreListener(demandAd: DemandAd) {
+        val bannerView = this
+        val coreListener = SdkCore.getListenerForDemand(demandAd)
+        bannerView.levelPlayBannerListener = object : LevelPlayBannerListener {
+            override fun onAdLoaded(adInfo: AdInfo?) {}
+            override fun onAdLoadFailed(p0: IronSourceError?) {}
+            override fun onAdLeftApplication(adInfo: AdInfo?) {}
+
+            override fun onAdClicked(adInfo: AdInfo?) {
+                coreListener.onAdClicked(adInfo.asAd(demandAd))
+            }
+
+            override fun onAdScreenPresented(adInfo: AdInfo?) {
+                val ad = adInfo.asAd(demandAd)
+                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(ad)
+                coreListener.onAdDisplayed(ad)
+            }
+
+            override fun onAdScreenDismissed(adInfo: AdInfo?) {
+                coreListener.onAdHidden(adInfo.asAd(demandAd))
+            }
+        }
+    }
+
+    private fun AdInfo?.asAd(demandAd: DemandAd): Ad {
+        val adInfo = this
+        return Ad(
+            demandId = demandId,
+            demandAd = demandAd,
+            price = adInfo?.revenue ?: 0.0,
+            sourceAd = adInfo ?: demandAd,
+            currencyCode = null,
+            auctionRound = Ad.AuctionRound.Mediation,
+            dsp = null,
+            monetizationNetwork = adInfo?.adNetwork
+        )
+    }
+
 
     private fun onInterstitialCallbackIntercepted(callback: InterstitialInterceptor) {
         interstitialDemandAd?.let { demandAd ->
@@ -218,106 +333,6 @@ class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
         }
     }
 
-    override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle, adContainer: ViewGroup?): AuctionRequest {
-        return AuctionRequest {
-            val placementId = adParams.getString(PlacementKey)
-            val bannerSize = adParams.getInt(BannerSizeKey, BannerSize.Banner.ordinal).let {
-                BannerSize.values()[it]
-            }
-            val isBannerSize = when (bannerSize) {
-                BannerSize.Banner -> ISBannerSize.BANNER
-                BannerSize.Large -> ISBannerSize.LARGE
-                BannerSize.MRec -> ISBannerSize.RECTANGLE
-                BannerSize.Smart -> ISBannerSize.SMART
-                BannerSize.LeaderBoard -> error("Not supported")
-            }
-            val bannerView = IronSource.createBanner(context as Activity, isBannerSize)
-            suspendCancellableCoroutine { continuation ->
-                val isFinished = AtomicBoolean(false)
-                bannerView.levelPlayBannerListener = object : LevelPlayBannerListener {
-                    override fun onAdLoaded(adInfo: AdInfo?) {
-                        if (!isFinished.getAndSet(true)) {
-                            val ad = adInfo.asAd(demandAd)
-                            bannerView.setCoreListener(demandAd)
-                            continuation.resume(
-                                Result.success(
-                                    AuctionResult(
-                                        ad = ad,
-                                        adProvider = object : AdProvider, AdViewProvider {
-                                            override fun getAdView(): View = bannerView
-                                            override fun canShow(): Boolean = true
-                                            override fun showAd(activity: Activity?, adParams: Bundle) {}
-                                            override fun destroy() {
-                                                IronSource.destroyBanner(bannerView)
-                                            }
-
-                                        }
-                                    )
-                                )
-                            )
-                        }
-                    }
-
-                    override fun onAdLoadFailed(ironSourceError: IronSourceError?) {
-                        if (!isFinished.getAndSet(true)) {
-                            bannerView.removeBannerListener()
-                            continuation.resume(Result.failure(ironSourceError.asBidonError()))
-                        }
-                    }
-
-                    override fun onAdClicked(adInfo: AdInfo?) {}
-                    override fun onAdLeftApplication(adInfo: AdInfo?) {}
-                    override fun onAdScreenPresented(adInfo: AdInfo?) {}
-                    override fun onAdScreenDismissed(adInfo: AdInfo?) {}
-                }
-                if (placementId.isNullOrBlank()) {
-                    IronSource.loadBanner(bannerView)
-                } else {
-                    IronSource.loadBanner(bannerView, placementId)
-                }
-            }
-        }
-    }
-
-    override fun parseConfigParam(json: JsonObject): IronSourceParameters = json.parse(IronSourceParameters.serializer())
-
-    private fun IronSourceBannerLayout.setCoreListener(demandAd: DemandAd) {
-        val bannerView = this
-        val coreListener = SdkCore.getListenerForDemand(demandAd)
-        bannerView.levelPlayBannerListener = object : LevelPlayBannerListener {
-            override fun onAdLoaded(adInfo: AdInfo?) {}
-            override fun onAdLoadFailed(p0: IronSourceError?) {}
-            override fun onAdLeftApplication(adInfo: AdInfo?) {}
-
-            override fun onAdClicked(adInfo: AdInfo?) {
-                coreListener.onAdClicked(adInfo.asAd(demandAd))
-            }
-
-            override fun onAdScreenPresented(adInfo: AdInfo?) {
-                val ad = adInfo.asAd(demandAd)
-                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(ad)
-                coreListener.onAdDisplayed(ad)
-            }
-
-            override fun onAdScreenDismissed(adInfo: AdInfo?) {
-                coreListener.onAdHidden(adInfo.asAd(demandAd))
-            }
-        }
-    }
-
-    private fun AdInfo?.asAd(demandAd: DemandAd): Ad {
-        val adInfo = this
-        return Ad(
-            demandId = demandId,
-            demandAd = demandAd,
-            price = adInfo?.revenue ?: 0.0,
-            sourceAd = adInfo ?: demandAd,
-            currencyCode = null,
-            auctionRound = Ad.AuctionRound.Mediation,
-            dsp = null,
-            monetizationNetwork = adInfo?.adNetwork
-        )
-    }
 }
 
 internal sealed interface InterstitialInterceptor {

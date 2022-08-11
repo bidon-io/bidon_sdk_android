@@ -6,7 +6,7 @@ import com.applovin.mediation.ads.MaxInterstitialAd
 import com.applovin.mediation.ads.MaxRewardedAd
 import com.appodealstack.applovin.asAd
 import com.appodealstack.bidon.SdkCore
-import com.appodealstack.bidon.auctions.AuctionResult
+import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.adapters.RewardedAdListener
 
 internal fun MaxRewardedAd.setCoreListener(auctionResult: AuctionResult) {

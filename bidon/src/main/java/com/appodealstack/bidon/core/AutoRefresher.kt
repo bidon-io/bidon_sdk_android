@@ -4,16 +4,15 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import com.appodealstack.bidon.auctions.AdsRepository
-import com.appodealstack.bidon.auctions.AuctionListener
-import com.appodealstack.bidon.auctions.NewAuction
-import com.appodealstack.bidon.core.ext.logInternal
-import com.appodealstack.bidon.core.ext.retrieveAuctionRequests
-import com.appodealstack.bidon.adapters.AdSource
 import com.appodealstack.bidon.adapters.AdViewProvider
 import com.appodealstack.bidon.adapters.Adapter
 import com.appodealstack.bidon.adapters.DemandAd
 import com.appodealstack.bidon.adapters.banners.AutoRefresh
+import com.appodealstack.bidon.auctions.domain.AdsRepository
+import com.appodealstack.bidon.auctions.Auction
+import com.appodealstack.bidon.auctions.AuctionListener
+import com.appodealstack.bidon.core.ext.logInternal
+import com.appodealstack.bidon.di.get
 import kotlinx.coroutines.*
 
 internal interface AutoRefresher {
@@ -80,17 +79,11 @@ internal class AutoRefresherImpl(
 
         jobs[demandAd] = scope.launch {
             if (!adsRepository.isAuctionActive(demandAd)) {
-                val auction = NewAuction
+                val auction = get<Auction>()
                 adsRepository.saveAuction(demandAd, auction)
                 auction.start(
-                    mediationRequests = adapters
-                        .filterIsInstance<AdSource.Banner>()
-                        .retrieveAuctionRequests(context, demandAd, adParams, adContainer)
-                        .toSet(),
-                    postBidRequests = adapters
-                        .filterIsInstance<AdSource.Banner>()
-                        .retrieveAuctionRequests(context, demandAd, adParams, adContainer)
-                        .toSet(),
+                    mediationRequests = setOf(),
+                    postBidRequests = setOf(),
                     onDemandLoaded = { auctionResult ->
                         auctionListener.demandAuctionSucceed(auctionResult)
                     },

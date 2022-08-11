@@ -2,9 +2,10 @@ package com.appodealstack.bidon.adapters
 
 import android.app.Activity
 import android.content.Context
-import android.os.Bundle
 import android.view.ViewGroup
-import com.appodealstack.bidon.auctions.AuctionRequest
+import com.appodealstack.bidon.adapters.banners.BannerSize
+import com.appodealstack.bidon.auctions.domain.AuctionRequest
+import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.config.data.models.AdapterInfo
 import kotlinx.serialization.json.JsonObject
 
@@ -19,15 +20,31 @@ interface Initializable<T : AdapterParameters> {
 }
 
 sealed interface AdSource {
-    interface Interstitial : AdSource {
-        fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest
+    interface Interstitial<T : AdParams> : AdSource {
+        fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: T): AuctionRequest
+        fun interstitialParams(
+            priceFloor: Double,
+            lineItems: List<LineItem>,
+        ): AdParams
     }
 
-    interface Rewarded : AdSource {
-        fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest
+    interface Rewarded<T : AdParams> : AdSource {
+        fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: T): AuctionRequest
+        fun rewardedParams(
+            priceFloor: Double,
+            lineItems: List<LineItem>,
+        ): AdParams
     }
 
-    interface Banner : AdSource {
-        fun banner(context: Context, demandAd: DemandAd, adParams: Bundle, adContainer: ViewGroup?): AuctionRequest
+    interface Banner<T : AdParams> : AdSource {
+        fun banner(context: Context, demandAd: DemandAd, adParams: T): AuctionRequest
+        fun bannerParams(
+            priceFloor: Double,
+            lineItems: List<LineItem>,
+            bannerSize: BannerSize,
+            adContainer: ViewGroup?
+        ): AdParams
     }
+
+    interface AdParams
 }

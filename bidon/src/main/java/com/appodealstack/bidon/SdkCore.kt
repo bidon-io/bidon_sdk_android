@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import com.appodealstack.bidon.analytics.AdRevenueInterceptor
-import com.appodealstack.bidon.auctions.AuctionResolver
+import com.appodealstack.bidon.auctions.domain.AuctionResolver
 import com.appodealstack.bidon.core.InitializationCallback
 import com.appodealstack.bidon.core.impl.ListenersHolderImpl
 import com.appodealstack.bidon.adapters.Ad

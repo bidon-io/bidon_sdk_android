@@ -1,13 +1,7 @@
-package com.appodealstack.bidon.auctions
+package com.appodealstack.bidon.auctions.data.models
 
 import com.appodealstack.bidon.adapters.Ad
 import com.appodealstack.bidon.adapters.AdProvider
-
-fun interface AuctionRequest {
-    suspend fun execute(data: Data?): Result<AuctionResult>
-
-    data class Data(val priceFloor: Double)
-}
 
 class AuctionResult(
     val ad: Ad,

@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.core.impl
 
 import com.appodealstack.bidon.auctions.AuctionListener
-import com.appodealstack.bidon.auctions.AuctionResult
+import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.core.ListenersHolder
 import com.appodealstack.bidon.core.ext.addOrRemoveIfNull
 import com.appodealstack.bidon.adapters.*

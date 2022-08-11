@@ -41,7 +41,7 @@ internal class DeviceBinder(
             height = screenSize.y,
             ppi = metrics.densityDpi,
             pxRatio = metrics.density,
-            javaScriptSupport = 1f,
+            javaScriptSupport = 1,  //TODO a28 obtain javaScriptSupport. 1- supports, 0 - no
             language = Locale.getDefault().toString(),
             carrier = getCarrier(context),
             mccmnc = getPhoneMCCMNC(context),
@@ -74,7 +74,7 @@ internal class DeviceBinder(
         @SerialName("pxratio")
         val pxRatio: Float?,
         @SerialName("js")
-        val javaScriptSupport: Float?,
+        val javaScriptSupport: Int?,
 
         @SerialName("language")
         val language: String?,

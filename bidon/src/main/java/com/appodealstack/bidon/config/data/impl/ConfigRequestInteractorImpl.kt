@@ -15,7 +15,8 @@ import kotlinx.serialization.json.*
 internal class ConfigRequestInteractorImpl(
     private val dataProvider: DataProvider
 ) : ConfigRequestInteractor {
-    private val BaseUrl = "https://herokuapp.appodeal.com/android_bidon_config"
+    private val BaseUrl = "https://65fd4c26-cf49-4905-901d-b251c4c3f2ab.mock.pstmn.io/"
+//    private val BaseUrl = "https://herokuapp.appodeal.com/android_bidon_config"
 //    private const val BaseUrl = "https://run.mocky.io/v3/a53f8ae1-f0c5-4e57-b25b-78f3831fb947"
 //    private const val BaseUrl = "https://1e69e7f9-a8f2-4cc2-9d30-5a71dd5d6db2.mock.pstmn.io"
 
@@ -34,7 +35,7 @@ internal class ConfigRequestInteractorImpl(
         return httpClient.enqueue(
             method = HttpClient.Method.POST,
             useUniqueRequestId = false,
-            url = BaseUrl ?: "${AppodealEndpoints.activeEndpoint}/config",
+            url = "${BaseUrl}config" ?: "${AppodealEndpoints.activeEndpoint}/config",
             parser = { response ->
                 requireNotNull(response) {
                     "Response is null /config"

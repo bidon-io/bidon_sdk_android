@@ -16,16 +16,16 @@ import com.appodealstack.applovin.ext.sdkVersion
 import com.appodealstack.applovin.impl.asBidonError
 import com.appodealstack.applovin.impl.setCoreListener
 import com.appodealstack.bidon.SdkCore
+import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.analytics.MediationNetwork
-import com.appodealstack.bidon.auctions.AuctionRequest
-import com.appodealstack.bidon.auctions.AuctionResult
+import com.appodealstack.bidon.auctions.domain.AuctionRequest
+import com.appodealstack.bidon.auctions.data.models.AuctionResult
+import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.core.parse
-import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.adapters.banners.BannerSize
-import com.appodealstack.bidon.adapters.banners.BannerSizeKey
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.JsonObject
 import java.util.concurrent.atomic.AtomicBoolean
@@ -34,16 +34,13 @@ import kotlin.coroutines.resume
 val ApplovinMaxDemandId = DemandId("applovin")
 
 class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
-    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner,
-    PlacementSource by PlacementSourceImpl(),
+    AdSource.Interstitial<ApplovinFullscreenAdParams>, AdSource.Rewarded<ApplovinFullscreenAdParams>,
+    AdSource.Banner<ApplovinBannerParams>,
     AdRevenueSource by AdRevenueSourceImpl(),
     ExtrasSource by ExtrasSourceImpl(),
     MediationNetwork {
 
     private lateinit var context: Context
-    private val bannerAdUnitIds = mutableListOf<String>()
-    private val interstitialAdUnitIds = mutableListOf<String>()
-    private val rewardedAdUnitIds = mutableListOf<String>()
 
     override val mediationNetwork = BNMediationNetwork.ApplovinMax
     override val demandId: DemandId = ApplovinMaxDemandId
@@ -54,9 +51,6 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
 
     override suspend fun init(activity: Activity, configParams: ApplovinParameters): Unit =
         suspendCancellableCoroutine { continuation ->
-//            bannerAdUnitIds.addAll(configParams.bannerAdUnitIds)
-//            interstitialAdUnitIds.addAll(configParams.interstitialAdUnitIds)
-//            rewardedAdUnitIds.addAll(configParams.rewardedAdUnitIds)
             this.context = activity.applicationContext
             if (!AppLovinSdk.getInstance(context).isInitialized) {
                 AppLovinSdk.getInstance(context).mediationProvider = "max"
@@ -70,23 +64,19 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
 
     override fun parseConfigParam(json: JsonObject): ApplovinParameters = json.parse(ApplovinParameters.serializer())
 
-    override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle, adContainer: ViewGroup?): AuctionRequest {
-        val adUnitId = adParams.getString(AdUnitIdKey) ?: bannerAdUnitIds.first()
-        val bannerSize = adParams.getInt(BannerSizeKey, BannerSize.Banner.ordinal).let {
-            BannerSize.values()[it]
-        }
-        if (bannerSize !in arrayOf(BannerSize.Banner, BannerSize.LeaderBoard, BannerSize.MRec)) {
+    override fun banner(context: Context, demandAd: DemandAd, adParams: ApplovinBannerParams): AuctionRequest {
+        if (adParams.bannerSize !in arrayOf(BannerSize.Banner, BannerSize.LeaderBoard, BannerSize.MRec)) {
             return AuctionRequest {
                 Result.failure(DemandError.BannerSizeNotSupported(demandId))
             }
         }
         logInternal("Tag", "1")
-        val maxAdView = MaxAdView(adUnitId, bannerSize.asMaxAdFormat(), context).apply {
+        val maxAdView = MaxAdView(adParams.adUnitId, adParams.bannerSize.asMaxAdFormat(), context).apply {
             val isAdaptive = getExtras(demandAd)?.getString(AdaptiveBannerKey, "-")
             if (isAdaptive == "true") {
                 val width = ViewGroup.LayoutParams.MATCH_PARENT
                 // Height calculating should be done on application side and passed with extras[AdaptiveBannerHeightKey]
-                val heightPx = adParams.getInt(AdaptiveBannerHeightKey, ViewGroup.LayoutParams.WRAP_CONTENT)
+                val heightPx = adParams.adaptiveBannerHeight ?: ViewGroup.LayoutParams.WRAP_CONTENT
                 layoutParams = FrameLayout.LayoutParams(width, heightPx)
             }
             getExtras(demandAd)?.let { bundle ->
@@ -96,7 +86,7 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
                     }
                 }
             }
-            getPlacement(demandAd)?.let {
+            demandAd.placement?.let {
                 placement = it
             }
             /**
@@ -173,10 +163,9 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
         }
     }
 
-    override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
+    override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: ApplovinFullscreenAdParams): AuctionRequest {
         if (activity == null) return AuctionRequest { Result.failure(DemandError.NoActivity(demandId)) }
-        val adUnitId = adParams.getString(AdUnitIdKey) ?: interstitialAdUnitIds.first()
-        val maxInterstitialAd = MaxInterstitialAd(adUnitId, activity)
+        val maxInterstitialAd = MaxInterstitialAd(adParams.adUnitId, activity)
         return AuctionRequest {
             suspendCancellableCoroutine { continuation ->
                 val isFinished = AtomicBoolean(false)
@@ -251,10 +240,9 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
         }
     }
 
-    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
+    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: ApplovinFullscreenAdParams): AuctionRequest {
         if (activity == null) return AuctionRequest { Result.failure(DemandError.NoActivity(demandId)) }
-        val adUnitId = adParams.getString(AdUnitIdKey) ?: rewardedAdUnitIds.first()
-        val rewardedAd = MaxRewardedAd.getInstance(adUnitId, activity)
+        val rewardedAd = MaxRewardedAd.getInstance(adParams.adUnitId, activity)
         return AuctionRequest {
             suspendCancellableCoroutine { continuation ->
                 val isFinished = AtomicBoolean(false)
@@ -328,6 +316,23 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
                 rewardedAd.loadAd()
             }
         }
+    }
+
+    override fun interstitialParams(priceFloor: Double, lineItems: List<LineItem>): AdSource.AdParams {
+        TODO("Not yet implemented")
+    }
+
+    override fun rewardedParams(priceFloor: Double, lineItems: List<LineItem>): AdSource.AdParams {
+        TODO("Not yet implemented")
+    }
+
+    override fun bannerParams(
+        priceFloor: Double,
+        lineItems: List<LineItem>,
+        bannerSize: BannerSize,
+        adContainer: ViewGroup?
+    ): AdSource.AdParams {
+        TODO("Not yet implemented")
     }
 
     private fun BannerSize.asMaxAdFormat() = when (this) {

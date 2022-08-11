@@ -1,15 +1,9 @@
-package com.appodealstack.bidon.auctions
+package com.appodealstack.bidon.auctions.domain.impl
 
 import com.appodealstack.bidon.adapters.DemandAd
-
-internal interface AdsRepository {
-    fun destroyResults(demandAd: DemandAd)
-    fun getWinnerOrNull(demandAd: DemandAd, onWinnerFound: (AuctionResult?) -> Unit)
-
-    fun saveAuction(demandAd: DemandAd, auction: Auction)
-    fun isAuctionActive(demandAd: DemandAd): Boolean
-    fun getResults(demandAd: DemandAd): List<AuctionResult>
-}
+import com.appodealstack.bidon.auctions.domain.AdsRepository
+import com.appodealstack.bidon.auctions.Auction
+import com.appodealstack.bidon.auctions.data.models.AuctionResult
 
 internal class AdsRepositoryImpl : AdsRepository {
     private val auctionMap = mutableMapOf<DemandAd, Auction>()

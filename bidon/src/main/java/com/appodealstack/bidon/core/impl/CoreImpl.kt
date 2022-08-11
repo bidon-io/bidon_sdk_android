@@ -7,22 +7,21 @@ import android.view.View
 import android.view.ViewGroup
 import com.appodealstack.bidon.Core
 import com.appodealstack.bidon.Core.SdkState
+import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.adapters.banners.AutoRefresh
 import com.appodealstack.bidon.analytics.AdRevenueInterceptor
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolder
 import com.appodealstack.bidon.analytics.AdRevenueLogger
 import com.appodealstack.bidon.analytics.MediationNetwork
-import com.appodealstack.bidon.auctions.AdsRepository
-import com.appodealstack.bidon.auctions.AuctionResolver
+import com.appodealstack.bidon.auctions.domain.AdsRepository
+import com.appodealstack.bidon.auctions.Auction
+import com.appodealstack.bidon.auctions.domain.AuctionResolver
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
-import com.appodealstack.bidon.auctions.NewAuction
-import com.appodealstack.bidon.core.AutoRefresher
 import com.appodealstack.bidon.core.AdaptersSource
+import com.appodealstack.bidon.core.AutoRefresher
 import com.appodealstack.bidon.core.InitializationCallback
 import com.appodealstack.bidon.core.ListenersHolder
 import com.appodealstack.bidon.core.ext.logInternal
-import com.appodealstack.bidon.core.ext.retrieveAuctionRequests
-import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.adapters.banners.AutoRefresh
 import com.appodealstack.bidon.di.get
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
@@ -58,15 +57,11 @@ internal class CoreImpl(
             return
         }
         if (!adsRepository.isAuctionActive(demandAd)) {
-            val auction = NewAuction.withResolver(getAuctionResolver(demandAd))
+            val auction = get<Auction>().withResolver(getAuctionResolver(demandAd))
             adsRepository.saveAuction(demandAd, auction)
             auction.start(
-                mediationRequests = adapters
-                    .retrieveAuctionRequests(activity, demandAd, adParams)
-                    .toSet(),
-                postBidRequests = adapters
-                    .retrieveAuctionRequests(activity, demandAd, adParams)
-                    .toSet(),
+                mediationRequests = setOf(),
+                postBidRequests = setOf(),
                 onDemandLoaded = { auctionResult ->
                     auctionListener.demandAuctionSucceed(auctionResult)
                 },

@@ -8,13 +8,13 @@ import android.view.ViewGroup
 import com.appodealstack.bidmachine.ext.adapterVersion
 import com.appodealstack.bidmachine.ext.sdkVersion
 import com.appodealstack.bidon.SdkCore
-import com.appodealstack.bidon.auctions.AuctionRequest
-import com.appodealstack.bidon.auctions.AuctionResult
-import com.appodealstack.bidon.config.data.models.AdapterInfo
-import com.appodealstack.bidon.core.parse
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
-import com.appodealstack.bidon.adapters.banners.BannerSizeKey
+import com.appodealstack.bidon.auctions.domain.AuctionRequest
+import com.appodealstack.bidon.auctions.data.models.AuctionResult
+import com.appodealstack.bidon.auctions.data.models.LineItem
+import com.appodealstack.bidon.config.data.models.AdapterInfo
+import com.appodealstack.bidon.core.parse
 import io.bidmachine.BidMachine
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.banner.BannerListener
@@ -37,7 +37,7 @@ val BidMachineDemandId = DemandId("bidmachine")
 typealias BidMachineBannerSize = io.bidmachine.banner.BannerSize
 
 class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
-    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner,
+    AdSource.Interstitial<BMFullscreenParams>, AdSource.Rewarded<BMFullscreenParams>, AdSource.Banner<BMBannerParams>,
     PlacementSource by PlacementSourceImpl() {
     private lateinit var context: Context
 
@@ -56,18 +56,13 @@ class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
             }
         }
 
-    override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
-        return AuctionRequest { data ->
+    override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: BMFullscreenParams): AuctionRequest {
+        return AuctionRequest {
             suspendCancellableCoroutine { continuation ->
                 val isFinished = AtomicBoolean(false)
-                val placement = adParams.getString(PlacementKey)
                 val interstitialRequest = InterstitialRequest.Builder().apply {
-                    data?.let {
-                        setPriceFloorParams(PriceFloorParams().addPriceFloor(it.priceFloor))
-                    }
-                    placement?.let {
-                        setPlacementId(placement)
-                    }
+                    setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.priceFloor))
+                    demandAd.placement?.let { setPlacementId(it) }
                 }.build()
                 InterstitialAd(context)
                     .setListener(object : InterstitialListener {
@@ -116,17 +111,14 @@ class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
         }
     }
 
-    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
-        return AuctionRequest { data ->
+    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: BMFullscreenParams): AuctionRequest {
+        return AuctionRequest {
             suspendCancellableCoroutine { continuation ->
                 val isFinished = AtomicBoolean(false)
-                val placement = adParams.getString(PlacementKey)
                 val request = RewardedRequest.Builder().apply {
-                    data?.let {
-                        setPriceFloorParams(PriceFloorParams().addPriceFloor(it.priceFloor))
-                    }
-                    placement?.let {
-                        setPlacementId(placement)
+                    setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.priceFloor))
+                    demandAd.placement?.let {
+                        setPlacementId(it)
                     }
                 }.build()
                 RewardedAd(context)
@@ -178,20 +170,15 @@ class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
         }
     }
 
-    override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle, adContainer: ViewGroup?): AuctionRequest {
-        return AuctionRequest { data ->
+    override fun banner(context: Context, demandAd: DemandAd, adParams: BMBannerParams): AuctionRequest {
+        return AuctionRequest {
             suspendCancellableCoroutine { continuation ->
                 val isFinished = AtomicBoolean(false)
-                val bannerSize = adParams.getInt(BannerSizeKey, BannerSize.Banner.ordinal).let {
-                    BannerSize.values()[it]
-                }
                 val request = BannerRequest.Builder()
-                    .setSize(bannerSize.asBidMachineBannerSize())
+                    .setSize(adParams.bannerSize.asBidMachineBannerSize())
                     .apply {
-                        data?.let {
-                            setPriceFloorParams(PriceFloorParams().addPriceFloor(it.priceFloor))
-                        }
-                        getPlacement(demandAd)?.let {
+                        setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.priceFloor))
+                        demandAd.placement?.let {
                             setPlacementId(it)
                         }
                     }.build()
@@ -243,6 +230,24 @@ class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
 
     override fun parseConfigParam(json: JsonObject): BidMachineParameters = json.parse(BidMachineParameters.serializer())
 
+
+    override fun interstitialParams(priceFloor: Double, lineItems: List<LineItem>): AdSource.AdParams {
+        return BMFullscreenParams(priceFloor = priceFloor)
+    }
+
+    override fun rewardedParams(priceFloor: Double, lineItems: List<LineItem>): AdSource.AdParams {
+        return BMFullscreenParams(priceFloor = priceFloor)
+    }
+
+    override fun bannerParams(
+        priceFloor: Double,
+        lineItems: List<LineItem>,
+        bannerSize: BannerSize,
+        adContainer: ViewGroup?
+    ): AdSource.AdParams {
+        return BMBannerParams(priceFloor = priceFloor, bannerSize = bannerSize)
+
+    }
 
     private fun InterstitialAd.setCoreListener(auctionResult: AuctionResult) {
         val coreListener = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)

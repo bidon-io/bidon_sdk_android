@@ -1,10 +1,12 @@
 package com.appodealstack.bidon.adapters
 
+@Deprecated("")
 interface PlacementProvider {
     fun setPlacement(placement: String?)
     fun getPlacement(): String?
 }
 
+@Deprecated("")
 interface PlacementSource {
     fun setPlacement(demandAd: DemandAd, placement: String?)
     fun getPlacement(demandAd: DemandAd): String?

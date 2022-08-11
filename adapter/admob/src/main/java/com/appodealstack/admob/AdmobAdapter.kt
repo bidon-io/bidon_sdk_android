@@ -8,14 +8,14 @@ import android.view.ViewGroup
 import com.appodealstack.admob.ext.adapterVersion
 import com.appodealstack.admob.ext.sdkVersion
 import com.appodealstack.bidon.SdkCore
-import com.appodealstack.bidon.analytics.BNMediationNetwork
-import com.appodealstack.bidon.auctions.AuctionRequest
-import com.appodealstack.bidon.auctions.AuctionResult
-import com.appodealstack.bidon.config.data.models.AdapterInfo
-import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
-import com.appodealstack.bidon.adapters.banners.BannerSizeKey
+import com.appodealstack.bidon.analytics.BNMediationNetwork
+import com.appodealstack.bidon.auctions.domain.AuctionRequest
+import com.appodealstack.bidon.auctions.data.models.AuctionResult
+import com.appodealstack.bidon.auctions.data.models.LineItem
+import com.appodealstack.bidon.config.data.models.AdapterInfo
+import com.appodealstack.bidon.core.ext.logInternal
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -37,7 +37,8 @@ val AdmobDemandId = DemandId("admob")
 private value class AdUnitId(val value: String)
 
 class AdmobAdapter : Adapter, Initializable<AdmobParameters>,
-    AdSource.Interstitial, AdSource.Rewarded, AdSource.Banner {
+    AdSource.Interstitial<AdmobFullscreenAdParams>, AdSource.Rewarded<AdmobFullscreenAdParams>,
+    AdSource.Banner<AdmobBannerParams> {
     private lateinit var context: Context
 
     override val demandId = AdmobDemandId
@@ -46,188 +47,190 @@ class AdmobAdapter : Adapter, Initializable<AdmobParameters>,
         sdkVersion = sdkVersion
     )
 
-    private val bannersAdUnits = mutableMapOf<Double, AdUnitId>()
-    private val interstitialAdUnits = mutableMapOf<Double, AdUnitId>()
-    private val rewardedAdUnits = mutableMapOf<Double, AdUnitId>()
-
     override suspend fun init(activity: Activity, configParams: AdmobParameters): Unit = suspendCoroutine { continuation ->
         this.context = activity.applicationContext
         /**
          * Don't forget set Automatic refresh is Disabled for each AdUnit.
          * Manage refresh rate with [AutoRefresher.setAutoRefresh].
          */
-//        interstitialAdUnits.putAll(configParams.interstitials.map { (price, adUnit) ->
-//            price to AdUnitId(adUnit)
-//        })
-//        rewardedAdUnits.putAll(configParams.rewarded.map { (price, adUnit) ->
-//            price to AdUnitId(adUnit)
-//        })
-//        bannersAdUnits.putAll(configParams.banners.map { (price, adUnit) ->
-//            price to AdUnitId(adUnit)
-//        })
         MobileAds.initialize(context) {
             continuation.resume(Unit)
         }
     }
 
-    override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
-        return AuctionRequest { data ->
+    override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: AdmobFullscreenAdParams): AuctionRequest {
+        return AuctionRequest {
             withContext(Dispatchers.Main) {
                 suspendCancellableCoroutine { continuation ->
-                    val isFinished = AtomicBoolean(false)
-                    val adRequest = AdRequest.Builder().build()
-                    InterstitialAd.load(
-                        context,
-                        interstitialAdUnits.getUnitId(data?.priceFloor ?: 0.0).value,
-                        adRequest,
-                        object : InterstitialAdLoadCallback() {
-                            override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                                if (!isFinished.getAndSet(true)) {
-                                    continuation.resume(Result.failure(loadAdError.asBidonError()))
+                    val adUnitId = adParams.admobLineItems.firstOrNull { it.price > adParams.priceFloor }?.adUnitId
+                    if (adUnitId.isNullOrBlank()) {
+                        continuation.resume(Result.failure(DemandError.NoAppropriateAdUnitId(demandId)))
+                    } else {
+                        val isFinished = AtomicBoolean(false)
+                        val adRequest = AdRequest.Builder().build()
+                        InterstitialAd.load(
+                            context,
+                            adUnitId,
+                            adRequest,
+                            object : InterstitialAdLoadCallback() {
+                                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                                    if (!isFinished.getAndSet(true)) {
+                                        continuation.resume(Result.failure(loadAdError.asBidonError()))
+                                    }
                                 }
-                            }
 
-                            override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                                if (!isFinished.getAndSet(true)) {
-                                    val auctionResult = AuctionResult(
-                                        ad = asAd(
-                                            demandAd = demandAd,
-                                            price = interstitialAdUnits.getPrice(unitId = interstitialAd.adUnitId),
-                                            sourceAd = interstitialAd
-                                        ),
-                                        adProvider = object : AdProvider {
-                                            override fun canShow(): Boolean = true
-                                            override fun destroy() {}
+                                override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                                    if (!isFinished.getAndSet(true)) {
+                                        val auctionResult = AuctionResult(
+                                            ad = asAd(
+                                                demandAd = demandAd,
+                                                price = adParams.admobLineItems.getPrice(unitId = interstitialAd.adUnitId),
+                                                sourceAd = interstitialAd
+                                            ),
+                                            adProvider = object : AdProvider {
+                                                override fun canShow(): Boolean = true
+                                                override fun destroy() {}
 
-                                            override fun showAd(activity: Activity?, adParams: Bundle) {
-                                                if (activity == null) {
-                                                    logInternal(
-                                                        "AdmobDemand",
-                                                        "Error while showing InterstitialAd: activity is null."
-                                                    )
-                                                } else {
-                                                    interstitialAd.show(activity)
-                                                }
-                                            }
-                                        }
-                                    )
-                                    interstitialAd.setCoreListener(demandAd, auctionResult)
-                                    continuation.resume(Result.success(auctionResult))
-                                }
-                            }
-                        })
-                }
-            }
-        }
-    }
-
-    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: Bundle): AuctionRequest {
-        return AuctionRequest { data ->
-            withContext(Dispatchers.Main) {
-                suspendCancellableCoroutine { continuation ->
-                    val isFinished = AtomicBoolean(false)
-                    val adRequest = AdRequest.Builder().build()
-                    RewardedAd.load(
-                        context,
-                        rewardedAdUnits.getUnitId(data?.priceFloor ?: 0.0).value,
-                        adRequest,
-                        object : RewardedAdLoadCallback() {
-                            override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                                if (!isFinished.getAndSet(true)) {
-                                    continuation.resume(Result.failure(loadAdError.asBidonError()))
-                                }
-                            }
-
-                            override fun onAdLoaded(rewardedAd: RewardedAd) {
-                                if (!isFinished.getAndSet(true)) {
-                                    val ad = asAd(
-                                        demandAd = demandAd,
-                                        price = rewardedAdUnits.getPrice(unitId = rewardedAd.adUnitId),
-                                        sourceAd = rewardedAd
-                                    )
-                                    val auctionResult = AuctionResult(
-                                        ad = ad,
-                                        adProvider = object : AdProvider {
-                                            override fun canShow(): Boolean = true
-                                            override fun destroy() {}
-
-                                            override fun showAd(activity: Activity?, adParams: Bundle) {
-                                                if (activity == null) {
-                                                    logInternal(
-                                                        "AdmobDemand",
-                                                        "Error while showing RewardedAd: activity is null."
-                                                    )
-                                                } else {
-                                                    rewardedAd.show(activity) { rewardItem ->
-                                                        logInternal("rew", "rewardedAd.show(activity) $rewardItem")
-                                                        SdkCore.getListenerForDemand(demandAd).onUserRewarded(
-                                                            ad = ad,
-                                                            reward = RewardedAdListener.Reward(
-                                                                label = rewardItem.type,
-                                                                amount = rewardItem.amount
-                                                            )
+                                                override fun showAd(activity: Activity?, adParams: Bundle) {
+                                                    if (activity == null) {
+                                                        logInternal(
+                                                            "AdmobDemand",
+                                                            "Error while showing InterstitialAd: activity is null."
                                                         )
+                                                    } else {
+                                                        interstitialAd.show(activity)
                                                     }
                                                 }
                                             }
-                                        }
-                                    )
-                                    rewardedAd.setCoreListener(demandAd, auctionResult)
-                                    continuation.resume(Result.success(auctionResult))
+                                        )
+                                        interstitialAd.setCoreListener(demandAd, auctionResult)
+                                        continuation.resume(Result.success(auctionResult))
+                                    }
                                 }
-                            }
-                        })
+                            })
+                    }
                 }
             }
         }
     }
 
-    override fun banner(context: Context, demandAd: DemandAd, adParams: Bundle, adContainer: ViewGroup?): AuctionRequest {
-        return AuctionRequest { data ->
+    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: AdmobFullscreenAdParams): AuctionRequest {
+        return AuctionRequest {
+            withContext(Dispatchers.Main) {
+                suspendCancellableCoroutine { continuation ->
+                    val adUnitId = adParams.admobLineItems.firstOrNull { it.price > adParams.priceFloor }?.adUnitId
+                    if (adUnitId.isNullOrBlank()) {
+                        continuation.resume(Result.failure(DemandError.NoAppropriateAdUnitId(demandId)))
+                    } else {
+                        val isFinished = AtomicBoolean(false)
+                        val adRequest = AdRequest.Builder().build()
+                        RewardedAd.load(
+                            context,
+                            adUnitId,
+                            adRequest,
+                            object : RewardedAdLoadCallback() {
+                                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                                    if (!isFinished.getAndSet(true)) {
+                                        continuation.resume(Result.failure(loadAdError.asBidonError()))
+                                    }
+                                }
+
+                                override fun onAdLoaded(rewardedAd: RewardedAd) {
+                                    if (!isFinished.getAndSet(true)) {
+                                        val ad = asAd(
+                                            demandAd = demandAd,
+                                            price = adParams.admobLineItems.getPrice(unitId = rewardedAd.adUnitId),
+                                            sourceAd = rewardedAd
+                                        )
+                                        val auctionResult = AuctionResult(
+                                            ad = ad,
+                                            adProvider = object : AdProvider {
+                                                override fun canShow(): Boolean = true
+                                                override fun destroy() {}
+
+                                                override fun showAd(activity: Activity?, adParams: Bundle) {
+                                                    if (activity == null) {
+                                                        logInternal(
+                                                            "AdmobDemand",
+                                                            "Error while showing RewardedAd: activity is null."
+                                                        )
+                                                    } else {
+                                                        rewardedAd.show(activity) { rewardItem ->
+                                                            logInternal("rew", "rewardedAd.show(activity) $rewardItem")
+                                                            SdkCore.getListenerForDemand(demandAd).onUserRewarded(
+                                                                ad = ad,
+                                                                reward = RewardedAdListener.Reward(
+                                                                    label = rewardItem.type,
+                                                                    amount = rewardItem.amount
+                                                                )
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        )
+                                        rewardedAd.setCoreListener(demandAd, auctionResult)
+                                        continuation.resume(Result.success(auctionResult))
+                                    }
+                                }
+                            })
+                    }
+                }
+            }
+        }
+    }
+
+    override fun banner(context: Context, demandAd: DemandAd, adParams: AdmobBannerParams): AuctionRequest {
+        return AuctionRequest {
             withContext(Dispatchers.Main) {
                 suspendCancellableCoroutine { continuation ->
                     val isFinished = AtomicBoolean(false)
                     val adRequest = AdRequest.Builder().build()
                     val adView = AdView(context)
-                    val bannerSize = adParams.getInt(BannerSizeKey, BannerSize.Banner.ordinal).let {
-                        BannerSize.values()[it]
-                    }
-                    val admobBannerSize = bannerSize.asAdmobAdSize()
-                    if (admobBannerSize != null) {
-                        adView.setAdSize(admobBannerSize)
-                        adView.adUnitId = bannersAdUnits.getUnitId(data?.priceFloor ?: 0.0).value
-                        adView.adListener = object : AdListener() {
-                            override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                                if (!isFinished.getAndSet(true)) {
-                                    continuation.resume(Result.failure(loadAdError.asBidonError()))
+                    val admobBannerSize = adParams.bannerSize.asAdmobAdSize()
+                    val adUnitId = adParams.admobLineItems.firstOrNull { it.price > adParams.priceFloor }?.adUnitId
+                    when {
+                        adUnitId.isNullOrBlank() -> {
+                            continuation.resume(Result.failure(DemandError.NoAppropriateAdUnitId(demandId)))
+                        }
+                        admobBannerSize != null -> {
+                            adView.setAdSize(admobBannerSize)
+                            adView.adUnitId = adUnitId
+
+                            adView.adListener = object : AdListener() {
+                                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                                    if (!isFinished.getAndSet(true)) {
+                                        continuation.resume(Result.failure(loadAdError.asBidonError()))
+                                    }
+                                }
+
+                                override fun onAdLoaded() {
+                                    val ad = asAd(
+                                        demandAd = demandAd,
+                                        price = adParams.admobLineItems.getPrice(unitId = adView.adUnitId),
+                                        sourceAd = adView
+                                    )
+                                    val auctionResult = AuctionResult(
+                                        ad = ad,
+                                        adProvider = object : AdProvider, AdViewProvider {
+                                            override fun canShow(): Boolean = true
+                                            override fun destroy() {
+                                                adView.destroy()
+                                            }
+
+                                            override fun showAd(activity: Activity?, adParams: Bundle) {}
+                                            override fun getAdView(): View = adView
+                                        }
+                                    )
+                                    adView.setCoreListener(demandAd, auctionResult)
+                                    continuation.resume(Result.success(auctionResult))
                                 }
                             }
-
-                            override fun onAdLoaded() {
-                                val ad = asAd(
-                                    demandAd = demandAd,
-                                    price = bannersAdUnits.getPrice(unitId = adView.adUnitId),
-                                    sourceAd = adView
-                                )
-                                val auctionResult = AuctionResult(
-                                    ad = ad,
-                                    adProvider = object : AdProvider, AdViewProvider {
-                                        override fun canShow(): Boolean = true
-                                        override fun destroy() {
-                                            adView.destroy()
-                                        }
-
-                                        override fun showAd(activity: Activity?, adParams: Bundle) {}
-                                        override fun getAdView(): View = adView
-                                    }
-                                )
-                                adView.setCoreListener(demandAd, auctionResult)
-                                continuation.resume(Result.success(auctionResult))
-                            }
+                            adView.loadAd(adRequest)
                         }
-                        adView.loadAd(adRequest)
-                    } else {
-                        continuation.resume(Result.failure(DemandError.BannerSizeNotSupported(demandId)))
+                        else -> {
+                            continuation.resume(Result.failure(DemandError.BannerSizeNotSupported(demandId)))
+                        }
                     }
                 }
             }
@@ -235,6 +238,44 @@ class AdmobAdapter : Adapter, Initializable<AdmobParameters>,
     }
 
     override fun parseConfigParam(json: JsonObject): AdmobParameters = AdmobParameters
+
+    override fun bannerParams(
+        priceFloor: Double,
+        lineItems: List<LineItem>,
+        bannerSize: BannerSize,
+        adContainer: ViewGroup?
+    ): AdSource.AdParams {
+        return AdmobBannerParams(
+            admobLineItems = lineItems.filterByDemandId(),
+            bannerSize = bannerSize,
+            adContainer = adContainer,
+            priceFloor = priceFloor
+        )
+    }
+
+    override fun interstitialParams(priceFloor: Double, lineItems: List<LineItem>): AdSource.AdParams {
+        return AdmobFullscreenAdParams(
+            admobLineItems = lineItems.filterByDemandId(),
+            priceFloor = priceFloor
+        )
+    }
+
+    override fun rewardedParams(priceFloor: Double, lineItems: List<LineItem>): AdSource.AdParams {
+        return AdmobFullscreenAdParams(
+            admobLineItems = lineItems.filterByDemandId(),
+            priceFloor = priceFloor
+        )
+    }
+
+    private fun List<LineItem>.filterByDemandId() =
+        this.filter { it.demandId == demandId.demandId }.mapNotNull {
+            val price = it.priceFloor ?: return@mapNotNull null
+            val adUnitId = it.adUnitId ?: return@mapNotNull null
+            AdmobLineItem(
+                price = price,
+                adUnitId = adUnitId
+            )
+        }.sortedBy { it.price }
 
     private fun InterstitialAd.setCoreListener(ownerDemandAd: DemandAd, auctionData: AuctionResult) {
         val coreListener = SdkCore.getListenerForDemand(ownerDemandAd)
@@ -311,15 +352,9 @@ class AdmobAdapter : Adapter, Initializable<AdmobParameters>,
         }
     }
 
-    private fun Map<Double, AdUnitId>.getUnitId(price: Double): AdUnitId {
-        val sortedKeys = this.keys.sorted()
-        val priceFloor = sortedKeys.firstOrNull { it > price } ?: sortedKeys.last()
-        return this.getValue(priceFloor)
-    }
-
-    private fun Map<Double, AdUnitId>.getPrice(unitId: String): Double {
+    private fun List<AdmobLineItem>.getPrice(unitId: String): Double {
         return this.mapNotNull { (price, adUnitId) ->
-            price.takeIf { unitId == adUnitId.value }
+            price.takeIf { unitId == adUnitId }
         }.first()
     }
 
