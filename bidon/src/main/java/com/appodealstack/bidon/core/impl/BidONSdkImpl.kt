@@ -3,6 +3,7 @@ package com.appodealstack.bidon.core.impl
 import android.app.Activity
 import com.appodealstack.bidon.BidONSdk
 import com.appodealstack.bidon.config.domain.BidONInitializer
+import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.InitializationCallback
 import com.appodealstack.bidon.core.ext.logError
 import kotlinx.coroutines.CoroutineScope
@@ -11,13 +12,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 
 internal class BidONSdkImpl(
-    private val bidONInitializer: BidONInitializer
+    private val bidONInitializer: BidONInitializer,
+    private val contextProvider: ContextProvider
 ) : BidONSdk {
     @OptIn(DelicateCoroutinesApi::class)
     private val dispatcher by lazy { newSingleThreadContext("BidON") }
     private val scope get() = CoroutineScope(dispatcher)
 
     override fun init(activity: Activity, appKey: String, callback: InitializationCallback?) {
+        contextProvider.setContext(activity)
         scope.launch {
             runCatching {
                 bidONInitializer.init(activity, appKey)

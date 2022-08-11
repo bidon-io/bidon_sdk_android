@@ -10,20 +10,13 @@ import com.appodealstack.bidon.auctions.AuctionResolversHolder
 import com.appodealstack.bidon.auctions.impl.AuctionResolversHolderImpl
 import com.appodealstack.bidon.config.data.impl.AdapterInstanceCreatorImpl
 import com.appodealstack.bidon.config.data.impl.ConfigRequestInteractorImpl
-import com.appodealstack.bidon.config.domain.AdapterInstanceCreator
-import com.appodealstack.bidon.config.domain.BidONInitializer
-import com.appodealstack.bidon.config.domain.ConfigRequestInteractor
-import com.appodealstack.bidon.config.domain.InitAndRegisterAdaptersUseCase
+import com.appodealstack.bidon.config.domain.*
+import com.appodealstack.bidon.config.domain.databinders.*
 import com.appodealstack.bidon.config.domain.impl.BidONInitializerImpl
+import com.appodealstack.bidon.config.domain.impl.DataProviderImpl
 import com.appodealstack.bidon.config.domain.impl.InitAndRegisterAdaptersUseCaseImpl
-import com.appodealstack.bidon.core.AdaptersSource
-import com.appodealstack.bidon.core.AutoRefresher
-import com.appodealstack.bidon.core.AutoRefresherImpl
-import com.appodealstack.bidon.core.ListenersHolder
-import com.appodealstack.bidon.core.impl.AdaptersSourceImpl
-import com.appodealstack.bidon.core.impl.BidONSdkImpl
-import com.appodealstack.bidon.core.impl.CoreImpl
-import com.appodealstack.bidon.core.impl.ListenersHolderImpl
+import com.appodealstack.bidon.core.*
+import com.appodealstack.bidon.core.impl.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -38,12 +31,22 @@ internal object DI {
     fun initDependencyInjection() {
         if (!isInitialized.getAndSet(true)) {
             registerDependencyInjection {
-                single<BidONSdk> {
+                /**
+                 * Singletons
+                 */
+                singleton<BidONSdk> {
                     BidONSdkImpl(
-                        bidONInitializer = get()
+                        bidONInitializer = get(),
+                        contextProvider = get()
                     )
                 }
+                singleton<AdsRepository> { AdsRepositoryImpl() }
+                singleton<Core> { CoreImpl() }
+                singleton<ContextProvider> { ContextProviderImpl() }
 
+                /**
+                 * Factories
+                 */
                 factory<BidONInitializer> {
                     BidONInitializerImpl(
                         initAndRegisterAdapters = get(),
@@ -58,7 +61,11 @@ internal object DI {
                 }
                 factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
 
-                factory<ConfigRequestInteractor> { ConfigRequestInteractorImpl() }
+                factory<ConfigRequestInteractor> {
+                    ConfigRequestInteractorImpl(
+                        dataProvider = get()
+                    )
+                }
                 factory<AdaptersSource> { AdaptersSourceImpl() }
                 factory<ListenersHolder> { ListenersHolderImpl() }
                 factory<AdRevenueInterceptorHolder> { AdRevenueInterceptorHolderImpl() }
@@ -68,8 +75,26 @@ internal object DI {
                         adsRepository = get()
                     )
                 }
-                single<AdsRepository> { AdsRepositoryImpl() }
-                single<Core> { CoreImpl() }
+
+                /**
+                 * Binders
+                 */
+                factory<DataProvider> {
+                    DataProviderImpl(
+                        deviceBinder = get(),
+                        appBinder = get(),
+                        geoBinder = get(),
+                        sessionBinder = get(),
+                        tokenBinder = get(),
+                        userBinder = get(),
+                    )
+                }
+                factory { DeviceBinder(contextProvider = get()) }
+                factory { AppBinder() }
+                factory { GeoBinder() }
+                factory { SessionBinder() }
+                factory { TokenBinder() }
+                factory { UserBinder() }
             }
         }
     }

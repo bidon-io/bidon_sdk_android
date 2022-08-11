@@ -60,7 +60,7 @@ internal object SimpleInjection {
             addFactory(factory)
         }
 
-        inline fun <reified T : Any> single(noinline singleton: () -> T) {
+        inline fun <reified T : Any> singleton(noinline singleton: () -> T) {
             addSingleton(singleton)
         }
     }
