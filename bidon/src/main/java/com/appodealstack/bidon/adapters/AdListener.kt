@@ -40,4 +40,3 @@ interface RewardedAdListener {
         val amount: Int
     )
 }
-

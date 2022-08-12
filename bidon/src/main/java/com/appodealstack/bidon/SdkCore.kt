@@ -5,15 +5,15 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import com.appodealstack.bidon.analytics.AdRevenueInterceptor
-import com.appodealstack.bidon.auctions.domain.AuctionResolver
-import com.appodealstack.bidon.core.InitializationCallback
-import com.appodealstack.bidon.core.impl.ListenersHolderImpl
 import com.appodealstack.bidon.adapters.Ad
 import com.appodealstack.bidon.adapters.AdListener
 import com.appodealstack.bidon.adapters.AdRevenueListener
 import com.appodealstack.bidon.adapters.DemandAd
 import com.appodealstack.bidon.adapters.banners.AutoRefresh
+import com.appodealstack.bidon.analytics.AdRevenueInterceptor
+import com.appodealstack.bidon.auctions.domain.AuctionResolver
+import com.appodealstack.bidon.core.InitializationCallback
+import com.appodealstack.bidon.core.impl.ListenersHolderImpl
 import com.appodealstack.bidon.di.DI.initDependencyInjection
 import com.appodealstack.bidon.di.get
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +23,7 @@ val SdkCore: Core by lazy {
     get()
 }
 
+@Deprecated("")
 interface Core {
     /**
      * Should be changed only in [SdkInitialization]
@@ -37,7 +38,7 @@ interface Core {
         callback: InitializationCallback? = null
     )
 
-    fun loadAd(activity: Activity?, demandAd: DemandAd, adParams: Bundle)
+    fun loadAd(activity: Activity?, demandAd: DemandAd)
     fun loadAdView(
         context: Context,
         demandAd: DemandAd,
@@ -73,9 +74,5 @@ interface Core {
     fun logAdRevenue(ad: Ad)
     fun getAdRevenueInterceptor(): AdRevenueInterceptor?
 
-    enum class SdkState {
-        NotInitialized,
-        Initializing,
-        Initialized
-    }
 }
+

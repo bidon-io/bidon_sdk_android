@@ -26,7 +26,7 @@ dependencyResolutionManagement {
 rootProject.name = "BidOn Decorators"
 
 include(
-    ":appBidON",
+    ":app",
 )
 include(
     ":bidon",

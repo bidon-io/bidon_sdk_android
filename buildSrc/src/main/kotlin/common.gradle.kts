@@ -30,12 +30,18 @@ android {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
+    implementation(Dependencies.Library.KotlinxCoroutinesCore)
+    implementation(Dependencies.Library.KotlinxCoroutinesAndroid)
+
     implementation("androidx.core:core-ktx:1.8.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0-RC")
     implementation("androidx.annotation:annotation:1.4.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
+
+    /**
+     * Testing
+     */
     testImplementation(kotlin("test"))
     testImplementation("io.mockk:mockk:1.12.4")
     testImplementation("com.google.truth:truth:1.1.3")

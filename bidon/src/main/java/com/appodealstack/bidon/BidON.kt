@@ -5,27 +5,14 @@ import com.appodealstack.bidon.core.InitializationCallback
 import com.appodealstack.bidon.di.DI.initDependencyInjection
 import com.appodealstack.bidon.di.get
 
-val BidON: BidONSdk by lazy {
+val BidON: BidOnSdk by lazy {
     initDependencyInjection()
     get()
 }
 
-interface BidONSdk {
+interface BidOnSdk {
     companion object {
-        const val NONE = 0              //0000000000
-        const val INTERSTITIAL_INT = 1  //0000000001
-        const val SKIPPABLE_VIDEO = 2   //0000000010
-        const val INTERSTITIAL = 3      //0000000011
-        const val BANNER = 4            //0000000100
-        const val BANNER_BOTTOM = 8     //0000001000
-        const val BANNER_TOP = 16       //0000010000
-        const val BANNER_LEFT = 1024
-        const val BANNER_RIGHT = 2048
-        const val BANNER_VIEW = 64      //0001000000
-        const val REWARDED_VIDEO = 128  //0010000000
-        const val MREC = 256            //0100000000
-        const val NATIVE = 512          //1000000000
-        const val ALL = 4095            //1111111111
+        const val DefaultPlacement = "default"
     }
 
     fun init(
@@ -34,7 +21,8 @@ interface BidONSdk {
         callback: InitializationCallback? = null
     )
 
-//    fun isInitialized(adType: Int): Boolean
+    fun isInitialized(): Boolean
+
 //    fun updateGDPRUserConsent(consent: GDPRUserConsent)
 //    fun updateCCPAUserConsent(consent: CCPAUserConsent)
 //    fun isAutoCacheEnabled(adType: Int): Boolean

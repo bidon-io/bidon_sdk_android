@@ -21,5 +21,17 @@ object Dependencies {
 
     object Library {
         const val PlayServicesAds = "com.google.android.gms:play-services-ads:21.1.0"
+
+        private const val ktorVersion = "2.1.0"
+        const val KtorClientCore = "io.ktor:ktor-client-core:$ktorVersion"
+        const val KtorClientOkHttp = "io.ktor:ktor-client-okhttp:$ktorVersion"
+        const val KtorClientLogging = "io.ktor:ktor-client-logging:$ktorVersion"
+        const val KtorClientEncoding = "io.ktor:ktor-client-encoding:$ktorVersion"
+        const val KtorClientNegotiation = "io.ktor:ktor-client-content-negotiation:$ktorVersion"
+        const val KtorSerializationKotlinxJson = "io.ktor:ktor-serialization-kotlinx-json:$ktorVersion"
+
+        private const val kotlinxCoroutinesVersion = "1.6.4"
+        const val KotlinxCoroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
+        const val KotlinxCoroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinxCoroutinesVersion"
     }
 }

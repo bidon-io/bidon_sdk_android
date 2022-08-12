@@ -48,7 +48,7 @@ class FyberInterstitialImpl : FyberInterstitial {
                 placementId = placementId
             )
         }
-        SdkCore.loadAd(activity, demandAd, bundleOf(PlacementKey to placementId))
+        SdkCore.loadAd(activity, demandAd)
     }
 
     override fun setInterstitialListener(fyberInterstitialListener: FyberInterstitialListener) {

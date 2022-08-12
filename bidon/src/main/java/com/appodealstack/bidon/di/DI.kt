@@ -1,6 +1,6 @@
 package com.appodealstack.bidon.di
 
-import com.appodealstack.bidon.BidONSdk
+import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.Core
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolder
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolderImpl
@@ -12,11 +12,12 @@ import com.appodealstack.bidon.config.data.impl.AdapterInstanceCreatorImpl
 import com.appodealstack.bidon.config.data.impl.ConfigRequestInteractorImpl
 import com.appodealstack.bidon.config.domain.*
 import com.appodealstack.bidon.config.domain.databinders.*
-import com.appodealstack.bidon.config.domain.impl.BidONInitializerImpl
+import com.appodealstack.bidon.config.domain.impl.BidOnInitializerImpl
 import com.appodealstack.bidon.config.domain.impl.DataProviderImpl
 import com.appodealstack.bidon.config.domain.impl.InitAndRegisterAdaptersUseCaseImpl
 import com.appodealstack.bidon.core.*
 import com.appodealstack.bidon.core.impl.*
+import com.appodealstack.bidon.utilities.ktor.BidonHttpClient
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -34,8 +35,8 @@ internal object DI {
                 /**
                  * Singletons
                  */
-                singleton<BidONSdk> {
-                    BidONSdkImpl(
+                singleton<BidOnSdk> {
+                    BidOnSdkImpl(
                         bidONInitializer = get(),
                         contextProvider = get()
                     )
@@ -43,12 +44,13 @@ internal object DI {
                 singleton<AdsRepository> { AdsRepositoryImpl() }
                 singleton<Core> { CoreImpl() }
                 singleton<ContextProvider> { ContextProviderImpl() }
+                singleton<AdaptersSource> { AdaptersSourceImpl() }
 
                 /**
                  * Factories
                  */
-                factory<BidONInitializer> {
-                    BidONInitializerImpl(
+                factory<BidOnInitializer> {
+                    BidOnInitializerImpl(
                         initAndRegisterAdapters = get(),
                         configRequestInteractor = get(),
                         adapterInstanceCreator = get()
@@ -56,17 +58,17 @@ internal object DI {
                 }
                 factory<InitAndRegisterAdaptersUseCase> {
                     InitAndRegisterAdaptersUseCaseImpl(
-                        adaptersSource = get<Core>() as AdaptersSource
+                        adaptersSource = get()
                     )
                 }
                 factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
 
                 factory<ConfigRequestInteractor> {
                     ConfigRequestInteractorImpl(
-                        dataProvider = get()
+                        dataProvider = get(),
+                        httpClient = BidonHttpClient
                     )
                 }
-                factory<AdaptersSource> { AdaptersSourceImpl() }
                 factory<ListenersHolder> { ListenersHolderImpl() }
                 factory<AdRevenueInterceptorHolder> { AdRevenueInterceptorHolderImpl() }
                 factory<AuctionResolversHolder> { AuctionResolversHolderImpl() }

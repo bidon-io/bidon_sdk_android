@@ -26,7 +26,7 @@ internal class InterstitialAdWrapperImpl(
         get() = SdkCore.canShow(demandAd)
 
     override fun loadAd() {
-        SdkCore.loadAd(activityRef.get(), demandAd, bundleOf(AdUnitIdKey to adUnitId))
+        SdkCore.loadAd(activityRef.get(), demandAd)
     }
 
     override fun getAdUnitId(): String = adUnitId
