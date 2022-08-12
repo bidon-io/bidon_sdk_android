@@ -4,6 +4,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import com.appodeal.mads.theme.AppTypography
 
 @Composable
@@ -74,13 +75,16 @@ fun Body1Text(
 @Composable
 fun Body2Text(
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    maxLines: Int = 10,
 ) {
     Text(
         modifier = modifier,
         text = text,
         style = AppTypography.body2,
-        color = Color.White
+        color = Color.White,
+        maxLines = maxLines,
+        overflow = TextOverflow.Ellipsis
     )
 }
 

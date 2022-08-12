@@ -23,6 +23,8 @@ interface BidOnSdk {
 
     fun isInitialized(): Boolean
 
+    fun setBaseUrl(host: String?): BidOnSdk
+
 //    fun updateGDPRUserConsent(consent: GDPRUserConsent)
 //    fun updateCCPAUserConsent(consent: CCPAUserConsent)
 //    fun isAutoCacheEnabled(adType: Int): Boolean

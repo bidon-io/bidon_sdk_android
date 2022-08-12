@@ -2,7 +2,7 @@ package com.appodealstack.bidon.utilities.network.httpclients
 
 import com.appodealstack.bidon.utilities.network.HttpClient
 import com.appodealstack.bidon.utilities.network.HttpError
-import com.appodealstack.bidon.utilities.network.NetworkSettings.BaseAppodealUrl
+import com.appodealstack.bidon.utilities.network.NetworkSettings.BaseBidOnUrl
 import com.appodealstack.bidon.utilities.network.Networking
 import com.appodealstack.bidon.utilities.network.encoders.Base64RequestDataEncoder
 import com.appodealstack.bidon.utilities.network.encoders.GZIPRequestDataEncoder
@@ -73,7 +73,7 @@ internal class HttpClientImpl(
 
         // creating and adding signature for response verifying if needed
         val verifier = Verifier.newInstance()
-        if (useUniqueRequestId && !url.startsWith(BaseAppodealUrl)) {
+        if (useUniqueRequestId && !url.startsWith(BaseBidOnUrl)) {
             val uniqueRequestId = verifier.createRequestId()
             allHeaders[XRequestId] = listOf(uniqueRequestId)
         }
@@ -96,7 +96,7 @@ internal class HttpClientImpl(
                     is RawResponse.Success -> {
                         // decoding data
                         // verifying response signature if needed
-                        if (useUniqueRequestId && !url.startsWith(BaseAppodealUrl)) {
+                        if (useUniqueRequestId && !url.startsWith(BaseBidOnUrl)) {
                             val signature = rawResponse.headers[XSignature]?.firstOrNull()
                             val isSuccessfullyVerified = verifier.isResponseValid(responseId = signature)
                             if (!isSuccessfullyVerified) {

@@ -1,16 +1,16 @@
 package com.appodealstack.bidon.utilities.network.endpoint
 
 import com.appodealstack.bidon.core.ext.toHexString
-import com.appodealstack.bidon.utilities.network.AppodealEndpoint
+import com.appodealstack.bidon.utilities.network.BidOnEndpoints
 import com.appodealstack.bidon.utilities.network.NetworkSettings
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.text.SimpleDateFormat
 import java.util.*
 
-internal class AppodealEndpointImpl : AppodealEndpoint {
+internal class BidOnEndpointsImpl : BidOnEndpoints {
     private val hosts: Queue<String> = LinkedList()
-    private var defaultEndpoint: String = NetworkSettings.BaseAppodealUrl
+    private var defaultEndpoint: String = NetworkSettings.BaseBidOnUrl
 
     override val activeEndpoint: String get() = hosts.peek() ?: defaultEndpoint
 

@@ -17,7 +17,11 @@ import com.appodealstack.bidon.config.domain.impl.DataProviderImpl
 import com.appodealstack.bidon.config.domain.impl.InitAndRegisterAdaptersUseCaseImpl
 import com.appodealstack.bidon.core.*
 import com.appodealstack.bidon.core.impl.*
+import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
+import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 import com.appodealstack.bidon.utilities.ktor.BidonHttpClient
+import com.appodealstack.bidon.utilities.network.BidOnEndpoints
+import com.appodealstack.bidon.utilities.network.endpoint.BidOnEndpointsImpl
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -38,13 +42,21 @@ internal object DI {
                 singleton<BidOnSdk> {
                     BidOnSdkImpl(
                         bidONInitializer = get(),
-                        contextProvider = get()
+                        contextProvider = get(),
+                        adaptersSource = get(),
+                        bidOnEndpoints = get()
                     )
                 }
                 singleton<AdsRepository> { AdsRepositoryImpl() }
                 singleton<Core> { CoreImpl() }
                 singleton<ContextProvider> { ContextProviderImpl() }
                 singleton<AdaptersSource> { AdaptersSourceImpl() }
+                singleton<BidOnEndpoints> { BidOnEndpointsImpl() }
+                singleton<KeyValueStorage> {
+                    KeyValueStorageImpl(
+                        context = get<ContextProvider>().requiredContext
+                    )
+                }
 
                 /**
                  * Factories
@@ -66,7 +78,8 @@ internal object DI {
                 factory<ConfigRequestInteractor> {
                     ConfigRequestInteractorImpl(
                         dataProvider = get(),
-                        httpClient = BidonHttpClient
+                        httpClient = BidonHttpClient,
+                        bidOnEndpoints = get()
                     )
                 }
                 factory<ListenersHolder> { ListenersHolderImpl() }

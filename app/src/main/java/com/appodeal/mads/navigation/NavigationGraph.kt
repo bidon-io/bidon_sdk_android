@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.appodeal.mads.ui.*
+import com.appodeal.mads.ui.settings.ServerSettingsScreen
 
 @Composable
 fun NavigationGraph(
@@ -29,6 +30,9 @@ fun NavigationGraph(
         }
         composable(Screen.Banners.route) {
             BannerApplovinScreen(navController, bannerApplovinViewModel)
+        }
+        composable(Screen.ServerSettings.route) {
+            ServerSettingsScreen(navController)
         }
     }
 }

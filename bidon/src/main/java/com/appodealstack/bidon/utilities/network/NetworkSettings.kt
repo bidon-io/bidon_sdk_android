@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.utilities.network
 
-internal object NetworkSettings {
-    const val BaseAppodealUrl = "https://a.appbaqend.com"
+object NetworkSettings {
+    const val BaseBidOnUrl = "https://b.appbaqend.com"
 
     object Debug {
         const val PUBLIC_KEY =

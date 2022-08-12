@@ -16,24 +16,23 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.appodeal.mads.component.AppButton
+import com.appodeal.mads.component.AppTextButton
 import com.appodeal.mads.component.H5Text
 import com.appodeal.mads.navigation.Screen
+import com.appodealstack.bidon.BidON
+import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 
 @Composable
 fun MainScreen(
     navController: NavHostController,
     initState: MutableState<Boolean>,
 ) {
-    val viewModel = remember {
-        MainViewModel()
-    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -49,12 +48,17 @@ fun MainScreen(
                 text = "BidON"
             )
             AppButton(text = "Init") {
-                viewModel.initSdk(
-                    activity = context as Activity,
-                    onInitialized = {
+                BidON
+                    .setBaseUrl(KeyValueStorageImpl(context).host)
+                    .init(
+                        activity = context as Activity,
+                        appKey = "YOUR_APP_KEY",
+                    ) {
                         initState.value = true
                     }
-                )
+            }
+            AppTextButton(text = "Server settings", modifier = Modifier.padding(top = 30.dp)) {
+                navController.navigate(Screen.ServerSettings.route)
             }
         } else {
             H5Text(

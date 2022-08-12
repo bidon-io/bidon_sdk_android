@@ -5,4 +5,5 @@ enum class Screen(val route: String) {
     Interstitial("interstitial"),
     Rewarded("rewarded"),
     Banners("banners"),
+    ServerSettings("server_settings"),
 }
