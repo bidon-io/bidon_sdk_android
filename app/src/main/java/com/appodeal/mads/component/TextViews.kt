@@ -91,12 +91,15 @@ fun Body2Text(
 @Composable
 fun CaptionText(
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    maxLines: Int = 10,
 ) {
     Text(
         modifier = modifier,
         text = text,
         style = AppTypography.caption,
-        color = Color.White
+        color = Color.White,
+        maxLines = maxLines,
+        overflow = TextOverflow.Ellipsis
     )
 }

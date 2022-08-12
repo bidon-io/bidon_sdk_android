@@ -14,10 +14,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.appodeal.mads.component.AppButton
+import com.appodeal.mads.component.*
 import com.appodeal.mads.component.AppToolbar
-import com.appodeal.mads.component.Body2Text
-import com.appodeal.mads.component.CaptionText
 import com.appodeal.mads.theme.getShapeByPositionFor
 import com.appodeal.mads.ui.settings.data.Host
 import com.appodeal.mads.ui.settings.data.Ports
@@ -120,14 +118,15 @@ private fun RenderHosts(hosts: List<Host>, selectedHost: Host, onClick: (Host) -
                 Column(
                     modifier = Modifier.align(Alignment.CenterStart)
                 ) {
-                    Body2Text(
+                    Body1Text(
                         text = host.name,
                     )
-                    Body2Text(
+                    CaptionText(
                         text = when (host) {
                             Host.Production -> NetworkSettings.BaseBidOnUrl
                             Host.MockServer -> MockUrl
                         },
+                        maxLines = 1
                     )
                 }
                 if (host == selectedHost) {
