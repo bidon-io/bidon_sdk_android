@@ -26,6 +26,7 @@ import com.appodeal.mads.component.AppTextButton
 import com.appodeal.mads.component.H5Text
 import com.appodeal.mads.navigation.Screen
 import com.appodealstack.bidon.BidON
+import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 
 @Composable
@@ -42,6 +43,9 @@ fun MainScreen(
         verticalArrangement = Arrangement.Center
     ) {
         val context = LocalContext.current
+        val keyValueStorage: KeyValueStorage = KeyValueStorageImpl().apply {
+            init(context)
+        }
         if (!initState.value) {
             H5Text(
                 modifier = Modifier.padding(bottom = 40.dp),
@@ -49,7 +53,7 @@ fun MainScreen(
             )
             AppButton(text = "Init") {
                 BidON
-                    .setBaseUrl(KeyValueStorageImpl(context).host)
+                    .setBaseUrl(keyValueStorage.host)
                     .init(
                         activity = context as Activity,
                         appKey = "YOUR_APP_KEY",

@@ -4,12 +4,12 @@ import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.Core
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolder
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolderImpl
+import com.appodealstack.bidon.auctions.AuctionResolversHolder
 import com.appodealstack.bidon.auctions.domain.AdsRepository
 import com.appodealstack.bidon.auctions.domain.impl.AdsRepositoryImpl
-import com.appodealstack.bidon.auctions.AuctionResolversHolder
 import com.appodealstack.bidon.auctions.domain.impl.AuctionResolversHolderImpl
 import com.appodealstack.bidon.config.data.impl.AdapterInstanceCreatorImpl
-import com.appodealstack.bidon.config.data.impl.ConfigRequestInteractorImpl
+import com.appodealstack.bidon.config.data.impl.GetConfigRequestUseCaseImpl
 import com.appodealstack.bidon.config.domain.*
 import com.appodealstack.bidon.config.domain.databinders.*
 import com.appodealstack.bidon.config.domain.impl.BidOnInitializerImpl
@@ -52,11 +52,7 @@ internal object DI {
                 singleton<ContextProvider> { ContextProviderImpl() }
                 singleton<AdaptersSource> { AdaptersSourceImpl() }
                 singleton<BidOnEndpoints> { BidOnEndpointsImpl() }
-                singleton<KeyValueStorage> {
-                    KeyValueStorageImpl(
-                        context = get<ContextProvider>().requiredContext
-                    )
-                }
+                singleton<KeyValueStorage> { KeyValueStorageImpl() }
 
                 /**
                  * Factories
@@ -64,8 +60,9 @@ internal object DI {
                 factory<BidOnInitializer> {
                     BidOnInitializerImpl(
                         initAndRegisterAdapters = get(),
-                        configRequestInteractor = get(),
-                        adapterInstanceCreator = get()
+                        getConfigRequest = get(),
+                        adapterInstanceCreator = get(),
+                        keyValueStorage = get()
                     )
                 }
                 factory<InitAndRegisterAdaptersUseCase> {
@@ -75,11 +72,10 @@ internal object DI {
                 }
                 factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
 
-                factory<ConfigRequestInteractor> {
-                    ConfigRequestInteractorImpl(
+                factory<GetConfigRequestUseCase> {
+                    GetConfigRequestUseCaseImpl(
                         dataProvider = get(),
-                        httpClient = BidonHttpClient,
-                        bidOnEndpoints = get()
+                        keyValueStorage = get()
                     )
                 }
                 factory<ListenersHolder> { ListenersHolderImpl() }

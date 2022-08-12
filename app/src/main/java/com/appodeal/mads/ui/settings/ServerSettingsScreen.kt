@@ -15,10 +15,8 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.appodeal.mads.component.*
-import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.theme.getShapeByPositionFor
 import com.appodeal.mads.ui.settings.data.Host
-import com.appodeal.mads.ui.settings.data.Ports
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 import com.appodealstack.bidon.utilities.network.NetworkSettings
@@ -29,7 +27,9 @@ private const val MockUrl = "https://1e94ed35-7878-4446-8ffb-b46e4d362cb7.mock.p
 @Composable
 internal fun ServerSettingsScreen(
     navController: NavController,
-    keyValueStorage: KeyValueStorage = KeyValueStorageImpl(navController.context)
+    keyValueStorage: KeyValueStorage = KeyValueStorageImpl().apply {
+        init(navController.context)
+    }
 ) {
     val host = remember {
         mutableStateOf(

@@ -7,7 +7,6 @@ import com.appodealstack.bidon.core.AdaptersSource
 import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.InitializationCallback
 import com.appodealstack.bidon.core.ext.logError
-import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.utilities.network.BidOnEndpoints
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
