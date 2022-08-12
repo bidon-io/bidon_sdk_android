@@ -1,0 +1,13 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="AppTheme" parent="@style/Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:colorPrimary" tools:ignore="NewApi">#223551</item>
+        <item name="android:colorAccent">#223551</item>
+        <item name="android:windowBackground">#223551</item>
+        <item name="android:colorBackground">#223551</item>
+        <item name="colorPrimary">#223551</item>
+        <item name="colorAccent">#223551</item>
+        <item name="android:statusBarColor">#223551</item>
+        <item name="android:navigationBarColor">#223551</item>
+    </style>
+</resources>

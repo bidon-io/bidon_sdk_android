@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="@style/Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">#223551</item>
+        <item name="android:colorBackground">#223551</item>
+        <item name="android:windowSplashscreenContent">@drawable/bg_splash_screen</item>
+    </style>
+</resources>
