@@ -26,6 +26,7 @@ object Dependencies {
         const val KtorClientCore = "io.ktor:ktor-client-core:$ktorVersion"
         const val KtorClientOkHttp = "io.ktor:ktor-client-okhttp:$ktorVersion"
         const val KtorClientLogging = "io.ktor:ktor-client-logging:$ktorVersion"
+        const val KtorClientLoggingLongBack = "ch.qos.logback:logback-classic:1.3.0-beta0"
         const val KtorClientEncoding = "io.ktor:ktor-client-encoding:$ktorVersion"
         const val KtorClientNegotiation = "io.ktor:ktor-client-content-negotiation:$ktorVersion"
         const val KtorSerializationKotlinxJson = "io.ktor:ktor-serialization-kotlinx-json:$ktorVersion"

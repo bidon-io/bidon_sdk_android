@@ -6,6 +6,7 @@ import com.appodealstack.bidon.config.domain.ConfigRequestInteractor
 import com.appodealstack.bidon.config.domain.DataBinderType
 import com.appodealstack.bidon.config.domain.DataProvider
 import com.appodealstack.bidon.core.BidonJson
+import com.appodealstack.bidon.core.ext.logInfo
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -34,6 +35,7 @@ internal class ConfigRequestInteractorImpl(
                 put(key, jsonElement)
             }
         }
+        logInfo(Tag, "Request body: $requestBody")
         val response = httpClient.post {
             contentType(ContentType.Application.Json)
             url {
@@ -43,9 +45,10 @@ internal class ConfigRequestInteractorImpl(
             }
             setBody(requestBody)
         }
-        val jsonResponse  = response.body<JsonObject>()
+        val jsonResponse = response.body<JsonObject>()
         val config = jsonResponse.getValue("init")
         BidonJson.decodeFromJsonElement(ConfigResponse.serializer(), config)
     }
 }
 
+private const val Tag = "ConfigRequestInteractor"

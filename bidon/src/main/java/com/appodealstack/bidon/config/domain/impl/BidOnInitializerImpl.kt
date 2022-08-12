@@ -33,8 +33,6 @@ internal class BidOnInitializerImpl(
                     it.demandId.demandId to it.adapterInfo
                 }
             )
-            logInfo(Tag, "Config request body: ${body.getJson()}")
-
             return configRequestInteractor.request(body)
                 .map { configResponse ->
                     logInfo(Tag, "Config data: $configResponse")
