@@ -5,9 +5,13 @@ import com.appodealstack.bidon.Core
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolder
 import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolderImpl
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
+import com.appodealstack.bidon.auctions.data.impl.GetAuctionRequestUseCaseImpl
 import com.appodealstack.bidon.auctions.domain.AdsRepository
+import com.appodealstack.bidon.auctions.domain.GetAuctionRequestUseCase
+import com.appodealstack.bidon.auctions.domain.NewAuction
 import com.appodealstack.bidon.auctions.domain.impl.AdsRepositoryImpl
 import com.appodealstack.bidon.auctions.domain.impl.AuctionResolversHolderImpl
+import com.appodealstack.bidon.auctions.domain.impl.NewAuctionImpl
 import com.appodealstack.bidon.config.data.impl.AdapterInstanceCreatorImpl
 import com.appodealstack.bidon.config.data.impl.GetConfigRequestUseCaseImpl
 import com.appodealstack.bidon.config.domain.*
@@ -19,7 +23,6 @@ import com.appodealstack.bidon.core.*
 import com.appodealstack.bidon.core.impl.*
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
-import com.appodealstack.bidon.utilities.ktor.BidonHttpClient
 import com.appodealstack.bidon.utilities.network.BidOnEndpoints
 import com.appodealstack.bidon.utilities.network.endpoint.BidOnEndpointsImpl
 import java.util.concurrent.atomic.AtomicBoolean
@@ -71,19 +74,33 @@ internal object DI {
                     )
                 }
                 factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
+                factory<AdRevenueInterceptorHolder> { AdRevenueInterceptorHolderImpl() }
+                factory<AuctionResolversHolder> { AuctionResolversHolderImpl() }
+                factory<NewAuction> {
+                    NewAuctionImpl(
+                        adaptersSource = get(),
+                        contextProvider = get(),
+                        getAuctionRequest = get()
+                    )
+                }
+                factory<AutoRefresher> {
+                    AutoRefresherImpl(
+                        adsRepository = get()
+                    )
+                }
 
+                /**
+                 * Requests
+                 */
                 factory<GetConfigRequestUseCase> {
                     GetConfigRequestUseCaseImpl(
                         dataProvider = get(),
                         keyValueStorage = get()
                     )
                 }
-                factory<ListenersHolder> { ListenersHolderImpl() }
-                factory<AdRevenueInterceptorHolder> { AdRevenueInterceptorHolderImpl() }
-                factory<AuctionResolversHolder> { AuctionResolversHolderImpl() }
-                factory<AutoRefresher> {
-                    AutoRefresherImpl(
-                        adsRepository = get()
+                factory<GetAuctionRequestUseCase> {
+                    GetAuctionRequestUseCaseImpl(
+                        dataProvider = get(),
                     )
                 }
 

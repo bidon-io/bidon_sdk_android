@@ -6,7 +6,6 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import com.appodealstack.fyber.PlacementKey
 import com.appodealstack.fyber.banner.BNFyberBannerOption.Position
-import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.core.DefaultAutoRefreshTimeoutMs
 import com.appodealstack.bidon.adapters.Ad
 import com.appodealstack.bidon.adapters.AdListener
@@ -63,33 +62,11 @@ class FyberBannerImpl : FyberBanner {
                 placementId = placementId
             )
         }
-        SdkCore.loadAdView(
-            context = activity,
-            adContainer = adContainer,
-            demandAd = demandAd,
-            adParams = bundleOf(PlacementKey to placementId),
-            autoRefresh = autoRefresh,
-            onViewReady = { adView ->
-                if (adView != bannerViews[placementId]) {
-                    // Winner is not Fyber, so we have to cancel Fyber FairBid banner.
-                    Banner.destroy(placementId)
-                    bannerViews[placementId]?.let { adContainer ->
-                        adContainer.removeAllViews()
-                        adContainer.addView(adView)
-                        adContainer.isVisible = true
-                    }
-                } else {
-                    // Winner is Fyber FairBid banner.
-                    adView.isVisible = true
-                }
-            }
-        )
     }
 
     override fun destroy(placementId: String) {
         bannerViews[placementId]?.removeAllViews()
         bannerViews.remove(placementId)
-        SdkCore.destroyAd(getDemandAd(placementId), bundleOf())
     }
 
     override fun getImpressionDepth(): Int {
@@ -101,21 +78,17 @@ class FyberBannerImpl : FyberBanner {
             autoRefresh = AutoRefresh.On(DefaultAutoRefreshTimeoutMs)
         }
         val demandAd = getDemandAd(placementId)
-        SdkCore.setAutoRefresh(demandAd, autoRefresh)
     }
 
     override fun stopAutoRefresh(placementId: String) {
         val demandAd = getDemandAd(placementId)
         autoRefresh = AutoRefresh.Off
-        SdkCore.setAutoRefresh(demandAd, autoRefresh)
     }
 
     override fun setAutoRefreshTimeout(placementId: String, timeoutMs: Long) {
         if (timeoutMs < 0) return
         val demandAd = getDemandAd(placementId)
         autoRefresh = if (timeoutMs == 0L) AutoRefresh.Off else AutoRefresh.On(timeoutMs)
-        SdkCore.setAutoRefresh(demandAd, autoRefresh)
-
     }
 
     private fun getDemandAd(placementId: String) = ads.getOrPut(placementId) {
@@ -127,43 +100,6 @@ class FyberBannerImpl : FyberBanner {
         fyberBannerListener: FyberBannerListener,
         placementId: String
     ) {
-        SdkCore.setListener(demandAd, object : AdListener {
-            override fun onAdLoaded(ad: Ad) {
-                fyberBannerListener.onLoad(placementId, ad)
-            }
 
-            override fun onAdLoadFailed(cause: Throwable) {
-                fyberBannerListener.onError(placementId, cause)
-            }
-
-            override fun onAdDisplayed(ad: Ad) {
-                fyberBannerListener.onShow(placementId, ad)
-            }
-
-            override fun onAdDisplayFailed(cause: Throwable) {
-            }
-
-            override fun onAdImpression(ad: Ad) {
-            }
-
-            override fun onAdClicked(ad: Ad) {
-                fyberBannerListener.onClick(placementId, ad)
-            }
-
-            override fun onAdHidden(ad: Ad) {
-            }
-
-            override fun onDemandAdLoaded(ad: Ad) {
-                fyberBannerListener.onDemandAdLoaded(placementId, ad)
-            }
-
-            override fun onDemandAdLoadFailed(cause: Throwable) {
-                fyberBannerListener.onDemandAdLoadFailed(placementId, cause)
-            }
-
-            override fun onAuctionFinished(ads: List<Ad>) {
-                fyberBannerListener.onAuctionFinished(placementId, ads)
-            }
-        })
     }
 }

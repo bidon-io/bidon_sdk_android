@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -18,8 +19,10 @@ import androidx.navigation.NavHostController
 import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.component.Body2Text
-import com.appodeal.mads.setInterstitialListener
-import com.appodealstack.applovin.interstitial.BNMaxInterstitialAd
+import com.appodealstack.bidon.ad.Interstitial
+import com.appodealstack.bidon.ad.InterstitialListener
+import com.appodealstack.bidon.adapters.Ad
+import com.appodealstack.bidon.auctions.data.models.OldAuctionResult
 
 @Composable
 fun InterstitialScreen(
@@ -27,7 +30,7 @@ fun InterstitialScreen(
 ) {
 
     val activity = LocalContext.current as Activity
-    val interstitialAd = BNMaxInterstitialAd("c7c5f664e60b9bfb", activity)
+    val interstitial = Interstitial("c7c5f664e60b9bfb")//.BNMaxInterstitialAd("c7c5f664e60b9bfb", activity)
 
     val logFlow = remember {
         mutableStateOf(listOf("Log"))
@@ -48,14 +51,65 @@ fun InterstitialScreen(
                 .padding(24.dp)
         ) {
             AppButton(text = "Load") {
-                interstitialAd.setInterstitialListener(
-                    log = { log ->
-                        logFlow.value = logFlow.value + log
-                    })
-                interstitialAd.loadAd()
+                interstitial.setInterstitialListener(
+                    object : InterstitialListener {
+                        override fun onAdLoaded(ad: Ad) {
+                            logFlow.log("onAdLoaded: $ad")
+                        }
+
+                        override fun onAdLoadFailed(cause: Throwable) {
+                            logFlow.log("onAdLoadFailed: $cause")
+                        }
+
+                        override fun onAdShown(ad: Ad) {
+                            logFlow.log("onAdShown: $ad")
+                        }
+
+                        override fun onAdShowFailed(cause: Throwable) {
+                            logFlow.log("onAdShowFailed: $cause")
+                        }
+
+                        override fun onAdImpression(ad: Ad) {
+                            logFlow.log("onAdImpression: $ad")
+                        }
+
+                        override fun onAdClicked(ad: Ad) {
+                            logFlow.log("onAdClicked: $ad")
+                        }
+
+                        override fun onAdClosed(ad: Ad) {
+                            logFlow.log("onAdClosed: $ad")
+                        }
+
+                        override fun auctionStarted() {
+                            logFlow.log("auctionStarted")
+                        }
+
+                        override fun auctionSucceed(auctionResults: List<OldAuctionResult>) {
+                            logFlow.log("auctionSucceed: $auctionResults")
+                        }
+
+                        override fun auctionFailed(error: Throwable) {
+                            logFlow.log("auctionFailed: $error")
+                        }
+
+                        override fun roundStarted(roundId: String) {
+                            logFlow.log("roundStarted: roundId=$roundId")
+                        }
+
+                        override fun roundSucceed(roundId: String, roundResults: List<OldAuctionResult>) {
+                            logFlow.log("roundSucceed: roundId=$roundId. roundResults=$roundResults")
+                        }
+
+                        override fun roundFailed(roundId: String, error: Throwable) {
+                            logFlow.log("roundFailed: roundId=$roundId, $error")
+                        }
+                    }
+                )
+                interstitial.load()
             }
             AppButton(text = "Show") {
-                interstitialAd.showAd()
+                interstitial.show(activity)
             }
             LazyColumn(
                 modifier = Modifier
@@ -74,5 +128,11 @@ fun InterstitialScreen(
                 }
             }
         }
+    }
+}
+
+private fun MutableState<List<String>>.log(string: String) {
+    synchronized(this) {
+        this.value = this.value + string
     }
 }

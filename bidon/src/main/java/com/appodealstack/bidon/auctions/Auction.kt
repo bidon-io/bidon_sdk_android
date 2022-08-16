@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.auctions
 
-import com.appodealstack.bidon.auctions.data.models.AuctionResult
-import com.appodealstack.bidon.auctions.domain.AuctionRequest
+import com.appodealstack.bidon.auctions.data.models.OldAuctionResult
+import com.appodealstack.bidon.auctions.domain.OldAuctionRequest
 import com.appodealstack.bidon.auctions.domain.AuctionResolver
 
 @Deprecated("")
@@ -10,18 +10,18 @@ internal interface Auction {
     fun withResolver(auctionResolver: AuctionResolver): Auction
 
     fun start(
-        mediationRequests: Set<AuctionRequest>,
-        postBidRequests: Set<AuctionRequest>,
-        onDemandLoaded: (intermediateResult: AuctionResult) -> Unit,
+        mediationRequests: Set<OldAuctionRequest>,
+        postBidRequests: Set<OldAuctionRequest>,
+        onDemandLoaded: (intermediateResult: OldAuctionResult) -> Unit,
         onDemandLoadFailed: (intermediateResult: Throwable) -> Unit,
-        onAuctionFinished: (allResults: List<AuctionResult>) -> Unit,
+        onAuctionFinished: (allResults: List<OldAuctionResult>) -> Unit,
         onAuctionFailed: (cause: Throwable) -> Unit,
-        onWinnerFound: (AuctionResult) -> Unit,
+        onWinnerFound: (OldAuctionResult) -> Unit,
     )
 
-    fun getWinnerOrNull(onWinnerFound: (AuctionResult?) -> Unit)
+    fun getWinnerOrNull(onWinnerFound: (OldAuctionResult?) -> Unit)
     fun isAuctionActive(): Boolean
-    suspend fun awaitAndGetResults(): Result<List<AuctionResult>>
-    fun getResults(): List<AuctionResult>
+    suspend fun awaitAndGetResults(): Result<List<OldAuctionResult>>
+    fun getResults(): List<OldAuctionResult>
 }
 

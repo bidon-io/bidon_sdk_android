@@ -41,4 +41,4 @@ internal class GetConfigRequestUseCaseImpl(
 }
 
 private const val ConfigRequestPath = "config"
-private const val Tag = "ConfigRequestInteractor"
+private const val Tag = "ConfigRequestUseCase"

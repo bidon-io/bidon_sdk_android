@@ -2,14 +2,9 @@ package com.appodealstack.fyber.interstitial
 
 import android.app.Activity
 import androidx.core.os.bundleOf
-import com.appodealstack.fyber.PlacementKey
-import com.appodealstack.bidon.SdkCore
-import com.appodealstack.bidon.core.DefaultAutoRefreshTimeoutMs
-import com.appodealstack.bidon.adapters.Ad
-import com.appodealstack.bidon.adapters.AdListener
 import com.appodealstack.bidon.adapters.AdType
 import com.appodealstack.bidon.adapters.DemandAd
-import com.appodealstack.bidon.adapters.banners.AutoRefresh
+import com.appodealstack.fyber.PlacementKey
 import com.fyber.fairbid.ads.ImpressionData
 import com.fyber.fairbid.ads.Interstitial
 import com.fyber.fairbid.ads.LossNotificationReason
@@ -48,7 +43,6 @@ class FyberInterstitialImpl : FyberInterstitial {
                 placementId = placementId
             )
         }
-        SdkCore.loadAd(activity, demandAd)
     }
 
     override fun setInterstitialListener(fyberInterstitialListener: FyberInterstitialListener) {
@@ -59,7 +53,6 @@ class FyberInterstitialImpl : FyberInterstitial {
     }
 
     override fun show(placementId: String, activity: Activity) {
-        SdkCore.showAd(activity, demandAd = getDemandAd(placementId), bundleOf(PlacementKey to placementId))
     }
 
     override fun show(placementId: String, showOptions: ShowOptions, activity: Activity) {
@@ -68,11 +61,7 @@ class FyberInterstitialImpl : FyberInterstitial {
                 this.putString(key, value)
             }
         }
-        SdkCore.showAd(
-            activity = activity,
-            demandAd = getDemandAd(placementId),
-            adParams = bundle
-        )
+
     }
 
     override fun isAvailable(placementId: String): Boolean {
@@ -84,11 +73,9 @@ class FyberInterstitialImpl : FyberInterstitial {
     }
 
     override fun enableAutoRequesting(placementId: String) {
-        SdkCore.setAutoRefresh(getDemandAd(placementId), AutoRefresh.On(DefaultAutoRefreshTimeoutMs))
     }
 
     override fun disableAutoRequesting(placementId: String) {
-        SdkCore.setAutoRefresh(getDemandAd(placementId), AutoRefresh.Off)
     }
 
     override fun getImpressionDepth(): Int {
@@ -108,45 +95,6 @@ class FyberInterstitialImpl : FyberInterstitial {
         fyberInterstitialListener: FyberInterstitialListener,
         placementId: String
     ) {
-        SdkCore.setListener(demandAd, object : AdListener {
-            override fun onAdLoaded(ad: Ad) {
-                fyberInterstitialListener.onAvailable(placementId, ad)
-            }
 
-            override fun onAdLoadFailed(cause: Throwable) {
-                fyberInterstitialListener.onUnavailable(placementId, cause)
-            }
-
-            override fun onAdDisplayed(ad: Ad) {
-                fyberInterstitialListener.onShow(placementId, ad)
-            }
-
-            override fun onAdDisplayFailed(cause: Throwable) {
-                fyberInterstitialListener.onShowFailure(placementId, cause)
-            }
-
-            override fun onAdImpression(ad: Ad) {
-            }
-
-            override fun onAdClicked(ad: Ad) {
-                fyberInterstitialListener.onClick(placementId, ad)
-            }
-
-            override fun onAdHidden(ad: Ad) {
-                fyberInterstitialListener.onHide(placementId, ad)
-            }
-
-            override fun onDemandAdLoaded(ad: Ad) {
-                fyberInterstitialListener.onDemandAdLoaded(placementId, ad)
-            }
-
-            override fun onDemandAdLoadFailed(cause: Throwable) {
-                fyberInterstitialListener.onDemandAdLoadFailed(placementId, cause)
-            }
-
-            override fun onAuctionFinished(ads: List<Ad>) {
-                fyberInterstitialListener.onAuctionFinished(placementId, ads)
-            }
-        })
     }
 }

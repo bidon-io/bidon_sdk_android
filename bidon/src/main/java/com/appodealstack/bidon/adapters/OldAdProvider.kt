@@ -4,7 +4,8 @@ import android.app.Activity
 import android.os.Bundle
 import android.view.View
 
-interface AdProvider {
+@Deprecated("")
+interface OldAdProvider {
     fun canShow(): Boolean
     fun showAd(activity: Activity?, adParams: Bundle)
     fun destroy()

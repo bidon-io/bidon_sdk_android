@@ -2,17 +2,10 @@ package com.appodealstack.fyber
 
 import android.app.Activity
 import android.content.Context
-import android.os.Bundle
-import android.view.View
-import android.view.ViewGroup
 import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.analytics.MediationNetwork
-import com.appodealstack.bidon.auctions.domain.AuctionRequest
-import com.appodealstack.bidon.auctions.data.models.AuctionResult
-import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.appodealstack.bidon.core.parse
 import com.appodealstack.fyber.banner.BannerInterceptor
@@ -24,19 +17,18 @@ import com.appodealstack.fyber.interstitial.initInterstitialListener
 import com.appodealstack.fyber.rewarded.RewardedInterceptor
 import com.appodealstack.fyber.rewarded.initRewardedListener
 import com.fyber.FairBid
-import com.fyber.fairbid.ads.*
-import com.fyber.fairbid.ads.banner.BannerOptions
+import com.fyber.fairbid.ads.ImpressionData
+import com.fyber.fairbid.ads.Interstitial
+import com.fyber.fairbid.ads.Rewarded
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 
 val FairBidDemandId = DemandId("fair_bid")
 
 class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
-    AdSource.Interstitial<AdSource.AdParams>, AdSource.Rewarded<AdSource.AdParams>, AdSource.Banner<FairBidBannerParams>,
     MediationNetwork {
     override val mediationNetwork = BNMediationNetwork.Fyber
     override val demandId: DemandId = FairBidDemandId
@@ -80,6 +72,7 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
 
     override suspend fun init(activity: Activity, configParams: FairBidParameters) {
         this.context = activity.applicationContext
+        Interstitial()
         FairBid.configureForAppId(configParams.appKey)
             .enableLogs()
             .disableAutoRequesting()
@@ -97,155 +90,155 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
             sourceAd = placementId, // Cause FairBid is a Singleton
             monetizationNetwork = this?.networkInstanceId,
             dsp = this?.demandSource,
-            auctionRound = Ad.AuctionRound.Mediation,
+            roundId = "Ad.AuctionRound.Mediation",
             currencyCode = this?.currency,
         )
     }
 
-    override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: AdSource.AdParams): AuctionRequest {
-        return AuctionRequest {
-            val placementId = demandAd.placement
-            if (placementId.isNullOrBlank()) {
-                return@AuctionRequest Result.failure(DemandError.NoPlacement(demandId))
-            }
-            interstitialPlacementsDemandAd[placementId] = demandAd
-            Interstitial.request(placementId)
-            val loadingResult = interstitialInterceptorFlow.first {
-                (it as? InterstitialInterceptor.Loaded)?.placementId == placementId ||
-                        (it as? InterstitialInterceptor.LoadFailed)?.placementId == placementId
-            }
-            return@AuctionRequest when (loadingResult) {
-                is InterstitialInterceptor.Loaded -> {
-                    val impressionData = Interstitial.getImpressionData(placementId)
-                    Result.success(
-                        AuctionResult(
-                            ad = impressionData.asAd(demandAd, placementId),
-                            adProvider = object : AdProvider {
-                                override fun canShow(): Boolean = Interstitial.isAvailable(placementId)
-                                override fun destroy() {}
-                                override fun showAd(activity: Activity?, adParams: Bundle) {
-                                    val options = ShowOptions().apply {
-                                        customParameters = adParams.keySet().mapNotNull { key ->
-                                            try {
-                                                key to adParams.getString(key)
-                                            } catch (e: Exception) {
-                                                null
-                                            }
-                                        }.toMap()
-                                    }
-                                    Interstitial.show(placementId, options, activity)
-                                }
-                            }
-                        )
-                    )
-                }
-                is InterstitialInterceptor.LoadFailed -> {
-                    Result.failure(DemandError.NoFill(demandId))
-                }
-                else -> error("Unexpected state: $loadingResult")
-            }
-        }
-    }
-
-    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: AdSource.AdParams): AuctionRequest {
-        return AuctionRequest {
-            val placementId = demandAd.placement
-            if (placementId.isNullOrBlank()) {
-                return@AuctionRequest Result.failure(DemandError.NoPlacement(demandId))
-            }
-            placements.addIfAbsent(placementId)
-            rewardedPlacementsDemandAd[placementId] = demandAd
-            Rewarded.request(placementId)
-            val loadingResult = rewardedInterceptorFlow.first {
-                (it as? RewardedInterceptor.Loaded)?.placementId == placementId ||
-                        (it as? RewardedInterceptor.LoadFailed)?.placementId == placementId
-            }
-            return@AuctionRequest when (loadingResult) {
-                is RewardedInterceptor.Loaded -> {
-                    val impressionData = Rewarded.getImpressionData(placementId)
-                    Result.success(
-                        AuctionResult(
-                            ad = impressionData.asAd(demandAd, placementId),
-                            adProvider = object : AdProvider {
-                                override fun canShow(): Boolean = Interstitial.isAvailable(placementId)
-                                override fun destroy() {}
-                                override fun showAd(activity: Activity?, adParams: Bundle) {
-                                    val options = ShowOptions().apply {
-                                        customParameters = adParams.keySet().mapNotNull { key ->
-                                            try {
-                                                key to adParams.getString(key)
-                                            } catch (e: Exception) {
-                                                null
-                                            }
-                                        }.toMap()
-                                    }
-                                    Interstitial.show(placementId, options, activity)
-                                }
-                            }
-                        )
-                    )
-                }
-                is RewardedInterceptor.LoadFailed -> {
-                    Result.failure(DemandError.NoFill(demandId))
-                }
-                else -> error("Unexpected state: $loadingResult")
-            }
-        }
-    }
-
-    override fun banner(context: Context, demandAd: DemandAd, adParams: FairBidBannerParams): AuctionRequest {
-        return AuctionRequest {
-            val placementId = demandAd.placement
-            if (placementId.isNullOrBlank()) {
-                return@AuctionRequest Result.failure(DemandError.NoPlacement(demandId))
-            }
-            bannerPlacementsRevenue.remove(placementId)
-            Banner.show(placementId, BannerOptions().placeInContainer(adParams.adContainer), context as Activity)
-            val loadingResult = bannerInterceptorFlow.first {
-                (it as? BannerInterceptor.Loaded)?.placementId == placementId ||
-                        (it as? BannerInterceptor.Error)?.placementId == placementId
-            }
-            return@AuctionRequest when (loadingResult) {
-                is BannerInterceptor.Error -> {
-                    Result.failure(loadingResult.cause)
-                }
-                is BannerInterceptor.Loaded -> {
-                    Result.success(
-                        AuctionResult(
-                            ad = null.asAd(demandAd, placementId),
-                            adProvider = object : AdProvider, AdViewProvider {
-                                override fun getAdView(): View = adParams.adContainer
-                                override fun canShow(): Boolean = true
-                                override fun showAd(activity: Activity?, adParams: Bundle) {}
-
-                                override fun destroy() {
-                                    Banner.destroy(placementId)
-                                }
-                            }
-                        )
-                    )
-                }
-                is BannerInterceptor.Clicked,
-                is BannerInterceptor.RequestStarted,
-                is BannerInterceptor.Shown -> error("Unexpected state: $loadingResult")
-            }
-        }
-    }
-
-    override fun interstitialParams(priceFloor: Double, lineItems: List<LineItem>): AdSource.AdParams {
-        error("No additional params for FairBid interstitial")
-    }
-
-    override fun rewardedParams(priceFloor: Double, lineItems: List<LineItem>): AdSource.AdParams {
-        error("No additional params for FairBid rewarded")
-    }
-
-    override fun bannerParams(
-        priceFloor: Double,
-        lineItems: List<LineItem>,
-        bannerSize: BannerSize,
-        adContainer: ViewGroup?
-    ): AdSource.AdParams = FairBidBannerParams(requireNotNull(adContainer))
+//    override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: AdSource.AdParams): OldAuctionRequest {
+//        return OldAuctionRequest {
+//            val placementId = demandAd.placement
+//            if (placementId.isNullOrBlank()) {
+//                return@OldAuctionRequest Result.failure(DemandError.NoPlacement(demandId))
+//            }
+//            interstitialPlacementsDemandAd[placementId] = demandAd
+//            Interstitial.request(placementId)
+//            val loadingResult = interstitialInterceptorFlow.first {
+//                (it as? InterstitialInterceptor.Loaded)?.placementId == placementId ||
+//                        (it as? InterstitialInterceptor.LoadFailed)?.placementId == placementId
+//            }
+//            return@OldAuctionRequest when (loadingResult) {
+//                is InterstitialInterceptor.Loaded -> {
+//                    val impressionData = Interstitial.getImpressionData(placementId)
+//                    Result.success(
+//                        OldAuctionResult(
+//                            ad = impressionData.asAd(demandAd, placementId),
+//                            adProvider = object : OldAdProvider {
+//                                override fun canShow(): Boolean = Interstitial.isAvailable(placementId)
+//                                override fun destroy() {}
+//                                override fun showAd(activity: Activity?, adParams: Bundle) {
+//                                    val options = ShowOptions().apply {
+//                                        customParameters = adParams.keySet().mapNotNull { key ->
+//                                            try {
+//                                                key to adParams.getString(key)
+//                                            } catch (e: Exception) {
+//                                                null
+//                                            }
+//                                        }.toMap()
+//                                    }
+//                                    Interstitial.show(placementId, options, activity)
+//                                }
+//                            }
+//                        )
+//                    )
+//                }
+//                is InterstitialInterceptor.LoadFailed -> {
+//                    Result.failure(DemandError.NoFill(demandId))
+//                }
+//                else -> error("Unexpected state: $loadingResult")
+//            }
+//        }
+//    }
+//
+//    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: AdSource.AdParams): OldAuctionRequest {
+//        return OldAuctionRequest {
+//            val placementId = demandAd.placement
+//            if (placementId.isNullOrBlank()) {
+//                return@OldAuctionRequest Result.failure(DemandError.NoPlacement(demandId))
+//            }
+//            placements.addIfAbsent(placementId)
+//            rewardedPlacementsDemandAd[placementId] = demandAd
+//            Rewarded.request(placementId)
+//            val loadingResult = rewardedInterceptorFlow.first {
+//                (it as? RewardedInterceptor.Loaded)?.placementId == placementId ||
+//                        (it as? RewardedInterceptor.LoadFailed)?.placementId == placementId
+//            }
+//            return@OldAuctionRequest when (loadingResult) {
+//                is RewardedInterceptor.Loaded -> {
+//                    val impressionData = Rewarded.getImpressionData(placementId)
+//                    Result.success(
+//                        OldAuctionResult(
+//                            ad = impressionData.asAd(demandAd, placementId),
+//                            adProvider = object : OldAdProvider {
+//                                override fun canShow(): Boolean = Interstitial.isAvailable(placementId)
+//                                override fun destroy() {}
+//                                override fun showAd(activity: Activity?, adParams: Bundle) {
+//                                    val options = ShowOptions().apply {
+//                                        customParameters = adParams.keySet().mapNotNull { key ->
+//                                            try {
+//                                                key to adParams.getString(key)
+//                                            } catch (e: Exception) {
+//                                                null
+//                                            }
+//                                        }.toMap()
+//                                    }
+//                                    Interstitial.show(placementId, options, activity)
+//                                }
+//                            }
+//                        )
+//                    )
+//                }
+//                is RewardedInterceptor.LoadFailed -> {
+//                    Result.failure(DemandError.NoFill(demandId))
+//                }
+//                else -> error("Unexpected state: $loadingResult")
+//            }
+//        }
+//    }
+//
+//    override fun banner(context: Context, demandAd: DemandAd, adParams: FairBidBannerParams): OldAuctionRequest {
+//        return OldAuctionRequest {
+//            val placementId = demandAd.placement
+//            if (placementId.isNullOrBlank()) {
+//                return@OldAuctionRequest Result.failure(DemandError.NoPlacement(demandId))
+//            }
+//            bannerPlacementsRevenue.remove(placementId)
+//            Banner.show(placementId, BannerOptions().placeInContainer(adParams.adContainer), context as Activity)
+//            val loadingResult = bannerInterceptorFlow.first {
+//                (it as? BannerInterceptor.Loaded)?.placementId == placementId ||
+//                        (it as? BannerInterceptor.Error)?.placementId == placementId
+//            }
+//            return@OldAuctionRequest when (loadingResult) {
+//                is BannerInterceptor.Error -> {
+//                    Result.failure(loadingResult.cause)
+//                }
+//                is BannerInterceptor.Loaded -> {
+//                    Result.success(
+//                        OldAuctionResult(
+//                            ad = null.asAd(demandAd, placementId),
+//                            adProvider = object : OldAdProvider, AdViewProvider {
+//                                override fun getAdView(): View = adParams.adContainer
+//                                override fun canShow(): Boolean = true
+//                                override fun showAd(activity: Activity?, adParams: Bundle) {}
+//
+//                                override fun destroy() {
+//                                    Banner.destroy(placementId)
+//                                }
+//                            }
+//                        )
+//                    )
+//                }
+//                is BannerInterceptor.Clicked,
+//                is BannerInterceptor.RequestStarted,
+//                is BannerInterceptor.Shown -> error("Unexpected state: $loadingResult")
+//            }
+//        }
+//    }
+//
+//    override fun interstitialParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdSource.AdParams {
+//        error("No additional params for FairBid interstitial")
+//    }
+//
+//    override fun rewardedParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdSource.AdParams {
+//        error("No additional params for FairBid rewarded")
+//    }
+//
+//    override fun bannerParams(
+//        priceFloor: Double,
+//        lineItems: List<LineItem>,
+//        bannerSize: BannerSize,
+//        adContainer: ViewGroup?
+//    ): AdSource.AdParams = FairBidBannerParams(requireNotNull(adContainer))
 
     private fun proceedInterstitialCallbacks(interceptor: InterstitialInterceptor) {
         when (interceptor) {
@@ -255,15 +248,15 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
             }
             is InterstitialInterceptor.Hidden -> {
                 val (listener, ad) = getCoreListener(interceptor.placementId)
-                listener.onAdHidden(ad)
+                listener.onAdClosed(ad)
             }
             is InterstitialInterceptor.ShowFailed -> {
                 val (listener, ad) = getCoreListener(interceptor.placementId)
-                listener.onAdDisplayFailed(DemandError.Unspecified(ad.demandId))
+                listener.onAdShowFailed(DemandError.Unspecified(ad.demandId))
             }
             is InterstitialInterceptor.Shown -> {
                 val (listener, ad) = getCoreListener(interceptor.placementId)
-                listener.onAdDisplayed(ad)
+                listener.onAdShown(ad)
             }
             is InterstitialInterceptor.LoadFailed,
             is InterstitialInterceptor.Loaded -> {
@@ -283,15 +276,15 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
             }
             is RewardedInterceptor.Hidden -> {
                 val (listener, ad) = getCoreListener(interceptor.placementId)
-                listener.onAdHidden(ad)
+                listener.onAdClosed(ad)
             }
             is RewardedInterceptor.ShowFailed -> {
                 val (listener, ad) = getCoreListener(interceptor.placementId)
-                listener.onAdDisplayFailed(DemandError.Unspecified(ad.demandId))
+                listener.onAdShowFailed(DemandError.Unspecified(ad.demandId))
             }
             is RewardedInterceptor.Shown -> {
                 val (listener, ad) = getCoreListener(interceptor.placementId)
-                listener.onAdDisplayed(ad)
+                listener.onAdShown(ad)
             }
             is RewardedInterceptor.LoadFailed,
             is RewardedInterceptor.Loaded -> {
@@ -322,7 +315,7 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
             is BannerInterceptor.Shown -> {
                 bannerPlacementsRevenue[interceptor.placementId] = interceptor.impressionData
                 val (listener, ad) = getCoreListener(interceptor.placementId)
-                listener.onAdDisplayed(ad)
+                listener.onAdShown(ad)
             }
         }
     }

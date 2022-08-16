@@ -6,7 +6,7 @@ class Ad(
     val demandId: DemandId,
     val demandAd: DemandAd,
     val price: Double,
-    val auctionRound: AuctionRound,
+    val roundId: String,
     val monetizationNetwork: String?,
     val dsp: String?,
     val sourceAd: Any,
@@ -16,9 +16,10 @@ class Ad(
         get() = currencyCode?.let { Currency.getInstance(it) }
 
     override fun toString(): String {
-        return "Ad(demandId=${demandId.demandId}, adType=${demandAd.adType}, price=$price, auctionRound=$auctionRound, monetizationNetwork=$monetizationNetwork, dsp=$dsp, currency=${currency?.currencyCode}, $sourceAd)"
+        return "Ad(demandId=${demandId.demandId}, adType=${demandAd.adType}, price=$price, auctionRound=$roundId, monetizationNetwork=$monetizationNetwork, dsp=$dsp, currency=${currency?.currencyCode}, $sourceAd)"
     }
 
+    @Deprecated("")
     enum class AuctionRound(val roundName: String) {
         Mediation("mediation"),
         PostBid("postbid"),

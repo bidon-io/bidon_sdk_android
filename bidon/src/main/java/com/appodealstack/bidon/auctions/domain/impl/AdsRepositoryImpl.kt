@@ -3,7 +3,7 @@ package com.appodealstack.bidon.auctions.domain.impl
 import com.appodealstack.bidon.adapters.DemandAd
 import com.appodealstack.bidon.auctions.domain.AdsRepository
 import com.appodealstack.bidon.auctions.Auction
-import com.appodealstack.bidon.auctions.data.models.AuctionResult
+import com.appodealstack.bidon.auctions.data.models.OldAuctionResult
 
 internal class AdsRepositoryImpl : AdsRepository {
     private val auctionMap = mutableMapOf<DemandAd, Auction>()
@@ -17,7 +17,7 @@ internal class AdsRepositoryImpl : AdsRepository {
         auctionMap.remove(demandAd)
     }
 
-    override fun getWinnerOrNull(demandAd: DemandAd, onWinnerFound: (AuctionResult?) -> Unit) {
+    override fun getWinnerOrNull(demandAd: DemandAd, onWinnerFound: (OldAuctionResult?) -> Unit) {
         auctionMap[demandAd]?.getWinnerOrNull(
             onWinnerFound = onWinnerFound
         )
@@ -31,7 +31,7 @@ internal class AdsRepositoryImpl : AdsRepository {
         return auctionMap[demandAd]?.isAuctionActive() ?: false
     }
 
-    override fun getResults(demandAd: DemandAd): List<AuctionResult> {
+    override fun getResults(demandAd: DemandAd): List<OldAuctionResult> {
         return auctionMap[demandAd]?.getResults() ?: emptyList()
     }
 }

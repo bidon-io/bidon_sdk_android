@@ -1,5 +1,6 @@
 package com.appodealstack.bidon.config.data.models
 
+import com.appodealstack.bidon.config.domain.DataBinderType
 import com.appodealstack.bidon.core.BidonJson
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

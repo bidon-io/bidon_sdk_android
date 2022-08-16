@@ -6,10 +6,10 @@ import com.applovin.mediation.ads.MaxInterstitialAd
 import com.applovin.mediation.ads.MaxRewardedAd
 import com.appodealstack.applovin.asAd
 import com.appodealstack.bidon.SdkCore
-import com.appodealstack.bidon.auctions.data.models.AuctionResult
+import com.appodealstack.bidon.auctions.data.models.OldAuctionResult
 import com.appodealstack.bidon.adapters.RewardedAdListener
 
-internal fun MaxRewardedAd.setCoreListener(auctionResult: AuctionResult) {
+internal fun MaxRewardedAd.setCoreListener(auctionResult: OldAuctionResult) {
     val core = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)
     val demandAd = auctionResult.ad.demandAd
     this.setListener(
@@ -19,11 +19,11 @@ internal fun MaxRewardedAd.setCoreListener(auctionResult: AuctionResult) {
             }
 
             override fun onAdDisplayed(maxAd: MaxAd?) {
-                core.onAdDisplayed(maxAd.asAd(demandAd))
+                core.onAdShown(maxAd.asAd(demandAd))
             }
 
             override fun onAdHidden(maxAd: MaxAd?) {
-                core.onAdHidden(maxAd.asAd(demandAd))
+                core.onAdClosed(maxAd.asAd(demandAd))
             }
 
             override fun onAdClicked(maxAd: MaxAd?) {
@@ -35,7 +35,7 @@ internal fun MaxRewardedAd.setCoreListener(auctionResult: AuctionResult) {
             }
 
             override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError) {
-                core.onAdDisplayFailed(error.asBidonError())
+                core.onAdShowFailed(error.asBidonError())
             }
 
             override fun onRewardedVideoStarted(maxAd: MaxAd?) {
@@ -61,7 +61,7 @@ internal fun MaxRewardedAd.setCoreListener(auctionResult: AuctionResult) {
     )
 }
 
-internal fun MaxAdView.setCoreListener(auctionResult: AuctionResult) {
+internal fun MaxAdView.setCoreListener(auctionResult: OldAuctionResult) {
     val core = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)
     val demandAd = auctionResult.ad.demandAd
     this.setListener(
@@ -71,11 +71,11 @@ internal fun MaxAdView.setCoreListener(auctionResult: AuctionResult) {
             }
 
             override fun onAdDisplayed(maxAd: MaxAd?) {
-                core.onAdDisplayed(maxAd.asAd(demandAd))
+                core.onAdShown(maxAd.asAd(demandAd))
             }
 
             override fun onAdHidden(maxAd: MaxAd?) {
-                core.onAdHidden(maxAd.asAd(demandAd))
+                core.onAdClosed(maxAd.asAd(demandAd))
             }
 
             override fun onAdClicked(maxAd: MaxAd?) {
@@ -87,7 +87,7 @@ internal fun MaxAdView.setCoreListener(auctionResult: AuctionResult) {
             }
 
             override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError) {
-                core.onAdDisplayFailed(error.asBidonError())
+                core.onAdShowFailed(error.asBidonError())
             }
 
             override fun onAdExpanded(ad: MaxAd?) {
@@ -99,7 +99,7 @@ internal fun MaxAdView.setCoreListener(auctionResult: AuctionResult) {
     )
 }
 
-internal fun MaxInterstitialAd.setCoreListener(auctionResult: AuctionResult) {
+internal fun MaxInterstitialAd.setCoreListener(auctionResult: OldAuctionResult) {
     val core = SdkCore.getListenerForDemand(auctionResult.ad.demandAd)
     this.setListener(
         object : MaxAdListener {
@@ -108,11 +108,11 @@ internal fun MaxInterstitialAd.setCoreListener(auctionResult: AuctionResult) {
             }
 
             override fun onAdDisplayed(ad: MaxAd?) {
-                core.onAdDisplayed(auctionResult.ad)
+                core.onAdShown(auctionResult.ad)
             }
 
             override fun onAdHidden(ad: MaxAd?) {
-                core.onAdHidden(auctionResult.ad)
+                core.onAdClosed(auctionResult.ad)
             }
 
             override fun onAdClicked(ad: MaxAd?) {
@@ -124,7 +124,7 @@ internal fun MaxInterstitialAd.setCoreListener(auctionResult: AuctionResult) {
             }
 
             override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError) {
-                core.onAdDisplayFailed(error.asBidonError())
+                core.onAdShowFailed(error.asBidonError())
             }
         }
     )

@@ -3,7 +3,6 @@ package com.appodealstack.fyber.rewarded
 import android.app.Activity
 import androidx.core.os.bundleOf
 import com.appodealstack.fyber.PlacementKey
-import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.core.DefaultAutoRefreshTimeoutMs
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.AutoRefresh
@@ -45,7 +44,6 @@ class FyberRewardedImpl : FyberRewarded {
                 placementId = placementId
             )
         }
-        SdkCore.loadAd(activity, demandAd, bundleOf(PlacementKey to placementId))
     }
 
     override fun setRewardedListener(fyberRewardedListener: FyberRewardedListener) {
@@ -56,7 +54,6 @@ class FyberRewardedImpl : FyberRewarded {
     }
 
     override fun show(placementId: String, activity: Activity) {
-        SdkCore.showAd(activity, demandAd = getDemandAd(placementId), bundleOf(PlacementKey to placementId))
     }
 
     override fun show(placementId: String, showOptions: ShowOptions, activity: Activity) {
@@ -65,11 +62,6 @@ class FyberRewardedImpl : FyberRewarded {
                 this.putString(key, value)
             }
         }
-        SdkCore.showAd(
-            activity = activity,
-            demandAd = getDemandAd(placementId),
-            adParams = bundle
-        )
     }
 
     override fun isAvailable(placementId: String): Boolean {
@@ -81,11 +73,9 @@ class FyberRewardedImpl : FyberRewarded {
     }
 
     override fun enableAutoRequesting(placementId: String) {
-        SdkCore.setAutoRefresh(getDemandAd(placementId), AutoRefresh.On(DefaultAutoRefreshTimeoutMs))
     }
 
     override fun disableAutoRequesting(placementId: String) {
-        SdkCore.setAutoRefresh(getDemandAd(placementId), AutoRefresh.Off)
     }
 
     override fun getImpressionDepth(): Int {
@@ -105,49 +95,6 @@ class FyberRewardedImpl : FyberRewarded {
         fyberRewardedListener: FyberRewardedListener,
         placementId: String
     ) {
-        SdkCore.setListener(demandAd, object : AdListener {
-            override fun onAdLoaded(ad: Ad) {
-                fyberRewardedListener.onAvailable(placementId, ad)
-            }
 
-            override fun onAdLoadFailed(cause: Throwable) {
-                fyberRewardedListener.onUnavailable(placementId, cause)
-            }
-
-            override fun onAdDisplayed(ad: Ad) {
-                fyberRewardedListener.onShow(placementId, ad)
-            }
-
-            override fun onAdDisplayFailed(cause: Throwable) {
-                fyberRewardedListener.onShowFailure(placementId, cause)
-            }
-
-            override fun onAdImpression(ad: Ad) {
-            }
-
-            override fun onAdClicked(ad: Ad) {
-                fyberRewardedListener.onClick(placementId, ad)
-            }
-
-            override fun onAdHidden(ad: Ad) {
-                fyberRewardedListener.onHide(placementId, ad)
-            }
-
-            override fun onDemandAdLoaded(ad: Ad) {
-                fyberRewardedListener.onDemandAdLoaded(placementId, ad)
-            }
-
-            override fun onDemandAdLoadFailed(cause: Throwable) {
-                fyberRewardedListener.onDemandAdLoadFailed(placementId, cause)
-            }
-
-            override fun onAuctionFinished(ads: List<Ad>) {
-                fyberRewardedListener.onAuctionFinished(placementId, ads)
-            }
-
-            override fun onUserRewarded(ad: Ad, reward: RewardedAdListener.Reward?) {
-                fyberRewardedListener.onCompletion(placementId, userRewarded = reward != null)
-            }
-        })
     }
 }

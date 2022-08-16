@@ -13,11 +13,11 @@ import com.appodealstack.bidon.adapters.banners.AutoRefresh
 import com.appodealstack.bidon.analytics.AdRevenueInterceptor
 import com.appodealstack.bidon.auctions.domain.AuctionResolver
 import com.appodealstack.bidon.core.InitializationCallback
-import com.appodealstack.bidon.core.impl.ListenersHolderImpl
 import com.appodealstack.bidon.di.DI.initDependencyInjection
 import com.appodealstack.bidon.di.get
 import kotlinx.coroutines.flow.StateFlow
 
+@Deprecated("")
 val SdkCore: Core by lazy {
     initDependencyInjection()
     get()

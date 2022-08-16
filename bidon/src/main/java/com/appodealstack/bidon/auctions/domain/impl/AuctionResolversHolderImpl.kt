@@ -12,6 +12,6 @@ internal class AuctionResolversHolderImpl : AuctionResolversHolder {
     }
 
     override fun getAuctionResolver(demandAd: DemandAd): AuctionResolver {
-        return resolvers[demandAd] ?: DefaultAuctionResolver
+        return resolvers[demandAd] ?: MaxEcpmAuctionResolver
     }
 }

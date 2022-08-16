@@ -20,14 +20,13 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
-import com.appodeal.mads.component.*
+import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppToolbar
-import com.appodeal.mads.setBannerListener
-import com.appodealstack.applovin.banner.BNMaxAdView
-import com.appodealstack.bidon.core.DefaultAutoRefreshTimeoutMs
+import com.appodeal.mads.component.Body2Text
+import com.appodeal.mads.component.ItemSelector
 import com.appodealstack.bidon.adapters.banners.BannerSize
+import com.appodealstack.bidon.core.DefaultAutoRefreshTimeoutMs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,23 +54,23 @@ fun BannerApplovinScreen(navController: NavHostController, viewModel: BannerAppl
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            val bannerView = state.value.bannerAdView
-            if (bannerView != null) {
-                AndroidView(
-                    modifier = Modifier.height(
-                        when (state.value.adFormat) {
-                            BannerSize.Banner -> 50.dp
-                            BannerSize.LeaderBoard -> 90.dp
-                            BannerSize.MRec -> 250.dp
-                            else -> error("Not supported")
-                        }
-                    ),
-                    factory = {
-                        bannerView
-                    })
-            } else {
-                Subtitle1Text(text = "Place for Banner")
-            }
+//            val bannerView = state.value.bannerAdView
+//            if (bannerView != null) {
+//                AndroidView(
+//                    modifier = Modifier.height(
+//                        when (state.value.adFormat) {
+//                            BannerSize.Banner -> 50.dp
+//                            BannerSize.LeaderBoard -> 90.dp
+//                            BannerSize.MRec -> 250.dp
+//                            else -> error("Not supported")
+//                        }
+//                    ),
+//                    factory = {
+//                        bannerView
+//                    })
+//            } else {
+//                Subtitle1Text(text = "Place for Banner")
+//            }
         }
 
         Column(
@@ -116,14 +115,14 @@ fun BannerApplovinScreen(navController: NavHostController, viewModel: BannerAppl
             AppButton(text = "Create banner") {
                 viewModel.createAd(context)
             }
-            if (state.value.bannerAdView != null) {
-                AppButton(text = "Load") {
-                    viewModel.loadAd()
-                }
-                AppButton(text = "Destroy") {
-                    viewModel.destroyAd()
-                }
-            }
+//            if (state.value.bannerAdView != null) {
+//                AppButton(text = "Load") {
+//                    viewModel.loadAd()
+//                }
+//                AppButton(text = "Destroy") {
+//                    viewModel.destroyAd()
+//                }
+//            }
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -147,7 +146,7 @@ fun BannerApplovinScreen(navController: NavHostController, viewModel: BannerAppl
 class BannerApplovinViewModel {
     class State(
         val logs: List<String>,
-        val bannerAdView: BNMaxAdView?,
+//        val bannerAdView: BNMaxAdView?,
         val adFormat: BannerSize,
         val autoRefreshTtl: Long,
     )
@@ -157,7 +156,7 @@ class BannerApplovinViewModel {
     val stateFlow = MutableStateFlow(
         State(
             logs = listOf("Logs"),
-            bannerAdView = null,
+//            bannerAdView = null,
             adFormat = BannerSize.Banner,
             autoRefreshTtl = DefaultAutoRefreshTimeoutMs
         )
@@ -168,25 +167,25 @@ class BannerApplovinViewModel {
         destroyAd()
         updateState(
             State(
-                bannerAdView = BNMaxAdView(
-                    adUnitId = "c7c5f664e60b9bfb",
-                    adFormat = state.adFormat,
-                    context = context
-                ).also {
-                    it.setBannerListener { log ->
-                        synchronized(this) {
-                            val state1 = stateFlow.value
-                            updateState(
-                                State(
-                                    adFormat = state1.adFormat,
-                                    logs = state1.logs + log,
-                                    bannerAdView = state1.bannerAdView,
-                                    autoRefreshTtl = state1.autoRefreshTtl,
-                                )
-                            )
-                        }
-                    }
-                },
+//                bannerAdView = BNMaxAdView(
+//                    adUnitId = "c7c5f664e60b9bfb",
+//                    adFormat = state.adFormat,
+//                    context = context
+//                ).also {
+//                    it.setBannerListener { log ->
+//                        synchronized(this) {
+//                            val state1 = stateFlow.value
+//                            updateState(
+//                                State(
+//                                    adFormat = state1.adFormat,
+//                                    logs = state1.logs + log,
+//                                    bannerAdView = state1.bannerAdView,
+//                                    autoRefreshTtl = state1.autoRefreshTtl,
+//                                )
+//                            )
+//                        }
+//                    }
+//                },
                 logs = state.logs,
                 adFormat = state.adFormat,
                 autoRefreshTtl = state.autoRefreshTtl,
@@ -195,17 +194,17 @@ class BannerApplovinViewModel {
     }
 
     fun loadAd() {
-        stateFlow.value.bannerAdView?.loadAd()
+//        stateFlow.value.bannerAdView?.loadAd()
     }
 
     fun destroyAd() {
-        stateFlow.value.bannerAdView?.destroy()
+//        stateFlow.value.bannerAdView?.destroy()
         val state = stateFlow.value
         updateState(
             State(
                 adFormat = state.adFormat,
                 logs = state.logs,
-                bannerAdView = null,
+//                bannerAdView = null,
                 autoRefreshTtl = state.autoRefreshTtl,
             )
         )
@@ -217,7 +216,7 @@ class BannerApplovinViewModel {
             State(
                 adFormat = bannerSize,
                 logs = state.logs,
-                bannerAdView = state.bannerAdView,
+//                bannerAdView = state.bannerAdView,
                 autoRefreshTtl = state.autoRefreshTtl,
             )
         )
@@ -225,21 +224,21 @@ class BannerApplovinViewModel {
 
     fun setAutoRefresh(ttlMs: Long) {
         val state = stateFlow.value
-        state.bannerAdView?.let {
-            if (ttlMs == 0L) {
-                it.stopAutoRefresh()
-            } else {
-                it.setAutoRefreshTimeout(ttlMs)
-            }
-        }
-        updateState(
-            State(
-                adFormat = state.adFormat,
-                logs = state.logs,
-                bannerAdView = state.bannerAdView,
-                autoRefreshTtl = ttlMs,
-            )
-        )
+//        state.bannerAdView?.let {
+//            if (ttlMs == 0L) {
+//                it.stopAutoRefresh()
+//            } else {
+//                it.setAutoRefreshTimeout(ttlMs)
+//            }
+//        }
+//        updateState(
+//            State(
+//                adFormat = state.adFormat,
+//                logs = state.logs,
+//                bannerAdView = state.bannerAdView,
+//                autoRefreshTtl = ttlMs,
+//            )
+//        )
     }
 
     private fun updateState(newState: State) {

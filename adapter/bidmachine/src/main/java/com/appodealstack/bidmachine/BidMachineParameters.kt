@@ -23,4 +23,5 @@ data class BMBannerParams(
 
 data class BMFullscreenParams(
     val priceFloor: Double,
+    val timeout: Long,
 ): AdSource.AdParams

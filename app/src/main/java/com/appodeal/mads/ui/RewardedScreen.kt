@@ -18,8 +18,7 @@ import androidx.navigation.NavHostController
 import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.component.Body2Text
-import com.appodeal.mads.setRewardedListener
-import com.appodealstack.applovin.rewarded.BNMaxRewardedAd
+import com.appodealstack.bidon.ad.Interstitial
 
 
 @Composable
@@ -27,7 +26,7 @@ fun RewardedScreen(
     navController: NavHostController,
 ) {
     val activity = LocalContext.current as Activity
-    val rewardedAd = BNMaxRewardedAd("c7c5f664e60b9bfb", activity)
+    val rewardedAd = Interstitial("c7c5f664e60b9bfb")
 
     val logFlow = remember {
         mutableStateOf(listOf("Log"))
@@ -47,13 +46,10 @@ fun RewardedScreen(
                 .padding(24.dp)
         ) {
             AppButton(text = "Load") {
-                rewardedAd.setRewardedListener { log ->
-                    logFlow.value = logFlow.value + log
-                }
-                rewardedAd.loadAd()
+                rewardedAd.load()
             }
             AppButton(text = "Show") {
-                rewardedAd.showAd()
+                rewardedAd.show(activity)
             }
             LazyColumn(
                 modifier = Modifier

@@ -67,7 +67,7 @@ class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenu
         val nonMandatory = mutableMapOf<String, String>().apply {
             ad.dsp?.let { this["demand_source_name"] = it }
             this["ad_type"] = ad.demandAd.adType.adTypeName
-            this["auction_round"] = ad.auctionRound.roundName
+            this["auction_round"] = ad.roundId
         }
         val monetizationNetwork = ad.monetizationNetwork ?: "unknown"
         val eventRevenue = ad.price

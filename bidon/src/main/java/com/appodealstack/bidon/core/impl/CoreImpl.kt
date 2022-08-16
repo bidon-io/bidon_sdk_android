@@ -20,7 +20,6 @@ import com.appodealstack.bidon.auctions.domain.AuctionResolver
 import com.appodealstack.bidon.core.AdaptersSource
 import com.appodealstack.bidon.core.AutoRefresher
 import com.appodealstack.bidon.core.InitializationCallback
-import com.appodealstack.bidon.core.ListenersHolder
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.di.get
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,7 +30,6 @@ internal class CoreImpl(
     private val adsRepository: AdsRepository = get()
 ) : Core,
     AdaptersSource by get(),
-    ListenersHolder by get(),
     AutoRefresher by get(),
     AdRevenueInterceptorHolder by get(),
     AuctionResolversHolder by get() {
@@ -64,20 +62,15 @@ internal class CoreImpl(
                 mediationRequests = setOf(),
                 postBidRequests = setOf(),
                 onDemandLoaded = { auctionResult ->
-                    auctionListener.demandAuctionSucceed(auctionResult)
                 },
                 onDemandLoadFailed = { throwable ->
-                    auctionListener.demandAuctionFailed(demandAd, throwable)
                 },
                 onAuctionFailed = {
                     adsRepository.destroyResults(demandAd)
-                    auctionListener.auctionFailed(demandAd, it)
                 },
                 onAuctionFinished = {
-                    auctionListener.auctionSucceed(demandAd, it)
                 },
                 onWinnerFound = {
-                    auctionListener.winnerFound(it)
                 }
             )
         } else {
@@ -104,7 +97,7 @@ internal class CoreImpl(
             autoRefresh = autoRefresh,
             onViewReady = onViewReady,
             adapters = adapters,
-            auctionListener = auctionListener,
+            auctionListener = TODO(),
             adContainer = adContainer
         )
     }
@@ -127,7 +120,6 @@ internal class CoreImpl(
     }
 
     override fun destroyAd(demandAd: DemandAd, adParams: Bundle) {
-        addUserListener(demandAd, null)
         cancelAutoRefresh(demandAd)
         return adsRepository.destroyResults(demandAd)
     }
@@ -152,7 +144,6 @@ internal class CoreImpl(
     }
 
     override fun setListener(demandAd: DemandAd, adListener: AdListener) {
-        addUserListener(demandAd, adListener)
     }
 
     override fun setRevenueListener(demandAd: DemandAd, adRevenueListener: AdRevenueListener) {
@@ -210,6 +201,10 @@ internal class CoreImpl(
     }
 
     override fun saveAuctionResolver(demandAd: DemandAd, auctionResolver: AuctionResolver) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getListenerForDemand(demandAd: DemandAd): AdListener {
         TODO("Not yet implemented")
     }
 
