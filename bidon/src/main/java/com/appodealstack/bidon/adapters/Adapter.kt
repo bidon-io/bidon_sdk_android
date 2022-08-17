@@ -33,18 +33,15 @@ sealed interface AdProvider {
 
 sealed interface AdSource {
     val demandId: DemandId
+    val ad: Ad?
+    fun destroy()
 
     interface Interstitial<T : AdParams> : AdSource {
         val state: StateFlow<State>
 
         // todo a28 check bid-> context instead of activity
+        fun getParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdParams
         suspend fun bid(activity: Activity?, adParams: T): Result<State.Bid.Success>
-        fun getParams(
-            priceFloor: Double,
-            timeout: Long,
-            lineItems: List<LineItem>,
-        ): AdParams
-
         suspend fun fill(): Result<State.Fill.Success>
         fun show(activity: Activity)
         fun notifyLoss()
@@ -52,7 +49,7 @@ sealed interface AdSource {
 
         sealed interface State {
             object Initialized : State
-            class Expired(val cause: Throwable) : State
+            class Expired(val ad: Ad) : State
 
             sealed interface Bid : State {
                 object Requesting : Bid
@@ -67,7 +64,6 @@ sealed interface AdSource {
             }
 
             sealed interface Show : State {
-                class Shown(val ad: Ad) : Show
                 class ShowFailed(val cause: Throwable) : Show
                 class Impression(val ad: Ad) : Show
                 class Clicked(val ad: Ad) : Show

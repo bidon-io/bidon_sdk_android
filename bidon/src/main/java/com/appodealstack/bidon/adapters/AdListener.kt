@@ -32,11 +32,11 @@ interface NewAdListener {
      * Callback invokes after auction completed, but no winner found.
      */
     fun onAdLoadFailed(cause: Throwable)
-    fun onAdShown(ad: Ad)
     fun onAdShowFailed(cause: Throwable)
-    fun onAdImpression(ad: Ad)
+    fun onAdImpression(ad: Ad) // equals onAdShown
     fun onAdClicked(ad: Ad)
     fun onAdClosed(ad: Ad)
+    fun onAdExpired(ad: Ad)
 }
 
 interface ExtendedListener {

@@ -30,10 +30,69 @@ fun InterstitialScreen(
 ) {
 
     val activity = LocalContext.current as Activity
-    val interstitial = Interstitial("c7c5f664e60b9bfb")//.BNMaxInterstitialAd("c7c5f664e60b9bfb", activity)
 
     val logFlow = remember {
         mutableStateOf(listOf("Log"))
+    }
+
+    val interstitial by lazy {
+        Interstitial("c7c5f664e60b9bfb").apply {
+            setInterstitialListener(
+                object : InterstitialListener {
+                    override fun onAdLoaded(ad: Ad) {
+                        logFlow.log("onAdLoaded: $ad")
+                    }
+
+                    override fun onAdLoadFailed(cause: Throwable) {
+                        logFlow.log("onAdLoadFailed: $cause")
+                    }
+
+                    override fun onAdShowFailed(cause: Throwable) {
+                        logFlow.log("onAdShowFailed: $cause")
+                    }
+
+                    override fun onAdImpression(ad: Ad) {
+                        logFlow.log("onAdImpression: $ad")
+                    }
+
+                    override fun onAdClicked(ad: Ad) {
+                        logFlow.log("onAdClicked: $ad")
+                    }
+
+                    override fun onAdClosed(ad: Ad) {
+                        logFlow.log("onAdClosed: $ad")
+                    }
+
+                    override fun onAdExpired(ad: Ad) {
+                        logFlow.log("onAdExpired: $ad")
+                    }
+
+                    override fun auctionStarted() {
+                        logFlow.log("auctionStarted")
+                    }
+
+                    override fun auctionSucceed(auctionResults: List<AuctionResult>) {
+                        logFlow.log("auctionSucceed: $auctionResults")
+                    }
+
+                    override fun auctionFailed(error: Throwable) {
+                        logFlow.log("auctionFailed: $error")
+                    }
+
+                    override fun roundStarted(roundId: String) {
+                        logFlow.log("roundStarted: roundId=$roundId")
+                    }
+
+                    override fun roundSucceed(roundId: String, roundResults: List<AuctionResult>) {
+                        logFlow.log("roundSucceed: roundId=$roundId. roundResults=$roundResults")
+                    }
+
+                    override fun roundFailed(roundId: String, error: Throwable) {
+                        logFlow.log("roundFailed: roundId=$roundId, $error")
+                    }
+                }
+            )
+        }
     }
 
     Column(
@@ -51,65 +110,13 @@ fun InterstitialScreen(
                 .padding(24.dp)
         ) {
             AppButton(text = "Load") {
-                interstitial.setInterstitialListener(
-                    object : InterstitialListener {
-                        override fun onAdLoaded(ad: Ad) {
-                            logFlow.log("onAdLoaded: $ad")
-                        }
-
-                        override fun onAdLoadFailed(cause: Throwable) {
-                            logFlow.log("onAdLoadFailed: $cause")
-                        }
-
-                        override fun onAdShown(ad: Ad) {
-                            logFlow.log("onAdShown: $ad")
-                        }
-
-                        override fun onAdShowFailed(cause: Throwable) {
-                            logFlow.log("onAdShowFailed: $cause")
-                        }
-
-                        override fun onAdImpression(ad: Ad) {
-                            logFlow.log("onAdImpression: $ad")
-                        }
-
-                        override fun onAdClicked(ad: Ad) {
-                            logFlow.log("onAdClicked: $ad")
-                        }
-
-                        override fun onAdClosed(ad: Ad) {
-                            logFlow.log("onAdClosed: $ad")
-                        }
-
-                        override fun auctionStarted() {
-                            logFlow.log("auctionStarted")
-                        }
-
-                        override fun auctionSucceed(auctionResults: List<AuctionResult>) {
-                            logFlow.log("auctionSucceed: $auctionResults")
-                        }
-
-                        override fun auctionFailed(error: Throwable) {
-                            logFlow.log("auctionFailed: $error")
-                        }
-
-                        override fun roundStarted(roundId: String) {
-                            logFlow.log("roundStarted: roundId=$roundId")
-                        }
-
-                        override fun roundSucceed(roundId: String, roundResults: List<AuctionResult>) {
-                            logFlow.log("roundSucceed: roundId=$roundId. roundResults=$roundResults")
-                        }
-
-                        override fun roundFailed(roundId: String, error: Throwable) {
-                            logFlow.log("roundFailed: roundId=$roundId, $error")
-                        }
-                    }
-                )
                 interstitial.load()
             }
             AppButton(text = "Show") {
                 interstitial.show(activity)
+            }
+            AppButton(text = "Destroy") {
+                interstitial.destroy()
             }
             LazyColumn(
                 modifier = Modifier

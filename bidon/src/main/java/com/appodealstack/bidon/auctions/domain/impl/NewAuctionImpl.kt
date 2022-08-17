@@ -2,10 +2,7 @@ package com.appodealstack.bidon.auctions.domain.impl
 
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.auctions.data.models.*
-import com.appodealstack.bidon.auctions.domain.AuctionResolver
-import com.appodealstack.bidon.auctions.domain.GetAuctionRequestUseCase
-import com.appodealstack.bidon.auctions.domain.NewAuction
-import com.appodealstack.bidon.auctions.domain.RoundsListener
+import com.appodealstack.bidon.auctions.domain.*
 import com.appodealstack.bidon.core.AdaptersSource
 import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.ext.asFailure
@@ -23,12 +20,15 @@ internal class NewAuctionImpl(
     private val contextProvider: ContextProvider,
     private val getAuctionRequest: GetAuctionRequestUseCase
 ) : NewAuction {
-    private val isAuctionActive = MutableStateFlow(true)
-    private val isAuctionStarted = MutableStateFlow(false)
+    private val state = MutableStateFlow(AuctionState.Initialized)
     private val auctionResults = MutableStateFlow(listOf<AuctionResult>())
 
-    override val isActive: Boolean
-        get() = isAuctionActive.value
+    override val results: List<AuctionResult>
+        get() = auctionResults.value.takeIf {
+            state.value == AuctionState.Finished
+        }.orEmpty()
+
+    override val isActive: Boolean get() = state.value == AuctionState.InProgress
 
     override suspend fun start(
         demandAd: DemandAd,
@@ -36,9 +36,12 @@ internal class NewAuctionImpl(
         roundsListener: RoundsListener,
         adTypeAdditionalData: AdTypeAdditional
     ): Result<List<AuctionResult>> = runCatching {
-        if (!isAuctionStarted.getAndUpdate { true }) {
+        check(state.value != AuctionState.Destroyed) {
+            "Auction is already destroyed."
+        }
+        if (state.getAndUpdate { AuctionState.InProgress } == AuctionState.Initialized) {
             logInfo(Tag, "Action started $this")
-            // Request for Auction-data /auction
+            // Request for Auction-data at /auction
             val auctionData = requestActionData()
 
             // Start auction
@@ -54,6 +57,8 @@ internal class NewAuctionImpl(
                 adTypeAdditionalData = adTypeAdditionalData
             )
             logInfo(Tag, "Rounds completed")
+
+            // Finding winner
             val finalResults = fillWinner(
                 auctionResults = auctionResults.value,
                 timeout = auctionData.fillTimeout ?: DefaultFillTimeoutMs
@@ -66,14 +71,26 @@ internal class NewAuctionImpl(
             }
             notifyLosers(finalResults)
 
+            // Subscribe to winner
+
+
             // Finish auction
-            isAuctionActive.value = false
+            state.value = AuctionState.Finished
         }
-        isAuctionActive.first { !it }
+        state.first { it == AuctionState.Finished }
 
         auctionResults.value.ifEmpty {
             throw BidonError.AuctionFailed
         }
+    }
+
+    override fun destroy() {
+        logInfo(Tag, "Destroyed")
+        state.value = AuctionState.Destroyed
+        auctionResults.value.forEach {
+            it.adSource.destroy()
+        }
+        auctionResults.value = emptyList()
     }
 
     private fun notifyLosers(finalResults: List<AuctionResult>) {

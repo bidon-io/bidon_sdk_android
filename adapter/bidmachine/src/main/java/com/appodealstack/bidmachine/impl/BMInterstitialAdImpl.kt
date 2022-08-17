@@ -11,6 +11,7 @@ import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.core.ext.asFailure
 import com.appodealstack.bidon.core.ext.asSuccess
+import com.appodealstack.bidon.core.ext.logError
 import io.bidmachine.AdContentType
 import io.bidmachine.AdRequest
 import io.bidmachine.PriceFloorParams
@@ -26,7 +27,9 @@ internal class BMInterstitialAdImpl(
     private val demandAd: DemandAd,
     private val roundId: String
 ) : AdSource.Interstitial<BMFullscreenParams> {
+
     override val state = MutableStateFlow<State>(State.Initialized)
+    override val ad: Ad? get() = interstitialAd?.asAd()
 
     private var context: Context? = null
     private var adRequest: InterstitialRequest? = null
@@ -42,7 +45,7 @@ internal class BMInterstitialAdImpl(
                 state.value = State.Bid.Success(
                     AuctionResult(
                         priceFloor = result.price,
-                        adSource = this@BMInterstitialAdImpl
+                        adSource = this@BMInterstitialAdImpl,
                     )
                 )
             }
@@ -73,8 +76,6 @@ internal class BMInterstitialAdImpl(
 
             @Deprecated("Source BidMachine deprecated callback")
             override fun onAdShown(interstitialAd: InterstitialAd) {
-                this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                state.value = State.Show.Shown(interstitialAd.asAd())
             }
 
             override fun onAdShowFailed(interstitialAd: InterstitialAd, bmError: BMError) {
@@ -94,7 +95,7 @@ internal class BMInterstitialAdImpl(
 
             override fun onAdExpired(interstitialAd: InterstitialAd) {
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                state.value = State.Expired(DemandError.Expired(demandId))
+                state.value = State.Expired(interstitialAd.asAd())
             }
 
             override fun onAdClosed(interstitialAd: InterstitialAd, boolean: Boolean) {
@@ -153,7 +154,7 @@ internal class BMInterstitialAdImpl(
         return when (state) {
             is State.Fill.Success -> state.asSuccess()
             is State.Fill.Failure -> state.cause.asFailure()
-            is State.Expired -> state.cause.asFailure()
+            is State.Expired -> BidonError.FillTimedOut(demandId).asFailure()
             else -> error("unexpected: $state")
         }
     }
@@ -163,6 +164,7 @@ internal class BMInterstitialAdImpl(
         if (bmInterstitialAd?.canShow() == true) {
             bmInterstitialAd.show()
         } else {
+            logError(Tag, "Not valid state. Expected 'State.Fill.Success'. Actual: ${state.value}.")
             state.value = State.Show.ShowFailed(DemandError.FullscreenAdNotReady(demandId))
         }
     }
@@ -179,6 +181,13 @@ internal class BMInterstitialAdImpl(
         return BMFullscreenParams(priceFloor = priceFloor, timeout = timeout)
     }
 
+    override fun destroy() {
+        adRequest?.destroy()
+        adRequest = null
+        interstitialAd?.destroy()
+        interstitialAd = null
+    }
+
     private fun InterstitialAd.asAd(): Ad {
         return Ad(
             demandId = demandId,
@@ -192,3 +201,5 @@ internal class BMInterstitialAdImpl(
         )
     }
 }
+
+private const val Tag = "BidMachine Interstitial"

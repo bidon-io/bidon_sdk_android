@@ -29,7 +29,7 @@ fun logError(tag: String = DefaultTag, message: String, error: Throwable? = null
 }
 
 fun logInfo(tag: String = DefaultTag, message: String) {
-    val msg = if (tag == DefaultTag) message else "$tag: $message"
+    val msg = if (tag == DefaultTag) message else "[$tag] $message"
     val title = DefaultTag
     Log.d(title, msg)
 }
