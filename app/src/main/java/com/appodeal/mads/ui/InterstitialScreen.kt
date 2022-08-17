@@ -22,7 +22,7 @@ import com.appodeal.mads.component.Body2Text
 import com.appodealstack.bidon.ad.Interstitial
 import com.appodealstack.bidon.ad.InterstitialListener
 import com.appodealstack.bidon.adapters.Ad
-import com.appodealstack.bidon.auctions.data.models.OldAuctionResult
+import com.appodealstack.bidon.auctions.data.models.AuctionResult
 
 @Composable
 fun InterstitialScreen(
@@ -85,7 +85,7 @@ fun InterstitialScreen(
                             logFlow.log("auctionStarted")
                         }
 
-                        override fun auctionSucceed(auctionResults: List<OldAuctionResult>) {
+                        override fun auctionSucceed(auctionResults: List<AuctionResult>) {
                             logFlow.log("auctionSucceed: $auctionResults")
                         }
 
@@ -97,7 +97,7 @@ fun InterstitialScreen(
                             logFlow.log("roundStarted: roundId=$roundId")
                         }
 
-                        override fun roundSucceed(roundId: String, roundResults: List<OldAuctionResult>) {
+                        override fun roundSucceed(roundId: String, roundResults: List<AuctionResult>) {
                             logFlow.log("roundSucceed: roundId=$roundId. roundResults=$roundResults")
                         }
 

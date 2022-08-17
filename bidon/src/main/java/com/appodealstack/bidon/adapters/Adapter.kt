@@ -51,34 +51,15 @@ sealed interface AdSource {
             class Bid(val result: AuctionResult) : State
             object LoadingResources : State
             class Fill(val ad: Ad) : State
+            class LoadFailed(val cause: Throwable) : State
             class Clicked(val ad: Ad) : State
             class Closed(val ad: Ad) : State
             class Impression(val ad: Ad) : State
             class Shown(val ad: Ad) : State
-            class Failed(val cause: Throwable) : State
+            class Expired(val cause: Throwable) : State
+            class ShowFailed(val cause: Throwable) : State
         }
     }
-
-//    @Deprecated("")
-//    interface OldInterstitial<T : AdParams> : AdSource {
-//        fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: T): OldAuctionRequest
-//        fun interstitialParams(
-//            priceFloor: Double,
-//            timeout: Long,
-//            lineItems: List<LineItem>,
-//        ): AdParams
-//    }
-//
-//    @Deprecated("")
-//    interface OldRewarded<T : AdParams> : AdSource {
-//        fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: T): OldAuctionRequest
-//        fun rewardedParams(
-//            priceFloor: Double,
-//            timeout: Long,
-//            lineItems: List<LineItem>,
-//        ): AdParams
-//    }
-//
 //    @Deprecated("")
 //    interface OldBanner<T : AdParams> : AdSource {
 //        fun banner(context: Context, demandAd: DemandAd, adParams: T): OldAuctionRequest

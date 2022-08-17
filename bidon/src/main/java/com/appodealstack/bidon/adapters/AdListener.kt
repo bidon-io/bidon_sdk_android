@@ -1,5 +1,6 @@
 package com.appodealstack.bidon.adapters
 
+@Deprecated("")
 interface AdListener : ExtendedListener, RewardedAdListener {
 
     /**
