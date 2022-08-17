@@ -26,9 +26,9 @@ internal class BMInterstitialAdImpl(
     private val demandAd: DemandAd,
     private val roundId: String
 ) : AdSource.Interstitial<BMFullscreenParams> {
-    private val state = MutableStateFlow<State>(State.Initialized)
-    private var context: Context? = null
+    override val state = MutableStateFlow<State>(State.Initialized)
 
+    private var context: Context? = null
     private var adRequest: InterstitialRequest? = null
     private var interstitialAd: InterstitialAd? = null
 
@@ -39,7 +39,7 @@ internal class BMInterstitialAdImpl(
                 result: BMAuctionResult
             ) {
                 adRequest = request
-                state.value = State.Bid(
+                state.value = State.Bid.Success(
                     AuctionResult(
                         priceFloor = result.price,
                         adSource = this@BMInterstitialAdImpl
@@ -49,12 +49,12 @@ internal class BMInterstitialAdImpl(
 
             override fun onRequestFailed(request: InterstitialRequest, bmError: BMError) {
                 adRequest = request
-                state.value = State.LoadFailed(bmError.asBidonError(demandId))
+                state.value = State.Bid.Failure(bmError.asBidonError(demandId))
             }
 
             override fun onRequestExpired(request: InterstitialRequest) {
                 adRequest = request
-                state.value = State.Expired(DemandError.Expired(demandId))
+                state.value = State.Bid.Failure(DemandError.Expired(demandId))
             }
         }
     }
@@ -63,33 +63,33 @@ internal class BMInterstitialAdImpl(
         object : InterstitialListener {
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                state.value = State.Fill(interstitialAd.asAd())
+                state.value = State.Fill.Success(interstitialAd.asAd())
             }
 
             override fun onAdLoadFailed(interstitialAd: InterstitialAd, bmError: BMError) {
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                state.value = State.LoadFailed(bmError.asBidonError(demandId))
+                state.value = State.Fill.Failure(bmError.asBidonError(demandId))
             }
 
             @Deprecated("Source BidMachine deprecated callback")
             override fun onAdShown(interstitialAd: InterstitialAd) {
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                state.value = State.Shown(interstitialAd.asAd())
+                state.value = State.Show.Shown(interstitialAd.asAd())
             }
 
             override fun onAdShowFailed(interstitialAd: InterstitialAd, bmError: BMError) {
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                state.value = State.ShowFailed(bmError.asBidonError(demandId))
+                state.value = State.Show.ShowFailed(bmError.asBidonError(demandId))
             }
 
             override fun onAdImpression(interstitialAd: InterstitialAd) {
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                state.value = State.Impression(interstitialAd.asAd())
+                state.value = State.Show.Impression(interstitialAd.asAd())
             }
 
             override fun onAdClicked(interstitialAd: InterstitialAd) {
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                state.value = State.Clicked(interstitialAd.asAd())
+                state.value = State.Show.Clicked(interstitialAd.asAd())
             }
 
             override fun onAdExpired(interstitialAd: InterstitialAd) {
@@ -99,18 +99,18 @@ internal class BMInterstitialAdImpl(
 
             override fun onAdClosed(interstitialAd: InterstitialAd, boolean: Boolean) {
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                state.value = State.Closed(interstitialAd.asAd())
+                state.value = State.Show.Closed(interstitialAd.asAd())
             }
         }
     }
 
-    override suspend fun bid(activity: Activity?, adParams: BMFullscreenParams): Result<State.Bid> {
+    override suspend fun bid(activity: Activity?, adParams: BMFullscreenParams): Result<State.Bid.Success> {
         context = activity?.applicationContext
-        state.value = State.Requesting
+        state.value = State.Bid.Requesting
 
         val context = activity?.applicationContext
         if (context == null) {
-            state.value = State.ShowFailed(DemandError.NoActivity(demandId))
+            state.value = State.Bid.Failure(DemandError.NoActivity(demandId))
         } else {
             InterstitialRequest.Builder()
                 .setAdContentType(AdContentType.All)
@@ -125,21 +125,21 @@ internal class BMInterstitialAdImpl(
                 }
                 .request(context)
         }
-        val bidResult = state.first {
-            it is State.Bid || it is State.LoadFailed
-        }
-        return when (bidResult) {
-            is State.Bid -> bidResult.asSuccess()
-            is State.ShowFailed -> bidResult.cause.asFailure()
-            else -> error("Unexpected")
+        val state = state.first {
+            it is State.Bid.Success || it is State.Bid.Failure
+        } as State.Bid
+        return when (state) {
+            is State.Bid.Failure -> state.cause.asFailure()
+            is State.Bid.Success -> state.asSuccess()
+            State.Bid.Requesting -> error("unexpected: $state")
         }
     }
 
-    override suspend fun fill(): Result<State.Fill> {
-        state.value = State.LoadingResources
+    override suspend fun fill(): Result<State.Fill.Success> {
+        state.value = State.Fill.LoadingResources
         val context = context
         if (context == null) {
-            state.value = State.LoadFailed(DemandError.NoActivity(demandId))
+            state.value = State.Fill.Failure(DemandError.NoActivity(demandId))
         } else {
             val bmInterstitialAd = InterstitialAd(context).also {
                 interstitialAd = it
@@ -147,22 +147,23 @@ internal class BMInterstitialAdImpl(
             bmInterstitialAd.setListener(interstitialListener)
             bmInterstitialAd.load(adRequest)
         }
-        val bidResult = state.first {
-            it is State.Fill || it is State.LoadFailed
+        val state = state.first {
+            it is State.Fill.Success || it is State.Fill.Failure || it is State.Expired
         }
-        return when (bidResult) {
-            is State.Fill -> bidResult.asSuccess()
-            is State.LoadFailed -> bidResult.cause.asFailure()
-            else -> error("Unexpected")
+        return when (state) {
+            is State.Fill.Success -> state.asSuccess()
+            is State.Fill.Failure -> state.cause.asFailure()
+            is State.Expired -> state.cause.asFailure()
+            else -> error("unexpected: $state")
         }
     }
 
     override fun show(activity: Activity) {
-        val bmInterstitialAd = ((state.value as? State.Fill)?.ad?.sourceAd as? InterstitialAd)
+        val bmInterstitialAd = ((state.value as? State.Fill.Success)?.ad?.sourceAd as? InterstitialAd)
         if (bmInterstitialAd?.canShow() == true) {
             bmInterstitialAd.show()
         } else {
-            state.value = State.ShowFailed(DemandError.FullscreenAdNotReady(demandId))
+            state.value = State.Show.ShowFailed(DemandError.FullscreenAdNotReady(demandId))
         }
     }
 

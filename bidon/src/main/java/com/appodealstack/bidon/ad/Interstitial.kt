@@ -11,6 +11,8 @@ import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.domain.NewAuction
 import com.appodealstack.bidon.auctions.domain.impl.MaxEcpmAuctionResolver
 import com.appodealstack.bidon.core.SdkDispatchers
+import com.appodealstack.bidon.core.ext.logError
+import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.di.get
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +50,7 @@ internal class InterstitialAdImpl(
     }
 
     override fun load(placement: String?) {
+        logInfo(Tag, "Load with placement: $placement")
         if (auctionJob?.isActive == true) return
         auctionJob = scope.launch {
             auctionResults.clear()
@@ -60,10 +63,12 @@ internal class InterstitialAdImpl(
                 ),
                 roundsListener = listener
             ).onSuccess { results ->
+                logInfo(Tag, "Auction completed successfully: $results")
                 auctionResults.addAll(results)
                 listener.auctionSucceed(results)
                 // listener.onAdLoaded(results.first().adSource.ad)
             }.onFailure {
+                logError(Tag, "Auction failed", it)
                 auctionResults.clear()
                 listener.onAdLoadFailed(cause = it)
             }
@@ -71,6 +76,7 @@ internal class InterstitialAdImpl(
     }
 
     override fun show(activity: Activity, placement: String?) {
+        logInfo(Tag, "Show with placement: $placement")
         if (auctionJob?.isActive != true) {
             auctionResults.firstOrNull()?.let {
                 when (val adSource = it.adSource) {
@@ -81,6 +87,7 @@ internal class InterstitialAdImpl(
     }
 
     override fun setInterstitialListener(listener: InterstitialListener) {
+        logInfo(Tag, "Set interstitial listener")
         this.userListener = listener
     }
 
@@ -141,4 +148,6 @@ internal class InterstitialAdImpl(
         }
     }
 }
+
+private const val Tag = "Interstitial"
 

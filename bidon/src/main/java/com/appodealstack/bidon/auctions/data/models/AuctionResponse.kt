@@ -12,6 +12,8 @@ internal data class AuctionResponse(
     val lineItems: List<LineItem>?,
     @SerialName("min_price")
     val minPrice: Double?,
+    @SerialName("fill_timeout")
+    val fillTimeout: Long?,
     @SerialName("token")
     val token: JsonObject?,
 )

@@ -8,6 +8,7 @@ import com.appodealstack.bidon.auctions.domain.NewAuction
 import com.appodealstack.bidon.auctions.domain.RoundsListener
 import com.appodealstack.bidon.core.AdaptersSource
 import com.appodealstack.bidon.core.ContextProvider
+import com.appodealstack.bidon.core.ext.asFailure
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
 import kotlinx.coroutines.async
@@ -36,6 +37,7 @@ internal class NewAuctionImpl(
         adTypeAdditionalData: AdTypeAdditional
     ): Result<List<AuctionResult>> = runCatching {
         if (!isAuctionStarted.getAndUpdate { true }) {
+            logInfo(Tag, "Action started $this")
             // Request for Auction-data /auction
             val auctionData = requestActionData()
 
@@ -51,17 +53,25 @@ internal class NewAuctionImpl(
                 demandAd = demandAd,
                 adTypeAdditionalData = adTypeAdditionalData
             )
+            logInfo(Tag, "Rounds completed")
+            val finalResults = fillWinner(
+                auctionResults = auctionResults.value,
+                timeout = auctionData.fillTimeout ?: DefaultFillTimeoutMs
+            ).also {
+                auctionResults.value = it
+            }
+            logInfo(Tag, "Action finished with ${finalResults.size} results")
+            finalResults.forEachIndexed { index, auctionResult ->
+                logInfo(Tag, "Action result #$index: $auctionResult")
+            }
+            notifyLosers(finalResults)
 
             // Finish auction
             isAuctionActive.value = false
         }
         isAuctionActive.first { !it }
 
-        val finalResults = fillWinner(auctionResults.value).also {
-            auctionResults.value = it
-        }
-        notifyLosers(finalResults)
-        finalResults.ifEmpty {
+        auctionResults.value.ifEmpty {
             throw BidonError.AuctionFailed
         }
     }
@@ -77,22 +87,30 @@ internal class NewAuctionImpl(
         }
     }
 
-    private suspend fun fillWinner(auctionResults: List<AuctionResult>): List<AuctionResult> {
-        val index = auctionResults.indexOfFirst {
-            when (val adSource = it.adSource) {
+    private suspend fun fillWinner(auctionResults: List<AuctionResult>, timeout: Long): List<AuctionResult> {
+        val index = auctionResults.indexOfFirst { auctionResult ->
+            when (val adSource = auctionResult.adSource) {
                 is AdSource.Interstitial<*> -> {
-                    adSource.fill()
+                    logInfo(Tag, "Filling winner started for auction result: $auctionResult")
+                    val fillResult = withTimeoutOrNull(timeout) {
+                        adSource.fill()
+                    } ?: BidonError.FillTimedOut(auctionResult.adSource.demandId).asFailure()
+
+                    fillResult
                         .onFailure {
-                            logInfo(Tag, "Notified loss: ${adSource.demandId}")
+                            logError(Tag, "Failed to fill. Notified loss: ${adSource.demandId}", it)
                             adSource.notifyLoss()
-                        }.onSuccess {
-                            logInfo(Tag, "Notified loss: ${adSource.demandId}")
+                        }
+                        .onSuccess {
+                            logInfo(Tag, "Winner filled. Notified win: ${adSource.demandId}")
                             adSource.notifyWin()
-                        }.isSuccess
+                        }
+                        .isSuccess
                 }
             }
         }
-        return auctionResults.drop(index)
+        return if (index == -1) auctionResults
+        else auctionResults.drop(index)
     }
 
     private suspend fun conductRounds(
@@ -158,6 +176,7 @@ internal class NewAuctionImpl(
         adTypeAdditionalData: AdTypeAdditional,
         timeout: Long
     ): Result<List<AuctionResult>> = runCatching {
+        logInfo(Tag, "Round '${round.id}' started")
         val filteredAdapters = adaptersSource.adapters.filter {
             it.demandId.demandId in round.demandIds
         }
@@ -187,8 +206,12 @@ internal class NewAuctionImpl(
                         }
                     }
                 }
-            }.mapNotNull { deferred ->
-                deferred.await()?.getOrNull()?.result
+            }.mapIndexedNotNull { index, deferred ->
+                deferred.await()?.getOrNull()?.result?.also {
+                    logInfo(Tag, "Round '${round.id}' results #$index: $it")
+                }
+            }.also {
+                logInfo(Tag, "Round '${round.id}' finished with ${it.size} results: $it")
             }
     }
 
@@ -211,3 +234,4 @@ internal class NewAuctionImpl(
 }
 
 private const val Tag = "Auction"
+private const val DefaultFillTimeoutMs = 10000L

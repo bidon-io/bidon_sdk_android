@@ -2,7 +2,7 @@ package com.appodealstack.bidon.adapters
 
 sealed class BidonError : Throwable() {
     object AuctionFailed : BidonError()
-
+    class FillTimedOut(val demandId: DemandId) : BidonError()
 }
 
 sealed class DemandError(val demandId: DemandId? = null) : BidonError() {
