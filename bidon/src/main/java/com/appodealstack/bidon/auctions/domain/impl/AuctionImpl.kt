@@ -15,11 +15,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.withTimeoutOrNull
 
-internal class NewAuctionImpl(
+internal class AuctionImpl(
     private val adaptersSource: AdaptersSource,
     private val contextProvider: ContextProvider,
     private val getAuctionRequest: GetAuctionRequestUseCase
-) : NewAuction {
+) : Auction {
     private val state = MutableStateFlow(AuctionState.Initialized)
     private val auctionResults = MutableStateFlow(listOf<AuctionResult>())
 

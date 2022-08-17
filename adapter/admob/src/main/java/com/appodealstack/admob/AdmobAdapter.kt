@@ -4,17 +4,12 @@ import android.app.Activity
 import android.content.Context
 import com.appodealstack.admob.ext.adapterVersion
 import com.appodealstack.admob.ext.sdkVersion
-import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.auctions.data.models.LineItem
-import com.appodealstack.bidon.auctions.data.models.OldAuctionResult
 import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.google.android.gms.ads.*
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.rewarded.RewardedAd
 import kotlinx.serialization.json.JsonObject
 import java.util.*
 import kotlin.coroutines.resume
@@ -263,82 +258,7 @@ class AdmobAdapter : Adapter, Initializable<AdmobParameters> {
                 adUnitId = adUnitId
             )
         }.sortedBy { it.price }
-
-    private fun InterstitialAd.setCoreListener(ownerDemandAd: DemandAd, auctionData: OldAuctionResult) {
-        val coreListener = SdkCore.getListenerForDemand(ownerDemandAd)
-        this.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdClicked() {
-                coreListener.onAdClicked(auctionData.ad)
-            }
-
-            override fun onAdDismissedFullScreenContent() {
-                coreListener.onAdClosed(auctionData.ad)
-            }
-
-            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                coreListener.onAdShowFailed(adError.asBidonError())
-            }
-
-            override fun onAdShowedFullScreenContent() {
-                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(auctionData.ad)
-                coreListener.onAdShown(auctionData.ad)
-            }
-
-            override fun onAdImpression() {
-                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(auctionData.ad)
-                coreListener.onAdImpression(auctionData.ad)
-            }
-        }
-    }
-
-    private fun RewardedAd.setCoreListener(ownerDemandAd: DemandAd, auctionData: OldAuctionResult) {
-        val coreListener = SdkCore.getListenerForDemand(ownerDemandAd)
-        this.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdClicked() {
-                coreListener.onAdClicked(auctionData.ad)
-            }
-
-            override fun onAdDismissedFullScreenContent() {
-                coreListener.onAdClosed(auctionData.ad)
-            }
-
-            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                coreListener.onAdShowFailed(adError.asBidonError())
-            }
-
-            override fun onAdShowedFullScreenContent() {
-                coreListener.onAdShown(auctionData.ad)
-            }
-
-            override fun onAdImpression() {
-                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(auctionData.ad)
-                coreListener.onAdImpression(auctionData.ad)
-            }
-        }
-    }
-
-    private fun AdView.setCoreListener(demandAd: DemandAd, auctionData: OldAuctionResult) {
-        val coreListener = SdkCore.getListenerForDemand(demandAd)
-        this.adListener = object : AdListener() {
-            override fun onAdClicked() {
-                coreListener.onAdClicked(auctionData.ad)
-            }
-
-            override fun onAdClosed() {
-                coreListener.onAdClosed(auctionData.ad)
-            }
-
-            override fun onAdOpened() {
-                coreListener.onAdShown(auctionData.ad)
-            }
-
-            override fun onAdImpression() {
-                coreListener.onAdImpression(auctionData.ad)
-                SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(auctionData.ad)
-            }
-        }
-    }
-
+    
     private fun List<AdmobLineItem>.getPrice(unitId: String): Double {
         return this.mapNotNull { (price, adUnitId) ->
             price.takeIf { unitId == adUnitId }

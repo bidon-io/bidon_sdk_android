@@ -6,7 +6,7 @@ import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.AdSource.Interstitial.State
 import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
-import com.appodealstack.bidon.auctions.domain.NewAuction
+import com.appodealstack.bidon.auctions.domain.Auction
 import com.appodealstack.bidon.auctions.domain.impl.MaxEcpmAuctionResolver
 import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.ext.logError
@@ -40,7 +40,7 @@ internal class InterstitialAdImpl(
     private val demandAd by lazy {
         DemandAd(AdType.Interstitial, placementId)
     }
-    private var auction: NewAuction? = null
+    private var auction: Auction? = null
     private val scope: CoroutineScope get() = CoroutineScope(dispatcher)
     private var userListener: InterstitialListener? = null
     private var auctionJob: Job? = null
@@ -59,7 +59,7 @@ internal class InterstitialAdImpl(
         listener.auctionStarted()
 
         auctionJob = scope.launch {
-            val auction = get<NewAuction>().also {
+            val auction = get<Auction>().also {
                 auction = it
             }
             auction.start(

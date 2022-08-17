@@ -4,7 +4,7 @@ import com.appodealstack.bidon.adapters.DemandAd
 import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 
-internal interface NewAuction {
+internal interface Auction {
     suspend fun start(
         demandAd: DemandAd,
         resolver: AuctionResolver,

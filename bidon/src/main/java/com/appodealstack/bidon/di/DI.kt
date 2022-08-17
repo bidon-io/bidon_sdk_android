@@ -1,17 +1,12 @@
 package com.appodealstack.bidon.di
 
 import com.appodealstack.bidon.BidOnSdk
-import com.appodealstack.bidon.Core
-import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolder
-import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolderImpl
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
 import com.appodealstack.bidon.auctions.data.impl.GetAuctionRequestUseCaseImpl
-import com.appodealstack.bidon.auctions.domain.AdsRepository
 import com.appodealstack.bidon.auctions.domain.GetAuctionRequestUseCase
-import com.appodealstack.bidon.auctions.domain.NewAuction
-import com.appodealstack.bidon.auctions.domain.impl.AdsRepositoryImpl
+import com.appodealstack.bidon.auctions.domain.Auction
 import com.appodealstack.bidon.auctions.domain.impl.AuctionResolversHolderImpl
-import com.appodealstack.bidon.auctions.domain.impl.NewAuctionImpl
+import com.appodealstack.bidon.auctions.domain.impl.AuctionImpl
 import com.appodealstack.bidon.config.data.impl.AdapterInstanceCreatorImpl
 import com.appodealstack.bidon.config.data.impl.GetConfigRequestUseCaseImpl
 import com.appodealstack.bidon.config.domain.*
@@ -50,8 +45,6 @@ internal object DI {
                         bidOnEndpoints = get()
                     )
                 }
-                singleton<AdsRepository> { AdsRepositoryImpl() }
-                singleton<Core> { CoreImpl() }
                 singleton<ContextProvider> { ContextProviderImpl() }
                 singleton<AdaptersSource> { AdaptersSourceImpl() }
                 singleton<BidOnEndpoints> { BidOnEndpointsImpl() }
@@ -74,19 +67,16 @@ internal object DI {
                     )
                 }
                 factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
-                factory<AdRevenueInterceptorHolder> { AdRevenueInterceptorHolderImpl() }
                 factory<AuctionResolversHolder> { AuctionResolversHolderImpl() }
-                factory<NewAuction> {
-                    NewAuctionImpl(
+                factory<Auction> {
+                    AuctionImpl(
                         adaptersSource = get(),
                         contextProvider = get(),
                         getAuctionRequest = get()
                     )
                 }
                 factory<AutoRefresher> {
-                    AutoRefresherImpl(
-                        adsRepository = get()
-                    )
+                    AutoRefresherImpl()
                 }
 
                 /**

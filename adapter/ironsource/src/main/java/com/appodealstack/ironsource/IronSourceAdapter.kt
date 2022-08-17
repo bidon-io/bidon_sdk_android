@@ -1,7 +1,6 @@
 package com.appodealstack.ironsource
 
 import android.app.Activity
-import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.analytics.MediationNetwork
@@ -40,19 +39,6 @@ class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
     private val rewardedFlow = MutableSharedFlow<RewardedInterceptor>(Int.MAX_VALUE)
     private var interstitialDemandAd: DemandAd? = null
     private var rewardedDemandAd: DemandAd? = null
-
-    init {
-        scope.launch {
-            interstitialFlow.collect { callback ->
-                onInterstitialCallbackIntercepted(callback)
-            }
-        }
-        scope.launch {
-            rewardedFlow.collect { callback ->
-                onRewardedCallbackIntercepted(callback)
-            }
-        }
-    }
 
     override suspend fun init(activity: Activity, configParams: IronSourceParameters): Unit = suspendCancellableCoroutine {
         val initializationListener = InitializationListener {
@@ -248,76 +234,6 @@ class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
         )
     }
 
-
-    private fun onInterstitialCallbackIntercepted(callback: InterstitialInterceptor) {
-        interstitialDemandAd?.let { demandAd ->
-            val coreListener = SdkCore.getListenerForDemand(demandAd)
-            when (callback) {
-                is InterstitialInterceptor.AdClicked -> {
-                    coreListener.onAdClicked(callback.adInfo.asAd(demandAd))
-                }
-                is InterstitialInterceptor.AdClosed -> {
-                    coreListener.onAdClosed(callback.adInfo.asAd(demandAd))
-                }
-                is InterstitialInterceptor.AdOpened -> {
-                    coreListener.onAdImpression(callback.adInfo.asAd(demandAd))
-                }
-                is InterstitialInterceptor.AdShowFailed -> {
-                    coreListener.onAdShowFailed(callback.ironSourceError.asBidonError())
-                }
-                is InterstitialInterceptor.AdShowSucceeded -> {
-                    val ad = callback.adInfo.asAd(demandAd)
-                    coreListener.onAdShown(callback.adInfo.asAd(demandAd))
-                    SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(ad)
-                }
-                is InterstitialInterceptor.AdReady,
-                is InterstitialInterceptor.AdLoadFailed -> {
-                    // do nothing
-                }
-            }
-        }
-    }
-
-    private fun onRewardedCallbackIntercepted(callback: RewardedInterceptor) {
-        rewardedDemandAd?.let { demandAd ->
-            val coreListener = SdkCore.getListenerForDemand(demandAd)
-            when (callback) {
-                is RewardedInterceptor.AdClicked -> {
-                    coreListener.onAdClicked(callback.adInfo.asAd(demandAd))
-                }
-                is RewardedInterceptor.AdClosed -> {
-                    coreListener.onAdClosed(callback.adInfo.asAd(demandAd))
-                }
-                is RewardedInterceptor.AdOpened -> {
-                    coreListener.onAdImpression(callback.adInfo.asAd(demandAd))
-                }
-                is RewardedInterceptor.AdShowFailed -> {
-                    coreListener.onAdShowFailed(callback.ironSourceError.asBidonError())
-                }
-                is RewardedInterceptor.Rewarded -> {
-                    val ad = callback.adInfo.asAd(demandAd)
-                    SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(ad)
-                    coreListener.onUserRewarded(
-                        ad = ad,
-                        reward = RewardedAdListener.Reward(
-                            label = callback.placement?.rewardName ?: "",
-                            amount = callback.placement?.rewardAmount ?: 0
-                        )
-                    )
-                }
-                RewardedInterceptor.Started -> {
-                    coreListener.onRewardedStarted(null.asAd(demandAd))
-                }
-                RewardedInterceptor.Ended -> {
-                    coreListener.onRewardedCompleted(null.asAd(demandAd))
-                }
-                is RewardedInterceptor.AdReady,
-                is RewardedInterceptor.AdLoadFailed -> {
-                    // do nothing
-                }
-            }
-        }
-    }
 
 }
 
