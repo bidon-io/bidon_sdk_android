@@ -108,7 +108,7 @@ internal class InterstitialAdImpl(
                         /**
                          * Auction data should be deleted after shown
                          */
-                        auction.destroy()
+                        // auction.destroy()
                     }
                 }
             }

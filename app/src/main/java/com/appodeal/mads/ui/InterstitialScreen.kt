@@ -72,7 +72,12 @@ fun InterstitialScreen(
                     }
 
                     override fun auctionSucceed(auctionResults: List<AuctionResult>) {
-                        logFlow.log("auctionSucceed: $auctionResults")
+                        buildString {
+                            appendLine("auctionSucceed: ${auctionResults.size}")
+                            auctionResults.forEachIndexed { index, auctionResult ->
+                                appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.priceFloor}")
+                            }
+                        }
                     }
 
                     override fun auctionFailed(error: Throwable) {
@@ -84,7 +89,14 @@ fun InterstitialScreen(
                     }
 
                     override fun roundSucceed(roundId: String, roundResults: List<AuctionResult>) {
-                        logFlow.log("roundSucceed: roundId=$roundId. roundResults=$roundResults")
+                        logFlow.log(
+                            buildString {
+                                appendLine("roundSucceed: $roundId ${roundResults.size}")
+                                roundResults.forEachIndexed { index, auctionResult ->
+                                    appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.priceFloor}")
+                                }
+                            }
+                        )
                     }
 
                     override fun roundFailed(roundId: String, error: Throwable) {
@@ -107,7 +119,7 @@ fun InterstitialScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp)
+                .padding(start = 24.dp, end = 24.dp, top = 24.dp)
         ) {
             AppButton(text = "Load") {
                 interstitial.load()

@@ -54,9 +54,24 @@ internal class AdmobInterstitialImpl(
         }
     }
 
+    /**
+     * @see https://developers.google.com/android/reference/com/google/android/gms/ads/OnPaidEventListener
+     */
     private val paidListener by lazy {
         OnPaidEventListener { adValue ->
-            logInfo(Tag, "OnPaidEventListener: ${adValue.valueMicros} ${adValue.currencyCode}, ${adValue.precisionType}")
+            val type = when (adValue.precisionType) {
+                0 -> "UNKNOWN"
+                1 -> "PRECISE"
+                2 -> "ESTIMATED"
+                3 -> "PUBLISHER_PROVIDED"
+                else -> "unknown type ${adValue.precisionType}"
+            }
+            val valueMicros = adValue.valueMicros
+            val ecpm = adValue.valueMicros / 1_000_000L
+            logInfo(
+                Tag,
+                "OnPaidEventListener( ValueMicros=$valueMicros, $ecpm ${adValue.currencyCode}, $type )"
+            )
         }
     }
 

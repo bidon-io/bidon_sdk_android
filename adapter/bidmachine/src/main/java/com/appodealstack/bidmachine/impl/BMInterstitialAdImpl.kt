@@ -11,6 +11,7 @@ import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.core.ext.asFailure
 import com.appodealstack.bidon.core.ext.asSuccess
+import com.appodealstack.bidon.core.ext.logError
 import io.bidmachine.AdContentType
 import io.bidmachine.AdRequest
 import io.bidmachine.PriceFloorParams
@@ -51,6 +52,7 @@ internal class BMInterstitialAdImpl(
 
             override fun onRequestFailed(request: InterstitialRequest, bmError: BMError) {
                 adRequest = request
+                logError(Tag, "Error while bidding: $bmError")
                 state.value = State.Bid.Failure(bmError.asBidonError(demandId))
             }
 
