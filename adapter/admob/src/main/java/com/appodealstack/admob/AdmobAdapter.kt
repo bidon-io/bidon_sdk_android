@@ -4,10 +4,9 @@ import android.app.Activity
 import android.content.Context
 import com.appodealstack.admob.ext.adapterVersion
 import com.appodealstack.admob.ext.sdkVersion
+import com.appodealstack.admob.impl.AdmobInterstitialImpl
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
-import com.appodealstack.bidon.analytics.BNMediationNetwork
-import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.google.android.gms.ads.*
 import kotlinx.serialization.json.JsonObject
@@ -20,7 +19,8 @@ val AdmobDemandId = DemandId("admob")
 @JvmInline
 private value class AdUnitId(val value: String)
 
-class AdmobAdapter : Adapter, Initializable<AdmobParameters> {
+class AdmobAdapter : Adapter, Initializable<AdmobInitParameters>,
+AdProvider.Interstitial<AdmobFullscreenAdParams>{
     private lateinit var context: Context
 
     override val demandId = AdmobDemandId
@@ -29,7 +29,7 @@ class AdmobAdapter : Adapter, Initializable<AdmobParameters> {
         sdkVersion = sdkVersion
     )
 
-    override suspend fun init(activity: Activity, configParams: AdmobParameters): Unit = suspendCoroutine { continuation ->
+    override suspend fun init(activity: Activity, configParams: AdmobInitParameters): Unit = suspendCoroutine { continuation ->
         this.context = activity.applicationContext
         /**
          * Don't forget set Automatic refresh is Disabled for each AdUnit.
@@ -40,62 +40,10 @@ class AdmobAdapter : Adapter, Initializable<AdmobParameters> {
         }
     }
 
-//    override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: AdmobFullscreenAdParams): OldAuctionRequest {
-//        return OldAuctionRequest {
-//            withContext(Dispatchers.Main) {
-//                suspendCancellableCoroutine { continuation ->
-//                    val adUnitId = adParams.admobLineItems.firstOrNull { it.price > adParams.priceFloor }?.adUnitId
-//                    if (adUnitId.isNullOrBlank()) {
-//                        continuation.resume(Result.failure(DemandError.NoAppropriateAdUnitId(demandId)))
-//                    } else {
-//                        val isFinished = AtomicBoolean(false)
-//                        val adRequest = AdRequest.Builder().build()
-//                        InterstitialAd.load(
-//                            context,
-//                            adUnitId,
-//                            adRequest,
-//                            object : InterstitialAdLoadCallback() {
-//                                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-//                                    if (!isFinished.getAndSet(true)) {
-//                                        continuation.resume(Result.failure(loadAdError.asBidonError()))
-//                                    }
-//                                }
-//
-//                                override fun onAdLoaded(interstitialAd: InterstitialAd) {
-//                                    if (!isFinished.getAndSet(true)) {
-//                                        val auctionResult = OldAuctionResult(
-//                                            ad = asAd(
-//                                                demandAd = demandAd,
-//                                                price = adParams.admobLineItems.getPrice(unitId = interstitialAd.adUnitId),
-//                                                sourceAd = interstitialAd
-//                                            ),
-//                                            adProvider = object : OldAdProvider {
-//                                                override fun canShow(): Boolean = true
-//                                                override fun destroy() {}
-//
-//                                                override fun showAd(activity: Activity?, adParams: Bundle) {
-//                                                    if (activity == null) {
-//                                                        logInternal(
-//                                                            "AdmobDemand",
-//                                                            "Error while showing InterstitialAd: activity is null."
-//                                                        )
-//                                                    } else {
-//                                                        interstitialAd.show(activity)
-//                                                    }
-//                                                }
-//                                            }
-//                                        )
-//                                        interstitialAd.setCoreListener(demandAd, auctionResult)
-//                                        continuation.resume(Result.success(auctionResult))
-//                                    }
-//                                }
-//                            })
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
+    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<AdmobFullscreenAdParams> {
+        return AdmobInterstitialImpl(demandId, demandAd, roundId)
+    }
+
 //    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: AdmobFullscreenAdParams): OldAuctionRequest {
 //        return OldAuctionRequest {
 //            withContext(Dispatchers.Main) {
@@ -219,7 +167,7 @@ class AdmobAdapter : Adapter, Initializable<AdmobParameters> {
 //        }
 //    }
 
-    override fun parseConfigParam(json: JsonObject): AdmobParameters = AdmobParameters
+    override fun parseConfigParam(json: JsonObject): AdmobInitParameters = AdmobInitParameters
 
 //    override fun bannerParams(
 //        priceFloor: Double,
@@ -249,39 +197,10 @@ class AdmobAdapter : Adapter, Initializable<AdmobParameters> {
 //        )
 //    }
 
-    private fun List<LineItem>.filterByDemandId() =
-        this.filter { it.demandId == demandId.demandId }.mapNotNull {
-            val price = it.priceFloor ?: return@mapNotNull null
-            val adUnitId = it.adUnitId ?: return@mapNotNull null
-            AdmobLineItem(
-                price = price,
-                adUnitId = adUnitId
-            )
-        }.sortedBy { it.price }
-    
-    private fun List<AdmobLineItem>.getPrice(unitId: String): Double {
-        return this.mapNotNull { (price, adUnitId) ->
-            price.takeIf { unitId == adUnitId }
-        }.first()
-    }
-
     private fun BannerSize.asAdmobAdSize() = when (this) {
         BannerSize.Banner -> AdSize.BANNER
         BannerSize.LeaderBoard -> AdSize.LEADERBOARD
         BannerSize.MRec -> AdSize.MEDIUM_RECTANGLE
         else -> null
-    }
-
-    private fun asAd(demandAd: DemandAd, sourceAd: Any, price: Double): Ad {
-        return Ad(
-            demandId = AdmobDemandId,
-            demandAd = demandAd,
-            price = price,
-            sourceAd = sourceAd,
-            monetizationNetwork = BNMediationNetwork.GoogleAdmob.networkName,
-            dsp = null,
-            roundId = "Ad.AuctionRound.PostBid",
-            currencyCode = null
-        )
     }
 }

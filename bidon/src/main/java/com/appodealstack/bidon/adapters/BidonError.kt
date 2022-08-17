@@ -1,9 +1,11 @@
 package com.appodealstack.bidon.adapters
 
 sealed class BidonError : Throwable() {
+    object NoContextFound: BidonError()
     object AuctionFailed : BidonError()
     class FillTimedOut(val demandId: DemandId) : BidonError()
     object FullscreenAdNotReady : BidonError()
+    object NoAppropriateAdUnitId : BidonError()
 }
 
 sealed class DemandError(val demandId: DemandId? = null) : BidonError() {

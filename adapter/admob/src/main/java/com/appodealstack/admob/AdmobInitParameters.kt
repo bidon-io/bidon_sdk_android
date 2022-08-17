@@ -5,7 +5,7 @@ import com.appodealstack.bidon.adapters.AdSource
 import com.appodealstack.bidon.adapters.AdapterParameters
 import com.appodealstack.bidon.adapters.banners.BannerSize
 
-object AdmobParameters : AdapterParameters
+object AdmobInitParameters : AdapterParameters
 
 data class AdmobBannerParams(
     val admobLineItems: List<AdmobLineItem>,

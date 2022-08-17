@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LineItem(
-    @SerialName("demand")
+    @SerialName("id")
     val demandId: String?,
     @SerialName("pricefloor")
     val priceFloor: Double?,

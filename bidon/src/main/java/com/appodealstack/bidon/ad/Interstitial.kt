@@ -12,12 +12,9 @@ import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.di.get
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 class Interstitial(
     override val placementId: String = DefaultPlacement
@@ -106,7 +103,13 @@ internal class InterstitialAdImpl(
             }
             else -> {
                 when (val adSource = auction.results.first().adSource) {
-                    is AdSource.Interstitial<*> -> adSource.show(activity)
+                    is AdSource.Interstitial<*> -> {
+                        adSource.show(activity)
+                        /**
+                         * Auction data should be deleted after shown
+                         */
+                        auction.destroy()
+                    }
                 }
             }
         }

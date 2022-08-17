@@ -32,9 +32,7 @@ internal class GetConfigRequestUseCaseImpl(
             body = requestBody,
         ).map { jsonResponse ->
             val config = jsonResponse.getValue("init")
-            keyValueStorage.token = jsonResponse.getValue("token").toString().also {
-                println(">>>>>>> $it")
-            }
+            keyValueStorage.token = jsonResponse.getValue("token").toString()
             BidonJson.decodeFromJsonElement(ConfigResponse.serializer(), config)
         }
     }

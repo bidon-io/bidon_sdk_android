@@ -224,7 +224,9 @@ internal class AuctionImpl(
                     }
                 }
             }.mapIndexedNotNull { index, deferred ->
-                deferred.await()?.getOrNull()?.result?.also {
+                deferred.await()?.onFailure {
+                    logError(Tag, "Round '${round.id}'. Error while receiving bid.", it)
+                }?.getOrNull()?.result?.also {
                     logInfo(Tag, "Round '${round.id}' results #$index: $it")
                 }
             }.also {

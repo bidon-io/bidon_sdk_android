@@ -11,7 +11,6 @@ import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.core.ext.asFailure
 import com.appodealstack.bidon.core.ext.asSuccess
-import com.appodealstack.bidon.core.ext.logError
 import io.bidmachine.AdContentType
 import io.bidmachine.AdRequest
 import io.bidmachine.PriceFloorParams
@@ -160,12 +159,10 @@ internal class BMInterstitialAdImpl(
     }
 
     override fun show(activity: Activity) {
-        val bmInterstitialAd = ((state.value as? State.Fill.Success)?.ad?.sourceAd as? InterstitialAd)
-        if (bmInterstitialAd?.canShow() == true) {
-            bmInterstitialAd.show()
+        if (interstitialAd?.canShow() == true) {
+            interstitialAd?.show()
         } else {
-            logError(Tag, "Not valid state. Expected 'State.Fill.Success'. Actual: ${state.value}.")
-            state.value = State.Show.ShowFailed(DemandError.FullscreenAdNotReady(demandId))
+            state.value = State.Show.ShowFailed(BidonError.FullscreenAdNotReady)
         }
     }
 
