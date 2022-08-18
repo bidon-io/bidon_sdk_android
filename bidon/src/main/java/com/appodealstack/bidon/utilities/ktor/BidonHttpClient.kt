@@ -33,6 +33,7 @@ val BidonHttpClient by lazy {
             )
         }
         defaultRequest {
+            // TODO add support Retry-After header field (milliseconds).
             header("X-BidOn-Version", BidOnSdkVersion)
         }
     }

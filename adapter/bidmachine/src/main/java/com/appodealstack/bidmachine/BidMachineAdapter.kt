@@ -32,6 +32,7 @@ class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
         suspendCancellableCoroutine { continuation ->
             this.context = activity.applicationContext
             val sourceId = configParams.sellerId
+            BidMachine.setLoggingEnabled(true)
             BidMachine.initialize(context, sourceId) {
                 continuation.resume(Unit)
             }

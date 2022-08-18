@@ -21,4 +21,5 @@ data class ApplovinBannerParams(
 
 data class ApplovinFullscreenAdParams(
     val adUnitId: String,
+    val timeoutMs: Long
 ): AdSource.AdParams

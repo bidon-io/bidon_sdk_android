@@ -8,6 +8,6 @@ internal enum class AdapterList(val classPath: String) {
     BidmachineAdapter(classPath = "com.appodealstack.bidmachine.BidMachineAdapter"),
     ApplovinAdapter(classPath = "com.appodealstack.applovin.ApplovinMaxAdapter"),
 //    FyberFairBidAdapter(classPath = "com.appodealstack.fyber.FairBidAdapter"),
-//    AppsflyerAdapter(classPath = "com.appodealstack.appsflyer.AppsflyerAnalytics"),
+    AppsflyerAdapter(classPath = "com.appodealstack.appsflyer.AppsflyerAnalytics"),
 //    IronSourceAdapter(classPath = "com.appodealstack.ironsource.IronSourceAdapter"),
 }

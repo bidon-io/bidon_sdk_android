@@ -22,6 +22,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
+// $0.1 ca-app-pub-9630071911882835/9299488830
+// $0.5 ca-app-pub-9630071911882835/4234864416
+// $1.0 ca-app-pub-9630071911882835/7790966049
+// $2.0 ca-app-pub-9630071911882835/1445049547
+
 internal class AdmobInterstitialImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
@@ -124,6 +129,7 @@ internal class AdmobInterstitialImpl(
 
     override suspend fun bid(activity: Activity?, adParams: AdmobFullscreenAdParams): Result<State.Bid.Success> {
         return withContext(dispatcher) {
+            state.value = State.Bid.Requesting
             admobLineItems.addAll(adParams.admobLineItems)
             val context = activity?.applicationContext
             if (context == null) {
@@ -172,9 +178,6 @@ internal class AdmobInterstitialImpl(
             interstitialAd?.show(activity)
         }
     }
-
-    override fun notifyLoss() {}
-    override fun notifyWin() {}
 
     private fun InterstitialAd.asAd(): Ad {
         return Ad(

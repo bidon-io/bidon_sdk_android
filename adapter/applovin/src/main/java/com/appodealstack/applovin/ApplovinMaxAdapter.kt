@@ -2,13 +2,11 @@ package com.appodealstack.applovin
 
 import android.app.Activity
 import android.content.Context
-import com.applovin.mediation.MaxAd
-import com.applovin.mediation.MaxAdFormat
 import com.applovin.sdk.AppLovinSdk
 import com.appodealstack.applovin.ext.adapterVersion
 import com.appodealstack.applovin.ext.sdkVersion
+import com.appodealstack.applovin.impl.MaxInterstitialImpl
 import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.analytics.MediationNetwork
 import com.appodealstack.bidon.config.data.models.AdapterInfo
@@ -20,6 +18,7 @@ import kotlin.coroutines.resume
 val ApplovinMaxDemandId = DemandId("applovin")
 
 class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
+    AdProvider.Interstitial<ApplovinFullscreenAdParams>,
     AdRevenueSource by AdRevenueSourceImpl(),
     ExtrasSource by ExtrasSourceImpl(),
     MediationNetwork {
@@ -35,10 +34,15 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
 
     override suspend fun init(activity: Activity, configParams: ApplovinParameters): Unit =
         suspendCancellableCoroutine { continuation ->
-            this.context = activity.applicationContext
-            if (!AppLovinSdk.getInstance(context).isInitialized) {
-                AppLovinSdk.getInstance(context).mediationProvider = "max"
-                AppLovinSdk.initializeSdk(context) {
+            val context = activity.applicationContext.also {
+                context = it
+            }
+//            val instance = AppLovinSdk.getInstance(configParams.key, AppLovinSdkSettings(context), context)
+            val instance = AppLovinSdk.getInstance(context)
+            instance.settings.setVerboseLogging(true)
+            if (!instance.isInitialized) {
+                instance.mediationProvider = "max"
+                instance.initializeSdk {
                     continuation.resume(Unit)
                 }
             } else {
@@ -48,7 +52,11 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
 
     override fun parseConfigParam(json: JsonObject): ApplovinParameters = json.parse(ApplovinParameters.serializer())
 
-//    override fun banner(context: Context, demandAd: DemandAd, adParams: ApplovinBannerParams): OldAuctionRequest {
+    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<ApplovinFullscreenAdParams> {
+        return MaxInterstitialImpl(demandId, demandAd, roundId)
+    }
+
+    //    override fun banner(context: Context, demandAd: DemandAd, adParams: ApplovinBannerParams): OldAuctionRequest {
 //        if (adParams.bannerSize !in arrayOf(BannerSize.Banner, BannerSize.LeaderBoard, BannerSize.MRec)) {
 //            return OldAuctionRequest {
 //                Result.failure(DemandError.BannerSizeNotSupported(demandId))
@@ -147,83 +155,6 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
 //        }
 //    }
 //
-//    override fun interstitial(activity: Activity?, demandAd: DemandAd, adParams: ApplovinFullscreenAdParams): OldAuctionRequest {
-//        if (activity == null) return OldAuctionRequest { Result.failure(DemandError.NoActivity(demandId)) }
-//        val maxInterstitialAd = MaxInterstitialAd(adParams.adUnitId, activity)
-//        return OldAuctionRequest {
-//            suspendCancellableCoroutine { continuation ->
-//                val isFinished = AtomicBoolean(false)
-//                maxInterstitialAd.setListener(
-//                    object : MaxAdListener {
-//                        override fun onAdLoaded(maxAd: MaxAd) {
-//                            if (!isFinished.getAndSet(true)) {
-//                                val ad = maxAd.asAd(demandAd)
-//                                val auctionResult = OldAuctionResult(
-//                                    ad = ad,
-//                                    adProvider = object : OldAdProvider, AdRevenueProvider, ExtrasProvider {
-//                                        override fun canShow(): Boolean {
-//                                            return maxInterstitialAd.isReady
-//                                        }
-//
-//                                        override fun showAd(activity: Activity?, adParams: Bundle) {
-//                                            val placement = adParams.getString(PlacementKey)
-//                                            val customData = adParams.getString(CustomDataKey)
-//                                            maxInterstitialAd.showAd(placement, customData)
-//                                        }
-//
-//                                        override fun destroy() = maxInterstitialAd.destroy()
-//
-//                                        override fun setAdRevenueListener(adRevenueListener: AdRevenueListener) {
-//                                            maxInterstitialAd.setRevenueListener {
-//                                                adRevenueListener.onAdRevenuePaid(ad)
-//                                            }
-//                                        }
-//
-//                                        override fun setExtras(adParams: Bundle) {
-//                                            adParams.keySet().forEach { key ->
-//                                                if (adParams.get(key) is String) {
-//                                                    maxInterstitialAd.setExtraParameter(key, adParams.getString(key))
-//                                                }
-//                                            }
-//                                        }
-//
-//                                    }
-//                                )
-//                                maxInterstitialAd.setRevenueListener {
-//                                    SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(it.asAd(demandAd))
-//                                    getUserAdRevenueListener(demandAd)?.onAdRevenuePaid(ad)
-//                                }
-//                                getExtras(demandAd)?.let { bundle ->
-//                                    bundle.keySet().forEach { key ->
-//                                        if (bundle.get(key) is String) {
-//                                            maxInterstitialAd.setExtraParameter(key, bundle.getString(key))
-//                                        }
-//                                    }
-//                                }
-//                                maxInterstitialAd.setCoreListener(auctionResult)
-//                                continuation.resume(Result.success(auctionResult))
-//                            }
-//                        }
-//
-//                        override fun onAdLoadFailed(adUnitId: String?, error: MaxError) {
-//                            if (!isFinished.getAndSet(true)) {
-//                                // remove listener
-//                                maxInterstitialAd.setListener(null)
-//                                continuation.resume(Result.failure(error.asBidonError()))
-//                            }
-//                        }
-//
-//                        override fun onAdDisplayed(ad: MaxAd?) {}
-//                        override fun onAdHidden(ad: MaxAd?) {}
-//                        override fun onAdClicked(ad: MaxAd?) {}
-//                        override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError?) {}
-//                    }
-//                )
-//                maxInterstitialAd.loadAd()
-//            }
-//        }
-//    }
-//
 //    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: ApplovinFullscreenAdParams): OldAuctionRequest {
 //        if (activity == null) return OldAuctionRequest { Result.failure(DemandError.NoActivity(demandId)) }
 //        val rewardedAd = MaxRewardedAd.getInstance(adParams.adUnitId, activity)
@@ -302,44 +233,7 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
 //        }
 //    }
 //
-//    override fun interstitialParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdSource.AdParams {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun rewardedParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdSource.AdParams {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun bannerParams(
-//        priceFloor: Double,
-//        lineItems: List<LineItem>,
-//        bannerSize: BannerSize,
-//        adContainer: ViewGroup?
-//    ): AdSource.AdParams {
-//        TODO("Not yet implemented")
-//    }
 
-    private fun BannerSize.asMaxAdFormat() = when (this) {
-        BannerSize.Banner -> MaxAdFormat.BANNER
-        BannerSize.LeaderBoard -> MaxAdFormat.LEADER
-        BannerSize.MRec -> MaxAdFormat.MREC
-        else -> error("Not supported")
-    }
-
-}
-
-internal fun MaxAd?.asAd(demandAd: DemandAd): Ad {
-    val maxAd = this
-    return Ad(
-        demandId = ApplovinMaxDemandId,
-        demandAd = demandAd,
-        price = maxAd?.revenue ?: 0.0,
-        sourceAd = maxAd ?: demandAd,
-        monetizationNetwork = maxAd?.networkName,
-        dsp = maxAd?.dspId,
-        roundId = "Ad.AuctionRound.Mediation",
-        currencyCode = null
-    )
 }
 
 internal const val AdUnitIdKey = "adUnitId"
