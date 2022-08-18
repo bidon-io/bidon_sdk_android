@@ -95,6 +95,7 @@ internal class AuctionImpl(
 
     private fun notifyLosers(finalResults: List<AuctionResult>) {
         finalResults.drop(1)
+            .map { it.adSource }
             .filterIsInstance<AdSource.WinLossNotifiable>()
             .forEach {
                 logInfo(Tag, "Notified loss: ${(it as? AdSource)?.demandId}")
