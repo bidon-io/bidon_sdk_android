@@ -26,7 +26,7 @@ internal class BMInterstitialAdImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
     private val roundId: String
-) : AdSource.Interstitial<BMFullscreenParams> {
+) : AdSource.Interstitial<BMFullscreenParams>, AdSource.WinLossNotifiable {
 
     override val state = MutableStateFlow<State>(State.Initialized)
     override val ad: Ad? get() = interstitialAd?.asAd()
@@ -53,6 +53,7 @@ internal class BMInterstitialAdImpl(
             override fun onRequestFailed(request: InterstitialRequest, bmError: BMError) {
                 adRequest = request
                 logError(Tag, "Error while bidding: $bmError")
+                bmError.code
                 state.value = State.Bid.Failure(bmError.asBidonError(demandId))
             }
 

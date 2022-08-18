@@ -36,16 +36,22 @@ sealed interface AdSource {
     val ad: Ad?
     fun destroy()
 
+    interface WinLossNotifiable {
+        fun notifyLoss()
+        fun notifyWin()
+    }
+
     interface Interstitial<T : AdParams> : AdSource {
         val state: StateFlow<State>
 
-        // todo a28 check bid-> context instead of activity
         fun getParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdParams
+
+        /**
+         * Applovin needs Activity instance for interstitial 🤦‍️
+         */
         suspend fun bid(activity: Activity?, adParams: T): Result<State.Bid.Success>
         suspend fun fill(): Result<State.Fill.Success>
         fun show(activity: Activity)
-        fun notifyLoss()
-        fun notifyWin()
 
         sealed interface State {
             object Initialized : State

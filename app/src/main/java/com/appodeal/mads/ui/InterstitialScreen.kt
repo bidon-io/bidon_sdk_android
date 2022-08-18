@@ -36,11 +36,11 @@ fun InterstitialScreen(
     }
 
     val interstitial by lazy {
-        Interstitial("c7c5f664e60b9bfb").apply {
+        Interstitial("some_placement_id").apply {
             setInterstitialListener(
                 object : InterstitialListener {
                     override fun onAdLoaded(ad: Ad) {
-                        logFlow.log("onAdLoaded: $ad")
+                        logFlow.log("onAdLoaded WINNER:\n$ad")
                     }
 
                     override fun onAdLoadFailed(cause: Throwable) {
@@ -72,12 +72,13 @@ fun InterstitialScreen(
                     }
 
                     override fun auctionSucceed(auctionResults: List<AuctionResult>) {
-                        buildString {
+                        val log = buildString {
                             appendLine("auctionSucceed: ${auctionResults.size}")
                             auctionResults.forEachIndexed { index, auctionResult ->
                                 appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.priceFloor}")
                             }
                         }
+                        logFlow.log(log)
                     }
 
                     override fun auctionFailed(error: Throwable) {

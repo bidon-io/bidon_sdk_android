@@ -94,14 +94,11 @@ internal class AuctionImpl(
     }
 
     private fun notifyLosers(finalResults: List<AuctionResult>) {
-        finalResults.drop(1).forEach {
-            when (val sourceAd = it.adSource) {
-                is AdSource.Interstitial<*> -> {
-                    logInfo(Tag, "Notified loss: ${it.adSource.demandId}")
-                    sourceAd.notifyLoss()
-                }
+        finalResults.drop(1)
+            .filterIsInstance<AdSource.WinLossNotifiable>()
+            .forEach {
+                it.notifyLoss()
             }
-        }
     }
 
     private suspend fun fillWinner(auctionResults: List<AuctionResult>, timeout: Long): List<AuctionResult> {
@@ -114,13 +111,19 @@ internal class AuctionImpl(
                     } ?: BidonError.FillTimedOut(auctionResult.adSource.demandId).asFailure()
 
                     fillResult
-                        .onFailure {
-                            logError(Tag, "Failed to fill. Notified loss: ${adSource.demandId}", it)
-                            adSource.notifyLoss()
+                        .onFailure { cause ->
+                            logError(Tag, "Failed to fill: ${adSource.demandId}", cause)
+                            (adSource as? AdSource.WinLossNotifiable)?.let {
+                                logInfo(Tag, "Notified loss: ${adSource.demandId}")
+                                it.notifyLoss()
+                            }
                         }
                         .onSuccess {
-                            logInfo(Tag, "Winner filled. Notified win: ${adSource.demandId}")
-                            adSource.notifyWin()
+                            logInfo(Tag, "Winner filled: ${adSource.demandId}")
+                            (adSource as? AdSource.WinLossNotifiable)?.let {
+                                logInfo(Tag, "Notified win: ${adSource.demandId}")
+                                it.notifyWin()
+                            }
                         }
                         .isSuccess
                 }
@@ -193,10 +196,10 @@ internal class AuctionImpl(
         adTypeAdditionalData: AdTypeAdditional,
         timeout: Long
     ): Result<List<AuctionResult>> = runCatching {
-        logInfo(Tag, "Round '${round.id}' started")
         val filteredAdapters = adaptersSource.adapters.filter {
             it.demandId.demandId in round.demandIds
         }
+        logInfo(Tag, "Round '${round.id}' started with adapters [${filteredAdapters.joinToString { it.demandId.demandId }}]")
         val auctionRequests = when (demandAd.adType) {
             AdType.Interstitial -> {
                 check(adTypeAdditionalData is AdTypeAdditional.Interstitial)
@@ -209,6 +212,7 @@ internal class AuctionImpl(
         }
         auctionRequests
             .map { auctionRequest ->
+                logInfo(Tag, "Round '${round.id}'. Adapter ${auctionRequest.demandId.demandId} starts bidding")
                 coroutineScope {
                     async {
                         withTimeoutOrNull(round.timeoutMs) {
@@ -220,15 +224,17 @@ internal class AuctionImpl(
                                     lineItems = lineItems
                                 )
                             )
-                        }
+                        } ?: BidonError.BidTimedOut(auctionRequest.demandId).asFailure()
                     }
                 }
             }.mapIndexedNotNull { index, deferred ->
-                deferred.await()?.onFailure {
-                    logError(Tag, "Round '${round.id}'. Error while receiving bid.", it)
-                }?.getOrNull()?.result?.also {
-                    logInfo(Tag, "Round '${round.id}' results #$index: $it")
-                }
+                deferred.await()
+                    .onSuccess {
+                        logInfo(Tag, "Round '${round.id}' results #$index: $it")
+                    }
+                    .onFailure {
+                        logError(Tag, "Round '${round.id}'. Error while receiving bid.", it)
+                    }.getOrNull()?.result
             }.also {
                 logInfo(Tag, "Round '${round.id}' finished with ${it.size} results: $it")
             }

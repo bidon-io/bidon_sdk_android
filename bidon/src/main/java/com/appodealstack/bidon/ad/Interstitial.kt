@@ -11,6 +11,7 @@ import com.appodealstack.bidon.auctions.domain.impl.MaxEcpmAuctionResolver
 import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
+import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.di.get
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
