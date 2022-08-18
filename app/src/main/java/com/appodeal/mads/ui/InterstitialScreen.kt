@@ -23,6 +23,7 @@ import com.appodealstack.bidon.ad.Interstitial
 import com.appodealstack.bidon.ad.InterstitialListener
 import com.appodealstack.bidon.adapters.Ad
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
+import com.appodealstack.bidon.core.ext.logInternal
 
 @Composable
 fun InterstitialScreen(
@@ -73,7 +74,7 @@ fun InterstitialScreen(
 
                     override fun auctionSucceed(auctionResults: List<AuctionResult>) {
                         val log = buildString {
-                            appendLine("auctionSucceed: ${auctionResults.size}")
+                            appendLine("AuctionSucceed (${auctionResults.size} items)")
                             auctionResults.forEachIndexed { index, auctionResult ->
                                 appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.priceFloor}")
                             }
@@ -86,13 +87,13 @@ fun InterstitialScreen(
                     }
 
                     override fun roundStarted(roundId: String) {
-                        logFlow.log("roundStarted: roundId=$roundId")
+                        logFlow.log("RoundStarted(roundId=$roundId)")
                     }
 
                     override fun roundSucceed(roundId: String, roundResults: List<AuctionResult>) {
                         logFlow.log(
                             buildString {
-                                appendLine("roundSucceed: $roundId ${roundResults.size}")
+                                appendLine("roundSucceed($roundId)")
                                 roundResults.forEachIndexed { index, auctionResult ->
                                     appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.priceFloor}")
                                 }
@@ -155,4 +156,7 @@ private fun MutableState<List<String>>.log(string: String) {
     synchronized(this) {
         this.value = this.value + string
     }
+    logInternal(Tag, string)
 }
+
+private const val Tag = "InterstitialScreen"

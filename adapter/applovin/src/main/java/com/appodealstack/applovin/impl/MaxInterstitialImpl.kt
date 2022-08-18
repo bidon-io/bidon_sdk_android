@@ -91,7 +91,7 @@ internal class MaxInterstitialImpl(
         adParams: ApplovinFullscreenAdParams
     ): Result<State.Bid.Success> {
         state.value = State.Bid.Requesting
-        logInternal(Tag, "Starting with ${adParams.adUnitId}")
+        logInternal(Tag, "Starting with $adParams")
         val maxInterstitialAd = MaxInterstitialAd(adParams.adUnitId, activity).also {
             it.setListener(maxAdListener)
             interstitialAd = it

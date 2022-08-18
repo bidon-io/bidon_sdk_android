@@ -25,14 +25,14 @@
             android:value="8M_ro4EHQZexs13KI8fEI0cw7s57D11LN1AA5PRW-4Sq6W9OepdypFtx5z2J-4fM5rWBEziD2918fBXJ-AFoP7" />
 
 <!--        admob for com.appodealstack.demo -->
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-9630071911882835~1859982518" />
-
-        <!--        old unknown info -->
 <!--        <meta-data-->
 <!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
-<!--            android:value="ca-app-pub-3940256099942544~3347511713" />-->
+<!--            android:value="ca-app-pub-9630071911882835~1859982518" />-->
+
+        <!--        old unknown info -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
     </application>
 
 </manifest>

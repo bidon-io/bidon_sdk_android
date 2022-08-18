@@ -12,6 +12,7 @@ import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.core.ext.asFailure
 import com.appodealstack.bidon.core.ext.asSuccess
 import com.appodealstack.bidon.core.ext.logError
+import com.appodealstack.bidon.core.ext.logInternal
 import io.bidmachine.AdContentType
 import io.bidmachine.AdRequest
 import io.bidmachine.PriceFloorParams
@@ -110,6 +111,7 @@ internal class BMInterstitialAdImpl(
     override suspend fun bid(activity: Activity?, adParams: BMFullscreenParams): Result<State.Bid.Success> {
         context = activity?.applicationContext
         state.value = State.Bid.Requesting
+        logInternal(Tag, "Starting with $adParams")
 
         val context = activity?.applicationContext
         if (context == null) {

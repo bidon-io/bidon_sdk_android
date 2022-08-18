@@ -97,6 +97,7 @@ internal class AuctionImpl(
         finalResults.drop(1)
             .filterIsInstance<AdSource.WinLossNotifiable>()
             .forEach {
+                logInfo(Tag, "Notified loss: ${(it as? AdSource)?.demandId}")
                 it.notifyLoss()
             }
     }
@@ -230,7 +231,7 @@ internal class AuctionImpl(
             }.mapIndexedNotNull { index, deferred ->
                 deferred.await()
                     .onSuccess {
-                        logInfo(Tag, "Round '${round.id}' results #$index: $it")
+                        logInfo(Tag, "Round '${round.id}' result #$index: ${it.result}")
                     }
                     .onFailure {
                         logError(Tag, "Round '${round.id}'. Error while receiving bid.", it)

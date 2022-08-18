@@ -9,10 +9,7 @@ import com.appodealstack.bidon.adapters.AdSource.Interstitial.State
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
-import com.appodealstack.bidon.core.ext.asFailure
-import com.appodealstack.bidon.core.ext.asSuccess
-import com.appodealstack.bidon.core.ext.logError
-import com.appodealstack.bidon.core.ext.logInfo
+import com.appodealstack.bidon.core.ext.*
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
@@ -130,6 +127,7 @@ internal class AdmobInterstitialImpl(
     override suspend fun bid(activity: Activity?, adParams: AdmobFullscreenAdParams): Result<State.Bid.Success> {
         return withContext(dispatcher) {
             state.value = State.Bid.Requesting
+            logInternal(Tag, "Starting with $adParams")
             admobLineItems.addAll(adParams.admobLineItems)
             val context = activity?.applicationContext
             if (context == null) {
