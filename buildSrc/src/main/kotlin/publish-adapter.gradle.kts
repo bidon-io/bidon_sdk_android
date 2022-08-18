@@ -2,7 +2,10 @@ plugins {
     id("maven-publish")
 }
 val githubProperties = java.util.Properties()
-githubProperties.load(java.io.FileInputStream(rootProject.file("github.properties")))
+val githubCredentialFile: File = rootProject.file("github.properties")
+if (githubCredentialFile.exists()) {
+    githubProperties.load(java.io.FileInputStream(githubCredentialFile))
+}
 
 afterEvaluate {
     configure<PublishingExtension> {
