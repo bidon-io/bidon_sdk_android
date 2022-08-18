@@ -1,6 +1,7 @@
 package com.appodealstack.bidon.ad
 
 import android.app.Activity
+import com.appodealstack.bidon.BidON
 import com.appodealstack.bidon.BidOnSdk.Companion.DefaultPlacement
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.AdSource.Interstitial.State
@@ -170,6 +171,7 @@ internal class InterstitialAdImpl(
         }
 
         override fun onAdImpression(ad: Ad) {
+            BidON.logRevenue(ad)
             userListener?.onAdImpression(ad)
         }
 

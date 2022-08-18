@@ -2,6 +2,8 @@ package com.appodealstack.bidon.core.impl
 
 import android.app.Activity
 import com.appodealstack.bidon.BidOnSdk
+import com.appodealstack.bidon.adapters.Ad
+import com.appodealstack.bidon.analytics.AdRevenueLogger
 import com.appodealstack.bidon.config.domain.BidOnInitializer
 import com.appodealstack.bidon.core.AdaptersSource
 import com.appodealstack.bidon.core.ContextProvider
@@ -44,6 +46,13 @@ internal class BidOnSdkImpl(
             bidOnEndpoints.init(host, setOf())
         }
         return this
+    }
+
+    override fun logRevenue(ad: Ad) {
+        adaptersSource.adapters.filterIsInstance<AdRevenueLogger>()
+            .forEach { adRevenueLogger ->
+                adRevenueLogger.logAdRevenue(ad)
+            }
     }
 
 }

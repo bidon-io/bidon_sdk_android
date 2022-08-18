@@ -3,7 +3,7 @@ package com.appodealstack.bidon.analytics
 import com.appodealstack.bidon.adapters.Ad
 
 interface AdRevenueLogger {
-    fun logAdRevenue(mediationNetwork: BNMediationNetwork, ad: Ad)
+    fun logAdRevenue(ad: Ad)
 }
 
 interface MediationNetwork {

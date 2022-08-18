@@ -194,7 +194,7 @@ internal class BMInterstitialAdImpl(
             demandAd = demandAd,
             price = this.auctionResult?.price ?: 0.0,
             sourceAd = this,
-            currencyCode = null,
+            currencyCode = "USD",
             roundId = roundId,
             dsp = this.auctionResult?.demandSource,
             monetizationNetwork = null
