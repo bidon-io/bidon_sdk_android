@@ -11,7 +11,10 @@ import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.AdSource.Interstitial.State
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
-import com.appodealstack.bidon.core.ext.*
+import com.appodealstack.bidon.core.ext.asFailure
+import com.appodealstack.bidon.core.ext.asSuccess
+import com.appodealstack.bidon.core.ext.logError
+import com.appodealstack.bidon.core.ext.logInternal
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 
@@ -25,10 +28,8 @@ internal class MaxInterstitialImpl(
     private var maxAd: MaxAd? = null
 
     private val maxAdListener by lazy {
-        logInternal("Applovin", "maxAdListener")
         object : MaxAdListener {
             override fun onAdLoaded(ad: MaxAd) {
-                logInternal("Applovin", "onAdLoaded: $ad")
                 maxAd = ad
                 state.value = State.Bid.Success(
                     AuctionResult(
@@ -44,25 +45,21 @@ internal class MaxInterstitialImpl(
             }
 
             override fun onAdDisplayed(ad: MaxAd) {
-                logInternal("Applovin", "onAdDisplayed: $ad")
                 maxAd = ad
                 state.value = State.Show.Impression(ad.asAd())
             }
 
             override fun onAdHidden(ad: MaxAd) {
-                logInternal("Applovin", "onAdHidden: $ad")
                 maxAd = ad
                 state.value = State.Show.Closed(ad.asAd())
             }
 
             override fun onAdClicked(ad: MaxAd) {
-                logInternal("Applovin", "onAdClicked: $ad")
                 maxAd = ad
                 state.value = State.Show.Clicked(ad.asAd())
             }
 
             override fun onAdDisplayFailed(ad: MaxAd, error: MaxError) {
-                logInternal("Applovin", "onAdDisplayFailed: $ad")
                 maxAd = ad
                 state.value = State.Show.ShowFailed(error.asBidonError())
             }
@@ -72,7 +69,7 @@ internal class MaxInterstitialImpl(
     override val state = MutableStateFlow<State>(State.Initialized)
 
     override val ad: Ad?
-    get() = maxAd?.asAd() ?: interstitialAd?.asAd()
+        get() = maxAd?.asAd() ?: interstitialAd?.asAd()
 
     override fun destroy() {
         logInternal(Tag, "destroy")
@@ -99,14 +96,10 @@ internal class MaxInterstitialImpl(
             it.setListener(maxAdListener)
             interstitialAd = it
         }
-        logInternal("Applovin", "2")
         maxInterstitialAd.loadAd()
-        logInternal("Applovin", "3")
         val state = state.first {
-            logInternal("Applovin", "state: ${state.value}")
             it is State.Bid.Success || it is State.Bid.Failure
         } as State.Bid
-        logInternal("Applovin", "4")
         return when (state) {
             is State.Bid.Failure -> state.cause.asFailure()
             is State.Bid.Success -> state.asSuccess()
@@ -116,7 +109,7 @@ internal class MaxInterstitialImpl(
 
     override suspend fun fill(): Result<State.Fill.Success> = runCatching {
         /**
-         * Applovin fill the bid automatically. It's not needed to fill it manually.
+         * Applovin fills the bid automatically. It's not needed to fill it manually.
          */
         State.Fill.Success(
             requireNotNull(interstitialAd?.asAd())
@@ -131,6 +124,9 @@ internal class MaxInterstitialImpl(
         }
     }
 
+    /**
+     * Use it after loaded ECPM is known
+     */
     private fun MaxAd?.asAd(): Ad {
         val maxAd = this
         return Ad(
@@ -141,10 +137,13 @@ internal class MaxInterstitialImpl(
             monetizationNetwork = maxAd?.networkName,
             dsp = maxAd?.dspId,
             roundId = roundId,
-            currencyCode = "USD"
+            currencyCode = USD
         )
     }
 
+    /**
+     * Use it before loaded ECPM is unknown
+     */
     private fun MaxInterstitialAd?.asAd(): Ad {
         val maxAd = this
         return Ad(
@@ -155,9 +154,10 @@ internal class MaxInterstitialImpl(
             monetizationNetwork = null,
             dsp = null,
             roundId = roundId,
-            currencyCode = null
+            currencyCode = USD
         )
     }
 }
 
 private const val Tag = "ApplovinMax Interstitial"
+private const val USD = "USD"

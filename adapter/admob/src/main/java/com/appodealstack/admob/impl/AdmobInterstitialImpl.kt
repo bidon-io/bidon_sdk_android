@@ -164,7 +164,7 @@ internal class AdmobInterstitialImpl(
 
     override suspend fun fill(): Result<State.Fill.Success> = runCatching {
         /**
-         * Admob fill the bid automatically. It's not needed to fill it manually.
+         * Admob fills the bid automatically. It's not needed to fill it manually.
          */
         State.Fill.Success(
             requireNotNull(interstitialAd?.asAd())
