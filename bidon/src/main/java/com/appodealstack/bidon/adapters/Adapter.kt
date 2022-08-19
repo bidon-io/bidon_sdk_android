@@ -27,54 +27,33 @@ sealed interface AdProvider {
     }
 
     interface Rewarded<T : AdSource.AdParams> : AdProvider {
-        fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Interstitial<T>
+        fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<T>
     }
 }
 
-sealed interface AdSource {
+sealed interface AdSource<T : AdSource.AdParams> {
     val demandId: DemandId
     val ad: Ad?
-    fun destroy()
 
-    interface WinLossNotifiable {
-        fun notifyLoss()
-        fun notifyWin()
+    /**
+     * Applovin needs Activity instance for interstitial 🤦‍️
+     */
+    suspend fun bid(activity: Activity?, adParams: T): Result<AuctionResult>
+    suspend fun fill(): Result<Ad>
+    fun show(activity: Activity)
+    fun destroy()
+    fun getParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdParams
+
+
+    interface Interstitial<T : AdParams> : AdSource<T> {
+        val state: StateFlow<State>
     }
 
-    interface Interstitial<T : AdParams> : AdSource {
+    interface Rewarded<T : AdParams> : AdSource<T> {
         val state: StateFlow<State>
 
-        fun getParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdParams
-
-        /**
-         * Applovin needs Activity instance for interstitial 🤦‍️
-         */
-        suspend fun bid(activity: Activity?, adParams: T): Result<State.Bid.Success>
-        suspend fun fill(): Result<State.Fill.Success>
-        fun show(activity: Activity)
-
-        sealed interface State {
-            object Initialized : State
-            class Expired(val ad: Ad) : State
-
-            sealed interface Bid : State {
-                object Requesting : Bid
-                class Success(val result: AuctionResult) : Bid
-                class Failure(val cause: Throwable) : Bid
-            }
-
-            sealed interface Fill : State {
-                object LoadingResources : Fill
-                class Success(val ad: Ad) : Fill
-                class Failure(val cause: Throwable) : Fill
-            }
-
-            sealed interface Show : State {
-                class ShowFailed(val cause: Throwable) : Show
-                class Impression(val ad: Ad) : Show
-                class Clicked(val ad: Ad) : Show
-                class Closed(val ad: Ad) : Show
-            }
+        sealed interface OnReward : State {
+            class Success(val ad: Ad, val reward: Reward) : OnReward
         }
     }
 //    @Deprecated("")
@@ -89,4 +68,44 @@ sealed interface AdSource {
 //    }
 
     interface AdParams
+
+    sealed interface State {
+        object Initialized : State
+        class Expired(val ad: Ad) : State
+
+        sealed interface Bid : State {
+            object Requesting : Bid
+            class Success(val result: AuctionResult) : Bid
+            class Failure(val cause: Throwable) : Bid
+        }
+
+        sealed interface Fill : State {
+            object LoadingResources : Fill
+            class Success(val ad: Ad) : Fill
+            class Failure(val cause: Throwable) : Fill
+        }
+
+        sealed interface Show : State {
+            class ShowFailed(val cause: Throwable) : Show
+            class Clicked(val ad: Ad) : Show
+            class Closed(val ad: Ad) : Show
+            class Impression(val ad: Ad) : Show
+        }
+    }
+}
+
+interface WinLossNotifiable {
+    fun notifyLoss()
+    fun notifyWin()
+}
+
+sealed interface AdObjectState {
+    object Initialized : AdObjectState
+    class Expired(val ad: Ad) : AdObjectState
+    class Bid(val result: AuctionResult) : AdObjectState
+    class Fill(val ad: Ad) : AdObjectState
+    class Clicked(val ad: Ad) : AdObjectState
+    class Closed(val ad: Ad) : AdObjectState
+    class Impression(val ad: Ad) : AdObjectState
+    class OnReward(val ad: Ad, val reward: Reward) : AdObjectState
 }

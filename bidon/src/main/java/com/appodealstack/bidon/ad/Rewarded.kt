@@ -5,6 +5,7 @@ import com.appodealstack.bidon.BidON
 import com.appodealstack.bidon.BidOnSdk.Companion.DefaultPlacement
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.AdSource.State
+import com.appodealstack.bidon.adapters.AdSource.Rewarded.OnReward
 import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.domain.Auction
@@ -20,35 +21,35 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-class Interstitial(
+class Rewarded(
     override val placementId: String = DefaultPlacement
-) : InterstitialAd by InterstitialAdImpl(placementId)
+) : RewardedAd by RewardedImpl(placementId)
 
-interface InterstitialAd {
+interface RewardedAd {
     val placementId: String
 
     fun load()
     fun destroy()
     fun show(activity: Activity)
-    fun setInterstitialListener(listener: InterstitialListener)
+    fun setRewardedListener(listener: RewardedListener)
 }
 
-internal class InterstitialAdImpl(
+internal class RewardedImpl(
     override val placementId: String,
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Default,
-) : InterstitialAd {
+) : RewardedAd {
 
     private val demandAd by lazy {
-        DemandAd(AdType.Interstitial, placementId)
+        DemandAd(AdType.Rewarded, placementId)
     }
     private var auction: Auction? = null
     private val scope: CoroutineScope get() = CoroutineScope(dispatcher)
-    private var userListener: InterstitialListener? = null
+    private var userListener: RewardedListener? = null
     private var auctionJob: Job? = null
     private var observeCallbacksJob: Job? = null
 
     private val listener by lazy {
-        getInterstitialListener()
+        getRewardedListener()
     }
 
     override fun load() {
@@ -66,7 +67,7 @@ internal class InterstitialAdImpl(
             auction.start(
                 demandAd = demandAd,
                 resolver = MaxEcpmAuctionResolver,
-                adTypeAdditionalData = AdTypeAdditional.Interstitial(
+                adTypeAdditionalData = AdTypeAdditional.Rewarded(
                     activity = null
                 ),
                 roundsListener = listener
@@ -107,15 +108,15 @@ internal class InterstitialAdImpl(
             }
             else -> {
                 auction.results.map { it.adSource }
-                    .filterIsInstance<AdSource.Interstitial<*>>()
+                    .filterIsInstance<AdSource.Rewarded<*>>()
                     .first()
                     .show(activity)
             }
         }
     }
 
-    override fun setInterstitialListener(listener: InterstitialListener) {
-        logInfo(Tag, "Set interstitial listener")
+    override fun setRewardedListener(listener: RewardedListener) {
+        logInfo(Tag, "Set rewarded listener")
         this.userListener = listener
     }
 
@@ -133,7 +134,7 @@ internal class InterstitialAdImpl(
      */
 
     private fun subscribeToWinner(adSource: AdSource<*>) {
-        require(adSource is AdSource.Interstitial<*>)
+        require(adSource is AdSource.Rewarded<*>)
         observeCallbacksJob = adSource.state.onEach { state ->
             when (state) {
                 State.Initialized,
@@ -150,12 +151,12 @@ internal class InterstitialAdImpl(
                 is State.Show.Closed -> listener.onAdClosed(state.ad)
                 is State.Show.Impression -> listener.onAdImpression(state.ad)
                 is State.Show.ShowFailed -> listener.onAdShowFailed(state.cause)
-                is AdSource.Rewarded.OnReward.Success -> TODO()
+                is OnReward.Success -> listener.onUserRewarded(state.ad, state.reward)
             }
         }.launchIn(scope)
     }
 
-    private fun getInterstitialListener() = object : InterstitialListener {
+    private fun getRewardedListener() = object : RewardedListener {
         override fun onAdLoaded(ad: Ad) {
             userListener?.onAdLoaded(ad)
         }
@@ -208,9 +209,13 @@ internal class InterstitialAdImpl(
         override fun roundFailed(roundId: String, error: Throwable) {
             userListener?.roundFailed(roundId, error)
         }
+
+        override fun onUserRewarded(ad: Ad, reward: Reward?) {
+            userListener?.onUserRewarded(ad, reward)
+        }
     }
 
 }
 
-private const val Tag = "Interstitial"
+private const val Tag = "Rewarded"
 

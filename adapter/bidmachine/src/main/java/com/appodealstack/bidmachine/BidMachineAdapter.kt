@@ -5,6 +5,7 @@ import android.content.Context
 import com.appodealstack.bidmachine.ext.adapterVersion
 import com.appodealstack.bidmachine.ext.sdkVersion
 import com.appodealstack.bidmachine.impl.BMInterstitialAdImpl
+import com.appodealstack.bidmachine.impl.BMRewardedAdImpl
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.appodealstack.bidon.core.parse
@@ -19,6 +20,7 @@ internal typealias BidMachineBannerSize = io.bidmachine.banner.BannerSize
 internal typealias BMAuctionResult = io.bidmachine.models.AuctionResult
 
 class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
+    AdProvider.Rewarded<BMFullscreenParams>,
     AdProvider.Interstitial<BMFullscreenParams> {
     private lateinit var context: Context
 
@@ -45,65 +47,10 @@ class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
         return BMInterstitialAdImpl(demandId, demandAd, roundId)
     }
 
-//    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: BMFullscreenParams): OldAuctionRequest {
-//        return OldAuctionRequest {
-//            suspendCancellableCoroutine { continuation ->
-//                val isFinished = AtomicBoolean(false)
-//                val request = RewardedRequest.Builder().apply {
-//                    setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.priceFloor))
-//                    demandAd.placement?.let {
-//                        setPlacementId(it)
-//                    }
-//                }.build()
-//                RewardedAd(context)
-//                    .setListener(object : RewardedListener {
-//                        override fun onAdLoaded(rewardedAd: RewardedAd) {
-//                            if (!isFinished.getAndSet(true)) {
-//                                val auctionResult = OldAuctionResult(
-//                                    ad = rewardedAd.auctionResult.asAd(demandAd, rewardedAd),
-//                                    adProvider = object : OldAdProvider {
-//                                        override fun canShow(): Boolean = rewardedAd.canShow()
-//                                        override fun showAd(activity: Activity?, adParams: Bundle) = rewardedAd.show()
-//                                        override fun destroy() = rewardedAd.destroy()
-//                                    }
-//                                )
-//                                rewardedAd.setCoreListener(auctionResult)
-//                                continuation.resume(Result.success(auctionResult))
-//                            }
-//                        }
-//
-//                        override fun onAdLoadFailed(rewardedAd: RewardedAd, bmError: BMError) {
-//                            if (!isFinished.getAndSet(true)) {
-//                                // remove listener
-//                                rewardedAd.setListener(null)
-//                                continuation.resume(Result.failure(bmError.asBidonError(demandId)))
-//                            }
-//                        }
-//
-//                        override fun onAdExpired(rewardedAd: RewardedAd) {
-//                            if (!isFinished.getAndSet(true)) {
-//                                // remove listener
-//                                rewardedAd.setListener(null)
-//                                continuation.resume(Result.failure(DemandError.Expired(demandId)))
-//                            }
-//                        }
-//
-//                        @Deprecated("Deprecated in Java")
-//                        override fun onAdShown(p0: RewardedAd) {
-//                        }
-//
-//                        override fun onAdImpression(p0: RewardedAd) {}
-//                        override fun onAdClicked(p0: RewardedAd) {}
-//                        override fun onAdShowFailed(p0: RewardedAd, p1: BMError) {}
-//                        override fun onAdClosed(p0: RewardedAd, p1: Boolean) {}
-//                        override fun onAdRewarded(p0: RewardedAd) {}
-//
-//                    })
-//                    .load(request)
-//            }
-//        }
-//    }
-//
+    override fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<BMFullscreenParams> {
+        return BMRewardedAdImpl(demandId, demandAd, roundId)
+    }
+
 //    override fun banner(context: Context, demandAd: DemandAd, adParams: BMBannerParams): OldAuctionRequest {
 //        return OldAuctionRequest {
 //            suspendCancellableCoroutine { continuation ->

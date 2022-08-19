@@ -8,7 +8,7 @@ import com.applovin.mediation.ads.MaxInterstitialAd
 import com.appodealstack.applovin.ApplovinFullscreenAdParams
 import com.appodealstack.applovin.ApplovinMaxDemandId
 import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.adapters.AdSource.Interstitial.State
+import com.appodealstack.bidon.adapters.AdSource.State
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.core.ext.asFailure
@@ -89,7 +89,7 @@ internal class MaxInterstitialImpl(
     override suspend fun bid(
         activity: Activity?,
         adParams: ApplovinFullscreenAdParams
-    ): Result<State.Bid.Success> {
+    ): Result<AuctionResult> {
         state.value = State.Bid.Requesting
         logInternal(Tag, "Starting with $adParams")
         val maxInterstitialAd = MaxInterstitialAd(adParams.adUnitId, activity).also {
@@ -102,18 +102,18 @@ internal class MaxInterstitialImpl(
         } as State.Bid
         return when (state) {
             is State.Bid.Failure -> state.cause.asFailure()
-            is State.Bid.Success -> state.asSuccess()
+            is State.Bid.Success -> state.result.asSuccess()
             State.Bid.Requesting -> error("unexpected: $state")
         }
     }
 
-    override suspend fun fill(): Result<State.Fill.Success> = runCatching {
+    override suspend fun fill(): Result<Ad> = runCatching {
         /**
          * Applovin fills the bid automatically. It's not needed to fill it manually.
          */
         State.Fill.Success(
             requireNotNull(interstitialAd?.asAd())
-        ).also { state.value = it }
+        ).also { state.value = it }.ad
     }
 
     override fun show(activity: Activity) {
