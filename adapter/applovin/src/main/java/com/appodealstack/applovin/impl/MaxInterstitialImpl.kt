@@ -5,10 +5,9 @@ import com.applovin.mediation.MaxAd
 import com.applovin.mediation.MaxAdListener
 import com.applovin.mediation.MaxError
 import com.applovin.mediation.ads.MaxInterstitialAd
-import com.appodealstack.applovin.ApplovinFullscreenAdParams
+import com.appodealstack.applovin.ApplovinFullscreenAdAuctionParams
 import com.appodealstack.applovin.ApplovinMaxDemandId
 import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.adapters.AdSource.State
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.core.ext.asFailure
@@ -22,7 +21,7 @@ internal class MaxInterstitialImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
     private val roundId: String
-) : AdSource.Interstitial<ApplovinFullscreenAdParams> {
+) : AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
 
     private var interstitialAd: MaxInterstitialAd? = null
     private var maxAd: MaxAd? = null
@@ -31,7 +30,7 @@ internal class MaxInterstitialImpl(
         object : MaxAdListener {
             override fun onAdLoaded(ad: MaxAd) {
                 maxAd = ad
-                state.value = State.Bid.Success(
+                state.value = AdState.Bid(
                     AuctionResult(
                         priceFloor = ad.revenue,
                         adSource = this@MaxInterstitialImpl
@@ -41,32 +40,32 @@ internal class MaxInterstitialImpl(
 
             override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
                 logError(Tag, "(code=${error.code}) ${error.message}", error.asBidonError())
-                state.value = State.Bid.Failure(error.asBidonError())
+                state.value = AdState.LoadFailed(error.asBidonError())
             }
 
             override fun onAdDisplayed(ad: MaxAd) {
                 maxAd = ad
-                state.value = State.Show.Impression(ad.asAd())
+                state.value = AdState.Impression(ad.asAd())
             }
 
             override fun onAdHidden(ad: MaxAd) {
                 maxAd = ad
-                state.value = State.Show.Closed(ad.asAd())
+                state.value = AdState.Closed(ad.asAd())
             }
 
             override fun onAdClicked(ad: MaxAd) {
                 maxAd = ad
-                state.value = State.Show.Clicked(ad.asAd())
+                state.value = AdState.Clicked(ad.asAd())
             }
 
             override fun onAdDisplayFailed(ad: MaxAd, error: MaxError) {
                 maxAd = ad
-                state.value = State.Show.ShowFailed(error.asBidonError())
+                state.value = AdState.ShowFailed(error.asBidonError())
             }
         }
     }
 
-    override val state = MutableStateFlow<State>(State.Initialized)
+    override val state = MutableStateFlow<AdState>(AdState.Initialized)
 
     override val ad: Ad?
         get() = maxAd?.asAd() ?: interstitialAd?.asAd()
@@ -79,8 +78,8 @@ internal class MaxInterstitialImpl(
         maxAd = null
     }
 
-    override fun getParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdSource.AdParams {
-        return ApplovinFullscreenAdParams(
+    override fun getAuctionParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdAuctionParams {
+        return ApplovinFullscreenAdAuctionParams(
             adUnitId = checkNotNull(lineItems.first { it.demandId == demandId.demandId }.adUnitId),
             timeoutMs = timeout
         )
@@ -88,9 +87,8 @@ internal class MaxInterstitialImpl(
 
     override suspend fun bid(
         activity: Activity?,
-        adParams: ApplovinFullscreenAdParams
+        adParams: ApplovinFullscreenAdAuctionParams
     ): Result<AuctionResult> {
-        state.value = State.Bid.Requesting
         logInternal(Tag, "Starting with $adParams")
         val maxInterstitialAd = MaxInterstitialAd(adParams.adUnitId, activity).also {
             it.setListener(maxAdListener)
@@ -98,12 +96,12 @@ internal class MaxInterstitialImpl(
         }
         maxInterstitialAd.loadAd()
         val state = state.first {
-            it is State.Bid.Success || it is State.Bid.Failure
-        } as State.Bid
+            it is AdState.Bid || it is AdState.LoadFailed
+        }
         return when (state) {
-            is State.Bid.Failure -> state.cause.asFailure()
-            is State.Bid.Success -> state.result.asSuccess()
-            State.Bid.Requesting -> error("unexpected: $state")
+            is AdState.LoadFailed -> state.cause.asFailure()
+            is AdState.Bid -> state.result.asSuccess()
+            else -> error("unexpected: $state")
         }
     }
 
@@ -111,7 +109,7 @@ internal class MaxInterstitialImpl(
         /**
          * Applovin fills the bid automatically. It's not needed to fill it manually.
          */
-        State.Fill.Success(
+        AdState.Fill(
             requireNotNull(interstitialAd?.asAd())
         ).also { state.value = it }.ad
     }
@@ -120,7 +118,7 @@ internal class MaxInterstitialImpl(
         if (interstitialAd?.isReady == true) {
             interstitialAd?.showAd()
         } else {
-            state.value = State.Show.ShowFailed(BidonError.FullscreenAdNotReady)
+            state.value = AdState.ShowFailed(BidonError.FullscreenAdNotReady)
         }
     }
 

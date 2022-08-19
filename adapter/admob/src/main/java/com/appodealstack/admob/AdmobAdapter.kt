@@ -21,8 +21,8 @@ val AdmobDemandId = DemandId("admob")
 private value class AdUnitId(val value: String)
 
 class AdmobAdapter : Adapter, Initializable<AdmobInitParameters>,
-    AdProvider.Rewarded<AdmobFullscreenAdParams>,
-    AdProvider.Interstitial<AdmobFullscreenAdParams> {
+    AdProvider.Rewarded<AdmobFullscreenAdAuctionParams>,
+    AdProvider.Interstitial<AdmobFullscreenAdAuctionParams> {
     private lateinit var context: Context
 
     override val demandId = AdmobDemandId
@@ -42,11 +42,11 @@ class AdmobAdapter : Adapter, Initializable<AdmobInitParameters>,
         }
     }
 
-    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<AdmobFullscreenAdParams> {
+    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<AdmobFullscreenAdAuctionParams> {
         return AdmobInterstitialImpl(demandId, demandAd, roundId)
     }
 
-    override fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<AdmobFullscreenAdParams> {
+    override fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<AdmobFullscreenAdAuctionParams> {
         return AdmobRewardedImpl(demandId, demandAd, roundId)
     }
 

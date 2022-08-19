@@ -5,6 +5,10 @@ buildscript {
         mavenCentral()
         maven("https://plugins.gradle.org/m2/")
         maven("https://artifacts.applovin.com/android")
+        maven {
+            name = "BidMachine Ads maven repository"
+            url = uri("https://artifactory.bidmachine.io/bidmachine")
+        }
     }
     dependencies {
         classpath("com.android.tools.build:gradle:7.2.2")

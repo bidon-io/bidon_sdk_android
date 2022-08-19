@@ -149,6 +149,7 @@ internal class AuctionImpl(
                         }
                         .isSuccess
                 }
+                is AdSource.Banner -> TODO()
             }
         }
         return if (index == -1) auctionResults
@@ -225,13 +226,13 @@ internal class AuctionImpl(
         val auctionRequests = when (demandAd.adType) {
             AdType.Interstitial -> {
                 check(adTypeAdditionalData is AdTypeAdditional.Interstitial)
-                filteredAdapters.filterIsInstance<AdProvider.Interstitial<AdSource.AdParams>>().map {
+                filteredAdapters.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>().map {
                     it.interstitial(demandAd, round.id)
                 }
             }
             AdType.Rewarded -> {
                 check(adTypeAdditionalData is AdTypeAdditional.Rewarded)
-                filteredAdapters.filterIsInstance<AdProvider.Rewarded<AdSource.AdParams>>().map {
+                filteredAdapters.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().map {
                     it.rewarded(demandAd, round.id)
                 }
             }
@@ -245,7 +246,7 @@ internal class AuctionImpl(
                         withTimeoutOrNull(round.timeoutMs) {
                             auctionRequest.bid(
                                 activity = contextProvider.activity,
-                                adParams = auctionRequest.getParams(
+                                adParams = auctionRequest.getAuctionParams(
                                     priceFloor = priceFloor,
                                     timeout = timeout,
                                     lineItems = lineItems

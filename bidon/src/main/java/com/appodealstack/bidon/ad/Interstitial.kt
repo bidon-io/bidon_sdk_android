@@ -4,7 +4,7 @@ import android.app.Activity
 import com.appodealstack.bidon.BidON
 import com.appodealstack.bidon.BidOnSdk.Companion.DefaultPlacement
 import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.adapters.AdSource.State
+import com.appodealstack.bidon.adapters.AdState
 import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.domain.Auction
@@ -136,21 +136,18 @@ internal class InterstitialAdImpl(
         require(adSource is AdSource.Interstitial<*>)
         observeCallbacksJob = adSource.state.onEach { state ->
             when (state) {
-                State.Initialized,
-                is State.Bid.Failure,
-                State.Bid.Requesting,
-                is State.Bid.Success,
-                is State.Fill.Failure,
-                State.Fill.LoadingResources,
-                is State.Fill.Success -> {
+                AdState.Initialized,
+                is AdState.Bid ,
+                is AdState.OnReward,
+                is AdState.Fill -> {
                     // do nothing
                 }
-                is State.Expired -> listener.onAdExpired(state.ad)
-                is State.Show.Clicked -> listener.onAdClicked(state.ad)
-                is State.Show.Closed -> listener.onAdClosed(state.ad)
-                is State.Show.Impression -> listener.onAdImpression(state.ad)
-                is State.Show.ShowFailed -> listener.onAdShowFailed(state.cause)
-                is AdSource.Rewarded.OnReward.Success -> TODO()
+                is AdState.Clicked -> listener.onAdClicked(state.ad)
+                is AdState.Closed -> listener.onAdClosed(state.ad)
+                is AdState.Impression -> listener.onAdImpression(state.ad)
+                is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
+                is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
+                is AdState.Expired -> listener.onAdExpired(state.ad)
             }
         }.launchIn(scope)
     }

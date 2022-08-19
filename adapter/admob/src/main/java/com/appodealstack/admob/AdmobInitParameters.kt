@@ -1,23 +1,23 @@
 package com.appodealstack.admob
 
 import android.view.ViewGroup
-import com.appodealstack.bidon.adapters.AdSource
+import com.appodealstack.bidon.adapters.AdAuctionParams
 import com.appodealstack.bidon.adapters.AdapterParameters
 import com.appodealstack.bidon.adapters.banners.BannerSize
 
 object AdmobInitParameters : AdapterParameters
 
-data class AdmobBannerParams(
+data class AdmobBannerAuctionParams(
     val admobLineItems: List<AdmobLineItem>,
     val bannerSize: BannerSize,
     val adContainer: ViewGroup?,
     val priceFloor: Double
-) : AdSource.AdParams
+) : AdAuctionParams
 
 data class AdmobLineItem(val price: Double, val adUnitId: String)
 
 
-data class AdmobFullscreenAdParams(
+data class AdmobFullscreenAdAuctionParams(
     val admobLineItems: List<AdmobLineItem>,
     val priceFloor: Double
-) : AdSource.AdParams
+) : AdAuctionParams

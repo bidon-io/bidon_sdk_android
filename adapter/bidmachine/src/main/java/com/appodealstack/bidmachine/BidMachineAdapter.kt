@@ -20,8 +20,8 @@ internal typealias BidMachineBannerSize = io.bidmachine.banner.BannerSize
 internal typealias BMAuctionResult = io.bidmachine.models.AuctionResult
 
 class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
-    AdProvider.Rewarded<BMFullscreenParams>,
-    AdProvider.Interstitial<BMFullscreenParams> {
+    AdProvider.Rewarded<BMFullscreenAuctionParams>,
+    AdProvider.Interstitial<BMFullscreenAuctionParams> {
     private lateinit var context: Context
 
     override val demandId = BidMachineDemandId
@@ -43,11 +43,11 @@ class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
 
     override fun parseConfigParam(json: JsonObject): BidMachineParameters = json.parse(BidMachineParameters.serializer())
 
-    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<BMFullscreenParams> {
+    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<BMFullscreenAuctionParams> {
         return BMInterstitialAdImpl(demandId, demandAd, roundId)
     }
 
-    override fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<BMFullscreenParams> {
+    override fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<BMFullscreenAuctionParams> {
         return BMRewardedAdImpl(demandId, demandAd, roundId)
     }
 

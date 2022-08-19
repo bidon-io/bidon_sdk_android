@@ -18,7 +18,7 @@ import kotlin.coroutines.resume
 val ApplovinMaxDemandId = DemandId("applovin")
 
 class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
-    AdProvider.Interstitial<ApplovinFullscreenAdParams>,
+    AdProvider.Interstitial<ApplovinFullscreenAdAuctionParams>,
     AdRevenueSource by AdRevenueSourceImpl(),
     ExtrasSource by ExtrasSourceImpl(),
     MediationNetwork {
@@ -52,7 +52,7 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
 
     override fun parseConfigParam(json: JsonObject): ApplovinParameters = json.parse(ApplovinParameters.serializer())
 
-    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<ApplovinFullscreenAdParams> {
+    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
         return MaxInterstitialImpl(demandId, demandAd, roundId)
     }
 
