@@ -100,55 +100,27 @@ internal class AuctionImpl(
 
     private suspend fun fillWinner(auctionResults: List<AuctionResult>, timeout: Long): List<AuctionResult> {
         val index = auctionResults.indexOfFirst { auctionResult ->
-            when (val adSource = auctionResult.adSource) {
-                is AdSource.Interstitial<*> -> {
-                    logInfo(Tag, "Filling winner started for auction result: $auctionResult")
-                    val fillResult = withTimeoutOrNull(timeout) {
-                        adSource.fill()
-                    } ?: BidonError.FillTimedOut(auctionResult.adSource.demandId).asFailure()
+            val fillResult = withTimeoutOrNull(timeout) {
+                logInfo(Tag, "Filling winner started for auction result: $auctionResult")
+                auctionResult.adSource.fill()
+            } ?: BidonError.FillTimedOut(auctionResult.adSource.demandId).asFailure()
 
-                    fillResult
-                        .onFailure { cause ->
-                            logError(Tag, "Failed to fill: ${adSource.demandId}", cause)
-                            (adSource as? WinLossNotifiable)?.let {
-                                logInfo(Tag, "Notified loss: ${adSource.demandId}")
-                                it.notifyLoss()
-                            }
-                        }
-                        .onSuccess {
-                            logInfo(Tag, "Winner filled: ${adSource.demandId}")
-                            (adSource as? WinLossNotifiable)?.let {
-                                logInfo(Tag, "Notified win: ${adSource.demandId}")
-                                it.notifyWin()
-                            }
-                        }
-                        .isSuccess
+            fillResult
+                .onFailure { cause ->
+                    logError(Tag, "Failed to fill: ${auctionResult.adSource.demandId}", cause)
+                    (auctionResult.adSource as? WinLossNotifiable)?.let {
+                        logInfo(Tag, "Notified loss: ${auctionResult.adSource.demandId}")
+                        it.notifyLoss()
+                    }
                 }
-                is AdSource.Rewarded<*> -> {
-                    logInfo(Tag, "Filling winner started for auction result: $auctionResult")
-                    val fillResult = withTimeoutOrNull(timeout) {
-                        adSource.fill()
-                    } ?: BidonError.FillTimedOut(auctionResult.adSource.demandId).asFailure()
-
-                    fillResult
-                        .onFailure { cause ->
-                            logError(Tag, "Failed to fill: ${adSource.demandId}", cause)
-                            (adSource as? WinLossNotifiable)?.let {
-                                logInfo(Tag, "Notified loss: ${adSource.demandId}")
-                                it.notifyLoss()
-                            }
-                        }
-                        .onSuccess {
-                            logInfo(Tag, "Winner filled: ${adSource.demandId}")
-                            (adSource as? WinLossNotifiable)?.let {
-                                logInfo(Tag, "Notified win: ${adSource.demandId}")
-                                it.notifyWin()
-                            }
-                        }
-                        .isSuccess
+                .onSuccess {
+                    logInfo(Tag, "Winner filled: ${auctionResult.adSource.demandId}")
+                    (auctionResult.adSource as? WinLossNotifiable)?.let {
+                        logInfo(Tag, "Notified win: ${auctionResult.adSource.demandId}")
+                        it.notifyWin()
+                    }
                 }
-                is AdSource.Banner -> TODO()
-            }
+                .isSuccess
         }
         return if (index == -1) auctionResults
         else auctionResults.drop(index)
