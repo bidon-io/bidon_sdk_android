@@ -6,6 +6,7 @@ import com.applovin.sdk.AppLovinSdk
 import com.appodealstack.applovin.ext.adapterVersion
 import com.appodealstack.applovin.ext.sdkVersion
 import com.appodealstack.applovin.impl.MaxInterstitialImpl
+import com.appodealstack.applovin.impl.MaxRewardedImpl
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.analytics.MediationNetwork
@@ -19,6 +20,7 @@ val ApplovinMaxDemandId = DemandId("applovin")
 
 class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
     AdProvider.Interstitial<ApplovinFullscreenAdAuctionParams>,
+    AdProvider.Rewarded<ApplovinFullscreenAdAuctionParams>,
     AdRevenueSource by AdRevenueSourceImpl(),
     ExtrasSource by ExtrasSourceImpl(),
     MediationNetwork {
@@ -54,6 +56,10 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
 
     override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
         return MaxInterstitialImpl(demandId, demandAd, roundId)
+    }
+
+    override fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<ApplovinFullscreenAdAuctionParams> {
+        return MaxRewardedImpl(demandId, demandAd, roundId)
     }
 
     //    override fun banner(context: Context, demandAd: DemandAd, adParams: ApplovinBannerParams): OldAuctionRequest {
