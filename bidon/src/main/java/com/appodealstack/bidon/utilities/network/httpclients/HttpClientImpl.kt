@@ -1,5 +1,7 @@
 package com.appodealstack.bidon.utilities.network.httpclients
 
+import com.appodeal.ads.network.httpclients.verification.Verifier
+import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.utilities.network.HttpClient
 import com.appodealstack.bidon.utilities.network.HttpError
 import com.appodealstack.bidon.utilities.network.NetworkSettings.BaseBidOnUrl
@@ -10,8 +12,6 @@ import com.appodealstack.bidon.utilities.network.encoders.RequestDataDecoder
 import com.appodealstack.bidon.utilities.network.encoders.RequestDataEncoder
 import com.appodealstack.bidon.utilities.network.encoders.ext.decodeWith
 import com.appodealstack.bidon.utilities.network.encoders.ext.encodeWith
-import com.appodeal.ads.network.httpclients.verification.Verifier
-import com.appodealstack.bidon.core.ext.logInternal
 
 internal val jsonHttpClient by lazy {
     HttpClientImpl(

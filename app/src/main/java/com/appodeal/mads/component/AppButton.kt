@@ -16,7 +16,8 @@ fun AppButton(
         modifier = modifier,
         onClick = {
             onClick.invoke()
-        }) {
+        }
+    ) {
         Text(text = text)
     }
 }
@@ -31,7 +32,8 @@ fun AppTextButton(
         modifier = modifier,
         onClick = {
             onClick.invoke()
-        }) {
+        }
+    ) {
         Text(text = text)
     }
 }

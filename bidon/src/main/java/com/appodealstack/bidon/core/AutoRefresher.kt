@@ -83,18 +83,18 @@ internal class AutoRefresherImpl(
 //                        //auctionListener.auctionSucceed(auctionResult)
 //                    },
 //                    onDemandLoadFailed = { throwable ->
-////                        auctionListener.demandAuctionFailed(demandAd, throwable)
+// //                        auctionListener.demandAuctionFailed(demandAd, throwable)
 //                    },
 //                    onAuctionFailed = {
 //                        adsRepository.destroyResults(demandAd)
-////                        auctionListener.auctionFailed(demandAd, it)
+// //                        auctionListener.auctionFailed(demandAd, it)
 //                    },
 //                    onWinnerFound = {
-////                        auctionListener.winnerFound(it)
+// //                        auctionListener.winnerFound(it)
 //                        onViewReady.invoke((it.adProvider as AdViewProvider).getAdView())
 //                    },
 //                    onAuctionFinished = {
-////                        auctionListener.auctionSucceed(demandAd, it)
+// //                        auctionListener.auctionSucceed(demandAd, it)
 //                        repeat()
 //                    },
 //                )
@@ -119,7 +119,6 @@ internal class AutoRefresherImpl(
         jobs.remove(demandAd)
         autoRefreshMap.remove(demandAd)
     }
-
 }
 
 const val DefaultAutoRefreshTimeoutMs = 10_000L

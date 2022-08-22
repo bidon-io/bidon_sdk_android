@@ -1,6 +1,5 @@
 package com.appodealstack.bidon.di
 import com.appodealstack.bidon.di.SimpleInjection.Scope
-
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KClass
 
@@ -65,4 +64,3 @@ internal object SimpleInjection {
         }
     }
 }
-

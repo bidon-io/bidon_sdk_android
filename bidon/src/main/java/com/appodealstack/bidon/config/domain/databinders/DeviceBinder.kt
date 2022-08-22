@@ -18,7 +18,6 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import java.util.*
 
-
 internal class DeviceBinder(
     private val contextProvider: ContextProvider
 ) : DataBinder {
@@ -31,7 +30,7 @@ internal class DeviceBinder(
         val screenSize = getScreenSize(context)
         val metrics = context.resources.displayMetrics
         return Device(
-            userAgent = "=-=-=", //TODO a28 obtain user agent
+            userAgent = "=-=-=", // TODO a28 obtain user agent
             manufacturer = Build.MANUFACTURER,
             deviceModel = "${Build.MANUFACTURER} ${Build.MODEL}",
             os = "Android",
@@ -41,7 +40,7 @@ internal class DeviceBinder(
             height = screenSize.y,
             ppi = metrics.densityDpi,
             pxRatio = metrics.density,
-            javaScriptSupport = 1,  //TODO a28 obtain javaScriptSupport. 1- supports, 0 - no
+            javaScriptSupport = 1, // TODO a28 obtain javaScriptSupport. 1- supports, 0 - no
             language = Locale.getDefault().toString(),
             carrier = getCarrier(context),
             mccmnc = getPhoneMCCMNC(context),
@@ -96,7 +95,6 @@ internal class DeviceBinder(
             Cellular5G(7),
         }
     }
-
 
     /**
      * Get screen size using [WindowManager].

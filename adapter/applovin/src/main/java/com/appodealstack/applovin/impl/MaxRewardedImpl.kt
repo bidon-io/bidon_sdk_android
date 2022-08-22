@@ -2,9 +2,10 @@ package com.appodealstack.applovin.impl
 
 import android.app.Activity
 import com.applovin.mediation.MaxAd
-import com.applovin.mediation.MaxAdListener
 import com.applovin.mediation.MaxError
-import com.applovin.mediation.ads.MaxInterstitialAd
+import com.applovin.mediation.MaxReward
+import com.applovin.mediation.MaxRewardedAdListener
+import com.applovin.mediation.ads.MaxRewardedAd
 import com.appodealstack.applovin.ApplovinFullscreenAdAuctionParams
 import com.appodealstack.applovin.ApplovinMaxDemandId
 import com.appodealstack.bidon.adapters.*
@@ -17,23 +18,23 @@ import com.appodealstack.bidon.core.ext.logInternal
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 
-internal class MaxInterstitialImpl(
+internal class MaxRewardedImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
     private val roundId: String
-) : AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
+) : AdSource.Rewarded<ApplovinFullscreenAdAuctionParams> {
 
-    private var interstitialAd: MaxInterstitialAd? = null
+    private var rewardedAd: MaxRewardedAd? = null
     private var maxAd: MaxAd? = null
 
     private val maxAdListener by lazy {
-        object : MaxAdListener {
+        object : MaxRewardedAdListener {
             override fun onAdLoaded(ad: MaxAd) {
                 maxAd = ad
                 state.value = AdState.Bid(
                     AuctionResult(
                         priceFloor = ad.revenue,
-                        adSource = this@MaxInterstitialImpl
+                        adSource = this@MaxRewardedImpl
                     )
                 )
             }
@@ -62,19 +63,30 @@ internal class MaxInterstitialImpl(
                 maxAd = ad
                 state.value = AdState.ShowFailed(error.asBidonError())
             }
+
+            override fun onRewardedVideoStarted(ad: MaxAd?) {}
+            override fun onRewardedVideoCompleted(ad: MaxAd?) {}
+
+            override fun onUserRewarded(ad: MaxAd, reward: MaxReward?) {
+                maxAd = ad
+                state.value = AdState.OnReward(
+                    ad = ad.asAd(),
+                    reward = Reward(reward?.label ?: "", reward?.amount ?: 0)
+                )
+            }
         }
     }
 
     override val state = MutableStateFlow<AdState>(AdState.Initialized)
 
     override val ad: Ad?
-        get() = maxAd?.asAd() ?: interstitialAd?.asAd()
+        get() = maxAd?.asAd() ?: rewardedAd?.asAd()
 
     override fun destroy() {
         logInternal(Tag, "destroy")
-        interstitialAd?.setListener(null)
-        interstitialAd?.destroy()
-        interstitialAd = null
+        rewardedAd?.setListener(null)
+        rewardedAd?.destroy()
+        rewardedAd = null
         maxAd = null
     }
 
@@ -90,9 +102,9 @@ internal class MaxInterstitialImpl(
         adParams: ApplovinFullscreenAdAuctionParams
     ): Result<AuctionResult> {
         logInternal(Tag, "Starting with $adParams")
-        val maxInterstitialAd = MaxInterstitialAd(adParams.adUnitId, activity).also {
+        val maxInterstitialAd = MaxRewardedAd.getInstance(adParams.adUnitId, activity).also {
             it.setListener(maxAdListener)
-            interstitialAd = it
+            rewardedAd = it
         }
         maxInterstitialAd.loadAd()
         val state = state.first {
@@ -110,13 +122,13 @@ internal class MaxInterstitialImpl(
          * Applovin fills the bid automatically. It's not needed to fill it manually.
          */
         AdState.Fill(
-            requireNotNull(interstitialAd?.asAd())
+            requireNotNull(rewardedAd?.asAd())
         ).also { state.value = it }.ad
     }
 
     override fun show(activity: Activity) {
-        if (interstitialAd?.isReady == true) {
-            interstitialAd?.showAd()
+        if (rewardedAd?.isReady == true) {
+            rewardedAd?.showAd()
         } else {
             state.value = AdState.ShowFailed(BidonError.FullscreenAdNotReady)
         }
@@ -142,7 +154,7 @@ internal class MaxInterstitialImpl(
     /**
      * Use it before loaded ECPM is unknown
      */
-    private fun MaxInterstitialAd?.asAd(): Ad {
+    private fun MaxRewardedAd?.asAd(): Ad {
         val maxAd = this
         return Ad(
             demandId = ApplovinMaxDemandId,
@@ -157,5 +169,5 @@ internal class MaxInterstitialImpl(
     }
 }
 
-private const val Tag = "ApplovinMax Interstitial"
+private const val Tag = "ApplovinMax Rewarded"
 private const val USD = "USD"

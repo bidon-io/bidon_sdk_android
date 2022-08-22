@@ -71,9 +71,6 @@ internal class AuctionImpl(
             }
             notifyLosers(finalResults)
 
-            // Subscribe to winner
-
-
             // Finish auction
             state.value = AuctionState.Finished
         }
@@ -96,9 +93,9 @@ internal class AuctionImpl(
     private fun notifyLosers(finalResults: List<AuctionResult>) {
         finalResults.drop(1)
             .map { it.adSource }
-            .filterIsInstance<AdSource.WinLossNotifiable>()
+            .filterIsInstance<WinLossNotifiable>()
             .forEach {
-                logInfo(Tag, "Notified loss: ${(it as? AdSource)?.demandId}")
+                logInfo(Tag, "Notified loss: ${(it as? AdSource<*>)?.demandId}")
                 it.notifyLoss()
             }
     }
@@ -115,20 +112,44 @@ internal class AuctionImpl(
                     fillResult
                         .onFailure { cause ->
                             logError(Tag, "Failed to fill: ${adSource.demandId}", cause)
-                            (adSource as? AdSource.WinLossNotifiable)?.let {
+                            (adSource as? WinLossNotifiable)?.let {
                                 logInfo(Tag, "Notified loss: ${adSource.demandId}")
                                 it.notifyLoss()
                             }
                         }
                         .onSuccess {
                             logInfo(Tag, "Winner filled: ${adSource.demandId}")
-                            (adSource as? AdSource.WinLossNotifiable)?.let {
+                            (adSource as? WinLossNotifiable)?.let {
                                 logInfo(Tag, "Notified win: ${adSource.demandId}")
                                 it.notifyWin()
                             }
                         }
                         .isSuccess
                 }
+                is AdSource.Rewarded<*> -> {
+                    logInfo(Tag, "Filling winner started for auction result: $auctionResult")
+                    val fillResult = withTimeoutOrNull(timeout) {
+                        adSource.fill()
+                    } ?: BidonError.FillTimedOut(auctionResult.adSource.demandId).asFailure()
+
+                    fillResult
+                        .onFailure { cause ->
+                            logError(Tag, "Failed to fill: ${adSource.demandId}", cause)
+                            (adSource as? WinLossNotifiable)?.let {
+                                logInfo(Tag, "Notified loss: ${adSource.demandId}")
+                                it.notifyLoss()
+                            }
+                        }
+                        .onSuccess {
+                            logInfo(Tag, "Winner filled: ${adSource.demandId}")
+                            (adSource as? WinLossNotifiable)?.let {
+                                logInfo(Tag, "Notified win: ${adSource.demandId}")
+                                it.notifyWin()
+                            }
+                        }
+                        .isSuccess
+                }
+                is AdSource.Banner -> TODO()
             }
         }
         return if (index == -1) auctionResults
@@ -164,7 +185,8 @@ internal class AuctionImpl(
                      * Received price should not be less then initial one [minPriceFloor].
                      */
                     it.priceFloor >= minPriceFloor
-                })
+                }
+            )
             roundsListener.roundSucceed(
                 roundId = round.id,
                 roundResults = roundResults
@@ -205,12 +227,17 @@ internal class AuctionImpl(
         val auctionRequests = when (demandAd.adType) {
             AdType.Interstitial -> {
                 check(adTypeAdditionalData is AdTypeAdditional.Interstitial)
-                filteredAdapters.filterIsInstance<AdProvider.Interstitial<AdSource.AdParams>>().map {
+                filteredAdapters.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>().map {
                     it.interstitial(demandAd, round.id)
                 }
             }
+            AdType.Rewarded -> {
+                check(adTypeAdditionalData is AdTypeAdditional.Rewarded)
+                filteredAdapters.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().map {
+                    it.rewarded(demandAd, round.id)
+                }
+            }
             AdType.Banner -> TODO()
-            AdType.Rewarded -> TODO()
         }
         auctionRequests
             .map { auctionRequest ->
@@ -220,7 +247,7 @@ internal class AuctionImpl(
                         withTimeoutOrNull(round.timeoutMs) {
                             auctionRequest.bid(
                                 activity = contextProvider.activity,
-                                adParams = auctionRequest.getParams(
+                                adParams = auctionRequest.getAuctionParams(
                                     priceFloor = priceFloor,
                                     timeout = timeout,
                                     lineItems = lineItems
@@ -231,12 +258,12 @@ internal class AuctionImpl(
                 }
             }.mapIndexedNotNull { index, deferred ->
                 deferred.await()
-                    .onSuccess {
-                        logInfo(Tag, "Round '${round.id}' result #$index: ${it.result}")
+                    .onSuccess { auctionResult ->
+                        logInfo(Tag, "Round '${round.id}' result #$index: $auctionResult")
                     }
                     .onFailure {
                         logError(Tag, "Round '${round.id}'. Error while receiving bid.", it)
-                    }.getOrNull()?.result
+                    }.getOrNull()
             }.also {
                 logInfo(Tag, "Round '${round.id}' finished with ${it.size} results: $it")
             }

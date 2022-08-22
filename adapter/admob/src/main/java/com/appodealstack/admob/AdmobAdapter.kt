@@ -5,6 +5,7 @@ import android.content.Context
 import com.appodealstack.admob.ext.adapterVersion
 import com.appodealstack.admob.ext.sdkVersion
 import com.appodealstack.admob.impl.AdmobInterstitialImpl
+import com.appodealstack.admob.impl.AdmobRewardedImpl
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.config.data.models.AdapterInfo
@@ -19,8 +20,11 @@ val AdmobDemandId = DemandId("admob")
 @JvmInline
 private value class AdUnitId(val value: String)
 
-class AdmobAdapter : Adapter, Initializable<AdmobInitParameters>,
-AdProvider.Interstitial<AdmobFullscreenAdParams>{
+class AdmobAdapter :
+    Adapter,
+    Initializable<AdmobInitParameters>,
+    AdProvider.Rewarded<AdmobFullscreenAdAuctionParams>,
+    AdProvider.Interstitial<AdmobFullscreenAdAuctionParams> {
     private lateinit var context: Context
 
     override val demandId = AdmobDemandId
@@ -40,77 +44,15 @@ AdProvider.Interstitial<AdmobFullscreenAdParams>{
         }
     }
 
-    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<AdmobFullscreenAdParams> {
+    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<AdmobFullscreenAdAuctionParams> {
         return AdmobInterstitialImpl(demandId, demandAd, roundId)
     }
 
-//    override fun rewarded(activity: Activity?, demandAd: DemandAd, adParams: AdmobFullscreenAdParams): OldAuctionRequest {
-//        return OldAuctionRequest {
-//            withContext(Dispatchers.Main) {
-//                suspendCancellableCoroutine { continuation ->
-//                    val adUnitId = adParams.admobLineItems.firstOrNull { it.price > adParams.priceFloor }?.adUnitId
-//                    if (adUnitId.isNullOrBlank()) {
-//                        continuation.resume(Result.failure(DemandError.NoAppropriateAdUnitId(demandId)))
-//                    } else {
-//                        val isFinished = AtomicBoolean(false)
-//                        val adRequest = AdRequest.Builder().build()
-//                        RewardedAd.load(
-//                            context,
-//                            adUnitId,
-//                            adRequest,
-//                            object : RewardedAdLoadCallback() {
-//                                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-//                                    if (!isFinished.getAndSet(true)) {
-//                                        continuation.resume(Result.failure(loadAdError.asBidonError()))
-//                                    }
-//                                }
-//
-//                                override fun onAdLoaded(rewardedAd: RewardedAd) {
-//                                    if (!isFinished.getAndSet(true)) {
-//                                        val ad = asAd(
-//                                            demandAd = demandAd,
-//                                            price = adParams.admobLineItems.getPrice(unitId = rewardedAd.adUnitId),
-//                                            sourceAd = rewardedAd
-//                                        )
-//                                        val auctionResult = OldAuctionResult(
-//                                            ad = ad,
-//                                            adProvider = object : OldAdProvider {
-//                                                override fun canShow(): Boolean = true
-//                                                override fun destroy() {}
-//
-//                                                override fun showAd(activity: Activity?, adParams: Bundle) {
-//                                                    if (activity == null) {
-//                                                        logInternal(
-//                                                            "AdmobDemand",
-//                                                            "Error while showing RewardedAd: activity is null."
-//                                                        )
-//                                                    } else {
-//                                                        rewardedAd.show(activity) { rewardItem ->
-//                                                            logInternal("rew", "rewardedAd.show(activity) $rewardItem")
-//                                                            SdkCore.getListenerForDemand(demandAd).onUserRewarded(
-//                                                                ad = ad,
-//                                                                reward = RewardedAdListener.Reward(
-//                                                                    label = rewardItem.type,
-//                                                                    amount = rewardItem.amount
-//                                                                )
-//                                                            )
-//                                                        }
-//                                                    }
-//                                                }
-//                                            }
-//                                        )
-//                                        rewardedAd.setCoreListener(demandAd, auctionResult)
-//                                        continuation.resume(Result.success(auctionResult))
-//                                    }
-//                                }
-//                            })
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    override fun banner(context: Context, demandAd: DemandAd, adParams: AdmobBannerParams): OldAuctionRequest {
+    override fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<AdmobFullscreenAdAuctionParams> {
+        return AdmobRewardedImpl(demandId, demandAd, roundId)
+    }
+
+    //    override fun banner(context: Context, demandAd: DemandAd, adParams: AdmobBannerParams): OldAuctionRequest {
 //        return OldAuctionRequest {
 //            withContext(Dispatchers.Main) {
 //                suspendCancellableCoroutine { continuation ->

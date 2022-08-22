@@ -23,7 +23,6 @@ import com.appodealstack.bidon.utilities.network.NetworkSettings
 
 private const val MockUrl = "https://1e94ed35-7878-4446-8ffb-b46e4d362cb7.mock.pstmn.io"
 
-
 @Composable
 internal fun ServerSettingsScreen(
     navController: NavController,

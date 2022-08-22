@@ -10,8 +10,8 @@ import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.core.ext.*
 import com.google.android.gms.ads.*
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,35 +23,44 @@ import kotlinx.coroutines.withContext
 // $1.0 ca-app-pub-9630071911882835/7790966049
 // $2.0 ca-app-pub-9630071911882835/1445049547
 
-internal class AdmobInterstitialImpl(
+@Suppress("unused")
+internal class AdmobRewardedImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
     private val roundId: String
-) : AdSource.Interstitial<AdmobFullscreenAdAuctionParams> {
+) : AdSource.Rewarded<AdmobFullscreenAdAuctionParams> {
 
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
     private val admobLineItems = mutableListOf<AdmobLineItem>()
-    private var interstitialAd: InterstitialAd? = null
-    private val requiredInterstitialAd: InterstitialAd get() = requireNotNull(interstitialAd)
+    private var rewardedAd: RewardedAd? = null
+    private val requiredRewardedAd: RewardedAd get() = requireNotNull(rewardedAd)
 
     private val requestListener by lazy {
-        object : InterstitialAdLoadCallback() {
+        object : RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(Tag, "Error while loading ad: $loadAdError")
                 state.value = AdState.LoadFailed(loadAdError.asBidonError())
             }
 
-            override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                this@AdmobInterstitialImpl.interstitialAd = interstitialAd
-                interstitialAd.onPaidEventListener = paidListener
-                interstitialAd.fullScreenContentCallback = interstitialListener
+            override fun onAdLoaded(rewardedAd: RewardedAd) {
+                this@AdmobRewardedImpl.rewardedAd = rewardedAd
+                requiredRewardedAd.onPaidEventListener = paidListener
+                requiredRewardedAd.fullScreenContentCallback = rewardedListener
                 state.value = AdState.Bid(
                     AuctionResult(
-                        priceFloor = admobLineItems.getPriceFloor(interstitialAd.adUnitId),
-                        adSource = this@AdmobInterstitialImpl
+                        priceFloor = admobLineItems.getPriceFloor(rewardedAd.adUnitId),
+                        adSource = this@AdmobRewardedImpl
                     )
                 )
             }
+        }
+    }
+    private val onUserEarnedRewardListener by lazy {
+        OnUserEarnedRewardListener { rewardItem ->
+            state.value = AdState.OnReward(
+                ad = requiredRewardedAd.asAd(),
+                reward = Reward(rewardItem.type, rewardItem.amount)
+            )
         }
     }
 
@@ -69,21 +78,18 @@ internal class AdmobInterstitialImpl(
             }
             val valueMicros = adValue.valueMicros
             val ecpm = adValue.valueMicros / 1_000_000L
-            logInfo(
-                Tag,
-                "OnPaidEventListener( ValueMicros=$valueMicros, $ecpm ${adValue.currencyCode}, $type )"
-            )
+            logInfo(Tag, "OnPaidEventListener( ValueMicros=$valueMicros, $ecpm ${adValue.currencyCode}, $type )")
         }
     }
 
-    private val interstitialListener by lazy {
+    private val rewardedListener by lazy {
         object : FullScreenContentCallback() {
             override fun onAdClicked() {
-                state.value = AdState.Clicked(requiredInterstitialAd.asAd())
+                state.value = AdState.Clicked(requiredRewardedAd.asAd())
             }
 
             override fun onAdDismissedFullScreenContent() {
-                state.value = AdState.Closed(requiredInterstitialAd.asAd())
+                state.value = AdState.Closed(requiredRewardedAd.asAd())
             }
 
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
@@ -91,7 +97,7 @@ internal class AdmobInterstitialImpl(
             }
 
             override fun onAdImpression() {
-                state.value = AdState.Impression(requiredInterstitialAd.asAd())
+                state.value = AdState.Impression(requiredRewardedAd.asAd())
             }
 
             override fun onAdShowedFullScreenContent() {}
@@ -99,14 +105,14 @@ internal class AdmobInterstitialImpl(
     }
 
     override val ad: Ad?
-        get() = interstitialAd?.asAd()
+        get() = rewardedAd?.asAd()
 
     override val state = MutableStateFlow<AdState>(AdState.Initialized)
 
     override fun destroy() {
-        interstitialAd?.onPaidEventListener = null
-        interstitialAd?.fullScreenContentCallback = null
-        interstitialAd = null
+        rewardedAd?.onPaidEventListener = null
+        rewardedAd?.fullScreenContentCallback = null
+        rewardedAd = null
         admobLineItems.clear()
     }
 
@@ -135,7 +141,7 @@ internal class AdmobInterstitialImpl(
                 val adRequest = AdRequest.Builder().build()
                 val adUnitId = admobLineItems.firstOrNull { it.price > adParams.priceFloor }?.adUnitId
                 if (!adUnitId.isNullOrBlank()) {
-                    InterstitialAd.load(context, adUnitId, adRequest, requestListener)
+                    RewardedAd.load(context, adUnitId, adRequest, requestListener)
                 } else {
                     val error = BidonError.NoAppropriateAdUnitId
                     logError(
@@ -163,19 +169,19 @@ internal class AdmobInterstitialImpl(
          * Admob fills the bid automatically. It's not needed to fill it manually.
          */
         AdState.Fill(
-            requireNotNull(interstitialAd?.asAd())
+            requiredRewardedAd.asAd()
         ).also { state.value = it }.ad
     }
 
     override fun show(activity: Activity) {
-        if (interstitialAd == null) {
+        if (rewardedAd == null) {
             state.value = AdState.ShowFailed(BidonError.FullscreenAdNotReady)
         } else {
-            interstitialAd?.show(activity)
+            rewardedAd?.show(activity, onUserEarnedRewardListener)
         }
     }
 
-    private fun InterstitialAd.asAd(): Ad {
+    private fun RewardedAd.asAd(): Ad {
         return Ad(
             demandId = demandId,
             demandAd = demandAd,
@@ -193,4 +199,4 @@ internal class AdmobInterstitialImpl(
     }
 }
 
-private const val Tag = "Admob Interstitial"
+private const val Tag = "Admob Rewarded"

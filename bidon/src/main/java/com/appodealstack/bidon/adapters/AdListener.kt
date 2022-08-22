@@ -20,12 +20,10 @@ interface AdListener {
 }
 
 interface RewardedAdListener {
-    fun onRewardedStarted(ad: Ad) {}
-    fun onRewardedCompleted(ad: Ad) {}
     fun onUserRewarded(ad: Ad, reward: Reward?) {}
-
-    data class Reward(
-        val label: String,
-        val amount: Int
-    )
 }
+
+data class Reward(
+    val label: String,
+    val amount: Int
+)

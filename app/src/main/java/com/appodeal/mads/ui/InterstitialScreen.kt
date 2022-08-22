@@ -115,7 +115,7 @@ fun InterstitialScreen(
             .background(MaterialTheme.colors.background)
     ) {
         AppToolbar(
-            title = "Max Interstitial",
+            title = "Interstitial Ad",
             onNavigationButtonClicked = { navController.popBackStack() }
         )
         Column(

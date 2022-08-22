@@ -16,5 +16,5 @@ class OldAuctionResult(
 
 data class AuctionResult(
     val priceFloor: Double,
-    val adSource: AdSource,
+    val adSource: AdSource<*>,
 )

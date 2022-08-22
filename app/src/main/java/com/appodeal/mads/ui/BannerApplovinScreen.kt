@@ -111,7 +111,6 @@ fun BannerApplovinScreen(navController: NavHostController, viewModel: BannerAppl
                 valueRange = 0f..30f
             )
 
-
             AppButton(text = "Create banner") {
                 viewModel.createAd(context)
             }

@@ -30,7 +30,6 @@ val BidonJson by lazy {
     }
 }
 
-
 fun <T> JsonElement.parse(serializer: KSerializer<T>): T {
     return BidonJson.decodeFromJsonElement(
         deserializer = serializer,

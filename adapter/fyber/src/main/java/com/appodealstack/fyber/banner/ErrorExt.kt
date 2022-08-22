@@ -1,10 +1,10 @@
 package com.appodealstack.fyber.banner
 
-import com.appodealstack.fyber.FairBidDemandId
 import com.appodealstack.bidon.adapters.DemandError
+import com.appodealstack.fyber.FairBidDemandId
 import com.fyber.fairbid.ads.RequestFailure
 
-internal fun RequestFailure?.asDemandError(): DemandError = when(this){
+internal fun RequestFailure?.asDemandError(): DemandError = when (this) {
     RequestFailure.TIMEOUT -> DemandError.NetworkTimeout(FairBidDemandId)
     RequestFailure.NO_FILL -> DemandError.NoFill(FairBidDemandId)
     RequestFailure.BAD_CREDENTIALS -> DemandError.BadCredential(FairBidDemandId)

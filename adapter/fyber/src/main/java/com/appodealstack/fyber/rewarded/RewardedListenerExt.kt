@@ -30,14 +30,12 @@ internal fun MutableSharedFlow<RewardedInterceptor>.initRewardedListener() {
             rewardedInterceptorFlow.tryEmit(
                 RewardedInterceptor.ShowFailed(placementId)
             )
-
         }
 
         override fun onAvailable(placementId: String) {
             rewardedInterceptorFlow.tryEmit(
                 RewardedInterceptor.Loaded(placementId)
             )
-
         }
 
         override fun onUnavailable(placementId: String) {

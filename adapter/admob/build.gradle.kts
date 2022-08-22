@@ -11,15 +11,15 @@ project.extra.apply {
 }
 
 android {
-    defaultConfig{
+    defaultConfig {
         ADAPTER_VERSION = Versions.Adapters.Admob
     }
 }
 
-//publishInfo {
+// publishInfo {
 //    versionName = "0.0.1"
 //    artifactId = "admob-adapter"
-//}
+// }
 
 dependencies {
     implementation(project(":bidon"))

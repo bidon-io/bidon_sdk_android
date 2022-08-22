@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 
 @Composable
 internal fun AppTheme(
-    darkTheme: Boolean = true,//isSystemInDarkTheme(),
+    darkTheme: Boolean = true, // isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
@@ -16,8 +16,8 @@ internal fun AppTheme(
     )
 }
 
-//@Composable
-//internal fun SetSystemBarColors() {
+// @Composable
+// internal fun SetSystemBarColors() {
 //    val systemUiController = rememberSystemUiController()
 //    val useDarkIcons = MaterialTheme.colors.isLight
 //    val bgColor = MaterialTheme.colors.background
@@ -27,4 +27,4 @@ internal fun AppTheme(
 //            darkIcons = useDarkIcons
 //        )
 //    }
-//}
+// }
