@@ -133,9 +133,8 @@ internal class RewardedImpl(
 
     private fun subscribeToWinner(adSource: AdSource<*>) {
         require(adSource is AdSource.Rewarded<*>)
-        observeCallbacksJob = adSource.state.onEach { state ->
+        observeCallbacksJob = adSource.adState.onEach { state ->
             when (state) {
-                AdState.Initialized,
                 is AdState.Bid,
                 is AdState.Fill -> {
                     // do nothing

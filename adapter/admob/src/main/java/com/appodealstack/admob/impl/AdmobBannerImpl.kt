@@ -1,8 +1,8 @@
 package com.appodealstack.admob.impl
 
 import android.app.Activity
+import android.content.Context
 import android.view.View
-import android.view.ViewGroup
 import com.appodealstack.admob.AdmobBannerAuctionParams
 import com.appodealstack.admob.AdmobLineItem
 import com.appodealstack.admob.asBidonError
@@ -16,7 +16,7 @@ import com.google.android.gms.ads.*
 import com.google.android.gms.ads.AdListener
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
@@ -25,6 +25,11 @@ internal class AdmobBannerImpl(
     private val demandAd: DemandAd,
     private val roundId: String
 ) : AdSource.Banner<AdmobBannerAuctionParams> {
+
+    override val ad: Ad?
+        get() = adView?.asAd()
+
+    override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
 
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
     private val admobLineItems = mutableListOf<AdmobLineItem>()
@@ -35,31 +40,35 @@ internal class AdmobBannerImpl(
         object : AdListener() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(Tag, "Error while loading ad: $loadAdError")
-                state.value = AdState.LoadFailed(loadAdError.asBidonError())
+                adState.tryEmit(AdState.LoadFailed(loadAdError.asBidonError()))
             }
 
             override fun onAdLoaded() {
+                logError(Tag, "Loaded successfully: $adView")
                 adView?.let {
+                    logError(Tag, "Loaded successfully: $adView")
                     it.onPaidEventListener = paidListener
-                    state.value = AdState.Bid(
-                        AuctionResult(
-                            priceFloor = admobLineItems.getPriceFloor(it.adUnitId),
-                            adSource = this@AdmobBannerImpl
+                    adState.tryEmit(
+                        AdState.Bid(
+                            AuctionResult(
+                                priceFloor = admobLineItems.getPriceFloor(it.adUnitId),
+                                adSource = this@AdmobBannerImpl
+                            )
                         )
                     )
                 }
             }
 
             override fun onAdClicked() {
-                state.value = AdState.Clicked(requiredAdView.asAd())
+                adState.tryEmit(AdState.Clicked(requiredAdView.asAd()))
             }
 
             override fun onAdClosed() {
-                state.value = AdState.Closed(requiredAdView.asAd())
+                adState.tryEmit(AdState.Closed(requiredAdView.asAd()))
             }
 
             override fun onAdImpression() {
-                state.value = AdState.Impression(requiredAdView.asAd())
+                adState.tryEmit(AdState.Impression(requiredAdView.asAd()))
             }
 
             override fun onAdOpened() {}
@@ -87,11 +96,6 @@ internal class AdmobBannerImpl(
         }
     }
 
-    override val ad: Ad?
-        get() = adView?.asAd()
-
-    override val state = MutableStateFlow<AdState>(AdState.Initialized)
-
     override fun destroy() {
         adView?.onPaidEventListener = null
         adView = null
@@ -99,11 +103,11 @@ internal class AdmobBannerImpl(
     }
 
     override fun getAuctionParams(
+        context: Context,
         priceFloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         bannerSize: BannerSize,
-        adContainer: ViewGroup,
     ): AdAuctionParams {
         return AdmobBannerAuctionParams(
             admobLineItems = lineItems
@@ -115,7 +119,7 @@ internal class AdmobBannerImpl(
                 }.sortedBy { it.price },
             priceFloor = priceFloor,
             bannerSize = bannerSize,
-            adContainer = adContainer,
+            context = context,
         )
     }
 
@@ -126,7 +130,7 @@ internal class AdmobBannerImpl(
             val adUnitId = admobLineItems.firstOrNull { it.price > adParams.priceFloor }?.adUnitId
             val admobBannerSize = adParams.bannerSize.asAdmobAdSize()
             if (!adUnitId.isNullOrBlank() && admobBannerSize != null) {
-                val adView = AdView(adParams.adContainer.context).also {
+                val adView = AdView(adParams.context).also {
                     adView = it
                 }
                 adView.setAdSize(admobBannerSize)
@@ -141,9 +145,10 @@ internal class AdmobBannerImpl(
                     message = "No appropriate AdUnitId found for price_floor=${adParams.priceFloor}. LineItems: $admobLineItems",
                     error = error
                 )
-                state.value = AdState.LoadFailed(error)
+                adState.tryEmit(AdState.LoadFailed(error))
             }
-            val state = state.first {
+            val state = adState.first {
+                logInternal(Tag, "+++++ >>>>>> $it")
                 it is AdState.Bid || it is AdState.LoadFailed
             }
             when (state) {
@@ -160,7 +165,7 @@ internal class AdmobBannerImpl(
          */
         AdState.Fill(
             requireNotNull(adView?.asAd())
-        ).also { state.value = it }.ad
+        ).also { adState.tryEmit(it) }.ad
     }
 
     override fun show(activity: Activity) {}

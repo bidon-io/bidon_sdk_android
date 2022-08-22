@@ -134,9 +134,8 @@ internal class InterstitialAdImpl(
 
     private fun subscribeToWinner(adSource: AdSource<*>) {
         require(adSource is AdSource.Interstitial<*>)
-        observeCallbacksJob = adSource.state.onEach { state ->
+        observeCallbacksJob = adSource.adState.onEach { state ->
             when (state) {
-                AdState.Initialized,
                 is AdState.Bid,
                 is AdState.OnReward,
                 is AdState.Fill -> {

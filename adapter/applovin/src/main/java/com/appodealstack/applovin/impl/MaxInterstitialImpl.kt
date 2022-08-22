@@ -14,7 +14,7 @@ import com.appodealstack.bidon.core.ext.asFailure
 import com.appodealstack.bidon.core.ext.asSuccess
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInternal
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 
 internal class MaxInterstitialImpl(
@@ -30,42 +30,44 @@ internal class MaxInterstitialImpl(
         object : MaxAdListener {
             override fun onAdLoaded(ad: MaxAd) {
                 maxAd = ad
-                state.value = AdState.Bid(
-                    AuctionResult(
-                        priceFloor = ad.revenue,
-                        adSource = this@MaxInterstitialImpl
+                adState.tryEmit(
+                    AdState.Bid(
+                        AuctionResult(
+                            priceFloor = ad.revenue,
+                            adSource = this@MaxInterstitialImpl
+                        )
                     )
                 )
             }
 
             override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
                 logError(Tag, "(code=${error.code}) ${error.message}", error.asBidonError())
-                state.value = AdState.LoadFailed(error.asBidonError())
+                adState.tryEmit(AdState.LoadFailed(error.asBidonError()))
             }
 
             override fun onAdDisplayed(ad: MaxAd) {
                 maxAd = ad
-                state.value = AdState.Impression(ad.asAd())
+                adState.tryEmit(AdState.Impression(ad.asAd()))
             }
 
             override fun onAdHidden(ad: MaxAd) {
                 maxAd = ad
-                state.value = AdState.Closed(ad.asAd())
+                adState.tryEmit(AdState.Closed(ad.asAd()))
             }
 
             override fun onAdClicked(ad: MaxAd) {
                 maxAd = ad
-                state.value = AdState.Clicked(ad.asAd())
+                adState.tryEmit(AdState.Clicked(ad.asAd()))
             }
 
             override fun onAdDisplayFailed(ad: MaxAd, error: MaxError) {
                 maxAd = ad
-                state.value = AdState.ShowFailed(error.asBidonError())
+                adState.tryEmit(AdState.ShowFailed(error.asBidonError()))
             }
         }
     }
 
-    override val state = MutableStateFlow<AdState>(AdState.Initialized)
+    override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
 
     override val ad: Ad?
         get() = maxAd?.asAd() ?: interstitialAd?.asAd()
@@ -78,7 +80,12 @@ internal class MaxInterstitialImpl(
         maxAd = null
     }
 
-    override fun getAuctionParams(activity: Activity, priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdAuctionParams {
+    override fun getAuctionParams(
+        activity: Activity,
+        priceFloor: Double,
+        timeout: Long,
+        lineItems: List<LineItem>
+    ): AdAuctionParams {
         return ApplovinFullscreenAdAuctionParams(
             activity = activity,
             adUnitId = checkNotNull(lineItems.first { it.demandId == demandId.demandId }.adUnitId),
@@ -95,7 +102,7 @@ internal class MaxInterstitialImpl(
             interstitialAd = it
         }
         maxInterstitialAd.loadAd()
-        val state = state.first {
+        val state = adState.first {
             it is AdState.Bid || it is AdState.LoadFailed
         }
         return when (state) {
@@ -111,14 +118,14 @@ internal class MaxInterstitialImpl(
          */
         AdState.Fill(
             requireNotNull(interstitialAd?.asAd())
-        ).also { state.value = it }.ad
+        ).also { adState.tryEmit(it) }.ad
     }
 
     override fun show(activity: Activity) {
         if (interstitialAd?.isReady == true) {
             interstitialAd?.showAd()
         } else {
-            state.value = AdState.ShowFailed(BidonError.FullscreenAdNotReady)
+            adState.tryEmit(AdState.ShowFailed(BidonError.FullscreenAdNotReady))
         }
     }
 

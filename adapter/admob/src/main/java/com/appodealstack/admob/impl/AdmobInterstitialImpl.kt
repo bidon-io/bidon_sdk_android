@@ -14,7 +14,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
@@ -38,17 +38,19 @@ internal class AdmobInterstitialImpl(
         object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(Tag, "Error while loading ad: $loadAdError")
-                state.value = AdState.LoadFailed(loadAdError.asBidonError())
+                adState.tryEmit(AdState.LoadFailed(loadAdError.asBidonError()))
             }
 
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
                 this@AdmobInterstitialImpl.interstitialAd = interstitialAd
                 interstitialAd.onPaidEventListener = paidListener
                 interstitialAd.fullScreenContentCallback = interstitialListener
-                state.value = AdState.Bid(
-                    AuctionResult(
-                        priceFloor = admobLineItems.getPriceFloor(interstitialAd.adUnitId),
-                        adSource = this@AdmobInterstitialImpl
+                adState.tryEmit(
+                    AdState.Bid(
+                        AuctionResult(
+                            priceFloor = admobLineItems.getPriceFloor(interstitialAd.adUnitId),
+                            adSource = this@AdmobInterstitialImpl
+                        )
                     )
                 )
             }
@@ -79,19 +81,19 @@ internal class AdmobInterstitialImpl(
     private val interstitialListener by lazy {
         object : FullScreenContentCallback() {
             override fun onAdClicked() {
-                state.value = AdState.Clicked(requiredInterstitialAd.asAd())
+                adState.tryEmit(AdState.Clicked(requiredInterstitialAd.asAd()))
             }
 
             override fun onAdDismissedFullScreenContent() {
-                state.value = AdState.Closed(requiredInterstitialAd.asAd())
+                adState.tryEmit(AdState.Closed(requiredInterstitialAd.asAd()))
             }
 
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
-                state.value = AdState.ShowFailed(error.asBidonError())
+                adState.tryEmit(AdState.ShowFailed(error.asBidonError()))
             }
 
             override fun onAdImpression() {
-                state.value = AdState.Impression(requiredInterstitialAd.asAd())
+                adState.tryEmit(AdState.Impression(requiredInterstitialAd.asAd()))
             }
 
             override fun onAdShowedFullScreenContent() {}
@@ -101,7 +103,7 @@ internal class AdmobInterstitialImpl(
     override val ad: Ad?
         get() = interstitialAd?.asAd()
 
-    override val state = MutableStateFlow<AdState>(AdState.Initialized)
+    override val adState = MutableSharedFlow<AdState>(Int.MAX_VALUE)
 
     override fun destroy() {
         interstitialAd?.onPaidEventListener = null
@@ -145,9 +147,9 @@ internal class AdmobInterstitialImpl(
                         "but LineItem with max priceFloor=${admobLineItems.last().price}. LineItems: $admobLineItems",
                     error = error
                 )
-                state.value = AdState.LoadFailed(error)
+                adState.tryEmit(AdState.LoadFailed(error))
             }
-            val state = state.first {
+            val state = adState.first {
                 it is AdState.Bid || it is AdState.LoadFailed
             }
             when (state) {
@@ -164,12 +166,12 @@ internal class AdmobInterstitialImpl(
          */
         AdState.Fill(
             requireNotNull(interstitialAd?.asAd())
-        ).also { state.value = it }.ad
+        ).also { adState.tryEmit(it) }.ad
     }
 
     override fun show(activity: Activity) {
         if (interstitialAd == null) {
-            state.value = AdState.ShowFailed(BidonError.FullscreenAdNotReady)
+            adState.tryEmit(AdState.ShowFailed(BidonError.FullscreenAdNotReady))
         } else {
             interstitialAd?.show(activity)
         }

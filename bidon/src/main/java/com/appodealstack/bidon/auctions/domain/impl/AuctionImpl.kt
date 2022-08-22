@@ -224,7 +224,7 @@ internal class AuctionImpl(
                                         priceFloor = priceFloor,
                                         timeout = timeout,
                                         lineItems = lineItems,
-                                        adContainer = adTypeAdditionalData.adContainer,
+                                        context = adTypeAdditionalData.context,
                                         bannerSize = adTypeAdditionalData.bannerSize
                                     )
                                 }

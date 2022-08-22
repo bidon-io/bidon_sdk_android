@@ -16,7 +16,6 @@ fun NavigationGraph(
     val initState = remember {
         mutableStateOf(false)
     }
-    val bannerApplovinViewModel = BannerApplovinViewModel()
 
     NavHost(navController = navController, startDestination = Screen.Main.route) {
         composable(Screen.Main.route) {
@@ -29,7 +28,7 @@ fun NavigationGraph(
             RewardedScreen(navController)
         }
         composable(Screen.Banners.route) {
-            BannerApplovinScreen(navController, bannerApplovinViewModel)
+            BannerScreen(navController)
         }
         composable(Screen.ServerSettings.route) {
             ServerSettingsScreen(navController)
