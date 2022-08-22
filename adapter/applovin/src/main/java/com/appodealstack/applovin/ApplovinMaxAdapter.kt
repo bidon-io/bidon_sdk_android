@@ -18,7 +18,9 @@ import kotlin.coroutines.resume
 
 val ApplovinMaxDemandId = DemandId("applovin")
 
-class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
+class ApplovinMaxAdapter :
+    Adapter,
+    Initializable<ApplovinParameters>,
     AdProvider.Interstitial<ApplovinFullscreenAdAuctionParams>,
     AdProvider.Rewarded<ApplovinFullscreenAdAuctionParams>,
     AdRevenueSource by AdRevenueSourceImpl(),
@@ -239,7 +241,6 @@ class ApplovinMaxAdapter : Adapter, Initializable<ApplovinParameters>,
 //        }
 //    }
 //
-
 }
 
 internal const val AdUnitIdKey = "adUnitId"

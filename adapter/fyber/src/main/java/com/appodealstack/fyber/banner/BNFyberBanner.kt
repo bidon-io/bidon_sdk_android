@@ -96,6 +96,5 @@ class FyberBannerImpl : FyberBanner {
         fyberBannerListener: FyberBannerListener,
         placementId: String
     ) {
-
     }
 }

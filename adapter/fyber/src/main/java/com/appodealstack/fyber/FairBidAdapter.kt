@@ -25,7 +25,9 @@ import kotlinx.serialization.json.JsonObject
 
 val FairBidDemandId = DemandId("fair_bid")
 
-class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
+class FairBidAdapter :
+    Adapter,
+    Initializable<FairBidParameters>,
     MediationNetwork {
     override val mediationNetwork = BNMediationNetwork.Fyber
     override val demandId: DemandId = FairBidDemandId
@@ -227,7 +229,6 @@ class FairBidAdapter : Adapter, Initializable<FairBidParameters>,
 
     override fun parseConfigParam(json: JsonObject): FairBidParameters =
         requireNotNull(json[demandId.demandId]).parse(FairBidParameters.serializer())
-
 }
 
 const val PlacementKey = "placement"

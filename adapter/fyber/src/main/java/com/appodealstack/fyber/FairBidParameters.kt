@@ -14,4 +14,4 @@ data class FairBidParameters(
 
 data class FairBidBannerAuctionParams(
     val adContainer: ViewGroup
-): AdAuctionParams
+) : AdAuctionParams

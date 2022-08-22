@@ -30,14 +30,12 @@ internal fun MutableSharedFlow<InterstitialInterceptor>.initInterstitialListener
             interstitialInterceptorFlow.tryEmit(
                 InterstitialInterceptor.ShowFailed(placementId)
             )
-
         }
 
         override fun onAvailable(placementId: String) {
             interstitialInterceptorFlow.tryEmit(
                 InterstitialInterceptor.Loaded(placementId)
             )
-
         }
 
         override fun onUnavailable(placementId: String) {

@@ -11,7 +11,7 @@ project.extra.apply {
 }
 
 android {
-    defaultConfig{
+    defaultConfig {
         ADAPTER_VERSION = Versions.BidONVersionName
     }
 }

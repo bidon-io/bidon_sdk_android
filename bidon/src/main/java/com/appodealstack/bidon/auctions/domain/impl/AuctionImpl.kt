@@ -185,7 +185,8 @@ internal class AuctionImpl(
                      * Received price should not be less then initial one [minPriceFloor].
                      */
                     it.priceFloor >= minPriceFloor
-                })
+                }
+            )
             roundsListener.roundSucceed(
                 roundId = round.id,
                 roundResults = roundResults

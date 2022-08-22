@@ -44,11 +44,10 @@ sealed interface AdSource<T : AdAuctionParams> {
     fun show(activity: Activity)
     fun destroy()
     fun getAuctionParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdAuctionParams
-    
+
     interface Interstitial<T : AdAuctionParams> : AdSource<T>
     interface Rewarded<T : AdAuctionParams> : AdSource<T>
     interface Banner<T : AdAuctionParams> : AdSource<T>
-    
 }
 interface AdAuctionParams
 

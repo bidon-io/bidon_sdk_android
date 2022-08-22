@@ -20,7 +20,6 @@ import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.component.Body2Text
 import com.appodealstack.bidon.ad.Interstitial
 
-
 @Composable
 fun OldRewardedScreen(
     navController: NavHostController,
@@ -39,7 +38,8 @@ fun OldRewardedScreen(
     ) {
         AppToolbar(
             title = "Max Rewarded",
-            onNavigationButtonClicked = { navController.popBackStack() })
+            onNavigationButtonClicked = { navController.popBackStack() }
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()

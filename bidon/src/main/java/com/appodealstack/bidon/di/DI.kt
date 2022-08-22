@@ -3,10 +3,10 @@ package com.appodealstack.bidon.di
 import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
 import com.appodealstack.bidon.auctions.data.impl.GetAuctionRequestUseCaseImpl
-import com.appodealstack.bidon.auctions.domain.GetAuctionRequestUseCase
 import com.appodealstack.bidon.auctions.domain.Auction
-import com.appodealstack.bidon.auctions.domain.impl.AuctionResolversHolderImpl
+import com.appodealstack.bidon.auctions.domain.GetAuctionRequestUseCase
 import com.appodealstack.bidon.auctions.domain.impl.AuctionImpl
+import com.appodealstack.bidon.auctions.domain.impl.AuctionResolversHolderImpl
 import com.appodealstack.bidon.config.data.impl.AdapterInstanceCreatorImpl
 import com.appodealstack.bidon.config.data.impl.GetConfigRequestUseCaseImpl
 import com.appodealstack.bidon.config.domain.*

@@ -137,7 +137,7 @@ internal class InterstitialAdImpl(
         observeCallbacksJob = adSource.state.onEach { state ->
             when (state) {
                 AdState.Initialized,
-                is AdState.Bid ,
+                is AdState.Bid,
                 is AdState.OnReward,
                 is AdState.Fill -> {
                     // do nothing
@@ -206,8 +206,6 @@ internal class InterstitialAdImpl(
             userListener?.roundFailed(roundId, error)
         }
     }
-
 }
 
 private const val Tag = "Interstitial"
-

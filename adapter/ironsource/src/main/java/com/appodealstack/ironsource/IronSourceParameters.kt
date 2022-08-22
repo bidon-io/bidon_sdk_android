@@ -1,6 +1,5 @@
 package com.appodealstack.ironsource
 
-import com.appodealstack.bidon.adapters.AdSource
 import com.appodealstack.bidon.adapters.AdapterParameters
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import kotlinx.serialization.SerialName
@@ -14,4 +13,4 @@ data class IronSourceParameters(
 
 data class ISBannerAuctionParams(
     val bannerSize: BannerSize,
-): AdAuctionParams
+) : AdAuctionParams

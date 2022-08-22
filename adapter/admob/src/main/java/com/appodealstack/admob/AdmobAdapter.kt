@@ -20,7 +20,9 @@ val AdmobDemandId = DemandId("admob")
 @JvmInline
 private value class AdUnitId(val value: String)
 
-class AdmobAdapter : Adapter, Initializable<AdmobInitParameters>,
+class AdmobAdapter :
+    Adapter,
+    Initializable<AdmobInitParameters>,
     AdProvider.Rewarded<AdmobFullscreenAdAuctionParams>,
     AdProvider.Interstitial<AdmobFullscreenAdAuctionParams> {
     private lateinit var context: Context

@@ -16,7 +16,6 @@ data class AdmobBannerAuctionParams(
 
 data class AdmobLineItem(val price: Double, val adUnitId: String)
 
-
 data class AdmobFullscreenAdAuctionParams(
     val admobLineItems: List<AdmobLineItem>,
     val priceFloor: Double

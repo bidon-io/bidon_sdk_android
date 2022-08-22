@@ -8,4 +8,3 @@ internal interface ContextProvider {
     val requiredContext: Context
     fun setContext(context: Context)
 }
-

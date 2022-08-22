@@ -8,7 +8,6 @@ import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.appodealstack.bidon.core.parse
 import com.appodealstack.ironsource.ext.adapterVersion
 import com.appodealstack.ironsource.ext.sdkVersion
-import com.appodealstack.ironsource.impl.asBidonError
 import com.ironsource.mediationsdk.IronSource
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
 import com.ironsource.mediationsdk.logger.IronSourceError
@@ -17,14 +16,15 @@ import com.ironsource.mediationsdk.sdk.InitializationListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.JsonObject
 import kotlin.coroutines.resume
 
 val IronSourceDemandId = DemandId("ironsource")
 
-class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
+class IronSourceAdapter :
+    Adapter,
+    Initializable<IronSourceParameters>,
     MediationNetwork {
 
     override val mediationNetwork = BNMediationNetwork.IronSource
@@ -233,8 +233,6 @@ class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
             monetizationNetwork = adInfo?.adNetwork
         )
     }
-
-
 }
 
 internal sealed interface InterstitialInterceptor {
@@ -258,6 +256,5 @@ internal sealed interface RewardedInterceptor {
     object Started : RewardedInterceptor
     object Ended : RewardedInterceptor
 }
-
 
 const val PlacementKey = "placement"

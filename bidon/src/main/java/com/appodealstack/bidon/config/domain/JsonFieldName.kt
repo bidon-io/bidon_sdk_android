@@ -4,12 +4,12 @@ package com.appodealstack.bidon.config.domain
  * Mark field to be taken to JSON.
  *
 data class TestMePack(
-     @JsonFieldName("field_name_1")
-     val fieldString: String,
-     @JsonFieldName("field_name_2")
-     val fieldInt: Int,
-     @SkipField
-     val fieldShouldNotBeTaken: String,
+ @JsonFieldName("field_name_1")
+ val fieldString: String,
+ @JsonFieldName("field_name_2")
+ val fieldInt: Int,
+ @SkipField
+ val fieldShouldNotBeTaken: String,
 )
  */
 @Target(AnnotationTarget.FIELD)

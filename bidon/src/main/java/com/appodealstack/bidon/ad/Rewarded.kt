@@ -209,8 +209,6 @@ internal class RewardedImpl(
             userListener?.onUserRewarded(ad, reward)
         }
     }
-
 }
 
 private const val Tag = "Rewarded"
-

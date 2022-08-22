@@ -26,7 +26,6 @@ data class AppsflyerParameters(
     val appId: String
 ) : AdapterParameters
 
-
 private val AppsflyerDemandId = DemandId("appsflyer")
 
 @Suppress("unused")
@@ -83,7 +82,6 @@ class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenu
     }
 
     override fun parseConfigParam(json: JsonObject): AppsflyerParameters = json.parse(AppsflyerParameters.serializer())
-
 }
 
 private const val Tag = "AppsflyerAdapter"

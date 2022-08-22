@@ -21,7 +21,6 @@ interface AdListener {
 
 interface RewardedAdListener {
     fun onUserRewarded(ad: Ad, reward: Reward?) {}
-
 }
 
 data class Reward(

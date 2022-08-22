@@ -19,7 +19,9 @@ val BidMachineDemandId = DemandId("bidmachine")
 internal typealias BidMachineBannerSize = io.bidmachine.banner.BannerSize
 internal typealias BMAuctionResult = io.bidmachine.models.AuctionResult
 
-class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
+class BidMachineAdapter :
+    Adapter,
+    Initializable<BidMachineParameters>,
     AdProvider.Rewarded<BMFullscreenAuctionParams>,
     AdProvider.Interstitial<BMFullscreenAuctionParams> {
     private lateinit var context: Context
@@ -39,7 +41,6 @@ class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
                 continuation.resume(Unit)
             }
         }
-
 
     override fun parseConfigParam(json: JsonObject): BidMachineParameters = json.parse(BidMachineParameters.serializer())
 
@@ -142,7 +143,6 @@ class BidMachineAdapter : Adapter, Initializable<BidMachineParameters>,
 //            monetizationNetwork = demandId.demandId
 //        )
 //    }
-
 }
 
 private const val PlacementKey = "placement"

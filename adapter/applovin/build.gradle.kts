@@ -1,9 +1,9 @@
-import ext.ADAPTER_SDK_VERSION
+
 import ext.ADAPTER_VERSION
 
 plugins {
     id("common")
-  //  id("publish-adapter")
+    //  id("publish-adapter")
 }
 
 project.extra.apply {
@@ -12,7 +12,7 @@ project.extra.apply {
 }
 
 android {
-    defaultConfig{
+    defaultConfig {
         ADAPTER_VERSION = Versions.Adapters.Applovin
     }
 }

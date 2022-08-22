@@ -147,7 +147,7 @@ internal class AdmobRewardedImpl(
                     logError(
                         tag = Tag,
                         message = "No appropriate AdUnitId found. PriceFloor=${adParams.priceFloor}, " +
-                                "but LineItem with max priceFloor=${admobLineItems.last().price}. LineItems: $admobLineItems",
+                            "but LineItem with max priceFloor=${admobLineItems.last().price}. LineItems: $admobLineItems",
                         error = error
                     )
                     state.value = AdState.LoadFailed(error)

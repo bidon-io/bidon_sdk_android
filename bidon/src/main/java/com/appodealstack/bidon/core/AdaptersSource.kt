@@ -6,4 +6,3 @@ internal interface AdaptersSource {
     val adapters: List<Adapter>
     fun add(adapters: List<Adapter>)
 }
-

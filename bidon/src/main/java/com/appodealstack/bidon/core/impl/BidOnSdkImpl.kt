@@ -54,5 +54,4 @@ internal class BidOnSdkImpl(
                 adRevenueLogger.logAdRevenue(ad)
             }
     }
-
 }

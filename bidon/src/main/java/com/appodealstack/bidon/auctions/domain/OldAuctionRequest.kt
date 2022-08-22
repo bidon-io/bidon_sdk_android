@@ -11,4 +11,3 @@ fun interface OldAuctionRequest {
 fun interface AuctionRequest {
     suspend fun execute(): Result<AuctionResult>
 }
-

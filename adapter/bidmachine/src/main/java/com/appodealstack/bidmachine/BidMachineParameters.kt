@@ -14,14 +14,14 @@ data class BidMachineParameters(
     val endpoint: String?,
     @SerialName("mediation_config")
     val mediationConfig: List<String>?,
-): AdapterParameters
+) : AdapterParameters
 
 data class BMBannerAuctionParams(
     val bannerSize: BannerSize,
     val priceFloor: Double,
-): AdAuctionParams
+) : AdAuctionParams
 
 data class BMFullscreenAuctionParams(
     val priceFloor: Double,
     val timeout: Long,
-): AdAuctionParams
+) : AdAuctionParams
