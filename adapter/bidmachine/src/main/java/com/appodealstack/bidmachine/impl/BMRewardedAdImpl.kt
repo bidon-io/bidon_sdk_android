@@ -119,25 +119,18 @@ internal class BMRewardedAdImpl(
         }
     }
 
-    override suspend fun bid(activity: Activity?, adParams: BMFullscreenAuctionParams): Result<AuctionResult> {
-        context = activity?.applicationContext
+    override suspend fun bid(adParams: BMFullscreenAuctionParams): Result<AuctionResult> {
         logInternal(Tag, "Starting with $adParams")
-
-        val context = activity?.applicationContext
-        if (context == null) {
-            state.value = AdState.LoadFailed(DemandError.NoActivity(demandId))
-        } else {
-            RewardedRequest.Builder()
-                .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.priceFloor))
-                .setLoadingTimeOut(adParams.timeout.toInt())
-                .setListener(requestListener)
-                .setPlacementId(demandAd.placement)
-                .build()
-                .also {
-                    adRequest = it
-                }
-                .request(context)
-        }
+        RewardedRequest.Builder()
+            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.priceFloor))
+            .setLoadingTimeOut(adParams.timeout.toInt())
+            .setListener(requestListener)
+            .setPlacementId(demandAd.placement)
+            .build()
+            .also {
+                adRequest = it
+            }
+            .request(adParams.context)
         val state = state.first {
             it is AdState.Bid || it is AdState.LoadFailed
         }
@@ -186,8 +179,13 @@ internal class BMRewardedAdImpl(
         adRequest?.notifyMediationWin()
     }
 
-    override fun getAuctionParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdAuctionParams {
-        return BMFullscreenAuctionParams(priceFloor = priceFloor, timeout = timeout)
+    override fun getAuctionParams(
+        activity: Activity,
+        priceFloor: Double,
+        timeout: Long,
+        lineItems: List<LineItem>
+    ): AdAuctionParams {
+        return BMFullscreenAuctionParams(priceFloor = priceFloor, timeout = timeout, context = activity.applicationContext)
     }
 
     override fun destroy() {

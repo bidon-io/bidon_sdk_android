@@ -1,5 +1,6 @@
 package com.appodealstack.applovin
 
+import android.app.Activity
 import com.appodealstack.bidon.adapters.AdAuctionParams
 import com.appodealstack.bidon.adapters.AdapterParameters
 import com.appodealstack.bidon.adapters.banners.BannerSize
@@ -20,6 +21,7 @@ data class ApplovinBannerAuctionParams(
 ) : AdAuctionParams
 
 data class ApplovinFullscreenAdAuctionParams(
+    val activity: Activity,
     val adUnitId: String,
     val timeoutMs: Long
 ) : AdAuctionParams

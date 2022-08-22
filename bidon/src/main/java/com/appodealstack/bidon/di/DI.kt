@@ -71,7 +71,6 @@ internal object DI {
                 factory<Auction> {
                     AuctionImpl(
                         adaptersSource = get(),
-                        contextProvider = get(),
                         getAuctionRequest = get()
                     )
                 }

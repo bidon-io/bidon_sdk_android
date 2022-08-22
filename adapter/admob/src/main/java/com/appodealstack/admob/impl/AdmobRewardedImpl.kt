@@ -116,7 +116,7 @@ internal class AdmobRewardedImpl(
         admobLineItems.clear()
     }
 
-    override fun getAuctionParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdAuctionParams {
+    override fun getAuctionParams(activity: Activity, priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdAuctionParams {
         return AdmobFullscreenAdAuctionParams(
             admobLineItems = lineItems
                 .filter { it.demandId == demandId.demandId }
@@ -125,33 +125,28 @@ internal class AdmobRewardedImpl(
                     val adUnitId = it.adUnitId ?: return@mapNotNull null
                     AdmobLineItem(price = price, adUnitId = adUnitId)
                 }.sortedBy { it.price },
-            priceFloor = priceFloor
+            priceFloor = priceFloor,
+            context = activity.applicationContext
         )
     }
 
-    override suspend fun bid(activity: Activity?, adParams: AdmobFullscreenAdAuctionParams): Result<AuctionResult> {
+    override suspend fun bid(adParams: AdmobFullscreenAdAuctionParams): Result<AuctionResult> {
         return withContext(dispatcher) {
             logInternal(Tag, "Starting with $adParams")
             admobLineItems.addAll(adParams.admobLineItems)
-            val context = activity?.applicationContext
-            if (context == null) {
-                logError(Tag, "Can not bid() Admob, cause no Context found", BidonError.NoContextFound)
-                state.value = AdState.LoadFailed(BidonError.NoContextFound)
+            val adRequest = AdRequest.Builder().build()
+            val adUnitId = admobLineItems.firstOrNull { it.price > adParams.priceFloor }?.adUnitId
+            if (!adUnitId.isNullOrBlank()) {
+                RewardedAd.load(adParams.context, adUnitId, adRequest, requestListener)
             } else {
-                val adRequest = AdRequest.Builder().build()
-                val adUnitId = admobLineItems.firstOrNull { it.price > adParams.priceFloor }?.adUnitId
-                if (!adUnitId.isNullOrBlank()) {
-                    RewardedAd.load(context, adUnitId, adRequest, requestListener)
-                } else {
-                    val error = BidonError.NoAppropriateAdUnitId
-                    logError(
-                        tag = Tag,
-                        message = "No appropriate AdUnitId found. PriceFloor=${adParams.priceFloor}, " +
-                            "but LineItem with max priceFloor=${admobLineItems.last().price}. LineItems: $admobLineItems",
-                        error = error
-                    )
-                    state.value = AdState.LoadFailed(error)
-                }
+                val error = BidonError.NoAppropriateAdUnitId
+                logError(
+                    tag = Tag,
+                    message = "No appropriate AdUnitId found. PriceFloor=${adParams.priceFloor}, " +
+                        "but LineItem with max priceFloor=${admobLineItems.last().price}. LineItems: $admobLineItems",
+                    error = error
+                )
+                state.value = AdState.LoadFailed(error)
             }
             val state = state.first {
                 it is AdState.Bid || it is AdState.LoadFailed

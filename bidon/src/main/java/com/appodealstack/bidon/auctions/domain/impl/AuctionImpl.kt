@@ -4,7 +4,6 @@ import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.auctions.data.models.*
 import com.appodealstack.bidon.auctions.domain.*
 import com.appodealstack.bidon.core.AdaptersSource
-import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.ext.asFailure
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
@@ -17,7 +16,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 internal class AuctionImpl(
     private val adaptersSource: AdaptersSource,
-    private val contextProvider: ContextProvider,
     private val getAuctionRequest: GetAuctionRequestUseCase
 ) : Auction {
     private val state = MutableStateFlow(AuctionState.Initialized)
@@ -224,36 +222,61 @@ internal class AuctionImpl(
             it.demandId.demandId in round.demandIds
         }
         logInfo(Tag, "Round '${round.id}' started with adapters [${filteredAdapters.joinToString { it.demandId.demandId }}]")
-        val auctionRequests = when (demandAd.adType) {
+        val adSources = when (demandAd.adType) {
             AdType.Interstitial -> {
-                check(adTypeAdditionalData is AdTypeAdditional.Interstitial)
                 filteredAdapters.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>().map {
                     it.interstitial(demandAd, round.id)
                 }
             }
             AdType.Rewarded -> {
-                check(adTypeAdditionalData is AdTypeAdditional.Rewarded)
                 filteredAdapters.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().map {
                     it.rewarded(demandAd, round.id)
                 }
             }
-            AdType.Banner -> TODO()
+            AdType.Banner -> {
+                filteredAdapters.filterIsInstance<AdProvider.Banner<AdAuctionParams>>().map {
+                    it.banner(demandAd, round.id)
+                }
+            }
         }
-        auctionRequests
-            .map { auctionRequest ->
-                logInfo(Tag, "Round '${round.id}'. Adapter ${auctionRequest.demandId.demandId} starts bidding")
+        adSources
+            .map { adSource ->
+                logInfo(Tag, "Round '${round.id}'. Adapter ${adSource.demandId.demandId} starts bidding")
                 coroutineScope {
                     async {
                         withTimeoutOrNull(round.timeoutMs) {
-                            auctionRequest.bid(
-                                activity = contextProvider.activity,
-                                adParams = auctionRequest.getAuctionParams(
-                                    priceFloor = priceFloor,
-                                    timeout = timeout,
-                                    lineItems = lineItems
-                                )
-                            )
-                        } ?: BidonError.BidTimedOut(auctionRequest.demandId).asFailure()
+                            val adParam = when (adSource) {
+                                is AdSource.Banner -> {
+                                    check(adTypeAdditionalData is AdTypeAdditional.Banner)
+                                    adSource.getAuctionParams(
+                                        priceFloor = priceFloor,
+                                        timeout = timeout,
+                                        lineItems = lineItems,
+                                        adContainer = adTypeAdditionalData.adContainer,
+                                        bannerSize = adTypeAdditionalData.bannerSize
+                                    )
+                                }
+                                is AdSource.Interstitial -> {
+                                    check(adTypeAdditionalData is AdTypeAdditional.Interstitial)
+                                    adSource.getAuctionParams(
+                                        priceFloor = priceFloor,
+                                        timeout = timeout,
+                                        lineItems = lineItems,
+                                        activity = adTypeAdditionalData.activity
+                                    )
+                                }
+                                is AdSource.Rewarded -> {
+                                    check(adTypeAdditionalData is AdTypeAdditional.Rewarded)
+                                    adSource.getAuctionParams(
+                                        priceFloor = priceFloor,
+                                        timeout = timeout,
+                                        lineItems = lineItems,
+                                        activity = adTypeAdditionalData.activity
+                                    )
+                                }
+                            }
+                            adSource.bid(adParam)
+                        } ?: BidonError.BidTimedOut(adSource.demandId).asFailure()
                     }
                 }
             }.mapIndexedNotNull { index, deferred ->

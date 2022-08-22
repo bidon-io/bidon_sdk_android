@@ -78,19 +78,19 @@ internal class MaxInterstitialImpl(
         maxAd = null
     }
 
-    override fun getAuctionParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdAuctionParams {
+    override fun getAuctionParams(activity: Activity, priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdAuctionParams {
         return ApplovinFullscreenAdAuctionParams(
+            activity = activity,
             adUnitId = checkNotNull(lineItems.first { it.demandId == demandId.demandId }.adUnitId),
-            timeoutMs = timeout
+            timeoutMs = timeout,
         )
     }
 
     override suspend fun bid(
-        activity: Activity?,
         adParams: ApplovinFullscreenAdAuctionParams
     ): Result<AuctionResult> {
         logInternal(Tag, "Starting with $adParams")
-        val maxInterstitialAd = MaxInterstitialAd(adParams.adUnitId, activity).also {
+        val maxInterstitialAd = MaxInterstitialAd(adParams.adUnitId, adParams.activity).also {
             it.setListener(maxAdListener)
             interstitialAd = it
         }

@@ -26,7 +26,7 @@ class Rewarded(
 interface RewardedAd {
     val placementId: String
 
-    fun load()
+    fun load(activity: Activity)
     fun destroy()
     fun show(activity: Activity)
     fun setRewardedListener(listener: RewardedListener)
@@ -50,7 +50,7 @@ internal class RewardedImpl(
         getRewardedListener()
     }
 
-    override fun load() {
+    override fun load(activity: Activity) {
         logInfo(Tag, "Load with placement: $placementId")
         if (auctionJob?.isActive == true) return
 
@@ -66,7 +66,7 @@ internal class RewardedImpl(
                 demandAd = demandAd,
                 resolver = MaxEcpmAuctionResolver,
                 adTypeAdditionalData = AdTypeAdditional.Rewarded(
-                    activity = null
+                    activity = activity
                 ),
                 roundsListener = listener
             ).onSuccess { results ->

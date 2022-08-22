@@ -27,7 +27,7 @@ class Interstitial(
 interface InterstitialAd {
     val placementId: String
 
-    fun load()
+    fun load(activity: Activity)
     fun destroy()
     fun show(activity: Activity)
     fun setInterstitialListener(listener: InterstitialListener)
@@ -51,7 +51,7 @@ internal class InterstitialAdImpl(
         getInterstitialListener()
     }
 
-    override fun load() {
+    override fun load(activity: Activity) {
         logInfo(Tag, "Load with placement: $placementId")
         if (auctionJob?.isActive == true) return
 
@@ -67,7 +67,7 @@ internal class InterstitialAdImpl(
                 demandAd = demandAd,
                 resolver = MaxEcpmAuctionResolver,
                 adTypeAdditionalData = AdTypeAdditional.Interstitial(
-                    activity = null
+                    activity = activity
                 ),
                 roundsListener = listener
             ).onSuccess { results ->

@@ -129,7 +129,7 @@ fun RewardedScreen(
                 .padding(start = 24.dp, end = 24.dp, top = 24.dp)
         ) {
             AppButton(text = "Load") {
-                rewarded.load()
+                rewarded.load(activity)
             }
             AppButton(text = "Show") {
                 rewarded.show(activity)

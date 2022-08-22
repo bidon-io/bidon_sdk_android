@@ -124,7 +124,7 @@ fun InterstitialScreen(
                 .padding(start = 24.dp, end = 24.dp, top = 24.dp)
         ) {
             AppButton(text = "Load") {
-                interstitial.load()
+                interstitial.load(activity)
             }
             AppButton(text = "Show") {
                 interstitial.show(activity)
