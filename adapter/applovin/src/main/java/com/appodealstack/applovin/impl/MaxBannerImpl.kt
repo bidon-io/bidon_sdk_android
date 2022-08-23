@@ -97,11 +97,12 @@ internal class MaxBannerImpl(
         bannerSize: BannerSize,
         onLineItemConsumed: (LineItem) -> Unit,
     ): AdAuctionParams {
+        val lineItem = lineItems.minByOrNull { it.priceFloor }
+            ?.also(onLineItemConsumed)
         return ApplovinBannerAuctionParams(
             context = adContainer.context,
-            adUnitId = checkNotNull(lineItems.first { it.demandId == demandId.demandId }.adUnitId),
+            lineItem = requireNotNull(lineItem),
             bannerSize = bannerSize,
-            priceFloor = priceFloor,
             adaptiveBannerHeight = null
         )
     }
@@ -117,7 +118,7 @@ internal class MaxBannerImpl(
 
         val maxAdView = if (adParams.bannerSize == BannerSize.Smart) {
             MaxAdView(
-                adParams.adUnitId,
+                adParams.lineItem.adUnitId,
                 adParams.context,
             ).apply {
                 val activity = adParams.context as Activity
@@ -128,7 +129,7 @@ internal class MaxBannerImpl(
             }
         } else {
             MaxAdView(
-                adParams.adUnitId,
+                adParams.lineItem.adUnitId,
                 adParams.bannerSize.asMaxAdFormat(),
                 adParams.context,
             )
@@ -137,7 +138,7 @@ internal class MaxBannerImpl(
             setListener(maxAdListener)
             placement = demandAd.placement
             /**
-             * [AutoRefresher] provides auto-refresh
+             * AutoRefresher.kt provides auto-refresh
              */
             setExtraParameter("allow_pause_auto_refresh_immediately", "true")
             stopAutoRefresh()

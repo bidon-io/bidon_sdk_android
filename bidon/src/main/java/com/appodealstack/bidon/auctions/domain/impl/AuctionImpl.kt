@@ -221,7 +221,7 @@ internal class AuctionImpl(
                                     adSource.getAuctionParams(
                                         priceFloor = priceFloor,
                                         timeout = timeout,
-                                        lineItems = mutableLineItems,
+                                        lineItems = mutableLineItems.filterBy(adSource.demandId),
                                         adContainer = adTypeAdditionalData.adContainer,
                                         bannerSize = adTypeAdditionalData.bannerSize,
                                         onLineItemConsumed = { lineItem ->
@@ -234,7 +234,7 @@ internal class AuctionImpl(
                                     adSource.getAuctionParams(
                                         priceFloor = priceFloor,
                                         timeout = timeout,
-                                        lineItems = mutableLineItems,
+                                        lineItems = mutableLineItems.filterBy(adSource.demandId),
                                         activity = adTypeAdditionalData.activity,
                                         onLineItemConsumed = { lineItem ->
                                             mutableLineItems.remove(lineItem)
@@ -246,7 +246,7 @@ internal class AuctionImpl(
                                     adSource.getAuctionParams(
                                         priceFloor = priceFloor,
                                         timeout = timeout,
-                                        lineItems = mutableLineItems,
+                                        lineItems = mutableLineItems.filterBy(adSource.demandId),
                                         activity = adTypeAdditionalData.activity,
                                         onLineItemConsumed = { lineItem ->
                                             mutableLineItems.remove(lineItem)
@@ -281,6 +281,9 @@ internal class AuctionImpl(
             "No auction data response"
         }
     }
+
+    private fun List<LineItem>.filterBy(demandId: DemandId) =
+        this.filter { it.demandId == demandId.demandId }
 }
 
 private const val Tag = "Auction"

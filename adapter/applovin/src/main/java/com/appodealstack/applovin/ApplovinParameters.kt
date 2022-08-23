@@ -5,6 +5,7 @@ import android.content.Context
 import com.appodealstack.bidon.adapters.AdAuctionParams
 import com.appodealstack.bidon.adapters.AdapterParameters
 import com.appodealstack.bidon.adapters.banners.BannerSize
+import com.appodealstack.bidon.auctions.data.models.LineItem
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -17,13 +18,12 @@ data class ApplovinParameters(
 data class ApplovinBannerAuctionParams(
     val context: Context,
     val bannerSize: BannerSize,
-    val priceFloor: Double,
-    val adUnitId: String,
+    val lineItem: LineItem,
     val adaptiveBannerHeight: Int?
 ) : AdAuctionParams
 
 data class ApplovinFullscreenAdAuctionParams(
     val activity: Activity,
-    val adUnitId: String,
+    val lineItem: LineItem,
     val timeoutMs: Long
 ) : AdAuctionParams

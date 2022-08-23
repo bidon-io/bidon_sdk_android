@@ -120,7 +120,6 @@ internal class AdmobInterstitialImpl(
         onLineItemConsumed: (LineItem) -> Unit,
     ): AdAuctionParams {
         val lineItem = lineItems
-            .filter { it.demandId == demandId.demandId }
             .mapNotNull {
                 it.takeIf { !it.adUnitId.isNullOrBlank() }
             }.minByOrNull { it.priceFloor }

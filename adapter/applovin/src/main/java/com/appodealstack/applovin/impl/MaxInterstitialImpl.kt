@@ -87,9 +87,11 @@ internal class MaxInterstitialImpl(
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit,
     ): AdAuctionParams {
+        val lineItem = lineItems.minByOrNull { it.priceFloor }
+            ?.also(onLineItemConsumed)
         return ApplovinFullscreenAdAuctionParams(
             activity = activity,
-            adUnitId = checkNotNull(lineItems.first { it.demandId == demandId.demandId }.adUnitId),
+            lineItem = requireNotNull(lineItem),
             timeoutMs = timeout,
         )
     }
@@ -98,7 +100,7 @@ internal class MaxInterstitialImpl(
         adParams: ApplovinFullscreenAdAuctionParams
     ): Result<AuctionResult> {
         logInternal(Tag, "Starting with $adParams")
-        val maxInterstitialAd = MaxInterstitialAd(adParams.adUnitId, adParams.activity).also {
+        val maxInterstitialAd = MaxInterstitialAd(adParams.lineItem.adUnitId, adParams.activity).also {
             it.setListener(maxAdListener)
             interstitialAd = it
         }
