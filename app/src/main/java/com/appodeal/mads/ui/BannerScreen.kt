@@ -119,7 +119,9 @@ fun BannerScreen(navController: NavHostController) {
                 Slider(
                     value = (autoRefreshTtl.value / 1000).toFloat(),
                     onValueChange = {
-                        autoRefreshTtl.value = ((it * 1000).toLong())
+                        val newTimeout = ((it * 1000).toLong())
+                        banner.value?.startAutoRefresh(timeoutMs = newTimeout)
+                        autoRefreshTtl.value = newTimeout
                     },
                     steps = 30,
                     valueRange = 0f..30f
@@ -127,6 +129,8 @@ fun BannerScreen(navController: NavHostController) {
 
                 AppButton(text = "Create banner") {
                     banner.value = Banner(context, "some_placement_id").apply {
+                        setAdSize(bannerSize.value)
+                        startAutoRefresh(timeoutMs = autoRefreshTtl.value)
                         setBannerListener(
                             object : BannerListener {
                                 override fun onAdLoaded(ad: Ad) {
@@ -196,7 +200,6 @@ fun BannerScreen(navController: NavHostController) {
                             }
                         )
                     }
-                    banner.value?.setAdSize(bannerSize.value)
                 }
                 if (banner.value != null) {
                     AppButton(text = "Load") {

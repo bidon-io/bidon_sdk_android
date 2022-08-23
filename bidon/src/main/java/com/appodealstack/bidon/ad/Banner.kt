@@ -31,6 +31,12 @@ interface BannerAd {
     fun load()
     fun destroy()
     fun setBannerListener(listener: BannerListener)
+
+    /**
+     * By default AutoRefresh is on with [DefaultAutoRefreshTimeoutMs]
+     */
+    fun startAutoRefresh(timeoutMs: Long = DefaultAutoRefreshTimeoutMs)
+    fun stopAutoRefresh()
 }
 
 class Banner private constructor(
@@ -66,6 +72,7 @@ class Banner private constructor(
     private var bannerSize: BannerSize = BannerSize.Banner
 
     override fun setAdSize(bannerSize: BannerSize) {
+        logInfo(Tag, "BannerSize set: $bannerSize")
         this.bannerSize = bannerSize
     }
 
@@ -117,6 +124,16 @@ class Banner private constructor(
     override fun setBannerListener(listener: BannerListener) {
         logInfo(Tag, "Set banner listener")
         this.userListener = listener
+    }
+
+    override fun startAutoRefresh(timeoutMs: Long) {
+        logInfo(Tag, "Auto-refresh started with timeout $timeoutMs ms")
+        TODO("Not implemented")
+    }
+
+    override fun stopAutoRefresh() {
+        logInfo(Tag, "Auto-refresh stopped")
+        TODO("Not implemented")
     }
 
     override fun destroy() {
@@ -209,3 +226,4 @@ class Banner private constructor(
 }
 
 private const val Tag = "Banner"
+private const val DefaultAutoRefreshTimeoutMs = 15_000L
