@@ -53,7 +53,7 @@ fun BannerScreen(navController: NavHostController) {
             .background(MaterialTheme.colors.background)
     ) {
         AppToolbar(
-            title = "Max Banner",
+            title = "Banners",
             onNavigationButtonClicked = { navController.popBackStack() }
         )
         Box(

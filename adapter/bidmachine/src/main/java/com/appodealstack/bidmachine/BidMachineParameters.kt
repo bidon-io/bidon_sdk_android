@@ -18,8 +18,10 @@ data class BidMachineParameters(
 ) : AdapterParameters
 
 data class BMBannerAuctionParams(
+    val context: Context,
     val bannerSize: BannerSize,
     val priceFloor: Double,
+    val timeout: Long,
 ) : AdAuctionParams
 
 data class BMFullscreenAuctionParams(
