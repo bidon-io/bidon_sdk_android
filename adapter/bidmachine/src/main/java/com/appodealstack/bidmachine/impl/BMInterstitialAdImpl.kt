@@ -183,6 +183,7 @@ internal class BMInterstitialAdImpl(
     }
 
     override fun destroy() {
+        logInternal(Tag, "destroy")
         adRequest?.destroy()
         adRequest = null
         interstitialAd?.destroy()

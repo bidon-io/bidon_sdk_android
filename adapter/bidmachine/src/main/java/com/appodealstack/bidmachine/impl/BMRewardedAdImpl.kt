@@ -194,6 +194,7 @@ internal class BMRewardedAdImpl(
     }
 
     override fun destroy() {
+        logInternal(Tag, "destroy")
         adRequest?.destroy()
         adRequest = null
         rewardedAd?.destroy()

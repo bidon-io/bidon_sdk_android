@@ -106,6 +106,7 @@ internal class AdmobInterstitialImpl(
     override val adState = MutableSharedFlow<AdState>(Int.MAX_VALUE)
 
     override fun destroy() {
+        logInternal(Tag, "destroy")
         interstitialAd?.onPaidEventListener = null
         interstitialAd?.fullScreenContentCallback = null
         interstitialAd = null

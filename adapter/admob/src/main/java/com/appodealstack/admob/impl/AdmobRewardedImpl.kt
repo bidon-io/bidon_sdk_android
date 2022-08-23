@@ -114,6 +114,7 @@ internal class AdmobRewardedImpl(
     override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
 
     override fun destroy() {
+        logInternal(Tag, "destroy")
         rewardedAd?.onPaidEventListener = null
         rewardedAd?.fullScreenContentCallback = null
         rewardedAd = null

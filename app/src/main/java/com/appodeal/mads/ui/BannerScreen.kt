@@ -24,12 +24,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
 import com.appodeal.mads.component.*
-import com.appodealstack.bidon.ad.Banner
 import com.appodealstack.bidon.ad.BannerListener
 import com.appodealstack.bidon.adapters.Ad
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.core.ext.logInternal
+import com.appodealstack.bidon.view.Banner
 
 @Composable
 fun BannerScreen(navController: NavHostController) {
@@ -120,7 +120,11 @@ fun BannerScreen(navController: NavHostController) {
                     value = (autoRefreshTtl.value / 1000).toFloat(),
                     onValueChange = {
                         val newTimeout = ((it * 1000).toLong())
-                        banner.value?.startAutoRefresh(timeoutMs = newTimeout)
+                        if (newTimeout == 0L) {
+                            banner.value?.stopAutoRefresh()
+                        } else {
+                            banner.value?.startAutoRefresh(timeoutMs = newTimeout)
+                        }
                         autoRefreshTtl.value = newTimeout
                     },
                     steps = 30,
@@ -130,7 +134,11 @@ fun BannerScreen(navController: NavHostController) {
                 AppButton(text = "Create banner") {
                     banner.value = Banner(context, "some_placement_id").apply {
                         setAdSize(bannerSize.value)
-                        startAutoRefresh(timeoutMs = autoRefreshTtl.value)
+                        if (autoRefreshTtl.value == 0L) {
+                            banner.value?.stopAutoRefresh()
+                        } else {
+                            banner.value?.startAutoRefresh(timeoutMs = autoRefreshTtl.value)
+                        }
                         setBannerListener(
                             object : BannerListener {
                                 override fun onAdLoaded(ad: Ad) {

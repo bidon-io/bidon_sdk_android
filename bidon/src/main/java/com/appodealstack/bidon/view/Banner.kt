@@ -1,16 +1,19 @@
-package com.appodealstack.bidon.ad
+package com.appodealstack.bidon.view
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import com.appodealstack.bidon.BidON
 import com.appodealstack.bidon.BidOnSdk.Companion.DefaultPlacement
+import com.appodealstack.bidon.ad.BannerListener
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.domain.Auction
+import com.appodealstack.bidon.auctions.domain.AutoRefresher
 import com.appodealstack.bidon.auctions.domain.impl.MaxEcpmAuctionResolver
 import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.ext.logError
@@ -23,6 +26,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 interface BannerAd {
     val placementId: String
@@ -37,13 +41,17 @@ interface BannerAd {
      */
     fun startAutoRefresh(timeoutMs: Long = DefaultAutoRefreshTimeoutMs)
     fun stopAutoRefresh()
+
+    interface AutoRefreshable {
+        fun onRefresh()
+    }
 }
 
 class Banner private constructor(
     context: Context,
     attrs: AttributeSet? = null,
     @AttrRes defStyleAtt: Int = 0
-) : BannerAd, FrameLayout(context, attrs, defStyleAtt) {
+) : BannerAd, FrameLayout(context, attrs, defStyleAtt), BannerAd.AutoRefreshable {
 
     constructor(
         context: Context,
@@ -59,11 +67,15 @@ class Banner private constructor(
     private val demandAd by lazy {
         DemandAd(AdType.Banner, placementId)
     }
+    private val autoRefresher: AutoRefresher = get {
+        params(this@Banner as BannerAd.AutoRefreshable)
+    }
+    private var auctionJob: Job? = null
     private var auction: Auction? = null
     private val scope: CoroutineScope get() = CoroutineScope(dispatcher)
     private var userListener: BannerListener? = null
-    private var auctionJob: Job? = null
     private var observeCallbacksJob: Job? = null
+    private val isBannerDisplaying = AtomicBoolean(false)
 
     private val listener by lazy {
         getBannerListener()
@@ -107,11 +119,9 @@ class Banner private constructor(
                         "[Ad] should exist when the Action succeeds"
                     }
                 )
-                val adContainer = this@Banner
-                adContainer.removeAllViews()
                 results.first().let { auctionResult ->
                     require(auctionResult.adSource is AdSource.Banner)
-                    adContainer.addView(auctionResult.adSource.getAdView())
+                    showAdView(auctionResult.adSource.getAdView())
                 }
             }.onFailure {
                 logError(Tag, "Auction failed", it)
@@ -127,16 +137,24 @@ class Banner private constructor(
     }
 
     override fun startAutoRefresh(timeoutMs: Long) {
-        logInfo(Tag, "Auto-refresh started with timeout $timeoutMs ms")
-        // TODO("Not implemented")
+        logInfo(Tag, "Auto-refresh initialized with timeout $timeoutMs ms")
+        autoRefresher.setAutoRefreshTimeout(timeoutMs)
+        if (isBannerDisplaying.get()) {
+            autoRefresher.trigger()
+        }
     }
 
     override fun stopAutoRefresh() {
         logInfo(Tag, "Auto-refresh stopped")
-        // TODO("Not implemented")
+        autoRefresher.stopAutoRefresh()
+    }
+
+    override fun onRefresh() {
+        load()
     }
 
     override fun destroy() {
+        autoRefresher.stopAutoRefresh()
         auctionJob?.cancel()
         auctionJob = null
         observeCallbacksJob?.cancel()
@@ -144,11 +162,18 @@ class Banner private constructor(
         auction?.destroy()
         auction = null
         this.removeAllViews()
+        isBannerDisplaying.set(false)
     }
 
     /**
      * Private
      */
+
+    private fun showAdView(adView: View) {
+        removeAllViews()
+        addView(adView)
+        isBannerDisplaying.set(true)
+    }
 
     private fun subscribeToWinner(adSource: AdSource<*>) {
         observeCallbacksJob = adSource.adState.onEach { state ->
@@ -172,6 +197,7 @@ class Banner private constructor(
     private fun getBannerListener() = object : BannerListener {
         override fun onAdLoaded(ad: Ad) {
             userListener?.onAdLoaded(ad)
+            autoRefresher.trigger()
         }
 
         override fun onAdLoadFailed(cause: Throwable) {
@@ -226,4 +252,4 @@ class Banner private constructor(
 }
 
 private const val Tag = "Banner"
-private const val DefaultAutoRefreshTimeoutMs = 15_000L
+internal const val DefaultAutoRefreshTimeoutMs = 5_000L

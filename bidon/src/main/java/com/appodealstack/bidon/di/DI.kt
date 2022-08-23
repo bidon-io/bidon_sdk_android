@@ -4,6 +4,8 @@ import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
 import com.appodealstack.bidon.auctions.data.impl.GetAuctionRequestUseCaseImpl
 import com.appodealstack.bidon.auctions.domain.Auction
+import com.appodealstack.bidon.auctions.domain.AutoRefresher
+import com.appodealstack.bidon.auctions.domain.AutoRefresherImpl
 import com.appodealstack.bidon.auctions.domain.GetAuctionRequestUseCase
 import com.appodealstack.bidon.auctions.domain.impl.AuctionImpl
 import com.appodealstack.bidon.auctions.domain.impl.AuctionResolversHolderImpl
@@ -20,6 +22,7 @@ import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 import com.appodealstack.bidon.utilities.network.BidOnEndpoints
 import com.appodealstack.bidon.utilities.network.endpoint.BidOnEndpointsImpl
+import com.appodealstack.bidon.view.BannerAd
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -74,8 +77,8 @@ internal object DI {
                         getAuctionRequest = get()
                     )
                 }
-                factory<AutoRefresher> {
-                    AutoRefresherImpl()
+                factoryWithParams<AutoRefresher> { param ->
+                    AutoRefresherImpl(autoRefreshable = param as BannerAd.AutoRefreshable)
                 }
 
                 /**

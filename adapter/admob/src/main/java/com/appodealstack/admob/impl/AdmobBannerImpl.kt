@@ -100,6 +100,7 @@ internal class AdmobBannerImpl(
     }
 
     override fun destroy() {
+        logInternal(Tag, "destroy")
         adView?.onPaidEventListener = null
         adView = null
         lineItem = null

@@ -168,6 +168,7 @@ internal class BMBannerAdImpl(
     }
 
     override fun destroy() {
+        logInternal(Tag, "destroy")
         adRequest?.destroy()
         adRequest = null
         bannerView?.destroy()
