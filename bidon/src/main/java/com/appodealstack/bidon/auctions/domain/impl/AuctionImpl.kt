@@ -269,18 +269,12 @@ internal class AuctionImpl(
     }
 
     private suspend fun requestActionData(): AuctionResponse {
-        val auctionResponse = getAuctionRequest.request()
-            .onFailure {
-                logError(Tag, "Error while loading auction data", it)
-            }.onSuccess {
-                logInfo(Tag, "Loaded auction data: $it")
-            }
-            .getOrNull()
+        val auctionResponse = getAuctionRequest.request().getOrNull()
         return requireNotNull(auctionResponse) {
-            "Something bad happened"
+            "No auction data response"
         }
     }
 }
 
 private const val Tag = "Auction"
-private const val DefaultFillTimeoutMs = 10000L
+private const val DefaultFillTimeoutMs = 10_000L
