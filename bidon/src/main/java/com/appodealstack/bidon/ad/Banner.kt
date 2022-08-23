@@ -128,12 +128,12 @@ class Banner private constructor(
 
     override fun startAutoRefresh(timeoutMs: Long) {
         logInfo(Tag, "Auto-refresh started with timeout $timeoutMs ms")
-        TODO("Not implemented")
+        // TODO("Not implemented")
     }
 
     override fun stopAutoRefresh() {
         logInfo(Tag, "Auto-refresh stopped")
-        TODO("Not implemented")
+        // TODO("Not implemented")
     }
 
     override fun destroy() {

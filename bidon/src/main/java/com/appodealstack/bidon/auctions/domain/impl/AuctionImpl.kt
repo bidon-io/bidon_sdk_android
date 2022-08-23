@@ -20,6 +20,7 @@ internal class AuctionImpl(
 ) : Auction {
     private val state = MutableStateFlow(AuctionState.Initialized)
     private val auctionResults = MutableStateFlow(listOf<AuctionResult>())
+    private val mutableLineItems = mutableListOf<LineItem>()
 
     override val results: List<AuctionResult>
         get() = auctionResults.value.takeIf {
@@ -41,11 +42,11 @@ internal class AuctionImpl(
             logInfo(Tag, "Action started $this")
             // Request for Auction-data at /auction
             val auctionData = requestActionData()
+            mutableLineItems.addAll(auctionData.lineItems ?: emptyList())
 
             // Start auction
             conductRounds(
                 rounds = auctionData.rounds ?: listOf(),
-                lineItems = auctionData.lineItems ?: listOf(),
                 minPriceFloor = auctionData.minPrice ?: 0.0,
                 priceFloor = auctionData.minPrice ?: 0.0,
                 auctionData = auctionData,
@@ -128,7 +129,6 @@ internal class AuctionImpl(
 
     private suspend fun conductRounds(
         rounds: List<Round>,
-        lineItems: List<LineItem>,
         minPriceFloor: Double,
         priceFloor: Double,
         roundsListener: RoundsListener,
@@ -142,7 +142,6 @@ internal class AuctionImpl(
 
         executeRound(
             round = round,
-            lineItems = lineItems,
             priceFloor = priceFloor,
             demandAd = demandAd,
             adTypeAdditionalData = adTypeAdditionalData,
@@ -171,7 +170,6 @@ internal class AuctionImpl(
         val nextPriceFloor = auctionResults.value.firstOrNull()?.priceFloor ?: priceFloor
         conductRounds(
             rounds = rounds.drop(1),
-            lineItems = lineItems,
             minPriceFloor = minPriceFloor,
             priceFloor = nextPriceFloor,
             roundsListener = roundsListener,
@@ -184,7 +182,6 @@ internal class AuctionImpl(
 
     private suspend fun executeRound(
         round: Round,
-        lineItems: List<LineItem>,
         priceFloor: Double,
         demandAd: DemandAd,
         adTypeAdditionalData: AdTypeAdditional,
@@ -194,6 +191,7 @@ internal class AuctionImpl(
             it.demandId.demandId in round.demandIds
         }
         logInfo(Tag, "Round '${round.id}' started with adapters [${filteredAdapters.joinToString { it.demandId.demandId }}]")
+        logInfo(Tag, "Round '${round.id}' started with line items: $mutableLineItems")
         val adSources = when (demandAd.adType) {
             AdType.Interstitial -> {
                 filteredAdapters.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>().map {
@@ -223,9 +221,12 @@ internal class AuctionImpl(
                                     adSource.getAuctionParams(
                                         priceFloor = priceFloor,
                                         timeout = timeout,
-                                        lineItems = lineItems,
+                                        lineItems = mutableLineItems,
                                         adContainer = adTypeAdditionalData.adContainer,
-                                        bannerSize = adTypeAdditionalData.bannerSize
+                                        bannerSize = adTypeAdditionalData.bannerSize,
+                                        onLineItemConsumed = { lineItem ->
+                                            mutableLineItems.remove(lineItem)
+                                        }
                                     )
                                 }
                                 is AdSource.Interstitial -> {
@@ -233,8 +234,11 @@ internal class AuctionImpl(
                                     adSource.getAuctionParams(
                                         priceFloor = priceFloor,
                                         timeout = timeout,
-                                        lineItems = lineItems,
-                                        activity = adTypeAdditionalData.activity
+                                        lineItems = mutableLineItems,
+                                        activity = adTypeAdditionalData.activity,
+                                        onLineItemConsumed = { lineItem ->
+                                            mutableLineItems.remove(lineItem)
+                                        }
                                     )
                                 }
                                 is AdSource.Rewarded -> {
@@ -242,8 +246,11 @@ internal class AuctionImpl(
                                     adSource.getAuctionParams(
                                         priceFloor = priceFloor,
                                         timeout = timeout,
-                                        lineItems = lineItems,
-                                        activity = adTypeAdditionalData.activity
+                                        lineItems = mutableLineItems,
+                                        activity = adTypeAdditionalData.activity,
+                                        onLineItemConsumed = { lineItem ->
+                                            mutableLineItems.remove(lineItem)
+                                        }
                                     )
                                 }
                             }

@@ -53,6 +53,7 @@ sealed interface AdSource<T : AdAuctionParams> {
             priceFloor: Double,
             timeout: Long,
             lineItems: List<LineItem>,
+            onLineItemConsumed: (LineItem) -> Unit,
         ): AdAuctionParams
     }
 
@@ -62,6 +63,7 @@ sealed interface AdSource<T : AdAuctionParams> {
             priceFloor: Double,
             timeout: Long,
             lineItems: List<LineItem>,
+            onLineItemConsumed: (LineItem) -> Unit,
         ): AdAuctionParams
     }
 
@@ -72,6 +74,7 @@ sealed interface AdSource<T : AdAuctionParams> {
             timeout: Long,
             lineItems: List<LineItem>,
             bannerSize: BannerSize,
+            onLineItemConsumed: (LineItem) -> Unit,
         ): AdAuctionParams
 
         fun getAdView(): View

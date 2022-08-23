@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import com.appodealstack.admob.AdmobBannerAuctionParams
-import com.appodealstack.admob.AdmobLineItem
 import com.appodealstack.admob.asBidonError
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
@@ -35,7 +34,8 @@ internal class AdmobBannerImpl(
     override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
 
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
-    private val admobLineItems = mutableListOf<AdmobLineItem>()
+
+    private var lineItem: LineItem? = null
     private var adView: AdView? = null
     private val requiredAdView: AdView get() = requireNotNull(adView)
 
@@ -54,7 +54,7 @@ internal class AdmobBannerImpl(
                     adState.tryEmit(
                         AdState.Bid(
                             AuctionResult(
-                                priceFloor = admobLineItems.getPriceFloor(it.adUnitId),
+                                priceFloor = requireNotNull(lineItem?.priceFloor),
                                 adSource = this@AdmobBannerImpl
                             )
                         )
@@ -102,7 +102,7 @@ internal class AdmobBannerImpl(
     override fun destroy() {
         adView?.onPaidEventListener = null
         adView = null
-        admobLineItems.clear()
+        lineItem = null
     }
 
     override fun getAuctionParams(
@@ -111,26 +111,26 @@ internal class AdmobBannerImpl(
         timeout: Long,
         lineItems: List<LineItem>,
         bannerSize: BannerSize,
+        onLineItemConsumed: (LineItem) -> Unit,
     ): AdAuctionParams {
+        val lineItem = lineItems
+            .filter { it.demandId == demandId.demandId }
+            .mapNotNull {
+                it.takeIf { !it.adUnitId.isNullOrBlank() }
+            }.minByOrNull { it.priceFloor }
+            ?.also(onLineItemConsumed)
         return AdmobBannerAuctionParams(
-            admobLineItems = lineItems
-                .filter { it.demandId == demandId.demandId }
-                .mapNotNull {
-                    val price = it.priceFloor ?: return@mapNotNull null
-                    val adUnitId = it.adUnitId ?: return@mapNotNull null
-                    AdmobLineItem(price = price, adUnitId = adUnitId)
-                }.sortedBy { it.price },
-            priceFloor = priceFloor,
+            lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
             bannerSize = bannerSize,
             adContainer = adContainer,
         )
     }
 
     override suspend fun bid(adParams: AdmobBannerAuctionParams): Result<AuctionResult> {
+        logInternal(Tag, "Starting with $adParams")
         return withContext(dispatcher) {
-            logInternal(Tag, "Starting with $adParams")
-            admobLineItems.addAll(adParams.admobLineItems)
-            val adUnitId = admobLineItems.firstOrNull { it.price > adParams.priceFloor }?.adUnitId
+            lineItem = adParams.lineItem
+            val adUnitId = lineItem?.adUnitId
             if (!adUnitId.isNullOrBlank()) {
                 val adView = AdView(adParams.adContainer.context)
                     .apply {
@@ -148,7 +148,7 @@ internal class AdmobBannerImpl(
                 val error = BidonError.NoAppropriateAdUnitId
                 logError(
                     tag = Tag,
-                    message = "No appropriate AdUnitId found for price_floor=${adParams.priceFloor}. LineItems: $admobLineItems",
+                    message = "No appropriate AdUnitId found for price_floor=${adParams.lineItem.priceFloor}",
                     error = error
                 )
                 adState.tryEmit(AdState.LoadFailed(error))
@@ -181,17 +181,13 @@ internal class AdmobBannerImpl(
         return Ad(
             demandId = demandId,
             demandAd = demandAd,
-            price = admobLineItems.getPriceFloor(adUnitId),
+            price = lineItem?.priceFloor ?: 0.0,
             sourceAd = this,
             monetizationNetwork = BNMediationNetwork.GoogleAdmob.networkName,
             dsp = null,
             roundId = roundId,
             currencyCode = "USD"
         )
-    }
-
-    private fun List<AdmobLineItem>.getPriceFloor(adUnitId: String): Double {
-        return this.first { it.adUnitId == adUnitId }.price
     }
 
     private fun BannerSize.asAdmobAdSize(adContainer: ViewGroup) = when (this) {

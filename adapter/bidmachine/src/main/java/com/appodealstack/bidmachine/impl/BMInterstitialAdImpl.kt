@@ -176,7 +176,8 @@ internal class BMInterstitialAdImpl(
         activity: Activity,
         priceFloor: Double,
         timeout: Long,
-        lineItems: List<LineItem>
+        lineItems: List<LineItem>,
+        onLineItemConsumed: (LineItem) -> Unit,
     ): AdAuctionParams {
         return BMFullscreenAuctionParams(priceFloor = priceFloor, timeout = timeout, context = activity.applicationContext)
     }

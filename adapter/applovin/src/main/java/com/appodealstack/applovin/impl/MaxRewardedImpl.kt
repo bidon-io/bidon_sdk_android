@@ -98,7 +98,8 @@ internal class MaxRewardedImpl(
         activity: Activity,
         priceFloor: Double,
         timeout: Long,
-        lineItems: List<LineItem>
+        lineItems: List<LineItem>,
+        onLineItemConsumed: (LineItem) -> Unit,
     ): AdAuctionParams {
         return ApplovinFullscreenAdAuctionParams(
             adUnitId = checkNotNull(lineItems.first { it.demandId == demandId.demandId }.adUnitId),

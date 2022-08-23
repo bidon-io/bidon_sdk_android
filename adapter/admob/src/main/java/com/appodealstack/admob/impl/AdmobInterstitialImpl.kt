@@ -2,7 +2,6 @@ package com.appodealstack.admob.impl
 
 import android.app.Activity
 import com.appodealstack.admob.AdmobFullscreenAdAuctionParams
-import com.appodealstack.admob.AdmobLineItem
 import com.appodealstack.admob.asBidonError
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.analytics.BNMediationNetwork
@@ -30,7 +29,8 @@ internal class AdmobInterstitialImpl(
 ) : AdSource.Interstitial<AdmobFullscreenAdAuctionParams> {
 
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
-    private val admobLineItems = mutableListOf<AdmobLineItem>()
+
+    private var lineItem: LineItem? = null
     private var interstitialAd: InterstitialAd? = null
     private val requiredInterstitialAd: InterstitialAd get() = requireNotNull(interstitialAd)
 
@@ -48,7 +48,7 @@ internal class AdmobInterstitialImpl(
                 adState.tryEmit(
                     AdState.Bid(
                         AuctionResult(
-                            priceFloor = admobLineItems.getPriceFloor(interstitialAd.adUnitId),
+                            priceFloor = requireNotNull(lineItem?.priceFloor),
                             adSource = this@AdmobInterstitialImpl
                         )
                     )
@@ -109,34 +109,35 @@ internal class AdmobInterstitialImpl(
         interstitialAd?.onPaidEventListener = null
         interstitialAd?.fullScreenContentCallback = null
         interstitialAd = null
-        admobLineItems.clear()
+        lineItem = null
     }
 
     override fun getAuctionParams(
         activity: Activity,
         priceFloor: Double,
         timeout: Long,
-        lineItems: List<LineItem>
+        lineItems: List<LineItem>,
+        onLineItemConsumed: (LineItem) -> Unit,
     ): AdAuctionParams {
+        val lineItem = lineItems
+            .filter { it.demandId == demandId.demandId }
+            .mapNotNull {
+                it.takeIf { !it.adUnitId.isNullOrBlank() }
+            }.minByOrNull { it.priceFloor }
+            ?.also(onLineItemConsumed)
         return AdmobFullscreenAdAuctionParams(
-            admobLineItems = lineItems
-                .filter { it.demandId == demandId.demandId }
-                .mapNotNull {
-                    val price = it.priceFloor ?: return@mapNotNull null
-                    val adUnitId = it.adUnitId ?: return@mapNotNull null
-                    AdmobLineItem(price = price, adUnitId = adUnitId)
-                }.sortedBy { it.price },
+            lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
             priceFloor = priceFloor,
             context = activity.applicationContext
         )
     }
 
     override suspend fun bid(adParams: AdmobFullscreenAdAuctionParams): Result<AuctionResult> {
+        logInternal(Tag, "Starting with $adParams")
         return withContext(dispatcher) {
-            logInternal(Tag, "Starting with $adParams")
-            admobLineItems.addAll(adParams.admobLineItems)
+            lineItem = adParams.lineItem
             val adRequest = AdRequest.Builder().build()
-            val adUnitId = admobLineItems.firstOrNull { it.price > adParams.priceFloor }?.adUnitId
+            val adUnitId = lineItem?.adUnitId
             if (!adUnitId.isNullOrBlank()) {
                 InterstitialAd.load(adParams.context, adUnitId, adRequest, requestListener)
             } else {
@@ -144,7 +145,7 @@ internal class AdmobInterstitialImpl(
                 logError(
                     tag = Tag,
                     message = "No appropriate AdUnitId found. PriceFloor=${adParams.priceFloor}, " +
-                        "but LineItem with max priceFloor=${admobLineItems.last().price}. LineItems: $admobLineItems",
+                        "but LineItem with max priceFloor=${lineItem?.priceFloor}",
                     error = error
                 )
                 adState.tryEmit(AdState.LoadFailed(error))
@@ -181,17 +182,13 @@ internal class AdmobInterstitialImpl(
         return Ad(
             demandId = demandId,
             demandAd = demandAd,
-            price = admobLineItems.getPriceFloor(adUnitId),
+            price = lineItem?.priceFloor ?: 0.0,
             sourceAd = this,
             monetizationNetwork = BNMediationNetwork.GoogleAdmob.networkName,
             dsp = null,
             roundId = roundId,
             currencyCode = "USD"
         )
-    }
-
-    private fun List<AdmobLineItem>.getPriceFloor(adUnitId: String): Double {
-        return this.first { it.adUnitId == adUnitId }.price
     }
 }
 

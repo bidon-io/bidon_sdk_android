@@ -94,7 +94,8 @@ internal class MaxBannerImpl(
         priceFloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
-        bannerSize: BannerSize
+        bannerSize: BannerSize,
+        onLineItemConsumed: (LineItem) -> Unit,
     ): AdAuctionParams {
         return ApplovinBannerAuctionParams(
             context = adContainer.context,
@@ -207,5 +208,5 @@ internal class MaxBannerImpl(
     }
 }
 
-private const val Tag = "ApplovinMax Interstitial"
+private const val Tag = "ApplovinMax Banner"
 private const val USD = "USD"

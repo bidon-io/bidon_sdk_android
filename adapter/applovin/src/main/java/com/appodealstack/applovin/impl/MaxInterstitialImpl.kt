@@ -84,7 +84,8 @@ internal class MaxInterstitialImpl(
         activity: Activity,
         priceFloor: Double,
         timeout: Long,
-        lineItems: List<LineItem>
+        lineItems: List<LineItem>,
+        onLineItemConsumed: (LineItem) -> Unit,
     ): AdAuctionParams {
         return ApplovinFullscreenAdAuctionParams(
             activity = activity,

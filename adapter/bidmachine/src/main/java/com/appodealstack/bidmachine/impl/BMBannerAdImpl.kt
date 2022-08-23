@@ -161,7 +161,8 @@ internal class BMBannerAdImpl(
         priceFloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
-        bannerSize: BannerSize
+        bannerSize: BannerSize,
+        onLineItemConsumed: (LineItem) -> Unit,
     ): AdAuctionParams {
         return BMBannerAuctionParams(priceFloor = priceFloor, timeout = timeout, context = adContainer.context, bannerSize = bannerSize)
     }
