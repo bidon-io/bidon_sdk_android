@@ -25,6 +25,14 @@ interface BidOnSdk {
 
     fun setBaseUrl(host: String?): BidOnSdk
 
+    fun getVersion(): String
+    fun getFrameworkName(): String {
+        return "Android"
+    }
+
+    fun getPluginVersion(): String?
+    fun getEngineVersion(): String?
+
 //    fun updateGDPRUserConsent(consent: GDPRUserConsent)
 //    fun updateCCPAUserConsent(consent: CCPAUserConsent)
 //    fun isAutoCacheEnabled(adType: Int): Boolean

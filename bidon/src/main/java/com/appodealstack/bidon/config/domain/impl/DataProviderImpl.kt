@@ -17,6 +17,7 @@ internal class DataProviderImpl(
     private val sessionBinder: SessionBinder,
     private val userBinder: UserBinder,
     private val tokenBinder: TokenBinder,
+    private val placementBinder: PlacementBinder
 ) : DataProvider {
 
     override suspend fun provide(dataBinders: List<DataBinderType>): Map<String, JsonElement> {
@@ -28,6 +29,7 @@ internal class DataProviderImpl(
                 DataBinderType.Session -> sessionBinder
                 DataBinderType.User -> userBinder
                 DataBinderType.Token -> tokenBinder
+                DataBinderType.Placement -> placementBinder
             }
             binder.fieldName to binder.getJsonElement()
         }

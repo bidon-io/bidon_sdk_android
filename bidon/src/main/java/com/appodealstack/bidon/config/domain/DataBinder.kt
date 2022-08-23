@@ -8,7 +8,8 @@ internal enum class DataBinderType {
     Geo,
     Session,
     User,
-    Token
+    Token,
+    Placement
 }
 
 /**
