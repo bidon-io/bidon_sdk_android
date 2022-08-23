@@ -2,7 +2,10 @@ package com.appodealstack.admob.impl
 
 import android.app.Activity
 import android.content.Context
+import android.util.DisplayMetrics
 import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import com.appodealstack.admob.AdmobBannerAuctionParams
 import com.appodealstack.admob.AdmobLineItem
 import com.appodealstack.admob.asBidonError
@@ -103,7 +106,7 @@ internal class AdmobBannerImpl(
     }
 
     override fun getAuctionParams(
-        context: Context,
+        adContainer: ViewGroup,
         priceFloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
@@ -119,7 +122,7 @@ internal class AdmobBannerImpl(
                 }.sortedBy { it.price },
             priceFloor = priceFloor,
             bannerSize = bannerSize,
-            context = context,
+            adContainer = adContainer,
         )
     }
 
@@ -128,14 +131,17 @@ internal class AdmobBannerImpl(
             logInternal(Tag, "Starting with $adParams")
             admobLineItems.addAll(adParams.admobLineItems)
             val adUnitId = admobLineItems.firstOrNull { it.price > adParams.priceFloor }?.adUnitId
-            val admobBannerSize = adParams.bannerSize.asAdmobAdSize()
-            if (!adUnitId.isNullOrBlank() && admobBannerSize != null) {
-                val adView = AdView(adParams.context).also {
-                    adView = it
-                }
-                adView.setAdSize(admobBannerSize)
-                adView.adUnitId = adUnitId
-                adView.adListener = requestListener
+            if (!adUnitId.isNullOrBlank()) {
+                val adView = AdView(adParams.adContainer.context)
+                    .apply {
+                        val admobBannerSize = adParams.bannerSize.asAdmobAdSize(adParams.adContainer)
+                        this.setAdSize(admobBannerSize)
+                        this.adUnitId = adUnitId
+                        this.adListener = requestListener
+                    }
+                    .also {
+                        adView = it
+                    }
                 val adRequest = AdRequest.Builder().build()
                 adView.loadAd(adRequest)
             } else {
@@ -148,7 +154,6 @@ internal class AdmobBannerImpl(
                 adState.tryEmit(AdState.LoadFailed(error))
             }
             val state = adState.first {
-                logInternal(Tag, "+++++ >>>>>> $it")
                 it is AdState.Bid || it is AdState.LoadFailed
             }
             when (state) {
@@ -189,11 +194,26 @@ internal class AdmobBannerImpl(
         return this.first { it.adUnitId == adUnitId }.price
     }
 
-    private fun BannerSize.asAdmobAdSize() = when (this) {
+    private fun BannerSize.asAdmobAdSize(adContainer: ViewGroup) = when (this) {
         BannerSize.Banner -> AdSize.BANNER
         BannerSize.LeaderBoard -> AdSize.LEADERBOARD
         BannerSize.MRec -> AdSize.MEDIUM_RECTANGLE
-        else -> null
+        BannerSize.Large -> AdSize.LARGE_BANNER
+        BannerSize.Smart -> adContainer.adaptiveAdSize()
+    }
+
+    private fun ViewGroup.adaptiveAdSize(): AdSize {
+        val windowManager = this.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val display = windowManager.defaultDisplay
+        val outMetrics = DisplayMetrics()
+        display.getMetrics(outMetrics)
+        val density = outMetrics.density
+        var adWidthPixels = this.width.toFloat()
+        if (adWidthPixels == 0f) {
+            adWidthPixels = outMetrics.widthPixels.toFloat()
+        }
+        val adWidth = (adWidthPixels / density).toInt()
+        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this.context, adWidth)
     }
 }
 

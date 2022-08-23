@@ -86,7 +86,7 @@ class Banner private constructor(
                 resolver = MaxEcpmAuctionResolver,
                 adTypeAdditionalData = AdTypeAdditional.Banner(
                     bannerSize = bannerSize,
-                    context = context
+                    adContainer = this@Banner
                 ),
                 roundsListener = listener
             ).onSuccess { results ->
@@ -137,7 +137,6 @@ class Banner private constructor(
         observeCallbacksJob = adSource.adState.onEach { state ->
             logInternal(Tag, "$state")
             when (state) {
-                AdState.Initialized,
                 is AdState.Bid,
                 is AdState.OnReward,
                 is AdState.Fill -> {

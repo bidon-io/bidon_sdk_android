@@ -3,6 +3,7 @@ package com.appodealstack.bidmachine.impl
 import android.app.Activity
 import android.content.Context
 import android.view.View
+import android.view.ViewGroup
 import com.appodealstack.bidmachine.BMAuctionResult
 import com.appodealstack.bidmachine.BMBannerAuctionParams
 import com.appodealstack.bidmachine.BidMachineBannerSize
@@ -156,13 +157,13 @@ internal class BMBannerAdImpl(
     }
 
     override fun getAuctionParams(
-        context: Context,
+        adContainer: ViewGroup,
         priceFloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         bannerSize: BannerSize
     ): AdAuctionParams {
-        return BMBannerAuctionParams(priceFloor = priceFloor, timeout = timeout, context = context, bannerSize = bannerSize)
+        return BMBannerAuctionParams(priceFloor = priceFloor, timeout = timeout, context = adContainer.context, bannerSize = bannerSize)
     }
 
     override fun destroy() {
@@ -193,9 +194,9 @@ internal class BMBannerAdImpl(
         BannerSize.Banner -> BidMachineBannerSize.Size_320x50
         BannerSize.LeaderBoard -> BidMachineBannerSize.Size_728x90
         BannerSize.MRec -> BidMachineBannerSize.Size_300x250
-        else -> BidMachineBannerSize.Size_320x50
+        BannerSize.Smart -> BidMachineBannerSize.Size_320x50
+        BannerSize.Large -> BidMachineBannerSize.Size_320x50
     }
-
 }
 
 private const val Tag = "BidMachine Interstitial"

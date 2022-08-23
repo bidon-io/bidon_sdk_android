@@ -73,7 +73,7 @@ fun BannerScreen(navController: NavHostController) {
                             BannerSize.LeaderBoard -> 90.dp
                             BannerSize.MRec -> 250.dp
                             BannerSize.Large -> 100.dp
-                            BannerSize.Smart -> TODO()
+                            BannerSize.Smart -> 100.dp
                         }
                     ),
                     factory = {

@@ -1,6 +1,7 @@
 package com.appodealstack.applovin
 
 import android.app.Activity
+import android.content.Context
 import com.appodealstack.bidon.adapters.AdAuctionParams
 import com.appodealstack.bidon.adapters.AdapterParameters
 import com.appodealstack.bidon.adapters.banners.BannerSize
@@ -14,6 +15,7 @@ data class ApplovinParameters(
 ) : AdapterParameters
 
 data class ApplovinBannerAuctionParams(
+    val context: Context,
     val bannerSize: BannerSize,
     val priceFloor: Double,
     val adUnitId: String,

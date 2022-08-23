@@ -75,7 +75,7 @@ internal class AuctionImpl(
         state.first { it == AuctionState.Finished }
 
         auctionResults.value.ifEmpty {
-            throw BidonError.AuctionFailed
+            throw BidonError.NoAuctionResults
         }
     }
 
@@ -224,7 +224,7 @@ internal class AuctionImpl(
                                         priceFloor = priceFloor,
                                         timeout = timeout,
                                         lineItems = lineItems,
-                                        context = adTypeAdditionalData.context,
+                                        adContainer = adTypeAdditionalData.adContainer,
                                         bannerSize = adTypeAdditionalData.bannerSize
                                     )
                                 }

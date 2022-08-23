@@ -1,8 +1,8 @@
 package com.appodealstack.bidon.adapters
 
 import android.app.Activity
-import android.content.Context
 import android.view.View
+import android.view.ViewGroup
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
@@ -67,7 +67,7 @@ sealed interface AdSource<T : AdAuctionParams> {
 
     interface Banner<T : AdAuctionParams> : AdSource<T> {
         fun getAuctionParams(
-            context: Context,
+            adContainer: ViewGroup,
             priceFloor: Double,
             timeout: Long,
             lineItems: List<LineItem>,
