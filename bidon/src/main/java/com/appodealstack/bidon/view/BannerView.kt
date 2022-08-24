@@ -2,7 +2,6 @@ package com.appodealstack.bidon.view
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import com.appodealstack.bidon.BidON
@@ -30,6 +29,7 @@ interface BannerAd {
 
     fun setAdSize(bannerSize: BannerSize)
     fun load()
+    fun show()
     fun destroy()
     fun setBannerListener(listener: BannerListener)
 
@@ -44,35 +44,14 @@ interface BannerAd {
     }
 }
 
-class BannerView constructor(
+class BannerView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     @AttrRes defStyleAtt: Int = 0
-) : BannerAd, FrameLayout(context, attrs, defStyleAtt), BannerAd.AutoRefreshable {
+) : FrameLayout(context, attrs, defStyleAtt), BannerAd, BannerAd.AutoRefreshable {
 
     constructor(context: Context, placementId: String) : this(context, null, 0) {
         this.placementId = placementId
-    }
-
-    init {
-        context.theme.obtainStyledAttributes(attrs, R.styleable.BannerView, 0, 0).apply {
-            try {
-                getString(R.styleable.BannerView_placementId)?.let {
-                    this@BannerView.placementId = it
-                }
-                getInteger(R.styleable.BannerView_bannerSize, 0).let {
-                    when (it) {
-                        1 -> this@BannerView.bannerSize = BannerSize.Banner
-                        2 -> this@BannerView.bannerSize = BannerSize.Large
-                        3 -> this@BannerView.bannerSize = BannerSize.LeaderBoard
-                        4 -> this@BannerView.bannerSize = BannerSize.MRec
-                        5 -> this@BannerView.bannerSize = BannerSize.Adaptive
-                    }
-                }
-            } finally {
-                recycle()
-            }
-        }
     }
 
     override var placementId: String = DefaultPlacement
@@ -90,12 +69,35 @@ class BannerView constructor(
         }
     }
 
-    private var auctionHolder: AuctionHolder? = null
+    private val auctionHolder: AuctionHolder by lazy {
+        get { params(demandAd to listener) }
+    }
     private var userListener: BannerListener? = null
     private var observeCallbacksJob: Job? = null
 
     private val listener by lazy {
         getBannerListener()
+    }
+
+    init {
+        context.theme.obtainStyledAttributes(attrs, R.styleable.BannerView, 0, 0).apply {
+            try {
+                getString(R.styleable.BannerView_placementId)?.let {
+                    this@BannerView.placementId = it
+                }
+                getInteger(R.styleable.BannerView_bannerSize, 0).let {
+                    when (it) {
+                        1 -> setAdSize(BannerSize.Banner)
+                        2 -> setAdSize(BannerSize.Large)
+                        3 -> setAdSize(BannerSize.LeaderBoard)
+                        4 -> setAdSize(BannerSize.MRec)
+                        5 -> setAdSize(BannerSize.Adaptive)
+                    }
+                }
+            } finally {
+                recycle()
+            }
+        }
     }
 
     override fun setAdSize(bannerSize: BannerSize) {
@@ -104,23 +106,14 @@ class BannerView constructor(
     }
 
     override fun load() {
+        if (!BidON.isInitialized()) {
+            logInfo(Tag, "Sdk is not initialized")
+            return
+        }
         logInfo(Tag, "Load with placement: $placementId")
-        observeCallbacksJob?.cancel()
-        observeCallbacksJob = null
-
-        if (auctionHolder?.isActive != true) {
+        if (!auctionHolder.isActive) {
             listener.auctionStarted()
-            /**
-             * Destroy all previous auction items.
-             */
-            auctionHolder?.destroy()
-            /**
-             * Create new auction
-             */
-            auctionHolder = get {
-                params(demandAd to listener)
-            }
-            auctionHolder?.startAuction(
+            auctionHolder.startAuction(
                 adTypeAdditional = AdTypeAdditional.Banner(
                     bannerSize = bannerSize,
                     adContainer = this@BannerView
@@ -153,6 +146,17 @@ class BannerView constructor(
         }
     }
 
+    override fun show() {
+        removeAllViews()
+        auctionHolder.popWinner()?.let { adSource ->
+            require(adSource is AdSource.Banner) {
+                "Unexpected AdSource type. Expected: AdSource.Banner. Actual: ${adSource::class.java}."
+            }
+            addView(adSource.getAdView())
+            isBannerDisplaying.set(true)
+        }
+    }
+
     override fun setBannerListener(listener: BannerListener) {
         logInfo(Tag, "Set banner listener")
         this.userListener = listener
@@ -175,9 +179,13 @@ class BannerView constructor(
         load()
     }
 
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        destroy()
+    }
+
     override fun destroy() {
-        auctionHolder?.destroy()
-        auctionHolder = null
+        auctionHolder.destroy()
         autoRefresher.stopAutoRefresh()
         observeCallbacksJob?.cancel()
         observeCallbacksJob = null
@@ -189,13 +197,8 @@ class BannerView constructor(
      * Private
      */
 
-    private fun showAdView(adView: View) {
-        removeAllViews()
-        addView(adView)
-        isBannerDisplaying.set(true)
-    }
-
     private fun subscribeToWinner(adSource: AdSource<*>) {
+        observeCallbacksJob?.cancel()
         observeCallbacksJob = adSource.adState.onEach { state ->
             logInternal(Tag, "$state")
             when (state) {
@@ -252,12 +255,7 @@ class BannerView constructor(
 
         override fun auctionSucceed(auctionResults: List<AuctionResult>) {
             userListener?.auctionSucceed(auctionResults)
-
-            val winner = auctionResults.first()
-            require(winner.adSource is AdSource.Banner) {
-                "Unexpected AdSource type. Expected: AdSource.Banner. Actual: ${winner.adSource::class.java}."
-            }
-            showAdView(winner.adSource.getAdView())
+            show()
         }
 
         override fun auctionFailed(error: Throwable) {
@@ -278,5 +276,5 @@ class BannerView constructor(
     }
 }
 
-private const val Tag = "Banner"
+private const val Tag = "BannerView"
 internal const val DefaultAutoRefreshTimeoutMs = 5_000L

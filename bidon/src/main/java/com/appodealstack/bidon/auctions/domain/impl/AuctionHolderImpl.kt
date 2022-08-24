@@ -1,5 +1,6 @@
 package com.appodealstack.bidon.auctions.domain.impl
 
+import com.appodealstack.bidon.adapters.AdSource
 import com.appodealstack.bidon.adapters.DemandAd
 import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
@@ -26,8 +27,8 @@ internal class AuctionHolderImpl(
     override val isActive: Boolean
         get() = auctionResultsDeferred?.isActive == true
 
-    override val winner: AuctionResult?
-        get() = auctionResults.firstOrNull()
+    private var displayingWinner: AuctionResult? = null
+    private var nextWinner: AuctionResult? = null
 
     override fun startAuction(
         adTypeAdditional: AdTypeAdditional,
@@ -47,15 +48,30 @@ internal class AuctionHolderImpl(
                 }
             deferred.await()
                 .onSuccess { results ->
+                    check(results.isNotEmpty()) {
+                        "Auction succeed if results is not empty"
+                    }
                     logInfo(Tag, "Auction completed successfully: $results")
-                    auctionResults.clear()
-                    auctionResults.addAll(results)
+                    nextWinner = results.first()
+                    with(auctionResults) {
+                        forEach { it.adSource.destroy() }
+                        clear()
+                        addAll(results)
+                    }
                     onResult.invoke(results.asSuccess())
                 }.onFailure {
+                    nextWinner = null
                     logError(Tag, "Auction failed", it)
                     onResult.invoke(it.asFailure())
                 }
         }
+    }
+
+    override fun popWinner(): AdSource<*>? {
+        displayingWinner?.adSource?.destroy()
+        displayingWinner = nextWinner
+        nextWinner = null
+        return displayingWinner?.adSource
     }
 
     override fun destroy() {
@@ -63,6 +79,8 @@ internal class AuctionHolderImpl(
             logInfo(Tag, "Auction canceled")
             it.cancel()
         }
+        displayingWinner = null
+        nextWinner = null
         with(auctionResults) {
             forEach { it.adSource.destroy() }
             clear()
