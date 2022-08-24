@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -30,9 +31,9 @@ import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 
 @Composable
-fun MainScreen(
+internal fun MainScreen(
     navController: NavHostController,
-    initState: MutableState<Boolean>,
+    initState: MutableState<MainScreenState>,
 ) {
     Column(
         modifier = Modifier
@@ -46,48 +47,63 @@ fun MainScreen(
         val keyValueStorage: KeyValueStorage = KeyValueStorageImpl().apply {
             init(context)
         }
-        if (!initState.value) {
-            H5Text(
-                modifier = Modifier.padding(bottom = 40.dp),
-                text = "BidON"
-            )
-            AppButton(text = "Init") {
-                BidON
-                    .setBaseUrl(keyValueStorage.host)
-                    .init(
-                        activity = context as Activity,
-                        appKey = "YOUR_APP_KEY",
-                    ) {
-                        initState.value = true
+        when (val state = initState.value) {
+            MainScreenState.NotInitialized,
+            MainScreenState.Initializing -> {
+                H5Text(
+                    modifier = Modifier.padding(bottom = 40.dp),
+                    text = "BidON"
+                )
+                if (state == MainScreenState.NotInitialized) {
+                    AppButton(text = "Init") {
+                        initState.value = MainScreenState.Initializing
+                        BidON
+                            .setBaseUrl(keyValueStorage.host)
+                            .init(
+                                activity = context as Activity,
+                                appKey = "YOUR_APP_KEY",
+                            ) {
+                                initState.value = MainScreenState.Initialized
+                            }
                     }
+                } else {
+                    CircularProgressIndicator()
+                }
+                AppTextButton(text = "Server settings", modifier = Modifier.padding(top = 30.dp)) {
+                    navController.navigate(Screen.ServerSettings.route)
+                }
             }
-            AppTextButton(text = "Server settings", modifier = Modifier.padding(top = 30.dp)) {
-                navController.navigate(Screen.ServerSettings.route)
-            }
-        } else {
-            H5Text(
-                modifier = Modifier.padding(bottom = 24.dp),
-                text = "Ad types"
-            )
-            AppButton(text = "Interstitial") {
-                navController.navigate(Screen.Interstitial.route)
-            }
-            AppButton(text = "Rewarded") {
-                navController.navigate(Screen.Rewarded.route)
-            }
-            AppButton(text = "Banner") {
-                navController.navigate(Screen.Banners.route)
-            }
-            TextButton(modifier = Modifier.padding(top = 100.dp), onClick = {
-                val packageManager: PackageManager = context.packageManager
-                val intent: Intent = packageManager.getLaunchIntentForPackage(context.packageName)!!
-                val componentName: ComponentName = intent.component!!
-                val restartIntent: Intent = Intent.makeRestartActivityTask(componentName)
-                context.startActivity(restartIntent)
-                Runtime.getRuntime().exit(0)
-            }) {
-                Text(text = "Restart / Re-Init application")
+            MainScreenState.Initialized -> {
+                H5Text(
+                    modifier = Modifier.padding(bottom = 24.dp),
+                    text = "Ad types"
+                )
+                AppButton(text = "Interstitial") {
+                    navController.navigate(Screen.Interstitial.route)
+                }
+                AppButton(text = "Rewarded") {
+                    navController.navigate(Screen.Rewarded.route)
+                }
+                AppButton(text = "Banner") {
+                    navController.navigate(Screen.Banners.route)
+                }
+                TextButton(modifier = Modifier.padding(top = 100.dp), onClick = {
+                    val packageManager: PackageManager = context.packageManager
+                    val intent: Intent = packageManager.getLaunchIntentForPackage(context.packageName)!!
+                    val componentName: ComponentName = intent.component!!
+                    val restartIntent: Intent = Intent.makeRestartActivityTask(componentName)
+                    context.startActivity(restartIntent)
+                    Runtime.getRuntime().exit(0)
+                }) {
+                    Text(text = "Restart / Re-Init application")
+                }
             }
         }
     }
+}
+
+internal enum class MainScreenState {
+    NotInitialized,
+    Initializing,
+    Initialized,
 }

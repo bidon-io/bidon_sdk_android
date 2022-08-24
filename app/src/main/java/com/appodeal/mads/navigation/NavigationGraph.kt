@@ -14,7 +14,7 @@ fun NavigationGraph(
     navController: NavHostController,
 ) {
     val initState = remember {
-        mutableStateOf(false)
+        mutableStateOf(MainScreenState.NotInitialized)
     }
 
     NavHost(navController = navController, startDestination = Screen.Main.route) {
