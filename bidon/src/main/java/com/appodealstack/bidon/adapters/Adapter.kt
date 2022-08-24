@@ -1,10 +1,13 @@
 package com.appodealstack.bidon.adapters
 
 import android.app.Activity
+import android.view.View
+import android.view.ViewGroup
+import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.config.data.models.AdapterInfo
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.serialization.json.JsonObject
 
 interface Adapter {
@@ -23,7 +26,7 @@ sealed interface AdProvider {
     }
 
     interface Banner<T : AdAuctionParams> : AdProvider {
-        fun banner(demandAd: DemandAd, roundId: String): AdSource.Interstitial<T>
+        fun banner(demandAd: DemandAd, roundId: String): AdSource.Banner<T>
     }
 
     interface Rewarded<T : AdAuctionParams> : AdProvider {
@@ -34,21 +37,50 @@ sealed interface AdProvider {
 sealed interface AdSource<T : AdAuctionParams> {
     val demandId: DemandId
     val ad: Ad?
-    val state: StateFlow<AdState>
+    val adState: SharedFlow<AdState>
 
     /**
      * Applovin needs Activity instance for interstitial 🤦‍️
      */
-    suspend fun bid(activity: Activity?, adParams: T): Result<AuctionResult>
+    suspend fun bid(adParams: T): Result<AuctionResult>
     suspend fun fill(): Result<Ad>
     fun show(activity: Activity)
     fun destroy()
-    fun getAuctionParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdAuctionParams
 
-    interface Interstitial<T : AdAuctionParams> : AdSource<T>
-    interface Rewarded<T : AdAuctionParams> : AdSource<T>
-    interface Banner<T : AdAuctionParams> : AdSource<T>
+    interface Interstitial<T : AdAuctionParams> : AdSource<T> {
+        fun getAuctionParams(
+            activity: Activity,
+            priceFloor: Double,
+            timeout: Long,
+            lineItems: List<LineItem>,
+            onLineItemConsumed: (LineItem) -> Unit,
+        ): AdAuctionParams
+    }
+
+    interface Rewarded<T : AdAuctionParams> : AdSource<T> {
+        fun getAuctionParams(
+            activity: Activity,
+            priceFloor: Double,
+            timeout: Long,
+            lineItems: List<LineItem>,
+            onLineItemConsumed: (LineItem) -> Unit,
+        ): AdAuctionParams
+    }
+
+    interface Banner<T : AdAuctionParams> : AdSource<T> {
+        fun getAuctionParams(
+            adContainer: ViewGroup,
+            priceFloor: Double,
+            timeout: Long,
+            lineItems: List<LineItem>,
+            bannerSize: BannerSize,
+            onLineItemConsumed: (LineItem) -> Unit,
+        ): AdAuctionParams
+
+        fun getAdView(): View
+    }
 }
+
 interface AdAuctionParams
 
 interface WinLossNotifiable {
@@ -57,7 +89,6 @@ interface WinLossNotifiable {
 }
 
 sealed interface AdState {
-    object Initialized : AdState
     class Expired(val ad: Ad) : AdState
     class Bid(val result: AuctionResult) : AdState
     class LoadFailed(val cause: Throwable) : AdState
@@ -68,14 +99,3 @@ sealed interface AdState {
     class OnReward(val ad: Ad, val reward: Reward) : AdState
     class ShowFailed(val cause: Throwable) : AdState
 }
-
-//    @Deprecated("")
-//    interface OldBanner<T : AdParams> : AdSource {
-//        fun banner(context: Context, demandAd: DemandAd, adParams: T): OldAuctionRequest
-//        fun bannerParams(
-//            priceFloor: Double,
-//            lineItems: List<LineItem>,
-//            bannerSize: BannerSize,
-//            adContainer: ViewGroup?
-//        ): AdParams
-//    }

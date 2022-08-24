@@ -2,7 +2,6 @@ package com.appodealstack.admob.impl
 
 import android.app.Activity
 import com.appodealstack.admob.AdmobFullscreenAdAuctionParams
-import com.appodealstack.admob.AdmobLineItem
 import com.appodealstack.admob.asBidonError
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.analytics.BNMediationNetwork
@@ -14,7 +13,7 @@ import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
@@ -31,7 +30,8 @@ internal class AdmobRewardedImpl(
 ) : AdSource.Rewarded<AdmobFullscreenAdAuctionParams> {
 
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
-    private val admobLineItems = mutableListOf<AdmobLineItem>()
+
+    private var lineItem: LineItem? = null
     private var rewardedAd: RewardedAd? = null
     private val requiredRewardedAd: RewardedAd get() = requireNotNull(rewardedAd)
 
@@ -39,17 +39,19 @@ internal class AdmobRewardedImpl(
         object : RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(Tag, "Error while loading ad: $loadAdError")
-                state.value = AdState.LoadFailed(loadAdError.asBidonError())
+                adState.tryEmit(AdState.LoadFailed(loadAdError.asBidonError()))
             }
 
             override fun onAdLoaded(rewardedAd: RewardedAd) {
                 this@AdmobRewardedImpl.rewardedAd = rewardedAd
                 requiredRewardedAd.onPaidEventListener = paidListener
                 requiredRewardedAd.fullScreenContentCallback = rewardedListener
-                state.value = AdState.Bid(
-                    AuctionResult(
-                        priceFloor = admobLineItems.getPriceFloor(rewardedAd.adUnitId),
-                        adSource = this@AdmobRewardedImpl
+                adState.tryEmit(
+                    AdState.Bid(
+                        AuctionResult(
+                            priceFloor = requireNotNull(lineItem?.priceFloor),
+                            adSource = this@AdmobRewardedImpl
+                        )
                     )
                 )
             }
@@ -57,9 +59,11 @@ internal class AdmobRewardedImpl(
     }
     private val onUserEarnedRewardListener by lazy {
         OnUserEarnedRewardListener { rewardItem ->
-            state.value = AdState.OnReward(
-                ad = requiredRewardedAd.asAd(),
-                reward = Reward(rewardItem.type, rewardItem.amount)
+            adState.tryEmit(
+                AdState.OnReward(
+                    ad = requiredRewardedAd.asAd(),
+                    reward = Reward(rewardItem.type, rewardItem.amount)
+                )
             )
         }
     }
@@ -85,19 +89,19 @@ internal class AdmobRewardedImpl(
     private val rewardedListener by lazy {
         object : FullScreenContentCallback() {
             override fun onAdClicked() {
-                state.value = AdState.Clicked(requiredRewardedAd.asAd())
+                adState.tryEmit(AdState.Clicked(requiredRewardedAd.asAd()))
             }
 
             override fun onAdDismissedFullScreenContent() {
-                state.value = AdState.Closed(requiredRewardedAd.asAd())
+                adState.tryEmit(AdState.Closed(requiredRewardedAd.asAd()))
             }
 
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
-                state.value = AdState.ShowFailed(error.asBidonError())
+                adState.tryEmit(AdState.ShowFailed(error.asBidonError()))
             }
 
             override fun onAdImpression() {
-                state.value = AdState.Impression(requiredRewardedAd.asAd())
+                adState.tryEmit(AdState.Impression(requiredRewardedAd.asAd()))
             }
 
             override fun onAdShowedFullScreenContent() {}
@@ -107,53 +111,54 @@ internal class AdmobRewardedImpl(
     override val ad: Ad?
         get() = rewardedAd?.asAd()
 
-    override val state = MutableStateFlow<AdState>(AdState.Initialized)
+    override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
 
     override fun destroy() {
+        logInternal(Tag, "destroy")
         rewardedAd?.onPaidEventListener = null
         rewardedAd?.fullScreenContentCallback = null
         rewardedAd = null
-        admobLineItems.clear()
+        lineItem = null
     }
 
-    override fun getAuctionParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdAuctionParams {
+    override fun getAuctionParams(
+        activity: Activity,
+        priceFloor: Double,
+        timeout: Long,
+        lineItems: List<LineItem>,
+        onLineItemConsumed: (LineItem) -> Unit,
+    ): AdAuctionParams {
+        val lineItem = lineItems
+            .mapNotNull {
+                it.takeIf { !it.adUnitId.isNullOrBlank() }
+            }.minByOrNull { it.priceFloor }
+            ?.also(onLineItemConsumed)
         return AdmobFullscreenAdAuctionParams(
-            admobLineItems = lineItems
-                .filter { it.demandId == demandId.demandId }
-                .mapNotNull {
-                    val price = it.priceFloor ?: return@mapNotNull null
-                    val adUnitId = it.adUnitId ?: return@mapNotNull null
-                    AdmobLineItem(price = price, adUnitId = adUnitId)
-                }.sortedBy { it.price },
-            priceFloor = priceFloor
+            lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
+            priceFloor = priceFloor,
+            context = activity.applicationContext
         )
     }
 
-    override suspend fun bid(activity: Activity?, adParams: AdmobFullscreenAdAuctionParams): Result<AuctionResult> {
+    override suspend fun bid(adParams: AdmobFullscreenAdAuctionParams): Result<AuctionResult> {
+        logInternal(Tag, "Starting with $adParams")
         return withContext(dispatcher) {
-            logInternal(Tag, "Starting with $adParams")
-            admobLineItems.addAll(adParams.admobLineItems)
-            val context = activity?.applicationContext
-            if (context == null) {
-                logError(Tag, "Can not bid() Admob, cause no Context found", BidonError.NoContextFound)
-                state.value = AdState.LoadFailed(BidonError.NoContextFound)
+            lineItem = adParams.lineItem
+            val adRequest = AdRequest.Builder().build()
+            val adUnitId = lineItem?.adUnitId
+            if (!adUnitId.isNullOrBlank()) {
+                RewardedAd.load(adParams.context, adUnitId, adRequest, requestListener)
             } else {
-                val adRequest = AdRequest.Builder().build()
-                val adUnitId = admobLineItems.firstOrNull { it.price > adParams.priceFloor }?.adUnitId
-                if (!adUnitId.isNullOrBlank()) {
-                    RewardedAd.load(context, adUnitId, adRequest, requestListener)
-                } else {
-                    val error = BidonError.NoAppropriateAdUnitId
-                    logError(
-                        tag = Tag,
-                        message = "No appropriate AdUnitId found. PriceFloor=${adParams.priceFloor}, " +
-                            "but LineItem with max priceFloor=${admobLineItems.last().price}. LineItems: $admobLineItems",
-                        error = error
-                    )
-                    state.value = AdState.LoadFailed(error)
-                }
+                val error = BidonError.NoAppropriateAdUnitId
+                logError(
+                    tag = Tag,
+                    message = "No appropriate AdUnitId found. PriceFloor=${adParams.priceFloor}, " +
+                        "but LineItem with max priceFloor=${lineItem?.priceFloor}",
+                    error = error
+                )
+                adState.tryEmit(AdState.LoadFailed(error))
             }
-            val state = state.first {
+            val state = adState.first {
                 it is AdState.Bid || it is AdState.LoadFailed
             }
             when (state) {
@@ -170,12 +175,12 @@ internal class AdmobRewardedImpl(
          */
         AdState.Fill(
             requiredRewardedAd.asAd()
-        ).also { state.value = it }.ad
+        ).also { adState.tryEmit(it) }.ad
     }
 
     override fun show(activity: Activity) {
         if (rewardedAd == null) {
-            state.value = AdState.ShowFailed(BidonError.FullscreenAdNotReady)
+            adState.tryEmit(AdState.ShowFailed(BidonError.FullscreenAdNotReady))
         } else {
             rewardedAd?.show(activity, onUserEarnedRewardListener)
         }
@@ -185,17 +190,13 @@ internal class AdmobRewardedImpl(
         return Ad(
             demandId = demandId,
             demandAd = demandAd,
-            price = admobLineItems.getPriceFloor(adUnitId),
+            price = lineItem?.priceFloor ?: 0.0,
             sourceAd = this,
             monetizationNetwork = BNMediationNetwork.GoogleAdmob.networkName,
             dsp = null,
             roundId = roundId,
             currencyCode = "USD"
         )
-    }
-
-    private fun List<AdmobLineItem>.getPriceFloor(adUnitId: String): Double {
-        return this.first { it.adUnitId == adUnitId }.price
     }
 }
 

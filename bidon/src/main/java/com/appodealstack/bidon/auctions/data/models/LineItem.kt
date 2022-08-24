@@ -8,7 +8,7 @@ data class LineItem(
     @SerialName("id")
     val demandId: String?,
     @SerialName("pricefloor")
-    val priceFloor: Double?,
+    val priceFloor: Double = 0.0,
     @SerialName("ad_unit_id")
     val adUnitId: String?,
 )

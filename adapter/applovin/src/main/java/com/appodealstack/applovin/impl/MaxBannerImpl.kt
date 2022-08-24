@@ -1,14 +1,19 @@
 package com.appodealstack.applovin.impl
 
 import android.app.Activity
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import com.applovin.mediation.MaxAd
+import com.applovin.mediation.MaxAdFormat
+import com.applovin.mediation.MaxAdViewAdListener
 import com.applovin.mediation.MaxError
-import com.applovin.mediation.MaxReward
-import com.applovin.mediation.MaxRewardedAdListener
-import com.applovin.mediation.ads.MaxRewardedAd
-import com.appodealstack.applovin.ApplovinFullscreenAdAuctionParams
+import com.applovin.mediation.ads.MaxAdView
+import com.applovin.sdk.AppLovinSdkUtils
+import com.appodealstack.applovin.ApplovinBannerAuctionParams
 import com.appodealstack.applovin.ApplovinMaxDemandId
 import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.core.ext.asFailure
@@ -18,28 +23,31 @@ import com.appodealstack.bidon.core.ext.logInternal
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 
-internal class MaxRewardedImpl(
+internal class MaxBannerImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
     private val roundId: String
-) : AdSource.Rewarded<ApplovinFullscreenAdAuctionParams> {
+) : AdSource.Banner<ApplovinBannerAuctionParams> {
 
-    private var rewardedAd: MaxRewardedAd? = null
+    private var maxAdView: MaxAdView? = null
     private var maxAd: MaxAd? = null
 
     private val maxAdListener by lazy {
-        object : MaxRewardedAdListener {
+        object : MaxAdViewAdListener {
             override fun onAdLoaded(ad: MaxAd) {
                 maxAd = ad
                 adState.tryEmit(
                     AdState.Bid(
                         AuctionResult(
                             priceFloor = ad.revenue,
-                            adSource = this@MaxRewardedImpl
+                            adSource = this@MaxBannerImpl
                         )
                     )
                 )
             }
+
+            override fun onAdExpanded(ad: MaxAd?) {}
+            override fun onAdCollapsed(ad: MaxAd?) {}
 
             override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
                 logError(Tag, "(code=${error.code}) ${error.message}", error.asBidonError())
@@ -65,58 +73,79 @@ internal class MaxRewardedImpl(
                 maxAd = ad
                 adState.tryEmit(AdState.ShowFailed(error.asBidonError()))
             }
-
-            override fun onRewardedVideoStarted(ad: MaxAd?) {}
-            override fun onRewardedVideoCompleted(ad: MaxAd?) {}
-
-            override fun onUserRewarded(ad: MaxAd, reward: MaxReward?) {
-                maxAd = ad
-                adState.tryEmit(
-                    AdState.OnReward(
-                        ad = ad.asAd(),
-                        reward = Reward(reward?.label ?: "", reward?.amount ?: 0)
-                    )
-                )
-            }
         }
     }
 
     override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
 
     override val ad: Ad?
-        get() = maxAd?.asAd() ?: rewardedAd?.asAd()
+        get() = maxAd?.asAd() ?: maxAdView?.asAd()
 
     override fun destroy() {
         logInternal(Tag, "destroy")
-        rewardedAd?.setListener(null)
-        rewardedAd?.destroy()
-        rewardedAd = null
+        maxAdView?.setListener(null)
+        maxAdView?.destroy()
+        maxAdView = null
         maxAd = null
     }
 
     override fun getAuctionParams(
-        activity: Activity,
+        adContainer: ViewGroup,
         priceFloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
+        bannerSize: BannerSize,
         onLineItemConsumed: (LineItem) -> Unit,
     ): AdAuctionParams {
         val lineItem = lineItems.minByOrNull { it.priceFloor }
             ?.also(onLineItemConsumed)
-        return ApplovinFullscreenAdAuctionParams(
+        return ApplovinBannerAuctionParams(
+            context = adContainer.context,
             lineItem = requireNotNull(lineItem),
-            timeoutMs = timeout,
-            activity = activity
+            bannerSize = bannerSize,
+            adaptiveBannerHeight = null
         )
     }
 
-    override suspend fun bid(adParams: ApplovinFullscreenAdAuctionParams): Result<AuctionResult> {
+    override fun getAdView(): View {
+        return requireNotNull(maxAdView)
+    }
+
+    override suspend fun bid(
+        adParams: ApplovinBannerAuctionParams
+    ): Result<AuctionResult> {
         logInternal(Tag, "Starting with $adParams")
-        val maxInterstitialAd = MaxRewardedAd.getInstance(adParams.lineItem.adUnitId, adParams.activity).also {
-            it.setListener(maxAdListener)
-            rewardedAd = it
+
+        val maxAdView = if (adParams.bannerSize == BannerSize.Smart) {
+            MaxAdView(
+                adParams.lineItem.adUnitId,
+                adParams.context,
+            ).apply {
+                val activity = adParams.context as Activity
+                val heightDp = MaxAdFormat.BANNER.getAdaptiveSize(activity).height
+                val heightPx = AppLovinSdkUtils.dpToPx(activity, heightDp)
+                layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, heightPx)
+                setExtraParameter("adaptive_banner", "true")
+            }
+        } else {
+            MaxAdView(
+                adParams.lineItem.adUnitId,
+                adParams.bannerSize.asMaxAdFormat(),
+                adParams.context,
+            )
         }
-        maxInterstitialAd.loadAd()
+        maxAdView.apply {
+            setListener(maxAdListener)
+            placement = demandAd.placement
+            /**
+             * AutoRefresher.kt provides auto-refresh
+             */
+            setExtraParameter("allow_pause_auto_refresh_immediately", "true")
+            stopAutoRefresh()
+        }.also {
+            this.maxAdView = it
+        }
+        maxAdView.loadAd()
         val state = adState.first {
             it is AdState.Bid || it is AdState.LoadFailed
         }
@@ -132,17 +161,11 @@ internal class MaxRewardedImpl(
          * Applovin fills the bid automatically. It's not needed to fill it manually.
          */
         AdState.Fill(
-            requireNotNull(rewardedAd?.asAd())
+            requireNotNull(maxAdView?.asAd())
         ).also { adState.tryEmit(it) }.ad
     }
 
-    override fun show(activity: Activity) {
-        if (rewardedAd?.isReady == true) {
-            rewardedAd?.showAd()
-        } else {
-            adState.tryEmit(AdState.ShowFailed(BidonError.FullscreenAdNotReady))
-        }
-    }
+    override fun show(activity: Activity) {}
 
     /**
      * Use it after loaded ECPM is known
@@ -164,7 +187,7 @@ internal class MaxRewardedImpl(
     /**
      * Use it before loaded ECPM is unknown
      */
-    private fun MaxRewardedAd?.asAd(): Ad {
+    private fun MaxAdView?.asAd(): Ad {
         val maxAd = this
         return Ad(
             demandId = ApplovinMaxDemandId,
@@ -177,7 +200,14 @@ internal class MaxRewardedImpl(
             currencyCode = USD
         )
     }
+
+    private fun BannerSize.asMaxAdFormat() = when (this) {
+        BannerSize.Banner -> MaxAdFormat.BANNER
+        BannerSize.LeaderBoard -> MaxAdFormat.LEADER
+        BannerSize.MRec -> MaxAdFormat.MREC
+        else -> error(BidonError.AdFormatIsNotSupported(demandId.demandId, bannerSize = this))
+    }
 }
 
-private const val Tag = "ApplovinMax Rewarded"
+private const val Tag = "ApplovinMax Banner"
 private const val USD = "USD"

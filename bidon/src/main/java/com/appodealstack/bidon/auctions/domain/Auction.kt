@@ -11,16 +11,10 @@ internal interface Auction {
         roundsListener: RoundsListener,
         adTypeAdditionalData: AdTypeAdditional
     ): Result<List<AuctionResult>>
-
-    fun destroy()
-
-    val results: List<AuctionResult>
-    val isActive: Boolean
 }
 
 enum class AuctionState {
     Initialized,
     InProgress,
     Finished,
-    Destroyed
 }

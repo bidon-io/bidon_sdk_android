@@ -4,13 +4,10 @@ import android.app.Activity
 import com.appodealstack.bidon.BidON
 import com.appodealstack.bidon.BidOnSdk.Companion.DefaultPlacement
 import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.adapters.AdState
 import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
-import com.appodealstack.bidon.auctions.domain.Auction
-import com.appodealstack.bidon.auctions.domain.impl.MaxEcpmAuctionResolver
+import com.appodealstack.bidon.auctions.domain.AuctionHolder
 import com.appodealstack.bidon.core.SdkDispatchers
-import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.di.get
 import kotlinx.coroutines.CoroutineDispatcher
@@ -18,7 +15,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 class Interstitial(
     override val placementId: String = DefaultPlacement
@@ -27,7 +23,7 @@ class Interstitial(
 interface InterstitialAd {
     val placementId: String
 
-    fun load()
+    fun load(activity: Activity)
     fun destroy()
     fun show(activity: Activity)
     fun setInterstitialListener(listener: InterstitialListener)
@@ -41,75 +37,85 @@ internal class InterstitialAdImpl(
     private val demandAd by lazy {
         DemandAd(AdType.Interstitial, placementId)
     }
-    private var auction: Auction? = null
-    private val scope: CoroutineScope get() = CoroutineScope(dispatcher)
     private var userListener: InterstitialListener? = null
-    private var auctionJob: Job? = null
     private var observeCallbacksJob: Job? = null
+    private var auctionHolder: AuctionHolder? = null
 
     private val listener by lazy {
         getInterstitialListener()
     }
 
-    override fun load() {
+    override fun load(activity: Activity) {
         logInfo(Tag, "Load with placement: $placementId")
-        if (auctionJob?.isActive == true) return
-
         observeCallbacksJob?.cancel()
         observeCallbacksJob = null
-        listener.auctionStarted()
 
-        auctionJob = scope.launch {
-            val auction = get<Auction>().also {
-                auction = it
+        if (auctionHolder?.isActive != true) {
+            listener.auctionStarted()
+            /**
+             * Destroy all previous auction items.
+             */
+            auctionHolder?.destroy()
+            /**
+             * Create new auction
+             */
+            auctionHolder = get {
+                params(demandAd to listener)
             }
-            auction.start(
-                demandAd = demandAd,
-                resolver = MaxEcpmAuctionResolver,
-                adTypeAdditionalData = AdTypeAdditional.Interstitial(
-                    activity = null
+            auctionHolder?.startAuction(
+                adTypeAdditional = AdTypeAdditional.Interstitial(
+                    activity = activity
                 ),
-                roundsListener = listener
-            ).onSuccess { results ->
-                logInfo(Tag, "Auction completed successfully: $results")
-
-                val winner = results.first()
-                subscribeToWinner(winner.adSource)
-                listener.auctionSucceed(results)
-                listener.onAdLoaded(
-                    requireNotNull(winner.adSource.ad) {
-                        "[Ad] should exist when the Action succeeds"
-                    }
-                )
-            }.onFailure {
-                logError(Tag, "Auction failed", it)
-                listener.auctionFailed(error = it)
-                listener.onAdLoadFailed(cause = it)
-            }
+                onResult = { result ->
+                    result
+                        .onSuccess { auctionResults ->
+                            /**
+                             * Winner found
+                             */
+                            val winner = auctionResults.first()
+                            subscribeToWinner(winner.adSource)
+                            listener.auctionSucceed(auctionResults)
+                            listener.onAdLoaded(
+                                requireNotNull(winner.adSource.ad) {
+                                    "[Ad] should exist when the Action succeeds"
+                                }
+                            )
+                        }.onFailure {
+                            /**
+                             * Auction failed
+                             */
+                            listener.auctionFailed(error = it)
+                            listener.onAdLoadFailed(cause = it)
+                        }
+                }
+            )
+        } else {
+            logInfo(Tag, "Auction already in progress. Placement: $placementId.")
         }
     }
 
     override fun show(activity: Activity) {
         logInfo(Tag, "Show with placement: $placementId")
-        val auction = auction
-        when {
-            auctionJob?.isActive == true -> {
-                logInfo(Tag, "Show failed. Auction in progress.")
-                listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
-            }
-            auction == null -> {
-                logInfo(Tag, "Show failed. No completed Auction.")
-                listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
-            }
-            auction.results.isEmpty() -> {
+        val holder = auctionHolder ?: run {
+            logInfo(Tag, "Show failed. No completed Auction.")
+            listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
+            return
+        }
+        if (holder.isActive) {
+            logInfo(Tag, "Show failed. Auction in progress.")
+            listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
+            return
+        }
+        when (val adSource = holder.winner?.adSource) {
+            null -> {
                 logInfo(Tag, "Show failed. No Auction results.")
                 listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
             }
             else -> {
-                auction.results.map { it.adSource }
-                    .filterIsInstance<AdSource.Interstitial<*>>()
-                    .first()
-                    .show(activity)
+                require(adSource is AdSource.Interstitial<*>) {
+                    "Unexpected AdSource type. Expected: AdSource.Interstitial. Actual: ${adSource::class.java}."
+                }
+                adSource.show(activity)
             }
         }
     }
@@ -120,12 +126,10 @@ internal class InterstitialAdImpl(
     }
 
     override fun destroy() {
-        auctionJob?.cancel()
-        auctionJob = null
+        auctionHolder?.destroy()
+        auctionHolder = null
         observeCallbacksJob?.cancel()
         observeCallbacksJob = null
-        auction?.destroy()
-        auction = null
     }
 
     /**
@@ -134,9 +138,8 @@ internal class InterstitialAdImpl(
 
     private fun subscribeToWinner(adSource: AdSource<*>) {
         require(adSource is AdSource.Interstitial<*>)
-        observeCallbacksJob = adSource.state.onEach { state ->
+        observeCallbacksJob = adSource.adState.onEach { state ->
             when (state) {
-                AdState.Initialized,
                 is AdState.Bid,
                 is AdState.OnReward,
                 is AdState.Fill -> {
@@ -149,7 +152,7 @@ internal class InterstitialAdImpl(
                 is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
                 is AdState.Expired -> listener.onAdExpired(state.ad)
             }
-        }.launchIn(scope)
+        }.launchIn(CoroutineScope(dispatcher))
     }
 
     private fun getInterstitialListener() = object : InterstitialListener {
