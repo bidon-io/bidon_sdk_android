@@ -116,7 +116,7 @@ internal class MaxBannerImpl(
     ): Result<AuctionResult> {
         logInternal(Tag, "Starting with $adParams")
 
-        val maxAdView = if (adParams.bannerSize == BannerSize.Smart) {
+        val maxAdView = if (adParams.bannerSize == BannerSize.Adaptive) {
             MaxAdView(
                 adParams.lineItem.adUnitId,
                 adParams.context,

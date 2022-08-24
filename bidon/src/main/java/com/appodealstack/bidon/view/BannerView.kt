@@ -7,6 +7,7 @@ import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import com.appodealstack.bidon.BidON
 import com.appodealstack.bidon.BidOnSdk.Companion.DefaultPlacement
+import com.appodealstack.bidon.R
 import com.appodealstack.bidon.ad.BannerListener
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
@@ -43,17 +44,35 @@ interface BannerAd {
     }
 }
 
-class Banner private constructor(
+class BannerView constructor(
     context: Context,
     attrs: AttributeSet? = null,
     @AttrRes defStyleAtt: Int = 0
 ) : BannerAd, FrameLayout(context, attrs, defStyleAtt), BannerAd.AutoRefreshable {
 
-    constructor(
-        context: Context,
-        placementId: String,
-    ) : this(context, null, 0) {
+    constructor(context: Context, placementId: String) : this(context, null, 0) {
         this.placementId = placementId
+    }
+
+    init {
+        context.theme.obtainStyledAttributes(attrs, R.styleable.BannerView, 0, 0).apply {
+            try {
+                getString(R.styleable.BannerView_placementId)?.let {
+                    this@BannerView.placementId = it
+                }
+                getInteger(R.styleable.BannerView_bannerSize, 0).let {
+                    when (it) {
+                        1 -> this@BannerView.bannerSize = BannerSize.Banner
+                        2 -> this@BannerView.bannerSize = BannerSize.Large
+                        3 -> this@BannerView.bannerSize = BannerSize.LeaderBoard
+                        4 -> this@BannerView.bannerSize = BannerSize.MRec
+                        5 -> this@BannerView.bannerSize = BannerSize.Adaptive
+                    }
+                }
+            } finally {
+                recycle()
+            }
+        }
     }
 
     override var placementId: String = DefaultPlacement
@@ -67,7 +86,7 @@ class Banner private constructor(
 
     private val autoRefresher: AutoRefresher by lazy {
         get {
-            params(this@Banner as BannerAd.AutoRefreshable)
+            params(this@BannerView as BannerAd.AutoRefreshable)
         }
     }
 
@@ -104,7 +123,7 @@ class Banner private constructor(
             auctionHolder?.startAuction(
                 adTypeAdditional = AdTypeAdditional.Banner(
                     bannerSize = bannerSize,
-                    adContainer = this@Banner
+                    adContainer = this@BannerView
                 ),
                 onResult = { result ->
                     result
@@ -203,6 +222,7 @@ class Banner private constructor(
 
         override fun onAdLoadFailed(cause: Throwable) {
             userListener?.onAdLoadFailed(cause)
+            autoRefresher.launchRefresh()
         }
 
         override fun onAdShowFailed(cause: Throwable) {

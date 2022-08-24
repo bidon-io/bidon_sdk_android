@@ -29,7 +29,7 @@ import com.appodealstack.bidon.adapters.Ad
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.core.ext.logInternal
-import com.appodealstack.bidon.view.Banner
+import com.appodealstack.bidon.view.BannerView
 
 @Composable
 fun BannerScreen(navController: NavHostController) {
@@ -43,8 +43,8 @@ fun BannerScreen(navController: NavHostController) {
     val autoRefreshTtl = remember {
         mutableStateOf(15000L)
     }
-    val banner = remember {
-        mutableStateOf<Banner?>(null)
+    val bannerView = remember {
+        mutableStateOf<BannerView?>(null)
     }
 
     Column(
@@ -64,7 +64,7 @@ fun BannerScreen(navController: NavHostController) {
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            val bannerView = banner.value
+            val bannerView = bannerView.value
             if (bannerView != null) {
                 AndroidView(
                     modifier = Modifier.height(
@@ -73,7 +73,7 @@ fun BannerScreen(navController: NavHostController) {
                             BannerSize.LeaderBoard -> 90.dp
                             BannerSize.MRec -> 250.dp
                             BannerSize.Large -> 100.dp
-                            BannerSize.Smart -> 100.dp
+                            BannerSize.Adaptive -> 100.dp
                         }
                     ),
                     factory = {
@@ -100,12 +100,12 @@ fun BannerScreen(navController: NavHostController) {
                             BannerSize.LeaderBoard -> "Leader Board 728x90"
                             BannerSize.MRec -> "MRec 300x250"
                             BannerSize.Large -> "Large 320x100"
-                            BannerSize.Smart -> "Smart/Adaptive"
+                            BannerSize.Adaptive -> "Smart/Adaptive"
                         }
                     },
                     onItemClicked = {
                         bannerSize.value = it
-                        banner.value?.setAdSize(it)
+                        bannerView.value?.setAdSize(it)
                     }
                 )
                 Spacer(modifier = Modifier.padding(top = 16.dp))
@@ -121,9 +121,9 @@ fun BannerScreen(navController: NavHostController) {
                     onValueChange = {
                         val newTimeout = ((it * 1000).toLong())
                         if (newTimeout == 0L) {
-                            banner.value?.stopAutoRefresh()
+                            bannerView.value?.stopAutoRefresh()
                         } else {
-                            banner.value?.startAutoRefresh(timeoutMs = newTimeout)
+                            bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
                         }
                         autoRefreshTtl.value = newTimeout
                     },
@@ -132,12 +132,12 @@ fun BannerScreen(navController: NavHostController) {
                 )
 
                 AppButton(text = "Create banner") {
-                    banner.value = Banner(context, "some_placement_id").apply {
+                    bannerView.value = BannerView(context, "some_placement_id").apply {
                         setAdSize(bannerSize.value)
                         if (autoRefreshTtl.value == 0L) {
-                            banner.value?.stopAutoRefresh()
+                            bannerView.value?.stopAutoRefresh()
                         } else {
-                            banner.value?.startAutoRefresh(timeoutMs = autoRefreshTtl.value)
+                            bannerView.value?.startAutoRefresh(timeoutMs = autoRefreshTtl.value)
                         }
                         setBannerListener(
                             object : BannerListener {
@@ -209,13 +209,13 @@ fun BannerScreen(navController: NavHostController) {
                         )
                     }
                 }
-                if (banner.value != null) {
+                if (bannerView.value != null) {
                     AppButton(text = "Load") {
-                        banner.value?.load()
+                        bannerView.value?.load()
                     }
                     AppButton(text = "Destroy") {
-                        banner.value?.destroy()
-                        banner.value = null
+                        bannerView.value?.destroy()
+                        bannerView.value = null
                     }
                 }
             }

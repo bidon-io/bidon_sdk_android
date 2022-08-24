@@ -196,7 +196,7 @@ internal class BMBannerAdImpl(
         BannerSize.Banner -> BidMachineBannerSize.Size_320x50
         BannerSize.LeaderBoard -> BidMachineBannerSize.Size_728x90
         BannerSize.MRec -> BidMachineBannerSize.Size_300x250
-        BannerSize.Smart -> BidMachineBannerSize.Size_320x50
+        BannerSize.Adaptive -> BidMachineBannerSize.Size_320x50
         BannerSize.Large -> BidMachineBannerSize.Size_320x50
     }
 }

@@ -50,9 +50,10 @@ internal class AutoRefresherImpl(
                 autoRefreshJob = scope.launch {
                     logInfo(Tag, "Auto-refresh timeout begin")
                     delay(ar.timeoutMs)
-                    logInfo(Tag, "Auto-refresh timeout finish")
-                    autoRefreshable.onRefresh()
-                    autoRefreshJob = null
+                    if (autoRefresh != AutoRefresh.Off) {
+                        logInfo(Tag, "Auto-refresh timeout finish")
+                        autoRefreshable.onRefresh()
+                    }
                 }
             }
         }

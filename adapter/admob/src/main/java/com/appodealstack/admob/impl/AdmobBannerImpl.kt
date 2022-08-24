@@ -195,7 +195,7 @@ internal class AdmobBannerImpl(
         BannerSize.LeaderBoard -> AdSize.LEADERBOARD
         BannerSize.MRec -> AdSize.MEDIUM_RECTANGLE
         BannerSize.Large -> AdSize.LARGE_BANNER
-        BannerSize.Smart -> adContainer.adaptiveAdSize()
+        BannerSize.Adaptive -> adContainer.adaptiveAdSize()
     }
 
     private fun ViewGroup.adaptiveAdSize(): AdSize {

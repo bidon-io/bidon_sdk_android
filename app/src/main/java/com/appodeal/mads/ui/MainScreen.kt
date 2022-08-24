@@ -84,8 +84,11 @@ internal fun MainScreen(
                 AppButton(text = "Rewarded") {
                     navController.navigate(Screen.Rewarded.route)
                 }
-                AppButton(text = "Banner") {
+                AppButton(text = "Banner Compose") {
                     navController.navigate(Screen.Banners.route)
+                }
+                AppButton(text = "Banner XML") {
+                    // navController.navigate(Screen.Banners.route)
                 }
                 TextButton(modifier = Modifier.padding(top = 100.dp), onClick = {
                     val packageManager: PackageManager = context.packageManager
