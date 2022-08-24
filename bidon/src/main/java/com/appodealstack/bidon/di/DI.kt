@@ -1,12 +1,11 @@
 package com.appodealstack.bidon.di
 
 import com.appodealstack.bidon.BidOnSdk
+import com.appodealstack.bidon.adapters.DemandAd
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
 import com.appodealstack.bidon.auctions.data.impl.GetAuctionRequestUseCaseImpl
-import com.appodealstack.bidon.auctions.domain.Auction
-import com.appodealstack.bidon.auctions.domain.AutoRefresher
-import com.appodealstack.bidon.auctions.domain.AutoRefresherImpl
-import com.appodealstack.bidon.auctions.domain.GetAuctionRequestUseCase
+import com.appodealstack.bidon.auctions.domain.*
+import com.appodealstack.bidon.auctions.domain.impl.AuctionHolderImpl
 import com.appodealstack.bidon.auctions.domain.impl.AuctionImpl
 import com.appodealstack.bidon.auctions.domain.impl.AuctionResolversHolderImpl
 import com.appodealstack.bidon.config.data.impl.AdapterInstanceCreatorImpl
@@ -16,8 +15,11 @@ import com.appodealstack.bidon.config.domain.databinders.*
 import com.appodealstack.bidon.config.domain.impl.BidOnInitializerImpl
 import com.appodealstack.bidon.config.domain.impl.DataProviderImpl
 import com.appodealstack.bidon.config.domain.impl.InitAndRegisterAdaptersUseCaseImpl
-import com.appodealstack.bidon.core.*
-import com.appodealstack.bidon.core.impl.*
+import com.appodealstack.bidon.core.AdaptersSource
+import com.appodealstack.bidon.core.ContextProvider
+import com.appodealstack.bidon.core.impl.AdaptersSourceImpl
+import com.appodealstack.bidon.core.impl.BidOnSdkImpl
+import com.appodealstack.bidon.core.impl.ContextProviderImpl
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 import com.appodealstack.bidon.utilities.network.BidOnEndpoints
@@ -79,6 +81,14 @@ internal object DI {
                 }
                 factoryWithParams<AutoRefresher> { param ->
                     AutoRefresherImpl(autoRefreshable = param as BannerAd.AutoRefreshable)
+                }
+                factoryWithParams<AuctionHolder> { param ->
+                    val (demandAd, listener) = param as Pair<DemandAd, RoundsListener>
+                    AuctionHolderImpl(
+                        auction = get(),
+                        demandAd = demandAd,
+                        roundsListener = listener
+                    )
                 }
 
                 /**

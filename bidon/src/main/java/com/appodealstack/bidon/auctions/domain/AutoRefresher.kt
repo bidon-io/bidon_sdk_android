@@ -10,7 +10,7 @@ import kotlinx.coroutines.*
 internal interface AutoRefresher {
     fun setAutoRefreshTimeout(timeoutMs: Long = DefaultAutoRefreshTimeoutMs)
     fun stopAutoRefresh()
-    fun trigger()
+    fun launchRefresh()
 }
 
 internal class AutoRefresherImpl(
@@ -36,7 +36,7 @@ internal class AutoRefresherImpl(
         autoRefreshJob = null
     }
 
-    override fun trigger() {
+    override fun launchRefresh() {
         proceedAutoRefresh()
     }
 

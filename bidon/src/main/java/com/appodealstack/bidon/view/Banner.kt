@@ -12,20 +12,16 @@ import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
-import com.appodealstack.bidon.auctions.domain.Auction
+import com.appodealstack.bidon.auctions.domain.AuctionHolder
 import com.appodealstack.bidon.auctions.domain.AutoRefresher
-import com.appodealstack.bidon.auctions.domain.impl.MaxEcpmAuctionResolver
 import com.appodealstack.bidon.core.SdkDispatchers
-import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.di.get
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
 interface BannerAd {
@@ -62,26 +58,26 @@ class Banner private constructor(
 
     override var placementId: String = DefaultPlacement
 
-    private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
+    private var bannerSize: BannerSize = BannerSize.Banner
+    private val isBannerDisplaying = AtomicBoolean(false)
 
     private val demandAd by lazy {
         DemandAd(AdType.Banner, placementId)
     }
-    private val autoRefresher: AutoRefresher = get {
-        params(this@Banner as BannerAd.AutoRefreshable)
+
+    private val autoRefresher: AutoRefresher by lazy {
+        get {
+            params(this@Banner as BannerAd.AutoRefreshable)
+        }
     }
-    private var auctionJob: Job? = null
-    private var auction: Auction? = null
-    private val scope: CoroutineScope get() = CoroutineScope(dispatcher)
+
+    private var auctionHolder: AuctionHolder? = null
     private var userListener: BannerListener? = null
     private var observeCallbacksJob: Job? = null
-    private val isBannerDisplaying = AtomicBoolean(false)
 
     private val listener by lazy {
         getBannerListener()
     }
-
-    private var bannerSize: BannerSize = BannerSize.Banner
 
     override fun setAdSize(bannerSize: BannerSize) {
         logInfo(Tag, "BannerSize set: $bannerSize")
@@ -90,44 +86,51 @@ class Banner private constructor(
 
     override fun load() {
         logInfo(Tag, "Load with placement: $placementId")
-        if (auctionJob?.isActive == true) return
-
         observeCallbacksJob?.cancel()
         observeCallbacksJob = null
-        listener.auctionStarted()
 
-        auctionJob = scope.launch {
-            val auction = get<Auction>().also {
-                auction = it
+        if (auctionHolder?.isActive != true) {
+            listener.auctionStarted()
+            /**
+             * Destroy all previous auction items.
+             */
+            auctionHolder?.destroy()
+            /**
+             * Create new auction
+             */
+            auctionHolder = get {
+                params(demandAd to listener)
             }
-            auction.start(
-                demandAd = demandAd,
-                resolver = MaxEcpmAuctionResolver,
-                adTypeAdditionalData = AdTypeAdditional.Banner(
+            auctionHolder?.startAuction(
+                adTypeAdditional = AdTypeAdditional.Banner(
                     bannerSize = bannerSize,
                     adContainer = this@Banner
                 ),
-                roundsListener = listener
-            ).onSuccess { results ->
-                logInfo(Tag, "Auction completed successfully: $results")
-
-                val winner = results.first()
-                subscribeToWinner(winner.adSource)
-                listener.auctionSucceed(results)
-                listener.onAdLoaded(
-                    requireNotNull(winner.adSource.ad) {
-                        "[Ad] should exist when the Action succeeds"
-                    }
-                )
-                results.first().let { auctionResult ->
-                    require(auctionResult.adSource is AdSource.Banner)
-                    showAdView(auctionResult.adSource.getAdView())
+                onResult = { result ->
+                    result
+                        .onSuccess { auctionResults ->
+                            /**
+                             * Winner found
+                             */
+                            val winner = auctionResults.first()
+                            subscribeToWinner(winner.adSource)
+                            listener.auctionSucceed(auctionResults)
+                            listener.onAdLoaded(
+                                requireNotNull(winner.adSource.ad) {
+                                    "[Ad] should exist when the Action succeeds"
+                                }
+                            )
+                        }.onFailure {
+                            /**
+                             * Auction failed
+                             */
+                            listener.auctionFailed(error = it)
+                            listener.onAdLoadFailed(cause = it)
+                        }
                 }
-            }.onFailure {
-                logError(Tag, "Auction failed", it)
-                listener.auctionFailed(error = it)
-                listener.onAdLoadFailed(cause = it)
-            }
+            )
+        } else {
+            logInfo(Tag, "Auction already in progress. Placement: $placementId.")
         }
     }
 
@@ -140,7 +143,7 @@ class Banner private constructor(
         logInfo(Tag, "Auto-refresh initialized with timeout $timeoutMs ms")
         autoRefresher.setAutoRefreshTimeout(timeoutMs)
         if (isBannerDisplaying.get()) {
-            autoRefresher.trigger()
+            autoRefresher.launchRefresh()
         }
     }
 
@@ -154,15 +157,13 @@ class Banner private constructor(
     }
 
     override fun destroy() {
+        auctionHolder?.destroy()
+        auctionHolder = null
         autoRefresher.stopAutoRefresh()
-        auctionJob?.cancel()
-        auctionJob = null
         observeCallbacksJob?.cancel()
         observeCallbacksJob = null
-        auction?.destroy()
-        auction = null
-        this.removeAllViews()
         isBannerDisplaying.set(false)
+        this.removeAllViews()
     }
 
     /**
@@ -191,13 +192,13 @@ class Banner private constructor(
                 is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
                 is AdState.Expired -> listener.onAdExpired(state.ad)
             }
-        }.launchIn(scope)
+        }.launchIn(CoroutineScope(SdkDispatchers.Main))
     }
 
     private fun getBannerListener() = object : BannerListener {
         override fun onAdLoaded(ad: Ad) {
             userListener?.onAdLoaded(ad)
-            autoRefresher.trigger()
+            autoRefresher.launchRefresh()
         }
 
         override fun onAdLoadFailed(cause: Throwable) {
@@ -231,6 +232,12 @@ class Banner private constructor(
 
         override fun auctionSucceed(auctionResults: List<AuctionResult>) {
             userListener?.auctionSucceed(auctionResults)
+
+            val winner = auctionResults.first()
+            require(winner.adSource is AdSource.Banner) {
+                "Unexpected AdSource type. Expected: AdSource.Banner. Actual: ${winner.adSource::class.java}."
+            }
+            showAdView(winner.adSource.getAdView())
         }
 
         override fun auctionFailed(error: Throwable) {

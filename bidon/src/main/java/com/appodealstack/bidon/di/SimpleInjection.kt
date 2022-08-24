@@ -55,7 +55,7 @@ internal object SimpleInjection {
     }
 
     inline fun <reified T : Any> getInstance(parameters: ScopeParams.() -> Unit): T {
-        val scopeParams = ScopeParams().apply(parameters).parameters!!
+        val scopeParams = ScopeParams().apply(parameters).getParameters()
         val instance = (paramFactories[T::class]?.factory?.invoke(scopeParams) as? T)
         return requireNotNull(instance) {
             "No instance Singleton/Factory provided for class: ${T::class.java}"
