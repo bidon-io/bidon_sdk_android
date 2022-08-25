@@ -73,10 +73,7 @@ internal class BMRewardedAdImpl(
                 adState.tryEmit(
                     AdState.OnReward(
                         ad = rewardedAd.asAd(),
-                        reward = Reward(
-                            label = "",
-                            amount = 0
-                        )
+                        reward = null
                     )
                 )
             }

@@ -22,24 +22,23 @@ val MaxDemandId = DemandId("max")
 @Suppress("unused")
 class MaxAdapter :
     Adapter,
-    Initializable<ApplovinParameters>,
-    AdProvider.Banner<ApplovinBannerAuctionParams>,
-    AdProvider.Interstitial<ApplovinFullscreenAdAuctionParams>,
-    AdProvider.Rewarded<ApplovinFullscreenAdAuctionParams>,
-    AdRevenueSource by AdRevenueSourceImpl(),
+    Initializable<MaxParameters>,
+    AdProvider.Banner<MaxBannerAuctionParams>,
+    AdProvider.Interstitial<MaxFullscreenAdAuctionParams>,
+    AdProvider.Rewarded<MaxFullscreenAdAuctionParams>,
     ExtrasSource by ExtrasSourceImpl(),
     MediationNetwork {
 
     private lateinit var context: Context
 
-    override val mediationNetwork = BNMediationNetwork.ApplovinMax
+    override val mediationNetwork = BNMediationNetwork.Max
     override val demandId: DemandId = MaxDemandId
     override val adapterInfo = AdapterInfo(
         adapterVersion = adapterVersion,
         sdkVersion = sdkVersion
     )
 
-    override suspend fun init(activity: Activity, configParams: ApplovinParameters): Unit =
+    override suspend fun init(activity: Activity, configParams: MaxParameters): Unit =
         suspendCancellableCoroutine { continuation ->
             val context = activity.applicationContext.also {
                 context = it
@@ -58,17 +57,17 @@ class MaxAdapter :
             }
         }
 
-    override fun parseConfigParam(json: JsonObject): ApplovinParameters = json.parse(ApplovinParameters.serializer())
+    override fun parseConfigParam(json: JsonObject): MaxParameters = json.parse(MaxParameters.serializer())
 
-    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
+    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<MaxFullscreenAdAuctionParams> {
         return MaxInterstitialImpl(demandId, demandAd, roundId)
     }
 
-    override fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<ApplovinFullscreenAdAuctionParams> {
+    override fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<MaxFullscreenAdAuctionParams> {
         return MaxRewardedImpl(demandId, demandAd, roundId)
     }
 
-    override fun banner(demandAd: DemandAd, roundId: String): AdSource.Banner<ApplovinBannerAuctionParams> {
+    override fun banner(demandAd: DemandAd, roundId: String): AdSource.Banner<MaxBannerAuctionParams> {
         return MaxBannerImpl(demandId, demandAd, roundId)
     }
 }

@@ -10,8 +10,8 @@ import com.applovin.mediation.MaxAdViewAdListener
 import com.applovin.mediation.MaxError
 import com.applovin.mediation.ads.MaxAdView
 import com.applovin.sdk.AppLovinSdkUtils
-import com.appodealstack.applovin.ApplovinBannerAuctionParams
-import com.appodealstack.applovin.MaxDemandId
+import com.appodealstack.applovin.ApplovinDemandId
+import com.appodealstack.applovin.MaxBannerAuctionParams
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
@@ -27,7 +27,7 @@ internal class MaxBannerImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
     private val roundId: String
-) : AdSource.Banner<ApplovinBannerAuctionParams> {
+) : AdSource.Banner<MaxBannerAuctionParams> {
 
     private var maxAdView: MaxAdView? = null
     private var maxAd: MaxAd? = null
@@ -99,7 +99,7 @@ internal class MaxBannerImpl(
     ): AdAuctionParams {
         val lineItem = lineItems.minByOrNull { it.priceFloor }
             ?.also(onLineItemConsumed)
-        return ApplovinBannerAuctionParams(
+        return MaxBannerAuctionParams(
             context = adContainer.context,
             lineItem = requireNotNull(lineItem),
             bannerSize = bannerSize,
@@ -112,7 +112,7 @@ internal class MaxBannerImpl(
     }
 
     override suspend fun bid(
-        adParams: ApplovinBannerAuctionParams
+        adParams: MaxBannerAuctionParams
     ): Result<AuctionResult> {
         logInternal(Tag, "Starting with $adParams")
 
@@ -173,7 +173,7 @@ internal class MaxBannerImpl(
     private fun MaxAd?.asAd(): Ad {
         val maxAd = this
         return Ad(
-            demandId = MaxDemandId,
+            demandId = ApplovinDemandId,
             demandAd = demandAd,
             price = maxAd?.revenue ?: 0.0,
             sourceAd = maxAd ?: demandAd,
@@ -190,7 +190,7 @@ internal class MaxBannerImpl(
     private fun MaxAdView?.asAd(): Ad {
         val maxAd = this
         return Ad(
-            demandId = MaxDemandId,
+            demandId = ApplovinDemandId,
             demandAd = demandAd,
             price = 0.0,
             sourceAd = maxAd ?: demandAd,
