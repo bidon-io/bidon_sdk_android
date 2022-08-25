@@ -116,12 +116,12 @@ internal class ApplovinBannerImpl(
             adView = it
         }
 
-        //TODO load and display
+        // TODO load and display
         bannerView.setAdLoadListener(requestListener)
         bannerView.loadNextAd()
 
-        //TODO load but not display. Impossible to use adSize and zoneId simultaneously.
-        //appLovinSdk.adService.loadNextAd(adSize, requestListener)
+        // TODO load but not display. Impossible to use adSize and zoneId simultaneously.
+        // appLovinSdk.adService.loadNextAd(adSize, requestListener)
 
         val state = adState.first {
             it is AdState.Bid || it is AdState.LoadFailed

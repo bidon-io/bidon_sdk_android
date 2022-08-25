@@ -1,7 +1,5 @@
 package com.appodealstack.bidon.config.domain.databinders
 
-import android.os.Build
-import com.appodealstack.bidon.BuildConfig
 import com.appodealstack.bidon.config.domain.DataBinder
 import com.appodealstack.bidon.core.BidonJson
 import kotlinx.serialization.SerialName
