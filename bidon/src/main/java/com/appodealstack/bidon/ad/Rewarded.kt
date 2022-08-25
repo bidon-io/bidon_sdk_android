@@ -39,30 +39,26 @@ internal class RewardedImpl(
     }
     private var userListener: RewardedListener? = null
     private var observeCallbacksJob: Job? = null
-    private var auctionHolder: AuctionHolder? = null
+    private val auctionHolder: AuctionHolder by lazy {
+        get { params(demandAd to listener) }
+    }
 
     private val listener by lazy {
         getRewardedListener()
     }
 
     override fun load(activity: Activity) {
+        if (!BidON.isInitialized()) {
+            logInfo(Tag, "Sdk is not initialized")
+            return
+        }
         logInfo(Tag, "Load with placement: $placementId")
         observeCallbacksJob?.cancel()
         observeCallbacksJob = null
 
-        if (auctionHolder?.isActive != true) {
+        if (!auctionHolder.isActive) {
             listener.auctionStarted()
-            /**
-             * Destroy all previous auction items.
-             */
-            auctionHolder?.destroy()
-            /**
-             * Create new auction
-             */
-            auctionHolder = get {
-                params(demandAd to listener)
-            }
-            auctionHolder?.startAuction(
+            auctionHolder.startAuction(
                 adTypeAdditional = AdTypeAdditional.Rewarded(
                     activity = activity
                 ),
@@ -96,17 +92,12 @@ internal class RewardedImpl(
 
     override fun show(activity: Activity) {
         logInfo(Tag, "Show with placement: $placementId")
-        val holder = auctionHolder ?: run {
-            logInfo(Tag, "Show failed. No completed Auction.")
-            listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
-            return
-        }
-        if (holder.isActive) {
+        if (auctionHolder.isActive) {
             logInfo(Tag, "Show failed. Auction in progress.")
             listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
             return
         }
-        when (val adSource = holder.winner?.adSource) {
+        when (val adSource = auctionHolder.popWinner()) {
             null -> {
                 logInfo(Tag, "Show failed. No Auction results.")
                 listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
@@ -126,8 +117,7 @@ internal class RewardedImpl(
     }
 
     override fun destroy() {
-        auctionHolder?.destroy()
-        auctionHolder = null
+        auctionHolder.destroy()
         observeCallbacksJob?.cancel()
         observeCallbacksJob = null
     }
