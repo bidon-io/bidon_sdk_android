@@ -21,7 +21,7 @@ import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 import com.appodealstack.bidon.utilities.network.NetworkSettings
 
-private const val MockUrl = "https://1e94ed35-7878-4446-8ffb-b46e4d362cb7.mock.pstmn.io"
+private const val MockUrl = "https://ef5347ef-7389-4095-8a57-cc78c827f8b2.mock.pstmn.io"
 
 @Composable
 internal fun ServerSettingsScreen(

@@ -10,19 +10,19 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ApplovinParameters(
+data class MaxParameters(
     @SerialName("app_key")
-    val key: String,
+    val key: String
 ) : AdapterParameters
 
-data class ApplovinBannerAuctionParams(
+data class MaxBannerAuctionParams(
     val context: Context,
     val bannerSize: BannerSize,
     val lineItem: LineItem,
     val adaptiveBannerHeight: Int?
 ) : AdAuctionParams
 
-data class ApplovinFullscreenAdAuctionParams(
+data class MaxFullscreenAdAuctionParams(
     val activity: Activity,
     val lineItem: LineItem,
     val timeoutMs: Long

@@ -1,12 +1,10 @@
 package com.appodealstack.applovin.impl
 
 import android.app.Activity
-import com.applovin.mediation.MaxAd
-import com.applovin.mediation.MaxAdListener
-import com.applovin.mediation.MaxError
-import com.applovin.mediation.ads.MaxInterstitialAd
+import com.applovin.adview.AppLovinIncentivizedInterstitial
+import com.applovin.sdk.*
 import com.appodealstack.applovin.ApplovinDemandId
-import com.appodealstack.applovin.MaxFullscreenAdAuctionParams
+import com.appodealstack.applovin.ApplovinFullscreenAdAuctionParams
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
@@ -17,52 +15,61 @@ import com.appodealstack.bidon.core.ext.logInternal
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 
-internal class MaxInterstitialImpl(
+/**
+ * I have no idea how it works. There is no documentation.
+ *
+ * https://appodeal.slack.com/archives/C02PE4GAFU0/p1661421318406689
+ */
+internal class ApplovinInterstitialImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
-    private val roundId: String
-) : AdSource.Interstitial<MaxFullscreenAdAuctionParams> {
+    private val roundId: String,
+    private val appLovinSdk: AppLovinSdk
+) : AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
 
-    private var interstitialAd: MaxInterstitialAd? = null
-    private var maxAd: MaxAd? = null
+    private var interstitialAd: AppLovinIncentivizedInterstitial? = null
+    private var appLovinAd: AppLovinAd? = null
+    private var lineItem: LineItem? = null
 
-    private val maxAdListener by lazy {
-        object : MaxAdListener {
-            override fun onAdLoaded(ad: MaxAd) {
-                maxAd = ad
+    private val requestListener by lazy {
+        object : AppLovinAdLoadListener {
+            override fun adReceived(ad: AppLovinAd) {
+                appLovinAd = ad
                 adState.tryEmit(
                     AdState.Bid(
                         AuctionResult(
-                            priceFloor = ad.revenue,
-                            adSource = this@MaxInterstitialImpl
+                            priceFloor = lineItem?.priceFloor ?: 0.0,
+                            adSource = this@ApplovinInterstitialImpl
                         )
                     )
                 )
             }
 
-            override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
-                logError(Tag, "(code=${error.code}) ${error.message}", error.asBidonError())
-                adState.tryEmit(AdState.LoadFailed(error.asBidonError()))
+            override fun failedToReceiveAd(errorCode: Int) {
+                logError(Tag, "Failed to receive ad. errorCode=$errorCode")
+                adState.tryEmit(AdState.LoadFailed(BidonError.NoFill(demandId)))
             }
+        }
+    }
 
-            override fun onAdDisplayed(ad: MaxAd) {
-                maxAd = ad
+    private val listener by lazy {
+        object :
+            AppLovinAdVideoPlaybackListener,
+            AppLovinAdDisplayListener,
+            AppLovinAdClickListener {
+            override fun videoPlaybackBegan(ad: AppLovinAd) {}
+            override fun videoPlaybackEnded(ad: AppLovinAd, percentViewed: Double, fullyWatched: Boolean) {}
+
+            override fun adDisplayed(ad: AppLovinAd) {
                 adState.tryEmit(AdState.Impression(ad.asAd()))
             }
 
-            override fun onAdHidden(ad: MaxAd) {
-                maxAd = ad
+            override fun adHidden(ad: AppLovinAd) {
                 adState.tryEmit(AdState.Closed(ad.asAd()))
             }
 
-            override fun onAdClicked(ad: MaxAd) {
-                maxAd = ad
+            override fun adClicked(ad: AppLovinAd) {
                 adState.tryEmit(AdState.Clicked(ad.asAd()))
-            }
-
-            override fun onAdDisplayFailed(ad: MaxAd, error: MaxError) {
-                maxAd = ad
-                adState.tryEmit(AdState.ShowFailed(error.asBidonError()))
             }
         }
     }
@@ -70,14 +77,12 @@ internal class MaxInterstitialImpl(
     override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
 
     override val ad: Ad?
-        get() = maxAd?.asAd() ?: interstitialAd?.asAd()
+        get() = appLovinAd?.asAd() ?: interstitialAd?.asAd()
 
     override fun destroy() {
         logInternal(Tag, "destroy")
-        interstitialAd?.setListener(null)
-        interstitialAd?.destroy()
         interstitialAd = null
-        maxAd = null
+        appLovinAd = null
     }
 
     override fun getAuctionParams(
@@ -89,7 +94,7 @@ internal class MaxInterstitialImpl(
     ): AdAuctionParams {
         val lineItem = lineItems.minByOrNull { it.priceFloor }
             ?.also(onLineItemConsumed)
-        return MaxFullscreenAdAuctionParams(
+        return ApplovinFullscreenAdAuctionParams(
             activity = activity,
             lineItem = requireNotNull(lineItem),
             timeoutMs = timeout,
@@ -97,14 +102,14 @@ internal class MaxInterstitialImpl(
     }
 
     override suspend fun bid(
-        adParams: MaxFullscreenAdAuctionParams
+        adParams: ApplovinFullscreenAdAuctionParams
     ): Result<AuctionResult> {
         logInternal(Tag, "Starting with $adParams")
-        val maxInterstitialAd = MaxInterstitialAd(adParams.lineItem.adUnitId, adParams.activity).also {
-            it.setListener(maxAdListener)
+        lineItem = adParams.lineItem
+        val incentivizedInterstitial = AppLovinIncentivizedInterstitial.create(adParams.lineItem.adUnitId, appLovinSdk).also {
             interstitialAd = it
         }
-        maxInterstitialAd.loadAd()
+        incentivizedInterstitial.preload(requestListener)
         val state = adState.first {
             it is AdState.Bid || it is AdState.LoadFailed
         }
@@ -116,50 +121,40 @@ internal class MaxInterstitialImpl(
     }
 
     override suspend fun fill(): Result<Ad> = runCatching {
-        /**
-         * Applovin fills the bid automatically. It's not needed to fill it manually.
-         */
-        AdState.Fill(
-            requireNotNull(interstitialAd?.asAd())
-        ).also { adState.tryEmit(it) }.ad
+        requireNotNull(appLovinAd?.asAd()).also {
+            adState.tryEmit(AdState.Fill(it))
+        }
     }
 
     override fun show(activity: Activity) {
-        if (interstitialAd?.isReady == true) {
-            interstitialAd?.showAd()
+        val appLovinAd = appLovinAd
+        if (interstitialAd?.isAdReadyToDisplay == true && appLovinAd != null) {
+            interstitialAd?.show(appLovinAd, activity, null, listener, listener, listener)
         } else {
             adState.tryEmit(AdState.ShowFailed(BidonError.FullscreenAdNotReady))
         }
     }
 
-    /**
-     * Use it after loaded ECPM is known
-     */
-    private fun MaxAd?.asAd(): Ad {
-        val maxAd = this
+    private fun AppLovinIncentivizedInterstitial?.asAd(): Ad {
         return Ad(
             demandId = ApplovinDemandId,
             demandAd = demandAd,
-            price = maxAd?.revenue ?: 0.0,
-            sourceAd = maxAd ?: demandAd,
-            monetizationNetwork = maxAd?.networkName,
-            dsp = maxAd?.dspId,
+            price = lineItem?.priceFloor ?: 0.0,
+            sourceAd = this ?: demandAd,
+            monetizationNetwork = demandId.demandId,
+            dsp = null,
             roundId = roundId,
             currencyCode = USD
         )
     }
 
-    /**
-     * Use it before loaded ECPM is unknown
-     */
-    private fun MaxInterstitialAd?.asAd(): Ad {
-        val maxAd = this
+    private fun AppLovinAd?.asAd(): Ad {
         return Ad(
             demandId = ApplovinDemandId,
             demandAd = demandAd,
-            price = 0.0,
-            sourceAd = maxAd ?: demandAd,
-            monetizationNetwork = null,
+            price = lineItem?.priceFloor ?: 0.0,
+            sourceAd = this ?: demandAd,
+            monetizationNetwork = demandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = USD

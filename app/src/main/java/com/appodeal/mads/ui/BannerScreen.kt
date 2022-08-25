@@ -30,6 +30,7 @@ import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.view.BannerView
+import com.appodealstack.bidon.view.DefaultAutoRefreshTimeoutMs
 
 @Composable
 fun BannerScreen(navController: NavHostController) {
@@ -41,7 +42,7 @@ fun BannerScreen(navController: NavHostController) {
         mutableStateOf(BannerSize.Banner)
     }
     val autoRefreshTtl = remember {
-        mutableStateOf(15000L)
+        mutableStateOf(DefaultAutoRefreshTimeoutMs)
     }
     val bannerView = remember {
         mutableStateOf<BannerView?>(null)
@@ -64,8 +65,8 @@ fun BannerScreen(navController: NavHostController) {
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            val bannerView = bannerView.value
-            if (bannerView != null) {
+            val view = bannerView.value
+            if (view != null) {
                 AndroidView(
                     modifier = Modifier.height(
                         when (bannerSize.value) {
@@ -77,7 +78,7 @@ fun BannerScreen(navController: NavHostController) {
                         }
                     ),
                     factory = {
-                        bannerView
+                        view
                     }
                 )
             } else {
