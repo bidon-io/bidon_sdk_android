@@ -85,7 +85,6 @@ internal object DI {
                 factoryWithParams<AuctionHolder> { param ->
                     val (demandAd, listener) = param as Pair<DemandAd, RoundsListener>
                     AuctionHolderImpl(
-                        auction = get(),
                         demandAd = demandAd,
                         roundsListener = listener
                     )

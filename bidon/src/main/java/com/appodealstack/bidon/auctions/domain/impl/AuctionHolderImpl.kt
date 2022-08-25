@@ -8,19 +8,18 @@ import com.appodealstack.bidon.auctions.domain.Auction
 import com.appodealstack.bidon.auctions.domain.AuctionHolder
 import com.appodealstack.bidon.auctions.domain.RoundsListener
 import com.appodealstack.bidon.core.SdkDispatchers
-import com.appodealstack.bidon.core.ext.asFailure
-import com.appodealstack.bidon.core.ext.asSuccess
-import com.appodealstack.bidon.core.ext.logError
-import com.appodealstack.bidon.core.ext.logInfo
+import com.appodealstack.bidon.core.ext.*
+import com.appodealstack.bidon.di.get
 import kotlinx.coroutines.*
 
 internal class AuctionHolderImpl(
-    private val auction: Auction,
     private val demandAd: DemandAd,
     private val roundsListener: RoundsListener,
 ) : AuctionHolder {
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
-    private val scope: CoroutineScope get() = CoroutineScope(dispatcher)
+    private val scope: CoroutineScope
+        get() = CoroutineScope(dispatcher)
+
     private val auctionResults = mutableListOf<AuctionResult>()
     private var auctionResultsDeferred: Deferred<Result<List<AuctionResult>>>? = null
 
@@ -37,7 +36,7 @@ internal class AuctionHolderImpl(
         scope.launch {
             val deferred =
                 auctionResultsDeferred ?: async {
-                    auction.start(
+                    get<Auction>().start(
                         demandAd = demandAd,
                         resolver = MaxEcpmAuctionResolver,
                         adTypeAdditionalData = adTypeAdditional,
@@ -63,6 +62,8 @@ internal class AuctionHolderImpl(
                     nextWinner = null
                     logError(Tag, "Auction failed", it)
                     onResult.invoke(it.asFailure())
+                }.onAny {
+                    auctionResultsDeferred = null
                 }
         }
     }
@@ -79,6 +80,7 @@ internal class AuctionHolderImpl(
             logInfo(Tag, "Auction canceled")
             it.cancel()
         }
+        auctionResultsDeferred = null
         displayingWinner = null
         nextWinner = null
         with(auctionResults) {
