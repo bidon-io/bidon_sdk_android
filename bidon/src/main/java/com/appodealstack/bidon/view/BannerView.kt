@@ -277,4 +277,4 @@ class BannerView @JvmOverloads constructor(
 }
 
 private const val Tag = "BannerView"
-internal const val DefaultAutoRefreshTimeoutMs = 5_000L
+const val DefaultAutoRefreshTimeoutMs = 10_000L
