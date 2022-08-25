@@ -7,7 +7,7 @@ import com.applovin.mediation.MaxReward
 import com.applovin.mediation.MaxRewardedAdListener
 import com.applovin.mediation.ads.MaxRewardedAd
 import com.appodealstack.applovin.ApplovinFullscreenAdAuctionParams
-import com.appodealstack.applovin.ApplovinMaxDemandId
+import com.appodealstack.applovin.MaxDemandId
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
@@ -150,7 +150,7 @@ internal class MaxRewardedImpl(
     private fun MaxAd?.asAd(): Ad {
         val maxAd = this
         return Ad(
-            demandId = ApplovinMaxDemandId,
+            demandId = MaxDemandId,
             demandAd = demandAd,
             price = maxAd?.revenue ?: 0.0,
             sourceAd = maxAd ?: demandAd,
@@ -167,7 +167,7 @@ internal class MaxRewardedImpl(
     private fun MaxRewardedAd?.asAd(): Ad {
         val maxAd = this
         return Ad(
-            demandId = ApplovinMaxDemandId,
+            demandId = MaxDemandId,
             demandAd = demandAd,
             price = 0.0,
             sourceAd = maxAd ?: demandAd,

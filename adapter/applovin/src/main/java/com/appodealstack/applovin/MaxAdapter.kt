@@ -17,10 +17,10 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.JsonObject
 import kotlin.coroutines.resume
 
-val ApplovinMaxDemandId = DemandId("applovin")
+val MaxDemandId = DemandId("max")
 
 @Suppress("unused")
-class ApplovinMaxAdapter :
+class MaxAdapter :
     Adapter,
     Initializable<ApplovinParameters>,
     AdProvider.Banner<ApplovinBannerAuctionParams>,
@@ -33,7 +33,7 @@ class ApplovinMaxAdapter :
     private lateinit var context: Context
 
     override val mediationNetwork = BNMediationNetwork.ApplovinMax
-    override val demandId: DemandId = ApplovinMaxDemandId
+    override val demandId: DemandId = MaxDemandId
     override val adapterInfo = AdapterInfo(
         adapterVersion = adapterVersion,
         sdkVersion = sdkVersion

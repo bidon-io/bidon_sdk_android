@@ -6,7 +6,7 @@ import com.applovin.mediation.MaxAdListener
 import com.applovin.mediation.MaxError
 import com.applovin.mediation.ads.MaxInterstitialAd
 import com.appodealstack.applovin.ApplovinFullscreenAdAuctionParams
-import com.appodealstack.applovin.ApplovinMaxDemandId
+import com.appodealstack.applovin.MaxDemandId
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
@@ -138,7 +138,7 @@ internal class MaxInterstitialImpl(
     private fun MaxAd?.asAd(): Ad {
         val maxAd = this
         return Ad(
-            demandId = ApplovinMaxDemandId,
+            demandId = MaxDemandId,
             demandAd = demandAd,
             price = maxAd?.revenue ?: 0.0,
             sourceAd = maxAd ?: demandAd,
@@ -155,7 +155,7 @@ internal class MaxInterstitialImpl(
     private fun MaxInterstitialAd?.asAd(): Ad {
         val maxAd = this
         return Ad(
-            demandId = ApplovinMaxDemandId,
+            demandId = MaxDemandId,
             demandAd = demandAd,
             price = 0.0,
             sourceAd = maxAd ?: demandAd,

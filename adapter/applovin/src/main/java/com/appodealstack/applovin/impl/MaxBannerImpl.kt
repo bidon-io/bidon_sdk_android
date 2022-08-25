@@ -11,7 +11,7 @@ import com.applovin.mediation.MaxError
 import com.applovin.mediation.ads.MaxAdView
 import com.applovin.sdk.AppLovinSdkUtils
 import com.appodealstack.applovin.ApplovinBannerAuctionParams
-import com.appodealstack.applovin.ApplovinMaxDemandId
+import com.appodealstack.applovin.MaxDemandId
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
@@ -173,7 +173,7 @@ internal class MaxBannerImpl(
     private fun MaxAd?.asAd(): Ad {
         val maxAd = this
         return Ad(
-            demandId = ApplovinMaxDemandId,
+            demandId = MaxDemandId,
             demandAd = demandAd,
             price = maxAd?.revenue ?: 0.0,
             sourceAd = maxAd ?: demandAd,
@@ -190,7 +190,7 @@ internal class MaxBannerImpl(
     private fun MaxAdView?.asAd(): Ad {
         val maxAd = this
         return Ad(
-            demandId = ApplovinMaxDemandId,
+            demandId = MaxDemandId,
             demandAd = demandAd,
             price = 0.0,
             sourceAd = maxAd ?: demandAd,
