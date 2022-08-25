@@ -25,7 +25,7 @@ internal class GetAuctionRequestUseCaseImpl(
         logInfo(Tag, "Request body: $requestBody")
         return JsonHttpRequest().invoke(
             path = AuctionRequestPath,
-            body = requestBody,
+            body = requestBody.toString().toByteArray(),
         ).map { jsonResponse ->
             BidonJson.decodeFromJsonElement(AuctionResponse.serializer(), jsonResponse)
         }.onFailure {

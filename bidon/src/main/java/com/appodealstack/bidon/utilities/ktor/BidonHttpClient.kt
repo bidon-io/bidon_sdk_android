@@ -11,15 +11,16 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.util.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 
 @OptIn(ExperimentalSerializationApi::class)
 val BidonHttpClient by lazy {
     HttpClient(OkHttp) {
-        install(ContentEncoding) {
-            gzip()
-        }
+//        install(ContentEncoding) {
+//            gzip()
+//        }
         install(Logging) {
             logger = Logger.ANDROID
             level = LogLevel.ALL
@@ -51,6 +52,8 @@ val BidonHttpClient by lazy {
         }
         defaultRequest {
             header("X-BidOn-Version", BidOnSdkVersion)
+//            header("Accept-Encoding", "gzip")
+//            header("Content-Encoding", "gzip")
         }
     }
 }

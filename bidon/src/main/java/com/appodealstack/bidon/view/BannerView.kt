@@ -279,4 +279,4 @@ class BannerView constructor(
 }
 
 private const val Tag = "Banner"
-internal const val DefaultAutoRefreshTimeoutMs = 5_000L
+const val DefaultAutoRefreshTimeoutMs = 15_000L

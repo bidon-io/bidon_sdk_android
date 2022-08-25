@@ -5,6 +5,7 @@ import android.content.Context
 import com.applovin.sdk.AppLovinSdk
 import com.appodealstack.applovin.ext.adapterVersion
 import com.appodealstack.applovin.ext.sdkVersion
+import com.appodealstack.applovin.impl.ApplovinBannerImpl
 import com.appodealstack.applovin.impl.ApplovinInterstitialImpl
 import com.appodealstack.applovin.impl.ApplovinRewardedImpl
 import com.appodealstack.bidon.adapters.*
@@ -68,7 +69,6 @@ class ApplovinAdapter :
     }
 
     override fun banner(demandAd: DemandAd, roundId: String): AdSource.Banner<ApplovinBannerAuctionParams> {
-//        return MaxBannerImpl(demandId, demandAd, roundId)
-        TODO()
+        return ApplovinBannerImpl(demandId, demandAd, roundId, requireNotNull(appLovinSdk))
     }
 }
