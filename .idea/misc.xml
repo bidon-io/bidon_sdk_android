@@ -3,11 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../layout/custom_preview.xml" value="0.2803951367781155" />
         <entry key="app/src/main/res/drawable/bg_splash_screen.xml" value="0.1065" />
         <entry key="app/src/main/res/drawable/btn_background.xml" value="0.1065" />
         <entry key="app/src/main/res/drawable/logo.xml" value="0.1065" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
-        <entry key="app/src/main/res/layout/banner_view_layout.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/banner_view_layout.xml" value="0.19907407407407407" />
         <entry key="app/src/main/res/layout/content_main.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_first.xml" value="0.2324074074074074" />
         <entry key="appIronSource/src/main/res/drawable/ic_launcher_background.xml" value="0.176" />

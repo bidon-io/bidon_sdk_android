@@ -6,8 +6,8 @@ import com.applovin.mediation.MaxError
 import com.applovin.mediation.MaxReward
 import com.applovin.mediation.MaxRewardedAdListener
 import com.applovin.mediation.ads.MaxRewardedAd
-import com.appodealstack.applovin.ApplovinFullscreenAdAuctionParams
-import com.appodealstack.applovin.ApplovinMaxDemandId
+import com.appodealstack.applovin.ApplovinDemandId
+import com.appodealstack.applovin.MaxFullscreenAdAuctionParams
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
@@ -22,7 +22,7 @@ internal class MaxRewardedImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
     private val roundId: String
-) : AdSource.Rewarded<ApplovinFullscreenAdAuctionParams> {
+) : AdSource.Rewarded<MaxFullscreenAdAuctionParams> {
 
     private var rewardedAd: MaxRewardedAd? = null
     private var maxAd: MaxAd? = null
@@ -103,14 +103,14 @@ internal class MaxRewardedImpl(
     ): AdAuctionParams {
         val lineItem = lineItems.minByOrNull { it.priceFloor }
             ?.also(onLineItemConsumed)
-        return ApplovinFullscreenAdAuctionParams(
+        return MaxFullscreenAdAuctionParams(
             lineItem = requireNotNull(lineItem),
             timeoutMs = timeout,
             activity = activity
         )
     }
 
-    override suspend fun bid(adParams: ApplovinFullscreenAdAuctionParams): Result<AuctionResult> {
+    override suspend fun bid(adParams: MaxFullscreenAdAuctionParams): Result<AuctionResult> {
         logInternal(Tag, "Starting with $adParams")
         val maxInterstitialAd = MaxRewardedAd.getInstance(adParams.lineItem.adUnitId, adParams.activity).also {
             it.setListener(maxAdListener)
@@ -150,7 +150,7 @@ internal class MaxRewardedImpl(
     private fun MaxAd?.asAd(): Ad {
         val maxAd = this
         return Ad(
-            demandId = ApplovinMaxDemandId,
+            demandId = ApplovinDemandId,
             demandAd = demandAd,
             price = maxAd?.revenue ?: 0.0,
             sourceAd = maxAd ?: demandAd,
@@ -167,7 +167,7 @@ internal class MaxRewardedImpl(
     private fun MaxRewardedAd?.asAd(): Ad {
         val maxAd = this
         return Ad(
-            demandId = ApplovinMaxDemandId,
+            demandId = ApplovinDemandId,
             demandAd = demandAd,
             price = 0.0,
             sourceAd = maxAd ?: demandAd,

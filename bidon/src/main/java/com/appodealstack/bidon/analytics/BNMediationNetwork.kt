@@ -2,7 +2,8 @@ package com.appodealstack.bidon.analytics
 
 enum class BNMediationNetwork(val networkName: String) {
     IronSource("ironsource"),
-    ApplovinMax("applovin"),
+    Applovin("applovin"),
+    Max("applovin_max"),
     GoogleAdmob("admob"),
     Fyber("fyber"),
     Appodeal("appodeal"),
