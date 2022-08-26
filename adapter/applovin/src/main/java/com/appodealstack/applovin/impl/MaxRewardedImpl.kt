@@ -100,10 +100,10 @@ internal class MaxRewardedImpl(
         timeout: Long,
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit,
-    ): AdAuctionParams {
+    ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems.minByOrNull { it.priceFloor }
             ?.also(onLineItemConsumed)
-        return MaxFullscreenAdAuctionParams(
+        MaxFullscreenAdAuctionParams(
             lineItem = requireNotNull(lineItem),
             timeoutMs = timeout,
             activity = activity

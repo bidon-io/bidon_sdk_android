@@ -13,6 +13,7 @@ import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
+import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
 import com.appodealstack.bidon.core.ext.*
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.AdListener
@@ -113,13 +114,11 @@ internal class AdmobBannerImpl(
         lineItems: List<LineItem>,
         bannerSize: BannerSize,
         onLineItemConsumed: (LineItem) -> Unit,
-    ): AdAuctionParams {
+    ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
-            .mapNotNull {
-                it.takeIf { !it.adUnitId.isNullOrBlank() }
-            }.minByOrNull { it.priceFloor }
+            .minByPricefloorOrNull(demandId, priceFloor)
             ?.also(onLineItemConsumed)
-        return AdmobBannerAuctionParams(
+        AdmobBannerAuctionParams(
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
             bannerSize = bannerSize,
             adContainer = adContainer,
@@ -198,6 +197,7 @@ internal class AdmobBannerImpl(
         BannerSize.Adaptive -> adContainer.adaptiveAdSize()
     }
 
+    @Suppress("DEPRECATION")
     private fun ViewGroup.adaptiveAdSize(): AdSize {
         val windowManager = this.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val display = windowManager.defaultDisplay

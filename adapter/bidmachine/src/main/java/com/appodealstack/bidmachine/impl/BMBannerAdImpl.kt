@@ -163,8 +163,8 @@ internal class BMBannerAdImpl(
         lineItems: List<LineItem>,
         bannerSize: BannerSize,
         onLineItemConsumed: (LineItem) -> Unit,
-    ): AdAuctionParams {
-        return BMBannerAuctionParams(priceFloor = priceFloor, timeout = timeout, context = adContainer.context, bannerSize = bannerSize)
+    ): Result<AdAuctionParams> = runCatching {
+        BMBannerAuctionParams(priceFloor = priceFloor, timeout = timeout, context = adContainer.context, bannerSize = bannerSize)
     }
 
     override fun destroy() {

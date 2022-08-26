@@ -186,8 +186,8 @@ internal class BMRewardedAdImpl(
         timeout: Long,
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit,
-    ): AdAuctionParams {
-        return BMFullscreenAuctionParams(priceFloor = priceFloor, timeout = timeout, context = activity.applicationContext)
+    ): Result<AdAuctionParams> = runCatching {
+        BMFullscreenAuctionParams(priceFloor = priceFloor, timeout = timeout, context = activity.applicationContext)
     }
 
     override fun destroy() {

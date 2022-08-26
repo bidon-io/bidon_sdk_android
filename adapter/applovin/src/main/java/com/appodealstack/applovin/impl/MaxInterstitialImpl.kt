@@ -10,6 +10,7 @@ import com.appodealstack.applovin.MaxFullscreenAdAuctionParams
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
+import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
 import com.appodealstack.bidon.core.ext.asFailure
 import com.appodealstack.bidon.core.ext.asSuccess
 import com.appodealstack.bidon.core.ext.logError
@@ -86,10 +87,11 @@ internal class MaxInterstitialImpl(
         timeout: Long,
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit,
-    ): AdAuctionParams {
-        val lineItem = lineItems.minByOrNull { it.priceFloor }
+    ): Result<AdAuctionParams> = runCatching {
+        val lineItem = lineItems
+            .minByPricefloorOrNull(demandId, priceFloor)
             ?.also(onLineItemConsumed)
-        return MaxFullscreenAdAuctionParams(
+        MaxFullscreenAdAuctionParams(
             activity = activity,
             lineItem = requireNotNull(lineItem),
             timeoutMs = timeout,

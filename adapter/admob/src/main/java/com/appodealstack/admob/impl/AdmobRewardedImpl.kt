@@ -7,6 +7,7 @@ import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
+import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
 import com.appodealstack.bidon.core.ext.*
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.rewarded.RewardedAd
@@ -127,13 +128,11 @@ internal class AdmobRewardedImpl(
         timeout: Long,
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit,
-    ): AdAuctionParams {
+    ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
-            .mapNotNull {
-                it.takeIf { !it.adUnitId.isNullOrBlank() }
-            }.minByOrNull { it.priceFloor }
+            .minByPricefloorOrNull(demandId, priceFloor)
             ?.also(onLineItemConsumed)
-        return AdmobFullscreenAdAuctionParams(
+        AdmobFullscreenAdAuctionParams(
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
             priceFloor = priceFloor,
             context = activity.applicationContext

@@ -7,11 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -25,12 +23,14 @@ import com.appodealstack.bidon.adapters.Ad
 import com.appodealstack.bidon.adapters.Reward
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.core.ext.logInternal
+import kotlinx.coroutines.launch
 
 @Composable
 fun RewardedScreen(
     navController: NavHostController,
 ) {
-
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
     val activity = LocalContext.current as Activity
 
     val logFlow = remember {
@@ -140,7 +140,8 @@ fun RewardedScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 24.dp)
+                    .padding(top = 24.dp),
+                state = listState
             ) {
                 items(logFlow.value) { logLine ->
                     Column(
@@ -151,6 +152,9 @@ fun RewardedScreen(
                     ) {
                         Body2Text(text = logLine)
                     }
+                }
+                coroutineScope.launch {
+                    listState.animateScrollToItem(index = logFlow.value.lastIndex)
                 }
             }
         }

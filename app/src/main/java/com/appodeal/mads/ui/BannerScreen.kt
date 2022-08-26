@@ -4,12 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -31,10 +29,13 @@ import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.view.BannerView
 import com.appodealstack.bidon.view.DefaultAutoRefreshTimeoutMs
+import kotlinx.coroutines.launch
 
 @Composable
 fun BannerScreen(navController: NavHostController) {
     val context = LocalContext.current
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
     val logFlow = remember {
         mutableStateOf(listOf("Log"))
     }
@@ -88,7 +89,8 @@ fun BannerScreen(navController: NavHostController) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 24.dp),
+            state = listState
         ) {
             item {
                 ItemSelector(
@@ -229,6 +231,9 @@ fun BannerScreen(navController: NavHostController) {
                 ) {
                     Body2Text(text = logLine)
                 }
+            }
+            coroutineScope.launch {
+                listState.animateScrollToItem(index = logFlow.value.lastIndex)
             }
         }
     }

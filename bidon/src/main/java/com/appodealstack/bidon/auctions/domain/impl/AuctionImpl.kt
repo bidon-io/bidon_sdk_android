@@ -142,6 +142,7 @@ internal class AuctionImpl(
                 roundResults = roundResults
             )
         }.onFailure {
+            logError(Tag, "Round '${round.id}' failed", it)
             roundsListener.roundFailed(
                 roundId = round.id,
                 error = it
@@ -167,89 +168,114 @@ internal class AuctionImpl(
         demandAd: DemandAd,
         adTypeAdditionalData: AdTypeAdditional,
         timeout: Long
-    ): Result<List<AuctionResult>> = runCatching {
-        val filteredAdapters = adaptersSource.adapters.filter {
-            it.demandId.demandId in round.demandIds
-        }
-        logInfo(Tag, "Round '${round.id}' started with adapters [${filteredAdapters.joinToString { it.demandId.demandId }}]")
-        logInfo(Tag, "Round '${round.id}' started with line items: $mutableLineItems")
-        val adSources = when (demandAd.adType) {
-            AdType.Interstitial -> {
-                filteredAdapters.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>().map {
-                    it.interstitial(demandAd, round.id)
+    ): Result<List<AuctionResult>> = coroutineScope {
+        runCatching {
+            val filteredAdapters = adaptersSource.adapters.filter {
+                it.demandId.demandId in round.demandIds
+            }
+            (round.demandIds - filteredAdapters.map { it.demandId.demandId }.toSet())
+                .takeIf { it.isNotEmpty() }
+                ?.let { logError(Tag, "Adapters not found: $it", NoSuchElementException(it.joinToString())) }
+            logInfo(Tag, "Round '${round.id}' started with adapters [${filteredAdapters.joinToString { it.demandId.demandId }}]")
+            logInfo(Tag, "Round '${round.id}' started with line items: $mutableLineItems")
+            val adSources = when (demandAd.adType) {
+                AdType.Interstitial -> {
+                    filteredAdapters.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>().map {
+                        it.interstitial(demandAd, round.id)
+                    }
+                }
+                AdType.Rewarded -> {
+                    filteredAdapters.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().map {
+                        it.rewarded(demandAd, round.id)
+                    }
+                }
+                AdType.Banner -> {
+                    filteredAdapters.filterIsInstance<AdProvider.Banner<AdAuctionParams>>().map {
+                        it.banner(demandAd, round.id)
+                    }
                 }
             }
-            AdType.Rewarded -> {
-                filteredAdapters.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().map {
-                    it.rewarded(demandAd, round.id)
-                }
-            }
-            AdType.Banner -> {
-                filteredAdapters.filterIsInstance<AdProvider.Banner<AdAuctionParams>>().map {
-                    it.banner(demandAd, round.id)
-                }
-            }
-        }
-        adSources
-            .map { adSource ->
-                logInfo(Tag, "Round '${round.id}'. Adapter ${adSource.demandId.demandId} starts bidding")
-                coroutineScope {
+            adSources
+                .map { adSource ->
+                    val availableLineItemsForDemand = mutableLineItems.filterBy(adSource.demandId)
+                    logInfo(
+                        tag = Tag,
+                        message = "Round '${round.id}'. Adapter ${adSource.demandId.demandId} starts bidding. " +
+                            "Min PriceFloor=$priceFloor. LineItems: $availableLineItemsForDemand."
+                    )
                     async {
                         withTimeoutOrNull(round.timeoutMs) {
-                            val adParam = when (adSource) {
-                                is AdSource.Banner -> {
-                                    check(adTypeAdditionalData is AdTypeAdditional.Banner)
-                                    adSource.getAuctionParams(
-                                        priceFloor = priceFloor,
-                                        timeout = timeout,
-                                        lineItems = mutableLineItems.filterBy(adSource.demandId),
-                                        adContainer = adTypeAdditionalData.adContainer,
-                                        bannerSize = adTypeAdditionalData.bannerSize,
-                                        onLineItemConsumed = { lineItem ->
-                                            mutableLineItems.remove(lineItem)
-                                        }
-                                    )
-                                }
-                                is AdSource.Interstitial -> {
-                                    check(adTypeAdditionalData is AdTypeAdditional.Interstitial)
-                                    adSource.getAuctionParams(
-                                        priceFloor = priceFloor,
-                                        timeout = timeout,
-                                        lineItems = mutableLineItems.filterBy(adSource.demandId),
-                                        activity = adTypeAdditionalData.activity,
-                                        onLineItemConsumed = { lineItem ->
-                                            mutableLineItems.remove(lineItem)
-                                        }
-                                    )
-                                }
-                                is AdSource.Rewarded -> {
-                                    check(adTypeAdditionalData is AdTypeAdditional.Rewarded)
-                                    adSource.getAuctionParams(
-                                        priceFloor = priceFloor,
-                                        timeout = timeout,
-                                        lineItems = mutableLineItems.filterBy(adSource.demandId),
-                                        activity = adTypeAdditionalData.activity,
-                                        onLineItemConsumed = { lineItem ->
-                                            mutableLineItems.remove(lineItem)
-                                        }
-                                    )
-                                }
-                            }
-                            adSource.bid(adParam)
+                            val adParam = obtainAdParamByType(
+                                adSource,
+                                adTypeAdditionalData,
+                                priceFloor,
+                                timeout,
+                                availableLineItemsForDemand
+                            )
+                            adParam.getOrNull()?.let {
+                                adSource.bid(adParams = it)
+                            } ?: BidonError.NoAppropriateAdUnitId.asFailure()
                         } ?: BidonError.BidTimedOut(adSource.demandId).asFailure()
-                    }
+                    } to adSource
+                }.mapIndexedNotNull { index, (deferred, adSource) ->
+                    val logRoundTitle = "Round '${round.id}' result #$index(${adSource.demandId.demandId})"
+                    deferred.await()
+                        .onSuccess { auctionResult ->
+                            logInfo(Tag, "$logRoundTitle: $auctionResult")
+                        }
+                        .onFailure { cause ->
+                            logError(Tag, "$logRoundTitle: error while receiving bid.", cause)
+                        }.getOrNull()
+                }.also {
+                    logInfo(Tag, "Round '${round.id}' finished with ${it.size} results: $it")
                 }
-            }.mapIndexedNotNull { index, deferred ->
-                deferred.await()
-                    .onSuccess { auctionResult ->
-                        logInfo(Tag, "Round '${round.id}' result #$index: $auctionResult")
-                    }
-                    .onFailure {
-                        logError(Tag, "Round '${round.id}'. Error while receiving bid.", it)
-                    }.getOrNull()
-            }.also {
-                logInfo(Tag, "Round '${round.id}' finished with ${it.size} results: $it")
-            }
+        }
+    }
+
+    private fun obtainAdParamByType(
+        adSource: AdSource<AdAuctionParams>,
+        adTypeAdditionalData: AdTypeAdditional,
+        priceFloor: Double,
+        timeout: Long,
+        availableLineItemsForDemand: List<LineItem>
+    ) = when (adSource) {
+        is AdSource.Banner -> {
+            check(adTypeAdditionalData is AdTypeAdditional.Banner)
+            adSource.getAuctionParams(
+                priceFloor = priceFloor,
+                timeout = timeout,
+                lineItems = availableLineItemsForDemand,
+                adContainer = adTypeAdditionalData.adContainer,
+                bannerSize = adTypeAdditionalData.bannerSize,
+                onLineItemConsumed = { lineItem ->
+                    mutableLineItems.remove(lineItem)
+                }
+            )
+        }
+        is AdSource.Interstitial -> {
+            check(adTypeAdditionalData is AdTypeAdditional.Interstitial)
+            adSource.getAuctionParams(
+                priceFloor = priceFloor,
+                timeout = timeout,
+                lineItems = availableLineItemsForDemand,
+                activity = adTypeAdditionalData.activity,
+                onLineItemConsumed = { lineItem ->
+                    mutableLineItems.remove(lineItem)
+                }
+            )
+        }
+        is AdSource.Rewarded -> {
+            check(adTypeAdditionalData is AdTypeAdditional.Rewarded)
+            adSource.getAuctionParams(
+                priceFloor = priceFloor,
+                timeout = timeout,
+                lineItems = availableLineItemsForDemand,
+                activity = adTypeAdditionalData.activity,
+                onLineItemConsumed = { lineItem ->
+                    mutableLineItems.remove(lineItem)
+                }
+            )
+        }
     }
 
     private suspend fun saveAuctionResults(resolver: AuctionResolver, roundResults: List<AuctionResult>) {

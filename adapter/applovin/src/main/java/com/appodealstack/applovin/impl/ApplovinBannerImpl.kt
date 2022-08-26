@@ -11,6 +11,7 @@ import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
+import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
 import com.appodealstack.bidon.core.ext.asFailure
 import com.appodealstack.bidon.core.ext.asSuccess
 import com.appodealstack.bidon.core.ext.logError
@@ -95,12 +96,13 @@ internal class ApplovinBannerImpl(
         lineItems: List<LineItem>,
         bannerSize: BannerSize,
         onLineItemConsumed: (LineItem) -> Unit
-    ): AdAuctionParams {
-        val lineItem = lineItems.minByOrNull { it.priceFloor }
+    ): Result<AdAuctionParams> = runCatching {
+        val lineItem = lineItems
+            .minByPricefloorOrNull(demandId, priceFloor)
             ?.also(onLineItemConsumed)
-        return ApplovinBannerAuctionParams(
+        ApplovinBannerAuctionParams(
             context = adContainer.context,
-            lineItem = requireNotNull(lineItem),
+            lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
             adaptiveBannerHeight = null,
             bannerSize = bannerSize
         )
@@ -111,7 +113,12 @@ internal class ApplovinBannerImpl(
     ): Result<AuctionResult> {
         logInternal(Tag, "Starting with $adParams")
         lineItem = adParams.lineItem
-        val adSize = adParams.bannerSize.asAppLovinAdSize() ?: error(BidonError.AdFormatIsNotSupported(demandId.demandId, adParams.bannerSize))
+        val adSize = adParams.bannerSize.asAppLovinAdSize() ?: error(
+            BidonError.AdFormatIsNotSupported(
+                demandId.demandId,
+                adParams.bannerSize
+            )
+        )
         val bannerView = AppLovinAdView(appLovinSdk, adSize, adParams.lineItem.adUnitId, adParams.context).also {
             adView = it
         }

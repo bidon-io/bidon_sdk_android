@@ -178,8 +178,8 @@ internal class BMInterstitialAdImpl(
         timeout: Long,
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit,
-    ): AdAuctionParams {
-        return BMFullscreenAuctionParams(priceFloor = priceFloor, timeout = timeout, context = activity.applicationContext)
+    ): Result<AdAuctionParams> {
+        return BMFullscreenAuctionParams(priceFloor = priceFloor, timeout = timeout, context = activity.applicationContext).asSuccess()
     }
 
     override fun destroy() {

@@ -17,8 +17,13 @@ internal class AuctionHolderImpl(
     private val roundsListener: RoundsListener,
 ) : AuctionHolder {
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
+    private val coroutineExceptionHandler by lazy {
+        CoroutineExceptionHandler { _, exception ->
+            logError(Tag, "CoroutineExceptionHandler", exception)
+        }
+    }
     private val scope: CoroutineScope
-        get() = CoroutineScope(dispatcher)
+        get() = CoroutineScope(dispatcher + coroutineExceptionHandler)
 
     private val auctionResults = mutableListOf<AuctionResult>()
     private var auctionResultsDeferred: Deferred<Result<List<AuctionResult>>>? = null
