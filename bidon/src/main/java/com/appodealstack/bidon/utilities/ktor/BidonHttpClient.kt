@@ -18,9 +18,9 @@ import kotlinx.serialization.json.Json
 @OptIn(ExperimentalSerializationApi::class)
 val BidonHttpClient by lazy {
     HttpClient(OkHttp) {
-//        install(ContentEncoding) {
-//            gzip()
-//        }
+        install(ContentEncoding) {
+            gzip()
+        }
         install(Logging) {
             logger = Logger.ANDROID
             level = LogLevel.ALL
@@ -38,13 +38,15 @@ val BidonHttpClient by lazy {
         install(HttpRequestRetry) {
             var retryDelay: Long? = null
             retryIf { _, response ->
-                (!response.status.isSuccess() && response.headers.contains(HttpHeaders.RetryAfter)).also {
+                val needRetry = !response.status.isSuccess() && response.headers.contains(HttpHeaders.RetryAfter)
+                if (needRetry) {
                     retryDelay = response.headers[HttpHeaders.RetryAfter]?.toLongOrNull()?.let { headerRetryDelay ->
                         // if [Retry-After] is in seconds, it < 100, else it has to be milliseconds.
                         headerRetryDelay.takeIf { it > 100L } ?: headerRetryDelay.times(1000)
                     }
                     logInfo(Tag, "Request failed. Retry after $retryDelay ms.")
                 }
+                needRetry
             }
             delayMillis(respectRetryAfterHeader = false) { retry ->
                 retryDelay ?: retry.toLong()

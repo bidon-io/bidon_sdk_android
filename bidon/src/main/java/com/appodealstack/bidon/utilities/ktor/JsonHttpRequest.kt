@@ -16,18 +16,18 @@ import kotlinx.serialization.json.JsonObject
 internal class JsonHttpRequest {
     suspend operator fun invoke(
         path: String,
-        body: ByteArray,
+        body: JsonObject,
         httpClient: HttpClient = BidonHttpClient,
         bidOnEndpoints: BidOnEndpoints = get(),
     ): Result<JsonObject> = runCatching {
         val response = httpClient.post {
-            contentType(ContentType.Application.GZip)
+            contentType(ContentType.Application.Json)
             url {
                 protocol = URLProtocol.HTTPS
                 host = bidOnEndpoints.activeEndpoint.substringAfter("https://")
                 path("/$path")
             }
-            setBody(GZIPRequestDataEncoder.encode(body).encodeBase64())
+            setBody(body)
         }
         when (response.status) {
             HttpStatusCode.OK -> {

@@ -29,7 +29,7 @@ internal class GetConfigRequestUseCaseImpl(
         logInfo(Tag, "Request body: $requestBody")
         return JsonHttpRequest().invoke(
             path = ConfigRequestPath,
-            body = requestBody.toString().toByteArray(),
+            body = requestBody,
         ).map { jsonResponse ->
             val config = jsonResponse.getValue("init")
             keyValueStorage.token = jsonResponse.getValue("token").toString()

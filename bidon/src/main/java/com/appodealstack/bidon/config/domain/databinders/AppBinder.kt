@@ -13,8 +13,8 @@ internal class AppBinder : DataBinder {
     override suspend fun getJsonElement(): JsonElement = BidonJson.encodeToJsonElement(createApp())
 
     private fun createApp(): App = App(
-        key = "b1689e101a2555084e08c2ba7375783bde166625bbeae00f",
-        bundle = "com.bidon.demo",
+        key = "d908f77a97ae0993514bc8edba7e776a36593c77e5f44994",
+        bundle = "com.appodealstack.demo",
         framework = "Android",
         frameworkVersion = "32",
         version = "Android 11",
