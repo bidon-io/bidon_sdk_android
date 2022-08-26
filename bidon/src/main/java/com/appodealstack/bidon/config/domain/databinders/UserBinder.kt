@@ -25,7 +25,7 @@ internal class UserBinder(
             idg = dataSource.getIdg(),
             consent = Consent(
                 status = dataSource.getConsentStatus(),
-                acceptedVendors = dataSource.getAcceptedVendors()?.toAcceptedVendorList(),
+                acceptedVendors = dataSource.getAcceptedVendors(),
                 vendorListVersion = dataSource.getVendorListVersion(),
                 createdAt = dataSource.getConsentCreatedAt(),
                 updatedAt = dataSource.getConsentUpdatedAt(),
@@ -40,11 +40,5 @@ internal class UserBinder(
             ),
             coppa = dataSource.getCoppa(),
         )
-    }
-
-    private fun List<Vendor>.toAcceptedVendorList(): List<AcceptedVendors> {
-        return this.map { vendor ->
-            AcceptedVendors(apdId = vendor.id, status = vendor.bundle)
-        }
     }
 }

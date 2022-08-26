@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.utilities.datasource.placement
 
 //TODO where I should take such data?
-class PlacementDataSourceImpl : PlacementDataSource {
+internal class PlacementDataSourceImpl : PlacementDataSource {
 
     override fun getName(): String {
         TODO("Not yet implemented")

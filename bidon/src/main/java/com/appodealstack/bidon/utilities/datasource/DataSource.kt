@@ -7,9 +7,10 @@ import com.appodealstack.bidon.utilities.datasource.location.LocationDataSourceI
 import com.appodealstack.bidon.utilities.datasource.placement.PlacementDataSourceImpl
 import com.appodealstack.bidon.utilities.datasource.session.SessionDataSourceImpl
 import com.appodealstack.bidon.utilities.datasource.token.TokenDataSourceImpl
+import com.appodealstack.bidon.utilities.datasource.user.RegulatorProvider
 import com.appodealstack.bidon.utilities.datasource.user.UserDataSourceImpl
 
-internal interface DataSource {
+internal object DataSourceProvider {
 
     fun getDataSource(type: SourceType, contextProvider: ContextProvider): DataSource {
         return when (type) {
@@ -18,11 +19,13 @@ internal interface DataSource {
             SourceType.Location -> LocationDataSourceImpl(contextProvider)
             SourceType.Session -> SessionDataSourceImpl(contextProvider)
             SourceType.Token -> TokenDataSourceImpl()
-            SourceType.User -> UserDataSourceImpl()//TODO how to pass regulator correctly)
+            SourceType.User -> UserDataSourceImpl(RegulatorProvider()) //TODO how to pass regulator correctly
             SourceType.Placement -> PlacementDataSourceImpl()
         }
     }
 }
+
+internal interface DataSource
 
 enum class SourceType {
     App,

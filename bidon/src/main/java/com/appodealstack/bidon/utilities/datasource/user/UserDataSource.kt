@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.utilities.datasource.user
 
+import com.appodealstack.bidon.config.domain.models.AcceptedVendors
 import com.appodealstack.bidon.utilities.datasource.DataSource
-import com.appodealstack.bidon.utilities.datasource.user.toconsentlib.Vendor
 
 internal interface UserDataSource : DataSource {
     //TODO temporary back Consent.toJson
@@ -17,7 +17,7 @@ internal interface UserDataSource : DataSource {
     fun getIdfa(): String
     fun getCoppa(): Boolean
     fun getConsentStatus(): String
-    fun getAcceptedVendors():  List<Vendor>?
+    fun getAcceptedVendors():  List<AcceptedVendors>?
     fun getVendorListVersion(): Int?
     fun getConsentCreatedAt(): Long?
     fun getConsentUpdatedAt(): Long?

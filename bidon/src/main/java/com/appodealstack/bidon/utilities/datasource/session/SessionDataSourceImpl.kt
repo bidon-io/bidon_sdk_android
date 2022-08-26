@@ -15,7 +15,7 @@ import java.io.*
 import java.lang.ref.WeakReference
 import java.util.regex.Pattern
 
-class SessionDataSourceImpl(
+internal class SessionDataSourceImpl(
     private val contextProvider: ContextProvider,
 ) : SessionDataSource {
 

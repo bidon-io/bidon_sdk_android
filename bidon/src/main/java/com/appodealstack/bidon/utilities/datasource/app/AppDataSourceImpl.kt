@@ -3,11 +3,14 @@ package com.appodealstack.bidon.utilities.datasource.app
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.os.Build
-import com.appodealstack.bidon.BidON
+import com.appodealstack.bidon.Version
 import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.ext.logInternal
+import com.appodealstack.bidon.utilities.datasource.DataSource
+import com.appodealstack.bidon.utilities.datasource.SourceType
+import com.appodealstack.bidon.utilities.datasource.SourceType.App
 
-class AppDataSourceImpl(
+internal class AppDataSourceImpl(
     private val contextProvider: ContextProvider
 ) : AppDataSource {
 
@@ -37,15 +40,19 @@ class AppDataSourceImpl(
     }
 
     override fun getFramework(): String {
-        return BidON.getFrameworkName()
+        return Version.frameworkName
     }
 
     override fun getFrameworkVersion(): String? {
-        return BidON.getEngineVersion()
+        return Version.frameworkVersion
     }
 
     override fun getPluginVersion(): String? {
-        return BidON.getPluginVersion()
+        return Version.engineVersion
+    }
+
+    override fun getVersion(): String {
+        return Version.version
     }
 
     private fun getPackageInfo(context: Context): PackageInfo? {

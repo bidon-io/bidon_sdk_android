@@ -15,7 +15,7 @@ internal class TokenBinder(
     override suspend fun getJsonElement(): JsonElement =
         BidonJson.encodeToJsonElement(createToken())
 
-    private fun createToken(): Token {
-        return Token(token = dataSource.getCachedToken())
+    private fun createToken(): Token? {
+        return dataSource.getCachedToken()
     }
 }

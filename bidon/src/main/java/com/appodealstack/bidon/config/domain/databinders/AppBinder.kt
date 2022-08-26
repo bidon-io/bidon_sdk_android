@@ -19,7 +19,7 @@ internal class AppBinder(
             bundle = dataSource.getBundleId(),
             key = dataSource.getAppKey(),
             framework = dataSource.getFramework(),
-            version = dataSource.getFrameworkVersion(),
+            version = dataSource.getVersion(),
             frameworkVersion = dataSource.getFrameworkVersion(),
             pluginVersion = dataSource.getPluginVersion()
         )

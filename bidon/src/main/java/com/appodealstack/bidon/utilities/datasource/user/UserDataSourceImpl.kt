@@ -1,41 +1,25 @@
 package com.appodealstack.bidon.utilities.datasource.user
 
+import com.appodealstack.bidon.config.domain.models.AcceptedVendors
+import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.utilities.datasource.user.toconsentlib.Consent
 import com.appodealstack.bidon.utilities.datasource.user.toconsentlib.Vendor
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 internal class UserDataSourceImpl(
     private val regulator: Regulator
 ) : UserDataSource {
 
-    private var advertisingProfile: AdvertisingInfo.AdvertisingProfile =
-        AdvertisingInfo.DefaultAdvertisingProfile
+    private var advertisingInfo: AdvertisingInfo = get()
+    private val currentProfile: AdvertisingInfoImpl.AdvertisingProfile
+        get() = advertisingInfo.adProfileFlow.value
+
 
     private val consent: Consent?
         get() = regulator.approvedConsent
 
     private val isLimitAdTrackingEnabled: Boolean
-        get() = advertisingProfile.isLimitAdTrackingEnabled
+        get() = currentProfile.isLimitAdTrackingEnabled
 
-    init {
-        CoroutineScope(Dispatchers.IO).launch {
-            AdvertisingInfo.adProfileFlow.collect {
-                advertisingProfile = it
-                applyAdvertisingProfile(it)
-            }
-        }
-    }
-
-    //TODO receive AdvertisingProfile
-    fun applyAdvertisingProfile(applyAdvertisingProfile: AdvertisingInfo.AdvertisingProfile) {
-        if (isLimitAdTrackingEnabled != applyAdvertisingProfile.isLimitAdTrackingEnabled ||
-            getIdfa() != applyAdvertisingProfile.id
-        ) {
-            advertisingProfile = applyAdvertisingProfile
-        }
-    }
 
     override fun getConsent(): String {
         return consent?.toJson().toString()
@@ -53,17 +37,17 @@ internal class UserDataSourceImpl(
 
     //TODO is it neccessary value?
     override fun getIdg(): String? {
-        return if (advertisingProfile.isAdvertisingIdWasGenerated) {
-            advertisingProfile.id
+        return if (currentProfile.isAdvertisingIdWasGenerated) {
+            currentProfile.id
         } else null
     }
 
     override fun wasAdIdGenerated(): Boolean {
-        return advertisingProfile.isAdvertisingIdWasGenerated
+        return currentProfile.isAdvertisingIdWasGenerated
     }
 
     override fun getIdfa(): String {
-        return advertisingProfile.id
+        return currentProfile.id
     }
 
     override fun getCoppa(): Boolean {
@@ -74,8 +58,8 @@ internal class UserDataSourceImpl(
         return consent?.status.toString()
     }
 
-    override fun getAcceptedVendors(): List<Vendor>? {
-        return consent?.acceptedVendors
+    override fun getAcceptedVendors(): List<AcceptedVendors>? {
+        return consent?.acceptedVendors?.toAcceptedVendorList()
     }
 
     override fun getVendorListVersion(): Int? {
@@ -112,5 +96,11 @@ internal class UserDataSourceImpl(
 
     override fun getIABConsentSubjectToGDPR(): String? {
         return consent?.IABConsentSubjectToGDPR
+    }
+
+    private fun List<Vendor>.toAcceptedVendorList(): List<AcceptedVendors> {
+        return this.map { vendor ->
+            AcceptedVendors(apdId = vendor.id, status = vendor.bundle)
+        }
     }
 }

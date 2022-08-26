@@ -8,17 +8,17 @@ data class Placement(
     @SerialName("name")
     val name: String,
     @SerialName("reward")
-    val reward: Reward,
+    val reward: Reward?,
     @SerialName("capping")
-    val capping: Capping,
+    val capping: Capping?,
 )
 
 @Serializable
 data class Reward(
-    @SerialName("currency")
-    val currency: String?,
+    @SerialName("title")
+    val currency: String,
     @SerialName("value")
-    val amount: Int?,
+    val amount: Int,
 )
 
 //TODO clarify model

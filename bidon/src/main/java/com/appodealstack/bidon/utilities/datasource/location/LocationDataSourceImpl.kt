@@ -10,8 +10,6 @@ import android.location.LocationManager
 import android.os.Process
 import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.ext.logInfo
-import com.appodealstack.bidon.utilities.restricted.Restrictable
-import com.appodealstack.bidon.utilities.restricted.RestrictableImpl
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.*
@@ -20,7 +18,6 @@ internal class LocationDataSourceImpl(
     private val contextProvider: ContextProvider
 ) : LocationDataSource {
 
-    private val restrictable: Restrictable = RestrictableImpl
     private val context: Context
         get() = contextProvider.requiredContext
     private val locationType: Int?
@@ -36,12 +33,9 @@ internal class LocationDataSourceImpl(
      * restrictions, will return `null`.
      */
     private var deviceLocation: Location? = null
-        get() = if (restrictable.canSendLocation()) {
-            if (field == null) {
-                lastLocation
-            }
-            field
-        } else null
+        get() = if (field == null) {
+            lastLocation
+        } else field
 
     override fun getAccuracy(): Float? {
         return deviceLocation?.accuracy
@@ -75,21 +69,12 @@ internal class LocationDataSourceImpl(
     }
 
     override fun getLat(): Double? {
-        if (restrictable.canSendLocation()) {
-            if (deviceLocation != null) {
-                return deviceLocation?.latitude
-            }
-        }
-        return null
+        return deviceLocation?.latitude
+
     }
 
     override fun getLon(): Double? {
-        if (restrictable.canSendLocation()) {
-            if (deviceLocation != null) {
-                return deviceLocation?.longitude
-            }
-        }
-        return null
+        return deviceLocation?.longitude
     }
 
     /**

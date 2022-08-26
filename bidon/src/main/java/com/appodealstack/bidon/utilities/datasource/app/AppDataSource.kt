@@ -11,4 +11,5 @@ internal interface AppDataSource: DataSource {
     fun getFramework(): String
     fun getFrameworkVersion(): String?
     fun getPluginVersion(): String?
+    fun getVersion(): String
 }

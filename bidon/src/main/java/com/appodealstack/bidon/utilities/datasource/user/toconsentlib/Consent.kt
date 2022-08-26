@@ -1,6 +1,8 @@
 package com.appodealstack.bidon.utilities.datasource.user.toconsentlib
 
 import com.appodealstack.bidon.utilities.asList
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import org.json.JSONArray
 import org.json.JSONObject
 

@@ -11,12 +11,9 @@ import android.view.WindowManager
 import android.webkit.WebSettings
 import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.ext.logInternal
-import com.appodealstack.bidon.utilities.datasource.DataSource
-import com.appodealstack.bidon.utilities.datasource.SourceType
-import com.appodealstack.bidon.utilities.restricted.Restrictable
 import java.util.*
 
-class DeviceDataSourceImpl(
+internal class DeviceDataSourceImpl(
     private val contextProvider: ContextProvider,
 ) : DeviceDataSource {
 
