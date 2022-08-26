@@ -138,9 +138,9 @@ fun BannerScreen(navController: NavHostController) {
                     bannerView.value = BannerView(context, "some_placement_id").apply {
                         setAdSize(bannerSize.value)
                         if (autoRefreshTtl.value == 0L) {
-                            bannerView.value?.stopAutoRefresh()
+                            stopAutoRefresh()
                         } else {
-                            bannerView.value?.startAutoRefresh(timeoutMs = autoRefreshTtl.value)
+                            startAutoRefresh(timeoutMs = autoRefreshTtl.value)
                         }
                         setBannerListener(
                             object : BannerListener {
