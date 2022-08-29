@@ -19,7 +19,6 @@ import com.appodealstack.bidon.core.ext.*
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.AdListener
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -44,14 +43,13 @@ internal class AdmobBannerImpl(
     private val requestListener by lazy {
         object : AdListener() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                logError(Tag, "Error while loading ad: $loadAdError")
+                logError(Tag, "Error while loading ad: $loadAdError. $this", loadAdError.asBidonError())
                 adState.tryEmit(AdState.LoadFailed(loadAdError.asBidonError()))
             }
 
             override fun onAdLoaded() {
-                logError(Tag, "Loaded successfully: $adView")
+                logInfo(Tag, "onAdLoaded: $this")
                 adView?.run {
-                    logError(Tag, "Loaded successfully: $adView")
                     adState.tryEmit(
                         AdState.Bid(
                             AuctionResult(
@@ -64,14 +62,17 @@ internal class AdmobBannerImpl(
             }
 
             override fun onAdClicked() {
+                logInternal(Tag, "onAdClicked: $this")
                 adState.tryEmit(AdState.Clicked(requiredAdView.asAd()))
             }
 
             override fun onAdClosed() {
+                logInternal(Tag, "onAdClosed: $this")
                 adState.tryEmit(AdState.Closed(requiredAdView.asAd()))
             }
 
             override fun onAdImpression() {
+                logInternal(Tag, "onAdImpression: $this")
                 adState.tryEmit(AdState.Impression(requiredAdView.asAd()))
             }
 
@@ -93,7 +94,7 @@ internal class AdmobBannerImpl(
             }
             val valueMicros = adValue.valueMicros
             val ecpm = adValue.valueMicros / 1_000_000L
-            logInfo(
+            logInternal(
                 Tag,
                 "OnPaidEventListener( ValueMicros=$valueMicros, $ecpm ${adValue.currencyCode}, $type )"
             )
@@ -101,7 +102,7 @@ internal class AdmobBannerImpl(
     }
 
     override fun destroy() {
-        logInternal(Tag, "destroy")
+        logInternal(Tag, "destroy $this")
         adView?.onPaidEventListener = null
         adView = null
         lineItem = null
@@ -165,6 +166,7 @@ internal class AdmobBannerImpl(
     }
 
     override suspend fun fill(): Result<Ad> = runCatching {
+        logInternal(Tag, "Starting fill: $this")
         /**
          * Admob fills the bid automatically. It's not needed to fill it manually.
          */

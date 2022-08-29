@@ -9,7 +9,8 @@ internal object TestAdapterParameters : AdapterParameters
 internal class TestAdapter(
     private val demandName: String,
     private val interstitialData: TestAdapterInterstitialParameters,
-) : Adapter, Initializable<TestAdapterParameters>,
+) : Adapter,
+    Initializable<TestAdapterParameters>,
     AdProvider.Interstitial<TestAdapterInterstitialParameters> {
     override val demandId = DemandId(demandName)
     override val adapterInfo = AdapterInfo(adapterVersion = "adapterVersion1", sdkVersion = "sdkVersion1")

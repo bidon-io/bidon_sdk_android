@@ -1,15 +1,9 @@
 package com.appodealstack.bidon.base
 
 import com.appodealstack.bidon.core.defaultDispatcherOverridden
-import com.appodealstack.bidon.core.ext.logError
-import com.appodealstack.bidon.core.ext.logInfo
-import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.core.ioDispatcherOverridden
 import com.appodealstack.bidon.core.mainDispatcherOverridden
 import com.appodealstack.bidon.core.singleDispatcherOverridden
-import io.mockk.every
-import io.mockk.mockkStatic
-import io.mockk.unmockkAll
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.test.resetMain

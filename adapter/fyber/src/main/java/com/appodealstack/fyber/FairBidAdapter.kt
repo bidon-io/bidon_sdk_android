@@ -20,7 +20,6 @@ import com.fyber.FairBid
 import com.fyber.fairbid.ads.ImpressionData
 import com.fyber.fairbid.ads.Interstitial
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.serialization.json.JsonObject
 

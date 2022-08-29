@@ -14,7 +14,6 @@ import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
 import com.appodealstack.bidon.core.ext.asFailure
 import com.appodealstack.bidon.core.ext.asSuccess
-import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInternal
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
@@ -38,6 +37,7 @@ internal class ApplovinBannerImpl(
     private val requestListener by lazy {
         object : AppLovinAdLoadListener {
             override fun adReceived(ad: AppLovinAd) {
+                logInternal(Tag, "adReceived: $this")
                 appLovinAd = ad
                 adState.tryEmit(
                     AdState.Bid(
@@ -50,29 +50,26 @@ internal class ApplovinBannerImpl(
             }
 
             override fun failedToReceiveAd(errorCode: Int) {
-                logError(Tag, "Failed to receive ad. errorCode=$errorCode")
+                logInternal(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
                 adState.tryEmit(AdState.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
     }
 
     private val listener by lazy {
-        object :
-            AppLovinAdVideoPlaybackListener,
-            AppLovinAdDisplayListener,
-            AppLovinAdClickListener {
-            override fun videoPlaybackBegan(ad: AppLovinAd) {}
-            override fun videoPlaybackEnded(ad: AppLovinAd, percentViewed: Double, fullyWatched: Boolean) {}
-
+        object : AppLovinAdDisplayListener, AppLovinAdClickListener {
             override fun adDisplayed(ad: AppLovinAd) {
+                logInternal(Tag, "adDisplayed: $this")
                 adState.tryEmit(AdState.Impression(ad.asAd()))
             }
 
             override fun adHidden(ad: AppLovinAd) {
+                logInternal(Tag, "adHidden: $this")
                 adState.tryEmit(AdState.Closed(ad.asAd()))
             }
 
             override fun adClicked(ad: AppLovinAd) {
+                logInternal(Tag, "adClicked: $this")
                 adState.tryEmit(AdState.Clicked(ad.asAd()))
             }
         }
@@ -84,7 +81,7 @@ internal class ApplovinBannerImpl(
         get() = appLovinAd?.asAd() ?: adView?.asAd()
 
     override fun destroy() {
-        logInternal(Tag, "destroy")
+        logInternal(Tag, "destroy $this")
         adView = null
         appLovinAd = null
     }
@@ -111,7 +108,7 @@ internal class ApplovinBannerImpl(
     override suspend fun bid(
         adParams: ApplovinBannerAuctionParams
     ): Result<AuctionResult> {
-        logInternal(Tag, "Starting with $adParams")
+        logInternal(Tag, "Starting with $adParams: $this")
         lineItem = adParams.lineItem
         val adSize = adParams.bannerSize.asAppLovinAdSize() ?: error(
             BidonError.AdFormatIsNotSupported(
@@ -120,6 +117,8 @@ internal class ApplovinBannerImpl(
             )
         )
         val bannerView = AppLovinAdView(appLovinSdk, adSize, adParams.lineItem.adUnitId, adParams.context).also {
+            it.setAdClickListener(listener)
+            it.setAdDisplayListener(listener)
             adView = it
         }
 
@@ -141,6 +140,7 @@ internal class ApplovinBannerImpl(
     }
 
     override suspend fun fill(): Result<Ad> = runCatching {
+        logInternal(Tag, "Starting fill: $this")
         requireNotNull(appLovinAd?.asAd()).also {
             adState.tryEmit(AdState.Fill(it))
         }

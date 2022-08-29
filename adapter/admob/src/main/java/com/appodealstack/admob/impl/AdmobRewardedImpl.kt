@@ -14,7 +14,6 @@ import com.google.android.gms.ads.*
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -40,11 +39,12 @@ internal class AdmobRewardedImpl(
     private val requestListener by lazy {
         object : RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                logError(Tag, "Error while loading ad: $loadAdError")
+                logInternal(Tag, "Error while loading ad: $loadAdError. $this", loadAdError.asBidonError())
                 adState.tryEmit(AdState.LoadFailed(loadAdError.asBidonError()))
             }
 
             override fun onAdLoaded(rewardedAd: RewardedAd) {
+                logInternal(Tag, "onAdLoaded: $this")
                 this@AdmobRewardedImpl.rewardedAd = rewardedAd
                 requiredRewardedAd.onPaidEventListener = paidListener
                 requiredRewardedAd.fullScreenContentCallback = rewardedListener
@@ -61,6 +61,7 @@ internal class AdmobRewardedImpl(
     }
     private val onUserEarnedRewardListener by lazy {
         OnUserEarnedRewardListener { rewardItem ->
+            logInternal(Tag, "onUserEarnedReward $rewardItem: $this")
             adState.tryEmit(
                 AdState.OnReward(
                     ad = requiredRewardedAd.asAd(),
@@ -84,25 +85,32 @@ internal class AdmobRewardedImpl(
             }
             val valueMicros = adValue.valueMicros
             val ecpm = adValue.valueMicros / 1_000_000L
-            logInfo(Tag, "OnPaidEventListener( ValueMicros=$valueMicros, $ecpm ${adValue.currencyCode}, $type )")
+            logInternal(
+                tag = Tag,
+                message = "OnPaidEventListener( ValueMicros=$valueMicros, $ecpm ${adValue.currencyCode}, $type ). $this"
+            )
         }
     }
 
     private val rewardedListener by lazy {
         object : FullScreenContentCallback() {
             override fun onAdClicked() {
+                logInternal(Tag, "onAdClicked: $this")
                 adState.tryEmit(AdState.Clicked(requiredRewardedAd.asAd()))
             }
 
             override fun onAdDismissedFullScreenContent() {
+                logInternal(Tag, "onAdDismissedFullScreenContent: $this")
                 adState.tryEmit(AdState.Closed(requiredRewardedAd.asAd()))
             }
 
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
+                logError(Tag, "onAdFailedToShowFullScreenContent: $this", error.asBidonError())
                 adState.tryEmit(AdState.ShowFailed(error.asBidonError()))
             }
 
             override fun onAdImpression() {
+                logInternal(Tag, "onAdImpression: $this")
                 adState.tryEmit(AdState.Impression(requiredRewardedAd.asAd()))
             }
 
@@ -116,7 +124,7 @@ internal class AdmobRewardedImpl(
     override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
 
     override fun destroy() {
-        logInternal(Tag, "destroy")
+        logInternal(Tag, "destroy $this")
         rewardedAd?.onPaidEventListener = null
         rewardedAd?.fullScreenContentCallback = null
         rewardedAd = null
@@ -141,7 +149,7 @@ internal class AdmobRewardedImpl(
     }
 
     override suspend fun bid(adParams: AdmobFullscreenAdAuctionParams): Result<AuctionResult> {
-        logInternal(Tag, "Starting with $adParams")
+        logInternal(Tag, "Starting with $adParams: $this")
         return withContext(dispatcher) {
             lineItem = adParams.lineItem
             val adRequest = AdRequest.Builder().build()
@@ -170,6 +178,7 @@ internal class AdmobRewardedImpl(
     }
 
     override suspend fun fill(): Result<Ad> = runCatching {
+        logInternal(Tag, "Starting fill: $this")
         /**
          * Admob fills the bid automatically. It's not needed to fill it manually.
          */
@@ -179,6 +188,7 @@ internal class AdmobRewardedImpl(
     }
 
     override fun show(activity: Activity) {
+        logInternal(Tag, "Starting show: $this")
         if (rewardedAd == null) {
             adState.tryEmit(AdState.ShowFailed(BidonError.FullscreenAdNotReady))
         } else {

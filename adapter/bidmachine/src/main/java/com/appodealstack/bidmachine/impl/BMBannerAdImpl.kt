@@ -14,7 +14,6 @@ import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.core.ext.asFailure
 import com.appodealstack.bidon.core.ext.asSuccess
-import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInternal
 import io.bidmachine.AdRequest
 import io.bidmachine.PriceFloorParams
@@ -41,8 +40,8 @@ internal class BMBannerAdImpl(
     private val requestListener by lazy {
         object : AdRequest.AdRequestListener<BannerRequest> {
             override fun onRequestSuccess(request: BannerRequest, result: BMAuctionResult) {
+                logInternal(Tag, "onRequestSuccess $result: $this")
                 adRequest = request
-                logInternal(Tag, "RequestSuccess: $result")
                 adState.tryEmit(
                     AdState.Bid(
                         AuctionResult(
@@ -54,13 +53,14 @@ internal class BMBannerAdImpl(
             }
 
             override fun onRequestFailed(request: BannerRequest, bmError: BMError) {
+                logInternal(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
                 adRequest = request
-                logError(Tag, "Error while bidding: $bmError")
                 bmError.code
                 adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
             }
 
             override fun onRequestExpired(request: BannerRequest) {
+                logInternal(Tag, "onRequestExpired: $this")
                 adRequest = request
                 adState.tryEmit(AdState.LoadFailed(DemandError.Expired(demandId)))
             }
@@ -70,11 +70,13 @@ internal class BMBannerAdImpl(
     private val bannerListener by lazy {
         object : BannerListener {
             override fun onAdLoaded(bannerView: BannerView) {
+                logInternal(Tag, "onAdLoaded: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 adState.tryEmit(AdState.Fill(bannerView.asAd()))
             }
 
             override fun onAdLoadFailed(bannerView: BannerView, bmError: BMError) {
+                logInternal(Tag, "onAdLoadFailed: $this", bmError.asBidonError(demandId))
                 this@BMBannerAdImpl.bannerView = bannerView
                 adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
             }
@@ -84,16 +86,19 @@ internal class BMBannerAdImpl(
             }
 
             override fun onAdImpression(bannerView: BannerView) {
+                logInternal(Tag, "onAdImpression: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 adState.tryEmit(AdState.Impression(bannerView.asAd()))
             }
 
             override fun onAdClicked(bannerView: BannerView) {
+                logInternal(Tag, "onAdClicked: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 adState.tryEmit(AdState.Clicked(bannerView.asAd()))
             }
 
             override fun onAdExpired(bannerView: BannerView) {
+                logInternal(Tag, "onAdExpired: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 adState.tryEmit(AdState.Expired(bannerView.asAd()))
             }
@@ -101,7 +106,7 @@ internal class BMBannerAdImpl(
     }
 
     override suspend fun bid(adParams: BMBannerAuctionParams): Result<AuctionResult> {
-        logInternal(Tag, "Starting with $adParams")
+        logInternal(Tag, "Starting with $adParams: $this")
         context = adParams.context
         BannerRequest.Builder()
             .setSize(adParams.bannerSize.asBidMachineBannerSize())
@@ -125,6 +130,7 @@ internal class BMBannerAdImpl(
     }
 
     override suspend fun fill(): Result<Ad> {
+        logInternal(Tag, "Starting fill: $this")
         val context = context
         if (context == null) {
             adState.tryEmit(AdState.LoadFailed(BidonError.NoContextFound))
@@ -168,7 +174,7 @@ internal class BMBannerAdImpl(
     }
 
     override fun destroy() {
-        logInternal(Tag, "destroy")
+        logInternal(Tag, "destroy $this")
         adRequest?.destroy()
         adRequest = null
         bannerView?.destroy()

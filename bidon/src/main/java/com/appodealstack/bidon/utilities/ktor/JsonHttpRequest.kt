@@ -5,7 +5,6 @@ import com.appodealstack.bidon.core.errors.BidonSdkError
 import com.appodealstack.bidon.core.errors.ErrorResponse
 import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.utilities.network.BidOnEndpoints
-import com.appodealstack.bidon.utilities.network.encoders.GZIPRequestDataEncoder
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*

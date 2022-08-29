@@ -10,7 +10,6 @@ import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.core.ext.asFailure
 import com.appodealstack.bidon.core.ext.asSuccess
-import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInternal
 import io.bidmachine.AdContentType
 import io.bidmachine.AdRequest
@@ -41,8 +40,8 @@ internal class BMInterstitialAdImpl(
                 request: InterstitialRequest,
                 result: BMAuctionResult
             ) {
+                logInternal(Tag, "onRequestSuccess $result: $this")
                 adRequest = request
-                logInternal(Tag, "RequestSuccess: $result")
                 adState.tryEmit(
                     AdState.Bid(
                         AuctionResult(
@@ -54,13 +53,14 @@ internal class BMInterstitialAdImpl(
             }
 
             override fun onRequestFailed(request: InterstitialRequest, bmError: BMError) {
+                logInternal(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
                 adRequest = request
-                logError(Tag, "Error while bidding: $bmError")
                 bmError.code
                 adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
             }
 
             override fun onRequestExpired(request: InterstitialRequest) {
+                logInternal(Tag, "onRequestExpired: $this")
                 adRequest = request
                 adState.tryEmit(AdState.LoadFailed(DemandError.Expired(demandId)))
             }
@@ -70,40 +70,47 @@ internal class BMInterstitialAdImpl(
     private val interstitialListener by lazy {
         object : InterstitialListener {
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                logInternal(Tag, "onAdLoaded: $this")
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
                 adState.tryEmit(AdState.Fill(interstitialAd.asAd()))
             }
 
             override fun onAdLoadFailed(interstitialAd: InterstitialAd, bmError: BMError) {
+                logInternal(Tag, "onAdLoadFailed: $this", bmError.asBidonError(demandId))
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
                 adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
             }
 
-            @Deprecated("Source BidMachine deprecated callback")
+            @Deprecated("Source BidMachine deprecated callback. Use onAdImpression.")
             override fun onAdShown(interstitialAd: InterstitialAd) {
             }
 
             override fun onAdShowFailed(interstitialAd: InterstitialAd, bmError: BMError) {
+                logInternal(Tag, "onAdShowFailed: $this", bmError.asBidonError(demandId))
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
                 adState.tryEmit(AdState.ShowFailed(bmError.asBidonError(demandId)))
             }
 
             override fun onAdImpression(interstitialAd: InterstitialAd) {
+                logInternal(Tag, "onAdImpression: $this")
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
                 adState.tryEmit(AdState.Impression(interstitialAd.asAd()))
             }
 
             override fun onAdClicked(interstitialAd: InterstitialAd) {
+                logInternal(Tag, "onAdClicked: $this")
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
                 adState.tryEmit(AdState.Clicked(interstitialAd.asAd()))
             }
 
             override fun onAdExpired(interstitialAd: InterstitialAd) {
+                logInternal(Tag, "onAdExpired: $this")
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
                 adState.tryEmit(AdState.Expired(interstitialAd.asAd()))
             }
 
             override fun onAdClosed(interstitialAd: InterstitialAd, boolean: Boolean) {
+                logInternal(Tag, "onAdClosed: $this")
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
                 adState.tryEmit(AdState.Closed(interstitialAd.asAd()))
             }
@@ -111,8 +118,8 @@ internal class BMInterstitialAdImpl(
     }
 
     override suspend fun bid(adParams: BMFullscreenAuctionParams): Result<AuctionResult> {
+        logInternal(Tag, "Starting with $adParams: $this")
         context = adParams.context
-        logInternal(Tag, "Starting with $adParams")
         InterstitialRequest.Builder()
             .setAdContentType(AdContentType.All)
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.priceFloor))
@@ -135,6 +142,7 @@ internal class BMInterstitialAdImpl(
     }
 
     override suspend fun fill(): Result<Ad> {
+        logInternal(Tag, "Starting fill: $this")
         val context = context
         if (context == null) {
             adState.tryEmit(AdState.LoadFailed(DemandError.NoActivity(demandId)))
@@ -157,6 +165,7 @@ internal class BMInterstitialAdImpl(
     }
 
     override fun show(activity: Activity) {
+        logInternal(Tag, "Starting show: $this")
         if (interstitialAd?.canShow() == true) {
             interstitialAd?.show()
         } else {
@@ -183,7 +192,7 @@ internal class BMInterstitialAdImpl(
     }
 
     override fun destroy() {
-        logInternal(Tag, "destroy")
+        logInternal(Tag, "destroy $this")
         adRequest?.destroy()
         adRequest = null
         interstitialAd?.destroy()

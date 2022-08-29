@@ -15,7 +15,6 @@ import com.appodealstack.bidon.core.AdaptersSource
 import com.appodealstack.bidon.core.ext.*
 import io.mockk.coEvery
 import io.mockk.every
-import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import kotlinx.coroutines.test.runTest
@@ -110,7 +109,6 @@ internal class AuctionImplTest : ConcurrentTest() {
 //        mockkStatic(::logError)
         every { logError(any(), any(), any()) } returns Unit
     }
-
 
     @Test
     fun `it should`() = runTest {
