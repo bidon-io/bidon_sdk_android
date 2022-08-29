@@ -149,11 +149,15 @@ class BannerView @JvmOverloads constructor(
     override fun show() {
         removeAllViews()
         auctionHolder.popWinner()?.let { adSource ->
+            val ad = requireNotNull(adSource.ad) {
+                "Ad should exist on start of displaying [${adSource.demandId}]"
+            }
             require(adSource is AdSource.Banner) {
                 "Unexpected AdSource type. Expected: AdSource.Banner. Actual: ${adSource::class.java}."
             }
             addView(adSource.getAdView())
             isBannerDisplaying.set(true)
+            listener.onAdImpression(ad)
         }
     }
 
