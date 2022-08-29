@@ -179,5 +179,5 @@ internal class MaxRewardedImpl(
     }
 }
 
-private const val Tag = "ApplovinMax Rewarded"
+private const val Tag = "Max Rewarded"
 private const val USD = "USD"

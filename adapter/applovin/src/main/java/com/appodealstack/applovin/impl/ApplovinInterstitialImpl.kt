@@ -164,5 +164,5 @@ internal class ApplovinInterstitialImpl(
     }
 }
 
-private const val Tag = "ApplovinMax Interstitial"
+private const val Tag = "Applovin Interstitial"
 private const val USD = "USD"

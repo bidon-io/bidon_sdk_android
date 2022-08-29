@@ -1,5 +1,8 @@
 package com.appodeal.mads.ui
 
+import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -58,31 +61,36 @@ fun BannerScreen(navController: NavHostController) {
             title = "Banners",
             onNavigationButtonClicked = { navController.popBackStack() }
         )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .dashedBorder(width = 1.dp, radius = 4.dp, color = MaterialTheme.colors.error)
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            val view = bannerView.value
-            if (view != null) {
-                AndroidView(
-                    modifier = Modifier.height(
-                        when (bannerSize.value) {
-                            BannerSize.Banner -> 50.dp
-                            BannerSize.LeaderBoard -> 90.dp
-                            BannerSize.MRec -> 250.dp
-                            BannerSize.Large -> 100.dp
-                            BannerSize.Adaptive -> 100.dp
-                        }
-                    ),
-                    factory = {
-                        view
+
+        val view = bannerView.value
+        if (view != null) {
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxWidth(),
+//                    .height(
+//                        when (bannerSize.value) {
+//                            BannerSize.Banner -> 50.dp
+//                            BannerSize.LeaderBoard -> 90.dp
+//                            BannerSize.MRec -> 250.dp
+//                            BannerSize.Large -> 100.dp
+//                            BannerSize.Adaptive -> 100.dp
+//                        }
+//                    ), // TODO Admob.OnPaidListener isn't invoked using ComposeView, but always in XML-Layout. Check it.
+                factory = {
+                    view.apply {
+                        layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
                     }
-                )
-            } else {
+                }
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+                    .dashedBorder(width = 1.dp, radius = 4.dp, color = MaterialTheme.colors.error)
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
                 Subtitle1Text(text = "Place for Banner")
             }
         }

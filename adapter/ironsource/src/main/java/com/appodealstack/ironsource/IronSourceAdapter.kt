@@ -5,6 +5,7 @@ import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.analytics.MediationNetwork
 import com.appodealstack.bidon.config.data.models.AdapterInfo
+import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.parse
 import com.appodealstack.ironsource.ext.adapterVersion
 import com.appodealstack.ironsource.ext.sdkVersion
@@ -34,7 +35,7 @@ class IronSourceAdapter :
         sdkVersion = sdkVersion
     )
 
-    private val scope: CoroutineScope get() = CoroutineScope(Dispatchers.Default)
+    private val scope: CoroutineScope get() = CoroutineScope(SdkDispatchers.Default)
     private val interstitialFlow = MutableSharedFlow<InterstitialInterceptor>(Int.MAX_VALUE)
     private val rewardedFlow = MutableSharedFlow<RewardedInterceptor>(Int.MAX_VALUE)
     private var interstitialDemandAd: DemandAd? = null

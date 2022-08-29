@@ -8,6 +8,7 @@ import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
+import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.ext.*
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -29,7 +30,7 @@ internal class AdmobInterstitialImpl(
     private val roundId: String
 ) : AdSource.Interstitial<AdmobFullscreenAdAuctionParams> {
 
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
+    private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
 
     private var lineItem: LineItem? = null
     private var interstitialAd: InterstitialAd? = null
