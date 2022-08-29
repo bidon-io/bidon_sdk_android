@@ -75,10 +75,13 @@ internal class AuctionImpl(
     private fun notifyLosers(finalResults: List<AuctionResult>) {
         finalResults.drop(1)
             .map { it.adSource }
-            .filterIsInstance<WinLossNotifiable>()
-            .forEach {
-                logInfo(Tag, "Notified loss: ${(it as? AdSource<*>)?.demandId}")
-                it.notifyLoss()
+            .forEach { adSource ->
+                if (adSource is WinLossNotifiable) {
+                    logInfo(Tag, "Notified loss: ${adSource.demandId}")
+                    adSource.notifyLoss()
+                }
+                logInfo(Tag, "Destroying loser: ${adSource.demandId}")
+                adSource.destroy()
             }
     }
 
@@ -203,7 +206,7 @@ internal class AuctionImpl(
                     logInfo(
                         tag = Tag,
                         message = "Round '${round.id}'. Adapter ${adSource.demandId.demandId} starts bidding. " +
-                            "Min PriceFloor=$priceFloor. LineItems: $availableLineItemsForDemand."
+                                "Min PriceFloor=$priceFloor. LineItems: $availableLineItemsForDemand."
                     )
                     async {
                         withTimeoutOrNull(round.timeoutMs) {
