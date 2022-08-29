@@ -50,9 +50,8 @@ internal class AdmobBannerImpl(
 
             override fun onAdLoaded() {
                 logError(Tag, "Loaded successfully: $adView")
-                adView?.let {
+                adView?.run {
                     logError(Tag, "Loaded successfully: $adView")
-                    it.onPaidEventListener = paidListener
                     adState.tryEmit(
                         AdState.Bid(
                             AuctionResult(
@@ -138,6 +137,7 @@ internal class AdmobBannerImpl(
                         this.setAdSize(admobBannerSize)
                         this.adUnitId = adUnitId
                         this.adListener = requestListener
+                        this.onPaidEventListener = paidListener
                     }
                     .also {
                         adView = it
