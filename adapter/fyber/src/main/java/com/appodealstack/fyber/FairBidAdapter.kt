@@ -6,6 +6,7 @@ import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.analytics.MediationNetwork
 import com.appodealstack.bidon.config.data.models.AdapterInfo
+import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.parse
 import com.appodealstack.fyber.banner.BannerInterceptor
 import com.appodealstack.fyber.banner.initBannerListener
@@ -38,7 +39,7 @@ class FairBidAdapter :
 
     private lateinit var context: Context
     private val scope: CoroutineScope
-        get() = CoroutineScope(Dispatchers.Default)
+        get() = CoroutineScope(SdkDispatchers.Default)
 
     private val interstitialInterceptorFlow = MutableSharedFlow<InterstitialInterceptor>(extraBufferCapacity = Int.MAX_VALUE)
     private val interstitialPlacementsDemandAd = mutableMapOf<String, DemandAd>()

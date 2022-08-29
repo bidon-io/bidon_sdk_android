@@ -14,6 +14,7 @@ import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
+import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.ext.*
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.AdListener
@@ -34,7 +35,7 @@ internal class AdmobBannerImpl(
 
     override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
 
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
+    private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
 
     private var lineItem: LineItem? = null
     private var adView: AdView? = null

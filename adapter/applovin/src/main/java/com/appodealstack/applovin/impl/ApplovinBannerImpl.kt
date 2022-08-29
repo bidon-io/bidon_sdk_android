@@ -186,5 +186,5 @@ internal class ApplovinBannerImpl(
     }
 }
 
-private const val Tag = "ApplovinMax Interstitial"
+private const val Tag = "Applovin Banner"
 private const val USD = "USD"
