@@ -206,7 +206,7 @@ internal class AuctionImpl(
                     logInfo(
                         tag = Tag,
                         message = "Round '${round.id}'. Adapter ${adSource.demandId.demandId} starts bidding. " +
-                                "Min PriceFloor=$priceFloor. LineItems: $availableLineItemsForDemand."
+                            "Min PriceFloor=$priceFloor. LineItems: $availableLineItemsForDemand."
                     )
                     async {
                         withTimeoutOrNull(round.timeoutMs) {
