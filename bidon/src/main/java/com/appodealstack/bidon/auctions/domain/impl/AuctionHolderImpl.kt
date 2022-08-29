@@ -25,7 +25,6 @@ internal class AuctionHolderImpl(
     private val scope: CoroutineScope
         get() = CoroutineScope(dispatcher + coroutineExceptionHandler)
 
-    private val auctionResults = mutableListOf<AuctionResult>()
     private var auctionResultsDeferred: Deferred<Result<List<AuctionResult>>>? = null
 
     override val isActive: Boolean
@@ -57,11 +56,6 @@ internal class AuctionHolderImpl(
                     }
                     logInfo(Tag, "Auction completed successfully: $results")
                     nextWinner = results.first()
-                    with(auctionResults) {
-                        forEach { it.adSource.destroy() }
-                        clear()
-                        addAll(results)
-                    }
                     onResult.invoke(results.asSuccess())
                 }.onFailure {
                     nextWinner = null
@@ -86,12 +80,10 @@ internal class AuctionHolderImpl(
             it.cancel()
         }
         auctionResultsDeferred = null
+        displayingWinner?.adSource?.destroy()
         displayingWinner = null
+        nextWinner?.adSource?.destroy()
         nextWinner = null
-        with(auctionResults) {
-            forEach { it.adSource.destroy() }
-            clear()
-        }
     }
 }
 
