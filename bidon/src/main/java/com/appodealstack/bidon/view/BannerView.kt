@@ -170,7 +170,7 @@ class BannerView @JvmOverloads constructor(
         logInfo(Tag, "Auto-refresh initialized with timeout $timeoutMs ms")
         autoRefresher.setAutoRefreshTimeout(timeoutMs)
         if (isBannerDisplaying.get()) {
-            autoRefresher.launchRefresh()
+            autoRefresher.launchRefreshIfNeeded()
         }
     }
 
@@ -224,12 +224,12 @@ class BannerView @JvmOverloads constructor(
     private fun getBannerListener() = object : BannerListener {
         override fun onAdLoaded(ad: Ad) {
             userListener?.onAdLoaded(ad)
-            autoRefresher.launchRefresh()
+            autoRefresher.launchRefreshIfNeeded()
         }
 
         override fun onAdLoadFailed(cause: Throwable) {
             userListener?.onAdLoadFailed(cause)
-            autoRefresher.launchRefresh()
+            autoRefresher.launchRefreshIfNeeded()
         }
 
         override fun onAdShowFailed(cause: Throwable) {

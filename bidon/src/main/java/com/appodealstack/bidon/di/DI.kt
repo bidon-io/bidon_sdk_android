@@ -1,5 +1,6 @@
 package com.appodealstack.bidon.di
 
+import android.app.Application
 import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.adapters.DemandAd
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
@@ -25,6 +26,8 @@ import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 import com.appodealstack.bidon.utilities.network.BidOnEndpoints
 import com.appodealstack.bidon.utilities.network.endpoint.BidOnEndpointsImpl
 import com.appodealstack.bidon.view.BannerAd
+import com.appodealstack.bidon.view.PauseResumeObserver
+import com.appodealstack.bidon.view.PauseResumeObserverImpl
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -54,6 +57,11 @@ internal object DI {
                 singleton<AdaptersSource> { AdaptersSourceImpl() }
                 singleton<BidOnEndpoints> { BidOnEndpointsImpl() }
                 singleton<KeyValueStorage> { KeyValueStorageImpl() }
+                singleton<PauseResumeObserver> {
+                    PauseResumeObserverImpl(
+                        application = get<ContextProvider>().requiredContext.applicationContext as Application
+                    )
+                }
 
                 /**
                  * Factories
@@ -81,6 +89,11 @@ internal object DI {
                 }
                 factoryWithParams<AutoRefresher> { param ->
                     AutoRefresherImpl(autoRefreshable = param as BannerAd.AutoRefreshable)
+                }
+                factory {
+                    CountDownTimer(
+                        pauseResumeObserver = get()
+                    )
                 }
                 factoryWithParams<AuctionHolder> { param ->
                     val (demandAd, listener) = param as Pair<DemandAd, RoundsListener>

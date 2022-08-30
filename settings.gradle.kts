@@ -23,7 +23,7 @@ dependencyResolutionManagement {
         }
     }
 }
-rootProject.name = "BidOn Decorators"
+rootProject.name = "BidOn SDK"
 
 include(
     ":app",

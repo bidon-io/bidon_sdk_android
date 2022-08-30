@@ -30,7 +30,7 @@ import com.appodealstack.bidon.adapters.Ad
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.core.ext.logInternal
-import com.appodealstack.bidon.view.BannerView
+import com.appodealstack.bidon.view.BannerView2
 import com.appodealstack.bidon.view.DefaultAutoRefreshTimeoutMs
 import kotlinx.coroutines.launch
 
@@ -49,7 +49,7 @@ fun BannerScreen(navController: NavHostController) {
         mutableStateOf(DefaultAutoRefreshTimeoutMs)
     }
     val bannerView = remember {
-        mutableStateOf<BannerView?>(null)
+        mutableStateOf<BannerView2?>(null)
     }
 
     Column(
@@ -143,7 +143,10 @@ fun BannerScreen(navController: NavHostController) {
                 )
 
                 AppButton(text = "Create banner") {
-                    bannerView.value = BannerView(context, "some_placement_id").apply {
+                    bannerView.value = BannerView2(
+                        context = context,
+                        placementId = "some_placement_id"
+                    ).apply {
                         setAdSize(bannerSize.value)
                         if (autoRefreshTtl.value == 0L) {
                             stopAutoRefresh()
