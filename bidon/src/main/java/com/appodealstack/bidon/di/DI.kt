@@ -18,16 +18,16 @@ import com.appodealstack.bidon.config.domain.impl.DataProviderImpl
 import com.appodealstack.bidon.config.domain.impl.InitAndRegisterAdaptersUseCaseImpl
 import com.appodealstack.bidon.core.AdaptersSource
 import com.appodealstack.bidon.core.ContextProvider
+import com.appodealstack.bidon.core.PauseResumeObserver
 import com.appodealstack.bidon.core.impl.AdaptersSourceImpl
 import com.appodealstack.bidon.core.impl.BidOnSdkImpl
 import com.appodealstack.bidon.core.impl.ContextProviderImpl
+import com.appodealstack.bidon.core.impl.PauseResumeObserverImpl
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 import com.appodealstack.bidon.utilities.network.BidOnEndpoints
 import com.appodealstack.bidon.utilities.network.endpoint.BidOnEndpointsImpl
 import com.appodealstack.bidon.view.BannerAd
-import com.appodealstack.bidon.view.PauseResumeObserver
-import com.appodealstack.bidon.view.PauseResumeObserverImpl
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -58,6 +58,7 @@ internal object DI {
                 singleton<BidOnEndpoints> { BidOnEndpointsImpl() }
                 singleton<KeyValueStorage> { KeyValueStorageImpl() }
                 singleton<PauseResumeObserver> {
+                    @Suppress("UNCHECKED_CAST")
                     PauseResumeObserverImpl(
                         application = get<ContextProvider>().requiredContext.applicationContext as Application
                     )
@@ -95,6 +96,8 @@ internal object DI {
                         pauseResumeObserver = get()
                     )
                 }
+
+                @Suppress("UNCHECKED_CAST")
                 factoryWithParams<AuctionHolder> { param ->
                     val (demandAd, listener) = param as Pair<DemandAd, RoundsListener>
                     AuctionHolderImpl(

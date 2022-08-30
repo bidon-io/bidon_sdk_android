@@ -1,8 +1,8 @@
 package com.appodealstack.bidon.auctions.domain
 
+import com.appodealstack.bidon.core.PauseResumeObserver
 import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.ext.logInternal
-import com.appodealstack.bidon.view.PauseResumeObserver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 
@@ -30,7 +30,7 @@ internal class CountDownTimer(
                     pauseResumeObserver.lifecycleFlow.first { state ->
                         state == PauseResumeObserver.LifecycleState.Resumed
                     }
-                    logInternal(Tag, "Tick $second/$seconds")
+                    logInternal(Tag, "Tick ${second + 1}/$seconds")
                 }
             }.also { timerDeferred = it }
             try {

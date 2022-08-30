@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.runtime.*
@@ -30,7 +32,7 @@ import com.appodealstack.bidon.adapters.Ad
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.core.ext.logInternal
-import com.appodealstack.bidon.view.BannerView2
+import com.appodealstack.bidon.view.BannerView
 import com.appodealstack.bidon.view.DefaultAutoRefreshTimeoutMs
 import kotlinx.coroutines.launch
 
@@ -45,11 +47,14 @@ fun BannerScreen(navController: NavHostController) {
     val bannerSize = remember {
         mutableStateOf(BannerSize.Banner)
     }
+    val showOnLoad = remember {
+        mutableStateOf(false)
+    }
     val autoRefreshTtl = remember {
         mutableStateOf(DefaultAutoRefreshTimeoutMs)
     }
     val bannerView = remember {
-        mutableStateOf<BannerView2?>(null)
+        mutableStateOf<BannerView?>(null)
     }
 
     Column(
@@ -62,11 +67,19 @@ fun BannerScreen(navController: NavHostController) {
             onNavigationButtonClicked = { navController.popBackStack() }
         )
 
-        val view = bannerView.value
-        if (view != null) {
-            AndroidView(
-                modifier = Modifier
-                    .fillMaxWidth(),
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .dashedBorder(width = 1.dp, radius = 4.dp, color = MaterialTheme.colors.error)
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            val view = bannerView.value
+            if (view != null) {
+                AndroidView(
+                    modifier = Modifier
+                        .fillMaxWidth(),
 //                    .height(
 //                        when (bannerSize.value) {
 //                            BannerSize.Banner -> 50.dp
@@ -76,21 +89,14 @@ fun BannerScreen(navController: NavHostController) {
 //                            BannerSize.Adaptive -> 100.dp
 //                        }
 //                    ), // TODO Admob.OnPaidListener isn't invoked using ComposeView, but always in XML-Layout. Check it.
-                factory = {
-                    view.apply {
-                        layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+                    factory = {
+                        view.apply {
+                            layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+                        }
                     }
-                }
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
-                    .dashedBorder(width = 1.dp, radius = 4.dp, color = MaterialTheme.colors.error)
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
+                )
+            } else {
+
                 Subtitle1Text(text = "Place for Banner")
             }
         }
@@ -143,7 +149,7 @@ fun BannerScreen(navController: NavHostController) {
                 )
 
                 AppButton(text = "Create banner") {
-                    bannerView.value = BannerView2(
+                    bannerView.value = BannerView(
                         context = context,
                         placementId = "some_placement_id"
                     ).apply {
@@ -224,8 +230,26 @@ fun BannerScreen(navController: NavHostController) {
                     }
                 }
                 if (bannerView.value != null) {
-                    AppButton(text = "Load") {
-                        bannerView.value?.load()
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        AppButton(
+                            text = "Load",
+                        ) {
+                            bannerView.value?.load()
+                            if (showOnLoad.value) {
+                                bannerView.value?.show()
+                            }
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                        Body2Text(text = "Show onLoad")
+                        Checkbox(
+                            colors = CheckboxDefaults.colors(MaterialTheme.colors.onBackground),
+                            checked = showOnLoad.value, onCheckedChange = {
+                                showOnLoad.value = it
+                            }
+                        )
+                    }
+                    AppButton(text = "Show") {
+                        bannerView.value?.show()
                     }
                     AppButton(text = "Destroy") {
                         bannerView.value?.destroy()
