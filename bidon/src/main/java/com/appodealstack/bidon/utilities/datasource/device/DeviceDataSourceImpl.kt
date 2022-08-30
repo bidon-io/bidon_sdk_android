@@ -97,7 +97,7 @@ internal class DeviceDataSourceImpl(
     }
 
     override fun getJavaScriptSupport(): Int {
-        return 1 // TODO a28 obtain javaScriptSupport. 1- supports, 0 - no
+        return 555555555 // TODO a28 obtain javaScriptSupport. 1- supports, 0 - no
     }
 
     override fun getLanguage(): String {

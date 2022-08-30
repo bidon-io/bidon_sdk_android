@@ -3,13 +3,13 @@ package com.appodealstack.bidon.config.domain
 import kotlinx.serialization.json.JsonElement
 
 internal enum class DataBinderType {
-    Device,
+    Device, // +- getJavaScriptSupport
     App,
-    Geo,
-    Session,
-    User,
+    Geo, // -
+    Session, // -
+    User, // -
     Token,
-    Placement
+    Placement // -
 }
 
 /**

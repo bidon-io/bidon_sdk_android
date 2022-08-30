@@ -31,11 +31,7 @@ internal class BidOnSdkImpl : BidOnSdk {
     private val bidOnEndpoints: BidOnEndpoints by lazy { get() }
 
     override fun isInitialized(): Boolean {
-        return if (!bidONInitializerDelegate.isInitialized()) {
-            false
-        } else {
-            bidONInitializer.isInitialized
-        }
+        return !bidONInitializerDelegate.isInitialized() && bidONInitializer.isInitialized
     }
 
     override fun init(activity: Activity, appKey: String, callback: InitializationCallback?) {

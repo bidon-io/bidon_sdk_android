@@ -13,7 +13,11 @@ import kotlinx.serialization.json.buildJsonObject
 internal class GetAuctionRequestUseCaseImpl(
     private val dataProvider: DataProvider,
 ) : GetAuctionRequestUseCase {
-    private val binders: List<DataBinderType> = listOf(DataBinderType.Device)
+    private val binders: List<DataBinderType> = listOf(
+        DataBinderType.Device,
+        DataBinderType.App,
+        DataBinderType.Token
+    )
 
     override suspend fun request(): Result<AuctionResponse> {
         val bindData = dataProvider.provide(binders)

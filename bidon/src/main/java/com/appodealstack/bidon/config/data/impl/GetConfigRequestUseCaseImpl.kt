@@ -19,6 +19,7 @@ internal class GetConfigRequestUseCaseImpl(
     private val binders: List<DataBinderType> = listOf(
         DataBinderType.Device,
         DataBinderType.App,
+        DataBinderType.Token,
     )
 
     override suspend fun request(body: ConfigRequestBody): Result<ConfigResponse> {
