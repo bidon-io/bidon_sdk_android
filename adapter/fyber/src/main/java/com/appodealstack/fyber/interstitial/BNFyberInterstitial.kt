@@ -61,7 +61,6 @@ class FyberInterstitialImpl : FyberInterstitial {
                 this.putString(key, value)
             }
         }
-
     }
 
     override fun isAvailable(placementId: String): Boolean {
@@ -95,6 +94,5 @@ class FyberInterstitialImpl : FyberInterstitial {
         fyberInterstitialListener: FyberInterstitialListener,
         placementId: String
     ) {
-
     }
 }

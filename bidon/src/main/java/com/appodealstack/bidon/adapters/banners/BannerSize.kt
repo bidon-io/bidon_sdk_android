@@ -5,7 +5,5 @@ enum class BannerSize {
     Large, // 320x90
     LeaderBoard, // 728x90
     MRec, // 300x250
-    Smart // Adaptive banner
+    Adaptive // Adaptive banner
 }
-
-const val BannerSizeKey = "BannerSizeKey"

@@ -16,7 +16,7 @@ internal class GetConfigRequestUseCaseImpl(
     private val dataProvider: DataProvider,
     private val keyValueStorage: KeyValueStorage
 ) : GetConfigRequestUseCase {
-    private val binders: List<DataBinderType> = listOf(DataBinderType.Device)
+    private val binders: List<DataBinderType> = listOf(DataBinderType.Device, DataBinderType.App)
 
     override suspend fun request(body: ConfigRequestBody): Result<ConfigResponse> {
         val bindData = dataProvider.provide(binders)
@@ -32,9 +32,7 @@ internal class GetConfigRequestUseCaseImpl(
             body = requestBody,
         ).map { jsonResponse ->
             val config = jsonResponse.getValue("init")
-            keyValueStorage.token = jsonResponse.getValue("token").toString().also {
-                println(">>>>>>> $it")
-            }
+            keyValueStorage.token = jsonResponse.getValue("token").toString()
             BidonJson.decodeFromJsonElement(ConfigResponse.serializer(), config)
         }
     }

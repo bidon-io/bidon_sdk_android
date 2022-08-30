@@ -1,6 +1,7 @@
 package com.appodealstack.bidmachine
 
-import com.appodealstack.bidon.adapters.AdSource
+import android.content.Context
+import com.appodealstack.bidon.adapters.AdAuctionParams
 import com.appodealstack.bidon.adapters.AdapterParameters
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import kotlinx.serialization.SerialName
@@ -14,14 +15,17 @@ data class BidMachineParameters(
     val endpoint: String?,
     @SerialName("mediation_config")
     val mediationConfig: List<String>?,
-): AdapterParameters
+) : AdapterParameters
 
-data class BMBannerParams(
+data class BMBannerAuctionParams(
+    val context: Context,
     val bannerSize: BannerSize,
     val priceFloor: Double,
-): AdSource.AdParams
+    val timeout: Long,
+) : AdAuctionParams
 
-data class BMFullscreenParams(
+data class BMFullscreenAuctionParams(
+    val context: Context,
     val priceFloor: Double,
     val timeout: Long,
-): AdSource.AdParams
+) : AdAuctionParams

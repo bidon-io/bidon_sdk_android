@@ -1,31 +1,30 @@
 package com.appodealstack.ironsource
 
 import android.app.Activity
-import com.appodealstack.bidon.SdkCore
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.analytics.MediationNetwork
 import com.appodealstack.bidon.config.data.models.AdapterInfo
+import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.parse
 import com.appodealstack.ironsource.ext.adapterVersion
 import com.appodealstack.ironsource.ext.sdkVersion
-import com.appodealstack.ironsource.impl.asBidonError
 import com.ironsource.mediationsdk.IronSource
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
 import com.ironsource.mediationsdk.logger.IronSourceError
 import com.ironsource.mediationsdk.model.Placement
 import com.ironsource.mediationsdk.sdk.InitializationListener
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.JsonObject
 import kotlin.coroutines.resume
 
 val IronSourceDemandId = DemandId("ironsource")
 
-class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
+class IronSourceAdapter :
+    Adapter,
+    Initializable<IronSourceParameters>,
     MediationNetwork {
 
     override val mediationNetwork = BNMediationNetwork.IronSource
@@ -35,24 +34,11 @@ class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
         sdkVersion = sdkVersion
     )
 
-    private val scope: CoroutineScope get() = CoroutineScope(Dispatchers.Default)
+    private val scope: CoroutineScope get() = CoroutineScope(SdkDispatchers.Default)
     private val interstitialFlow = MutableSharedFlow<InterstitialInterceptor>(Int.MAX_VALUE)
     private val rewardedFlow = MutableSharedFlow<RewardedInterceptor>(Int.MAX_VALUE)
     private var interstitialDemandAd: DemandAd? = null
     private var rewardedDemandAd: DemandAd? = null
-
-    init {
-        scope.launch {
-            interstitialFlow.collect { callback ->
-                onInterstitialCallbackIntercepted(callback)
-            }
-        }
-        scope.launch {
-            rewardedFlow.collect { callback ->
-                onRewardedCallbackIntercepted(callback)
-            }
-        }
-    }
 
     override suspend fun init(activity: Activity, configParams: IronSourceParameters): Unit = suspendCancellableCoroutine {
         val initializationListener = InitializationListener {
@@ -247,78 +233,6 @@ class IronSourceAdapter : Adapter, Initializable<IronSourceParameters>,
             monetizationNetwork = adInfo?.adNetwork
         )
     }
-
-
-    private fun onInterstitialCallbackIntercepted(callback: InterstitialInterceptor) {
-        interstitialDemandAd?.let { demandAd ->
-            val coreListener = SdkCore.getListenerForDemand(demandAd)
-            when (callback) {
-                is InterstitialInterceptor.AdClicked -> {
-                    coreListener.onAdClicked(callback.adInfo.asAd(demandAd))
-                }
-                is InterstitialInterceptor.AdClosed -> {
-                    coreListener.onAdClosed(callback.adInfo.asAd(demandAd))
-                }
-                is InterstitialInterceptor.AdOpened -> {
-                    coreListener.onAdImpression(callback.adInfo.asAd(demandAd))
-                }
-                is InterstitialInterceptor.AdShowFailed -> {
-                    coreListener.onAdShowFailed(callback.ironSourceError.asBidonError())
-                }
-                is InterstitialInterceptor.AdShowSucceeded -> {
-                    val ad = callback.adInfo.asAd(demandAd)
-                    coreListener.onAdShown(callback.adInfo.asAd(demandAd))
-                    SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(ad)
-                }
-                is InterstitialInterceptor.AdReady,
-                is InterstitialInterceptor.AdLoadFailed -> {
-                    // do nothing
-                }
-            }
-        }
-    }
-
-    private fun onRewardedCallbackIntercepted(callback: RewardedInterceptor) {
-        rewardedDemandAd?.let { demandAd ->
-            val coreListener = SdkCore.getListenerForDemand(demandAd)
-            when (callback) {
-                is RewardedInterceptor.AdClicked -> {
-                    coreListener.onAdClicked(callback.adInfo.asAd(demandAd))
-                }
-                is RewardedInterceptor.AdClosed -> {
-                    coreListener.onAdClosed(callback.adInfo.asAd(demandAd))
-                }
-                is RewardedInterceptor.AdOpened -> {
-                    coreListener.onAdImpression(callback.adInfo.asAd(demandAd))
-                }
-                is RewardedInterceptor.AdShowFailed -> {
-                    coreListener.onAdShowFailed(callback.ironSourceError.asBidonError())
-                }
-                is RewardedInterceptor.Rewarded -> {
-                    val ad = callback.adInfo.asAd(demandAd)
-                    SdkCore.getAdRevenueInterceptor()?.onAdRevenueReceived(ad)
-                    coreListener.onUserRewarded(
-                        ad = ad,
-                        reward = RewardedAdListener.Reward(
-                            label = callback.placement?.rewardName ?: "",
-                            amount = callback.placement?.rewardAmount ?: 0
-                        )
-                    )
-                }
-                RewardedInterceptor.Started -> {
-                    coreListener.onRewardedStarted(null.asAd(demandAd))
-                }
-                RewardedInterceptor.Ended -> {
-                    coreListener.onRewardedCompleted(null.asAd(demandAd))
-                }
-                is RewardedInterceptor.AdReady,
-                is RewardedInterceptor.AdLoadFailed -> {
-                    // do nothing
-                }
-            }
-        }
-    }
-
 }
 
 internal sealed interface InterstitialInterceptor {
@@ -342,6 +256,5 @@ internal sealed interface RewardedInterceptor {
     object Started : RewardedInterceptor
     object Ended : RewardedInterceptor
 }
-
 
 const val PlacementKey = "placement"

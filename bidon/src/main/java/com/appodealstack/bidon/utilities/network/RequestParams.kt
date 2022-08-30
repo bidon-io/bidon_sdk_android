@@ -1,6 +1,5 @@
 package com.appodealstack.bidon.utilities.network
 
-
 /**
  * Marker interface shows should use request signature (header with unique request id)
  */

@@ -1,6 +1,7 @@
 package com.appodealstack.bidon
 
 import android.app.Activity
+import com.appodealstack.bidon.adapters.Ad
 import com.appodealstack.bidon.core.InitializationCallback
 import com.appodealstack.bidon.di.DI.initDependencyInjection
 import com.appodealstack.bidon.di.get
@@ -24,6 +25,7 @@ interface BidOnSdk {
     fun isInitialized(): Boolean
 
     fun setBaseUrl(host: String?): BidOnSdk
+    fun logRevenue(ad: Ad)
 
 //    fun updateGDPRUserConsent(consent: GDPRUserConsent)
 //    fun updateCCPAUserConsent(consent: CCPAUserConsent)

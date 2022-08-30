@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="BannerView">
+        <attr name="placementId" format="string" />
+        <attr name="bannerSize" format="enum">
+            <enum name="banner" value="1" />
+            <enum name="large" value="2" />
+            <enum name="leader_board" value="3" />
+            <enum name="mrec" value="4" />
+            <enum name="adaptive" value="5" />
+        </attr>
+    </declare-styleable>
+</resources>

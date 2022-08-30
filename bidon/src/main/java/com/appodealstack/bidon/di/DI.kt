@@ -1,17 +1,14 @@
 package com.appodealstack.bidon.di
 
+import android.app.Application
 import com.appodealstack.bidon.BidOnSdk
-import com.appodealstack.bidon.Core
-import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolder
-import com.appodealstack.bidon.analytics.AdRevenueInterceptorHolderImpl
+import com.appodealstack.bidon.adapters.DemandAd
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
 import com.appodealstack.bidon.auctions.data.impl.GetAuctionRequestUseCaseImpl
-import com.appodealstack.bidon.auctions.domain.AdsRepository
-import com.appodealstack.bidon.auctions.domain.GetAuctionRequestUseCase
-import com.appodealstack.bidon.auctions.domain.NewAuction
-import com.appodealstack.bidon.auctions.domain.impl.AdsRepositoryImpl
+import com.appodealstack.bidon.auctions.domain.*
+import com.appodealstack.bidon.auctions.domain.impl.AuctionHolderImpl
+import com.appodealstack.bidon.auctions.domain.impl.AuctionImpl
 import com.appodealstack.bidon.auctions.domain.impl.AuctionResolversHolderImpl
-import com.appodealstack.bidon.auctions.domain.impl.NewAuctionImpl
 import com.appodealstack.bidon.config.data.impl.AdapterInstanceCreatorImpl
 import com.appodealstack.bidon.config.data.impl.GetConfigRequestUseCaseImpl
 import com.appodealstack.bidon.config.domain.*
@@ -19,6 +16,13 @@ import com.appodealstack.bidon.config.domain.databinders.*
 import com.appodealstack.bidon.config.domain.impl.BidOnInitializerImpl
 import com.appodealstack.bidon.config.domain.impl.DataProviderImpl
 import com.appodealstack.bidon.config.domain.impl.InitAndRegisterAdaptersUseCaseImpl
+import com.appodealstack.bidon.core.AdaptersSource
+import com.appodealstack.bidon.core.ContextProvider
+import com.appodealstack.bidon.core.PauseResumeObserver
+import com.appodealstack.bidon.core.impl.AdaptersSourceImpl
+import com.appodealstack.bidon.core.impl.BidOnSdkImpl
+import com.appodealstack.bidon.core.impl.ContextProviderImpl
+import com.appodealstack.bidon.core.impl.PauseResumeObserverImpl
 import com.appodealstack.bidon.core.*
 import com.appodealstack.bidon.core.impl.*
 import com.appodealstack.bidon.utilities.datasource.DataSourceProvider
@@ -37,6 +41,7 @@ import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 import com.appodealstack.bidon.utilities.network.BidOnEndpoints
 import com.appodealstack.bidon.utilities.network.endpoint.BidOnEndpointsImpl
+import com.appodealstack.bidon.view.BannerAd
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -62,12 +67,16 @@ internal object DI {
                         bidOnEndpoints = get()
                     )
                 }
-                singleton<AdsRepository> { AdsRepositoryImpl() }
-                singleton<Core> { CoreImpl() }
                 singleton<ContextProvider> { ContextProviderImpl() }
                 singleton<AdaptersSource> { AdaptersSourceImpl() }
                 singleton<BidOnEndpoints> { BidOnEndpointsImpl() }
                 singleton<KeyValueStorage> { KeyValueStorageImpl() }
+                singleton<PauseResumeObserver> {
+                    @Suppress("UNCHECKED_CAST")
+                    PauseResumeObserverImpl(
+                        application = get<ContextProvider>().requiredContext.applicationContext as Application
+                    )
+                }
                 singleton<AdvertisingInfo> { AdvertisingInfoImpl() }
 
                 /**
@@ -87,18 +96,28 @@ internal object DI {
                     )
                 }
                 factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
-                factory<AdRevenueInterceptorHolder> { AdRevenueInterceptorHolderImpl() }
                 factory<AuctionResolversHolder> { AuctionResolversHolderImpl() }
-                factory<NewAuction> {
-                    NewAuctionImpl(
+                factory<Auction> {
+                    AuctionImpl(
                         adaptersSource = get(),
-                        contextProvider = get(),
                         getAuctionRequest = get()
                     )
                 }
-                factory<AutoRefresher> {
-                    AutoRefresherImpl(
-                        adsRepository = get()
+                factoryWithParams<AutoRefresher> { param ->
+                    AutoRefresherImpl(autoRefreshable = param as BannerAd.AutoRefreshable)
+                }
+                factory {
+                    CountDownTimer(
+                        pauseResumeObserver = get()
+                    )
+                }
+
+                @Suppress("UNCHECKED_CAST")
+                factoryWithParams<AuctionHolder> { param ->
+                    val (demandAd, listener) = param as Pair<DemandAd, RoundsListener>
+                    AuctionHolderImpl(
+                        demandAd = demandAd,
+                        roundsListener = listener
                     )
                 }
 

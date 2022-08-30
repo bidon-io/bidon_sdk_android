@@ -6,9 +6,8 @@ import com.appodealstack.appsflyer.ext.adapterVersion
 import com.appodealstack.appsflyer.ext.sdkVersion
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.analytics.AdRevenueLogger
-import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.config.data.models.AdapterInfo
-import com.appodealstack.bidon.core.ext.logInternal
+import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.core.parse
 import com.appsflyer.AFLogger
 import com.appsflyer.AppsFlyerLib
@@ -27,9 +26,9 @@ data class AppsflyerParameters(
     val appId: String
 ) : AdapterParameters
 
-
 private val AppsflyerDemandId = DemandId("appsflyer")
 
+@Suppress("unused")
 class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenueLogger {
     override val demandId: DemandId = AppsflyerDemandId
 
@@ -62,8 +61,8 @@ class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenu
         }
     }
 
-    override fun logAdRevenue(mediationNetwork: BNMediationNetwork, ad: Ad) {
-        logInternal(Tag, "AdRevenue logged: $ad, mediationNetwork: $mediationNetwork")
+    override fun logAdRevenue(ad: Ad) {
+        logInfo(Tag, "AdRevenue logged: $ad")
         val nonMandatory = mutableMapOf<String, String>().apply {
             ad.dsp?.let { this["demand_source_name"] = it }
             this["ad_type"] = ad.demandAd.adType.adTypeName
@@ -75,17 +74,7 @@ class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenu
 
         AppsFlyerAdRevenue.logAdRevenue(
             monetizationNetwork,
-            when (mediationNetwork) {
-                BNMediationNetwork.IronSource -> MediationNetwork.ironsource
-                BNMediationNetwork.ApplovinMax -> MediationNetwork.applovinmax
-                BNMediationNetwork.GoogleAdmob -> MediationNetwork.googleadmob
-                BNMediationNetwork.Fyber -> MediationNetwork.fyber
-                BNMediationNetwork.Appodeal -> MediationNetwork.appodeal
-                BNMediationNetwork.Admost -> MediationNetwork.Admost
-                BNMediationNetwork.Topon -> MediationNetwork.Topon
-                BNMediationNetwork.Tradplus -> MediationNetwork.Tradplus
-                BNMediationNetwork.Yandex -> MediationNetwork.Yandex
-            },
+            MediationNetwork.appodeal, // @see https://appodeal.slack.com/archives/C02PE4GAFU0/p1660830733326759
             eventRevenueCurrency,
             eventRevenue,
             nonMandatory
@@ -93,7 +82,6 @@ class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenu
     }
 
     override fun parseConfigParam(json: JsonObject): AppsflyerParameters = json.parse(AppsflyerParameters.serializer())
-
 }
 
 private const val Tag = "AppsflyerAdapter"

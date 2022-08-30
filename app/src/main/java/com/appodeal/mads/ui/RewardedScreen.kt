@@ -7,10 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -18,18 +17,101 @@ import androidx.navigation.NavHostController
 import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.component.Body2Text
-import com.appodealstack.bidon.ad.Interstitial
-
+import com.appodealstack.bidon.ad.Rewarded
+import com.appodealstack.bidon.ad.RewardedListener
+import com.appodealstack.bidon.adapters.Ad
+import com.appodealstack.bidon.adapters.Reward
+import com.appodealstack.bidon.auctions.data.models.AuctionResult
+import com.appodealstack.bidon.core.ext.logInternal
+import kotlinx.coroutines.launch
 
 @Composable
 fun RewardedScreen(
     navController: NavHostController,
 ) {
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
     val activity = LocalContext.current as Activity
-    val rewardedAd = Interstitial("c7c5f664e60b9bfb")
 
     val logFlow = remember {
         mutableStateOf(listOf("Log"))
+    }
+
+    val rewarded by lazy {
+        Rewarded("some_placement_id").apply {
+            setRewardedListener(
+                object : RewardedListener {
+                    override fun onAdLoaded(ad: Ad) {
+                        logFlow.log("onAdLoaded WINNER:\n$ad")
+                    }
+
+                    override fun onAdLoadFailed(cause: Throwable) {
+                        logFlow.log("onAdLoadFailed: $cause")
+                    }
+
+                    override fun onAdShowFailed(cause: Throwable) {
+                        logFlow.log("onAdShowFailed: $cause")
+                    }
+
+                    override fun onAdImpression(ad: Ad) {
+                        logFlow.log("onAdImpression: $ad")
+                    }
+
+                    override fun onAdClicked(ad: Ad) {
+                        logFlow.log("onAdClicked: $ad")
+                    }
+
+                    override fun onAdClosed(ad: Ad) {
+                        logFlow.log("onAdClosed: $ad")
+                    }
+
+                    override fun onAdExpired(ad: Ad) {
+                        logFlow.log("onAdExpired: $ad")
+                    }
+
+                    override fun auctionStarted() {
+                        logFlow.log("auctionStarted")
+                    }
+
+                    override fun auctionSucceed(auctionResults: List<AuctionResult>) {
+                        val log = buildString {
+                            appendLine("AuctionSucceed (${auctionResults.size} items)")
+                            auctionResults.forEachIndexed { index, auctionResult ->
+                                appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.priceFloor}")
+                            }
+                        }
+                        logFlow.log(log)
+                    }
+
+                    override fun auctionFailed(error: Throwable) {
+                        logFlow.log("auctionFailed: $error")
+                    }
+
+                    override fun roundStarted(roundId: String) {
+                        logFlow.log("RoundStarted(roundId=$roundId)")
+                    }
+
+                    override fun roundSucceed(roundId: String, roundResults: List<AuctionResult>) {
+                        logFlow.log(
+                            buildString {
+                                appendLine("roundSucceed($roundId)")
+                                roundResults.forEachIndexed { index, auctionResult ->
+                                    appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.priceFloor}")
+                                }
+                            }
+                        )
+                    }
+
+                    override fun roundFailed(roundId: String, error: Throwable) {
+                        logFlow.log("roundFailed: roundId=$roundId, $error")
+                    }
+
+                    override fun onUserRewarded(ad: Ad, reward: Reward?) {
+                        logFlow.log("onUserRewarded: reward=$reward, ad=$ad")
+                    }
+                }
+            )
+        }
     }
 
     Column(
@@ -38,23 +120,28 @@ fun RewardedScreen(
             .background(MaterialTheme.colors.background)
     ) {
         AppToolbar(
-            title = "Max Rewarded",
-            onNavigationButtonClicked = { navController.popBackStack() })
+            title = "Rewarded Ad",
+            onNavigationButtonClicked = { navController.popBackStack() }
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp)
+                .padding(start = 24.dp, end = 24.dp, top = 24.dp)
         ) {
             AppButton(text = "Load") {
-                rewardedAd.load()
+                rewarded.load(activity)
             }
             AppButton(text = "Show") {
-                rewardedAd.show(activity)
+                rewarded.show(activity)
+            }
+            AppButton(text = "Destroy") {
+                rewarded.destroy()
             }
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 24.dp)
+                    .padding(top = 24.dp),
+                state = listState
             ) {
                 items(logFlow.value) { logLine ->
                     Column(
@@ -66,7 +153,19 @@ fun RewardedScreen(
                         Body2Text(text = logLine)
                     }
                 }
+                coroutineScope.launch {
+                    listState.animateScrollToItem(index = logFlow.value.lastIndex)
+                }
             }
         }
     }
 }
+
+private fun MutableState<List<String>>.log(string: String) {
+    synchronized(this) {
+        this.value = this.value + string
+    }
+    logInternal(Tag, string)
+}
+
+private const val Tag = "RewardedScreen"

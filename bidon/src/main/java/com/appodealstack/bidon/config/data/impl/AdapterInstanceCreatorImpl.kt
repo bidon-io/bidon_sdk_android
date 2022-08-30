@@ -1,11 +1,11 @@
 package com.appodealstack.bidon.config.data.impl
 
 import com.appodealstack.bidon.AdapterList
+import com.appodealstack.bidon.adapters.Adapter
 import com.appodealstack.bidon.config.domain.AdapterInstanceCreator
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.core.ext.logInternal
-import com.appodealstack.bidon.adapters.Adapter
 
 internal class AdapterInstanceCreatorImpl : AdapterInstanceCreator {
     override fun createAvailableAdapters(): List<Adapter> {

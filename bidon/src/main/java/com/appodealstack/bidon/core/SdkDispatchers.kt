@@ -14,8 +14,15 @@ var ioDispatcherOverridden: CoroutineDispatcher? = null
 @VisibleForTesting
 var singleDispatcherOverridden: CoroutineDispatcher? = null
 
+@VisibleForTesting
+var mainDispatcherOverridden: CoroutineDispatcher? = null
+
 object SdkDispatchers {
-    val Single: CoroutineDispatcher get() = singleDispatcherOverridden ?: newSingleThreadContext("BidON")
+    val Single: CoroutineDispatcher
+        get() = singleDispatcherOverridden ?: newSingleThreadContext("BidON")
+
+    val Main: CoroutineDispatcher
+        get() = mainDispatcherOverridden ?: Dispatchers.Main
 
     val Default: CoroutineDispatcher
         get() = defaultDispatcherOverridden ?: Dispatchers.Default

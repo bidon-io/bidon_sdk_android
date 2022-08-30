@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.core.impl
 
-import com.appodealstack.bidon.core.AdaptersSource
 import com.appodealstack.bidon.adapters.Adapter
+import com.appodealstack.bidon.core.AdaptersSource
 
 internal class AdaptersSourceImpl : AdaptersSource {
     override val adapters = mutableListOf<Adapter>()

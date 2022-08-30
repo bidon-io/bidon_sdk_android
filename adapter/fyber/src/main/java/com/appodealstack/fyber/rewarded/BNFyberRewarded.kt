@@ -2,10 +2,8 @@ package com.appodealstack.fyber.rewarded
 
 import android.app.Activity
 import androidx.core.os.bundleOf
-import com.appodealstack.fyber.PlacementKey
-import com.appodealstack.bidon.core.DefaultAutoRefreshTimeoutMs
 import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.adapters.banners.AutoRefresh
+import com.appodealstack.fyber.PlacementKey
 import com.fyber.fairbid.ads.ImpressionData
 import com.fyber.fairbid.ads.Interstitial
 import com.fyber.fairbid.ads.LossNotificationReason
@@ -95,6 +93,5 @@ class FyberRewardedImpl : FyberRewarded {
         fyberRewardedListener: FyberRewardedListener,
         placementId: String
     ) {
-
     }
 }

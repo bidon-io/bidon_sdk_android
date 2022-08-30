@@ -1,15 +1,22 @@
 package com.appodealstack.bidmachine
 
+import com.appodealstack.bidon.adapters.BidonError
 import com.appodealstack.bidon.adapters.DemandError
 import com.appodealstack.bidon.adapters.DemandId
 import io.bidmachine.utils.BMError
 
-internal fun BMError.asBidonError(demandId: DemandId): DemandError = when (this) {
+internal fun BMError.asBidonError(demandId: DemandId): BidonError = when (this) {
     BMError.Request,
     BMError.Server,
     BMError.NoConnection -> DemandError.NetworkError(demandId)
     BMError.TimeoutError -> DemandError.NetworkTimeout(demandId)
     BMError.AlreadyShown -> DemandError.FullscreenAdAlreadyShowing(demandId)
     BMError.Expired -> DemandError.Expired(demandId)
-    else -> DemandError.Unspecified(demandId)
+    else -> {
+        if (this.code == BMError.NO_CONTENT) {
+            BidonError.NoFill(demandId)
+        } else {
+            DemandError.Unspecified(demandId)
+        }
+    }
 }

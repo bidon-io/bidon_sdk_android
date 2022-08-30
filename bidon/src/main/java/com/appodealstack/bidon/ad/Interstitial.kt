@@ -1,23 +1,20 @@
 package com.appodealstack.bidon.ad
 
 import android.app.Activity
+import com.appodealstack.bidon.BidON
 import com.appodealstack.bidon.BidOnSdk.Companion.DefaultPlacement
-import com.appodealstack.bidon.adapters.Ad
-import com.appodealstack.bidon.adapters.AdSource
-import com.appodealstack.bidon.adapters.AdType
-import com.appodealstack.bidon.adapters.DemandAd
+import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
-import com.appodealstack.bidon.auctions.domain.NewAuction
-import com.appodealstack.bidon.auctions.domain.impl.MaxEcpmAuctionResolver
+import com.appodealstack.bidon.auctions.domain.AuctionHolder
 import com.appodealstack.bidon.core.SdkDispatchers
-import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.di.get
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class Interstitial(
     override val placementId: String = DefaultPlacement
@@ -26,8 +23,9 @@ class Interstitial(
 interface InterstitialAd {
     val placementId: String
 
-    fun load(placement: String? = null)
-    fun show(activity: Activity, placement: String? = null)
+    fun load(activity: Activity)
+    fun destroy()
+    fun show(activity: Activity)
     fun setInterstitialListener(listener: InterstitialListener)
 }
 
@@ -39,49 +37,73 @@ internal class InterstitialAdImpl(
     private val demandAd by lazy {
         DemandAd(AdType.Interstitial, placementId)
     }
-    private val auction: NewAuction get() = get()
-    private val scope: CoroutineScope get() = CoroutineScope(dispatcher)
     private var userListener: InterstitialListener? = null
-    private val auctionResults = mutableListOf<AuctionResult>()
-    private var auctionJob: Job? = null
+    private var observeCallbacksJob: Job? = null
+    private val auctionHolder: AuctionHolder by lazy {
+        get { params(demandAd to listener) }
+    }
 
     private val listener by lazy {
         getInterstitialListener()
     }
 
-    override fun load(placement: String?) {
-        logInfo(Tag, "Load with placement: $placement")
-        if (auctionJob?.isActive == true) return
-        auctionJob = scope.launch {
-            auctionResults.clear()
+    override fun load(activity: Activity) {
+        if (!BidON.isInitialized()) {
+            logInfo(Tag, "Sdk is not initialized")
+            return
+        }
+        logInfo(Tag, "Load with placement: $placementId")
+        if (!auctionHolder.isActive) {
             listener.auctionStarted()
-            auction.start(
-                demandAd = demandAd,
-                resolver = MaxEcpmAuctionResolver,
-                adTypeAdditionalData = AdTypeAdditional.Interstitial(
-                    activity = null
+            auctionHolder.startAuction(
+                adTypeAdditional = AdTypeAdditional.Interstitial(
+                    activity = activity
                 ),
-                roundsListener = listener
-            ).onSuccess { results ->
-                logInfo(Tag, "Auction completed successfully: $results")
-                auctionResults.addAll(results)
-                listener.auctionSucceed(results)
-                // listener.onAdLoaded(results.first().adSource.ad)
-            }.onFailure {
-                logError(Tag, "Auction failed", it)
-                auctionResults.clear()
-                listener.onAdLoadFailed(cause = it)
-            }
+                onResult = { result ->
+                    result
+                        .onSuccess { auctionResults ->
+                            /**
+                             * Winner found
+                             */
+                            val winner = auctionResults.first()
+                            subscribeToWinner(winner.adSource)
+                            listener.auctionSucceed(auctionResults)
+                            listener.onAdLoaded(
+                                requireNotNull(winner.adSource.ad) {
+                                    "[Ad] should exist when the Action succeeds"
+                                }
+                            )
+                        }.onFailure {
+                            /**
+                             * Auction failed
+                             */
+                            listener.auctionFailed(error = it)
+                            listener.onAdLoadFailed(cause = it)
+                        }
+                }
+            )
+        } else {
+            logInfo(Tag, "Auction already in progress. Placement: $placementId.")
         }
     }
 
-    override fun show(activity: Activity, placement: String?) {
-        logInfo(Tag, "Show with placement: $placement")
-        if (auctionJob?.isActive != true) {
-            auctionResults.firstOrNull()?.let {
-                when (val adSource = it.adSource) {
-                    is AdSource.Interstitial<*> -> adSource.show(activity)
+    override fun show(activity: Activity) {
+        logInfo(Tag, "Show with placement: $placementId")
+        if (auctionHolder.isActive) {
+            logInfo(Tag, "Show failed. Auction in progress.")
+            listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
+            return
+        }
+        when (val adSource = auctionHolder.popWinner()) {
+            null -> {
+                logInfo(Tag, "Show failed. No Auction results.")
+                listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
+            }
+            else -> {
+                require(adSource is AdSource.Interstitial<*>) {
+                    "Unexpected AdSource type. Expected: AdSource.Interstitial. Actual: ${adSource::class.java}."
                 }
+                adSource.show(activity)
             }
         }
     }
@@ -91,9 +113,35 @@ internal class InterstitialAdImpl(
         this.userListener = listener
     }
 
+    override fun destroy() {
+        auctionHolder.destroy()
+        observeCallbacksJob?.cancel()
+        observeCallbacksJob = null
+    }
+
     /**
      * Private
      */
+
+    private fun subscribeToWinner(adSource: AdSource<*>) {
+        require(adSource is AdSource.Interstitial<*>)
+        observeCallbacksJob = adSource.adState.onEach { state ->
+            when (state) {
+                is AdState.Bid,
+                is AdState.OnReward,
+                is AdState.Fill -> {
+                    // do nothing
+                }
+                is AdState.Clicked -> listener.onAdClicked(state.ad)
+                is AdState.Closed -> listener.onAdClosed(state.ad)
+                is AdState.Impression -> listener.onAdImpression(state.ad)
+                is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
+                is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
+                is AdState.Expired -> listener.onAdExpired(state.ad)
+            }
+        }.launchIn(CoroutineScope(dispatcher))
+    }
+
     private fun getInterstitialListener() = object : InterstitialListener {
         override fun onAdLoaded(ad: Ad) {
             userListener?.onAdLoaded(ad)
@@ -103,15 +151,12 @@ internal class InterstitialAdImpl(
             userListener?.onAdLoadFailed(cause)
         }
 
-        override fun onAdShown(ad: Ad) {
-            userListener?.onAdShown(ad)
-        }
-
         override fun onAdShowFailed(cause: Throwable) {
             userListener?.onAdShowFailed(cause)
         }
 
         override fun onAdImpression(ad: Ad) {
+            BidON.logRevenue(ad)
             userListener?.onAdImpression(ad)
         }
 
@@ -120,7 +165,11 @@ internal class InterstitialAdImpl(
         }
 
         override fun onAdClosed(ad: Ad) {
-            userListener?.onAdClicked(ad)
+            userListener?.onAdClosed(ad)
+        }
+
+        override fun onAdExpired(ad: Ad) {
+            userListener?.onAdExpired(ad)
         }
 
         override fun auctionStarted() {
@@ -150,4 +199,3 @@ internal class InterstitialAdImpl(
 }
 
 private const val Tag = "Interstitial"
-

@@ -8,8 +8,8 @@ import android.net.Network
 import android.net.NetworkRequest
 import com.appodealstack.bidon.utilities.network.NetworkState
 import com.appodealstack.bidon.utilities.network.NetworkStateObserver
-import java.util.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.util.*
 
 internal class NetworkStateObserverImpl : NetworkStateObserver {
     private var connectivityManager: ConnectivityManager? = null
