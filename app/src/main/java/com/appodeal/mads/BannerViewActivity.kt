@@ -32,6 +32,7 @@ class BannerViewActivity : AppCompatActivity(R.layout.banner_view_layout) {
     private fun initViews() {
         loadButton.setOnClickListener {
             bannerView.load()
+            bannerView.show()
         }
         destroyButton.setOnClickListener {
             bannerView.destroy()

@@ -5,6 +5,9 @@
       <module name="BidOn_Decorators.buildSrc" target="1.8" />
       <module name="BidOn_Decorators.buildSrc.main" target="1.8" />
       <module name="BidOn_Decorators.buildSrc.test" target="1.8" />
+      <module name="BidOn_SDK.buildSrc" target="1.8" />
+      <module name="BidOn_SDK.buildSrc.main" target="1.8" />
+      <module name="BidOn_SDK.buildSrc.test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

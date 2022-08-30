@@ -5,24 +5,30 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import com.appodealstack.bidon.BidON
-import com.appodealstack.bidon.BidOnSdk.Companion.DefaultPlacement
+import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.R
 import com.appodealstack.bidon.ad.BannerListener
-import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.adapters.AdSource
+import com.appodealstack.bidon.adapters.AdState
+import com.appodealstack.bidon.adapters.AdType
+import com.appodealstack.bidon.adapters.DemandAd
+import com.appodealstack.bidon.adapters.banners.AutoRefresh
 import com.appodealstack.bidon.adapters.banners.BannerSize
 import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
-import com.appodealstack.bidon.auctions.data.models.AuctionResult
-import com.appodealstack.bidon.auctions.domain.AuctionHolder
-import com.appodealstack.bidon.auctions.domain.AutoRefresher
+import com.appodealstack.bidon.auctions.domain.Auction
+import com.appodealstack.bidon.auctions.domain.CountDownTimer
+import com.appodealstack.bidon.auctions.domain.impl.MaxEcpmAuctionResolver
+import com.appodealstack.bidon.core.PauseResumeObserver
 import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.di.get
+import com.appodealstack.bidon.view.helper.BannerState.*
+import com.appodealstack.bidon.view.helper.wrapUserBannerListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 interface BannerAd {
     val placementId: String
@@ -48,36 +54,30 @@ class BannerView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     @AttrRes defStyleAtt: Int = 0
-) : FrameLayout(context, attrs, defStyleAtt), BannerAd, BannerAd.AutoRefreshable {
+) : FrameLayout(context, attrs, defStyleAtt), BannerAd {
 
     constructor(context: Context, placementId: String) : this(context, null, 0) {
         this.placementId = placementId
     }
 
-    override var placementId: String = DefaultPlacement
-
+    override var placementId: String = BidOnSdk.DefaultPlacement
     private var bannerSize: BannerSize = BannerSize.Banner
-    private val isBannerDisplaying = AtomicBoolean(false)
-
-    private val demandAd by lazy {
-        DemandAd(AdType.Banner, placementId)
-    }
-
-    private val autoRefresher: AutoRefresher by lazy {
-        get {
-            params(this@BannerView as BannerAd.AutoRefreshable)
-        }
-    }
-
-    private val auctionHolder: AuctionHolder by lazy {
-        get { params(demandAd to listener) }
-    }
     private var userListener: BannerListener? = null
-    private var observeCallbacksJob: Job? = null
+    private var refresh: AutoRefresh = AutoRefresh.On(DefaultAutoRefreshTimeoutMs)
 
-    private val listener by lazy {
-        getBannerListener()
-    }
+    private val showState = MutableStateFlow<ShowState>(ShowState.Idle)
+    private val showActionFlow = MutableSharedFlow<ShowAction>(extraBufferCapacity = Int.MAX_VALUE)
+    private val loadState = MutableStateFlow<LoadState>(LoadState.Idle)
+    private val loadActionFlow = MutableSharedFlow<LoadAction>(extraBufferCapacity = Int.MAX_VALUE)
+
+    private val pauseResumeObserver: PauseResumeObserver by lazy { get() }
+    private val demandAd by lazy { DemandAd(AdType.Banner, placementId) }
+    private val listener by lazy { wrapUserBannerListener(userListener = { userListener }) }
+    private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
+    private val displayingRefreshTimer by lazy { get<CountDownTimer>() }
+    private val loadingRefreshTimer by lazy { get<CountDownTimer>() }
+    private var showJob: Job? = null
+    private var observeCallbacksJob: Job? = null
 
     init {
         context.theme.obtainStyledAttributes(attrs, R.styleable.BannerView, 0, 0).apply {
@@ -98,6 +98,8 @@ class BannerView @JvmOverloads constructor(
                 recycle()
             }
         }
+        launchLoadReducer()
+        launchShowReducer()
     }
 
     override fun setAdSize(bannerSize: BannerSize) {
@@ -105,82 +107,29 @@ class BannerView @JvmOverloads constructor(
         this.bannerSize = bannerSize
     }
 
-    override fun load() {
-        if (!BidON.isInitialized()) {
-            logInfo(Tag, "Sdk is not initialized")
-            return
-        }
-        logInfo(Tag, "Load with placement: $placementId")
-        if (!auctionHolder.isActive) {
-            listener.auctionStarted()
-            auctionHolder.startAuction(
-                adTypeAdditional = AdTypeAdditional.Banner(
-                    bannerSize = bannerSize,
-                    adContainer = this@BannerView
-                ),
-                onResult = { result ->
-                    result
-                        .onSuccess { auctionResults ->
-                            /**
-                             * Winner found
-                             */
-                            val winner = auctionResults.first()
-                            subscribeToWinner(winner.adSource)
-                            listener.auctionSucceed(auctionResults)
-                            listener.onAdLoaded(
-                                requireNotNull(winner.adSource.ad) {
-                                    "[Ad] should exist when the Action succeeds"
-                                }
-                            )
-                        }.onFailure {
-                            /**
-                             * Auction failed
-                             */
-                            listener.auctionFailed(error = it)
-                            listener.onAdLoadFailed(cause = it)
-                        }
-                }
-            )
-        } else {
-            logInfo(Tag, "Auction already in progress. Placement: $placementId.")
-        }
-    }
-
-    override fun show() {
-        removeAllViews()
-        auctionHolder.popWinner()?.let { adSource ->
-            val ad = requireNotNull(adSource.ad) {
-                "Ad should exist on start of displaying [${adSource.demandId}]"
-            }
-            require(adSource is AdSource.Banner) {
-                "Unexpected AdSource type. Expected: AdSource.Banner. Actual: ${adSource::class.java}."
-            }
-            addView(adSource.getAdView())
-            isBannerDisplaying.set(true)
-            listener.onAdImpression(ad)
-        }
-    }
-
     override fun setBannerListener(listener: BannerListener) {
         logInfo(Tag, "Set banner listener")
         this.userListener = listener
     }
 
+    override fun load() {
+        logInfo(Tag, "Load with placement invoked: $placementId")
+        sendAction(LoadAction.OnLoadInvoked)
+    }
+
+    override fun show() {
+        logInfo(Tag, "Show with placement invoked: $placementId")
+        sendAction(ShowAction.OnShowInvoked)
+    }
+
     override fun startAutoRefresh(timeoutMs: Long) {
         logInfo(Tag, "Auto-refresh initialized with timeout $timeoutMs ms")
-        autoRefresher.setAutoRefreshTimeout(timeoutMs)
-        if (isBannerDisplaying.get()) {
-            autoRefresher.launchRefresh()
-        }
+        sendAction(ShowAction.OnStartAutoRefreshInvoked(timeoutMs))
     }
 
     override fun stopAutoRefresh() {
         logInfo(Tag, "Auto-refresh stopped")
-        autoRefresher.stopAutoRefresh()
-    }
-
-    override fun onRefresh() {
-        load()
+        sendAction(ShowAction.OnStopAutoRefreshInvoked)
     }
 
     override fun onDetachedFromWindow() {
@@ -189,17 +138,212 @@ class BannerView @JvmOverloads constructor(
     }
 
     override fun destroy() {
-        auctionHolder.destroy()
-        autoRefresher.stopAutoRefresh()
-        observeCallbacksJob?.cancel()
-        observeCallbacksJob = null
-        isBannerDisplaying.set(false)
-        this.removeAllViews()
+        sendAction(LoadAction.OnDestroyInvoked)
+        sendAction(ShowAction.OnDestroyInvoked)
     }
 
     /**
      * Private
      */
+
+    private fun sendAction(action: ShowAction) {
+        if (!BidON.isInitialized()) {
+            logInfo(Tag, "Sdk is not initialized")
+            return
+        }
+        showActionFlow.tryEmit(action)
+    }
+
+    private fun sendAction(action: LoadAction) {
+        if (!BidON.isInitialized()) {
+            logInfo(Tag, "Sdk is not initialized")
+            return
+        }
+        loadActionFlow.tryEmit(action)
+    }
+
+    private fun launchLoadReducer() {
+        loadActionFlow.scan(
+            initial = loadState.value,
+            operation = { state, action ->
+                logInternal(Tag, "Load Action: ${action.javaClass.simpleName}. Current State: ${state.javaClass.simpleName}.")
+                when (action) {
+                    LoadAction.OnLoadInvoked -> {
+                        when (state) {
+                            LoadState.Idle -> {
+                                startAuction()
+                                LoadState.Loading
+                            }
+                            LoadState.Loading -> {
+                                logInternal(Tag, "Auction already in progress. Placement($placementId).")
+                                state
+                            }
+                            is LoadState.Loaded -> {
+                                logInternal(Tag, "Auction is completed and winner exists. Placement($placementId).")
+                                state
+                            }
+                        }
+                    }
+                    is LoadAction.OnAuctionSucceed -> {
+                        /**
+                         * Winner found
+                         */
+                        val winner = action.auctionResults.first()
+                        val ad = requireNotNull(winner.adSource.ad) {
+                            "[Ad] should exist when an Action succeeds"
+                        }
+                        listener.auctionSucceed(action.auctionResults)
+                        listener.onAdLoaded(ad)
+                        LoadState.Loaded(winner)
+                    }
+                    is LoadAction.OnAuctionFailed -> {
+                        /**
+                         * Auction failed
+                         */
+                        listener.auctionFailed(error = action.cause)
+                        listener.onAdLoadFailed(cause = action.cause)
+                        launchLoadingRefreshIfNeeded()
+                        LoadState.Idle
+                    }
+                    LoadAction.OnRefreshTimeoutFinished -> {
+                        sendAction(LoadAction.OnLoadInvoked)
+                        LoadState.Idle
+                    }
+                    LoadAction.OnWinnerTaken -> {
+                        if (refresh is AutoRefresh.On) {
+                            loadingRefreshTimer.stop()
+                            sendAction(LoadAction.OnRefreshTimeoutFinished)
+                        }
+                        LoadState.Idle
+                    }
+                    LoadAction.OnDestroyInvoked -> {
+                        loadingRefreshTimer.stop()
+                        LoadState.Idle
+                    }
+                }
+            }
+        ).onEach {
+            logInternal(Tag, "New Load state: ${it.javaClass.simpleName}")
+            loadState.value = it
+        }.launchIn(scope = scope)
+    }
+
+    private fun launchShowReducer() {
+        showActionFlow.scan(
+            initial = showState.value,
+            operation = { state, action ->
+                logInternal(Tag, "Show Action: ${action.javaClass.simpleName}. Current State: ${state.javaClass.simpleName}.")
+                when (action) {
+                    ShowAction.OnShowInvoked -> {
+                        proceedShow()
+                        state
+                    }
+                    is ShowAction.OnAdShown -> {
+                        listener.onAdImpression(action.ad)
+                        BidON.logRevenue(action.ad)
+                        (state as? ShowState.Displaying)?.auctionResult?.adSource?.destroy()
+                        launchDisplayingRefreshIfNeeded()
+                        ShowState.Displaying(action.winner)
+                    }
+                    ShowAction.OnRefreshTimeoutFinished -> {
+                        sendAction(ShowAction.OnShowInvoked)
+                        state
+                    }
+                    is ShowAction.OnStartAutoRefreshInvoked -> {
+                        refresh = AutoRefresh.On(action.timeoutMs)
+                        if (showState.value is ShowState.Displaying) {
+                            launchLoadingRefreshIfNeeded()
+                            launchDisplayingRefreshIfNeeded()
+                        }
+                        state
+                    }
+                    ShowAction.OnStopAutoRefreshInvoked -> {
+                        refresh = AutoRefresh.Off
+                        displayingRefreshTimer.stop()
+                        loadingRefreshTimer.stop()
+                        state
+                    }
+                    ShowAction.OnDestroyInvoked -> {
+                        observeCallbacksJob?.cancel()
+                        observeCallbacksJob = null
+                        displayingRefreshTimer.stop()
+                        this.removeAllViews()
+                        ShowState.Idle
+                    }
+                }
+            }
+        ).onEach {
+            logInternal(Tag, "New Show state: ${it.javaClass.simpleName}")
+            showState.value = it
+        }.launchIn(scope = scope)
+    }
+
+    private fun launchLoadingRefreshIfNeeded() {
+        (refresh as? AutoRefresh.On)?.timeoutMs?.let { timeoutMs ->
+            logInternal(Tag, "Launching Loading CountDownTimer: $timeoutMs ms")
+            loadingRefreshTimer.startTimer(timeoutMs) {
+                sendAction(LoadAction.OnRefreshTimeoutFinished)
+            }
+        }
+    }
+
+    private fun launchDisplayingRefreshIfNeeded() {
+        (refresh as? AutoRefresh.On)?.timeoutMs?.let { timeoutMs ->
+            logInternal(Tag, "Launching Display CountDownTimer: $timeoutMs ms")
+            displayingRefreshTimer.startTimer(timeoutMs) {
+                sendAction(ShowAction.OnRefreshTimeoutFinished)
+            }
+        }
+    }
+
+    private fun proceedShow() {
+        showJob?.cancel()
+        showJob = scope.launch {
+            try {
+                val winner = (loadState.first { it is LoadState.Loaded } as? LoadState.Loaded)?.auctionResult ?: return@launch
+                sendAction(LoadAction.OnWinnerTaken)
+                subscribeToWinner(winner.adSource)
+                val adSource = requireNotNull(winner.adSource as? AdSource.Banner) {
+                    "Unexpected AdSource type. Expected: AdSource.Banner. Actual: ${winner.adSource::class.java}."
+                }
+                val ad = requireNotNull(adSource.ad) {
+                    "Ad should exist on start of displaying [${adSource.demandId}]"
+                }
+                // wait if app in background
+                pauseResumeObserver.lifecycleFlow.first {
+                    val isResumed = it == PauseResumeObserver.LifecycleState.Resumed
+                    if (!isResumed) {
+                        logInternal(Tag, "Showing is waiting for Resumed state. Current: $it")
+                    }
+                    isResumed
+                }
+                // add AdView to Screen
+                removeAllViews()
+                addView(adSource.getAdView())
+                sendAction(ShowAction.OnAdShown(winner, ad))
+            } catch (e: Exception) {
+            }
+        }
+    }
+
+    private fun startAuction() {
+        listener.auctionStarted()
+        scope.launch {
+            get<Auction>().start(
+                demandAd = demandAd,
+                resolver = MaxEcpmAuctionResolver,
+                adTypeAdditionalData = AdTypeAdditional.Banner(
+                    bannerSize = bannerSize,
+                    adContainer = this@BannerView
+                ),
+                roundsListener = listener
+            ).onSuccess { auctionResults ->
+                sendAction(LoadAction.OnAuctionSucceed(auctionResults))
+            }.onFailure {
+                sendAction(LoadAction.OnAuctionFailed(it))
+            }
+        }
+    }
 
     private fun subscribeToWinner(adSource: AdSource<*>) {
         observeCallbacksJob?.cancel()
@@ -218,65 +362,7 @@ class BannerView @JvmOverloads constructor(
                 is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
                 is AdState.Expired -> listener.onAdExpired(state.ad)
             }
-        }.launchIn(CoroutineScope(SdkDispatchers.Main))
-    }
-
-    private fun getBannerListener() = object : BannerListener {
-        override fun onAdLoaded(ad: Ad) {
-            userListener?.onAdLoaded(ad)
-            autoRefresher.launchRefresh()
-        }
-
-        override fun onAdLoadFailed(cause: Throwable) {
-            userListener?.onAdLoadFailed(cause)
-            autoRefresher.launchRefresh()
-        }
-
-        override fun onAdShowFailed(cause: Throwable) {
-            userListener?.onAdShowFailed(cause)
-        }
-
-        override fun onAdImpression(ad: Ad) {
-            BidON.logRevenue(ad)
-            userListener?.onAdImpression(ad)
-        }
-
-        override fun onAdClicked(ad: Ad) {
-            userListener?.onAdClicked(ad)
-        }
-
-        override fun onAdClosed(ad: Ad) {
-            userListener?.onAdClosed(ad)
-        }
-
-        override fun onAdExpired(ad: Ad) {
-            userListener?.onAdExpired(ad)
-        }
-
-        override fun auctionStarted() {
-            userListener?.auctionStarted()
-        }
-
-        override fun auctionSucceed(auctionResults: List<AuctionResult>) {
-            userListener?.auctionSucceed(auctionResults)
-            show()
-        }
-
-        override fun auctionFailed(error: Throwable) {
-            userListener?.auctionFailed(error)
-        }
-
-        override fun roundStarted(roundId: String) {
-            userListener?.roundStarted(roundId)
-        }
-
-        override fun roundSucceed(roundId: String, roundResults: List<AuctionResult>) {
-            userListener?.roundSucceed(roundId, roundResults)
-        }
-
-        override fun roundFailed(roundId: String, error: Throwable) {
-            userListener?.roundFailed(roundId, error)
-        }
+        }.launchIn(scope)
     }
 }
 

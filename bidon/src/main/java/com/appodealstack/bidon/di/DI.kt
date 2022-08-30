@@ -1,5 +1,6 @@
 package com.appodealstack.bidon.di
 
+import android.app.Application
 import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.adapters.DemandAd
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
@@ -17,9 +18,11 @@ import com.appodealstack.bidon.config.domain.impl.DataProviderImpl
 import com.appodealstack.bidon.config.domain.impl.InitAndRegisterAdaptersUseCaseImpl
 import com.appodealstack.bidon.core.AdaptersSource
 import com.appodealstack.bidon.core.ContextProvider
+import com.appodealstack.bidon.core.PauseResumeObserver
 import com.appodealstack.bidon.core.impl.AdaptersSourceImpl
 import com.appodealstack.bidon.core.impl.BidOnSdkImpl
 import com.appodealstack.bidon.core.impl.ContextProviderImpl
+import com.appodealstack.bidon.core.impl.PauseResumeObserverImpl
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 import com.appodealstack.bidon.utilities.network.BidOnEndpoints
@@ -54,6 +57,12 @@ internal object DI {
                 singleton<AdaptersSource> { AdaptersSourceImpl() }
                 singleton<BidOnEndpoints> { BidOnEndpointsImpl() }
                 singleton<KeyValueStorage> { KeyValueStorageImpl() }
+                singleton<PauseResumeObserver> {
+                    @Suppress("UNCHECKED_CAST")
+                    PauseResumeObserverImpl(
+                        application = get<ContextProvider>().requiredContext.applicationContext as Application
+                    )
+                }
 
                 /**
                  * Factories
@@ -82,6 +91,13 @@ internal object DI {
                 factoryWithParams<AutoRefresher> { param ->
                     AutoRefresherImpl(autoRefreshable = param as BannerAd.AutoRefreshable)
                 }
+                factory {
+                    CountDownTimer(
+                        pauseResumeObserver = get()
+                    )
+                }
+
+                @Suppress("UNCHECKED_CAST")
                 factoryWithParams<AuctionHolder> { param ->
                     val (demandAd, listener) = param as Pair<DemandAd, RoundsListener>
                     AuctionHolderImpl(
