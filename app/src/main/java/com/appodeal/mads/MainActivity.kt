@@ -10,7 +10,6 @@ import com.appodeal.mads.theme.AppTheme
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             AppTheme {
                 val navController = rememberNavController()

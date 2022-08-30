@@ -1,19 +1,18 @@
 package com.appodealstack.bidon.utilities.keyvaluestorage
 
-import android.content.Context
-
 /**
  * Add unique [Key] for each variable.
+ *
+ * Use it in non-Main thread for avoiding ANRs.
  */
 interface KeyValueStorage {
-    val appKey: String?
+    var appKey: String?
     var token: String?
+    var host: String?
 
-    fun init(context: Context)
     fun clear()
 }
 
 internal enum class Key {
-    Token, BidonAppKey
+    Token, BidonAppKey, Host
 }
-

@@ -2,25 +2,21 @@ package com.appodealstack.bidon.utilities.keyvaluestorage
 
 import android.content.Context
 
-class KeyValueStorageImpl : KeyValueStorage {
-    private var context: Context? = null
-
+class KeyValueStorageImpl(private val context: Context) : KeyValueStorage {
     private val sharedPreferences by lazy {
-        requireNotNull(context) {
-            "KeyValueStorage is not initialized"
-        }.getSharedPreferences("bidon_preferences", Context.MODE_PRIVATE)
+        context.getSharedPreferences("bidon_preferences", Context.MODE_PRIVATE)
     }
     override var token: String?
         get() = Key.Token.getString()
         set(value) = Key.Token.saveString(value)
 
+    override var host: String?
+        get() = Key.Host.getString()
+        set(value) = Key.Host.saveString(value)
+
     override var appKey: String?
         get() = Key.BidonAppKey.getString()
         set(value) = Key.BidonAppKey.saveString(value)
-
-    override fun init(context: Context) {
-        this.context = context
-    }
 
     override fun clear() {
         sharedPreferences.edit().clear().apply()

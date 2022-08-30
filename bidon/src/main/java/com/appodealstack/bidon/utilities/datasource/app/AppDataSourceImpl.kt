@@ -4,17 +4,16 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.os.Build
 import com.appodealstack.bidon.Version
-import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 
 internal class AppDataSourceImpl(
-    private val contextProvider: ContextProvider,
+    private val context: Context,
     private val keyValueStorage: KeyValueStorage
 ) : AppDataSource {
 
     override fun getVersionCode(): Number? {
-        val packageInfo = getPackageInfo(contextProvider.requiredContext)
+        val packageInfo = getPackageInfo(context)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             packageInfo?.longVersionCode
         } else {
@@ -23,8 +22,8 @@ internal class AppDataSourceImpl(
         }
     }
 
-    override fun getBundleId(): String = contextProvider.requiredContext.packageName
-    override fun getVersionName(): String? = getPackageInfo(contextProvider.requiredContext)?.versionName
+    override fun getBundleId(): String = context.packageName
+    override fun getVersionName(): String? = getPackageInfo(context)?.versionName
     override fun getAppKey(): String? = keyValueStorage.appKey
     override fun getFramework(): String = Version.frameworkName
     override fun getFrameworkVersion(): String? = Version.frameworkVersion

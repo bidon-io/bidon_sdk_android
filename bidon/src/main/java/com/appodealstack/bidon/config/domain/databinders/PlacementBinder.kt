@@ -18,12 +18,14 @@ internal class PlacementBinder(
         BidonJson.encodeToJsonElement(createPlacement())
 
     private fun createPlacement(): Placement {
+        val type = dataSource.getRewardType()
+        val amount = dataSource.getRewardAmount()
+        val reward = amount?.let {
+            Reward(currency = type ?: "", amount = it)
+        }
         return Placement(
             name = dataSource.getName(),
-            reward = Reward(
-                currency = dataSource.getRewardCurrency(),
-                amount = dataSource.getRewardAmount()
-            ),
+            reward = reward,
             capping = Capping(
                 setting = dataSource.getCappingSetting(),
                 value = dataSource.getCappingValue()

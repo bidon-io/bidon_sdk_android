@@ -1,6 +1,5 @@
 package com.appodealstack.bidon.utilities.datasource.placement
 
-// TODO where I should take such data?
 internal class PlacementDataSourceImpl : PlacementDataSource {
 
     override fun getName(): String {
@@ -11,7 +10,7 @@ internal class PlacementDataSourceImpl : PlacementDataSource {
         TODO("Not yet implemented")
     }
 
-    override fun getRewardCurrency(): String? {
+    override fun getRewardType(): String? {
         TODO("Not yet implemented")
     }
 

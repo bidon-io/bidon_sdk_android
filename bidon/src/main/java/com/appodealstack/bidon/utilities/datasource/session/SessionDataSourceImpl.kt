@@ -9,18 +9,14 @@ import android.os.Debug
 import android.os.Environment
 import android.os.StatFs
 import android.text.TextUtils
-import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.ext.logError
 import java.io.*
 import java.lang.ref.WeakReference
 import java.util.regex.Pattern
 
 internal class SessionDataSourceImpl(
-    private val contextProvider: ContextProvider,
+    private val context: Context,
 ) : SessionDataSource {
-
-    private val context: Context
-        get() = contextProvider.requiredContext
 
     private var weakActivityManager: WeakReference<ActivityManager>? = null
     private val MAX_CPU_FREQUENCY: MutableMap<Int, Float> = HashMap()

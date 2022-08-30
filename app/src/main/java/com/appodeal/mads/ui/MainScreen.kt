@@ -45,9 +45,7 @@ internal fun MainScreen(
         verticalArrangement = Arrangement.Center
     ) {
         val context = LocalContext.current
-        val keyValueStorage: KeyValueStorage = KeyValueStorageImpl().apply {
-            init(context)
-        }
+        val keyValueStorage: KeyValueStorage = KeyValueStorageImpl(context)
         when (val state = initState.value) {
             MainScreenState.NotInitialized,
             MainScreenState.Initializing -> {
@@ -62,7 +60,7 @@ internal fun MainScreen(
                             .setBaseUrl(keyValueStorage.host)
                             .init(
                                 activity = context as Activity,
-                                appKey = "YOUR_APP_KEY",
+                                appKey = "d908f77a97ae0993514bc8edba7e776a36593c77e5f44994",
                             ) {
                                 initState.value = MainScreenState.Initialized
                             }

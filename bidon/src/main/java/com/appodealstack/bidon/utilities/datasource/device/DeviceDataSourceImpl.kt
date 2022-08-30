@@ -9,20 +9,17 @@ import android.telephony.TelephonyManager
 import android.view.Display
 import android.view.WindowManager
 import android.webkit.WebSettings
-import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.ext.logInternal
 import java.util.*
 
 internal class DeviceDataSourceImpl(
-    private val contextProvider: ContextProvider,
+    private val context: Context,
 ) : DeviceDataSource {
 
     private var cachedHttpAgentString: String? = null
     private val model: String = Build.MODEL
     private val buildId: String = Build.ID
     private val versionRelease: String = Build.VERSION.RELEASE
-    private val context: Context
-        get() = contextProvider.requiredContext
     private val screenSize by lazy {
         getScreenSize(context)
     }

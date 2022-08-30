@@ -8,18 +8,15 @@ import android.location.Criteria
 import android.location.Location
 import android.location.LocationManager
 import android.os.Process
-import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.ext.logInfo
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.*
 
 internal class LocationDataSourceImpl(
-    private val contextProvider: ContextProvider
+    private val context: Context
 ) : LocationDataSource {
 
-    private val context: Context
-        get() = contextProvider.requiredContext
     private val locationType: Int?
     private var weakLocationManager: WeakReference<LocationManager>? = null
 

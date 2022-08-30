@@ -7,11 +7,13 @@ import com.appodealstack.bidon.config.domain.AdapterInstanceCreator
 import com.appodealstack.bidon.config.domain.BidOnInitializer
 import com.appodealstack.bidon.config.domain.GetConfigRequestUseCase
 import com.appodealstack.bidon.config.domain.InitAndRegisterAdaptersUseCase
+import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 
 internal class BidOnInitializerImpl(
     private val initAndRegisterAdapters: InitAndRegisterAdaptersUseCase,
@@ -26,7 +28,9 @@ internal class BidOnInitializerImpl(
 
     override suspend fun init(activity: Activity, appKey: String): Result<Unit> {
         if (sdkState.compareAndSet(expect = SdkState.NotInitialized, update = SdkState.Initializing)) {
-            keyValueStorage.init(activity.applicationContext)
+            withContext(SdkDispatchers.IO) {
+                keyValueStorage.appKey = appKey
+            }
             val adapters = adapterInstanceCreator.createAvailableAdapters()
             logInfo(Tag, "Created adapters instances: $adapters")
 

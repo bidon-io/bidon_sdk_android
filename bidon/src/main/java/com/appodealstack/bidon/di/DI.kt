@@ -1,6 +1,7 @@
 package com.appodealstack.bidon.di
 
 import android.app.Application
+import android.content.Context
 import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.adapters.DemandAd
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
@@ -17,11 +18,9 @@ import com.appodealstack.bidon.config.domain.impl.BidOnInitializerImpl
 import com.appodealstack.bidon.config.domain.impl.DataProviderImpl
 import com.appodealstack.bidon.config.domain.impl.InitAndRegisterAdaptersUseCaseImpl
 import com.appodealstack.bidon.core.AdaptersSource
-import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.PauseResumeObserver
 import com.appodealstack.bidon.core.impl.AdaptersSourceImpl
 import com.appodealstack.bidon.core.impl.BidOnSdkImpl
-import com.appodealstack.bidon.core.impl.ContextProviderImpl
 import com.appodealstack.bidon.core.impl.PauseResumeObserverImpl
 import com.appodealstack.bidon.utilities.datasource.app.AppDataSource
 import com.appodealstack.bidon.utilities.datasource.app.AppDataSourceImpl
@@ -49,8 +48,14 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Dependency Injection
  */
-internal object DI {
+object DI {
     private val isInitialized = AtomicBoolean(false)
+
+    fun init(context: Context) {
+        registerDependencyInjection {
+            singleton<Context> { context.applicationContext }
+        }
+    }
 
     /**
      * Initializing Dependency Injection module
@@ -61,22 +66,19 @@ internal object DI {
                 /**
                  * Singletons
                  */
-                singleton<BidOnSdk> {
-                    BidOnSdkImpl(
-                        bidONInitializer = get(),
-                        contextProvider = get(),
-                        adaptersSource = get(),
-                        bidOnEndpoints = get()
-                    )
-                }
-                singleton<ContextProvider> { ContextProviderImpl() }
+                singleton<BidOnSdk> { BidOnSdkImpl() }
+
                 singleton<AdaptersSource> { AdaptersSourceImpl() }
                 singleton<BidOnEndpoints> { BidOnEndpointsImpl() }
-                singleton<KeyValueStorage> { KeyValueStorageImpl() }
+                singleton<KeyValueStorage> {
+                    KeyValueStorageImpl(
+                        context = get()
+                    )
+                }
                 singleton<PauseResumeObserver> {
                     @Suppress("UNCHECKED_CAST")
                     PauseResumeObserverImpl(
-                        application = get<ContextProvider>().requiredContext.applicationContext as Application
+                        application = get<Context>() as Application
                     )
                 }
                 singleton<AdvertisingInfo> { AdvertisingInfoImpl() }
@@ -89,7 +91,7 @@ internal object DI {
                         initAndRegisterAdapters = get(),
                         getConfigRequest = get(),
                         adapterInstanceCreator = get(),
-                        keyValueStorage = get()
+                        keyValueStorage = get(),
                     )
                 }
                 factory<InitAndRegisterAdaptersUseCase> {
@@ -141,6 +143,22 @@ internal object DI {
                 /**
                  * Binders
                  */
+                factory { DeviceBinder(dataSource = get()) }
+                factory { AppBinder(dataSource = get()) }
+                factory { GeoBinder(dataSource = get()) }
+                factory { SessionBinder(dataSource = get()) }
+                factory { TokenBinder(dataSource = get()) }
+                factory { UserBinder(dataSource = get()) }
+                factory { PlacementBinder(dataSource = get()) }
+
+                factory<AppDataSource> { AppDataSourceImpl(context = get(), keyValueStorage = get()) }
+                factory<DeviceDataSource> { DeviceDataSourceImpl(context = get()) }
+                factory<LocationDataSource> { LocationDataSourceImpl(context = get()) }
+                factory<SessionDataSource> { SessionDataSourceImpl(context = get()) }
+                factory<TokenDataSource> { TokenDataSourceImpl(keyValueStorage = get()) }
+                factory<UserDataSource> { UserDataSourceImpl(consentFactory = { null }) } // TODO Add ConsentManager
+                factory<PlacementDataSource> { PlacementDataSourceImpl() }
+
                 factory<DataProvider> {
                     DataProviderImpl(
                         deviceBinder = get(),
@@ -152,22 +170,6 @@ internal object DI {
                         placementBinder = get()
                     )
                 }
-
-                factory<AppDataSource> { AppDataSourceImpl(contextProvider = get()) }
-                factory<DeviceDataSource> { DeviceDataSourceImpl(contextProvider = get()) }
-                factory<LocationDataSource> { LocationDataSourceImpl(contextProvider = get()) }
-                factory<SessionDataSource> { SessionDataSourceImpl(contextProvider = get()) }
-                factory<TokenDataSource> { TokenDataSourceImpl() }
-                factory<UserDataSource> { UserDataSourceImpl(consentFactory = { null }) }
-                factory<PlacementDataSource> { PlacementDataSourceImpl() }
-
-                factory { DeviceBinder(dataSource = get()) }
-                factory { AppBinder(dataSource = get()) }
-                factory { GeoBinder(dataSource = get()) }
-                factory { SessionBinder(dataSource = get()) }
-                factory { TokenBinder(dataSource = get()) }
-                factory { UserBinder(dataSource = get()) }
-                factory { PlacementBinder(dataSource = get()) }
             }
         }
     }
