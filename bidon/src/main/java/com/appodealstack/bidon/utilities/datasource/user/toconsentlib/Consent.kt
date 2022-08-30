@@ -1,15 +1,13 @@
 package com.appodealstack.bidon.utilities.datasource.user.toconsentlib
 
 import com.appodealstack.bidon.utilities.asList
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import org.json.JSONArray
 import org.json.JSONObject
 
 /**
  * An object containing data about the user's consent to the collection and use of his personal data.
  */
-//TODO should be in separate ConsentLibrary
+// TODO should be in separate ConsentLibrary
 data class Consent internal constructor(
     /**
      * Information about user consent [Status].
@@ -87,7 +85,6 @@ data class Consent internal constructor(
     enum class HasConsent {
         UNKNOWN, TRUE, FALSE
     }
-
 
     val isGDPRScope: Boolean get() = zone == Zone.GDPR
     val isCCPAScope: Boolean get() = zone == Zone.CCPA

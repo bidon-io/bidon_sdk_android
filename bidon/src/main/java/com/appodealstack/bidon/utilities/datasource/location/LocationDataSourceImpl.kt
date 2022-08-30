@@ -50,7 +50,7 @@ internal class LocationDataSourceImpl(
     }
 
     override fun getRegion(): String? {
-        //TODO naming?
+        // TODO naming?
         return address
     }
 
@@ -70,7 +70,6 @@ internal class LocationDataSourceImpl(
 
     override fun getLat(): Double? {
         return deviceLocation?.latitude
-
     }
 
     override fun getLon(): Double? {
@@ -84,8 +83,8 @@ internal class LocationDataSourceImpl(
      */
     @SuppressLint("MissingPermission")
     private fun getLocation(context: Context): Location? {
-        if (!isPermissionGranted(context, permission.ACCESS_FINE_LOCATION)
-            && !isPermissionGranted(context, permission.ACCESS_COARSE_LOCATION)
+        if (!isPermissionGranted(context, permission.ACCESS_FINE_LOCATION) &&
+            !isPermissionGranted(context, permission.ACCESS_COARSE_LOCATION)
         ) {
             return null
         }

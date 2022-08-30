@@ -15,7 +15,7 @@ import org.json.JSONObject
  * @param featureIds IAB features ids array.
  * @param legitimateInterestPurposeIds IAB leg int purposes ids array.
  */
-//TODO should be in separate ConsentLibrary
+// TODO should be in separate ConsentLibrary
 class Vendor @JvmOverloads constructor(
     val id: Int,
     val name: String,

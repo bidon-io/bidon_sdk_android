@@ -1,4 +1,4 @@
-package com.appodealstack.bidon.config.domain.models
+package com.appodealstack.bidon.config.data.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -21,7 +21,7 @@ data class Reward(
     val amount: Int,
 )
 
-//TODO clarify model
+// TODO clarify model
 @Serializable
 data class Capping(
     @SerialName("setting")

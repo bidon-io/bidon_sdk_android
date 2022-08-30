@@ -1,9 +1,8 @@
 package com.appodealstack.bidon.config.domain.databinders
 
+import com.appodealstack.bidon.config.data.models.Session
 import com.appodealstack.bidon.config.domain.DataBinder
-import com.appodealstack.bidon.config.domain.models.Session
 import com.appodealstack.bidon.core.BidonJson
-import com.appodealstack.bidon.utilities.datasource.location.LocationDataSource
 import com.appodealstack.bidon.utilities.datasource.session.SessionDataSource
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
@@ -35,5 +34,4 @@ internal class SessionBinder(
             cpuUsage = dataSource.getCpuUsage()
         )
     }
-
 }

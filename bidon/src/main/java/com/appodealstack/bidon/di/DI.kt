@@ -23,20 +23,22 @@ import com.appodealstack.bidon.core.impl.AdaptersSourceImpl
 import com.appodealstack.bidon.core.impl.BidOnSdkImpl
 import com.appodealstack.bidon.core.impl.ContextProviderImpl
 import com.appodealstack.bidon.core.impl.PauseResumeObserverImpl
-import com.appodealstack.bidon.core.*
-import com.appodealstack.bidon.core.impl.*
-import com.appodealstack.bidon.utilities.datasource.DataSourceProvider
-import com.appodealstack.bidon.utilities.datasource.DataSourceProvider.getDataSource
-import com.appodealstack.bidon.utilities.datasource.SourceType
 import com.appodealstack.bidon.utilities.datasource.app.AppDataSource
+import com.appodealstack.bidon.utilities.datasource.app.AppDataSourceImpl
 import com.appodealstack.bidon.utilities.datasource.device.DeviceDataSource
+import com.appodealstack.bidon.utilities.datasource.device.DeviceDataSourceImpl
 import com.appodealstack.bidon.utilities.datasource.location.LocationDataSource
+import com.appodealstack.bidon.utilities.datasource.location.LocationDataSourceImpl
 import com.appodealstack.bidon.utilities.datasource.placement.PlacementDataSource
+import com.appodealstack.bidon.utilities.datasource.placement.PlacementDataSourceImpl
 import com.appodealstack.bidon.utilities.datasource.session.SessionDataSource
+import com.appodealstack.bidon.utilities.datasource.session.SessionDataSourceImpl
 import com.appodealstack.bidon.utilities.datasource.token.TokenDataSource
+import com.appodealstack.bidon.utilities.datasource.token.TokenDataSourceImpl
 import com.appodealstack.bidon.utilities.datasource.user.AdvertisingInfo
 import com.appodealstack.bidon.utilities.datasource.user.AdvertisingInfoImpl
 import com.appodealstack.bidon.utilities.datasource.user.UserDataSource
+import com.appodealstack.bidon.utilities.datasource.user.UserDataSourceImpl
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 import com.appodealstack.bidon.utilities.network.BidOnEndpoints
@@ -150,13 +152,22 @@ internal object DI {
                         placementBinder = get()
                     )
                 }
-                factory { DeviceBinder(getDataSource(type = SourceType.Device, contextProvider = get()) as DeviceDataSource) }
-                factory { AppBinder(getDataSource(type = SourceType.App, contextProvider = get()) as AppDataSource) }
-                factory { GeoBinder(getDataSource(type = SourceType.Location, contextProvider = get()) as LocationDataSource) }
-                factory { SessionBinder(getDataSource(type = SourceType.Session, contextProvider = get()) as SessionDataSource)  }
-                factory { TokenBinder(getDataSource(type = SourceType.Token, contextProvider = get()) as TokenDataSource)  }
-                factory { UserBinder(getDataSource(type = SourceType.User, contextProvider = get()) as UserDataSource) }
-                factory { PlacementBinder(getDataSource(type = SourceType.Placement, contextProvider = get()) as PlacementDataSource) }
+
+                factory<AppDataSource> { AppDataSourceImpl(contextProvider = get()) }
+                factory<DeviceDataSource> { DeviceDataSourceImpl(contextProvider = get()) }
+                factory<LocationDataSource> { LocationDataSourceImpl(contextProvider = get()) }
+                factory<SessionDataSource> { SessionDataSourceImpl(contextProvider = get()) }
+                factory<TokenDataSource> { TokenDataSourceImpl() }
+                factory<UserDataSource> { UserDataSourceImpl(consentFactory = { null }) }
+                factory<PlacementDataSource> { PlacementDataSourceImpl() }
+
+                factory { DeviceBinder(dataSource = get()) }
+                factory { AppBinder(dataSource = get()) }
+                factory { GeoBinder(dataSource = get()) }
+                factory { SessionBinder(dataSource = get()) }
+                factory { TokenBinder(dataSource = get()) }
+                factory { UserBinder(dataSource = get()) }
+                factory { PlacementBinder(dataSource = get()) }
             }
         }
     }

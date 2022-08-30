@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import java.util.*
 
-internal class AdvertisingInfoImpl: AdvertisingInfo {
+internal class AdvertisingInfoImpl : AdvertisingInfo {
 
     override val adProfileFlow = MutableStateFlow<AdvertisingProfile>(DefaultAdvertisingProfile)
 

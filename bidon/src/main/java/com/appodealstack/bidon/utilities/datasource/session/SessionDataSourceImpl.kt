@@ -71,7 +71,6 @@ internal class SessionDataSourceImpl(
         return totalRamSize
     }
 
-
     /**
      * Get free ram size using [android.os.Debug.MemoryInfo].
      *
@@ -194,7 +193,6 @@ internal class SessionDataSourceImpl(
         return totalStorageSize
     }
 
-
     /**
      * Get max ram memory, which app can used using [ActivityManager]
      *
@@ -205,7 +203,7 @@ internal class SessionDataSourceImpl(
             if (maxRamAllocatedSize == 0L) {
                 maxRamAllocatedSize =
                     getActivityManager(context)
-                        .largeMemoryClass * 1024L * 1024L
+                    .largeMemoryClass * 1024L * 1024L
             }
         } catch (throwable: Throwable) {
             logError(message = throwable.message ?: "", error = throwable)
@@ -360,7 +358,6 @@ internal class SessionDataSourceImpl(
             closeable?.close()
         } catch (e: Throwable) {
             logError(message = e.message ?: "", error = e)
-
         }
     }
 }

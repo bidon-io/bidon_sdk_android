@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.config.domain.databinders
 
+import com.appodealstack.bidon.config.data.models.App
 import com.appodealstack.bidon.config.domain.DataBinder
-import com.appodealstack.bidon.config.domain.models.App
 import com.appodealstack.bidon.core.BidonJson
 import com.appodealstack.bidon.utilities.datasource.app.AppDataSource
 import kotlinx.serialization.json.JsonElement

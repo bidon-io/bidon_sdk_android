@@ -1,13 +1,11 @@
 package com.appodealstack.bidon.config.domain.databinders
 
+import com.appodealstack.bidon.config.data.models.Consent
+import com.appodealstack.bidon.config.data.models.Iab
+import com.appodealstack.bidon.config.data.models.User
 import com.appodealstack.bidon.config.domain.DataBinder
-import com.appodealstack.bidon.config.domain.models.AcceptedVendors
-import com.appodealstack.bidon.config.domain.models.Consent
-import com.appodealstack.bidon.config.domain.models.Iab
-import com.appodealstack.bidon.config.domain.models.User
 import com.appodealstack.bidon.core.BidonJson
 import com.appodealstack.bidon.utilities.datasource.user.UserDataSource
-import com.appodealstack.bidon.utilities.datasource.user.toconsentlib.Vendor
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 

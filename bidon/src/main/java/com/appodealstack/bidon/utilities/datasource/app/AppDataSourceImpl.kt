@@ -6,54 +6,30 @@ import android.os.Build
 import com.appodealstack.bidon.Version
 import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.ext.logInternal
-import com.appodealstack.bidon.utilities.datasource.DataSource
-import com.appodealstack.bidon.utilities.datasource.SourceType
-import com.appodealstack.bidon.utilities.datasource.SourceType.App
+import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 
 internal class AppDataSourceImpl(
-    private val contextProvider: ContextProvider
+    private val contextProvider: ContextProvider,
+    private val keyValueStorage: KeyValueStorage
 ) : AppDataSource {
 
-    val context: Context
-    get() = contextProvider.requiredContext
-
-    override fun getBundleId(): String {
-        return context.packageName
-    }
-
-    override fun getVersionName(): String? {
-        return getPackageInfo(context)?.versionName
-    }
-
     override fun getVersionCode(): Number? {
-        val packageInfo = getPackageInfo(context)
+        val packageInfo = getPackageInfo(contextProvider.requiredContext)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             packageInfo?.longVersionCode
         } else {
+            @Suppress("DEPRECATION")
             packageInfo?.versionCode
         }
     }
 
-    override fun getAppKey(): String? {
-        TODO("SharedPreferences")
-        return null
-    }
-
-    override fun getFramework(): String {
-        return Version.frameworkName
-    }
-
-    override fun getFrameworkVersion(): String? {
-        return Version.frameworkVersion
-    }
-
-    override fun getPluginVersion(): String? {
-        return Version.engineVersion
-    }
-
-    override fun getVersion(): String {
-        return Version.version
-    }
+    override fun getBundleId(): String = contextProvider.requiredContext.packageName
+    override fun getVersionName(): String? = getPackageInfo(contextProvider.requiredContext)?.versionName
+    override fun getAppKey(): String? = keyValueStorage.appKey
+    override fun getFramework(): String = Version.frameworkName
+    override fun getFrameworkVersion(): String? = Version.frameworkVersion
+    override fun getPluginVersion(): String? = Version.engineVersion
+    override fun getVersion(): String = Version.version
 
     private fun getPackageInfo(context: Context): PackageInfo? {
         var packageInfo: PackageInfo? = null

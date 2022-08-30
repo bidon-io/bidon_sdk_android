@@ -2,8 +2,7 @@ package com.appodealstack.bidon.utilities.datasource.device
 
 import com.appodealstack.bidon.utilities.datasource.DataSource
 
-internal interface DeviceDataSource: DataSource {
-
+internal interface DeviceDataSource : DataSource {
     fun getUserAgent(): String?
     fun getManufacturer(): String
     fun getDeviceModel(): String

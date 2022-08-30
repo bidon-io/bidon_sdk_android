@@ -1,41 +1,32 @@
 package com.appodealstack.bidon.utilities.datasource.user
 
-import com.appodealstack.bidon.config.domain.models.AcceptedVendors
+import com.appodealstack.bidon.config.data.models.AcceptedVendors
 import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.utilities.datasource.user.toconsentlib.Consent
 import com.appodealstack.bidon.utilities.datasource.user.toconsentlib.Vendor
 
 internal class UserDataSourceImpl(
-    private val regulator: Regulator
+    private val consentFactory: () -> Consent?
 ) : UserDataSource {
 
     private var advertisingInfo: AdvertisingInfo = get()
     private val currentProfile: AdvertisingInfoImpl.AdvertisingProfile
         get() = advertisingInfo.adProfileFlow.value
 
-
-    private val consent: Consent?
-        get() = regulator.approvedConsent
-
     private val isLimitAdTrackingEnabled: Boolean
         get() = currentProfile.isLimitAdTrackingEnabled
 
+    private val consent get() = consentFactory()
 
     override fun getConsent(): String {
         return consent?.toJson().toString()
     }
 
     override fun getTrackingAuthorizationStatus(): Int {
-        TODO(
-            "Not yet implemented" +
-                    "0 - Not determined\n" +
-                    "1 - Restricted\n" +
-                    "2 - Denied\n" +
-                    "3 - Authorized"
-        )
+        TODO()
     }
 
-    //TODO is it neccessary value?
+    // TODO is it neccessary value?
     override fun getIdg(): String? {
         return if (currentProfile.isAdvertisingIdWasGenerated) {
             currentProfile.id
@@ -51,7 +42,7 @@ internal class UserDataSourceImpl(
     }
 
     override fun getCoppa(): Boolean {
-        return LocalConsentData.getCoppa()
+        return false
     }
 
     override fun getConsentStatus(): String {
