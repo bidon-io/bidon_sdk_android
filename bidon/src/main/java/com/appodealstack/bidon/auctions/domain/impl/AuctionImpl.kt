@@ -29,9 +29,7 @@ internal class AuctionImpl(
         adTypeAdditionalData: AdTypeAdditional
     ): Result<List<AuctionResult>> = runCatching {
         if (state.getAndUpdate { AuctionState.InProgress } == AuctionState.Initialized) {
-            println("++++ 1")
             logInfo(Tag, "Action started $this")
-            println("++++ 2")
             // Request for Auction-data at /auction
             val auctionData = requestActionData()
             mutableLineItems.addAll(auctionData.lineItems ?: emptyList())
