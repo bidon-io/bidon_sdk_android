@@ -32,6 +32,8 @@ import com.appodealstack.bidon.utilities.datasource.placement.PlacementDataSourc
 import com.appodealstack.bidon.utilities.datasource.placement.PlacementDataSourceImpl
 import com.appodealstack.bidon.utilities.datasource.session.SessionDataSource
 import com.appodealstack.bidon.utilities.datasource.session.SessionDataSourceImpl
+import com.appodealstack.bidon.utilities.datasource.session.SessionTracker
+import com.appodealstack.bidon.utilities.datasource.session.SessionTrackerImpl
 import com.appodealstack.bidon.utilities.datasource.token.TokenDataSource
 import com.appodealstack.bidon.utilities.datasource.token.TokenDataSourceImpl
 import com.appodealstack.bidon.utilities.datasource.user.AdvertisingInfo
@@ -82,6 +84,19 @@ object DI {
                     )
                 }
                 singleton<AdvertisingInfo> { AdvertisingInfoImpl() }
+                singleton<LocationDataSource> { LocationDataSourceImpl(context = get()) }
+                singleton<SessionDataSource> {
+                    SessionDataSourceImpl(
+                        context = get(),
+                        sessionTracker = get()
+                    )
+                }
+                singleton<SessionTracker> {
+                    SessionTrackerImpl(
+                        context = get(),
+                        pauseResumeObserver = get()
+                    )
+                }
 
                 /**
                  * Factories
@@ -153,8 +168,6 @@ object DI {
 
                 factory<AppDataSource> { AppDataSourceImpl(context = get(), keyValueStorage = get()) }
                 factory<DeviceDataSource> { DeviceDataSourceImpl(context = get()) }
-                factory<LocationDataSource> { LocationDataSourceImpl(context = get()) }
-                factory<SessionDataSource> { SessionDataSourceImpl(context = get()) }
                 factory<TokenDataSource> { TokenDataSourceImpl(keyValueStorage = get()) }
                 factory<UserDataSource> { UserDataSourceImpl(consentFactory = { null }) } // TODO Add ConsentManager
                 factory<PlacementDataSource> { PlacementDataSourceImpl() }

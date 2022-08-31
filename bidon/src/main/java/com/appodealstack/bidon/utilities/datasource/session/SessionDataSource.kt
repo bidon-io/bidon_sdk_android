@@ -3,7 +3,6 @@ package com.appodealstack.bidon.utilities.datasource.session
 import com.appodealstack.bidon.utilities.datasource.DataSource
 
 internal interface SessionDataSource : DataSource {
-
     fun getId(): String
     fun getLaunchTs(): Long
     fun getLaunchMonotonicTs(): Long

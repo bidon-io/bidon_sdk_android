@@ -36,12 +36,12 @@ internal class PauseResumeObserverImpl(
                 }
 
                 override fun onActivityResumed(activity: Activity) {
-                    logInternal(Tag, "Activity Resumed")
+                    logInternal(Tag, "Activity Resumed $activity")
                     lifecycleFlow.value = PauseResumeObserver.LifecycleState.Resumed
                 }
 
                 override fun onActivityPaused(activity: Activity) {
-                    logInternal(Tag, "Activity Paused")
+                    logInternal(Tag, "Activity Paused $activity")
                     lifecycleFlow.value = PauseResumeObserver.LifecycleState.Paused
                 }
             })

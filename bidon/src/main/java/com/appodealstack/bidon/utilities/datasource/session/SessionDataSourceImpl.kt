@@ -10,21 +10,23 @@ import android.os.Environment
 import android.os.StatFs
 import android.text.TextUtils
 import com.appodealstack.bidon.core.ext.logError
+import com.appodealstack.bidon.core.ext.logInternal
 import java.io.*
 import java.lang.ref.WeakReference
 import java.util.regex.Pattern
 
 internal class SessionDataSourceImpl(
     private val context: Context,
+    private val sessionTracker: SessionTracker,
 ) : SessionDataSource {
 
     private var weakActivityManager: WeakReference<ActivityManager>? = null
-    private val MAX_CPU_FREQUENCY: MutableMap<Int, Float> = HashMap()
-    private val MIN_CPU_FREQUENCY: MutableMap<Int, Float> = HashMap()
+
+    private val maxCpuFrequency: MutableMap<Int, Float> = HashMap()
+    private val minCpuFrequency: MutableMap<Int, Float> = HashMap()
 
     private var totalStorageSize: Long = 0
     private var totalRamSize: Long = 0
-    private var maxRamAllocatedSize: Long = 0
     private var coreCount = 0
 
     /**
@@ -32,23 +34,20 @@ internal class SessionDataSourceImpl(
      *
      * @return free storage space in bytes.
      */
-    override fun getStorageFree(): Long {
-        try {
-            val stat = StatFs(Environment.getDataDirectory().absolutePath)
-            return stat.availableBlocks.toLong() * stat.blockSize.toLong()
-        } catch (throwable: Throwable) {
-            logError(message = throwable.message ?: "", error = throwable)
-        }
-        return 0
+    @Suppress("DEPRECATION")
+    override fun getStorageFree(): Long = try {
+        val stat = StatFs(Environment.getDataDirectory().absolutePath)
+        stat.availableBlocks.toLong() * stat.blockSize.toLong()
+    } catch (throwable: Throwable) {
+        logError(Tag, throwable.message ?: "", throwable)
+        0L
     }
 
-    override fun getStorageUsed(): Long {
-        try {
-            return getStorageSize() - getStorageFree()
-        } catch (throwable: Throwable) {
-            logError(message = throwable.message ?: "", error = throwable)
-        }
-        return 0
+    override fun getStorageUsed(): Long = try {
+        getStorageSize() - getStorageFree()
+    } catch (throwable: Throwable) {
+        logError(Tag, throwable.message ?: "", throwable)
+        0L
     }
 
     /**
@@ -56,31 +55,26 @@ internal class SessionDataSourceImpl(
      *
      * @return total ram size in bytes.
      */
-    override fun getRamSize(): Long {
-        try {
-            if (totalRamSize == 0L) {
-                totalRamSize = getMemoryInfo(context).totalMem
-            }
-        } catch (throwable: Throwable) {
-            logError(message = throwable.message ?: "", error = throwable)
+    override fun getRamSize(): Long = totalRamSize.takeIf { it != 0L }
+        ?: try {
+            getMemoryInfo(context).totalMem.also { totalRamSize = it }
+        } catch (e: Exception) {
+            logError(Tag, e.message ?: "", e)
+            0L
         }
-        return totalRamSize
-    }
 
     /**
      * Get free ram size using [android.os.Debug.MemoryInfo].
      *
      * @return used ram value in bytes.
      */
-    override fun getRamUsed(): Long {
-        try {
-            val memInfo = Debug.MemoryInfo()
-            Debug.getMemoryInfo(memInfo)
-            return memInfo.totalPss * 1024L
-        } catch (throwable: Throwable) {
-            logError(message = throwable.message ?: "", error = throwable)
-        }
-        return 0
+    override fun getRamUsed(): Long = try {
+        val memInfo = Debug.MemoryInfo()
+        Debug.getMemoryInfo(memInfo)
+        memInfo.totalPss * 1024L
+    } catch (throwable: Throwable) {
+        logError(Tag, throwable.message ?: "", throwable)
+        0
     }
 
     /**
@@ -88,59 +82,31 @@ internal class SessionDataSourceImpl(
      *
      * @return cpu usage in the range from 0 to 1.
      */
-    override fun getCpuUsage(): Float {
-        try {
-            val coreCount = getNumCores()
-            var freqSum = 0f
-            var minFreqSum = 0f
-            var maxFreqSum = 0f
-            for (i in 0 until coreCount) {
-                freqSum += getCurCpuFreq(i)
-                minFreqSum += getMinCpuFreq(i)
-                maxFreqSum += getMaxCpuFreq(i)
-            }
-            return getAverageClock(freqSum, minFreqSum, maxFreqSum)
-        } catch (throwable: Throwable) {
-            logError(message = throwable.message ?: "", error = throwable)
+    override fun getCpuUsage(): Float = try {
+        val coreCount = getNumCores()
+        var freqSum = 0f
+        var minFreqSum = 0f
+        var maxFreqSum = 0f
+        for (i in 0 until coreCount) {
+            freqSum += getCurCpuFreq(i)
+            minFreqSum += getMinCpuFreq(i)
+            maxFreqSum += getMaxCpuFreq(i)
         }
-        return 0f
+        getAverageClock(freqSum, minFreqSum, maxFreqSum)
+    } catch (throwable: Throwable) {
+        logError(Tag, throwable.message ?: "", throwable)
+        0f
     }
 
-    override fun getId(): String {
-        TODO("Not yet implemented")
-    }
-
-    override fun getLaunchTs(): Long {
-        TODO("Not yet implemented")
-    }
-
-    override fun getLaunchMonotonicTs(): Long {
-        TODO("Not yet implemented")
-    }
-
-    override fun getStartTs(): Long {
-        TODO("Not yet implemented")
-    }
-
-    override fun getMonotonicStartTs(): Long {
-        TODO("Not yet implemented")
-    }
-
-    override fun getTs(): Long {
-        return System.currentTimeMillis()
-    }
-
-    override fun getMonotonicTs(): Long {
-        TODO("Not yet implemented")
-    }
-
-    override fun getMemoryWarningsTs(): List<Long> {
-        TODO("Not yet implemented")
-    }
-
-    override fun getMemoryWarningsMonotonicTs(): List<Long> {
-        TODO("Not yet implemented")
-    }
+    override fun getId(): String = sessionTracker.sessionId
+    override fun getLaunchTs(): Long = sessionTracker.launchTs
+    override fun getLaunchMonotonicTs(): Long = sessionTracker.launchMonotonicTs
+    override fun getStartTs(): Long = sessionTracker.startTs
+    override fun getMonotonicStartTs(): Long = sessionTracker.startMonotonicTs
+    override fun getTs(): Long = sessionTracker.ts
+    override fun getMonotonicTs(): Long = sessionTracker.monotonicTs
+    override fun getMemoryWarningsTs(): List<Long> = sessionTracker.memoryWarningsTs
+    override fun getMemoryWarningsMonotonicTs(): List<Long> = sessionTracker.memoryWarningsMonotonicTs
 
     override fun getBattery(): Float {
         try {
@@ -148,17 +114,15 @@ internal class SessionDataSourceImpl(
             if (batteryStatus != null) {
                 val level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
                 val scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
-                return if (level == -1 || scale == -1) {
-                    -1f
-                } else {
+                if (level != -1 && scale != -1) {
                     val percentMultiplier = 100.0f
-                    level.toFloat() / scale.toFloat() * percentMultiplier
+                    return level.toFloat() / scale.toFloat() * percentMultiplier
                 }
             }
         } catch (throwable: Throwable) {
             logError(message = throwable.message ?: "", error = throwable)
         }
-        return -1f
+        return NoBatteryData
     }
 
     private fun getBatteryIntent(context: Context): Intent? {
@@ -190,38 +154,15 @@ internal class SessionDataSourceImpl(
     }
 
     /**
-     * Get max ram memory, which app can used using [ActivityManager]
-     *
-     * @return free ram size in bytes.
-     */
-    private fun getMaxRamAllocatedSize(context: Context): Long {
-        try {
-            if (maxRamAllocatedSize == 0L) {
-                maxRamAllocatedSize =
-                    getActivityManager(context)
-                    .largeMemoryClass * 1024L * 1024L
-            }
-        } catch (throwable: Throwable) {
-            logError(message = throwable.message ?: "", error = throwable)
-        }
-        return maxRamAllocatedSize
-    }
-
-    /**
      * Get [ActivityManager] from [WeakReference] or create new.
      *
      * @return [ActivityManager].
      */
-    private fun getActivityManager(context: Context): ActivityManager {
-        val activityManager: ActivityManager
-        if (weakActivityManager?.get() != null) {
-            activityManager = requireNotNull(weakActivityManager?.get())
-        } else {
-            activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-            weakActivityManager = WeakReference(activityManager)
-        }
-        return activityManager
-    }
+    private fun getActivityManager(context: Context): ActivityManager =
+        weakActivityManager?.get()
+            ?: (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).also {
+                weakActivityManager = WeakReference(it)
+            }
 
     /**
      * Calculate cpu usage.
@@ -233,13 +174,12 @@ internal class SessionDataSourceImpl(
         minFreqSum: Float,
         maxFreqSum: Float
     ): Float {
-        if (maxFreqSum - minFreqSum <= 0) {
-            return 0f
-        }
-        return if (maxFreqSum >= 0) {
-            (currentFreqSum - minFreqSum) / (maxFreqSum - minFreqSum)
-        } else {
-            0f
+        val diff = maxFreqSum - minFreqSum
+        logInternal("+++", "$currentFreqSum val $diff = $maxFreqSum - $minFreqSum")
+        return when {
+            diff <= 0 -> 0f
+            maxFreqSum >= 0 -> (currentFreqSum - minFreqSum) / diff
+            else -> 0f
         }
     }
 
@@ -248,28 +188,21 @@ internal class SessionDataSourceImpl(
      *
      * @return core count of CPU.
      */
-    private fun getNumCores(): Int {
-        if (coreCount == 0) {
-            try {
-                val dir = File("/sys/devices/system/cpu/")
-                val files = dir.listFiles { pathname ->
-                    Pattern.matches(
-                        "cpu[0-9]",
-                        pathname.name
-                    )
-                }
-                if (files != null) {
-                    coreCount = files.size
-                } else {
-                    coreCount = Runtime.getRuntime().availableProcessors()
-                }
-            } catch (throwable: Throwable) {
-                coreCount = Runtime.getRuntime().availableProcessors()
-                logError(message = throwable.message ?: "", error = throwable)
+    private fun getNumCores(): Int = coreCount.takeIf { it != 0 }
+        ?: try {
+            val dir = File("/sys/devices/system/cpu/")
+            val files = dir.listFiles { pathname ->
+                Pattern.matches("cpu[0-9]", pathname.name)
+            }
+            (files?.size ?: Runtime.getRuntime().availableProcessors()).also {
+                coreCount = it
+            }
+        } catch (throwable: Throwable) {
+            logError(message = throwable.message ?: "", error = throwable)
+            Runtime.getRuntime().availableProcessors().also {
+                coreCount = it
             }
         }
-        return coreCount
-    }
 
     /**
      * Get current frequency of core using contents of the system folder
@@ -289,14 +222,15 @@ internal class SessionDataSourceImpl(
      * @return max frequency of core in Hz
      */
     private fun getMaxCpuFreq(coreNum: Int): Float {
-        return if (MAX_CPU_FREQUENCY.containsKey(coreNum)) {
-            requireNotNull(MAX_CPU_FREQUENCY.get(coreNum))
+        val maxCpuFrequency = maxCpuFrequency
+        return if (maxCpuFrequency.containsKey(coreNum)) {
+            maxCpuFrequency[coreNum] ?: 0f
         } else {
             val path =
                 String.format("/sys/devices/system/cpu/cpu%s/cpufreq/cpuinfo_max_freq", coreNum)
             val result = readIntegerFile(path)
             if (result > 0) {
-                MAX_CPU_FREQUENCY[coreNum] = result
+                maxCpuFrequency[coreNum] = result
             }
             result
         }
@@ -309,14 +243,14 @@ internal class SessionDataSourceImpl(
      * @return current frequency of core in Hz
      */
     private fun getMinCpuFreq(coreNum: Int): Float {
-        return if (MIN_CPU_FREQUENCY.containsKey(coreNum)) {
-            requireNotNull(MIN_CPU_FREQUENCY.get(coreNum))
+        val minCpuFrequency = minCpuFrequency
+        return if (minCpuFrequency.containsKey(coreNum)) {
+            minCpuFrequency[coreNum] ?: 0f
         } else {
-            val path =
-                String.format("/sys/devices/system/cpu/cpu%s/cpufreq/cpuinfo_min_freq", coreNum)
+            val path = String.format("/sys/devices/system/cpu/cpu%s/cpufreq/cpuinfo_min_freq", coreNum)
             val result = readIntegerFile(path)
             if (result > 0) {
-                MIN_CPU_FREQUENCY[coreNum] = result
+                minCpuFrequency[coreNum] = result
             }
             result
         }
@@ -328,15 +262,14 @@ internal class SessionDataSourceImpl(
      * @return [Float] value from file.
      */
     private fun readIntegerFile(filePath: String): Float {
-        var closeable: Closeable? = null
+        var fileInputStream: Closeable? = null
+        var inputStreamReader: Closeable? = null
+        var bufferedReader: Closeable? = null
         val line: String
         try {
-            val fileInputStream = FileInputStream(filePath)
-            closeable = fileInputStream
-            val inputStreamReader = InputStreamReader(fileInputStream)
-            closeable = inputStreamReader
-            val bufferedReader = BufferedReader(inputStreamReader, 1024)
-            closeable = bufferedReader
+            fileInputStream = FileInputStream(filePath)
+            inputStreamReader = InputStreamReader(fileInputStream)
+            bufferedReader = BufferedReader(inputStreamReader, 1024)
             line = bufferedReader.readLine()
             if (!TextUtils.isEmpty(line)) {
                 return line.toFloat()
@@ -344,7 +277,9 @@ internal class SessionDataSourceImpl(
         } catch (e: Throwable) {
             // ignore
         } finally {
-            close(closeable)
+            close(fileInputStream)
+            close(inputStreamReader)
+            close(bufferedReader)
         }
         return 0f
     }
@@ -357,3 +292,7 @@ internal class SessionDataSourceImpl(
         }
     }
 }
+
+private const val Tag = "SessionDataSource"
+
+private const val NoBatteryData = -1f
