@@ -208,7 +208,7 @@ internal class BMInterstitialAdImpl(
             currencyCode = "USD",
             roundId = roundId,
             dsp = this.auctionResult?.demandSource,
-            monetizationNetwork = this.auctionResult?.demandSource
+            monetizationNetwork =demandId.demandId
         )
     }
 }

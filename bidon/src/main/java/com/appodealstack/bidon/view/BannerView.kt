@@ -279,6 +279,7 @@ class BannerView @JvmOverloads constructor(
     }
 
     private fun launchLoadingRefreshIfNeeded() {
+        logInternal(Tag, "launchLoadingRefreshIfNeeded$refresh")
         (refresh as? AutoRefresh.On)?.timeoutMs?.let { timeoutMs ->
             logInternal(Tag, "Launching Loading CountDownTimer: $timeoutMs ms")
             loadingRefreshTimer.startTimer(timeoutMs) {
@@ -288,6 +289,7 @@ class BannerView @JvmOverloads constructor(
     }
 
     private fun launchDisplayingRefreshIfNeeded() {
+        logInternal(Tag, "launchLoadingRefreshIfNeeded$refresh")
         (refresh as? AutoRefresh.On)?.timeoutMs?.let { timeoutMs ->
             logInternal(Tag, "Launching Display CountDownTimer: $timeoutMs ms")
             displayingRefreshTimer.startTimer(timeoutMs) {

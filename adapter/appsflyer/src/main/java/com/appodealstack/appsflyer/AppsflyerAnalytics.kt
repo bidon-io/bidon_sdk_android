@@ -73,7 +73,7 @@ class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenu
         val eventRevenueCurrency = ad.currency ?: Currency.getInstance(UsdCurrencyCode)
 
         AppsFlyerAdRevenue.logAdRevenue(
-            monetizationNetwork,
+            monetizationNetwork, // demandId
             MediationNetwork.appodeal, // @see https://appodeal.slack.com/archives/C02PE4GAFU0/p1660830733326759
             eventRevenueCurrency,
             eventRevenue,

@@ -202,7 +202,7 @@ internal class AdmobRewardedImpl(
             demandAd = demandAd,
             price = lineItem?.priceFloor ?: 0.0,
             sourceAd = this,
-            monetizationNetwork = BNMediationNetwork.GoogleAdmob.networkName,
+            monetizationNetwork = demandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = "USD"
