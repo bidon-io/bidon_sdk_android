@@ -35,4 +35,9 @@ object Dependencies {
         const val KotlinxCoroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
         const val KotlinxCoroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinxCoroutinesVersion"
     }
+
+    object Accompanist {
+        private const val accompanist = "0.24.13-rc"
+        const val permissions = "com.google.accompanist:accompanist-permissions:$accompanist"
+    }
 }

@@ -16,7 +16,8 @@ internal class GetAuctionRequestUseCaseImpl(
     private val binders: List<DataBinderType> = listOf(
         DataBinderType.Device,
         DataBinderType.App,
-        DataBinderType.Token
+        DataBinderType.Token,
+        DataBinderType.Geo,
     )
 
     override suspend fun request(): Result<AuctionResponse> {

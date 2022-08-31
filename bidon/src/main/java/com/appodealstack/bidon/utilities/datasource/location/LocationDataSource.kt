@@ -8,13 +8,13 @@ internal interface LocationDataSource : DataSource {
      * @return current device location latitude if permission is granted, if it's `null` - latitude
      * which were received from server. If it's not available by restrictions, will return `null`.
      */
-    fun getLat(): Double?
+    fun getLatitude(): Double?
 
     /**
      * @return current device location longitude if permission is granted, if it's `null` - longitude
      * which were received from server. If it's not available by restrictions, will return `null`.
      */
-    fun getLon(): Double?
+    fun getLongitude(): Double?
 
     fun getAccuracy(): Float?
     fun getLastFix(): Long?

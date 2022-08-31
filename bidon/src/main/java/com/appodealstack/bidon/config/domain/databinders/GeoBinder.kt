@@ -16,8 +16,8 @@ internal class GeoBinder(
 
     private fun createGeo(): Geo {
         return Geo(
-            lat = dataSource.getLat(),
-            lon = dataSource.getLon(),
+            lat = dataSource.getLatitude(),
+            lon = dataSource.getLongitude(),
             accuracy = dataSource.getAccuracy(),
             lastfix = dataSource.getLastFix(),
             country = dataSource.getCountry(),

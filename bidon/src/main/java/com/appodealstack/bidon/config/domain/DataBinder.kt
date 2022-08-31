@@ -5,7 +5,7 @@ import kotlinx.serialization.json.JsonElement
 internal enum class DataBinderType {
     Device, // +- getJavaScriptSupport
     App,
-    Geo, // -
+    Geo,
     Session, // -
     User, // -
     Token,

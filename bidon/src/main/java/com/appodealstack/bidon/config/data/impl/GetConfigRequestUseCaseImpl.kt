@@ -20,6 +20,7 @@ internal class GetConfigRequestUseCaseImpl(
         DataBinderType.Device,
         DataBinderType.App,
         DataBinderType.Token,
+        DataBinderType.Geo,
     )
 
     override suspend fun request(body: ConfigRequestBody): Result<ConfigResponse> {
