@@ -56,7 +56,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 )
             ),
         )
-        coEvery { getAuctionRequestUseCase.request() } returns AuctionResponse(
+        coEvery { getAuctionRequestUseCase.request(demandAd.placement, demandAd.adType, adTypeAdditionalData) } returns AuctionResponse(
             rounds = listOf(
                 Round(
                     id = "round1",
@@ -112,7 +112,7 @@ internal class AuctionImplTest : ConcurrentTest() {
 
     @Test
     fun `it should`() = runTest {
-        coEvery { getAuctionRequestUseCase.request() } returns BidonError.NoAuctionResults.asFailure()
+        coEvery { getAuctionRequestUseCase.request(demandAd.placement, demandAd.adType, adTypeAdditionalData) } returns BidonError.NoAuctionResults.asFailure()
         val roundsListener = object : RoundsListener {
             override fun roundStarted(roundId: String) {
                 println("roundStarted: $roundId")

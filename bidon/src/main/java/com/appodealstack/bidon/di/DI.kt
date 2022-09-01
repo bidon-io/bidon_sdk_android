@@ -4,12 +4,14 @@ import android.app.Application
 import android.content.Context
 import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.adapters.DemandAd
+import com.appodealstack.bidon.analytics.domain.StatsRequestUseCase
+import com.appodealstack.bidon.analytics.domain.StatsRequestUseCaseImpl
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
-import com.appodealstack.bidon.auctions.data.impl.GetAuctionRequestUseCaseImpl
 import com.appodealstack.bidon.auctions.domain.*
 import com.appodealstack.bidon.auctions.domain.impl.AuctionHolderImpl
 import com.appodealstack.bidon.auctions.domain.impl.AuctionImpl
 import com.appodealstack.bidon.auctions.domain.impl.AuctionResolversHolderImpl
+import com.appodealstack.bidon.auctions.domain.impl.GetAuctionRequestUseCaseImpl
 import com.appodealstack.bidon.config.data.impl.AdapterInstanceCreatorImpl
 import com.appodealstack.bidon.config.data.impl.GetConfigRequestUseCaseImpl
 import com.appodealstack.bidon.config.domain.*
@@ -143,6 +145,7 @@ object DI {
                         roundsListener = listener
                     )
                 }
+                factory<GetOrientationUseCase> { GetOrientationUseCaseImpl(context = get()) }
 
                 /**
                  * Requests
@@ -155,6 +158,12 @@ object DI {
                 }
                 factory<GetAuctionRequestUseCase> {
                     GetAuctionRequestUseCaseImpl(
+                        dataProvider = get(),
+                        getOrientation = get()
+                    )
+                }
+                factory<StatsRequestUseCase> {
+                    StatsRequestUseCaseImpl(
                         dataProvider = get(),
                     )
                 }

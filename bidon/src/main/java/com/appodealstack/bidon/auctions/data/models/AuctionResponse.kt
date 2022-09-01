@@ -2,7 +2,6 @@ package com.appodealstack.bidon.auctions.data.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
 
 @Serializable
 internal data class AuctionResponse(
@@ -15,5 +14,9 @@ internal data class AuctionResponse(
     @SerialName("fill_timeout")
     val fillTimeout: Long?,
     @SerialName("token")
-    val token: JsonObject?,
+    val token: String?,
+    @SerialName("auction_id")
+    val auctionId: String?,
+    @SerialName("auction_configuration_id")
+    val auctionConfigurationId: Int?,
 )

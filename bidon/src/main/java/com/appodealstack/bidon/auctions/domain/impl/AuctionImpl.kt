@@ -31,7 +31,7 @@ internal class AuctionImpl(
         if (state.getAndUpdate { AuctionState.InProgress } == AuctionState.Initialized) {
             logInfo(Tag, "Action started $this")
             // Request for Auction-data at /auction
-            val auctionData = requestActionData()
+            val auctionData = requestActionData(demandAd, adTypeAdditionalData)
             mutableLineItems.addAll(auctionData.lineItems ?: emptyList())
 
             // Start auction
@@ -285,8 +285,11 @@ internal class AuctionImpl(
         auctionResults.value = resolver.sortWinners(auctionResults.value + roundResults)
     }
 
-    private suspend fun requestActionData(): AuctionResponse {
-        val auctionResponse = getAuctionRequest.request().getOrNull()
+    private suspend fun requestActionData(demandAd: DemandAd, adTypeAdditionalData: AdTypeAdditional): AuctionResponse {
+        val auctionResponse = getAuctionRequest.request(
+            placement = demandAd.placement,
+            additionalData = adTypeAdditionalData
+        ).getOrNull()
         return requireNotNull(auctionResponse) {
             "No auction data response"
         }
