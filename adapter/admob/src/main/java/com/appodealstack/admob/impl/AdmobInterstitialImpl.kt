@@ -4,7 +4,6 @@ import android.app.Activity
 import com.appodealstack.admob.AdmobFullscreenAdAuctionParams
 import com.appodealstack.admob.asBidonError
 import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.analytics.BNMediationNetwork
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
@@ -190,7 +189,7 @@ internal class AdmobInterstitialImpl(
             demandAd = demandAd,
             price = lineItem?.priceFloor ?: 0.0,
             sourceAd = this,
-            monetizationNetwork = BNMediationNetwork.GoogleAdmob.networkName,
+            monetizationNetwork = demandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = "USD"

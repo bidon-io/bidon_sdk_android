@@ -56,14 +56,14 @@ class BannerView @JvmOverloads constructor(
     @AttrRes defStyleAtt: Int = 0
 ) : FrameLayout(context, attrs, defStyleAtt), BannerAd {
 
-    constructor(context: Context, placementId: String) : this(context, null, 0) {
-        this.placementId = placementId
-    }
-
     override var placementId: String = BidOnSdk.DefaultPlacement
     private var bannerSize: BannerSize = BannerSize.Banner
     private var userListener: BannerListener? = null
     private var refresh: AutoRefresh = AutoRefresh.On(DefaultAutoRefreshTimeoutMs)
+
+    constructor(context: Context, placementId: String) : this(context, null, 0) {
+        this.placementId = placementId
+    }
 
     private val showState = MutableStateFlow<ShowState>(ShowState.Idle)
     private val showActionFlow = MutableSharedFlow<ShowAction>(extraBufferCapacity = Int.MAX_VALUE)
@@ -124,11 +124,13 @@ class BannerView @JvmOverloads constructor(
 
     override fun startAutoRefresh(timeoutMs: Long) {
         logInfo(Tag, "Auto-refresh initialized with timeout $timeoutMs ms")
+        refresh = AutoRefresh.On(timeoutMs)
         sendAction(ShowAction.OnStartAutoRefreshInvoked(timeoutMs))
     }
 
     override fun stopAutoRefresh() {
         logInfo(Tag, "Auto-refresh stopped")
+        refresh = AutoRefresh.Off
         sendAction(ShowAction.OnStopAutoRefreshInvoked)
     }
 
@@ -250,7 +252,6 @@ class BannerView @JvmOverloads constructor(
                         state
                     }
                     is ShowAction.OnStartAutoRefreshInvoked -> {
-                        refresh = AutoRefresh.On(action.timeoutMs)
                         if (showState.value is ShowState.Displaying) {
                             launchLoadingRefreshIfNeeded()
                             launchDisplayingRefreshIfNeeded()
@@ -258,7 +259,6 @@ class BannerView @JvmOverloads constructor(
                         state
                     }
                     ShowAction.OnStopAutoRefreshInvoked -> {
-                        refresh = AutoRefresh.Off
                         displayingRefreshTimer.stop()
                         loadingRefreshTimer.stop()
                         state
@@ -298,6 +298,10 @@ class BannerView @JvmOverloads constructor(
 
     private fun proceedShow() {
         showJob?.cancel()
+        if (refresh is AutoRefresh.Off && loadState.value !is LoadState.Loaded) {
+            logInternal(Tag, "AutoRefresh is OFF and no banner loaded. Disable to show banner.")
+            return
+        }
         showJob = scope.launch {
             try {
                 val winner = (loadState.first { it is LoadState.Loaded } as? LoadState.Loaded)?.auctionResult ?: return@launch
