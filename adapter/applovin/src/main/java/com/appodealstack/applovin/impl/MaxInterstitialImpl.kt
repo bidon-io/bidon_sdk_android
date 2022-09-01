@@ -21,7 +21,8 @@ import kotlinx.coroutines.flow.first
 internal class MaxInterstitialImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
-    private val roundId: String
+    private val roundId: String,
+    private val auctionId: String
 ) : AdSource.Interstitial<MaxFullscreenAdAuctionParams> {
 
     private var interstitialAd: MaxInterstitialAd? = null
@@ -147,7 +148,8 @@ internal class MaxInterstitialImpl(
             monetizationNetwork = maxAd?.networkName,
             dsp = maxAd?.dspId,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 
@@ -164,7 +166,8 @@ internal class MaxInterstitialImpl(
             monetizationNetwork = null,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 }

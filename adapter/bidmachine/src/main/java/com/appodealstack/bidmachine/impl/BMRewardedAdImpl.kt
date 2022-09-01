@@ -23,7 +23,8 @@ import kotlinx.coroutines.flow.first
 internal class BMRewardedAdImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
-    private val roundId: String
+    private val roundId: String,
+    private val auctionId: String
 ) : AdSource.Rewarded<BMFullscreenAuctionParams>, WinLossNotifiable {
 
     override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
@@ -218,6 +219,7 @@ internal class BMRewardedAdImpl(
             roundId = roundId,
             dsp = this.auctionResult?.demandSource,
             monetizationNetwork = demandId.demandId,
+            auctionId = auctionId,
         )
     }
 }

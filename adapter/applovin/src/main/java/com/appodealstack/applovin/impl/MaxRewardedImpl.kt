@@ -21,7 +21,8 @@ import kotlinx.coroutines.flow.first
 internal class MaxRewardedImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
-    private val roundId: String
+    private val roundId: String,
+    private val auctionId: String
 ) : AdSource.Rewarded<MaxFullscreenAdAuctionParams> {
 
     private var rewardedAd: MaxRewardedAd? = null
@@ -157,7 +158,8 @@ internal class MaxRewardedImpl(
             monetizationNetwork = maxAd?.networkName,
             dsp = maxAd?.dspId,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 
@@ -174,7 +176,8 @@ internal class MaxRewardedImpl(
             monetizationNetwork = null,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 }

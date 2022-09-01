@@ -25,7 +25,8 @@ import kotlinx.coroutines.withContext
 internal class AdmobBannerImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
-    private val roundId: String
+    private val roundId: String,
+    private val auctionId: String
 ) : AdSource.Banner<AdmobBannerAuctionParams> {
 
     override val ad: Ad?
@@ -187,7 +188,8 @@ internal class AdmobBannerImpl(
             monetizationNetwork = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = "USD"
+            currencyCode = "USD",
+            auctionId = auctionId,
         )
     }
 

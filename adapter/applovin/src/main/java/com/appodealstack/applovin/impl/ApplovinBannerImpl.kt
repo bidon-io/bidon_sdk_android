@@ -27,7 +27,8 @@ internal class ApplovinBannerImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
     private val roundId: String,
-    private val appLovinSdk: AppLovinSdk
+    private val appLovinSdk: AppLovinSdk,
+    private val auctionId: String
 ) : AdSource.Banner<ApplovinBannerAuctionParams> {
 
     private var adView: AppLovinAdView? = null
@@ -156,7 +157,8 @@ internal class ApplovinBannerImpl(
             monetizationNetwork = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 
@@ -169,7 +171,8 @@ internal class ApplovinBannerImpl(
             monetizationNetwork = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 

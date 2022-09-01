@@ -24,7 +24,8 @@ internal class ApplovinInterstitialImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
     private val roundId: String,
-    private val appLovinSdk: AppLovinSdk
+    private val appLovinSdk: AppLovinSdk,
+    private val auctionId: String
 ) : AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
 
     private var interstitialAd: AppLovinIncentivizedInterstitial? = null
@@ -151,7 +152,8 @@ internal class ApplovinInterstitialImpl(
             monetizationNetwork = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 
@@ -164,7 +166,8 @@ internal class ApplovinInterstitialImpl(
             monetizationNetwork = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 }

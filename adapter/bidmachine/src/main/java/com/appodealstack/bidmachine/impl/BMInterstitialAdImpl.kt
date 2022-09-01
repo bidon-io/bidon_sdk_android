@@ -24,7 +24,8 @@ import kotlinx.coroutines.flow.first
 internal class BMInterstitialAdImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
-    private val roundId: String
+    private val roundId: String,
+    private val auctionId: String
 ) : AdSource.Interstitial<BMFullscreenAuctionParams>, WinLossNotifiable {
 
     override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
@@ -208,7 +209,8 @@ internal class BMInterstitialAdImpl(
             currencyCode = "USD",
             roundId = roundId,
             dsp = this.auctionResult?.demandSource,
-            monetizationNetwork = demandId.demandId
+            monetizationNetwork = demandId.demandId,
+            auctionId = auctionId,
         )
     }
 }

@@ -230,7 +230,8 @@ class IronSourceAdapter :
             currencyCode = null,
             roundId = "Ad.AuctionRound.Mediation",
             dsp = null,
-            monetizationNetwork = adInfo?.adNetwork
+            monetizationNetwork = adInfo?.adNetwork,
+            auctionId = "auctionId",
         )
     }
 }

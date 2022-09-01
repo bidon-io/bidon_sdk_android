@@ -25,7 +25,8 @@ import kotlinx.coroutines.withContext
 internal class AdmobInterstitialImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
-    private val roundId: String
+    private val roundId: String,
+    private val auctionId: String
 ) : AdSource.Interstitial<AdmobFullscreenAdAuctionParams> {
 
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
@@ -192,7 +193,8 @@ internal class AdmobInterstitialImpl(
             monetizationNetwork = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = "USD"
+            currencyCode = "USD",
+            auctionId = auctionId,
         )
     }
 }

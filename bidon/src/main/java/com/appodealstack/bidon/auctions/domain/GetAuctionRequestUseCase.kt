@@ -6,6 +6,7 @@ import com.appodealstack.bidon.auctions.data.models.AuctionResponse
 internal interface GetAuctionRequestUseCase {
     suspend fun request(
         placement: String,
-        additionalData: AdTypeAdditional
+        additionalData: AdTypeAdditional,
+        auctionId: String
     ): Result<AuctionResponse>
 }

@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.withTimeoutOrNull
+import java.util.*
+import kotlin.NoSuchElementException
 
 internal class AuctionImpl(
     private val adaptersSource: AdaptersSource,
@@ -21,6 +23,7 @@ internal class AuctionImpl(
     private val state = MutableStateFlow(AuctionState.Initialized)
     private val auctionResults = MutableStateFlow(listOf<AuctionResult>())
     private val mutableLineItems = mutableListOf<LineItem>()
+    private val auctionId by lazy { UUID.randomUUID().toString() }
 
     override suspend fun start(
         demandAd: DemandAd,
@@ -31,7 +34,7 @@ internal class AuctionImpl(
         if (state.getAndUpdate { AuctionState.InProgress } == AuctionState.Initialized) {
             logInfo(Tag, "Action started $this")
             // Request for Auction-data at /auction
-            val auctionData = requestActionData(demandAd, adTypeAdditionalData)
+            val auctionData = requestActionData(demandAd, adTypeAdditionalData, auctionId)
             mutableLineItems.addAll(auctionData.lineItems ?: emptyList())
 
             // Start auction
@@ -184,17 +187,17 @@ internal class AuctionImpl(
             val adSources = when (demandAd.adType) {
                 AdType.Interstitial -> {
                     filteredAdapters.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>().map {
-                        it.interstitial(demandAd, round.id)
+                        it.interstitial(demandAd = demandAd, roundId = round.id, auctionId = auctionId)
                     }
                 }
                 AdType.Rewarded -> {
                     filteredAdapters.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().map {
-                        it.rewarded(demandAd, round.id)
+                        it.rewarded(demandAd = demandAd, roundId = round.id, auctionId = auctionId)
                     }
                 }
                 AdType.Banner -> {
                     filteredAdapters.filterIsInstance<AdProvider.Banner<AdAuctionParams>>().map {
-                        it.banner(demandAd, round.id)
+                        it.banner(demandAd = demandAd, roundId = round.id, auctionId = auctionId)
                     }
                 }
             }
@@ -209,11 +212,13 @@ internal class AuctionImpl(
                     async {
                         withTimeoutOrNull(round.timeoutMs) {
                             val adParam = obtainAdParamByType(
-                                adSource,
-                                adTypeAdditionalData,
-                                priceFloor,
-                                timeout,
-                                availableLineItemsForDemand
+                                adSource = adSource,
+                                adTypeAdditionalData = adTypeAdditionalData,
+                                priceFloor = priceFloor,
+                                timeout = timeout,
+                                availableLineItemsForDemand = availableLineItemsForDemand,
+                                auctionId = auctionId,
+                                roundId = round.id
                             )
                             adParam.getOrNull()?.let {
                                 adSource.bid(adParams = it)
@@ -240,7 +245,9 @@ internal class AuctionImpl(
         adTypeAdditionalData: AdTypeAdditional,
         priceFloor: Double,
         timeout: Long,
-        availableLineItemsForDemand: List<LineItem>
+        availableLineItemsForDemand: List<LineItem>,
+        auctionId: String,
+        roundId: String
     ) = when (adSource) {
         is AdSource.Banner -> {
             check(adTypeAdditionalData is AdTypeAdditional.Banner)
@@ -252,7 +259,7 @@ internal class AuctionImpl(
                 bannerSize = adTypeAdditionalData.bannerSize,
                 onLineItemConsumed = { lineItem ->
                     mutableLineItems.remove(lineItem)
-                }
+                },
             )
         }
         is AdSource.Interstitial -> {
@@ -264,7 +271,7 @@ internal class AuctionImpl(
                 activity = adTypeAdditionalData.activity,
                 onLineItemConsumed = { lineItem ->
                     mutableLineItems.remove(lineItem)
-                }
+                },
             )
         }
         is AdSource.Rewarded -> {
@@ -276,7 +283,7 @@ internal class AuctionImpl(
                 activity = adTypeAdditionalData.activity,
                 onLineItemConsumed = { lineItem ->
                     mutableLineItems.remove(lineItem)
-                }
+                },
             )
         }
     }
@@ -285,10 +292,11 @@ internal class AuctionImpl(
         auctionResults.value = resolver.sortWinners(auctionResults.value + roundResults)
     }
 
-    private suspend fun requestActionData(demandAd: DemandAd, adTypeAdditionalData: AdTypeAdditional): AuctionResponse {
+    private suspend fun requestActionData(demandAd: DemandAd, adTypeAdditionalData: AdTypeAdditional, auctionId: String): AuctionResponse {
         val auctionResponse = getAuctionRequest.request(
             placement = demandAd.placement,
-            additionalData = adTypeAdditionalData
+            additionalData = adTypeAdditionalData,
+            auctionId = auctionId
         ).getOrNull()
         return requireNotNull(auctionResponse) {
             "No auction data response"

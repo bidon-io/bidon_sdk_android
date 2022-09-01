@@ -27,7 +27,8 @@ import kotlinx.coroutines.flow.first
 internal class MaxBannerImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
-    private val roundId: String
+    private val roundId: String,
+    private val auctionId: String
 ) : AdSource.Banner<MaxBannerAuctionParams> {
 
     private var maxAdView: MaxAdView? = null
@@ -182,7 +183,8 @@ internal class MaxBannerImpl(
             monetizationNetwork = maxAd?.networkName,
             dsp = maxAd?.dspId,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 
@@ -199,7 +201,8 @@ internal class MaxBannerImpl(
             monetizationNetwork = null,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 

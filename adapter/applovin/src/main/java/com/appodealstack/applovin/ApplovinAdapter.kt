@@ -60,15 +60,41 @@ class ApplovinAdapter :
 
     override fun parseConfigParam(json: JsonObject): ApplovinParameters = json.parse(ApplovinParameters.serializer())
 
-    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
-        return ApplovinInterstitialImpl(demandId, demandAd, roundId, requireNotNull(appLovinSdk))
+    override fun interstitial(
+        demandAd: DemandAd,
+        roundId: String,
+        auctionId: String
+    ): AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
+        return ApplovinInterstitialImpl(
+            demandId = demandId,
+            demandAd = demandAd,
+            roundId = roundId,
+            appLovinSdk = requireNotNull(appLovinSdk),
+            auctionId = auctionId
+        )
     }
 
-    override fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<ApplovinFullscreenAdAuctionParams> {
-        return ApplovinRewardedImpl(demandId, demandAd, roundId, requireNotNull(appLovinSdk))
+    override fun rewarded(
+        demandAd: DemandAd,
+        roundId: String,
+        auctionId: String
+    ): AdSource.Rewarded<ApplovinFullscreenAdAuctionParams> {
+        return ApplovinRewardedImpl(
+            demandId = demandId,
+            demandAd = demandAd,
+            roundId = roundId,
+            appLovinSdk = requireNotNull(appLovinSdk),
+            auctionId = auctionId
+        )
     }
 
-    override fun banner(demandAd: DemandAd, roundId: String): AdSource.Banner<ApplovinBannerAuctionParams> {
-        return ApplovinBannerImpl(demandId, demandAd, roundId, requireNotNull(appLovinSdk))
+    override fun banner(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Banner<ApplovinBannerAuctionParams> {
+        return ApplovinBannerImpl(
+            demandId = demandId,
+            demandAd = demandAd,
+            roundId = roundId,
+            appLovinSdk = requireNotNull(appLovinSdk),
+            auctionId = auctionId
+        )
     }
 }

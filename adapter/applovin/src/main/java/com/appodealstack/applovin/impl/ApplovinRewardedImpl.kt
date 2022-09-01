@@ -24,7 +24,8 @@ internal class ApplovinRewardedImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
     private val roundId: String,
-    private val appLovinSdk: AppLovinSdk
+    private val appLovinSdk: AppLovinSdk,
+    private val auctionId: String
 ) : AdSource.Rewarded<ApplovinFullscreenAdAuctionParams> {
 
     private var rewardedAd: AppLovinIncentivizedInterstitial? = null
@@ -161,7 +162,8 @@ internal class ApplovinRewardedImpl(
             monetizationNetwork = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 
@@ -174,7 +176,8 @@ internal class ApplovinRewardedImpl(
             monetizationNetwork = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 }

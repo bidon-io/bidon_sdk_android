@@ -26,7 +26,8 @@ import kotlinx.coroutines.withContext
 internal class AdmobRewardedImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
-    private val roundId: String
+    private val roundId: String,
+    private val auctionId: String
 ) : AdSource.Rewarded<AdmobFullscreenAdAuctionParams> {
 
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
@@ -204,7 +205,8 @@ internal class AdmobRewardedImpl(
             monetizationNetwork = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = "USD"
+            currencyCode = "USD",
+            auctionId = auctionId,
         )
     }
 }

@@ -9,6 +9,7 @@ import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.utilities.ktor.JsonHttpRequest
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.encodeToJsonElement
 
 internal class StatsRequestUseCaseImpl(
     private val dataProvider: DataProvider,
@@ -25,6 +26,7 @@ internal class StatsRequestUseCaseImpl(
     override suspend fun request(body: StatsRequestBody): Result<BaseResponse> {
         val bindData = dataProvider.provide(binders)
         val requestBody = buildJsonObject {
+            put("stats", BidonJson.encodeToJsonElement(body))
             bindData.forEach { (key, jsonElement) ->
                 put(key, jsonElement)
             }
@@ -36,9 +38,9 @@ internal class StatsRequestUseCaseImpl(
         ).map { jsonResponse ->
             BidonJson.decodeFromJsonElement(BaseResponse.serializer(), jsonResponse)
         }.onFailure {
-            logError(Tag, "Error while loading auction data", it)
+            logError(Tag, "Error while sending stats", it)
         }.onSuccess {
-            logInfo(Tag, "Loaded auction data: $it")
+            logInfo(Tag, "Stats was sent successfully")
         }
     }
 }

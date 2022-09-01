@@ -22,15 +22,15 @@ interface Initializable<T : AdapterParameters> {
 
 sealed interface AdProvider {
     interface Interstitial<T : AdAuctionParams> : AdProvider {
-        fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<T>
+        fun interstitial(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Interstitial<T>
     }
 
     interface Banner<T : AdAuctionParams> : AdProvider {
-        fun banner(demandAd: DemandAd, roundId: String): AdSource.Banner<T>
+        fun banner(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Banner<T>
     }
 
     interface Rewarded<T : AdAuctionParams> : AdProvider {
-        fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<T>
+        fun rewarded(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Rewarded<T>
     }
 }
 
@@ -53,7 +53,7 @@ sealed interface AdSource<T : AdAuctionParams> {
             priceFloor: Double,
             timeout: Long,
             lineItems: List<LineItem>,
-            onLineItemConsumed: (LineItem) -> Unit,
+            onLineItemConsumed: (LineItem) -> Unit
         ): Result<AdAuctionParams>
     }
 
@@ -63,7 +63,7 @@ sealed interface AdSource<T : AdAuctionParams> {
             priceFloor: Double,
             timeout: Long,
             lineItems: List<LineItem>,
-            onLineItemConsumed: (LineItem) -> Unit,
+            onLineItemConsumed: (LineItem) -> Unit
         ): Result<AdAuctionParams>
     }
 
@@ -74,7 +74,7 @@ sealed interface AdSource<T : AdAuctionParams> {
             timeout: Long,
             lineItems: List<LineItem>,
             bannerSize: BannerSize,
-            onLineItemConsumed: (LineItem) -> Unit,
+            onLineItemConsumed: (LineItem) -> Unit
         ): Result<AdAuctionParams>
 
         fun getAdView(): View

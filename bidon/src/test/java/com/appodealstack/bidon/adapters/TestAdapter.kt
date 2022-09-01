@@ -20,7 +20,11 @@ internal class TestAdapter(
 
     override fun parseConfigParam(json: JsonObject) = TestAdapterParameters
 
-    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<TestAdapterInterstitialParameters> {
+    override fun interstitial(
+        demandAd: DemandAd,
+        roundId: String,
+        auctionId: String
+    ): AdSource.Interstitial<TestAdapterInterstitialParameters> {
         return TestAdapterInterstitialImpl(demandId, roundId, interstitialData)
     }
 }

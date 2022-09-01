@@ -11,6 +11,7 @@ class Ad(
     val dsp: String?,
     val sourceAd: Any,
     val currencyCode: String?,
+    val auctionId: String,
 ) {
     val currency: Currency?
         get() = currencyCode?.let { Currency.getInstance(it) }

@@ -15,7 +15,6 @@ import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.utilities.ktor.JsonHttpRequest
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
-import java.util.*
 
 internal class GetAuctionRequestUseCaseImpl(
     private val dataProvider: DataProvider,
@@ -32,19 +31,18 @@ internal class GetAuctionRequestUseCaseImpl(
 
     override suspend fun request(
         placement: String,
-        additionalData: AdTypeAdditional
+        additionalData: AdTypeAdditional,
+        auctionId: String
     ): Result<AuctionResponse> {
         val (banner, interstitial, rewarded) = getData(additionalData)
-
         val adObject = AdObjectRequestBody(
             placementId = placement,
-            auctionId = UUID.randomUUID().toString(),
+            auctionId = auctionId,
             banner = banner,
             interstitial = interstitial,
             rewarded = rewarded,
             orientationCode = getOrientation().code
         )
-
         val bindData = dataProvider.provide(binders)
         val requestBody = buildJsonObject {
             put("ad_object", BidonJson.encodeToJsonElement(adObject))
