@@ -16,7 +16,14 @@ internal class GetConfigRequestUseCaseImpl(
     private val dataProvider: DataProvider,
     private val keyValueStorage: KeyValueStorage
 ) : GetConfigRequestUseCase {
-    private val binders: List<DataBinderType> = listOf(DataBinderType.Device, DataBinderType.App)
+    private val binders: List<DataBinderType> = listOf(
+        DataBinderType.Device,
+        DataBinderType.App,
+        DataBinderType.Token,
+        DataBinderType.Geo,
+        DataBinderType.Session,
+        DataBinderType.User,
+    )
 
     override suspend fun request(body: ConfigRequestBody): Result<ConfigResponse> {
         val bindData = dataProvider.provide(binders)

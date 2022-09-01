@@ -26,9 +26,7 @@ private const val MockUrl = "https://ef5347ef-7389-4095-8a57-cc78c827f8b2.mock.p
 @Composable
 internal fun ServerSettingsScreen(
     navController: NavController,
-    keyValueStorage: KeyValueStorage = KeyValueStorageImpl().apply {
-        init(navController.context)
-    }
+    keyValueStorage: KeyValueStorage = KeyValueStorageImpl(navController.context)
 ) {
     val host = remember {
         mutableStateOf(
@@ -38,9 +36,6 @@ internal fun ServerSettingsScreen(
                 else -> Host.Production
             }
         )
-    }
-    val port = remember {
-        mutableStateOf(keyValueStorage.port)
     }
     Column(
         modifier = Modifier
@@ -74,7 +69,6 @@ internal fun ServerSettingsScreen(
                 .padding(16.dp)
                 .align(Alignment.CenterHorizontally),
             onClick = {
-                keyValueStorage.port = port.value
                 keyValueStorage.host = when (host.value) {
                     Host.Production -> NetworkSettings.BaseBidOnUrl
                     Host.MockServer -> MockUrl
@@ -129,50 +123,6 @@ private fun RenderHosts(hosts: List<Host>, selectedHost: Host, onClick: (Host) -
                     )
                 }
                 if (host == selectedHost) {
-                    Image(
-                        painter = rememberVectorPainter(Icons.Outlined.Check),
-                        colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
-                        contentDescription = "",
-                        modifier = Modifier.align(Alignment.CenterEnd)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RenderPorts(ports: List<Int?>, selectedPort: Int?, onClick: (Int?) -> Unit) {
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth()
-    ) {
-        CaptionText(text = "Port")
-        ports.forEach { port ->
-            Box(
-                modifier = Modifier
-                    .padding(
-                        bottom = 1.dp
-                    )
-                    .clickable {
-                        onClick.invoke(port)
-                    }
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .background(
-                        color = MaterialTheme.colors.surface,
-                        shape = ports.getShapeByPositionFor(port)
-                    )
-                    .padding(
-                        horizontal = 10.dp,
-                    )
-            ) {
-                Body2Text(
-                    text = port.toString(),
-                    modifier = Modifier.align(Alignment.CenterStart)
-                )
-                if (port == selectedPort) {
                     Image(
                         painter = rememberVectorPainter(Icons.Outlined.Check),
                         colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),

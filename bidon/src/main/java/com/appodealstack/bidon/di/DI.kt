@@ -1,6 +1,7 @@
 package com.appodealstack.bidon.di
 
 import android.app.Application
+import android.content.Context
 import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.adapters.DemandAd
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
@@ -17,12 +18,28 @@ import com.appodealstack.bidon.config.domain.impl.BidOnInitializerImpl
 import com.appodealstack.bidon.config.domain.impl.DataProviderImpl
 import com.appodealstack.bidon.config.domain.impl.InitAndRegisterAdaptersUseCaseImpl
 import com.appodealstack.bidon.core.AdaptersSource
-import com.appodealstack.bidon.core.ContextProvider
 import com.appodealstack.bidon.core.PauseResumeObserver
 import com.appodealstack.bidon.core.impl.AdaptersSourceImpl
 import com.appodealstack.bidon.core.impl.BidOnSdkImpl
-import com.appodealstack.bidon.core.impl.ContextProviderImpl
 import com.appodealstack.bidon.core.impl.PauseResumeObserverImpl
+import com.appodealstack.bidon.utilities.datasource.app.AppDataSource
+import com.appodealstack.bidon.utilities.datasource.app.AppDataSourceImpl
+import com.appodealstack.bidon.utilities.datasource.device.DeviceDataSource
+import com.appodealstack.bidon.utilities.datasource.device.DeviceDataSourceImpl
+import com.appodealstack.bidon.utilities.datasource.location.LocationDataSource
+import com.appodealstack.bidon.utilities.datasource.location.LocationDataSourceImpl
+import com.appodealstack.bidon.utilities.datasource.placement.PlacementDataSource
+import com.appodealstack.bidon.utilities.datasource.placement.PlacementDataSourceImpl
+import com.appodealstack.bidon.utilities.datasource.session.SessionDataSource
+import com.appodealstack.bidon.utilities.datasource.session.SessionDataSourceImpl
+import com.appodealstack.bidon.utilities.datasource.session.SessionTracker
+import com.appodealstack.bidon.utilities.datasource.session.SessionTrackerImpl
+import com.appodealstack.bidon.utilities.datasource.token.TokenDataSource
+import com.appodealstack.bidon.utilities.datasource.token.TokenDataSourceImpl
+import com.appodealstack.bidon.utilities.datasource.user.AdvertisingData
+import com.appodealstack.bidon.utilities.datasource.user.UserDataSource
+import com.appodealstack.bidon.utilities.datasource.user.impl.AdvertisingDataImpl
+import com.appodealstack.bidon.utilities.datasource.user.impl.UserDataSourceImpl
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 import com.appodealstack.bidon.utilities.network.BidOnEndpoints
@@ -33,8 +50,14 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Dependency Injection
  */
-internal object DI {
+object DI {
     private val isInitialized = AtomicBoolean(false)
+
+    fun init(context: Context) {
+        registerDependencyInjection {
+            singleton<Context> { context.applicationContext }
+        }
+    }
 
     /**
      * Initializing Dependency Injection module
@@ -45,22 +68,37 @@ internal object DI {
                 /**
                  * Singletons
                  */
-                singleton<BidOnSdk> {
-                    BidOnSdkImpl(
-                        bidONInitializer = get(),
-                        contextProvider = get(),
-                        adaptersSource = get(),
-                        bidOnEndpoints = get()
-                    )
-                }
-                singleton<ContextProvider> { ContextProviderImpl() }
+                singleton<BidOnSdk> { BidOnSdkImpl() }
+
                 singleton<AdaptersSource> { AdaptersSourceImpl() }
                 singleton<BidOnEndpoints> { BidOnEndpointsImpl() }
-                singleton<KeyValueStorage> { KeyValueStorageImpl() }
+                singleton<KeyValueStorage> {
+                    KeyValueStorageImpl(
+                        context = get()
+                    )
+                }
                 singleton<PauseResumeObserver> {
                     @Suppress("UNCHECKED_CAST")
                     PauseResumeObserverImpl(
-                        application = get<ContextProvider>().requiredContext.applicationContext as Application
+                        application = get<Context>() as Application
+                    )
+                }
+                singleton<AdvertisingData> {
+                    AdvertisingDataImpl(
+                        context = get()
+                    )
+                }
+                singleton<LocationDataSource> { LocationDataSourceImpl(context = get()) }
+                singleton<SessionDataSource> {
+                    SessionDataSourceImpl(
+                        context = get(),
+                        sessionTracker = get()
+                    )
+                }
+                singleton<SessionTracker> {
+                    SessionTrackerImpl(
+                        context = get(),
+                        pauseResumeObserver = get()
                     )
                 }
 
@@ -72,7 +110,7 @@ internal object DI {
                         initAndRegisterAdapters = get(),
                         getConfigRequest = get(),
                         adapterInstanceCreator = get(),
-                        keyValueStorage = get()
+                        keyValueStorage = get(),
                     )
                 }
                 factory<InitAndRegisterAdaptersUseCase> {
@@ -124,6 +162,25 @@ internal object DI {
                 /**
                  * Binders
                  */
+                factory { DeviceBinder(dataSource = get()) }
+                factory { AppBinder(dataSource = get()) }
+                factory { GeoBinder(dataSource = get()) }
+                factory { SessionBinder(dataSource = get()) }
+                factory { TokenBinder(dataSource = get()) }
+                factory { UserBinder(dataSource = get()) }
+                factory { PlacementBinder(dataSource = get()) }
+
+                factory<AppDataSource> { AppDataSourceImpl(context = get(), keyValueStorage = get()) }
+                factory<DeviceDataSource> { DeviceDataSourceImpl(context = get()) }
+                factory<TokenDataSource> { TokenDataSourceImpl(keyValueStorage = get()) }
+                factory<UserDataSource> {
+                    UserDataSourceImpl(
+                        keyValueStorage = get(),
+                        advertisingData = get()
+                    )
+                }
+                factory<PlacementDataSource> { PlacementDataSourceImpl() }
+
                 factory<DataProvider> {
                     DataProviderImpl(
                         deviceBinder = get(),
@@ -132,14 +189,9 @@ internal object DI {
                         sessionBinder = get(),
                         tokenBinder = get(),
                         userBinder = get(),
+                        placementBinder = get()
                     )
                 }
-                factory { DeviceBinder(contextProvider = get()) }
-                factory { AppBinder() }
-                factory { GeoBinder() }
-                factory { SessionBinder() }
-                factory { TokenBinder() }
-                factory { UserBinder() }
             }
         }
     }

@@ -299,7 +299,7 @@ class BannerView @JvmOverloads constructor(
     private fun proceedShow() {
         showJob?.cancel()
         if (refresh is AutoRefresh.Off && loadState.value !is LoadState.Loaded) {
-            logInternal(Tag, "AutoRefresh is OFF and no banner loaded. Disable to show banner.")
+            logInternal(Tag, "AutoRefresh is OFF and no banner loaded. Unable to show banner.")
             return
         }
         showJob = scope.launch {

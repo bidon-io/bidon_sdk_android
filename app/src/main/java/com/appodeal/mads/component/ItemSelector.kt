@@ -19,7 +19,7 @@ import com.google.accompanist.flowlayout.SizeMode
 @Composable
 fun <T> ItemSelector(
     modifier: Modifier = Modifier,
-    title: String,
+    title: String? = null,
     description: String? = null,
     items: List<T>,
     selectedItem: T? = null,
@@ -29,13 +29,14 @@ fun <T> ItemSelector(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 16.dp)
     ) {
-        Text(
-            text = title,
-            color = MaterialTheme.colors.onPrimary,
-            style = MaterialTheme.typography.body2
-        )
+        title?.let {
+            Text(
+                text = title,
+                color = MaterialTheme.colors.onPrimary,
+                style = MaterialTheme.typography.body2
+            )
+        }
         description?.let {
             Text(
                 text = description,
@@ -75,7 +76,7 @@ fun <T> ItemSelector(
                             text = getItemTitle(item),
                             style = MaterialTheme.typography.button,
                             modifier = Modifier.padding(8.dp),
-                            fontSize = 12.sp,
+                            fontSize = 9.sp,
                             color = color
                         )
                     }

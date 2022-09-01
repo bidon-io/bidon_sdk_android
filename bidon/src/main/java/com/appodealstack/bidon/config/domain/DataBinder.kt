@@ -8,11 +8,12 @@ internal enum class DataBinderType {
     Geo,
     Session,
     User,
-    Token
+    Token,
+    Placement // -
 }
 
 /**
- * Scheme @see https://appodeal.atlassian.net/wiki/spaces/SX/pages/4490264831/SDK+Server+Schema#SDK%3C%3EServerSchema-Session
+ *  @see Scheme[https://appodeal.atlassian.net/wiki/spaces/SX/pages/4490264831/SDK+Server+Schema#SDK%3C%3EServerSchema-Session]
  */
 internal interface DataBinder {
     val fieldName: String
