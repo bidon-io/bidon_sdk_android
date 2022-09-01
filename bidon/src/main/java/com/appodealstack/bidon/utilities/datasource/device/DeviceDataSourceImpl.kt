@@ -57,10 +57,7 @@ internal class DeviceDataSourceImpl(
     override fun getPpi(): Int = metrics.densityDpi
     override fun getPxRatio(): Float = metrics.density
     override fun getLanguage(): String = Locale.getDefault().toString()
-
-    override fun getJavaScriptSupport(): Int {
-        return 1 // TODO a28 obtain javaScriptSupport. 1- supports, 0 - no
-    }
+    override fun getJavaScriptSupport(): Int = 1 // 1-supports, 0-not
 
     /**
      * Get mobile operator data using [TelephonyManager].

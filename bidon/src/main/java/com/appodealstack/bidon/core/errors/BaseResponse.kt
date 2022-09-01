@@ -4,9 +4,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ErrorResponse(
+open class BaseResponse(
+    @SerialName("success")
+    val success: Boolean?,
     @SerialName("error")
-    val error: Error
+    val error: Error?,
 ) {
     @Serializable
     data class Error(
