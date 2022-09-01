@@ -175,7 +175,6 @@ internal class SessionDataSourceImpl(
         maxFreqSum: Float
     ): Float {
         val diff = maxFreqSum - minFreqSum
-        logInternal("+++", "$currentFreqSum val $diff = $maxFreqSum - $minFreqSum")
         return when {
             diff <= 0 -> 0f
             maxFreqSum >= 0 -> (currentFreqSum - minFreqSum) / diff

@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Slider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +20,7 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.modifier.modifierLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -35,6 +35,8 @@ import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.view.BannerView
 import com.appodealstack.bidon.view.DefaultAutoRefreshTimeoutMs
 import kotlinx.coroutines.launch
+import kotlin.math.max
+import kotlin.math.min
 
 @Composable
 fun BannerScreen(navController: NavHostController) {
@@ -132,21 +134,50 @@ fun BannerScreen(navController: NavHostController) {
                 } else {
                     "each ${autoRefreshTtl.value / 1000} sec."
                 }
-                Body2Text(text = autoRefreshText)
-                Slider(
-                    value = (autoRefreshTtl.value / 1000).toFloat(),
-                    onValueChange = {
-                        val newTimeout = ((it * 1000).toLong())
-                        if (newTimeout == 0L) {
-                            bannerView.value?.stopAutoRefresh()
-                        } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    NumberScroller(
+                        modifier = Modifier.weight(1f),
+                        initialValue = DefaultAutoRefreshTimeoutMs / 1000f,
+                        value = (autoRefreshTtl.value.toInt() / 1000).toString(),
+                        onValueChanges = {
+                            val newTimeout = min(
+                                a = max(
+                                    a = (it * 1000L).toLong(),
+                                    b = 0L
+                                ),
+                                b = 30000L
+                            )
+                            if (newTimeout == 0L) {
+                                bannerView.value?.stopAutoRefresh()
+                            } else {
+                                bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
+                            }
+                            autoRefreshTtl.value = newTimeout
+                        },
+                        onPlusClicked = {
+                            val newTimeout = min(autoRefreshTtl.value + 1000, 30_000L)
                             bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
+                            autoRefreshTtl.value = newTimeout
+                        },
+                        onMinusClicked = {
+                            val newTimeout = kotlin.math.max(autoRefreshTtl.value - 1000, 0L)
+                            if (newTimeout == 0L) {
+                                bannerView.value?.stopAutoRefresh()
+                            } else {
+                                bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
+                            }
+                            autoRefreshTtl.value = newTimeout
                         }
-                        autoRefreshTtl.value = newTimeout
-                    },
-                    steps = 30,
-                    valueRange = 0f..30f
-                )
+                    )
+                    Body2Text(
+                        modifier = Modifier.weight(2f),
+                        text = autoRefreshText
+                    )
+                }
 
                 AppButton(text = "Create banner") {
                     bannerView.value = BannerView(
