@@ -10,7 +10,6 @@ import android.os.Environment
 import android.os.StatFs
 import android.text.TextUtils
 import com.appodealstack.bidon.core.ext.logError
-import com.appodealstack.bidon.core.ext.logInternal
 import java.io.*
 import java.lang.ref.WeakReference
 import java.util.regex.Pattern

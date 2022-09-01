@@ -1,8 +1,5 @@
 package com.appodeal.mads.ui
 
-import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +17,6 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.modifier.modifierLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -72,9 +68,13 @@ fun BannerScreen(navController: NavHostController) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .dashedBorder(width = 1.dp, radius = 4.dp, color = MaterialTheme.colors.error)
-                .padding(16.dp),
+                .padding(horizontal = 0.dp)
+                .dashedBorder(
+                    width = 1.dp,
+                    radius = 0.dp,
+                    color = MaterialTheme.colors.error
+                )
+                .padding(0.dp),
             contentAlignment = Alignment.Center
         ) {
             val view = bannerView.value
@@ -92,94 +92,85 @@ fun BannerScreen(navController: NavHostController) {
 //                        }
 //                    ), // TODO Admob.OnPaidListener isn't invoked using ComposeView, but always in XML-Layout. Check it.
                     factory = {
-                        view.apply {
-                            layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
-                        }
+                        view
                     }
                 )
             } else {
-
-                Subtitle1Text(text = "Place for Banner")
+                Subtitle1Text(text = "Place for Banner", modifier = Modifier.padding(8.dp))
             }
         }
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            state = listState
-        ) {
-            item {
-                ItemSelector(
-                    title = "Ad Format",
-                    items = BannerSize.values().toList(),
-                    selectedItem = bannerSize.value,
-                    getItemTitle = {
-                        when (it) {
-                            BannerSize.Banner -> "Banner 320x50"
-                            BannerSize.LeaderBoard -> "Leader Board 728x90"
-                            BannerSize.MRec -> "MRec 300x250"
-                            BannerSize.Large -> "Large 320x100"
-                            BannerSize.Adaptive -> "Smart/Adaptive"
+        Column(modifier = Modifier.padding(8.dp)) {
+            ItemSelector(
+                items = BannerSize.values().toList(),
+                selectedItem = bannerSize.value,
+                getItemTitle = {
+                    when (it) {
+                        BannerSize.Banner -> "Banner 320x50"
+                        BannerSize.LeaderBoard -> "Leader Board 728x90"
+                        BannerSize.MRec -> "MRec 300x250"
+                        BannerSize.Large -> "Large 320x100"
+                        BannerSize.Adaptive -> "Smart/Adaptive"
+                    }
+                },
+                onItemClicked = {
+                    bannerSize.value = it
+                    bannerView.value?.setAdSize(it)
+                }
+            )
+            Spacer(modifier = Modifier.padding(top = 2.dp))
+
+            val autoRefreshText = "AutoRefresh " + if (autoRefreshTtl.value / 1000 == 0L) {
+                "Off"
+            } else {
+                "each ${autoRefreshTtl.value / 1000} sec."
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                NumberScroller(
+                    modifier = Modifier.weight(1f),
+                    initialValue = DefaultAutoRefreshTimeoutMs / 1000f,
+                    value = (autoRefreshTtl.value.toInt() / 1000).toString(),
+                    onValueChanges = {
+                        val newTimeout = min(
+                            a = max(
+                                a = (it * 1000L).toLong(),
+                                b = 0L
+                            ),
+                            b = 30000L
+                        )
+                        if (newTimeout == 0L) {
+                            bannerView.value?.stopAutoRefresh()
+                        } else {
+                            bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
                         }
+                        autoRefreshTtl.value = newTimeout
                     },
-                    onItemClicked = {
-                        bannerSize.value = it
-                        bannerView.value?.setAdSize(it)
+                    onPlusClicked = {
+                        val newTimeout = min(autoRefreshTtl.value + 1000, 30_000L)
+                        bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
+                        autoRefreshTtl.value = newTimeout
+                    },
+                    onMinusClicked = {
+                        val newTimeout = kotlin.math.max(autoRefreshTtl.value - 1000, 0L)
+                        if (newTimeout == 0L) {
+                            bannerView.value?.stopAutoRefresh()
+                        } else {
+                            bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
+                        }
+                        autoRefreshTtl.value = newTimeout
                     }
                 )
-                Spacer(modifier = Modifier.padding(top = 16.dp))
+                Body2Text(
+                    modifier = Modifier.weight(2f),
+                    text = autoRefreshText
+                )
+            }
 
-                val autoRefreshText = "AutoRefresh " + if (autoRefreshTtl.value / 1000 == 0L) {
-                    "Off"
-                } else {
-                    "each ${autoRefreshTtl.value / 1000} sec."
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    NumberScroller(
-                        modifier = Modifier.weight(1f),
-                        initialValue = DefaultAutoRefreshTimeoutMs / 1000f,
-                        value = (autoRefreshTtl.value.toInt() / 1000).toString(),
-                        onValueChanges = {
-                            val newTimeout = min(
-                                a = max(
-                                    a = (it * 1000L).toLong(),
-                                    b = 0L
-                                ),
-                                b = 30000L
-                            )
-                            if (newTimeout == 0L) {
-                                bannerView.value?.stopAutoRefresh()
-                            } else {
-                                bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
-                            }
-                            autoRefreshTtl.value = newTimeout
-                        },
-                        onPlusClicked = {
-                            val newTimeout = min(autoRefreshTtl.value + 1000, 30_000L)
-                            bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
-                            autoRefreshTtl.value = newTimeout
-                        },
-                        onMinusClicked = {
-                            val newTimeout = kotlin.math.max(autoRefreshTtl.value - 1000, 0L)
-                            if (newTimeout == 0L) {
-                                bannerView.value?.stopAutoRefresh()
-                            } else {
-                                bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
-                            }
-                            autoRefreshTtl.value = newTimeout
-                        }
-                    )
-                    Body2Text(
-                        modifier = Modifier.weight(2f),
-                        text = autoRefreshText
-                    )
-                }
-
-                AppButton(text = "Create banner") {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                AppButton(text = "Create") {
                     bannerView.value = BannerView(
                         context = context,
                         placementId = "some_placement_id"
@@ -260,34 +251,42 @@ fun BannerScreen(navController: NavHostController) {
                         )
                     }
                 }
-                if (bannerView.value != null) {
-                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        AppButton(
-                            text = "Load",
-                        ) {
-                            bannerView.value?.load()
-                            if (showOnLoad.value) {
-                                bannerView.value?.show()
-                            }
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        Body2Text(text = "Show onLoad")
-                        Checkbox(
-                            colors = CheckboxDefaults.colors(MaterialTheme.colors.onBackground),
-                            checked = showOnLoad.value, onCheckedChange = {
-                                showOnLoad.value = it
-                            }
-                        )
-                    }
-                    AppButton(text = "Show") {
+                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                AppButton(
+                    text = "Load",
+                ) {
+                    bannerView.value?.load()
+                    if (showOnLoad.value) {
                         bannerView.value?.show()
                     }
-                    AppButton(text = "Destroy") {
-                        bannerView.value?.destroy()
-                        bannerView.value = null
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Body2Text(text = "Show onLoad")
+                Checkbox(
+                    colors = CheckboxDefaults.colors(MaterialTheme.colors.onBackground),
+                    checked = showOnLoad.value, onCheckedChange = {
+                        showOnLoad.value = it
                     }
+                )
+            }
+            Row {
+                AppButton(text = "Show") {
+                    bannerView.value?.show()
+                }
+                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                AppButton(text = "Destroy") {
+                    bannerView.value?.destroy()
+                    bannerView.value = null
                 }
             }
+        }
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
+            state = listState
+        ) {
             items(logFlow.value) { logLine ->
                 Column(
                     modifier = Modifier
