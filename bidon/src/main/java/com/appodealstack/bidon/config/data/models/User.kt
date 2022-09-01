@@ -6,13 +6,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class User(
     @SerialName("idfa")
-    var idfa: String,
+    var platformAdvertisingId: String, // idfa = iOS, AD_ID - Android.
     @SerialName("tracking_authorization_status")
     var trackingAuthorizationStatus: Int,
     @SerialName("idg")
-    var idg: String?,
+    var applicationId: String?, // ID that app generates on the very first launch and send across session.
     @SerialName("consent")
-    var consent: Consent,
+    var consent: Consent? = null, // TODO do not use it until ConsentManager is integrated
     @SerialName("coppa")
     var coppa: Boolean
 )

@@ -207,4 +207,4 @@ internal class BMBannerAdImpl(
     }
 }
 
-private const val Tag = "BidMachine Interstitial"
+private const val Tag = "BidMachine Banner"

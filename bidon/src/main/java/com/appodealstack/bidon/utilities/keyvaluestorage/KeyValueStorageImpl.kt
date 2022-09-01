@@ -1,6 +1,7 @@
 package com.appodealstack.bidon.utilities.keyvaluestorage
 
 import android.content.Context
+import java.util.*
 
 class KeyValueStorageImpl(private val context: Context) : KeyValueStorage {
     private val sharedPreferences by lazy {
@@ -13,6 +14,11 @@ class KeyValueStorageImpl(private val context: Context) : KeyValueStorage {
     override var host: String?
         get() = Key.Host.getString()
         set(value) = Key.Host.saveString(value)
+
+    override val applicationId: String
+        get() = Key.ClientApplicationId.getString() ?: UUID.randomUUID().toString().also {
+            Key.ClientApplicationId.saveString(it)
+        }
 
     override var appKey: String?
         get() = Key.BidonAppKey.getString()

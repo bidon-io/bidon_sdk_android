@@ -19,6 +19,7 @@ internal class GetAuctionRequestUseCaseImpl(
         DataBinderType.Token,
         DataBinderType.Geo,
         DataBinderType.Session,
+        DataBinderType.User,
     )
 
     override suspend fun request(): Result<AuctionResponse> {

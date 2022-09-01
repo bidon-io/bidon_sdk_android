@@ -6,6 +6,7 @@ package com.appodealstack.bidon.utilities.keyvaluestorage
  * Use it in non-Main thread for avoiding ANRs.
  */
 interface KeyValueStorage {
+    val applicationId: String // ID that app generates on the very first launch and send across session.
     var appKey: String?
     var token: String?
     var host: String?
@@ -14,5 +15,5 @@ interface KeyValueStorage {
 }
 
 internal enum class Key {
-    Token, BidonAppKey, Host
+    Token, BidonAppKey, ClientApplicationId, Host
 }

@@ -37,8 +37,8 @@ internal class SessionTrackerImpl(
     }
 
     init {
-        trackSessionTime(pauseResumeObserver)
-        trackMemoryIssue(context)
+        observeSessionTime(pauseResumeObserver)
+        observeMemoryIssue(context)
     }
 
     override var sessionId: String = UUID.randomUUID().toString()
@@ -58,8 +58,7 @@ internal class SessionTrackerImpl(
     private fun systemTime() = System.currentTimeMillis()
     private fun monotonicTime() = SystemClock.elapsedRealtime()
 
-
-    private fun trackMemoryIssue(context: Context) {
+    private fun observeMemoryIssue(context: Context) {
         (context.applicationContext as Application).registerComponentCallbacks(
             object : ComponentCallbacks2 {
                 override fun onConfigurationChanged(newConfig: Configuration) {}
@@ -73,7 +72,7 @@ internal class SessionTrackerImpl(
         )
     }
 
-    private fun trackSessionTime(pauseResumeObserver: PauseResumeObserver) {
+    private fun observeSessionTime(pauseResumeObserver: PauseResumeObserver) {
         var job: Job? = null
         var shouldStartNewSession = false
         pauseResumeObserver.lifecycleFlow.onEach { state ->

@@ -36,10 +36,10 @@ import com.appodealstack.bidon.utilities.datasource.session.SessionTracker
 import com.appodealstack.bidon.utilities.datasource.session.SessionTrackerImpl
 import com.appodealstack.bidon.utilities.datasource.token.TokenDataSource
 import com.appodealstack.bidon.utilities.datasource.token.TokenDataSourceImpl
-import com.appodealstack.bidon.utilities.datasource.user.AdvertisingInfo
-import com.appodealstack.bidon.utilities.datasource.user.AdvertisingInfoImpl
+import com.appodealstack.bidon.utilities.datasource.user.AdvertisingData
 import com.appodealstack.bidon.utilities.datasource.user.UserDataSource
-import com.appodealstack.bidon.utilities.datasource.user.UserDataSourceImpl
+import com.appodealstack.bidon.utilities.datasource.user.impl.AdvertisingDataImpl
+import com.appodealstack.bidon.utilities.datasource.user.impl.UserDataSourceImpl
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
 import com.appodealstack.bidon.utilities.network.BidOnEndpoints
@@ -83,7 +83,11 @@ object DI {
                         application = get<Context>() as Application
                     )
                 }
-                singleton<AdvertisingInfo> { AdvertisingInfoImpl() }
+                singleton<AdvertisingData> {
+                    AdvertisingDataImpl(
+                        context = get()
+                    )
+                }
                 singleton<LocationDataSource> { LocationDataSourceImpl(context = get()) }
                 singleton<SessionDataSource> {
                     SessionDataSourceImpl(
@@ -169,7 +173,12 @@ object DI {
                 factory<AppDataSource> { AppDataSourceImpl(context = get(), keyValueStorage = get()) }
                 factory<DeviceDataSource> { DeviceDataSourceImpl(context = get()) }
                 factory<TokenDataSource> { TokenDataSourceImpl(keyValueStorage = get()) }
-                factory<UserDataSource> { UserDataSourceImpl(consentFactory = { null }) } // TODO Add ConsentManager
+                factory<UserDataSource> {
+                    UserDataSourceImpl(
+                        keyValueStorage = get(),
+                        advertisingData = get()
+                    )
+                }
                 factory<PlacementDataSource> { PlacementDataSourceImpl() }
 
                 factory<DataProvider> {

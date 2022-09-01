@@ -17,9 +17,6 @@ internal class DeviceDataSourceImpl(
 ) : DeviceDataSource {
 
     private var cachedHttpAgentString: String? = null
-    private val model: String = Build.MODEL
-    private val buildId: String = Build.ID
-    private val versionRelease: String = Build.VERSION.RELEASE
     private val screenSize by lazy {
         getScreenSize(context)
     }
@@ -38,70 +35,31 @@ internal class DeviceDataSourceImpl(
         Cellular5G(7),
     }
 
-    override fun getUserAgent(): String? {
-        if (cachedHttpAgentString != null) {
-            return cachedHttpAgentString
+    override fun getUserAgent(): String {
+        return cachedHttpAgentString ?: try {
+            WebSettings.getDefaultUserAgent(context)
+                ?: generateHttpAgentString(context)
+                ?: getSystemHttpAgentString() ?: ""
+        } catch (e: Exception) {
+            ""
+        }.also {
+            cachedHttpAgentString = it
         }
-        try {
-            cachedHttpAgentString = WebSettings.getDefaultUserAgent(context)
-        } catch (throwable: Throwable) {
-            logInternal(message = throwable.message ?: "", error = throwable)
-        }
-        if (cachedHttpAgentString == null) {
-            cachedHttpAgentString = generateHttpAgentString(context)
-        }
-        if (cachedHttpAgentString == null) {
-            cachedHttpAgentString = getSystemHttpAgentString()
-        }
-        // We shouldn't try to obtain http agent string again after all possible methods has failed
-        if (cachedHttpAgentString == null) {
-            cachedHttpAgentString = ""
-        }
-        return cachedHttpAgentString
     }
 
-    override fun getManufacturer(): String {
-        return Build.MANUFACTURER
-    }
-
-    override fun getDeviceModel(): String {
-        return "${getManufacturer()} $model"
-    }
-
-    override fun getOs(): String {
-        return "Android"
-    }
-
-    override fun getOsVersion(): String {
-        return Build.VERSION.RELEASE
-    }
-
-    override fun getHardwareVersion(): String {
-        return Build.HARDWARE
-    }
-
-    override fun getScreenWidth(): Int {
-        return screenSize.x
-    }
-
-    override fun getScreenHeight(): Int {
-        return screenSize.y
-    }
-
-    override fun getPpi(): Int {
-        return metrics.densityDpi
-    }
-
-    override fun getPxRatio(): Float {
-        return metrics.density
-    }
+    override fun getManufacturer(): String = Build.MANUFACTURER
+    override fun getDeviceModel(): String = "${getManufacturer()} ${Build.MODEL}"
+    override fun getOs(): String = AndroidPlatform
+    override fun getOsVersion(): String = Build.VERSION.RELEASE
+    override fun getHardwareVersion(): String = Build.HARDWARE
+    override fun getScreenWidth(): Int = screenSize.x
+    override fun getScreenHeight(): Int = screenSize.y
+    override fun getPpi(): Int = metrics.densityDpi
+    override fun getPxRatio(): Float = metrics.density
+    override fun getLanguage(): String = Locale.getDefault().toString()
 
     override fun getJavaScriptSupport(): Int {
-        return 555555555 // TODO a28 obtain javaScriptSupport. 1- supports, 0 - no
-    }
-
-    override fun getLanguage(): String {
-        return Locale.getDefault().toString()
+        return 1 // TODO a28 obtain javaScriptSupport. 1- supports, 0 - no
     }
 
     /**
@@ -187,11 +145,11 @@ internal class DeviceDataSourceImpl(
         return try {
             val builder = StringBuilder("Mozilla/5.0")
             builder.append(" (Linux; Android ")
-                .append(versionRelease)
+                .append(Build.VERSION.RELEASE)
                 .append("; ")
-                .append(model)
+                .append(Build.MODEL)
                 .append(" Build/")
-                .append(buildId)
+                .append(Build.ID)
                 .append("; wv)")
             // This AppleWebKit version supported from Chrome 68, and it's probably should for for
             // most devices
@@ -237,3 +195,5 @@ internal class DeviceDataSourceImpl(
         return result
     }
 }
+
+private const val AndroidPlatform = "Android"

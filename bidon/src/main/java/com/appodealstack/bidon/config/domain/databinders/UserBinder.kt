@@ -1,7 +1,5 @@
 package com.appodealstack.bidon.config.domain.databinders
 
-import com.appodealstack.bidon.config.data.models.Consent
-import com.appodealstack.bidon.config.data.models.Iab
 import com.appodealstack.bidon.config.data.models.User
 import com.appodealstack.bidon.config.domain.DataBinder
 import com.appodealstack.bidon.core.BidonJson
@@ -18,25 +16,36 @@ internal class UserBinder(
 
     private fun createUser(): User {
         return User(
-            idfa = dataSource.getIdfa(),
+            platformAdvertisingId = dataSource.getAdvertisingId(),
             trackingAuthorizationStatus = dataSource.getTrackingAuthorizationStatus(),
-            idg = dataSource.getIdg(),
-            consent = Consent(
-                status = dataSource.getConsentStatus(),
-                acceptedVendors = dataSource.getAcceptedVendors(),
-                vendorListVersion = dataSource.getVendorListVersion(),
-                createdAt = dataSource.getConsentCreatedAt(),
-                updatedAt = dataSource.getConsentUpdatedAt(),
-                zone = dataSource.getConsentZone(),
-                iab = Iab(
-                    IABUSPrivacyString = dataSource.getIABUSPrivacyString(),
-                    IABConsentConsentString = dataSource.getIABConsentConsentString(),
-                    IABConsentParsedPurposeConsents = dataSource.getIABConsentParsedPurposeConsents(),
-                    IABConsentParsedVendorConsents = dataSource.getIABConsentParsedVendorConsents(),
-                    IABConsentSubjectToGDPR = dataSource.getIABConsentSubjectToGDPR(),
-                )
-            ),
-            coppa = dataSource.getCoppa(),
+            applicationId = dataSource.getApplicationId(),
+            consent = null,
+            coppa = false,
         )
     }
+
+    // // TODO do not use it until ConsentManager is integrated
+//    private fun createUser1(): User {
+//        return User(
+//            idfa = dataSource.getIdfa(),
+//            trackingAuthorizationStatus = dataSource.getTrackingAuthorizationStatus(),
+//            idg = dataSource.getIdg(),
+//            consent = Consent(
+//                status = dataSource.getConsentStatus(),
+//                acceptedVendors = dataSource.getAcceptedVendors(),
+//                vendorListVersion = dataSource.getVendorListVersion(),
+//                createdAt = dataSource.getConsentCreatedAt(),
+//                updatedAt = dataSource.getConsentUpdatedAt(),
+//                zone = dataSource.getConsentZone(),
+//                iab = Iab(
+//                    IABUSPrivacyString = dataSource.getIABUSPrivacyString(),
+//                    IABConsentConsentString = dataSource.getIABConsentConsentString(),
+//                    IABConsentParsedPurposeConsents = dataSource.getIABConsentParsedPurposeConsents(),
+//                    IABConsentParsedVendorConsents = dataSource.getIABConsentParsedVendorConsents(),
+//                    IABConsentSubjectToGDPR = dataSource.getIABConsentSubjectToGDPR(),
+//                )
+//            ),
+//            coppa = dataSource.getCoppa(),
+//        )
+//    }
 }
