@@ -6,11 +6,7 @@ internal interface PauseResumeObserver {
     val lifecycleFlow: StateFlow<LifecycleState>
 
     enum class LifecycleState {
-        Created,
-        Started,
         Resumed,
         Paused,
-        Stopped,
-        Destroyed,
     }
 }
