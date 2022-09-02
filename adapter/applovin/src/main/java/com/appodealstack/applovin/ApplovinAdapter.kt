@@ -3,6 +3,7 @@ package com.appodealstack.applovin
 import android.app.Activity
 import android.content.Context
 import com.applovin.sdk.AppLovinSdk
+import com.applovin.sdk.AppLovinSdkSettings
 import com.appodealstack.applovin.ext.adapterVersion
 import com.appodealstack.applovin.ext.sdkVersion
 import com.appodealstack.applovin.impl.ApplovinBannerImpl
@@ -45,7 +46,7 @@ class ApplovinAdapter :
             val context = activity.applicationContext.also {
                 context = it
             }
-            val instance = AppLovinSdk.getInstance(context).also {
+            val instance = AppLovinSdk.getInstance(configParams.key, AppLovinSdkSettings(context), context).also {
                 appLovinSdk = it
             }
             instance.settings.setVerboseLogging(true)

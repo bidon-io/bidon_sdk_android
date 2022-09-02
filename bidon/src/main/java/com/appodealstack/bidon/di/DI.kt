@@ -153,7 +153,7 @@ object DI {
                  */
                 factory<GetConfigRequestUseCase> {
                     GetConfigRequestUseCaseImpl(
-                        createRequestBody = get(),
+                        dataProvider = get(),
                         keyValueStorage = get()
                     )
                 }

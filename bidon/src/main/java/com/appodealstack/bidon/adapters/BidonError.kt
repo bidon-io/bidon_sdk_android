@@ -9,11 +9,14 @@ sealed class BidonError : Throwable() {
     class BidTimedOut(val demandId: DemandId) : BidonError()
     class FillTimedOut(val demandId: DemandId) : BidonError()
     class AdFormatIsNotSupported(val demandId: String, val bannerSize: BannerSize) : BidonError()
+    class NetworkError(val demandId: DemandId?) : BidonError()
+    class Unspecified(val demandId: DemandId?) : BidonError()
 
     object FullscreenAdNotReady : BidonError()
     object NoAppropriateAdUnitId : BidonError()
 }
 
+@Deprecated("use BidonError")
 sealed class DemandError(val demandId: DemandId? = null) : BidonError() {
     class Unspecified(demandId: DemandId?) : DemandError(demandId)
     class NoFill(demandId: DemandId?) : DemandError(demandId)
