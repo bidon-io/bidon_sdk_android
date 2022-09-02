@@ -149,12 +149,12 @@ fun BannerScreen(navController: NavHostController) {
                         autoRefreshTtl.value = newTimeout
                     },
                     onPlusClicked = {
-                        val newTimeout = min(autoRefreshTtl.value + 1000, 30_000L)
+                        val newTimeout = min(autoRefreshTtl.value + 5000, 30_000L)
                         bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
                         autoRefreshTtl.value = newTimeout
                     },
                     onMinusClicked = {
-                        val newTimeout = kotlin.math.max(autoRefreshTtl.value - 1000, 0L)
+                        val newTimeout = max(autoRefreshTtl.value - 5000, 0L)
                         if (newTimeout == 0L) {
                             bannerView.value?.stopAutoRefresh()
                         } else {

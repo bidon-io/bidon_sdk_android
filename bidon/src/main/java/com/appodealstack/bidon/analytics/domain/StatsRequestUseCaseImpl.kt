@@ -2,17 +2,15 @@ package com.appodealstack.bidon.analytics.domain
 
 import com.appodealstack.bidon.analytics.data.models.StatsRequestBody
 import com.appodealstack.bidon.config.domain.DataBinderType
-import com.appodealstack.bidon.config.domain.DataProvider
+import com.appodealstack.bidon.config.domain.databinders.CreateRequestBodyUseCase
 import com.appodealstack.bidon.core.BidonJson
 import com.appodealstack.bidon.core.errors.BaseResponse
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.utilities.ktor.JsonHttpRequest
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.encodeToJsonElement
 
 internal class StatsRequestUseCaseImpl(
-    private val dataProvider: DataProvider,
+    private val createRequestBody: CreateRequestBodyUseCase
 ) : StatsRequestUseCase {
     private val binders: List<DataBinderType> = listOf(
         DataBinderType.Device,
@@ -24,14 +22,12 @@ internal class StatsRequestUseCaseImpl(
     )
 
     override suspend fun request(body: StatsRequestBody): Result<BaseResponse> {
-        val bindData = dataProvider.provide(binders)
-        val requestBody = buildJsonObject {
-            put("stats", BidonJson.encodeToJsonElement(body))
-            bindData.forEach { (key, jsonElement) ->
-                put(key, jsonElement)
-            }
-        }
-        logInfo(Tag, "Request body: $requestBody")
+        val requestBody = createRequestBody(
+            binders = binders,
+            dataKeyName = "stats",
+            data = body,
+            dataSerializer = StatsRequestBody.serializer()
+        )
         return JsonHttpRequest().invoke(
             path = StatsRequestPath,
             body = requestBody,

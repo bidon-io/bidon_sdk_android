@@ -125,7 +125,8 @@ object DI {
                 factory<Auction> {
                     AuctionImpl(
                         adaptersSource = get(),
-                        getAuctionRequest = get()
+                        getAuctionRequest = get(),
+                        statsRequest = get(),
                     )
                 }
                 factoryWithParams<AutoRefresher> { param ->
@@ -152,19 +153,19 @@ object DI {
                  */
                 factory<GetConfigRequestUseCase> {
                     GetConfigRequestUseCaseImpl(
-                        dataProvider = get(),
+                        createRequestBody = get(),
                         keyValueStorage = get()
                     )
                 }
                 factory<GetAuctionRequestUseCase> {
                     GetAuctionRequestUseCaseImpl(
-                        dataProvider = get(),
+                        createRequestBody = get(),
                         getOrientation = get()
                     )
                 }
                 factory<StatsRequestUseCase> {
                     StatsRequestUseCaseImpl(
-                        dataProvider = get(),
+                        createRequestBody = get(),
                     )
                 }
 
@@ -189,6 +190,11 @@ object DI {
                     )
                 }
                 factory<PlacementDataSource> { PlacementDataSourceImpl() }
+                factory<CreateRequestBodyUseCase> {
+                    CreateRequestBodyUseCaseImpl(
+                        dataProvider = get()
+                    )
+                }
 
                 factory<DataProvider> {
                     DataProviderImpl(

@@ -1,6 +1,7 @@
 package com.appodealstack.bidon.auctions.domain.impl
 
 import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.analytics.domain.StatsRequestUseCase
 import com.appodealstack.bidon.auctions.data.models.*
 import com.appodealstack.bidon.auctions.domain.*
 import com.appodealstack.bidon.core.AdaptersSource
@@ -14,11 +15,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.*
-import kotlin.NoSuchElementException
 
 internal class AuctionImpl(
     private val adaptersSource: AdaptersSource,
-    private val getAuctionRequest: GetAuctionRequestUseCase
+    private val getAuctionRequest: GetAuctionRequestUseCase,
+    private val statsRequest: StatsRequestUseCase,
 ) : Auction {
     private val state = MutableStateFlow(AuctionState.Initialized)
     private val auctionResults = MutableStateFlow(listOf<AuctionResult>())
@@ -207,7 +208,7 @@ internal class AuctionImpl(
                     logInfo(
                         tag = Tag,
                         message = "Round '${round.id}'. Adapter ${adSource.demandId.demandId} starts bidding. " +
-                            "Min PriceFloor=$priceFloor. LineItems: $availableLineItemsForDemand."
+                                "Min PriceFloor=$priceFloor. LineItems: $availableLineItemsForDemand."
                     )
                     async {
                         withTimeoutOrNull(round.timeoutMs) {
@@ -217,8 +218,6 @@ internal class AuctionImpl(
                                 priceFloor = priceFloor,
                                 timeout = timeout,
                                 availableLineItemsForDemand = availableLineItemsForDemand,
-                                auctionId = auctionId,
-                                roundId = round.id
                             )
                             adParam.getOrNull()?.let {
                                 adSource.bid(adParams = it)
@@ -246,8 +245,6 @@ internal class AuctionImpl(
         priceFloor: Double,
         timeout: Long,
         availableLineItemsForDemand: List<LineItem>,
-        auctionId: String,
-        roundId: String
     ) = when (adSource) {
         is AdSource.Banner -> {
             check(adTypeAdditionalData is AdTypeAdditional.Banner)
@@ -292,7 +289,11 @@ internal class AuctionImpl(
         auctionResults.value = resolver.sortWinners(auctionResults.value + roundResults)
     }
 
-    private suspend fun requestActionData(demandAd: DemandAd, adTypeAdditionalData: AdTypeAdditional, auctionId: String): AuctionResponse {
+    private suspend fun requestActionData(
+        demandAd: DemandAd,
+        adTypeAdditionalData: AdTypeAdditional,
+        auctionId: String
+    ): AuctionResponse {
         val auctionResponse = getAuctionRequest.request(
             placement = demandAd.placement,
             additionalData = adTypeAdditionalData,
