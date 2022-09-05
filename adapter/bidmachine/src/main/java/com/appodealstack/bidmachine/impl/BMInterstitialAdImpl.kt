@@ -6,6 +6,10 @@ import com.appodealstack.bidmachine.BMAuctionResult
 import com.appodealstack.bidmachine.BMFullscreenAuctionParams
 import com.appodealstack.bidmachine.asBidonError
 import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.data.models.RoundStatus
+import com.appodealstack.bidon.analytics.data.models.asRoundStatus
+import com.appodealstack.bidon.analytics.domain.BidStatsProviderImpl
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.core.ext.asFailure
@@ -26,7 +30,13 @@ internal class BMInterstitialAdImpl(
     private val demandAd: DemandAd,
     private val roundId: String,
     private val auctionId: String
-) : AdSource.Interstitial<BMFullscreenAuctionParams>, WinLossNotifiable {
+) : AdSource.Interstitial<BMFullscreenAuctionParams>,
+    WinLossNotifiable,
+    BidStatsProvider by BidStatsProviderImpl(
+        auctionId = auctionId,
+        roundId = roundId,
+        demandId = demandId
+    ) {
 
     override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
     override val ad: Ad? get() = interstitialAd?.asAd()
@@ -43,10 +53,14 @@ internal class BMInterstitialAdImpl(
             ) {
                 logInternal(Tag, "onRequestSuccess $result: $this")
                 adRequest = request
+                onBidFinished(
+                    ecpm = result.price,
+                    roundStatus = RoundStatus.Successful,
+                )
                 adState.tryEmit(
                     AdState.Bid(
                         AuctionResult(
-                            priceFloor = result.price,
+                            ecpm = result.price,
                             adSource = this@BMInterstitialAdImpl,
                         )
                     )
@@ -56,13 +70,20 @@ internal class BMInterstitialAdImpl(
             override fun onRequestFailed(request: InterstitialRequest, bmError: BMError) {
                 logInternal(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
                 adRequest = request
-                bmError.code
+                onBidFinished(
+                    ecpm = null,
+                    roundStatus = bmError.asBidonError(demandId).asRoundStatus(),
+                )
                 adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
             }
 
             override fun onRequestExpired(request: InterstitialRequest) {
                 logInternal(Tag, "onRequestExpired: $this")
                 adRequest = request
+                onBidFinished(
+                    ecpm = null,
+                    roundStatus = RoundStatus.NoBid,
+                )
                 adState.tryEmit(AdState.LoadFailed(DemandError.Expired(demandId)))
             }
         }
@@ -118,8 +139,9 @@ internal class BMInterstitialAdImpl(
         }
     }
 
-    override suspend fun bid(adParams: BMFullscreenAuctionParams): Result<AuctionResult> {
+    override suspend fun bid(adParams: BMFullscreenAuctionParams): AuctionResult {
         logInternal(Tag, "Starting with $adParams: $this")
+        onBidStarted()
         context = adParams.context
         InterstitialRequest.Builder()
             .setAdContentType(AdContentType.All)
@@ -136,8 +158,13 @@ internal class BMInterstitialAdImpl(
             it is AdState.Bid || it is AdState.LoadFailed
         }
         return when (state) {
-            is AdState.LoadFailed -> state.cause.asFailure()
-            is AdState.Bid -> state.result.asSuccess()
+            is AdState.LoadFailed -> {
+                AuctionResult(
+                    ecpm = 0.0,
+                    adSource = this
+                )
+            }
+            is AdState.Bid -> state.result
             else -> error("unexpected: $state")
         }
     }
@@ -189,7 +216,11 @@ internal class BMInterstitialAdImpl(
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit,
     ): Result<AdAuctionParams> {
-        return BMFullscreenAuctionParams(priceFloor = priceFloor, timeout = timeout, context = activity.applicationContext).asSuccess()
+        return BMFullscreenAuctionParams(
+            priceFloor = priceFloor,
+            timeout = timeout,
+            context = activity.applicationContext
+        ).asSuccess()
     }
 
     override fun destroy() {

@@ -4,11 +4,16 @@ import android.app.Activity
 import com.appodealstack.admob.AdmobFullscreenAdAuctionParams
 import com.appodealstack.admob.asBidonError
 import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.data.models.RoundStatus
+import com.appodealstack.bidon.analytics.data.models.asRoundStatus
+import com.appodealstack.bidon.analytics.domain.BidStatsProviderImpl
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
 import com.appodealstack.bidon.core.SdkDispatchers
-import com.appodealstack.bidon.core.ext.*
+import com.appodealstack.bidon.core.ext.logError
+import com.appodealstack.bidon.core.ext.logInternal
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
@@ -27,7 +32,12 @@ internal class AdmobInterstitialImpl(
     private val demandAd: DemandAd,
     private val roundId: String,
     private val auctionId: String
-) : AdSource.Interstitial<AdmobFullscreenAdAuctionParams> {
+) : AdSource.Interstitial<AdmobFullscreenAdAuctionParams>,
+    BidStatsProvider by BidStatsProviderImpl(
+        auctionId = auctionId,
+        roundId = roundId,
+        demandId = demandId
+    ) {
 
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
 
@@ -39,6 +49,10 @@ internal class AdmobInterstitialImpl(
         object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logInternal(Tag, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
+                onBidFinished(
+                    ecpm = null,
+                    roundStatus = loadAdError.asBidonError().asRoundStatus(),
+                )
                 adState.tryEmit(AdState.LoadFailed(loadAdError.asBidonError()))
             }
 
@@ -47,11 +61,15 @@ internal class AdmobInterstitialImpl(
                 this@AdmobInterstitialImpl.interstitialAd = interstitialAd
                 interstitialAd.onPaidEventListener = paidListener
                 interstitialAd.fullScreenContentCallback = interstitialListener
+                onBidFinished(
+                    ecpm = requireNotNull(lineItem?.priceFloor),
+                    roundStatus = RoundStatus.Successful,
+                )
                 adState.tryEmit(
                     AdState.Bid(
                         AuctionResult(
-                            priceFloor = requireNotNull(lineItem?.priceFloor),
-                            adSource = this@AdmobInterstitialImpl
+                            ecpm = requireNotNull(lineItem?.priceFloor),
+                            adSource = this@AdmobInterstitialImpl,
                         )
                     )
                 )
@@ -136,8 +154,9 @@ internal class AdmobInterstitialImpl(
         )
     }
 
-    override suspend fun bid(adParams: AdmobFullscreenAdAuctionParams): Result<AuctionResult> {
+    override suspend fun bid(adParams: AdmobFullscreenAdAuctionParams): AuctionResult {
         logInternal(Tag, "Starting with $adParams: $this")
+        onBidStarted(adParams.lineItem.adUnitId)
         return withContext(dispatcher) {
             lineItem = adParams.lineItem
             val adRequest = AdRequest.Builder().build()
@@ -158,8 +177,13 @@ internal class AdmobInterstitialImpl(
                 it is AdState.Bid || it is AdState.LoadFailed
             }
             when (state) {
-                is AdState.LoadFailed -> state.cause.asFailure()
-                is AdState.Bid -> state.result.asSuccess()
+                is AdState.LoadFailed -> {
+                    AuctionResult(
+                        ecpm = 0.0,
+                        adSource = this@AdmobInterstitialImpl
+                    )
+                }
+                is AdState.Bid -> state.result
                 else -> error("unexpected: $state")
             }
         }

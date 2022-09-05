@@ -10,11 +10,17 @@ import com.appodealstack.admob.AdmobBannerAuctionParams
 import com.appodealstack.admob.asBidonError
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
+import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.data.models.RoundStatus
+import com.appodealstack.bidon.analytics.data.models.asRoundStatus
+import com.appodealstack.bidon.analytics.domain.BidStatsProviderImpl
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
 import com.appodealstack.bidon.core.SdkDispatchers
-import com.appodealstack.bidon.core.ext.*
+import com.appodealstack.bidon.core.ext.logError
+import com.appodealstack.bidon.core.ext.logInfo
+import com.appodealstack.bidon.core.ext.logInternal
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.AdListener
 import kotlinx.coroutines.CoroutineDispatcher
@@ -27,7 +33,12 @@ internal class AdmobBannerImpl(
     private val demandAd: DemandAd,
     private val roundId: String,
     private val auctionId: String
-) : AdSource.Banner<AdmobBannerAuctionParams> {
+) : AdSource.Banner<AdmobBannerAuctionParams>,
+    BidStatsProvider by BidStatsProviderImpl(
+        auctionId = auctionId,
+        roundId = roundId,
+        demandId = demandId
+    ) {
 
     override val ad: Ad?
         get() = adView?.asAd()
@@ -44,17 +55,27 @@ internal class AdmobBannerImpl(
         object : AdListener() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(Tag, "Error while loading ad: $loadAdError. $this", loadAdError.asBidonError())
-                adState.tryEmit(AdState.LoadFailed(loadAdError.asBidonError()))
+                onBidFinished(
+                    ecpm = null,
+                    roundStatus = loadAdError.asBidonError().asRoundStatus(),
+                )
+                adState.tryEmit(
+                    AdState.LoadFailed(loadAdError.asBidonError())
+                )
             }
 
             override fun onAdLoaded() {
                 logInfo(Tag, "onAdLoaded: $this")
+                onBidFinished(
+                    ecpm = requireNotNull(lineItem?.priceFloor),
+                    roundStatus = RoundStatus.Successful,
+                )
                 adView?.run {
                     adState.tryEmit(
                         AdState.Bid(
                             AuctionResult(
-                                priceFloor = requireNotNull(lineItem?.priceFloor),
-                                adSource = this@AdmobBannerImpl
+                                ecpm = requireNotNull(lineItem?.priceFloor),
+                                adSource = this@AdmobBannerImpl,
                             )
                         )
                     )
@@ -123,11 +144,13 @@ internal class AdmobBannerImpl(
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
             bannerSize = bannerSize,
             adContainer = adContainer,
+            priceFloor = priceFloor
         )
     }
 
-    override suspend fun bid(adParams: AdmobBannerAuctionParams): Result<AuctionResult> {
+    override suspend fun bid(adParams: AdmobBannerAuctionParams): AuctionResult {
         logInternal(Tag, "Starting with $adParams")
+        onBidStarted(adParams.lineItem.adUnitId)
         return withContext(dispatcher) {
             lineItem = adParams.lineItem
             val adUnitId = lineItem?.adUnitId
@@ -158,8 +181,13 @@ internal class AdmobBannerImpl(
                 it is AdState.Bid || it is AdState.LoadFailed
             }
             when (state) {
-                is AdState.LoadFailed -> state.cause.asFailure()
-                is AdState.Bid -> state.result.asSuccess()
+                is AdState.LoadFailed -> {
+                    AuctionResult(
+                        ecpm = 0.0,
+                        adSource = this@AdmobBannerImpl
+                    )
+                }
+                is AdState.Bid -> state.result
                 else -> error("unexpected: $state")
             }
         }

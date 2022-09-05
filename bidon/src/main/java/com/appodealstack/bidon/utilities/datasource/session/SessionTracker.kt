@@ -94,7 +94,6 @@ internal class SessionTrackerImpl(
                         shouldStartNewSession = true
                     }
                 }
-                else -> Unit
             }
         }.launchIn(scope)
     }

@@ -42,7 +42,7 @@ sealed interface AdSource<T : AdAuctionParams> {
     /**
      * Applovin needs Activity instance for interstitial 🤦‍️
      */
-    suspend fun bid(adParams: T): Result<AuctionResult>
+    suspend fun bid(adParams: T): AuctionResult
     suspend fun fill(): Result<Ad>
     fun show(activity: Activity)
     fun destroy()

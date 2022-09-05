@@ -1,6 +1,9 @@
 package com.appodealstack.bidon.analytics.domain
 
+import com.appodealstack.bidon.analytics.data.models.Demand
+import com.appodealstack.bidon.analytics.data.models.Round
 import com.appodealstack.bidon.analytics.data.models.StatsRequestBody
+import com.appodealstack.bidon.auctions.data.models.RoundStat
 import com.appodealstack.bidon.config.domain.DataBinderType
 import com.appodealstack.bidon.config.domain.databinders.CreateRequestBodyUseCase
 import com.appodealstack.bidon.core.BidonJson
@@ -21,7 +24,12 @@ internal class StatsRequestUseCaseImpl(
         DataBinderType.User,
     )
 
-    override suspend fun request(body: StatsRequestBody): Result<BaseResponse> {
+    override suspend operator fun invoke(
+        auctionId: String,
+        auctionConfigurationId: Int,
+        results: List<RoundStat>,
+    ): Result<BaseResponse> {
+        val body = results.asStatsRequestBody(auctionId, auctionConfigurationId)
         val requestBody = createRequestBody(
             binders = binders,
             dataKeyName = "stats",
@@ -38,6 +46,34 @@ internal class StatsRequestUseCaseImpl(
         }.onSuccess {
             logInfo(Tag, "Stats was sent successfully")
         }
+    }
+
+    private fun List<RoundStat>.asStatsRequestBody(
+        auctionId: String,
+        auctionConfigurationId: Int,
+    ): StatsRequestBody {
+        return StatsRequestBody(
+            auctionId = auctionId,
+            auctionConfigurationId = auctionConfigurationId,
+            rounds = this.map { stat ->
+                Round(
+                    id = stat.roundId,
+                    winnerEcpm = stat.winnerEcpm,
+                    winnerDemandId = stat.winnerDemandId?.demandId,
+                    pricefloor = stat.priceFloor,
+                    demands = stat.demands.map { demandStat ->
+                        Demand(
+                            demandId = demandStat.demandId.demandId,
+                            adUnitId = demandStat.adUnitId,
+                            roundStatusCode = demandStat.roundStatus.code,
+                            ecpm = demandStat.ecpm,
+                            startTs = demandStat.startTs,
+                            finishTs = demandStat.finishTs
+                        )
+                    }
+                )
+            }
+        )
     }
 }
 
