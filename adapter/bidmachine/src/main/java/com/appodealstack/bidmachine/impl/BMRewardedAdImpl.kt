@@ -6,6 +6,10 @@ import com.appodealstack.bidmachine.BMAuctionResult
 import com.appodealstack.bidmachine.BMFullscreenAuctionParams
 import com.appodealstack.bidmachine.asBidonError
 import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.data.models.RoundStatus
+import com.appodealstack.bidon.analytics.data.models.asRoundStatus
+import com.appodealstack.bidon.analytics.domain.BidStatsProviderImpl
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.core.ext.asFailure
@@ -23,8 +27,15 @@ import kotlinx.coroutines.flow.first
 internal class BMRewardedAdImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
-    private val roundId: String
-) : AdSource.Rewarded<BMFullscreenAuctionParams>, WinLossNotifiable {
+    private val roundId: String,
+    private val auctionId: String
+) : AdSource.Rewarded<BMFullscreenAuctionParams>,
+    WinLossNotifiable,
+    BidStatsProvider by BidStatsProviderImpl(
+        auctionId = auctionId,
+        roundId = roundId,
+        demandId = demandId
+    ) {
 
     override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
     override val ad: Ad? get() = rewardedAd?.asAd()
@@ -41,10 +52,14 @@ internal class BMRewardedAdImpl(
             ) {
                 logInternal(Tag, "onRequestSuccess $result: $this")
                 adRequest = request
+                onBidFinished(
+                    ecpm = result.price,
+                    roundStatus = RoundStatus.Successful,
+                )
                 adState.tryEmit(
                     AdState.Bid(
                         AuctionResult(
-                            priceFloor = result.price,
+                            ecpm = result.price,
                             adSource = this@BMRewardedAdImpl,
                         )
                     )
@@ -54,13 +69,20 @@ internal class BMRewardedAdImpl(
             override fun onRequestFailed(request: RewardedRequest, bmError: BMError) {
                 logInternal(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
                 adRequest = request
-                bmError.code
+                onBidFinished(
+                    ecpm = null,
+                    roundStatus = bmError.asBidonError(demandId).asRoundStatus(),
+                )
                 adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
             }
 
             override fun onRequestExpired(request: RewardedRequest) {
                 logInternal(Tag, "onRequestExpired: $this")
                 adRequest = request
+                onBidFinished(
+                    ecpm = null,
+                    roundStatus = RoundStatus.NoBid,
+                )
                 adState.tryEmit(AdState.LoadFailed(DemandError.Expired(demandId)))
             }
         }
@@ -127,8 +149,9 @@ internal class BMRewardedAdImpl(
         }
     }
 
-    override suspend fun bid(adParams: BMFullscreenAuctionParams): Result<AuctionResult> {
+    override suspend fun bid(adParams: BMFullscreenAuctionParams): AuctionResult {
         logInternal(Tag, "Starting with $adParams: $this")
+        onBidStarted()
         this.context = adParams.context
         RewardedRequest.Builder()
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.priceFloor))
@@ -144,8 +167,13 @@ internal class BMRewardedAdImpl(
             it is AdState.Bid || it is AdState.LoadFailed
         }
         return when (state) {
-            is AdState.LoadFailed -> state.cause.asFailure()
-            is AdState.Bid -> state.result.asSuccess()
+            is AdState.LoadFailed -> {
+                AuctionResult(
+                    ecpm = 0.0,
+                    adSource = this
+                )
+            }
+            is AdState.Bid -> state.result
             else -> error("unexpected: $state")
         }
     }
@@ -218,6 +246,7 @@ internal class BMRewardedAdImpl(
             roundId = roundId,
             dsp = this.auctionResult?.demandSource,
             monetizationNetwork = demandId.demandId,
+            auctionId = auctionId,
         )
     }
 }

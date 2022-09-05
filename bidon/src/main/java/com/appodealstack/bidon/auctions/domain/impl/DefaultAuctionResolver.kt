@@ -10,7 +10,7 @@ internal val MaxEcpmAuctionResolver: AuctionResolver by lazy {
 private class PriceAuctionResolver : AuctionResolver {
     override suspend fun sortWinners(list: List<AuctionResult>): List<AuctionResult> {
         return list.sortedByDescending {
-            it.priceFloor
+            it.ecpm
         }
     }
 }

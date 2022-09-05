@@ -77,7 +77,7 @@ fun RewardedScreen(
                         val log = buildString {
                             appendLine("AuctionSucceed (${auctionResults.size} items)")
                             auctionResults.forEachIndexed { index, auctionResult ->
-                                appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.priceFloor}")
+                                appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.ecpm}")
                             }
                         }
                         logFlow.log(log)
@@ -96,7 +96,7 @@ fun RewardedScreen(
                             buildString {
                                 appendLine("roundSucceed($roundId)")
                                 roundResults.forEachIndexed { index, auctionResult ->
-                                    appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.priceFloor}")
+                                    appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.ecpm}")
                                 }
                             }
                         )

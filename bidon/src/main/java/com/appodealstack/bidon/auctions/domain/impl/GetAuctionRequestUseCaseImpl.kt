@@ -8,17 +8,14 @@ import com.appodealstack.bidon.auctions.data.models.AuctionResponse
 import com.appodealstack.bidon.auctions.domain.GetAuctionRequestUseCase
 import com.appodealstack.bidon.auctions.domain.GetOrientationUseCase
 import com.appodealstack.bidon.config.domain.DataBinderType
-import com.appodealstack.bidon.config.domain.DataProvider
+import com.appodealstack.bidon.config.domain.databinders.CreateRequestBodyUseCase
 import com.appodealstack.bidon.core.BidonJson
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.utilities.ktor.JsonHttpRequest
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.encodeToJsonElement
-import java.util.*
 
 internal class GetAuctionRequestUseCaseImpl(
-    private val dataProvider: DataProvider,
+    private val createRequestBody: CreateRequestBodyUseCase,
     private val getOrientation: GetOrientationUseCase,
 ) : GetAuctionRequestUseCase {
     private val binders: List<DataBinderType> = listOf(
@@ -32,26 +29,24 @@ internal class GetAuctionRequestUseCaseImpl(
 
     override suspend fun request(
         placement: String,
-        additionalData: AdTypeAdditional
+        additionalData: AdTypeAdditional,
+        auctionId: String
     ): Result<AuctionResponse> {
         val (banner, interstitial, rewarded) = getData(additionalData)
-
         val adObject = AdObjectRequestBody(
             placementId = placement,
-            auctionId = UUID.randomUUID().toString(),
+            auctionId = auctionId,
             banner = banner,
             interstitial = interstitial,
             rewarded = rewarded,
             orientationCode = getOrientation().code
         )
-
-        val bindData = dataProvider.provide(binders)
-        val requestBody = buildJsonObject {
-            put("ad_object", BidonJson.encodeToJsonElement(adObject))
-            bindData.forEach { (key, jsonElement) ->
-                put(key, jsonElement)
-            }
-        }
+        val requestBody = createRequestBody(
+            binders = binders,
+            dataKeyName = "ad_object",
+            data = adObject,
+            dataSerializer = AdObjectRequestBody.serializer()
+        )
         logInfo(Tag, "Request body: $requestBody")
         return JsonHttpRequest().invoke(
             path = AuctionRequestPath,

@@ -6,11 +6,12 @@ import com.applovin.sdk.*
 import com.appodealstack.applovin.ApplovinDemandId
 import com.appodealstack.applovin.ApplovinFullscreenAdAuctionParams
 import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.data.models.RoundStatus
+import com.appodealstack.bidon.analytics.domain.BidStatsProviderImpl
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
-import com.appodealstack.bidon.core.ext.asFailure
-import com.appodealstack.bidon.core.ext.asSuccess
 import com.appodealstack.bidon.core.ext.logInternal
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
@@ -24,8 +25,14 @@ internal class ApplovinInterstitialImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
     private val roundId: String,
-    private val appLovinSdk: AppLovinSdk
-) : AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
+    private val appLovinSdk: AppLovinSdk,
+    private val auctionId: String
+) : AdSource.Interstitial<ApplovinFullscreenAdAuctionParams>,
+    BidStatsProvider by BidStatsProviderImpl(
+        auctionId = auctionId,
+        roundId = roundId,
+        demandId = demandId
+    ) {
 
     private var interstitialAd: AppLovinIncentivizedInterstitial? = null
     private var appLovinAd: AppLovinAd? = null
@@ -36,11 +43,15 @@ internal class ApplovinInterstitialImpl(
             override fun adReceived(ad: AppLovinAd) {
                 logInternal(Tag, "adReceived: $this")
                 appLovinAd = ad
+                onBidFinished(
+                    ecpm = requireNotNull(lineItem?.priceFloor),
+                    roundStatus = RoundStatus.Successful,
+                )
                 adState.tryEmit(
                     AdState.Bid(
                         AuctionResult(
-                            priceFloor = lineItem?.priceFloor ?: 0.0,
-                            adSource = this@ApplovinInterstitialImpl
+                            ecpm = lineItem?.priceFloor ?: 0.0,
+                            adSource = this@ApplovinInterstitialImpl,
                         )
                     )
                 )
@@ -48,6 +59,10 @@ internal class ApplovinInterstitialImpl(
 
             override fun failedToReceiveAd(errorCode: Int) {
                 logInternal(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
+                onBidFinished(
+                    ecpm = null,
+                    roundStatus = RoundStatus.NoBid,
+                )
                 adState.tryEmit(AdState.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
@@ -108,8 +123,9 @@ internal class ApplovinInterstitialImpl(
 
     override suspend fun bid(
         adParams: ApplovinFullscreenAdAuctionParams
-    ): Result<AuctionResult> {
+    ): AuctionResult {
         logInternal(Tag, "Starting with $adParams: $this")
+        onBidStarted(adParams.lineItem.adUnitId)
         lineItem = adParams.lineItem
         val incentivizedInterstitial = AppLovinIncentivizedInterstitial.create(adParams.lineItem.adUnitId, appLovinSdk).also {
             interstitialAd = it
@@ -119,8 +135,13 @@ internal class ApplovinInterstitialImpl(
             it is AdState.Bid || it is AdState.LoadFailed
         }
         return when (state) {
-            is AdState.LoadFailed -> state.cause.asFailure()
-            is AdState.Bid -> state.result.asSuccess()
+            is AdState.LoadFailed -> {
+                AuctionResult(
+                    ecpm = 0.0,
+                    adSource = this
+                )
+            }
+            is AdState.Bid -> state.result
             else -> error("unexpected: $state")
         }
     }
@@ -151,7 +172,8 @@ internal class ApplovinInterstitialImpl(
             monetizationNetwork = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 
@@ -164,7 +186,8 @@ internal class ApplovinInterstitialImpl(
             monetizationNetwork = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 }

@@ -9,10 +9,12 @@ import com.applovin.mediation.ads.MaxRewardedAd
 import com.appodealstack.applovin.ApplovinDemandId
 import com.appodealstack.applovin.MaxFullscreenAdAuctionParams
 import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.data.models.RoundStatus
+import com.appodealstack.bidon.analytics.data.models.asRoundStatus
+import com.appodealstack.bidon.analytics.domain.BidStatsProviderImpl
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
-import com.appodealstack.bidon.core.ext.asFailure
-import com.appodealstack.bidon.core.ext.asSuccess
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInternal
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,8 +23,14 @@ import kotlinx.coroutines.flow.first
 internal class MaxRewardedImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
-    private val roundId: String
-) : AdSource.Rewarded<MaxFullscreenAdAuctionParams> {
+    private val roundId: String,
+    private val auctionId: String
+) : AdSource.Rewarded<MaxFullscreenAdAuctionParams>,
+    BidStatsProvider by BidStatsProviderImpl(
+        auctionId = auctionId,
+        roundId = roundId,
+        demandId = demandId
+    ) {
 
     private var rewardedAd: MaxRewardedAd? = null
     private var maxAd: MaxAd? = null
@@ -31,11 +39,15 @@ internal class MaxRewardedImpl(
         object : MaxRewardedAdListener {
             override fun onAdLoaded(ad: MaxAd) {
                 maxAd = ad
+                onBidFinished(
+                    ecpm = requireNotNull(ad.revenue),
+                    roundStatus = RoundStatus.Successful,
+                )
                 adState.tryEmit(
                     AdState.Bid(
                         AuctionResult(
-                            priceFloor = ad.revenue,
-                            adSource = this@MaxRewardedImpl
+                            ecpm = ad.revenue,
+                            adSource = this@MaxRewardedImpl,
                         )
                     )
                 )
@@ -43,6 +55,10 @@ internal class MaxRewardedImpl(
 
             override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
                 logError(Tag, "(code=${error.code}) ${error.message}", error.asBidonError())
+                onBidFinished(
+                    ecpm = null,
+                    roundStatus = error.asBidonError().asRoundStatus(),
+                )
                 adState.tryEmit(AdState.LoadFailed(error.asBidonError()))
             }
 
@@ -110,8 +126,9 @@ internal class MaxRewardedImpl(
         )
     }
 
-    override suspend fun bid(adParams: MaxFullscreenAdAuctionParams): Result<AuctionResult> {
+    override suspend fun bid(adParams: MaxFullscreenAdAuctionParams): AuctionResult {
         logInternal(Tag, "Starting with $adParams")
+        onBidStarted(adParams.lineItem.adUnitId)
         val maxInterstitialAd = MaxRewardedAd.getInstance(adParams.lineItem.adUnitId, adParams.activity).also {
             it.setListener(maxAdListener)
             rewardedAd = it
@@ -121,8 +138,13 @@ internal class MaxRewardedImpl(
             it is AdState.Bid || it is AdState.LoadFailed
         }
         return when (state) {
-            is AdState.LoadFailed -> state.cause.asFailure()
-            is AdState.Bid -> state.result.asSuccess()
+            is AdState.LoadFailed -> {
+                AuctionResult(
+                    ecpm = 0.0,
+                    adSource = this
+                )
+            }
+            is AdState.Bid -> state.result
             else -> error("unexpected: $state")
         }
     }
@@ -157,7 +179,8 @@ internal class MaxRewardedImpl(
             monetizationNetwork = maxAd?.networkName,
             dsp = maxAd?.dspId,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 
@@ -174,7 +197,8 @@ internal class MaxRewardedImpl(
             monetizationNetwork = null,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 }

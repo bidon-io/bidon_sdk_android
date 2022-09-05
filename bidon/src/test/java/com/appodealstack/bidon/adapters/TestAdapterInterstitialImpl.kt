@@ -49,7 +49,7 @@ internal class TestAdapterInterstitialImpl(
         return when (adParams.bid) {
             Process.Succeed -> {
                 AuctionResult(
-                    priceFloor = 1.3,
+                    ecpm = 1.3,
                     adSource = this
                 ).asSuccess()
             }

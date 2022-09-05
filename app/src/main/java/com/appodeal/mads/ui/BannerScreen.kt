@@ -149,12 +149,12 @@ fun BannerScreen(navController: NavHostController) {
                         autoRefreshTtl.value = newTimeout
                     },
                     onPlusClicked = {
-                        val newTimeout = min(autoRefreshTtl.value + 1000, 30_000L)
+                        val newTimeout = min(autoRefreshTtl.value + 5000, 30_000L)
                         bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
                         autoRefreshTtl.value = newTimeout
                     },
                     onMinusClicked = {
-                        val newTimeout = kotlin.math.max(autoRefreshTtl.value - 1000, 0L)
+                        val newTimeout = max(autoRefreshTtl.value - 5000, 0L)
                         if (newTimeout == 0L) {
                             bannerView.value?.stopAutoRefresh()
                         } else {
@@ -219,7 +219,7 @@ fun BannerScreen(navController: NavHostController) {
                                     val log = buildString {
                                         appendLine("AuctionSucceed (${auctionResults.size} items)")
                                         auctionResults.forEachIndexed { index, auctionResult ->
-                                            appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.priceFloor}")
+                                            appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.ecpm}")
                                         }
                                     }
                                     logFlow.log(log)
@@ -238,7 +238,7 @@ fun BannerScreen(navController: NavHostController) {
                                         buildString {
                                             appendLine("roundSucceed($roundId)")
                                             roundResults.forEachIndexed { index, auctionResult ->
-                                                appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.priceFloor}")
+                                                appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.ecpm}")
                                             }
                                         }
                                     )

@@ -47,15 +47,19 @@ class BidMachineAdapter :
 
     override fun parseConfigParam(json: JsonObject): BidMachineParameters = json.parse(BidMachineParameters.serializer())
 
-    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<BMFullscreenAuctionParams> {
-        return BMInterstitialAdImpl(demandId, demandAd, roundId)
+    override fun interstitial(
+        demandAd: DemandAd,
+        roundId: String,
+        auctionId: String
+    ): AdSource.Interstitial<BMFullscreenAuctionParams> {
+        return BMInterstitialAdImpl(demandId = demandId, demandAd = demandAd, roundId = roundId, auctionId = auctionId)
     }
 
-    override fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<BMFullscreenAuctionParams> {
-        return BMRewardedAdImpl(demandId, demandAd, roundId)
+    override fun rewarded(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Rewarded<BMFullscreenAuctionParams> {
+        return BMRewardedAdImpl(demandId = demandId, demandAd = demandAd, roundId = roundId, auctionId = auctionId)
     }
 
-    override fun banner(demandAd: DemandAd, roundId: String): AdSource.Banner<BMBannerAuctionParams> {
-        return BMBannerAdImpl(demandId, demandAd, roundId)
+    override fun banner(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Banner<BMBannerAuctionParams> {
+        return BMBannerAdImpl(demandId = demandId, demandAd = demandAd, roundId = roundId, auctionId = auctionId)
     }
 }

@@ -3,6 +3,7 @@ package com.appodealstack.applovin
 import android.app.Activity
 import android.content.Context
 import com.applovin.sdk.AppLovinSdk
+import com.applovin.sdk.AppLovinSdkSettings
 import com.appodealstack.applovin.ext.adapterVersion
 import com.appodealstack.applovin.ext.sdkVersion
 import com.appodealstack.applovin.impl.ApplovinBannerImpl
@@ -45,7 +46,7 @@ class ApplovinAdapter :
             val context = activity.applicationContext.also {
                 context = it
             }
-            val instance = AppLovinSdk.getInstance(context).also {
+            val instance = AppLovinSdk.getInstance(configParams.key, AppLovinSdkSettings(context), context).also {
                 appLovinSdk = it
             }
             instance.settings.setVerboseLogging(true)
@@ -60,15 +61,41 @@ class ApplovinAdapter :
 
     override fun parseConfigParam(json: JsonObject): ApplovinParameters = json.parse(ApplovinParameters.serializer())
 
-    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
-        return ApplovinInterstitialImpl(demandId, demandAd, roundId, requireNotNull(appLovinSdk))
+    override fun interstitial(
+        demandAd: DemandAd,
+        roundId: String,
+        auctionId: String
+    ): AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
+        return ApplovinInterstitialImpl(
+            demandId = demandId,
+            demandAd = demandAd,
+            roundId = roundId,
+            appLovinSdk = requireNotNull(appLovinSdk),
+            auctionId = auctionId
+        )
     }
 
-    override fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<ApplovinFullscreenAdAuctionParams> {
-        return ApplovinRewardedImpl(demandId, demandAd, roundId, requireNotNull(appLovinSdk))
+    override fun rewarded(
+        demandAd: DemandAd,
+        roundId: String,
+        auctionId: String
+    ): AdSource.Rewarded<ApplovinFullscreenAdAuctionParams> {
+        return ApplovinRewardedImpl(
+            demandId = demandId,
+            demandAd = demandAd,
+            roundId = roundId,
+            appLovinSdk = requireNotNull(appLovinSdk),
+            auctionId = auctionId
+        )
     }
 
-    override fun banner(demandAd: DemandAd, roundId: String): AdSource.Banner<ApplovinBannerAuctionParams> {
-        return ApplovinBannerImpl(demandId, demandAd, roundId, requireNotNull(appLovinSdk))
+    override fun banner(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Banner<ApplovinBannerAuctionParams> {
+        return ApplovinBannerImpl(
+            demandId = demandId,
+            demandAd = demandAd,
+            roundId = roundId,
+            appLovinSdk = requireNotNull(appLovinSdk),
+            auctionId = auctionId
+        )
     }
 }

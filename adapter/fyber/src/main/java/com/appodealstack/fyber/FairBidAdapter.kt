@@ -73,6 +73,7 @@ class FairBidAdapter :
             dsp = this?.demandSource,
             roundId = "Ad.AuctionRound.Mediation",
             currencyCode = this?.currency,
+            auctionId = ""
         )
     }
 

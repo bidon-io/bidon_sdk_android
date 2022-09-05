@@ -13,6 +13,7 @@ data class AdmobBannerAuctionParams(
     val adContainer: ViewGroup,
     val bannerSize: BannerSize,
     val lineItem: LineItem,
+    val priceFloor: Double
 ) : AdAuctionParams
 
 data class AdmobFullscreenAdAuctionParams(

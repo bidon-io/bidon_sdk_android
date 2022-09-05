@@ -14,11 +14,13 @@ import com.appodealstack.applovin.ApplovinDemandId
 import com.appodealstack.applovin.MaxBannerAuctionParams
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
+import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.data.models.RoundStatus
+import com.appodealstack.bidon.analytics.data.models.asRoundStatus
+import com.appodealstack.bidon.analytics.domain.BidStatsProviderImpl
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
-import com.appodealstack.bidon.core.ext.asFailure
-import com.appodealstack.bidon.core.ext.asSuccess
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInternal
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,8 +29,14 @@ import kotlinx.coroutines.flow.first
 internal class MaxBannerImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
-    private val roundId: String
-) : AdSource.Banner<MaxBannerAuctionParams> {
+    private val roundId: String,
+    private val auctionId: String
+) : AdSource.Banner<MaxBannerAuctionParams>,
+    BidStatsProvider by BidStatsProviderImpl(
+        auctionId = auctionId,
+        roundId = roundId,
+        demandId = demandId
+    ) {
 
     private var maxAdView: MaxAdView? = null
     private var maxAd: MaxAd? = null
@@ -37,11 +45,15 @@ internal class MaxBannerImpl(
         object : MaxAdViewAdListener {
             override fun onAdLoaded(ad: MaxAd) {
                 maxAd = ad
+                onBidFinished(
+                    ecpm = requireNotNull(ad.revenue),
+                    roundStatus = RoundStatus.Successful,
+                )
                 adState.tryEmit(
                     AdState.Bid(
                         AuctionResult(
-                            priceFloor = ad.revenue,
-                            adSource = this@MaxBannerImpl
+                            ecpm = ad.revenue,
+                            adSource = this@MaxBannerImpl,
                         )
                     )
                 )
@@ -52,6 +64,10 @@ internal class MaxBannerImpl(
 
             override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
                 logError(Tag, "(code=${error.code}) ${error.message}", error.asBidonError())
+                onBidFinished(
+                    ecpm = null,
+                    roundStatus = error.asBidonError().asRoundStatus(),
+                )
                 adState.tryEmit(AdState.LoadFailed(error.asBidonError()))
             }
 
@@ -113,11 +129,9 @@ internal class MaxBannerImpl(
         return requireNotNull(maxAdView)
     }
 
-    override suspend fun bid(
-        adParams: MaxBannerAuctionParams
-    ): Result<AuctionResult> {
+    override suspend fun bid(adParams: MaxBannerAuctionParams): AuctionResult {
         logInternal(Tag, "Starting with $adParams")
-
+        onBidStarted(adParams.lineItem.adUnitId)
         val maxAdView = if (adParams.bannerSize == BannerSize.Adaptive) {
             MaxAdView(
                 adParams.lineItem.adUnitId,
@@ -152,8 +166,13 @@ internal class MaxBannerImpl(
             it is AdState.Bid || it is AdState.LoadFailed
         }
         return when (state) {
-            is AdState.LoadFailed -> state.cause.asFailure()
-            is AdState.Bid -> state.result.asSuccess()
+            is AdState.LoadFailed -> {
+                AuctionResult(
+                    ecpm = 0.0,
+                    adSource = this
+                )
+            }
+            is AdState.Bid -> state.result
             else -> error("unexpected: $state")
         }
     }
@@ -182,7 +201,8 @@ internal class MaxBannerImpl(
             monetizationNetwork = maxAd?.networkName,
             dsp = maxAd?.dspId,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 
@@ -199,7 +219,8 @@ internal class MaxBannerImpl(
             monetizationNetwork = null,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD
+            currencyCode = USD,
+            auctionId = auctionId,
         )
     }
 

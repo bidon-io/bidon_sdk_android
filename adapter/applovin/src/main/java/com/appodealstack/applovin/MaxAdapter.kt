@@ -59,15 +59,38 @@ class MaxAdapter :
 
     override fun parseConfigParam(json: JsonObject): MaxParameters = json.parse(MaxParameters.serializer())
 
-    override fun interstitial(demandAd: DemandAd, roundId: String): AdSource.Interstitial<MaxFullscreenAdAuctionParams> {
-        return MaxInterstitialImpl(demandId, demandAd, roundId)
+    override fun interstitial(
+        demandAd: DemandAd,
+        roundId: String,
+        auctionId: String
+    ): AdSource.Interstitial<MaxFullscreenAdAuctionParams> {
+        return MaxInterstitialImpl(
+            demandId = demandId,
+            demandAd = demandAd,
+            roundId = roundId,
+            auctionId = auctionId
+        )
     }
 
-    override fun rewarded(demandAd: DemandAd, roundId: String): AdSource.Rewarded<MaxFullscreenAdAuctionParams> {
-        return MaxRewardedImpl(demandId, demandAd, roundId)
+    override fun rewarded(
+        demandAd: DemandAd,
+        roundId: String,
+        auctionId: String
+    ): AdSource.Rewarded<MaxFullscreenAdAuctionParams> {
+        return MaxRewardedImpl(
+            demandId = demandId,
+            demandAd = demandAd,
+            roundId = roundId,
+            auctionId = auctionId
+        )
     }
 
-    override fun banner(demandAd: DemandAd, roundId: String): AdSource.Banner<MaxBannerAuctionParams> {
-        return MaxBannerImpl(demandId, demandAd, roundId)
+    override fun banner(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Banner<MaxBannerAuctionParams> {
+        return MaxBannerImpl(
+            demandId = demandId,
+            demandAd = demandAd,
+            roundId = roundId,
+            auctionId = auctionId
+        )
     }
 }

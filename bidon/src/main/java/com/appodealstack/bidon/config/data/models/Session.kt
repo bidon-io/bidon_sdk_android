@@ -13,16 +13,16 @@ data class Session(
     var launchMonotonicTs: Long,
     @SerialName("start_ts")
     var startTs: Long,
-    @SerialName("monotonic_start_ts")
+    @SerialName("start_monotonic_ts")
     var monotonicStartTs: Long,
     @SerialName("ts")
     var ts: Long,
     @SerialName("monotonic_ts")
     var monotonicTs: Long,
     @SerialName("memory_warnings_ts")
-    var memoryWarningsTs: List<Long> = arrayListOf(),
+    var memoryWarningsTs: List<Long>,
     @SerialName("memory_warnings_monotonic_ts")
-    var memoryWarningsMonotonicTs: List<Long> = arrayListOf(),
+    var memoryWarningsMonotonicTs: List<Long>,
     @SerialName("ram_used")
     var ramUsed: Long,
     @SerialName("ram_size")

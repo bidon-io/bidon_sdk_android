@@ -6,7 +6,6 @@ import com.appodealstack.bidon.config.domain.DataBinderType
 import com.appodealstack.bidon.config.domain.DataProvider
 import com.appodealstack.bidon.config.domain.GetConfigRequestUseCase
 import com.appodealstack.bidon.core.BidonJson
-import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.ktor.JsonHttpRequest
 import kotlinx.serialization.json.buildJsonObject
@@ -33,7 +32,6 @@ internal class GetConfigRequestUseCaseImpl(
                 put(key, jsonElement)
             }
         }
-        logInfo(Tag, "Request body: $requestBody")
         return JsonHttpRequest().invoke(
             path = ConfigRequestPath,
             body = requestBody,
@@ -46,4 +44,3 @@ internal class GetConfigRequestUseCaseImpl(
 }
 
 private const val ConfigRequestPath = "config"
-private const val Tag = "ConfigRequestUseCase"
