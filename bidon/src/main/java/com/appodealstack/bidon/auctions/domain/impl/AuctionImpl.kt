@@ -44,7 +44,8 @@ internal class AuctionImpl(
             val auctionData = requestActionData(
                 demandAd = demandAd,
                 adTypeAdditionalData = adTypeAdditionalData,
-                auctionId = UUID.randomUUID().toString()
+                auctionId = UUID.randomUUID().toString(),
+                adapters = adaptersSource.adapters
             )
             auctionId = auctionData.auctionId ?: run {
                 logError(Tag, "Auction ID is null at response $auctionData", NullPointerException())
@@ -428,12 +429,16 @@ internal class AuctionImpl(
     private suspend fun requestActionData(
         demandAd: DemandAd,
         adTypeAdditionalData: AdTypeAdditional,
-        auctionId: String
+        auctionId: String,
+        adapters: List<Adapter>
     ): AuctionResponse {
         val auctionResponse = getAuctionRequest.request(
             placement = demandAd.placement,
             additionalData = adTypeAdditionalData,
-            auctionId = auctionId
+            auctionId = auctionId,
+            adapters = adapters.associate {
+                it.demandId.demandId to it.adapterInfo
+            }
         ).getOrNull()
         return requireNotNull(auctionResponse) {
             "No auction data response"

@@ -7,6 +7,7 @@ import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
 import com.appodealstack.bidon.auctions.data.models.AuctionResponse
 import com.appodealstack.bidon.auctions.domain.GetAuctionRequestUseCase
 import com.appodealstack.bidon.auctions.domain.GetOrientationUseCase
+import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.appodealstack.bidon.config.domain.DataBinderType
 import com.appodealstack.bidon.config.domain.databinders.CreateRequestBodyUseCase
 import com.appodealstack.bidon.core.BidonJson
@@ -31,7 +32,8 @@ internal class GetAuctionRequestUseCaseImpl(
     override suspend fun request(
         placement: String,
         additionalData: AdTypeAdditional,
-        auctionId: String
+        auctionId: String,
+        adapters: Map<String, AdapterInfo>
     ): Result<AuctionResponse> {
         val (banner, interstitial, rewarded) = getData(additionalData)
         val adObject = AdObjectRequestBody(
@@ -42,11 +44,12 @@ internal class GetAuctionRequestUseCaseImpl(
             rewarded = rewarded,
             orientationCode = getOrientation().code
         )
-        val requestBody = createRequestBody(
+        val requestBody = createRequestBody.invoke(
             binders = binders,
             dataKeyName = "ad_object",
             data = adObject,
-            dataSerializer = AdObjectRequestBody.serializer()
+            dataSerializer = AdObjectRequestBody.serializer(),
+            adapters = adapters
         )
         logInfo(Tag, "Request body: $requestBody")
         return get<JsonHttpRequest>().invoke(
