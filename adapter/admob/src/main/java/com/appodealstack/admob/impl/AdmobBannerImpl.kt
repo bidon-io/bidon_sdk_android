@@ -225,7 +225,6 @@ internal class AdmobBannerImpl(
         BannerSize.Banner -> AdSize.BANNER
         BannerSize.LeaderBoard -> AdSize.LEADERBOARD
         BannerSize.MRec -> AdSize.MEDIUM_RECTANGLE
-        BannerSize.Large -> AdSize.LARGE_BANNER
         BannerSize.Adaptive -> adContainer.adaptiveAdSize()
     }
 

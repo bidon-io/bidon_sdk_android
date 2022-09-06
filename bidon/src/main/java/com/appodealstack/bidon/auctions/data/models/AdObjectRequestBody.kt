@@ -31,27 +31,18 @@ internal data class AdObjectRequestBody(
     class Rewarded // rewarded has no parameters
 
     @Serializable
-    data class Interstitial(
-        @SerialName("formats")
-        val formatCodes: List<Int>,
-    ) {
-        enum class Format(val code: Int) {
-            Static(0),
-            Video(1),
-        }
-    }
+    class Interstitial // interstitial has no parameters
 
     @Serializable
     data class Banner(
         @SerialName("format")
         val formatCode: Int,
-        @SerialName("adaptive")
-        val adaptive: Boolean,
     ) {
         enum class Format(val code: Int) {
             Banner320x50(0),
             LeaderBoard728x90(1),
             MRec300x250(2),
+            Banner320x50Adaptive(3),
         }
     }
 

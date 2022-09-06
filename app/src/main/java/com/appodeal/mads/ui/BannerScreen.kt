@@ -108,8 +108,7 @@ fun BannerScreen(navController: NavHostController) {
                         BannerSize.Banner -> "Banner 320x50"
                         BannerSize.LeaderBoard -> "Leader Board 728x90"
                         BannerSize.MRec -> "MRec 300x250"
-                        BannerSize.Large -> "Large 320x100"
-                        BannerSize.Adaptive -> "Smart/Adaptive"
+                        BannerSize.Adaptive -> "Smart/Adaptive 320x50"
                     }
                 },
                 onItemClicked = {

@@ -70,20 +70,15 @@ internal class GetAuctionRequestUseCaseImpl(
                 val banner = Banner(
                     formatCode = when (data.bannerSize) {
                         BannerSize.Banner -> Banner.Format.Banner320x50
-                        BannerSize.Large -> Banner.Format.Banner320x50
                         BannerSize.LeaderBoard -> Banner.Format.LeaderBoard728x90
                         BannerSize.MRec -> Banner.Format.MRec300x250
-                        BannerSize.Adaptive -> Banner.Format.Banner320x50
+                        BannerSize.Adaptive -> Banner.Format.Banner320x50Adaptive
                     }.code,
-                    adaptive = data.bannerSize == BannerSize.Adaptive
                 )
                 Triple(first = banner, second = null, third = null)
             }
             is AdTypeAdditional.Interstitial -> {
-                val interstitial = Interstitial(
-                    formatCodes = Interstitial.Format.values().map { it.code }.toList()
-                )
-                Triple(first = null, second = interstitial, third = null)
+                Triple(first = null, second = Interstitial(), third = null)
             }
             is AdTypeAdditional.Rewarded -> {
                 Triple(first = null, second = null, third = Rewarded())

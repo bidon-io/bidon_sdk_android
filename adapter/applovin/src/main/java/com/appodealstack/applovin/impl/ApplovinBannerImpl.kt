@@ -198,10 +198,9 @@ internal class ApplovinBannerImpl(
 
     private fun BannerSize.asAppLovinAdSize() = when (this) {
         BannerSize.Banner -> AppLovinAdSize.BANNER
+        BannerSize.Adaptive -> AppLovinAdSize.BANNER
         BannerSize.LeaderBoard -> AppLovinAdSize.LEADER
         BannerSize.MRec -> AppLovinAdSize.MREC
-        BannerSize.Large -> null
-        BannerSize.Adaptive -> null
     }
 }
 
