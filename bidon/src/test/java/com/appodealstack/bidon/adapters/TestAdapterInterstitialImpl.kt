@@ -40,21 +40,25 @@ internal class TestAdapterInterstitialImpl(
             dsp = "DSP-bidmachine",
             sourceAd = this,
             currencyCode = "USD",
+            auctionId = "auctionId-12312"
         )
 
     override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
 
-    override suspend fun bid(adParams: TestAdapterInterstitialParameters): Result<AuctionResult> {
+    override suspend fun bid(adParams: TestAdapterInterstitialParameters): AuctionResult {
         this.adParams = adParams
         return when (adParams.bid) {
             Process.Succeed -> {
                 AuctionResult(
                     ecpm = 1.3,
                     adSource = this
-                ).asSuccess()
+                )
             }
             Process.Failed -> {
-                BidonError.NoAppropriateAdUnitId.asFailure()
+                AuctionResult(
+                    ecpm = 0.0,
+                    adSource = this
+                )
             }
             Process.Timeout -> {
                 delay(60_000L)

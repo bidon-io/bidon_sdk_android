@@ -10,7 +10,6 @@ import com.appodealstack.bidon.core.ext.logInternal
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.lang.ref.WeakReference
 
-@Deprecated("")
 internal class PauseResumeObserverImpl(
     application: Application
 ) : PauseResumeObserver {

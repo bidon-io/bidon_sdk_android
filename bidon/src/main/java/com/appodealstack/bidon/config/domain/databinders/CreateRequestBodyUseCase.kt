@@ -13,10 +13,10 @@ import kotlinx.serialization.json.encodeToJsonElement
 internal interface CreateRequestBodyUseCase {
     suspend operator fun <T> invoke(
         binders: List<DataBinderType>,
-        dataKeyName: String,
-        data: T,
-        adapters: Map<String, AdapterInfo>,
-        dataSerializer: SerializationStrategy<T>,
+        adapters: Map<String, AdapterInfo>? = null,
+        dataKeyName: String?,
+        data: T?,
+        dataSerializer: SerializationStrategy<T>?,
     ): JsonObject
 }
 
@@ -25,15 +25,17 @@ internal class CreateRequestBodyUseCaseImpl(
 ) : CreateRequestBodyUseCase {
     override suspend operator fun <T> invoke(
         binders: List<DataBinderType>,
-        dataKeyName: String,
-        data: T,
-        adapters: Map<String, AdapterInfo>,
-        dataSerializer: SerializationStrategy<T>,
+        adapters: Map<String, AdapterInfo>?,
+        dataKeyName: String?,
+        data: T?,
+        dataSerializer: SerializationStrategy<T>?,
     ): JsonObject {
         val bindData = dataProvider.provide(binders)
         return buildJsonObject {
-            put(dataKeyName, BidonJson.encodeToJsonElement(dataSerializer, data))
-            if (adapters.isNotEmpty()) {
+            if (data != null && dataKeyName != null && dataSerializer != null) {
+                put(dataKeyName, BidonJson.encodeToJsonElement(dataSerializer, data))
+            }
+            adapters?.let {
                 put("adapters", BidonJson.encodeToJsonElement(adapters))
             }
             bindData.forEach { (key, jsonElement) ->

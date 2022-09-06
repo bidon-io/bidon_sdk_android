@@ -21,7 +21,6 @@ internal class GeoBinder(
             accuracy = dataSource.getAccuracy(),
             lastfix = dataSource.getLastFix(),
             country = dataSource.getCountry(),
-            region = dataSource.getRegion(),
             city = dataSource.getCity(),
             zip = dataSource.getZip(),
             utcOffset = dataSource.getUtcOffset()

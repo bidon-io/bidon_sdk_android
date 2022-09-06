@@ -13,12 +13,10 @@ import com.appodealstack.bidon.auctions.domain.RoundsListener
 import com.appodealstack.bidon.base.ConcurrentTest
 import com.appodealstack.bidon.core.AdaptersSource
 import com.appodealstack.bidon.core.ext.*
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.JsonObject
 import org.junit.Before
 import org.junit.Test
 
@@ -36,7 +34,8 @@ internal class AuctionImplTest : ConcurrentTest() {
     private val testee: Auction by lazy {
         AuctionImpl(
             adaptersSource = adaptersSource,
-            getAuctionRequest = getAuctionRequestUseCase
+            getAuctionRequest = getAuctionRequestUseCase,
+            statsRequest = mockk()
         )
     }
 
@@ -56,57 +55,59 @@ internal class AuctionImplTest : ConcurrentTest() {
                 )
             ),
         )
-        coEvery {
-            getAuctionRequestUseCase.request(
-                demandAd.placement, demandAd.adType, adTypeAdditionalData,
-                adapters.associate {
-                    it.demandId.demandId to it.adapterInfo
-                }
-            )
-        } returns AuctionResponse(
-            rounds = listOf(
-                Round(
-                    id = "round1",
-                    timeoutMs = 5000,
-                    demandIds = listOf(Applovin, Admob, BidMachine)
-                ),
-                Round(
-                    id = "round2",
-                    timeoutMs = 5000,
-                    demandIds = listOf(Admob, BidMachine)
-                ),
-                Round(
-                    id = "round3",
-                    timeoutMs = 5000,
-                    demandIds = listOf("UnknownDemandId")
-                ),
-            ),
-            fillTimeout = 5000,
-            lineItems = listOf(
-                LineItem(
-                    demandId = Applovin,
-                    priceFloor = 1.0,
-                    adUnitId = "-"
-                ),
-                LineItem(
-                    demandId = Applovin,
-                    priceFloor = 0.1,
-                    adUnitId = "-"
-                ),
-                LineItem(
-                    demandId = Applovin,
-                    priceFloor = 2.0,
-                    adUnitId = "-"
-                ),
-                LineItem(
-                    demandId = Admob,
-                    priceFloor = 1.5,
-                    adUnitId = "-"
-                ),
-            ),
-            minPrice = 1.0,
-            token = JsonObject(mapOf())
-        ).asSuccess()
+//        coEvery {
+//            getAuctionRequestUseCase.request(
+//                demandAd.placement,
+//                demandAd.adType,
+//                adTypeAdditionalData,
+//                adaptersSource.adapters.associate {
+//                    it.demandId.demandId to it.adapterInfo
+//                }
+//            )
+//        } returns AuctionResponse(
+//            rounds = listOf(
+//                Round(
+//                    id = "round1",
+//                    timeoutMs = 5000,
+//                    demandIds = listOf(Applovin, Admob, BidMachine)
+//                ),
+//                Round(
+//                    id = "round2",
+//                    timeoutMs = 5000,
+//                    demandIds = listOf(Admob, BidMachine)
+//                ),
+//                Round(
+//                    id = "round3",
+//                    timeoutMs = 5000,
+//                    demandIds = listOf("UnknownDemandId")
+//                ),
+//            ),
+//            fillTimeout = 5000,
+//            lineItems = listOf(
+//                LineItem(
+//                    demandId = Applovin,
+//                    priceFloor = 1.0,
+//                    adUnitId = "-"
+//                ),
+//                LineItem(
+//                    demandId = Applovin,
+//                    priceFloor = 0.1,
+//                    adUnitId = "-"
+//                ),
+//                LineItem(
+//                    demandId = Applovin,
+//                    priceFloor = 2.0,
+//                    adUnitId = "-"
+//                ),
+//                LineItem(
+//                    demandId = Admob,
+//                    priceFloor = 1.5,
+//                    adUnitId = "-"
+//                ),
+//            ),
+//            minPrice = 1.0,
+//            token = JsonObject(mapOf())
+//        ).asSuccess()
 
         mockkStatic(Log::class)
         mockkStatic(::logInfo)
@@ -119,14 +120,14 @@ internal class AuctionImplTest : ConcurrentTest() {
 
     @Test
     fun `it should`() = runTest {
-        coEvery {
-            getAuctionRequestUseCase.request(
-                demandAd.placement, demandAd.adType, adTypeAdditionalData,
-                adapters.associate {
-                    it.demandId.demandId to it.adapterInfo
-                }
-            )
-        } returns BidonError.NoAuctionResults.asFailure()
+//        coEvery {
+//            getAuctionRequestUseCase.request(
+//                demandAd.placement, demandAd.adType, adTypeAdditionalData,
+//                adapters.associate {
+//                    it.demandId.demandId to it.adapterInfo
+//                }
+//            )
+//        } returns BidonError.NoAuctionResults.asFailure()
         val roundsListener = object : RoundsListener {
             override fun roundStarted(roundId: String) {
                 println("roundStarted: $roundId")

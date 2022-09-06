@@ -38,9 +38,9 @@ internal class JsonHttpRequest(
                 @Suppress("RemoveExplicitTypeArguments")
                 response.body<JsonObject>().also { jsonResponse ->
                     withContext(SdkDispatchers.IO) {
-                        jsonResponse.getOrDefault("token", null)?.toString()?.let {
+                        jsonResponse.getOrDefault("token", null)?.let {
                             logInternal(Tag, "New token saved: $it")
-                            keyValueStorage.token = it
+                            keyValueStorage.token = it.toString()
                         }
                     }
                 }

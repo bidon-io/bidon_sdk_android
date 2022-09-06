@@ -46,10 +46,10 @@ internal class GetAuctionRequestUseCaseImpl(
         )
         val requestBody = createRequestBody.invoke(
             binders = binders,
+            adapters = adapters,
             dataKeyName = "ad_object",
             data = adObject,
             dataSerializer = AdObjectRequestBody.serializer(),
-            adapters = adapters
         )
         logInfo(Tag, "Request body: $requestBody")
         return get<JsonHttpRequest>().invoke(

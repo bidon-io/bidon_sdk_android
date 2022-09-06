@@ -156,7 +156,7 @@ object DI {
                  */
                 factory<GetConfigRequestUseCase> {
                     GetConfigRequestUseCaseImpl(
-                        dataProvider = get(),
+                        createRequestBody = get(),
                     )
                 }
                 factory<GetAuctionRequestUseCase> {

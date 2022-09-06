@@ -15,8 +15,6 @@ data class Geo(
     var lastfix: Long?,
     @SerialName("country")
     var country: String?,
-    @SerialName("region")
-    var region: String?,
     @SerialName("city")
     var city: String?,
     @SerialName("zip")
