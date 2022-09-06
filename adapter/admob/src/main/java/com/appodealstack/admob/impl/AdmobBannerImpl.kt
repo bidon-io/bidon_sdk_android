@@ -68,7 +68,7 @@ internal class AdmobBannerImpl(
                 logInfo(Tag, "onAdLoaded: $this")
                 onBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
-                    roundStatus = RoundStatus.Successful,
+                    roundStatus = RoundStatus.SuccessfulBid,
                 )
                 adView?.run {
                     adState.tryEmit(

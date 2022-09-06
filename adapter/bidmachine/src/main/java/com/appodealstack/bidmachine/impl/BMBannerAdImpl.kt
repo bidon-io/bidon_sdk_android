@@ -55,7 +55,7 @@ internal class BMBannerAdImpl(
                 adRequest = request
                 onBidFinished(
                     ecpm = result.price,
-                    roundStatus = RoundStatus.Successful,
+                    roundStatus = RoundStatus.SuccessfulBid,
                 )
                 adState.tryEmit(
                     AdState.Bid(

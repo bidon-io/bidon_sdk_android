@@ -64,7 +64,7 @@ internal class AdmobRewardedImpl(
                 requiredRewardedAd.fullScreenContentCallback = rewardedListener
                 onBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
-                    roundStatus = RoundStatus.Successful,
+                    roundStatus = RoundStatus.SuccessfulBid,
                 )
                 adState.tryEmit(
                     AdState.Bid(

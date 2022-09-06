@@ -16,8 +16,8 @@ internal data class RoundStat(
 internal data class DemandStat(
     val roundStatus: RoundStatus,
     val demandId: DemandId,
-    val startTs: Long,
-    val finishTs: Long,
+    val startTs: Long?,
+    val finishTs: Long?,
     val ecpm: Double?,
     val adUnitId: String?,
 )

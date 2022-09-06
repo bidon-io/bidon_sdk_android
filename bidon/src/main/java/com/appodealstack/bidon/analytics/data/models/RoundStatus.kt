@@ -3,20 +3,26 @@ package com.appodealstack.bidon.analytics.data.models
 import com.appodealstack.bidon.adapters.BidonError
 import com.appodealstack.bidon.adapters.DemandError
 
+/**
+ * @see https://appodeal.atlassian.net/wiki/spaces/SX/pages/4490264831/SDK+Server+Schema#SDK%3C%3EServerSchema-StatsRequest
+ */
 enum class RoundStatus(val code: Int) {
-    Successful(1),
-    NoBid(2),
-    NoFill(3), // for Admob only NoBid possible
-    UnknownAdapter(4),
-    AdapterNotInitialized(5),
-    BidTimeoutReached(6),
-    FillTimeoutReached(7),
-    NetworkError(8),
-    IncorrectAdUnitId(9),
-    NoAppropriateAdUnitId(10),
-    AuctionCancelled(11),
-    AdFormatNotSupported(12),
-    UnspecifiedException(13),
+    Win(1),
+    Loss(2),
+    NoBid(3),
+    NoFill(4), // for Admob only NoBid possible
+    UnknownAdapter(5),
+    AdapterNotInitialized(6),
+    BidTimeoutReached(7),
+    FillTimeoutReached(8),
+    NetworkError(9),
+    IncorrectAdUnitId(10),
+    NoAppropriateAdUnitId(11),
+    AuctionCancelled(12),
+    AdFormatNotSupported(13),
+    UnspecifiedException(14),
+
+    SuccessfulBid(-1), // Internal status
 }
 
 fun Throwable.asRoundStatus() = when (this as? BidonError) {

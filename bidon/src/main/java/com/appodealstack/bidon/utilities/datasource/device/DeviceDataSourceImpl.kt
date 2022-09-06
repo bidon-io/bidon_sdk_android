@@ -193,4 +193,4 @@ internal class DeviceDataSourceImpl(
     }
 }
 
-private const val AndroidPlatform = "Android"
+private const val AndroidPlatform = "android"

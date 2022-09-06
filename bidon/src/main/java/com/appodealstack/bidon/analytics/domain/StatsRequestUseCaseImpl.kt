@@ -28,7 +28,7 @@ internal class StatsRequestUseCaseImpl(
         auctionId: String,
         auctionConfigurationId: Int,
         results: List<RoundStat>,
-    ): Result<BaseResponse> {
+    ): Result<BaseResponse> = runCatching {
         val body = results.asStatsRequestBody(auctionId, auctionConfigurationId)
         val requestBody = createRequestBody(
             binders = binders,

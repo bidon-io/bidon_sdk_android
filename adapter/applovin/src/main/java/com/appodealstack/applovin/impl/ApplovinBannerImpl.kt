@@ -48,7 +48,7 @@ internal class ApplovinBannerImpl(
                 appLovinAd = ad
                 onBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
-                    roundStatus = RoundStatus.Successful,
+                    roundStatus = RoundStatus.SuccessfulBid,
                 )
                 adState.tryEmit(
                     AdState.Bid(

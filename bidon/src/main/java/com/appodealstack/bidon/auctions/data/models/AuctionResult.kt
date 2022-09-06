@@ -2,7 +2,7 @@ package com.appodealstack.bidon.auctions.data.models
 
 import com.appodealstack.bidon.adapters.AdSource
 
-data class AuctionResult(
+class AuctionResult(
     val ecpm: Double,
     val adSource: AdSource<*>,
 )

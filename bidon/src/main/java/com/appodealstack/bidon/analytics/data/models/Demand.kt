@@ -14,7 +14,7 @@ data class Demand(
     @SerialName("ecpm")
     val ecpm: Double?,
     @SerialName("start_ts")
-    val startTs: Long,
+    val startTs: Long?,
     @SerialName("finish_ts")
-    val finishTs: Long,
+    val finishTs: Long?,
 )

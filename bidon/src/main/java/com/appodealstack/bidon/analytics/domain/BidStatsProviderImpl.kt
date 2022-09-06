@@ -19,21 +19,31 @@ class BidStatsProviderImpl(auctionId: String, roundId: String, demandId: DemandI
         ecpm = null
     )
 
-    override fun onBidStarted(adUnitId: String?): BidStatsProvider {
+    override fun onBidStarted(adUnitId: String?) {
         stat = stat.copy(
             startTs = SystemTimeNow,
             adUnitId = adUnitId
         )
-        return this
     }
 
-    override fun onBidFinished(roundStatus: RoundStatus, ecpm: Double?): BidStatsProvider {
+    override fun onBidFinished(roundStatus: RoundStatus, ecpm: Double?) {
         stat = stat.copy(
             finishTs = SystemTimeNow,
             roundStatus = roundStatus,
             ecpm = ecpm,
         )
-        return this
+    }
+
+    override fun onWin() {
+        stat = stat.copy(
+            roundStatus = RoundStatus.Win
+        )
+    }
+
+    override fun onLoss() {
+        stat = stat.copy(
+            roundStatus = RoundStatus.Loss
+        )
     }
 
     override fun buildBidStatistic(): BidStat = stat

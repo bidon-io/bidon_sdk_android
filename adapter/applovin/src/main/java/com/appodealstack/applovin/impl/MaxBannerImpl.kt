@@ -47,7 +47,7 @@ internal class MaxBannerImpl(
                 maxAd = ad
                 onBidFinished(
                     ecpm = requireNotNull(ad.revenue),
-                    roundStatus = RoundStatus.Successful,
+                    roundStatus = RoundStatus.SuccessfulBid,
                 )
                 adState.tryEmit(
                     AdState.Bid(

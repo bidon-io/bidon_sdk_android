@@ -63,7 +63,7 @@ internal class AdmobInterstitialImpl(
                 interstitialAd.fullScreenContentCallback = interstitialListener
                 onBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
-                    roundStatus = RoundStatus.Successful,
+                    roundStatus = RoundStatus.SuccessfulBid,
                 )
                 adState.tryEmit(
                     AdState.Bid(
