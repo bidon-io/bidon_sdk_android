@@ -35,7 +35,8 @@ internal class StatsRequestUseCaseImpl(
             binders = binders,
             dataKeyName = "stats",
             data = body,
-            dataSerializer = StatsRequestBody.serializer()
+            dataSerializer = StatsRequestBody.serializer(),
+            adapters = emptyMap()
         )
         return get<JsonHttpRequest>().invoke(
             path = StatsRequestPath,

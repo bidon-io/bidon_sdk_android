@@ -33,7 +33,9 @@ internal class CreateRequestBodyUseCaseImpl(
         val bindData = dataProvider.provide(binders)
         return buildJsonObject {
             put(dataKeyName, BidonJson.encodeToJsonElement(dataSerializer, data))
-            put("adapters", BidonJson.encodeToJsonElement(adapters))
+            if (adapters.isNotEmpty()) {
+                put("adapters", BidonJson.encodeToJsonElement(adapters))
+            }
             bindData.forEach { (key, jsonElement) ->
                 put(key, jsonElement)
             }
