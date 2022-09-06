@@ -45,6 +45,7 @@ import com.appodealstack.bidon.utilities.datasource.user.impl.AdvertisingDataImp
 import com.appodealstack.bidon.utilities.datasource.user.impl.UserDataSourceImpl
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
+import com.appodealstack.bidon.utilities.ktor.JsonHttpRequest
 import com.appodealstack.bidon.utilities.network.BidOnEndpoints
 import com.appodealstack.bidon.utilities.network.endpoint.BidOnEndpointsImpl
 import com.appodealstack.bidon.view.BannerAd
@@ -148,6 +149,7 @@ object DI {
                     )
                 }
                 factory<GetOrientationUseCase> { GetOrientationUseCaseImpl(context = get()) }
+                factory { JsonHttpRequest(keyValueStorage = get()) }
 
                 /**
                  * Requests
@@ -155,7 +157,6 @@ object DI {
                 factory<GetConfigRequestUseCase> {
                     GetConfigRequestUseCaseImpl(
                         dataProvider = get(),
-                        keyValueStorage = get()
                     )
                 }
                 factory<GetAuctionRequestUseCase> {

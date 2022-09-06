@@ -10,6 +10,7 @@ import com.appodealstack.bidon.core.BidonJson
 import com.appodealstack.bidon.core.errors.BaseResponse
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
+import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.utilities.ktor.JsonHttpRequest
 
 internal class StatsRequestUseCaseImpl(
@@ -36,7 +37,7 @@ internal class StatsRequestUseCaseImpl(
             data = body,
             dataSerializer = StatsRequestBody.serializer()
         )
-        return JsonHttpRequest().invoke(
+        return get<JsonHttpRequest>().invoke(
             path = StatsRequestPath,
             body = requestBody,
         ).map { jsonResponse ->

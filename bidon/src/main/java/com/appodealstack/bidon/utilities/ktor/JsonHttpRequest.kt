@@ -1,17 +1,23 @@
 package com.appodealstack.bidon.utilities.ktor
 
 import com.appodealstack.bidon.core.BidonJson
+import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.errors.BaseResponse
 import com.appodealstack.bidon.core.errors.BidonSdkError
+import com.appodealstack.bidon.core.ext.logInternal
 import com.appodealstack.bidon.di.get
+import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utilities.network.BidOnEndpoints
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 
-internal class JsonHttpRequest {
+internal class JsonHttpRequest(
+    private val keyValueStorage: KeyValueStorage
+) {
     suspend operator fun invoke(
         path: String,
         body: JsonObject,
@@ -30,7 +36,14 @@ internal class JsonHttpRequest {
         when (response.status) {
             HttpStatusCode.OK -> {
                 @Suppress("RemoveExplicitTypeArguments")
-                response.body<JsonObject>()
+                response.body<JsonObject>().also { jsonResponse ->
+                    withContext(SdkDispatchers.IO) {
+                        jsonResponse.getOrDefault("token", null)?.toString()?.let {
+                            logInternal(Tag, "New token saved: $it")
+                            keyValueStorage.token = it
+                        }
+                    }
+                }
             }
             HttpStatusCode.InternalServerError -> {
                 val jsonResponse = response.body<JsonObject>()
@@ -48,3 +61,5 @@ internal class JsonHttpRequest {
         }
     }
 }
+
+private const val Tag = "JsonHttpRequest"

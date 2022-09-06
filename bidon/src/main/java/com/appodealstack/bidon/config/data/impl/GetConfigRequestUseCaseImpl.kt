@@ -6,14 +6,13 @@ import com.appodealstack.bidon.config.domain.DataBinderType
 import com.appodealstack.bidon.config.domain.DataProvider
 import com.appodealstack.bidon.config.domain.GetConfigRequestUseCase
 import com.appodealstack.bidon.core.BidonJson
-import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
+import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.utilities.ktor.JsonHttpRequest
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 
 internal class GetConfigRequestUseCaseImpl(
     private val dataProvider: DataProvider,
-    private val keyValueStorage: KeyValueStorage
 ) : GetConfigRequestUseCase {
     private val binders: List<DataBinderType> = listOf(
         DataBinderType.Device,
@@ -32,12 +31,11 @@ internal class GetConfigRequestUseCaseImpl(
                 put(key, jsonElement)
             }
         }
-        return JsonHttpRequest().invoke(
+        return get<JsonHttpRequest>().invoke(
             path = ConfigRequestPath,
             body = requestBody,
         ).map { jsonResponse ->
             val config = jsonResponse.getValue("init")
-            keyValueStorage.token = jsonResponse.getValue("token").toString()
             BidonJson.decodeFromJsonElement(ConfigResponse.serializer(), config)
         }
     }

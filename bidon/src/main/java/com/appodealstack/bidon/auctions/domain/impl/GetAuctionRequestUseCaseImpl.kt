@@ -12,6 +12,7 @@ import com.appodealstack.bidon.config.domain.databinders.CreateRequestBodyUseCas
 import com.appodealstack.bidon.core.BidonJson
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
+import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.utilities.ktor.JsonHttpRequest
 
 internal class GetAuctionRequestUseCaseImpl(
@@ -48,7 +49,7 @@ internal class GetAuctionRequestUseCaseImpl(
             dataSerializer = AdObjectRequestBody.serializer()
         )
         logInfo(Tag, "Request body: $requestBody")
-        return JsonHttpRequest().invoke(
+        return get<JsonHttpRequest>().invoke(
             path = AuctionRequestPath,
             body = requestBody,
         ).map { jsonResponse ->
