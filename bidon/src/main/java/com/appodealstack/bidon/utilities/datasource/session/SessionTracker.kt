@@ -5,8 +5,8 @@ import android.content.ComponentCallbacks2
 import android.content.Context
 import android.content.res.Configuration
 import android.os.SystemClock
+import com.appodealstack.bidon.core.ActivityLifecycleState
 import com.appodealstack.bidon.core.PauseResumeObserver
-import com.appodealstack.bidon.core.PauseResumeObserver.LifecycleState
 import com.appodealstack.bidon.core.ext.logInfo
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
@@ -77,7 +77,7 @@ internal class SessionTrackerImpl(
         var shouldStartNewSession = false
         pauseResumeObserver.lifecycleFlow.onEach { state ->
             when (state) {
-                LifecycleState.Resumed -> {
+                ActivityLifecycleState.Resumed -> {
                     job?.cancel()
                     if (shouldStartNewSession) {
                         shouldStartNewSession = false
@@ -87,7 +87,7 @@ internal class SessionTrackerImpl(
                         logInfo(Tag, "New session started with sessionId=$sessionId")
                     }
                 }
-                LifecycleState.Paused -> {
+                ActivityLifecycleState.Paused -> {
                     job?.cancel()
                     job = scope.launch {
                         delay(SessionResetTtlMs)

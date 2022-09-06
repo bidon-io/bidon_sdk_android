@@ -19,6 +19,7 @@ import com.appodealstack.bidon.config.domain.databinders.*
 import com.appodealstack.bidon.config.domain.impl.BidOnInitializerImpl
 import com.appodealstack.bidon.config.domain.impl.DataProviderImpl
 import com.appodealstack.bidon.config.domain.impl.InitAndRegisterAdaptersUseCaseImpl
+import com.appodealstack.bidon.core.ActivityLifecycleObserver
 import com.appodealstack.bidon.core.AdaptersSource
 import com.appodealstack.bidon.core.PauseResumeObserver
 import com.appodealstack.bidon.core.impl.AdaptersSourceImpl
@@ -132,9 +133,9 @@ object DI {
                 factoryWithParams<AutoRefresher> { param ->
                     AutoRefresherImpl(autoRefreshable = param as BannerAd.AutoRefreshable)
                 }
-                factory {
+                factoryWithParams { param ->
                     CountDownTimer(
-                        pauseResumeObserver = get()
+                        activityLifecycleObserver = param as ActivityLifecycleObserver
                     )
                 }
 

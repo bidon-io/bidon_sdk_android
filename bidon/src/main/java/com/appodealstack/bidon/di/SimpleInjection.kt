@@ -8,6 +8,12 @@ import kotlin.reflect.KClass
  * val instanceSomeClass = get<SomeClass>()
  */
 internal inline fun <reified T : Any> get(): T = SimpleInjection.getInstance()
+
+/**
+ * val instanceSomeClass = get<SomeClass> {
+ *    params(someParamToSomeClass)
+ * }
+ */
 internal inline fun <reified T : Any> get(params: ScopeParams.() -> Unit): T = SimpleInjection.getInstance(params)
 
 /**

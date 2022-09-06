@@ -1,6 +1,7 @@
 package com.appodealstack.bidon.auctions.domain
 
-import com.appodealstack.bidon.core.PauseResumeObserver
+import com.appodealstack.bidon.core.ActivityLifecycleObserver
+import com.appodealstack.bidon.core.ActivityLifecycleState
 import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.ext.logInternal
 import kotlinx.coroutines.*
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.first
  * Timer stops if Application is in the background, and continues on the foregrounded.
  */
 internal class CountDownTimer(
-    private val pauseResumeObserver: PauseResumeObserver
+    private val activityLifecycleObserver: ActivityLifecycleObserver
 ) {
     private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
     private var timerDeferred: Deferred<Unit>? = null
@@ -27,8 +28,8 @@ internal class CountDownTimer(
                 val seconds = (timeoutMs / OneSecond).toInt()
                 repeat(seconds) { second ->
                     delay(OneSecond)
-                    pauseResumeObserver.lifecycleFlow.first { state ->
-                        state == PauseResumeObserver.LifecycleState.Resumed
+                    activityLifecycleObserver.lifecycleFlow.first { state ->
+                        state == ActivityLifecycleState.Resumed
                     }
                     logInternal(Tag, "Tick ${second + 1}/$seconds")
                 }

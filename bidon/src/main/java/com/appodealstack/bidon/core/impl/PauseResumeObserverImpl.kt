@@ -4,11 +4,13 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.app.Application
 import android.os.Bundle
+import com.appodealstack.bidon.core.ActivityLifecycleState
 import com.appodealstack.bidon.core.PauseResumeObserver
 import com.appodealstack.bidon.core.ext.logInternal
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.lang.ref.WeakReference
 
+@Deprecated("")
 internal class PauseResumeObserverImpl(
     application: Application
 ) : PauseResumeObserver {
@@ -16,7 +18,7 @@ internal class PauseResumeObserverImpl(
     private var weakActivity: WeakReference<Activity>? = null
 
     override val lifecycleFlow = MutableStateFlow(
-        if (isForegrounded()) PauseResumeObserver.LifecycleState.Resumed else PauseResumeObserver.LifecycleState.Paused
+        if (isForegrounded()) ActivityLifecycleState.Resumed else ActivityLifecycleState.Paused
     )
 
     init {
@@ -28,21 +30,23 @@ internal class PauseResumeObserverImpl(
 
                 override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
                 override fun onActivityDestroyed(activity: Activity) {
+                    logInternal(Tag, "Activity Destroyed (current: ${weakActivity?.get()}) $activity")
                     if (activity == weakActivity?.get()) {
                         weakActivity = null
                     }
                 }
 
                 override fun onActivityResumed(activity: Activity) {
-                    logInternal(Tag, "Activity Resumed $activity")
+                    logInternal(Tag, "Activity Resumed (current: ${weakActivity?.get()}) $activity")
                     weakActivity = WeakReference(activity)
-                    lifecycleFlow.value = PauseResumeObserver.LifecycleState.Resumed
+                    lifecycleFlow.value = ActivityLifecycleState.Resumed
                 }
 
                 override fun onActivityPaused(activity: Activity) {
+                    logInternal(Tag, "Activity <Paused> (current: ${weakActivity?.get()}) $activity")
                     if (activity == weakActivity?.get()) {
                         logInternal(Tag, "Activity Paused $activity")
-                        lifecycleFlow.value = PauseResumeObserver.LifecycleState.Paused
+                        lifecycleFlow.value = ActivityLifecycleState.Paused
                     }
                 }
             })

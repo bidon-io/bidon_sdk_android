@@ -1,5 +1,6 @@
 package com.appodealstack.bidon.view
 
+import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
@@ -18,7 +19,8 @@ import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
 import com.appodealstack.bidon.auctions.domain.Auction
 import com.appodealstack.bidon.auctions.domain.CountDownTimer
 import com.appodealstack.bidon.auctions.domain.impl.MaxEcpmAuctionResolver
-import com.appodealstack.bidon.core.PauseResumeObserver
+import com.appodealstack.bidon.core.ActivityLifecycleObserver
+import com.appodealstack.bidon.core.ActivityLifecycleState
 import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.core.ext.logInternal
@@ -59,7 +61,12 @@ class BannerView @JvmOverloads constructor(
     override var placementId: String = BidOnSdk.DefaultPlacement
     private var bannerSize: BannerSize = BannerSize.Banner
     private var userListener: BannerListener? = null
-    private var refresh: AutoRefresh = AutoRefresh.On(DefaultAutoRefreshTimeoutMs)
+    private val activityLifecycleObserver by lazy { (context as? Activity)?.let { ActivityLifecycleObserver(it) } }
+    private var refresh: AutoRefresh = if (activityLifecycleObserver == null) {
+        AutoRefresh.Off
+    } else {
+        AutoRefresh.On(DefaultAutoRefreshTimeoutMs)
+    }
 
     constructor(context: Context, placementId: String) : this(context, null, 0) {
         this.placementId = placementId
@@ -70,12 +77,23 @@ class BannerView @JvmOverloads constructor(
     private val loadState = MutableStateFlow<LoadState>(LoadState.Idle)
     private val loadActionFlow = MutableSharedFlow<LoadAction>(extraBufferCapacity = Int.MAX_VALUE)
 
-    private val pauseResumeObserver: PauseResumeObserver by lazy { get() }
     private val demandAd by lazy { DemandAd(AdType.Banner, placementId) }
     private val listener by lazy { wrapUserBannerListener(userListener = { userListener }) }
     private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
-    private val displayingRefreshTimer by lazy { get<CountDownTimer>() }
-    private val loadingRefreshTimer by lazy { get<CountDownTimer>() }
+    private val displayingRefreshTimer by lazy {
+        activityLifecycleObserver?.let { observer ->
+            get<CountDownTimer> {
+                params(observer)
+            }
+        }
+    }
+    private val loadingRefreshTimer by lazy {
+        activityLifecycleObserver?.let { observer ->
+            get<CountDownTimer> {
+                params(observer)
+            }
+        }
+    }
     private var showJob: Job? = null
     private var observeCallbacksJob: Job? = null
 
@@ -123,6 +141,11 @@ class BannerView @JvmOverloads constructor(
     }
 
     override fun startAutoRefresh(timeoutMs: Long) {
+        if (activityLifecycleObserver == null) {
+            logInfo(Tag, "Auto-refresh is disabled, because BannerView created not with Activity context.")
+            refresh = AutoRefresh.Off
+            return
+        }
         logInfo(Tag, "Auto-refresh initialized with timeout $timeoutMs ms")
         refresh = AutoRefresh.On(timeoutMs)
         sendAction(ShowAction.OnStartAutoRefreshInvoked(timeoutMs))
@@ -213,13 +236,13 @@ class BannerView @JvmOverloads constructor(
                     }
                     LoadAction.OnWinnerTaken -> {
                         if (refresh is AutoRefresh.On) {
-                            loadingRefreshTimer.stop()
+                            loadingRefreshTimer?.stop()
                             sendAction(LoadAction.OnRefreshTimeoutFinished)
                         }
                         LoadState.Idle
                     }
                     LoadAction.OnDestroyInvoked -> {
-                        loadingRefreshTimer.stop()
+                        loadingRefreshTimer?.stop()
                         LoadState.Idle
                     }
                 }
@@ -259,14 +282,14 @@ class BannerView @JvmOverloads constructor(
                         state
                     }
                     ShowAction.OnStopAutoRefreshInvoked -> {
-                        displayingRefreshTimer.stop()
-                        loadingRefreshTimer.stop()
+                        displayingRefreshTimer?.stop()
+                        loadingRefreshTimer?.stop()
                         state
                     }
                     ShowAction.OnDestroyInvoked -> {
                         observeCallbacksJob?.cancel()
                         observeCallbacksJob = null
-                        displayingRefreshTimer.stop()
+                        displayingRefreshTimer?.stop()
                         this.removeAllViews()
                         ShowState.Idle
                     }
@@ -281,7 +304,7 @@ class BannerView @JvmOverloads constructor(
     private fun launchLoadingRefreshIfNeeded() {
         (refresh as? AutoRefresh.On)?.timeoutMs?.let { timeoutMs ->
             logInternal(Tag, "Launching Loading CountDownTimer: $timeoutMs ms")
-            loadingRefreshTimer.startTimer(timeoutMs) {
+            loadingRefreshTimer?.startTimer(timeoutMs) {
                 sendAction(LoadAction.OnRefreshTimeoutFinished)
             }
         }
@@ -290,7 +313,7 @@ class BannerView @JvmOverloads constructor(
     private fun launchDisplayingRefreshIfNeeded() {
         (refresh as? AutoRefresh.On)?.timeoutMs?.let { timeoutMs ->
             logInternal(Tag, "Launching Display CountDownTimer: $timeoutMs ms")
-            displayingRefreshTimer.startTimer(timeoutMs) {
+            displayingRefreshTimer?.startTimer(timeoutMs) {
                 sendAction(ShowAction.OnRefreshTimeoutFinished)
             }
         }
@@ -314,10 +337,10 @@ class BannerView @JvmOverloads constructor(
                     "Ad should exist on start of displaying [${adSource.demandId}]"
                 }
                 // wait if app in background
-                pauseResumeObserver.lifecycleFlow.first {
-                    val isResumed = it == PauseResumeObserver.LifecycleState.Resumed
+                activityLifecycleObserver?.lifecycleFlow?.first {
+                    val isResumed = it == ActivityLifecycleState.Resumed
                     if (!isResumed) {
-                        logInternal(Tag, "Showing is waiting for Resumed state. Current: $it")
+                        logInternal(Tag, "Showing is waiting for Activity Resumed state. Current: $it")
                     }
                     isResumed
                 }
