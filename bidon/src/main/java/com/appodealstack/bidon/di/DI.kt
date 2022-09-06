@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.Context
 import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.adapters.DemandAd
+import com.appodealstack.bidon.analytics.domain.SendImpressionRequestUseCase
+import com.appodealstack.bidon.analytics.domain.SendImpressionRequestUseCaseImpl
 import com.appodealstack.bidon.analytics.domain.StatsRequestUseCase
 import com.appodealstack.bidon.analytics.domain.StatsRequestUseCaseImpl
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
@@ -167,6 +169,11 @@ object DI {
                 }
                 factory<StatsRequestUseCase> {
                     StatsRequestUseCaseImpl(
+                        createRequestBody = get(),
+                    )
+                }
+                factory<SendImpressionRequestUseCase> {
+                    SendImpressionRequestUseCaseImpl(
                         createRequestBody = get(),
                     )
                 }

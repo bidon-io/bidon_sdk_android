@@ -6,10 +6,10 @@ import com.appodealstack.bidmachine.BMAuctionResult
 import com.appodealstack.bidmachine.BMFullscreenAuctionParams
 import com.appodealstack.bidmachine.asBidonError
 import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.StatisticsCollector
 import com.appodealstack.bidon.analytics.data.models.RoundStatus
 import com.appodealstack.bidon.analytics.data.models.asRoundStatus
-import com.appodealstack.bidon.analytics.domain.BidStatsProviderImpl
+import com.appodealstack.bidon.analytics.domain.StatisticsCollectorImpl
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.core.ext.asFailure
@@ -31,7 +31,7 @@ internal class BMRewardedAdImpl(
     private val auctionId: String
 ) : AdSource.Rewarded<BMFullscreenAuctionParams>,
     WinLossNotifiable,
-    BidStatsProvider by BidStatsProviderImpl(
+    StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
         demandId = demandId
@@ -52,7 +52,7 @@ internal class BMRewardedAdImpl(
             ) {
                 logInternal(Tag, "onRequestSuccess $result: $this")
                 adRequest = request
-                onBidFinished(
+                markBidFinished(
                     ecpm = result.price,
                     roundStatus = RoundStatus.SuccessfulBid,
                 )
@@ -69,7 +69,7 @@ internal class BMRewardedAdImpl(
             override fun onRequestFailed(request: RewardedRequest, bmError: BMError) {
                 logInternal(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
                 adRequest = request
-                onBidFinished(
+                markBidFinished(
                     ecpm = null,
                     roundStatus = bmError.asBidonError(demandId).asRoundStatus(),
                 )
@@ -79,7 +79,7 @@ internal class BMRewardedAdImpl(
             override fun onRequestExpired(request: RewardedRequest) {
                 logInternal(Tag, "onRequestExpired: $this")
                 adRequest = request
-                onBidFinished(
+                markBidFinished(
                     ecpm = null,
                     roundStatus = RoundStatus.NoBid,
                 )
@@ -151,7 +151,7 @@ internal class BMRewardedAdImpl(
 
     override suspend fun bid(adParams: BMFullscreenAuctionParams): AuctionResult {
         logInternal(Tag, "Starting with $adParams: $this")
-        onBidStarted()
+        markBidStarted()
         this.context = adParams.context
         RewardedRequest.Builder()
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.priceFloor))

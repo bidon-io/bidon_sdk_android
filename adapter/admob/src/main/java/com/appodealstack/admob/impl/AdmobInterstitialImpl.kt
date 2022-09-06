@@ -4,10 +4,10 @@ import android.app.Activity
 import com.appodealstack.admob.AdmobFullscreenAdAuctionParams
 import com.appodealstack.admob.asBidonError
 import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.StatisticsCollector
 import com.appodealstack.bidon.analytics.data.models.RoundStatus
 import com.appodealstack.bidon.analytics.data.models.asRoundStatus
-import com.appodealstack.bidon.analytics.domain.BidStatsProviderImpl
+import com.appodealstack.bidon.analytics.domain.StatisticsCollectorImpl
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
@@ -33,7 +33,7 @@ internal class AdmobInterstitialImpl(
     private val roundId: String,
     private val auctionId: String
 ) : AdSource.Interstitial<AdmobFullscreenAdAuctionParams>,
-    BidStatsProvider by BidStatsProviderImpl(
+    StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
         demandId = demandId
@@ -49,7 +49,7 @@ internal class AdmobInterstitialImpl(
         object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logInternal(Tag, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
-                onBidFinished(
+                markBidFinished(
                     ecpm = null,
                     roundStatus = loadAdError.asBidonError().asRoundStatus(),
                 )
@@ -61,7 +61,7 @@ internal class AdmobInterstitialImpl(
                 this@AdmobInterstitialImpl.interstitialAd = interstitialAd
                 interstitialAd.onPaidEventListener = paidListener
                 interstitialAd.fullScreenContentCallback = interstitialListener
-                onBidFinished(
+                markBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
                     roundStatus = RoundStatus.SuccessfulBid,
                 )
@@ -156,7 +156,7 @@ internal class AdmobInterstitialImpl(
 
     override suspend fun bid(adParams: AdmobFullscreenAdAuctionParams): AuctionResult {
         logInternal(Tag, "Starting with $adParams: $this")
-        onBidStarted(adParams.lineItem.adUnitId)
+        markBidStarted(adParams.lineItem.adUnitId)
         return withContext(dispatcher) {
             lineItem = adParams.lineItem
             val adRequest = AdRequest.Builder().build()

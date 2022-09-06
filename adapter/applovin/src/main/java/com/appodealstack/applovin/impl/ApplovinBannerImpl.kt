@@ -9,9 +9,9 @@ import com.appodealstack.applovin.ApplovinBannerAuctionParams
 import com.appodealstack.applovin.ApplovinDemandId
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
-import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.StatisticsCollector
 import com.appodealstack.bidon.analytics.data.models.RoundStatus
-import com.appodealstack.bidon.analytics.domain.BidStatsProviderImpl
+import com.appodealstack.bidon.analytics.domain.StatisticsCollectorImpl
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
@@ -31,7 +31,7 @@ internal class ApplovinBannerImpl(
     private val appLovinSdk: AppLovinSdk,
     private val auctionId: String
 ) : AdSource.Banner<ApplovinBannerAuctionParams>,
-    BidStatsProvider by BidStatsProviderImpl(
+    StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
         demandId = demandId
@@ -46,7 +46,7 @@ internal class ApplovinBannerImpl(
             override fun adReceived(ad: AppLovinAd) {
                 logInternal(Tag, "adReceived: $this")
                 appLovinAd = ad
-                onBidFinished(
+                markBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
                     roundStatus = RoundStatus.SuccessfulBid,
                 )
@@ -62,7 +62,7 @@ internal class ApplovinBannerImpl(
 
             override fun failedToReceiveAd(errorCode: Int) {
                 logInternal(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
-                onBidFinished(
+                markBidFinished(
                     ecpm = null,
                     roundStatus = RoundStatus.NoBid,
                 )
@@ -124,7 +124,7 @@ internal class ApplovinBannerImpl(
         adParams: ApplovinBannerAuctionParams
     ): AuctionResult {
         logInternal(Tag, "Starting with $adParams: $this")
-        onBidStarted(adParams.lineItem.adUnitId)
+        markBidStarted(adParams.lineItem.adUnitId)
         lineItem = adParams.lineItem
         val adSize = adParams.bannerSize.asAppLovinAdSize() ?: error(
             BidonError.AdFormatIsNotSupported(

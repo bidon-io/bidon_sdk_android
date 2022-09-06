@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.auctions.domain.impl
 
 import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.StatisticsCollector
 import com.appodealstack.bidon.analytics.data.models.RoundStatus
 import com.appodealstack.bidon.analytics.domain.StatsRequestUseCase
 import com.appodealstack.bidon.auctions.data.models.*
@@ -98,7 +98,7 @@ internal class AuctionImpl(
                     logInfo(Tag, "Notified loss: ${adSource.demandId}")
                     adSource.notifyLoss()
                 }
-                (adSource as? BidStatsProvider)?.onLoss()
+                (adSource as? StatisticsCollector)?.markLoss()
                 logInfo(Tag, "Destroying loser: ${adSource.demandId}")
                 adSource.destroy()
             }
@@ -118,7 +118,7 @@ internal class AuctionImpl(
                         logInfo(Tag, "Notified loss: ${auctionResult.adSource.demandId}")
                         it.notifyLoss()
                     }
-                    (auctionResult.adSource as? BidStatsProvider)?.onLoss()
+                    (auctionResult.adSource as? StatisticsCollector)?.markLoss()
                 }
                 .onSuccess {
                     logInfo(Tag, "Winner filled: ${auctionResult.adSource.demandId}")
@@ -126,7 +126,7 @@ internal class AuctionImpl(
                         logInfo(Tag, "Notified win: ${auctionResult.adSource.demandId}")
                         it.notifyWin()
                     }
-                    (auctionResult.adSource as? BidStatsProvider)?.onWin()
+                    (auctionResult.adSource as? StatisticsCollector)?.markWin()
                 }
                 .isSuccess
         }
@@ -180,7 +180,7 @@ internal class AuctionImpl(
     ) {
         val sortedResult = resolver.sortWinners(allResults)
         val successfulResults = sortedResult
-            .filter { (it.adSource as BidStatsProvider).buildBidStatistic().roundStatus == RoundStatus.SuccessfulBid }
+            .filter { (it.adSource as StatisticsCollector).buildBidStatistic().roundStatus == RoundStatus.SuccessfulBid }
             .filter {
                 /**
                  * Received price should not be less then initial one [minPriceFloor].
@@ -257,7 +257,7 @@ internal class AuctionImpl(
         coroutineScope {
             launch(SdkDispatchers.Default) {
                 val bidStats = statsAuctionResults.map {
-                    (it.adSource as BidStatsProvider).buildBidStatistic()
+                    (it.adSource as StatisticsCollector).buildBidStatistic()
                 }
                 statsRequest(
                     auctionId = auctionId,
@@ -357,7 +357,7 @@ internal class AuctionImpl(
                 }.mapIndexed { index, (deferred, adSource) ->
                     val logRoundTitle = "Round '${round.id}' result #$index(${adSource.demandId.demandId})"
                     deferred.await().also {
-                        logInfo(Tag, "$logRoundTitle: $it. Statistics: ${(adSource as BidStatsProvider).buildBidStatistic()}")
+                        logInfo(Tag, "$logRoundTitle: $it. Statistics: ${(adSource as StatisticsCollector).buildBidStatistic()}")
                     }
                 }.also {
                     logInfo(Tag, "Round '${round.id}' finished with ${it.size} results: $it")
@@ -366,7 +366,7 @@ internal class AuctionImpl(
     }
 
     private fun RoundStatus.asAuctionResult(adSource: AdSource<AdAuctionParams>): AuctionResult {
-        (adSource as BidStatsProvider).onBidFinished(
+        (adSource as StatisticsCollector).markBidFinished(
             roundStatus = this,
             ecpm = null
         )

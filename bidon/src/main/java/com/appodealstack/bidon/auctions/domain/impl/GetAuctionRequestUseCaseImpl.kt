@@ -1,8 +1,8 @@
 package com.appodealstack.bidon.auctions.domain.impl
 
 import com.appodealstack.bidon.adapters.banners.BannerSize
+import com.appodealstack.bidon.auctions.data.models.*
 import com.appodealstack.bidon.auctions.data.models.AdObjectRequestBody
-import com.appodealstack.bidon.auctions.data.models.AdObjectRequestBody.*
 import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
 import com.appodealstack.bidon.auctions.data.models.AuctionResponse
 import com.appodealstack.bidon.auctions.domain.GetAuctionRequestUseCase
@@ -44,7 +44,7 @@ internal class GetAuctionRequestUseCaseImpl(
             rewarded = rewarded,
             orientationCode = getOrientation().code
         )
-        val requestBody = createRequestBody.invoke(
+        val requestBody = createRequestBody(
             binders = binders,
             adapters = adapters,
             dataKeyName = "ad_object",
@@ -64,24 +64,24 @@ internal class GetAuctionRequestUseCaseImpl(
         }
     }
 
-    private fun getData(data: AdTypeAdditional): Triple<Banner?, Interstitial?, Rewarded?> {
+    private fun getData(data: AdTypeAdditional): Triple<BannerRequestBody?, InterstitialRequestBody?, RewardedRequestBody?> {
         return when (data) {
             is AdTypeAdditional.Banner -> {
-                val banner = Banner(
+                val banner = BannerRequestBody(
                     formatCode = when (data.bannerSize) {
-                        BannerSize.Banner -> Banner.Format.Banner320x50
-                        BannerSize.LeaderBoard -> Banner.Format.LeaderBoard728x90
-                        BannerSize.MRec -> Banner.Format.MRec300x250
-                        BannerSize.Adaptive -> Banner.Format.Banner320x50Adaptive
+                        BannerSize.Banner -> BannerRequestBody.Format.Banner320x50
+                        BannerSize.LeaderBoard -> BannerRequestBody.Format.LeaderBoard728x90
+                        BannerSize.MRec -> BannerRequestBody.Format.MRec300x250
+                        BannerSize.Adaptive -> BannerRequestBody.Format.AdaptiveBanner320x50
                     }.code,
                 )
                 Triple(first = banner, second = null, third = null)
             }
             is AdTypeAdditional.Interstitial -> {
-                Triple(first = null, second = Interstitial(), third = null)
+                Triple(first = null, second = InterstitialRequestBody(), third = null)
             }
             is AdTypeAdditional.Rewarded -> {
-                Triple(first = null, second = null, third = Rewarded())
+                Triple(first = null, second = null, third = RewardedRequestBody())
             }
         }
     }

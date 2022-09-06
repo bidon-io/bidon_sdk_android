@@ -9,10 +9,10 @@ import com.applovin.mediation.ads.MaxRewardedAd
 import com.appodealstack.applovin.ApplovinDemandId
 import com.appodealstack.applovin.MaxFullscreenAdAuctionParams
 import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.StatisticsCollector
 import com.appodealstack.bidon.analytics.data.models.RoundStatus
 import com.appodealstack.bidon.analytics.data.models.asRoundStatus
-import com.appodealstack.bidon.analytics.domain.BidStatsProviderImpl
+import com.appodealstack.bidon.analytics.domain.StatisticsCollectorImpl
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.core.ext.logError
@@ -26,7 +26,7 @@ internal class MaxRewardedImpl(
     private val roundId: String,
     private val auctionId: String
 ) : AdSource.Rewarded<MaxFullscreenAdAuctionParams>,
-    BidStatsProvider by BidStatsProviderImpl(
+    StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
         demandId = demandId
@@ -39,7 +39,7 @@ internal class MaxRewardedImpl(
         object : MaxRewardedAdListener {
             override fun onAdLoaded(ad: MaxAd) {
                 maxAd = ad
-                onBidFinished(
+                markBidFinished(
                     ecpm = requireNotNull(ad.revenue),
                     roundStatus = RoundStatus.SuccessfulBid,
                 )
@@ -55,7 +55,7 @@ internal class MaxRewardedImpl(
 
             override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
                 logError(Tag, "(code=${error.code}) ${error.message}", error.asBidonError())
-                onBidFinished(
+                markBidFinished(
                     ecpm = null,
                     roundStatus = error.asBidonError().asRoundStatus(),
                 )
@@ -128,7 +128,7 @@ internal class MaxRewardedImpl(
 
     override suspend fun bid(adParams: MaxFullscreenAdAuctionParams): AuctionResult {
         logInternal(Tag, "Starting with $adParams")
-        onBidStarted(adParams.lineItem.adUnitId)
+        markBidStarted(adParams.lineItem.adUnitId)
         val maxInterstitialAd = MaxRewardedAd.getInstance(adParams.lineItem.adUnitId, adParams.activity).also {
             it.setListener(maxAdListener)
             rewardedAd = it

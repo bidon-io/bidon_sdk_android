@@ -7,9 +7,9 @@ import kotlinx.serialization.Serializable
 /**
  * [orientationCode] is a [Orientation.code]
  *
- * [Interstitial.formatCodes] is a list of [Interstitial.Format.code]s
+ * [InterstitialRequestBody.formatCodes] is a list of [InterstitialRequestBody.Format.code]s
  *
- * [Banner.formatCode] is a [Banner.Format.code]
+ * [BannerRequestBody.formatCode] is a [BannerRequestBody.Format.code]
  */
 
 @Serializable
@@ -21,33 +21,16 @@ internal data class AdObjectRequestBody(
     @SerialName("auction_id")
     val auctionId: String,
     @SerialName("banner")
-    val banner: Banner?,
+    val banner: BannerRequestBody?,
     @SerialName("interstitial")
-    val interstitial: Interstitial?,
+    val interstitial: InterstitialRequestBody?,
     @SerialName("rewarded")
-    val rewarded: Rewarded?,
+    val rewarded: RewardedRequestBody?,
 ) {
-    @Serializable
-    class Rewarded // rewarded has no parameters
-
-    @Serializable
-    class Interstitial // interstitial has no parameters
-
-    @Serializable
-    data class Banner(
-        @SerialName("format")
-        val formatCode: Int,
-    ) {
-        enum class Format(val code: Int) {
-            Banner320x50(0),
-            LeaderBoard728x90(1),
-            MRec300x250(2),
-            Banner320x50Adaptive(3),
-        }
-    }
 
     enum class Orientation(val code: Int) {
         Portrait(0),
         Landscape(1)
     }
 }
+
