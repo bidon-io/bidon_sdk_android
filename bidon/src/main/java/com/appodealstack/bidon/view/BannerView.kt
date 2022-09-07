@@ -32,6 +32,7 @@ import com.appodealstack.bidon.view.helper.BannerState.*
 import com.appodealstack.bidon.view.helper.wrapUserBannerListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -267,6 +268,7 @@ class BannerView @JvmOverloads constructor(
                     }
                     is ShowAction.OnAdShown -> {
                         listener.onAdImpression(action.ad)
+                        sendStatsShownAsync(action.winner.adSource)
                         BidON.logRevenue(action.ad)
                         (state as? ShowState.Displaying)?.auctionResult?.adSource?.destroy()
                         launchDisplayingRefreshIfNeeded()
@@ -385,16 +387,11 @@ class BannerView @JvmOverloads constructor(
                     // do nothing
                 }
                 is AdState.Clicked -> {
-                    (adSource as? StatisticsCollector)?.sendClickImpression(
-                        Banner(format = bannerSize.asBannerFormat())
-                    )
+                    sendStatsClickedAsync(adSource)
                     listener.onAdClicked(state.ad)
                 }
                 is AdState.Closed -> listener.onAdClosed(state.ad)
                 is AdState.Impression -> {
-                    (adSource as? StatisticsCollector)?.sendShowImpression(
-                        Banner(format = bannerSize.asBannerFormat())
-                    )
                     listener.onAdImpression(state.ad)
                 }
                 is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
@@ -402,6 +399,26 @@ class BannerView @JvmOverloads constructor(
                 is AdState.Expired -> listener.onAdExpired(state.ad)
             }
         }.launchIn(scope)
+    }
+
+    private suspend fun sendStatsClickedAsync(adSource: AdSource<*>) {
+        coroutineScope {
+            launch {
+                (adSource as? StatisticsCollector)?.sendClickImpression(
+                    Banner(format = bannerSize.asBannerFormat())
+                )
+            }
+        }
+    }
+
+    private suspend fun sendStatsShownAsync(adSource: AdSource<*>) {
+        coroutineScope {
+            launch {
+                (adSource as? StatisticsCollector)?.sendShowImpression(
+                    Banner(format = bannerSize.asBannerFormat())
+                )
+            }
+        }
     }
 
     private fun BannerSize.asBannerFormat() = when (this) {

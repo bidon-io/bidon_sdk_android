@@ -4,11 +4,13 @@ import com.appodealstack.bidon.analytics.data.models.ImpressionRequestBody
 import com.appodealstack.bidon.config.domain.DataBinderType
 import com.appodealstack.bidon.config.domain.databinders.CreateRequestBodyUseCase
 import com.appodealstack.bidon.core.BidonJson
+import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.errors.BaseResponse
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.utilities.ktor.JsonHttpRequest
+import kotlinx.coroutines.withContext
 
 internal class SendImpressionRequestUseCaseImpl(
     private val createRequestBody: CreateRequestBodyUseCase,
@@ -24,26 +26,27 @@ internal class SendImpressionRequestUseCaseImpl(
     )
 
     override suspend fun invoke(
-        type: SendImpressionRequestUseCase.Type,
+        urlPath: String,
+        bodyKey: String,
         body: ImpressionRequestBody
-    ): Result<BaseResponse> {
+    ): Result<BaseResponse> = withContext(SdkDispatchers.IO) {
         val requestBody = createRequestBody.invoke(
             binders = binders,
-            dataKeyName = type.key,
+            dataKeyName = bodyKey,
             data = body,
             dataSerializer = ImpressionRequestBody.serializer(),
         )
         logInfo(Tag, "Request body: $requestBody")
 
-        return get<JsonHttpRequest>().invoke(
-            path = type.key,
+        get<JsonHttpRequest>().invoke(
+            path = urlPath,
             body = requestBody,
         ).map { jsonResponse ->
             BidonJson.decodeFromJsonElement(BaseResponse.serializer(), jsonResponse)
         }.onFailure {
-            logError(Tag, "Error while sending impression ${type.key}", it)
+            logError(Tag, "Error while sending impression $urlPath", it)
         }.onSuccess {
-            logInfo(Tag, "Impression ${type.key} was sent successfully")
+            logInfo(Tag, "Impression $urlPath was sent successfully")
         }
     }
 }

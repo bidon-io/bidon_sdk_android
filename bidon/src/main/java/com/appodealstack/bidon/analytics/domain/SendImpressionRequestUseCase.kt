@@ -5,7 +5,8 @@ import com.appodealstack.bidon.core.errors.BaseResponse
 
 internal interface SendImpressionRequestUseCase {
     suspend operator fun invoke(
-        type: Type,
+        urlPath: String,
+        bodyKey: String,
         body: ImpressionRequestBody,
     ): Result<BaseResponse>
 

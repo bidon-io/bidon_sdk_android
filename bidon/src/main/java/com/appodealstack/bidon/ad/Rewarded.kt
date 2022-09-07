@@ -4,15 +4,14 @@ import android.app.Activity
 import com.appodealstack.bidon.BidON
 import com.appodealstack.bidon.BidOnSdk.Companion.DefaultPlacement
 import com.appodealstack.bidon.adapters.*
+import com.appodealstack.bidon.analytics.StatisticsCollector
 import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.domain.AuctionHolder
 import com.appodealstack.bidon.core.SdkDispatchers
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.di.get
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -135,9 +134,15 @@ internal class RewardedImpl(
                     // do nothing
                 }
                 is AdState.OnReward -> listener.onUserRewarded(state.ad, state.reward)
-                is AdState.Clicked -> listener.onAdClicked(state.ad)
+                is AdState.Clicked -> {
+                    sendStatsClickedAsync(adSource)
+                    listener.onAdClicked(state.ad)
+                }
                 is AdState.Closed -> listener.onAdClosed(state.ad)
-                is AdState.Impression -> listener.onAdImpression(state.ad)
+                is AdState.Impression -> {
+                    sendStatsShownAsync(adSource)
+                    listener.onAdImpression(state.ad)
+                }
                 is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
                 is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
                 is AdState.Expired -> listener.onAdExpired(state.ad)
@@ -201,6 +206,26 @@ internal class RewardedImpl(
 
         override fun onUserRewarded(ad: Ad, reward: Reward?) {
             userListener?.onUserRewarded(ad, reward)
+        }
+    }
+
+    private suspend fun sendStatsClickedAsync(adSource: AdSource<*>) {
+        coroutineScope {
+            launch {
+                (adSource as? StatisticsCollector)?.sendClickImpression(
+                    StatisticsCollector.AdType.Rewarded
+                )
+            }
+        }
+    }
+
+    private suspend fun sendStatsShownAsync(adSource: AdSource<*>) {
+        coroutineScope {
+            launch {
+                (adSource as? StatisticsCollector)?.sendShowImpression(
+                    StatisticsCollector.AdType.Rewarded
+                )
+            }
         }
     }
 }

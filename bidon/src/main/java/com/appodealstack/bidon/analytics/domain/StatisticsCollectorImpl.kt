@@ -8,9 +8,11 @@ import com.appodealstack.bidon.auctions.data.models.BannerRequestBody
 import com.appodealstack.bidon.auctions.data.models.BidStat
 import com.appodealstack.bidon.auctions.data.models.InterstitialRequestBody
 import com.appodealstack.bidon.auctions.data.models.RewardedRequestBody
+import com.appodealstack.bidon.core.UrlPathAdType
 import com.appodealstack.bidon.core.ext.SystemTimeNow
 import com.appodealstack.bidon.di.get
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 
 class StatisticsCollectorImpl(
     auctionId: String,
@@ -25,6 +27,9 @@ class StatisticsCollectorImpl(
         get<SendImpressionRequestUseCase>()
     }
 
+    private val isShowSent = AtomicBoolean(false)
+    private val isClickSent = AtomicBoolean(false)
+
     private var stat: BidStat = BidStat(
         auctionId = auctionId,
         roundId = roundId,
@@ -37,17 +42,27 @@ class StatisticsCollectorImpl(
     )
 
     override suspend fun sendShowImpression(adType: StatisticsCollector.AdType) {
-        sendImpression(
-            type = SendImpressionRequestUseCase.Type.Show,
-            body = createImpressionRequestBody(adType)
-        )
+        if (isShowSent.getAndSet(true)) {
+            val key = SendImpressionRequestUseCase.Type.Show.key
+            val lastSegment = adType.asUrlPathAdType()
+            sendImpression(
+                urlPath = "$key/$lastSegment",
+                bodyKey = key,
+                body = createImpressionRequestBody(adType)
+            )
+        }
     }
 
     override suspend fun sendClickImpression(adType: StatisticsCollector.AdType) {
-        sendImpression(
-            type = SendImpressionRequestUseCase.Type.Click,
-            body = createImpressionRequestBody(adType)
-        )
+        if (isClickSent.getAndSet(true)) {
+            val key = SendImpressionRequestUseCase.Type.Click.key
+            val lastSegment = adType.asUrlPathAdType()
+            sendImpression(
+                urlPath = "$key/$lastSegment",
+                bodyKey = key,
+                body = createImpressionRequestBody(adType)
+            )
+        }
     }
 
     override fun markBidStarted(adUnitId: String?) {
@@ -106,5 +121,11 @@ class StatisticsCollectorImpl(
                 Triple(null, null, RewardedRequestBody())
             }
         }
+    }
+
+    private fun StatisticsCollector.AdType.asUrlPathAdType() = when (this) {
+        is StatisticsCollector.AdType.Banner -> UrlPathAdType.Banner.lastSegment
+        StatisticsCollector.AdType.Interstitial -> UrlPathAdType.Interstitial.lastSegment
+        StatisticsCollector.AdType.Rewarded -> UrlPathAdType.Rewarded.lastSegment
     }
 }

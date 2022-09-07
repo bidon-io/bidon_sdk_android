@@ -33,4 +33,3 @@ internal data class AdObjectRequestBody(
         Landscape(1)
     }
 }
-
