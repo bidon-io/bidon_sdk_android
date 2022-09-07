@@ -181,13 +181,6 @@ object DI {
                 /**
                  * Binders
                  */
-                factory { DeviceBinder(dataSource = get()) }
-                factory { AppBinder(dataSource = get()) }
-                factory { GeoBinder(dataSource = get()) }
-                factory { SessionBinder(dataSource = get()) }
-                factory { TokenBinder(dataSource = get()) }
-                factory { UserBinder(dataSource = get()) }
-                factory { PlacementBinder(dataSource = get()) }
 
                 factory<AppDataSource> { AppDataSourceImpl(context = get(), keyValueStorage = get()) }
                 factory<DeviceDataSource> { DeviceDataSourceImpl(context = get()) }
@@ -207,13 +200,14 @@ object DI {
 
                 factory<DataProvider> {
                     DataProviderImpl(
-                        deviceBinder = get(),
-                        appBinder = get(),
-                        geoBinder = get(),
-                        sessionBinder = get(),
-                        tokenBinder = get(),
-                        userBinder = get(),
-                        placementBinder = get()
+                        deviceBinder = DeviceBinder(dataSource = get()),
+                        appBinder = AppBinder(dataSource = get()),
+                        geoBinder = GeoBinder(dataSource = get()) ,
+                        sessionBinder = SessionBinder(dataSource = get()),
+                        tokenBinder = TokenBinder(dataSource = get()),
+                        userBinder = UserBinder(dataSource = get()),
+                        placementBinder = PlacementBinder(dataSource = get()),
+                        adaptersBinder = AdaptersBinder(adaptersSource = get())
                     )
                 }
             }

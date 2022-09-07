@@ -21,6 +21,7 @@ internal class GetAuctionRequestUseCaseImpl(
     private val getOrientation: GetOrientationUseCase,
 ) : GetAuctionRequestUseCase {
     private val binders: List<DataBinderType> = listOf(
+        DataBinderType.AvailableAdapters,
         DataBinderType.Device,
         DataBinderType.App,
         DataBinderType.Token,
@@ -46,7 +47,6 @@ internal class GetAuctionRequestUseCaseImpl(
         )
         val requestBody = createRequestBody(
             binders = binders,
-            adapters = adapters,
             dataKeyName = "ad_object",
             data = adObject,
             dataSerializer = AdObjectRequestBody.serializer(),
