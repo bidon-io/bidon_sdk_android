@@ -1,5 +1,6 @@
 package com.appodealstack.bidon.analytics.domain
 
+import com.appodealstack.bidon.adapters.AdType
 import com.appodealstack.bidon.analytics.data.models.Demand
 import com.appodealstack.bidon.analytics.data.models.Round
 import com.appodealstack.bidon.analytics.data.models.StatsRequestBody
@@ -7,6 +8,7 @@ import com.appodealstack.bidon.auctions.data.models.RoundStat
 import com.appodealstack.bidon.config.domain.DataBinderType
 import com.appodealstack.bidon.config.domain.databinders.CreateRequestBodyUseCase
 import com.appodealstack.bidon.core.BidonJson
+import com.appodealstack.bidon.core.asUrlPathAdType
 import com.appodealstack.bidon.core.errors.BaseResponse
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
@@ -29,6 +31,7 @@ internal class StatsRequestUseCaseImpl(
         auctionId: String,
         auctionConfigurationId: Int,
         results: List<RoundStat>,
+        adType: AdType,
     ): Result<BaseResponse> = runCatching {
         val body = results.asStatsRequestBody(auctionId, auctionConfigurationId)
         val requestBody = createRequestBody(
@@ -39,7 +42,7 @@ internal class StatsRequestUseCaseImpl(
         )
         logInfo("", "$requestBody")
         return get<JsonHttpRequest>().invoke(
-            path = StatsRequestPath,
+            path = "$StatsRequestPath/${adType.asUrlPathAdType().lastSegment}",
             body = requestBody,
         ).map { jsonResponse ->
             BidonJson.decodeFromJsonElement(BaseResponse.serializer(), jsonResponse)

@@ -1,8 +1,8 @@
 package com.appodealstack.bidon.auctions.domain.impl
 
 import com.appodealstack.bidon.adapters.banners.BannerSize
+import com.appodealstack.bidon.auctions.data.models.*
 import com.appodealstack.bidon.auctions.data.models.AdObjectRequestBody
-import com.appodealstack.bidon.auctions.data.models.AdObjectRequestBody.*
 import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
 import com.appodealstack.bidon.auctions.data.models.AuctionResponse
 import com.appodealstack.bidon.auctions.domain.GetAuctionRequestUseCase
@@ -11,6 +11,7 @@ import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.appodealstack.bidon.config.domain.DataBinderType
 import com.appodealstack.bidon.config.domain.databinders.CreateRequestBodyUseCase
 import com.appodealstack.bidon.core.BidonJson
+import com.appodealstack.bidon.core.asUrlPathAdType
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.di.get
@@ -21,6 +22,7 @@ internal class GetAuctionRequestUseCaseImpl(
     private val getOrientation: GetOrientationUseCase,
 ) : GetAuctionRequestUseCase {
     private val binders: List<DataBinderType> = listOf(
+        DataBinderType.AvailableAdapters,
         DataBinderType.Device,
         DataBinderType.App,
         DataBinderType.Token,
@@ -44,16 +46,15 @@ internal class GetAuctionRequestUseCaseImpl(
             rewarded = rewarded,
             orientationCode = getOrientation().code
         )
-        val requestBody = createRequestBody.invoke(
+        val requestBody = createRequestBody(
             binders = binders,
-            adapters = adapters,
             dataKeyName = "ad_object",
             data = adObject,
             dataSerializer = AdObjectRequestBody.serializer(),
         )
         logInfo(Tag, "Request body: $requestBody")
         return get<JsonHttpRequest>().invoke(
-            path = AuctionRequestPath,
+            path = "$AuctionRequestPath/${additionalData.asUrlPathAdType().lastSegment}",
             body = requestBody,
         ).map { jsonResponse ->
             BidonJson.decodeFromJsonElement(AuctionResponse.serializer(), jsonResponse)
@@ -64,24 +65,24 @@ internal class GetAuctionRequestUseCaseImpl(
         }
     }
 
-    private fun getData(data: AdTypeAdditional): Triple<Banner?, Interstitial?, Rewarded?> {
+    private fun getData(data: AdTypeAdditional): Triple<BannerRequestBody?, InterstitialRequestBody?, RewardedRequestBody?> {
         return when (data) {
             is AdTypeAdditional.Banner -> {
-                val banner = Banner(
+                val banner = BannerRequestBody(
                     formatCode = when (data.bannerSize) {
-                        BannerSize.Banner -> Banner.Format.Banner320x50
-                        BannerSize.LeaderBoard -> Banner.Format.LeaderBoard728x90
-                        BannerSize.MRec -> Banner.Format.MRec300x250
-                        BannerSize.Adaptive -> Banner.Format.Banner320x50Adaptive
+                        BannerSize.Banner -> BannerRequestBody.Format.Banner320x50
+                        BannerSize.LeaderBoard -> BannerRequestBody.Format.LeaderBoard728x90
+                        BannerSize.MRec -> BannerRequestBody.Format.MRec300x250
+                        BannerSize.Adaptive -> BannerRequestBody.Format.AdaptiveBanner320x50
                     }.code,
                 )
                 Triple(first = banner, second = null, third = null)
             }
             is AdTypeAdditional.Interstitial -> {
-                Triple(first = null, second = Interstitial(), third = null)
+                Triple(first = null, second = InterstitialRequestBody(), third = null)
             }
             is AdTypeAdditional.Rewarded -> {
-                Triple(first = null, second = null, third = Rewarded())
+                Triple(first = null, second = null, third = RewardedRequestBody())
             }
         }
     }

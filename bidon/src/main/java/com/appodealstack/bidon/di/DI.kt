@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.Context
 import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.adapters.DemandAd
+import com.appodealstack.bidon.analytics.domain.SendImpressionRequestUseCase
+import com.appodealstack.bidon.analytics.domain.SendImpressionRequestUseCaseImpl
 import com.appodealstack.bidon.analytics.domain.StatsRequestUseCase
 import com.appodealstack.bidon.analytics.domain.StatsRequestUseCaseImpl
 import com.appodealstack.bidon.auctions.AuctionResolversHolder
@@ -170,17 +172,15 @@ object DI {
                         createRequestBody = get(),
                     )
                 }
+                factory<SendImpressionRequestUseCase> {
+                    SendImpressionRequestUseCaseImpl(
+                        createRequestBody = get(),
+                    )
+                }
 
                 /**
                  * Binders
                  */
-                factory { DeviceBinder(dataSource = get()) }
-                factory { AppBinder(dataSource = get()) }
-                factory { GeoBinder(dataSource = get()) }
-                factory { SessionBinder(dataSource = get()) }
-                factory { TokenBinder(dataSource = get()) }
-                factory { UserBinder(dataSource = get()) }
-                factory { PlacementBinder(dataSource = get()) }
 
                 factory<AppDataSource> { AppDataSourceImpl(context = get(), keyValueStorage = get()) }
                 factory<DeviceDataSource> { DeviceDataSourceImpl(context = get()) }
@@ -200,13 +200,14 @@ object DI {
 
                 factory<DataProvider> {
                     DataProviderImpl(
-                        deviceBinder = get(),
-                        appBinder = get(),
-                        geoBinder = get(),
-                        sessionBinder = get(),
-                        tokenBinder = get(),
-                        userBinder = get(),
-                        placementBinder = get()
+                        deviceBinder = DeviceBinder(dataSource = get()),
+                        appBinder = AppBinder(dataSource = get()),
+                        geoBinder = GeoBinder(dataSource = get()),
+                        sessionBinder = SessionBinder(dataSource = get()),
+                        tokenBinder = TokenBinder(dataSource = get()),
+                        userBinder = UserBinder(dataSource = get()),
+                        placementBinder = PlacementBinder(dataSource = get()),
+                        adaptersBinder = AdaptersBinder(adaptersSource = get())
                     )
                 }
             }

@@ -15,7 +15,10 @@ import com.appodealstack.bidon.adapters.AdType
 import com.appodealstack.bidon.adapters.DemandAd
 import com.appodealstack.bidon.adapters.banners.AutoRefresh
 import com.appodealstack.bidon.adapters.banners.BannerSize
+import com.appodealstack.bidon.analytics.StatisticsCollector
+import com.appodealstack.bidon.analytics.StatisticsCollector.AdType.Banner
 import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
+import com.appodealstack.bidon.auctions.data.models.BannerRequestBody.Format
 import com.appodealstack.bidon.auctions.domain.Auction
 import com.appodealstack.bidon.auctions.domain.CountDownTimer
 import com.appodealstack.bidon.auctions.domain.impl.MaxEcpmAuctionResolver
@@ -29,6 +32,7 @@ import com.appodealstack.bidon.view.helper.BannerState.*
 import com.appodealstack.bidon.view.helper.wrapUserBannerListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -106,7 +110,6 @@ class BannerView @JvmOverloads constructor(
                 getInteger(R.styleable.BannerView_bannerSize, 0).let {
                     when (it) {
                         1 -> setAdSize(BannerSize.Banner)
-                        2 -> setAdSize(BannerSize.Large)
                         3 -> setAdSize(BannerSize.LeaderBoard)
                         4 -> setAdSize(BannerSize.MRec)
                         5 -> setAdSize(BannerSize.Adaptive)
@@ -265,6 +268,7 @@ class BannerView @JvmOverloads constructor(
                     }
                     is ShowAction.OnAdShown -> {
                         listener.onAdImpression(action.ad)
+                        sendStatsShownAsync(action.winner.adSource)
                         BidON.logRevenue(action.ad)
                         (state as? ShowState.Displaying)?.auctionResult?.adSource?.destroy()
                         launchDisplayingRefreshIfNeeded()
@@ -382,14 +386,46 @@ class BannerView @JvmOverloads constructor(
                 is AdState.Fill -> {
                     // do nothing
                 }
-                is AdState.Clicked -> listener.onAdClicked(state.ad)
+                is AdState.Clicked -> {
+                    sendStatsClickedAsync(adSource)
+                    listener.onAdClicked(state.ad)
+                }
                 is AdState.Closed -> listener.onAdClosed(state.ad)
-                is AdState.Impression -> listener.onAdImpression(state.ad)
+                is AdState.Impression -> {
+                    listener.onAdImpression(state.ad)
+                }
                 is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
                 is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
                 is AdState.Expired -> listener.onAdExpired(state.ad)
             }
         }.launchIn(scope)
+    }
+
+    private suspend fun sendStatsClickedAsync(adSource: AdSource<*>) {
+        coroutineScope {
+            launch {
+                (adSource as? StatisticsCollector)?.sendClickImpression(
+                    Banner(format = bannerSize.asBannerFormat())
+                )
+            }
+        }
+    }
+
+    private suspend fun sendStatsShownAsync(adSource: AdSource<*>) {
+        coroutineScope {
+            launch {
+                (adSource as? StatisticsCollector)?.sendShowImpression(
+                    Banner(format = bannerSize.asBannerFormat())
+                )
+            }
+        }
+    }
+
+    private fun BannerSize.asBannerFormat() = when (this) {
+        BannerSize.Banner -> Format.Banner320x50
+        BannerSize.LeaderBoard -> Format.LeaderBoard728x90
+        BannerSize.MRec -> Format.MRec300x250
+        BannerSize.Adaptive -> Format.AdaptiveBanner320x50
     }
 }
 

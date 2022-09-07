@@ -10,10 +10,10 @@ import com.appodealstack.admob.AdmobBannerAuctionParams
 import com.appodealstack.admob.asBidonError
 import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.banners.BannerSize
-import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.StatisticsCollector
 import com.appodealstack.bidon.analytics.data.models.RoundStatus
 import com.appodealstack.bidon.analytics.data.models.asRoundStatus
-import com.appodealstack.bidon.analytics.domain.BidStatsProviderImpl
+import com.appodealstack.bidon.analytics.domain.StatisticsCollectorImpl
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
@@ -34,7 +34,7 @@ internal class AdmobBannerImpl(
     private val roundId: String,
     private val auctionId: String
 ) : AdSource.Banner<AdmobBannerAuctionParams>,
-    BidStatsProvider by BidStatsProviderImpl(
+    StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
         demandId = demandId
@@ -55,7 +55,7 @@ internal class AdmobBannerImpl(
         object : AdListener() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(Tag, "Error while loading ad: $loadAdError. $this", loadAdError.asBidonError())
-                onBidFinished(
+                markBidFinished(
                     ecpm = null,
                     roundStatus = loadAdError.asBidonError().asRoundStatus(),
                 )
@@ -66,7 +66,7 @@ internal class AdmobBannerImpl(
 
             override fun onAdLoaded() {
                 logInfo(Tag, "onAdLoaded: $this")
-                onBidFinished(
+                markBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
                     roundStatus = RoundStatus.SuccessfulBid,
                 )
@@ -150,7 +150,7 @@ internal class AdmobBannerImpl(
 
     override suspend fun bid(adParams: AdmobBannerAuctionParams): AuctionResult {
         logInternal(Tag, "Starting with $adParams")
-        onBidStarted(adParams.lineItem.adUnitId)
+        markBidStarted(adParams.lineItem.adUnitId)
         return withContext(dispatcher) {
             lineItem = adParams.lineItem
             val adUnitId = lineItem?.adUnitId

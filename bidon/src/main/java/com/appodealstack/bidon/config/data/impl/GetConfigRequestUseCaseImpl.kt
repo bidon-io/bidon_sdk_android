@@ -8,6 +8,8 @@ import com.appodealstack.bidon.config.domain.databinders.CreateRequestBodyUseCas
 import com.appodealstack.bidon.core.BidonJson
 import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.utilities.ktor.JsonHttpRequest
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.encodeToJsonElement
 
 internal class GetConfigRequestUseCaseImpl(
     private val createRequestBody: CreateRequestBodyUseCase
@@ -22,13 +24,18 @@ internal class GetConfigRequestUseCaseImpl(
     )
 
     override suspend fun request(body: ConfigRequestBody): Result<ConfigResponse> {
-        val requestBody = createRequestBody(
+        val bindersData = createRequestBody(
             binders = binders,
-            adapters = body.adapters,
             dataKeyName = null,
             data = null,
             dataSerializer = null,
         )
+        val requestBody = buildJsonObject {
+            put("adapters", BidonJson.encodeToJsonElement(body.adapters))
+            bindersData.forEach { (key, jsonObject) ->
+                put(key, jsonObject)
+            }
+        }
         return get<JsonHttpRequest>().invoke(
             path = ConfigRequestPath,
             body = requestBody,

@@ -9,7 +9,8 @@ internal enum class DataBinderType {
     Session,
     User,
     Token,
-    Placement // - not ready to use
+    Placement, // - not ready to use
+    AvailableAdapters
 }
 
 /**

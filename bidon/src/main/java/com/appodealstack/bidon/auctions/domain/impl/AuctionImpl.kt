@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.auctions.domain.impl
 
 import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.StatisticsCollector
 import com.appodealstack.bidon.analytics.data.models.RoundStatus
 import com.appodealstack.bidon.analytics.domain.StatsRequestUseCase
 import com.appodealstack.bidon.auctions.data.models.*
@@ -30,7 +30,9 @@ internal class AuctionImpl(
     private val statsRound = mutableListOf<RoundStat>()
     private val statsAuctionResults = mutableListOf<AuctionResult>()
     private val mutableLineItems = mutableListOf<LineItem>()
-    private var auctionId: String = ""
+    private var _auctionDataResponse: AuctionResponse? = null
+    private val auctionDataResponse: AuctionResponse
+        get() = requireNotNull(_auctionDataResponse)
 
     override suspend fun start(
         demandAd: DemandAd,
@@ -46,10 +48,8 @@ internal class AuctionImpl(
                 adTypeAdditionalData = adTypeAdditionalData,
                 auctionId = UUID.randomUUID().toString(),
                 adapters = adaptersSource.adapters
-            )
-            auctionId = auctionData.auctionId ?: run {
-                logError(Tag, "Auction ID is null at response $auctionData", NullPointerException())
-                ""
+            ).also {
+                _auctionDataResponse = it
             }
             mutableLineItems.addAll(auctionData.lineItems ?: emptyList())
 
@@ -58,7 +58,6 @@ internal class AuctionImpl(
                 rounds = auctionData.rounds ?: listOf(),
                 minPriceFloor = auctionData.minPrice ?: 0.0,
                 priceFloor = auctionData.minPrice ?: 0.0,
-                auctionData = auctionData,
                 roundsListener = roundsListener,
                 resolver = resolver,
                 demandAd = demandAd,
@@ -81,7 +80,7 @@ internal class AuctionImpl(
 
             // Finish auction
             state.value = AuctionState.Finished
-            sendStatsAsync(auctionData.auctionConfigurationId)
+            sendStatsAsync(demandAd.adType)
         }
         state.first { it == AuctionState.Finished }
 
@@ -98,7 +97,7 @@ internal class AuctionImpl(
                     logInfo(Tag, "Notified loss: ${adSource.demandId}")
                     adSource.notifyLoss()
                 }
-                (adSource as? BidStatsProvider)?.onLoss()
+                (adSource as StatisticsCollector).markLoss()
                 logInfo(Tag, "Destroying loser: ${adSource.demandId}")
                 adSource.destroy()
             }
@@ -118,7 +117,7 @@ internal class AuctionImpl(
                         logInfo(Tag, "Notified loss: ${auctionResult.adSource.demandId}")
                         it.notifyLoss()
                     }
-                    (auctionResult.adSource as? BidStatsProvider)?.onLoss()
+                    (auctionResult.adSource as StatisticsCollector).markLoss()
                 }
                 .onSuccess {
                     logInfo(Tag, "Winner filled: ${auctionResult.adSource.demandId}")
@@ -126,7 +125,7 @@ internal class AuctionImpl(
                         logInfo(Tag, "Notified win: ${auctionResult.adSource.demandId}")
                         it.notifyWin()
                     }
-                    (auctionResult.adSource as? BidStatsProvider)?.onWin()
+                    (auctionResult.adSource as StatisticsCollector).markWin()
                 }
                 .isSuccess
         }
@@ -142,7 +141,6 @@ internal class AuctionImpl(
         resolver: AuctionResolver,
         demandAd: DemandAd,
         adTypeAdditionalData: AdTypeAdditional,
-        auctionData: AuctionResponse
     ) {
         val round = rounds.firstOrNull() ?: return
         roundsListener.roundStarted(round.id)
@@ -166,7 +164,6 @@ internal class AuctionImpl(
             resolver = resolver,
             demandAd = demandAd,
             adTypeAdditionalData = adTypeAdditionalData,
-            auctionData = auctionData
         )
     }
 
@@ -180,7 +177,7 @@ internal class AuctionImpl(
     ) {
         val sortedResult = resolver.sortWinners(allResults)
         val successfulResults = sortedResult
-            .filter { (it.adSource as BidStatsProvider).buildBidStatistic().roundStatus == RoundStatus.SuccessfulBid }
+            .filter { (it.adSource as StatisticsCollector).buildBidStatistic().roundStatus == RoundStatus.SuccessfulBid }
             .filter {
                 /**
                  * Received price should not be less then initial one [minPriceFloor].
@@ -241,8 +238,14 @@ internal class AuctionImpl(
             )
         } ?: emptyList()
 
+        allRoundResults.forEach {
+            (it.adSource as StatisticsCollector).addAuctionConfigurationId(
+                auctionConfigurationId = auctionDataResponse.auctionConfigurationId ?: 0
+            )
+        }
+
         val roundStat = RoundStat(
-            auctionId = auctionId,
+            auctionId = auctionDataResponse.auctionId ?: "",
             roundId = round.id,
             priceFloor = priceFloor,
             winnerDemandId = winner?.adSource?.demandId,
@@ -253,15 +256,15 @@ internal class AuctionImpl(
         statsRound.add(roundStat)
     }
 
-    private suspend fun sendStatsAsync(auctionConfigurationId: Int?) {
+    private suspend fun sendStatsAsync(adType: AdType) {
         coroutineScope {
             launch(SdkDispatchers.Default) {
                 val bidStats = statsAuctionResults.map {
-                    (it.adSource as BidStatsProvider).buildBidStatistic()
+                    (it.adSource as StatisticsCollector).buildBidStatistic()
                 }
-                statsRequest(
-                    auctionId = auctionId,
-                    auctionConfigurationId = auctionConfigurationId ?: -1,
+                statsRequest.invoke(
+                    auctionId = auctionDataResponse.auctionId ?: "",
+                    auctionConfigurationId = auctionDataResponse.auctionConfigurationId ?: -1,
                     results = statsRound.map { roundStat ->
                         val errorDemandStat = roundStat.demands
                         val succeedDemandStat = bidStats.filter { it.roundId == roundStat.roundId }
@@ -287,6 +290,7 @@ internal class AuctionImpl(
                             }
                         )
                     },
+                    adType = adType
                 )
                 statsRound.clear()
             }
@@ -318,17 +322,17 @@ internal class AuctionImpl(
             val adSources = when (demandAd.adType) {
                 AdType.Interstitial -> {
                     filteredAdapters.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>().map {
-                        it.interstitial(demandAd = demandAd, roundId = round.id, auctionId = auctionId)
+                        it.interstitial(demandAd = demandAd, roundId = round.id, auctionId = auctionDataResponse.auctionId ?: "")
                     }
                 }
                 AdType.Rewarded -> {
                     filteredAdapters.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().map {
-                        it.rewarded(demandAd = demandAd, roundId = round.id, auctionId = auctionId)
+                        it.rewarded(demandAd = demandAd, roundId = round.id, auctionId = auctionDataResponse.auctionId ?: "")
                     }
                 }
                 AdType.Banner -> {
                     filteredAdapters.filterIsInstance<AdProvider.Banner<AdAuctionParams>>().map {
-                        it.banner(demandAd = demandAd, roundId = round.id, auctionId = auctionId)
+                        it.banner(demandAd = demandAd, roundId = round.id, auctionId = auctionDataResponse.auctionId ?: "")
                     }
                 }
             }
@@ -357,7 +361,7 @@ internal class AuctionImpl(
                 }.mapIndexed { index, (deferred, adSource) ->
                     val logRoundTitle = "Round '${round.id}' result #$index(${adSource.demandId.demandId})"
                     deferred.await().also {
-                        logInfo(Tag, "$logRoundTitle: $it. Statistics: ${(adSource as BidStatsProvider).buildBidStatistic()}")
+                        logInfo(Tag, "$logRoundTitle: $it. Statistics: ${(adSource as StatisticsCollector).buildBidStatistic()}")
                     }
                 }.also {
                     logInfo(Tag, "Round '${round.id}' finished with ${it.size} results: $it")
@@ -366,7 +370,7 @@ internal class AuctionImpl(
     }
 
     private fun RoundStatus.asAuctionResult(adSource: AdSource<AdAuctionParams>): AuctionResult {
-        (adSource as BidStatsProvider).onBidFinished(
+        (adSource as StatisticsCollector).markBidFinished(
             roundStatus = this,
             ecpm = null
         )

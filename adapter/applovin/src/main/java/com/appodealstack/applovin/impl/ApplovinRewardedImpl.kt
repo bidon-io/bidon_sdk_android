@@ -6,9 +6,9 @@ import com.applovin.sdk.*
 import com.appodealstack.applovin.ApplovinDemandId
 import com.appodealstack.applovin.ApplovinFullscreenAdAuctionParams
 import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.analytics.BidStatsProvider
+import com.appodealstack.bidon.analytics.StatisticsCollector
 import com.appodealstack.bidon.analytics.data.models.RoundStatus
-import com.appodealstack.bidon.analytics.domain.BidStatsProviderImpl
+import com.appodealstack.bidon.analytics.domain.StatisticsCollectorImpl
 import com.appodealstack.bidon.auctions.data.models.AuctionResult
 import com.appodealstack.bidon.auctions.data.models.LineItem
 import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
@@ -28,7 +28,7 @@ internal class ApplovinRewardedImpl(
     private val appLovinSdk: AppLovinSdk,
     private val auctionId: String
 ) : AdSource.Rewarded<ApplovinFullscreenAdAuctionParams>,
-    BidStatsProvider by BidStatsProviderImpl(
+    StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
         demandId = demandId
@@ -43,7 +43,7 @@ internal class ApplovinRewardedImpl(
             override fun adReceived(ad: AppLovinAd) {
                 logInternal(Tag, "adReceived: $this")
                 appLovinAd = ad
-                onBidFinished(
+                markBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
                     roundStatus = RoundStatus.SuccessfulBid,
                 )
@@ -59,7 +59,7 @@ internal class ApplovinRewardedImpl(
 
             override fun failedToReceiveAd(errorCode: Int) {
                 logInternal(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
-                onBidFinished(
+                markBidFinished(
                     ecpm = null,
                     roundStatus = RoundStatus.NoBid,
                 )
@@ -133,7 +133,7 @@ internal class ApplovinRewardedImpl(
 
     override suspend fun bid(adParams: ApplovinFullscreenAdAuctionParams): AuctionResult {
         logInternal(Tag, "Starting with $adParams: $this")
-        onBidStarted(adParams.lineItem.adUnitId)
+        markBidStarted(adParams.lineItem.adUnitId)
         lineItem = adParams.lineItem
         val incentivizedInterstitial = AppLovinIncentivizedInterstitial.create(adParams.lineItem.adUnitId, appLovinSdk).also {
             rewardedAd = it
