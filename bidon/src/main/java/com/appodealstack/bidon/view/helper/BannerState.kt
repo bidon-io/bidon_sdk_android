@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.view.helper
 
-import com.appodealstack.bidon.adapters.Ad
-import com.appodealstack.bidon.auctions.data.models.AuctionResult
+import com.appodealstack.bidon.domain.auction.AuctionResult
+import com.appodealstack.bidon.domain.common.Ad
 
 internal interface BannerState {
     sealed interface ShowState {

@@ -23,11 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
 import com.appodeal.mads.component.*
-import com.appodealstack.bidon.ad.BannerListener
-import com.appodealstack.bidon.adapters.Ad
-import com.appodealstack.bidon.adapters.banners.BannerSize
-import com.appodealstack.bidon.auctions.data.models.AuctionResult
-import com.appodealstack.bidon.core.ext.logInternal
+import com.appodealstack.bidon.domain.auction.AuctionResult
+import com.appodealstack.bidon.domain.common.Ad
+import com.appodealstack.bidon.domain.common.BannerSize
+import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.view.BannerListener
 import com.appodealstack.bidon.view.BannerView
 import com.appodealstack.bidon.view.DefaultAutoRefreshTimeoutMs
 import kotlinx.coroutines.launch

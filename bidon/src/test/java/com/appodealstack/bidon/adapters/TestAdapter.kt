@@ -1,7 +1,10 @@
 package com.appodealstack.bidon.adapters
 
 import android.app.Activity
-import com.appodealstack.bidon.config.data.models.AdapterInfo
+import com.appodealstack.bidon.data.models.config.AdapterInfo
+import com.appodealstack.bidon.domain.adapter.*
+import com.appodealstack.bidon.domain.common.DemandAd
+import com.appodealstack.bidon.domain.common.DemandId
 import kotlinx.serialization.json.JsonObject
 
 internal object TestAdapterParameters : AdapterParameters

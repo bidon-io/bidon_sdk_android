@@ -1,6 +1,6 @@
 package com.appodealstack.fyber.rewarded
 
-import com.appodealstack.bidon.adapters.Ad
+import com.appodealstack.bidon.domain.common.Ad
 
 interface FyberRewardedListener {
     fun onAvailable(placementId: String, ad: Ad)

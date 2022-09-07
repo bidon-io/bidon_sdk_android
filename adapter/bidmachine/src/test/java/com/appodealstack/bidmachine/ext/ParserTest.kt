@@ -1,7 +1,7 @@
 package com.appodealstack.bidmachine.ext
 
 import com.appodealstack.bidmachine.BidMachineParameters
-import com.appodealstack.bidon.core.parse
+import com.appodealstack.bidon.data.json.parse
 import com.google.common.truth.Truth.assertThat
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json

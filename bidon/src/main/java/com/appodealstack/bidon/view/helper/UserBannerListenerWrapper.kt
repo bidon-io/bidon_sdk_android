@@ -1,8 +1,8 @@
 package com.appodealstack.bidon.view.helper
 
-import com.appodealstack.bidon.ad.BannerListener
-import com.appodealstack.bidon.adapters.Ad
-import com.appodealstack.bidon.auctions.data.models.AuctionResult
+import com.appodealstack.bidon.domain.auction.AuctionResult
+import com.appodealstack.bidon.domain.common.Ad
+import com.appodealstack.bidon.view.BannerListener
 
 internal fun wrapUserBannerListener(userListener: () -> BannerListener?) = object : BannerListener {
     override fun onAdLoaded(ad: Ad) {

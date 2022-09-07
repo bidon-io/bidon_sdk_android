@@ -17,9 +17,9 @@ import androidx.navigation.NavController
 import com.appodeal.mads.component.*
 import com.appodeal.mads.theme.getShapeByPositionFor
 import com.appodeal.mads.ui.settings.data.Host
-import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
-import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
-import com.appodealstack.bidon.utilities.network.NetworkSettings
+import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorage
+import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorageImpl
+import com.appodealstack.bidon.data.networking.NetworkSettings
 
 private const val MockUrl = "https://ef5347ef-7389-4095-8a57-cc78c827f8b2.mock.pstmn.io"
 

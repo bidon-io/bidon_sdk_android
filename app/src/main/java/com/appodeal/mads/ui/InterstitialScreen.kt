@@ -17,11 +17,11 @@ import androidx.navigation.NavHostController
 import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.component.Body2Text
-import com.appodealstack.bidon.ad.Interstitial
-import com.appodealstack.bidon.ad.InterstitialListener
-import com.appodealstack.bidon.adapters.Ad
-import com.appodealstack.bidon.auctions.data.models.AuctionResult
-import com.appodealstack.bidon.core.ext.logInternal
+import com.appodealstack.bidon.domain.auction.AuctionResult
+import com.appodealstack.bidon.domain.common.Ad
+import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.view.Interstitial
+import com.appodealstack.bidon.view.InterstitialListener
 import kotlinx.coroutines.launch
 
 @Composable

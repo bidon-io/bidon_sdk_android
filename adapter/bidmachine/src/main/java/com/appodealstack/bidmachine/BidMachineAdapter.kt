@@ -7,9 +7,14 @@ import com.appodealstack.bidmachine.ext.sdkVersion
 import com.appodealstack.bidmachine.impl.BMBannerAdImpl
 import com.appodealstack.bidmachine.impl.BMInterstitialAdImpl
 import com.appodealstack.bidmachine.impl.BMRewardedAdImpl
-import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.config.data.models.AdapterInfo
-import com.appodealstack.bidon.core.parse
+import com.appodealstack.bidon.data.json.parse
+import com.appodealstack.bidon.data.models.config.AdapterInfo
+import com.appodealstack.bidon.domain.adapter.AdProvider
+import com.appodealstack.bidon.domain.adapter.AdSource
+import com.appodealstack.bidon.domain.adapter.Adapter
+import com.appodealstack.bidon.domain.adapter.Initializable
+import com.appodealstack.bidon.domain.common.DemandAd
+import com.appodealstack.bidon.domain.common.DemandId
 import io.bidmachine.BidMachine
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.JsonObject
