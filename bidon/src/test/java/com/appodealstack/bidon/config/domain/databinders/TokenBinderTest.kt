@@ -2,11 +2,12 @@ package com.appodealstack.bidon.config.domain.databinders
 
 import android.util.Log
 import com.appodealstack.bidon.base.ConcurrentTest
-import com.appodealstack.bidon.config.data.models.Token
-import com.appodealstack.bidon.core.ext.logError
-import com.appodealstack.bidon.core.ext.logInfo
-import com.appodealstack.bidon.core.ext.logInternal
-import com.appodealstack.bidon.utilities.datasource.token.TokenDataSource
+import com.appodealstack.bidon.data.binderdatasources.token.TokenDataSource
+import com.appodealstack.bidon.data.models.config.Token
+import com.appodealstack.bidon.domain.databinders.TokenBinder
+import com.appodealstack.bidon.domain.stats.impl.logError
+import com.appodealstack.bidon.domain.stats.impl.logInfo
+import com.appodealstack.bidon.domain.stats.impl.logInternal
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk

@@ -1,7 +1,7 @@
 package com.appodealstack.fyber.banner
 
-import com.appodealstack.bidon.adapters.BidonError
-import com.appodealstack.bidon.adapters.DemandError
+import com.appodealstack.bidon.domain.common.BidonError
+import com.appodealstack.bidon.domain.common.DemandError
 import com.appodealstack.fyber.FairBidDemandId
 import com.fyber.fairbid.ads.RequestFailure
 

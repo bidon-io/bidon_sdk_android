@@ -1,0 +1,14 @@
+package com.appodealstack.bidon.domain.config
+
+/**
+ * Define adapters classes. Don't forget to add rules to proguard-files.
+ */
+internal enum class AdapterList(val classPath: String) {
+    AdmobAdapter(classPath = "com.appodealstack.admob.AdmobAdapter"),
+    BidmachineAdapter(classPath = "com.appodealstack.bidmachine.BidMachineAdapter"),
+    ApplovinAdapter(classPath = "com.appodealstack.applovin.ApplovinAdapter"),
+    AppsflyerAdapter(classPath = "com.appodealstack.appsflyer.AppsflyerAnalytics"),
+//    FyberFairBidAdapter(classPath = "com.appodealstack.fyber.FairBidAdapter"),
+//    IronSourceAdapter(classPath = "com.appodealstack.ironsource.IronSourceAdapter"),
+//    MaxAdapter(classPath = "com.appodealstack.applovin.MaxAdapter"),
+}

@@ -28,8 +28,8 @@ import com.appodeal.mads.component.AppTextButton
 import com.appodeal.mads.component.H5Text
 import com.appodeal.mads.navigation.Screen
 import com.appodealstack.bidon.BidON
-import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
-import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
+import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorage
+import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorageImpl
 
 @Composable
 internal fun MainScreen(

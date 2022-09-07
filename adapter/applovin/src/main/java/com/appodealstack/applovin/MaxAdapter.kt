@@ -8,11 +8,14 @@ import com.appodealstack.applovin.ext.sdkVersion
 import com.appodealstack.applovin.impl.MaxBannerImpl
 import com.appodealstack.applovin.impl.MaxInterstitialImpl
 import com.appodealstack.applovin.impl.MaxRewardedImpl
-import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.analytics.BNMediationNetwork
-import com.appodealstack.bidon.analytics.MediationNetwork
-import com.appodealstack.bidon.config.data.models.AdapterInfo
-import com.appodealstack.bidon.core.parse
+import com.appodealstack.bidon.data.json.parse
+import com.appodealstack.bidon.data.models.config.AdapterInfo
+import com.appodealstack.bidon.domain.adapter.AdProvider
+import com.appodealstack.bidon.domain.adapter.AdSource
+import com.appodealstack.bidon.domain.adapter.Adapter
+import com.appodealstack.bidon.domain.adapter.Initializable
+import com.appodealstack.bidon.domain.common.DemandAd
+import com.appodealstack.bidon.domain.common.DemandId
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.JsonObject
 import kotlin.coroutines.resume
@@ -25,13 +28,10 @@ class MaxAdapter :
     Initializable<MaxParameters>,
     AdProvider.Banner<MaxBannerAuctionParams>,
     AdProvider.Interstitial<MaxFullscreenAdAuctionParams>,
-    AdProvider.Rewarded<MaxFullscreenAdAuctionParams>,
-    ExtrasSource by ExtrasSourceImpl(),
-    MediationNetwork {
+    AdProvider.Rewarded<MaxFullscreenAdAuctionParams> {
 
     private lateinit var context: Context
 
-    override val mediationNetwork = BNMediationNetwork.Max
     override val demandId: DemandId = MaxDemandId
     override val adapterInfo = AdapterInfo(
         adapterVersion = adapterVersion,

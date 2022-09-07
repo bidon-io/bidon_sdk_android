@@ -1,9 +1,9 @@
 package com.appodealstack.bidmachine
 
 import android.content.Context
-import com.appodealstack.bidon.adapters.AdAuctionParams
-import com.appodealstack.bidon.adapters.AdapterParameters
-import com.appodealstack.bidon.adapters.banners.BannerSize
+import com.appodealstack.bidon.domain.adapter.AdAuctionParams
+import com.appodealstack.bidon.domain.adapter.AdapterParameters
+import com.appodealstack.bidon.domain.common.BannerSize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

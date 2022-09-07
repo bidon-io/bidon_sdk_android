@@ -1,10 +1,10 @@
 package com.appodealstack.bidon
 
 import android.app.Activity
-import com.appodealstack.bidon.adapters.Ad
-import com.appodealstack.bidon.core.InitializationCallback
 import com.appodealstack.bidon.di.DI.initDependencyInjection
 import com.appodealstack.bidon.di.get
+import com.appodealstack.bidon.domain.common.Ad
+import com.appodealstack.bidon.domain.config.InitializationCallback
 
 val BidON: BidOnSdk by lazy {
     initDependencyInjection()

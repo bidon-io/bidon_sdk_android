@@ -8,27 +8,26 @@ import androidx.annotation.AttrRes
 import com.appodealstack.bidon.BidON
 import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.R
-import com.appodealstack.bidon.ad.BannerListener
-import com.appodealstack.bidon.adapters.AdSource
-import com.appodealstack.bidon.adapters.AdState
-import com.appodealstack.bidon.adapters.AdType
-import com.appodealstack.bidon.adapters.DemandAd
-import com.appodealstack.bidon.adapters.banners.AutoRefresh
-import com.appodealstack.bidon.adapters.banners.BannerSize
-import com.appodealstack.bidon.analytics.StatisticsCollector
-import com.appodealstack.bidon.analytics.StatisticsCollector.AdType.Banner
-import com.appodealstack.bidon.auctions.data.models.AdTypeAdditional
-import com.appodealstack.bidon.auctions.data.models.BannerRequestBody.Format
-import com.appodealstack.bidon.auctions.domain.Auction
-import com.appodealstack.bidon.auctions.domain.CountDownTimer
-import com.appodealstack.bidon.auctions.domain.impl.MaxEcpmAuctionResolver
-import com.appodealstack.bidon.core.ActivityLifecycleObserver
-import com.appodealstack.bidon.core.ActivityLifecycleState
-import com.appodealstack.bidon.core.SdkDispatchers
-import com.appodealstack.bidon.core.ext.logInfo
-import com.appodealstack.bidon.core.ext.logInternal
+import com.appodealstack.bidon.data.models.auction.BannerRequestBody.Format
 import com.appodealstack.bidon.di.get
+import com.appodealstack.bidon.domain.adapter.AdSource
+import com.appodealstack.bidon.domain.adapter.AdState
+import com.appodealstack.bidon.domain.auction.AdTypeParam
+import com.appodealstack.bidon.domain.auction.Auction
+import com.appodealstack.bidon.domain.auction.impl.MaxEcpmAuctionResolver
+import com.appodealstack.bidon.domain.common.AdType
+import com.appodealstack.bidon.domain.common.AutoRefresh
+import com.appodealstack.bidon.domain.common.BannerSize
+import com.appodealstack.bidon.domain.common.DemandAd
+import com.appodealstack.bidon.domain.common.usecases.CountDownTimer
+import com.appodealstack.bidon.domain.stats.StatisticsCollector
+import com.appodealstack.bidon.domain.stats.StatisticsCollector.AdType.Banner
+import com.appodealstack.bidon.domain.stats.impl.logInfo
+import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.view.helper.ActivityLifecycleState
 import com.appodealstack.bidon.view.helper.BannerState.*
+import com.appodealstack.bidon.view.helper.SdkDispatchers
+import com.appodealstack.bidon.view.helper.impl.ActivityLifecycleObserver
 import com.appodealstack.bidon.view.helper.wrapUserBannerListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -363,7 +362,7 @@ class BannerView @JvmOverloads constructor(
             get<Auction>().start(
                 demandAd = demandAd,
                 resolver = MaxEcpmAuctionResolver,
-                adTypeAdditionalData = AdTypeAdditional.Banner(
+                adTypeParamData = AdTypeParam.Banner(
                     bannerSize = bannerSize,
                     adContainer = this@BannerView
                 ),

@@ -1,6 +1,6 @@
 package com.appodealstack.ironsource
 
-import com.appodealstack.bidon.adapters.AdapterParameters
+import com.appodealstack.bidon.domain.adapter.AdapterParameters
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

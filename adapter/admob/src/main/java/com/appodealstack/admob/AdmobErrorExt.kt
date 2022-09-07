@@ -1,6 +1,6 @@
 package com.appodealstack.admob
 
-import com.appodealstack.bidon.adapters.BidonError
+import com.appodealstack.bidon.domain.common.BidonError
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest.*
 import com.google.android.gms.ads.LoadAdError

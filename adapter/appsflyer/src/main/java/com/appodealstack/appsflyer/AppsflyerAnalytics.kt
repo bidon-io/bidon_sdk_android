@@ -4,11 +4,16 @@ import android.app.Activity
 import android.app.Application
 import com.appodealstack.appsflyer.ext.adapterVersion
 import com.appodealstack.appsflyer.ext.sdkVersion
-import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.analytics.AdRevenueLogger
-import com.appodealstack.bidon.config.data.models.AdapterInfo
-import com.appodealstack.bidon.core.ext.logInfo
-import com.appodealstack.bidon.core.parse
+import com.appodealstack.bidon.data.json.parse
+import com.appodealstack.bidon.data.models.config.AdapterInfo
+import com.appodealstack.bidon.domain.adapter.Adapter
+import com.appodealstack.bidon.domain.adapter.AdapterParameters
+import com.appodealstack.bidon.domain.adapter.Initializable
+import com.appodealstack.bidon.domain.analytic.AdRevenueLogger
+import com.appodealstack.bidon.domain.common.Ad
+import com.appodealstack.bidon.domain.common.DemandId
+import com.appodealstack.bidon.domain.common.UsdCurrencyCode
+import com.appodealstack.bidon.domain.stats.impl.logInfo
 import com.appsflyer.AFLogger
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.adrevenue.AppsFlyerAdRevenue
@@ -65,7 +70,7 @@ class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenu
         logInfo(Tag, "AdRevenue logged: $ad")
         val nonMandatory = mutableMapOf<String, String>().apply {
             ad.dsp?.let { this["demand_source_name"] = it }
-            this["ad_type"] = ad.demandAd.adType.adTypeName
+            this["ad_type"] = ad.demandAd.adType.code
             this["auction_round"] = ad.roundId
         }
         val monetizationNetwork = ad.monetizationNetwork ?: "unknown"

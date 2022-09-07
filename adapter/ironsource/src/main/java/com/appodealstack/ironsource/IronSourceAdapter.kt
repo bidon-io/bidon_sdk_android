@@ -1,12 +1,14 @@
 package com.appodealstack.ironsource
 
 import android.app.Activity
-import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.analytics.BNMediationNetwork
-import com.appodealstack.bidon.analytics.MediationNetwork
-import com.appodealstack.bidon.config.data.models.AdapterInfo
-import com.appodealstack.bidon.core.SdkDispatchers
-import com.appodealstack.bidon.core.parse
+import com.appodealstack.bidon.data.json.parse
+import com.appodealstack.bidon.data.models.config.AdapterInfo
+import com.appodealstack.bidon.domain.adapter.Adapter
+import com.appodealstack.bidon.domain.adapter.Initializable
+import com.appodealstack.bidon.domain.common.Ad
+import com.appodealstack.bidon.domain.common.DemandAd
+import com.appodealstack.bidon.domain.common.DemandId
+import com.appodealstack.bidon.view.helper.SdkDispatchers
 import com.appodealstack.ironsource.ext.adapterVersion
 import com.appodealstack.ironsource.ext.sdkVersion
 import com.ironsource.mediationsdk.IronSource
@@ -24,10 +26,8 @@ val IronSourceDemandId = DemandId("ironsource")
 
 class IronSourceAdapter :
     Adapter,
-    Initializable<IronSourceParameters>,
-    MediationNetwork {
+    Initializable<IronSourceParameters> {
 
-    override val mediationNetwork = BNMediationNetwork.IronSource
     override val demandId: DemandId = IronSourceDemandId
     override val adapterInfo = AdapterInfo(
         adapterVersion = adapterVersion,

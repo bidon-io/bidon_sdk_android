@@ -3,54 +3,61 @@ package com.appodealstack.bidon.di
 import android.app.Application
 import android.content.Context
 import com.appodealstack.bidon.BidOnSdk
-import com.appodealstack.bidon.adapters.DemandAd
-import com.appodealstack.bidon.analytics.domain.SendImpressionRequestUseCase
-import com.appodealstack.bidon.analytics.domain.SendImpressionRequestUseCaseImpl
-import com.appodealstack.bidon.analytics.domain.StatsRequestUseCase
-import com.appodealstack.bidon.analytics.domain.StatsRequestUseCaseImpl
-import com.appodealstack.bidon.auctions.AuctionResolversHolder
-import com.appodealstack.bidon.auctions.domain.*
-import com.appodealstack.bidon.auctions.domain.impl.AuctionHolderImpl
-import com.appodealstack.bidon.auctions.domain.impl.AuctionImpl
-import com.appodealstack.bidon.auctions.domain.impl.AuctionResolversHolderImpl
-import com.appodealstack.bidon.auctions.domain.impl.GetAuctionRequestUseCaseImpl
-import com.appodealstack.bidon.config.data.impl.AdapterInstanceCreatorImpl
-import com.appodealstack.bidon.config.data.impl.GetConfigRequestUseCaseImpl
-import com.appodealstack.bidon.config.domain.*
-import com.appodealstack.bidon.config.domain.databinders.*
-import com.appodealstack.bidon.config.domain.impl.BidOnInitializerImpl
-import com.appodealstack.bidon.config.domain.impl.DataProviderImpl
-import com.appodealstack.bidon.config.domain.impl.InitAndRegisterAdaptersUseCaseImpl
-import com.appodealstack.bidon.core.ActivityLifecycleObserver
-import com.appodealstack.bidon.core.AdaptersSource
-import com.appodealstack.bidon.core.PauseResumeObserver
-import com.appodealstack.bidon.core.impl.AdaptersSourceImpl
-import com.appodealstack.bidon.core.impl.BidOnSdkImpl
-import com.appodealstack.bidon.core.impl.PauseResumeObserverImpl
-import com.appodealstack.bidon.utilities.datasource.app.AppDataSource
-import com.appodealstack.bidon.utilities.datasource.app.AppDataSourceImpl
-import com.appodealstack.bidon.utilities.datasource.device.DeviceDataSource
-import com.appodealstack.bidon.utilities.datasource.device.DeviceDataSourceImpl
-import com.appodealstack.bidon.utilities.datasource.location.LocationDataSource
-import com.appodealstack.bidon.utilities.datasource.location.LocationDataSourceImpl
-import com.appodealstack.bidon.utilities.datasource.placement.PlacementDataSource
-import com.appodealstack.bidon.utilities.datasource.placement.PlacementDataSourceImpl
-import com.appodealstack.bidon.utilities.datasource.session.SessionDataSource
-import com.appodealstack.bidon.utilities.datasource.session.SessionDataSourceImpl
-import com.appodealstack.bidon.utilities.datasource.session.SessionTracker
-import com.appodealstack.bidon.utilities.datasource.session.SessionTrackerImpl
-import com.appodealstack.bidon.utilities.datasource.token.TokenDataSource
-import com.appodealstack.bidon.utilities.datasource.token.TokenDataSourceImpl
-import com.appodealstack.bidon.utilities.datasource.user.AdvertisingData
-import com.appodealstack.bidon.utilities.datasource.user.UserDataSource
-import com.appodealstack.bidon.utilities.datasource.user.impl.AdvertisingDataImpl
-import com.appodealstack.bidon.utilities.datasource.user.impl.UserDataSourceImpl
-import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorage
-import com.appodealstack.bidon.utilities.keyvaluestorage.KeyValueStorageImpl
-import com.appodealstack.bidon.utilities.ktor.JsonHttpRequest
-import com.appodealstack.bidon.utilities.network.BidOnEndpoints
-import com.appodealstack.bidon.utilities.network.endpoint.BidOnEndpointsImpl
+import com.appodealstack.bidon.data.binderdatasources.DataProvider
+import com.appodealstack.bidon.data.binderdatasources.DataProviderImpl
+import com.appodealstack.bidon.data.binderdatasources.app.AppDataSource
+import com.appodealstack.bidon.data.binderdatasources.app.AppDataSourceImpl
+import com.appodealstack.bidon.data.binderdatasources.device.DeviceDataSource
+import com.appodealstack.bidon.data.binderdatasources.device.DeviceDataSourceImpl
+import com.appodealstack.bidon.data.binderdatasources.location.LocationDataSource
+import com.appodealstack.bidon.data.binderdatasources.location.LocationDataSourceImpl
+import com.appodealstack.bidon.data.binderdatasources.placement.PlacementDataSource
+import com.appodealstack.bidon.data.binderdatasources.placement.PlacementDataSourceImpl
+import com.appodealstack.bidon.data.binderdatasources.session.SessionDataSource
+import com.appodealstack.bidon.data.binderdatasources.session.SessionDataSourceImpl
+import com.appodealstack.bidon.data.binderdatasources.session.SessionTracker
+import com.appodealstack.bidon.data.binderdatasources.session.SessionTrackerImpl
+import com.appodealstack.bidon.data.binderdatasources.token.TokenDataSource
+import com.appodealstack.bidon.data.binderdatasources.token.TokenDataSourceImpl
+import com.appodealstack.bidon.data.binderdatasources.user.AdvertisingData
+import com.appodealstack.bidon.data.binderdatasources.user.UserDataSource
+import com.appodealstack.bidon.data.binderdatasources.user.impl.AdvertisingDataImpl
+import com.appodealstack.bidon.data.binderdatasources.user.impl.UserDataSourceImpl
+import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorage
+import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorageImpl
+import com.appodealstack.bidon.data.networking.BidOnEndpoints
+import com.appodealstack.bidon.data.networking.JsonHttpRequest
+import com.appodealstack.bidon.data.networking.NetworkStateObserver
+import com.appodealstack.bidon.data.networking.impl.BidOnEndpointsImpl
+import com.appodealstack.bidon.data.networking.impl.NetworkStateObserverImpl
+import com.appodealstack.bidon.data.networking.requests.*
+import com.appodealstack.bidon.domain.adapter.AdaptersSource
+import com.appodealstack.bidon.domain.adapter.impl.AdaptersSourceImpl
+import com.appodealstack.bidon.domain.auction.Auction
+import com.appodealstack.bidon.domain.auction.AuctionHolder
+import com.appodealstack.bidon.domain.auction.RoundsListener
+import com.appodealstack.bidon.domain.auction.impl.AuctionHolderImpl
+import com.appodealstack.bidon.domain.auction.impl.AuctionImpl
+import com.appodealstack.bidon.domain.auction.usecases.GetAuctionRequestUseCase
+import com.appodealstack.bidon.domain.common.AutoRefresher
+import com.appodealstack.bidon.domain.common.DemandAd
+import com.appodealstack.bidon.domain.common.impl.AutoRefresherImpl
+import com.appodealstack.bidon.domain.common.impl.BidOnSdkImpl
+import com.appodealstack.bidon.domain.common.usecases.CountDownTimer
+import com.appodealstack.bidon.domain.config.*
+import com.appodealstack.bidon.domain.config.impl.AdapterInstanceCreatorImpl
+import com.appodealstack.bidon.domain.config.impl.BidOnInitializerImpl
+import com.appodealstack.bidon.domain.config.impl.InitAndRegisterAdaptersUseCaseImpl
+import com.appodealstack.bidon.domain.config.usecases.GetConfigRequestUseCase
+import com.appodealstack.bidon.domain.config.usecases.InitAndRegisterAdaptersUseCase
+import com.appodealstack.bidon.domain.databinders.*
+import com.appodealstack.bidon.domain.stats.usecases.SendImpressionRequestUseCase
+import com.appodealstack.bidon.domain.stats.usecases.StatsRequestUseCase
 import com.appodealstack.bidon.view.BannerAd
+import com.appodealstack.bidon.view.helper.*
+import com.appodealstack.bidon.view.helper.impl.ActivityLifecycleObserver
+import com.appodealstack.bidon.view.helper.impl.GetOrientationUseCaseImpl
+import com.appodealstack.bidon.view.helper.impl.PauseResumeObserverImpl
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -85,9 +92,11 @@ object DI {
                 }
                 singleton<PauseResumeObserver> {
                     @Suppress("UNCHECKED_CAST")
-                    PauseResumeObserverImpl(
-                        application = get<Context>() as Application
-                    )
+                    (
+                        PauseResumeObserverImpl(
+                            application = get<Context>() as Application
+                        )
+                        )
                 }
                 singleton<AdvertisingData> {
                     AdvertisingDataImpl(
@@ -107,6 +116,7 @@ object DI {
                         pauseResumeObserver = get()
                     )
                 }
+                singleton<NetworkStateObserver> { NetworkStateObserverImpl() }
 
                 /**
                  * Factories
@@ -125,7 +135,6 @@ object DI {
                     )
                 }
                 factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
-                factory<AuctionResolversHolder> { AuctionResolversHolderImpl() }
                 factory<Auction> {
                     AuctionImpl(
                         adaptersSource = get(),

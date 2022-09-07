@@ -3,9 +3,9 @@ package com.appodealstack.fyber.banner
 import android.app.Activity
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import com.appodealstack.bidon.adapters.AdType
-import com.appodealstack.bidon.adapters.DemandAd
-import com.appodealstack.bidon.adapters.banners.AutoRefresh
+import com.appodealstack.bidon.domain.common.AdType
+import com.appodealstack.bidon.domain.common.AutoRefresh
+import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.fyber.banner.BNFyberBannerOption.Position
 import com.fyber.fairbid.ads.Banner
 

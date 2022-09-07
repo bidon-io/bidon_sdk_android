@@ -2,17 +2,23 @@ package com.appodealstack.bidon.auctions.domain.impl
 
 import android.app.Activity
 import android.util.Log
-import com.appodealstack.bidon.adapters.*
 import com.appodealstack.bidon.adapters.Process
 import com.appodealstack.bidon.adapters.TestAdapter
 import com.appodealstack.bidon.adapters.TestAdapterInterstitialParameters
-import com.appodealstack.bidon.auctions.data.models.*
-import com.appodealstack.bidon.auctions.domain.Auction
-import com.appodealstack.bidon.auctions.domain.GetAuctionRequestUseCase
-import com.appodealstack.bidon.auctions.domain.RoundsListener
 import com.appodealstack.bidon.base.ConcurrentTest
-import com.appodealstack.bidon.core.AdaptersSource
-import com.appodealstack.bidon.core.ext.*
+import com.appodealstack.bidon.domain.adapter.AdaptersSource
+import com.appodealstack.bidon.domain.auction.AdTypeParam
+import com.appodealstack.bidon.domain.auction.Auction
+import com.appodealstack.bidon.domain.auction.AuctionResult
+import com.appodealstack.bidon.domain.auction.RoundsListener
+import com.appodealstack.bidon.domain.auction.impl.AuctionImpl
+import com.appodealstack.bidon.domain.auction.impl.MaxEcpmAuctionResolver
+import com.appodealstack.bidon.domain.auction.usecases.GetAuctionRequestUseCase
+import com.appodealstack.bidon.domain.common.AdType
+import com.appodealstack.bidon.domain.common.DemandAd
+import com.appodealstack.bidon.domain.stats.impl.logError
+import com.appodealstack.bidon.domain.stats.impl.logInfo
+import com.appodealstack.bidon.domain.stats.impl.logInternal
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -144,7 +150,7 @@ internal class AuctionImplTest : ConcurrentTest() {
         testee.start(
             demandAd = DemandAd(AdType.Interstitial, PlacementId),
             roundsListener = roundsListener,
-            adTypeAdditionalData = AdTypeAdditional.Interstitial(activity),
+            adTypeParamData = AdTypeParam.Interstitial(activity),
             resolver = MaxEcpmAuctionResolver
         ).onSuccess {
             println(it)

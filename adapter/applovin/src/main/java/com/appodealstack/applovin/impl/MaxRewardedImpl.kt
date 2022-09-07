@@ -8,15 +8,18 @@ import com.applovin.mediation.MaxRewardedAdListener
 import com.applovin.mediation.ads.MaxRewardedAd
 import com.appodealstack.applovin.ApplovinDemandId
 import com.appodealstack.applovin.MaxFullscreenAdAuctionParams
-import com.appodealstack.bidon.adapters.*
-import com.appodealstack.bidon.analytics.StatisticsCollector
-import com.appodealstack.bidon.analytics.data.models.RoundStatus
-import com.appodealstack.bidon.analytics.data.models.asRoundStatus
-import com.appodealstack.bidon.analytics.domain.StatisticsCollectorImpl
-import com.appodealstack.bidon.auctions.data.models.AuctionResult
-import com.appodealstack.bidon.auctions.data.models.LineItem
-import com.appodealstack.bidon.core.ext.logError
-import com.appodealstack.bidon.core.ext.logInternal
+import com.appodealstack.bidon.data.models.auction.LineItem
+import com.appodealstack.bidon.data.models.stats.RoundStatus
+import com.appodealstack.bidon.data.models.stats.asRoundStatus
+import com.appodealstack.bidon.domain.adapter.AdAuctionParams
+import com.appodealstack.bidon.domain.adapter.AdSource
+import com.appodealstack.bidon.domain.adapter.AdState
+import com.appodealstack.bidon.domain.auction.AuctionResult
+import com.appodealstack.bidon.domain.common.*
+import com.appodealstack.bidon.domain.stats.StatisticsCollector
+import com.appodealstack.bidon.domain.stats.impl.StatisticsCollectorImpl
+import com.appodealstack.bidon.domain.stats.impl.logError
+import com.appodealstack.bidon.domain.stats.impl.logInternal
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 
