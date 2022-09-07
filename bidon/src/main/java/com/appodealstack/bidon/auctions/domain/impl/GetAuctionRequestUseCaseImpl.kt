@@ -11,6 +11,7 @@ import com.appodealstack.bidon.config.data.models.AdapterInfo
 import com.appodealstack.bidon.config.domain.DataBinderType
 import com.appodealstack.bidon.config.domain.databinders.CreateRequestBodyUseCase
 import com.appodealstack.bidon.core.BidonJson
+import com.appodealstack.bidon.core.asUrlPathAdType
 import com.appodealstack.bidon.core.ext.logError
 import com.appodealstack.bidon.core.ext.logInfo
 import com.appodealstack.bidon.di.get
@@ -53,7 +54,7 @@ internal class GetAuctionRequestUseCaseImpl(
         )
         logInfo(Tag, "Request body: $requestBody")
         return get<JsonHttpRequest>().invoke(
-            path = AuctionRequestPath,
+            path = "$AuctionRequestPath/${additionalData.asUrlPathAdType().lastSegment}",
             body = requestBody,
         ).map { jsonResponse ->
             BidonJson.decodeFromJsonElement(AuctionResponse.serializer(), jsonResponse)

@@ -10,7 +10,6 @@ import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.utilities.ktor.JsonHttpRequest
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.json.putJsonObject
 
 internal class GetConfigRequestUseCaseImpl(
     private val createRequestBody: CreateRequestBodyUseCase

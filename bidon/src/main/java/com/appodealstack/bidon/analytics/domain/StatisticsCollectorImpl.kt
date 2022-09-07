@@ -47,7 +47,7 @@ class StatisticsCollectorImpl(
     override suspend fun sendShowImpression(adType: StatisticsCollector.AdType) {
         if (!isShowSent.getAndSet(true)) {
             val key = SendImpressionRequestUseCase.Type.Show.key
-            val lastSegment = adType.asUrlPathAdType()
+            val lastSegment = adType.asUrlPathAdType().lastSegment
             sendImpression(
                 urlPath = "$key/$lastSegment",
                 bodyKey = key,
@@ -59,7 +59,7 @@ class StatisticsCollectorImpl(
     override suspend fun sendClickImpression(adType: StatisticsCollector.AdType) {
         if (!isClickSent.getAndSet(true)) {
             val key = SendImpressionRequestUseCase.Type.Click.key
-            val lastSegment = adType.asUrlPathAdType()
+            val lastSegment = adType.asUrlPathAdType().lastSegment
             sendImpression(
                 urlPath = "$key/$lastSegment",
                 bodyKey = key,
@@ -131,8 +131,8 @@ class StatisticsCollectorImpl(
     }
 
     private fun StatisticsCollector.AdType.asUrlPathAdType() = when (this) {
-        is StatisticsCollector.AdType.Banner -> UrlPathAdType.Banner.lastSegment
-        StatisticsCollector.AdType.Interstitial -> UrlPathAdType.Interstitial.lastSegment
-        StatisticsCollector.AdType.Rewarded -> UrlPathAdType.Rewarded.lastSegment
+        is StatisticsCollector.AdType.Banner -> UrlPathAdType.Banner
+        StatisticsCollector.AdType.Interstitial -> UrlPathAdType.Interstitial
+        StatisticsCollector.AdType.Rewarded -> UrlPathAdType.Rewarded
     }
 }

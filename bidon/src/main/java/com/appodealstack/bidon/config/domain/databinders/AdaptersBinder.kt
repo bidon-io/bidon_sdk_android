@@ -9,12 +9,11 @@ import kotlinx.serialization.json.encodeToJsonElement
 
 internal class AdaptersBinder(
     private val adaptersSource: AdaptersSource
-) : DataBinder{
+) : DataBinder {
     override val fieldName: String = "adapters"
 
     override suspend fun getJsonElement(): JsonElement =
         BidonJson.encodeToJsonElement(createDevice())
-
 
     private fun createDevice(): Map<String, AdapterInfo> {
         return adaptersSource.adapters.associate {

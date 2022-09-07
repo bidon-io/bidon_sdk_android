@@ -202,7 +202,7 @@ object DI {
                     DataProviderImpl(
                         deviceBinder = DeviceBinder(dataSource = get()),
                         appBinder = AppBinder(dataSource = get()),
-                        geoBinder = GeoBinder(dataSource = get()) ,
+                        geoBinder = GeoBinder(dataSource = get()),
                         sessionBinder = SessionBinder(dataSource = get()),
                         tokenBinder = TokenBinder(dataSource = get()),
                         userBinder = UserBinder(dataSource = get()),

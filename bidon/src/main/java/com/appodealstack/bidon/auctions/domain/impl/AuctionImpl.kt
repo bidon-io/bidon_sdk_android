@@ -80,7 +80,7 @@ internal class AuctionImpl(
 
             // Finish auction
             state.value = AuctionState.Finished
-            sendStatsAsync(auctionData.auctionConfigurationId)
+            sendStatsAsync(demandAd.adType)
         }
         state.first { it == AuctionState.Finished }
 
@@ -256,15 +256,15 @@ internal class AuctionImpl(
         statsRound.add(roundStat)
     }
 
-    private suspend fun sendStatsAsync(auctionConfigurationId: Int?) {
+    private suspend fun sendStatsAsync(adType: AdType) {
         coroutineScope {
             launch(SdkDispatchers.Default) {
                 val bidStats = statsAuctionResults.map {
                     (it.adSource as StatisticsCollector).buildBidStatistic()
                 }
-                statsRequest(
+                statsRequest.invoke(
                     auctionId = auctionDataResponse.auctionId ?: "",
-                    auctionConfigurationId = auctionConfigurationId ?: -1,
+                    auctionConfigurationId = auctionDataResponse.auctionConfigurationId ?: -1,
                     results = statsRound.map { roundStat ->
                         val errorDemandStat = roundStat.demands
                         val succeedDemandStat = bidStats.filter { it.roundId == roundStat.roundId }
@@ -290,6 +290,7 @@ internal class AuctionImpl(
                             }
                         )
                     },
+                    adType = adType
                 )
                 statsRound.clear()
             }
@@ -341,7 +342,7 @@ internal class AuctionImpl(
                     logInfo(
                         tag = Tag,
                         message = "Round '${round.id}'. Adapter ${adSource.demandId.demandId} starts bidding. " +
-                                "Min PriceFloor=$priceFloor. LineItems: $availableLineItemsForDemand."
+                            "Min PriceFloor=$priceFloor. LineItems: $availableLineItemsForDemand."
                     )
                     async {
                         withTimeoutOrNull(round.timeoutMs) {
