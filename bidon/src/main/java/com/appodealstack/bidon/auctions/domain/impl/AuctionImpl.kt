@@ -30,8 +30,9 @@ internal class AuctionImpl(
     private val statsRound = mutableListOf<RoundStat>()
     private val statsAuctionResults = mutableListOf<AuctionResult>()
     private val mutableLineItems = mutableListOf<LineItem>()
-    private var auctionId: String = ""
-    private var auctionConfigurationId: Int = 0
+    private var _auctionDataResponse: AuctionResponse? = null
+    private val auctionDataResponse: AuctionResponse
+        get() = requireNotNull(_auctionDataResponse)
 
     override suspend fun start(
         demandAd: DemandAd,
@@ -47,14 +48,8 @@ internal class AuctionImpl(
                 adTypeAdditionalData = adTypeAdditionalData,
                 auctionId = UUID.randomUUID().toString(),
                 adapters = adaptersSource.adapters
-            )
-            auctionId = auctionData.auctionId ?: run {
-                logError(Tag, "Unexpectedly, Auction ID is null at response $auctionData", NullPointerException())
-                ""
-            }
-            auctionConfigurationId = auctionData.auctionConfigurationId ?: run {
-                logError(Tag, "Unexpectedly, AuctionConfigurationId is null at response $auctionData", NullPointerException())
-                0
+            ).also {
+                _auctionDataResponse = it
             }
             mutableLineItems.addAll(auctionData.lineItems ?: emptyList())
 
@@ -244,11 +239,13 @@ internal class AuctionImpl(
         } ?: emptyList()
 
         allRoundResults.forEach {
-            (it.adSource as StatisticsCollector).addAuctionConfigurationId(auctionConfigurationId)
+            (it.adSource as StatisticsCollector).addAuctionConfigurationId(
+                auctionConfigurationId = auctionDataResponse.auctionConfigurationId ?: 0
+            )
         }
 
         val roundStat = RoundStat(
-            auctionId = auctionId,
+            auctionId = auctionDataResponse.auctionId ?: "",
             roundId = round.id,
             priceFloor = priceFloor,
             winnerDemandId = winner?.adSource?.demandId,
@@ -266,7 +263,7 @@ internal class AuctionImpl(
                     (it.adSource as StatisticsCollector).buildBidStatistic()
                 }
                 statsRequest(
-                    auctionId = auctionId,
+                    auctionId = auctionDataResponse.auctionId ?: "",
                     auctionConfigurationId = auctionConfigurationId ?: -1,
                     results = statsRound.map { roundStat ->
                         val errorDemandStat = roundStat.demands
@@ -324,17 +321,17 @@ internal class AuctionImpl(
             val adSources = when (demandAd.adType) {
                 AdType.Interstitial -> {
                     filteredAdapters.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>().map {
-                        it.interstitial(demandAd = demandAd, roundId = round.id, auctionId = auctionId)
+                        it.interstitial(demandAd = demandAd, roundId = round.id, auctionId = auctionDataResponse.auctionId ?: "")
                     }
                 }
                 AdType.Rewarded -> {
                     filteredAdapters.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().map {
-                        it.rewarded(demandAd = demandAd, roundId = round.id, auctionId = auctionId)
+                        it.rewarded(demandAd = demandAd, roundId = round.id, auctionId = auctionDataResponse.auctionId ?: "")
                     }
                 }
                 AdType.Banner -> {
                     filteredAdapters.filterIsInstance<AdProvider.Banner<AdAuctionParams>>().map {
-                        it.banner(demandAd = demandAd, roundId = round.id, auctionId = auctionId)
+                        it.banner(demandAd = demandAd, roundId = round.id, auctionId = auctionDataResponse.auctionId ?: "")
                     }
                 }
             }
@@ -344,7 +341,7 @@ internal class AuctionImpl(
                     logInfo(
                         tag = Tag,
                         message = "Round '${round.id}'. Adapter ${adSource.demandId.demandId} starts bidding. " +
-                            "Min PriceFloor=$priceFloor. LineItems: $availableLineItemsForDemand."
+                                "Min PriceFloor=$priceFloor. LineItems: $availableLineItemsForDemand."
                     )
                     async {
                         withTimeoutOrNull(round.timeoutMs) {
