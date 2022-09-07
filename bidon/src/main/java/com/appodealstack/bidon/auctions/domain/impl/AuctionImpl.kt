@@ -153,7 +153,14 @@ internal class AuctionImpl(
             timeout = round.timeoutMs
         ).getOrNull() ?: emptyList()
 
-        proceedRoundResults(resolver, allRoundResults, minPriceFloor, round, priceFloor, roundsListener)
+        proceedRoundResults(
+            resolver = resolver,
+            allResults = allRoundResults,
+            minPriceFloor = minPriceFloor,
+            round = round,
+            priceFloor = priceFloor,
+            roundsListener = roundsListener
+        )
 
         val nextPriceFloor = auctionResults.value.firstOrNull()?.ecpm ?: priceFloor
         conductRounds(
@@ -180,9 +187,13 @@ internal class AuctionImpl(
             .filter { (it.adSource as StatisticsCollector).buildBidStatistic().roundStatus == RoundStatus.SuccessfulBid }
             .filter {
                 /**
-                 * Received price should not be less then initial one [minPriceFloor].
+                 * Received ecpm should not be less then initial one [minPriceFloor].
                  */
-                it.ecpm >= minPriceFloor
+                val isAbovePricefloor = it.ecpm >= minPriceFloor
+                if (!isAbovePricefloor) {
+                    (it.adSource as StatisticsCollector).markBelowPricefloor()
+                }
+                isAbovePricefloor
             }
 
         /**

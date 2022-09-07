@@ -21,6 +21,7 @@ enum class RoundStatus(val code: Int) {
     AuctionCancelled(12),
     AdFormatNotSupported(13),
     UnspecifiedException(14),
+    BelowPricefloor(15),
 
     SuccessfulBid(-1), // Internal status
 }

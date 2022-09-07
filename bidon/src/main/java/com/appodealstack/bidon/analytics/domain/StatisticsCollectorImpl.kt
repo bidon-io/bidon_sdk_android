@@ -99,6 +99,12 @@ class StatisticsCollectorImpl(
         )
     }
 
+    override fun markBelowPricefloor() {
+        stat = stat.copy(
+            roundStatus = RoundStatus.BelowPricefloor
+        )
+    }
+
     override fun buildBidStatistic(): BidStat = stat
 
     private fun createImpressionRequestBody(adType: StatisticsCollector.AdType): ImpressionRequestBody {

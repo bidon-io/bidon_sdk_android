@@ -13,6 +13,7 @@ interface StatisticsCollector {
     fun markBidFinished(roundStatus: RoundStatus, ecpm: Double?)
     fun markWin()
     fun markLoss()
+    fun markBelowPricefloor()
     fun addAuctionConfigurationId(auctionConfigurationId: Int)
 
     fun buildBidStatistic(): BidStat
