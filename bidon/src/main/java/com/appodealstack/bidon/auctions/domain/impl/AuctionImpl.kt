@@ -31,6 +31,7 @@ internal class AuctionImpl(
     private val statsAuctionResults = mutableListOf<AuctionResult>()
     private val mutableLineItems = mutableListOf<LineItem>()
     private var auctionId: String = ""
+    private var auctionConfigurationId: Int = 0
 
     override suspend fun start(
         demandAd: DemandAd,
@@ -48,8 +49,12 @@ internal class AuctionImpl(
                 adapters = adaptersSource.adapters
             )
             auctionId = auctionData.auctionId ?: run {
-                logError(Tag, "Auction ID is null at response $auctionData", NullPointerException())
+                logError(Tag, "Unexpectedly, Auction ID is null at response $auctionData", NullPointerException())
                 ""
+            }
+            auctionConfigurationId = auctionData.auctionConfigurationId ?: run {
+                logError(Tag, "Unexpectedly, AuctionConfigurationId is null at response $auctionData", NullPointerException())
+                0
             }
             mutableLineItems.addAll(auctionData.lineItems ?: emptyList())
 
@@ -58,7 +63,6 @@ internal class AuctionImpl(
                 rounds = auctionData.rounds ?: listOf(),
                 minPriceFloor = auctionData.minPrice ?: 0.0,
                 priceFloor = auctionData.minPrice ?: 0.0,
-                auctionData = auctionData,
                 roundsListener = roundsListener,
                 resolver = resolver,
                 demandAd = demandAd,
@@ -98,7 +102,7 @@ internal class AuctionImpl(
                     logInfo(Tag, "Notified loss: ${adSource.demandId}")
                     adSource.notifyLoss()
                 }
-                (adSource as? StatisticsCollector)?.markLoss()
+                (adSource as StatisticsCollector).markLoss()
                 logInfo(Tag, "Destroying loser: ${adSource.demandId}")
                 adSource.destroy()
             }
@@ -118,7 +122,7 @@ internal class AuctionImpl(
                         logInfo(Tag, "Notified loss: ${auctionResult.adSource.demandId}")
                         it.notifyLoss()
                     }
-                    (auctionResult.adSource as? StatisticsCollector)?.markLoss()
+                    (auctionResult.adSource as StatisticsCollector).markLoss()
                 }
                 .onSuccess {
                     logInfo(Tag, "Winner filled: ${auctionResult.adSource.demandId}")
@@ -126,7 +130,7 @@ internal class AuctionImpl(
                         logInfo(Tag, "Notified win: ${auctionResult.adSource.demandId}")
                         it.notifyWin()
                     }
-                    (auctionResult.adSource as? StatisticsCollector)?.markWin()
+                    (auctionResult.adSource as StatisticsCollector).markWin()
                 }
                 .isSuccess
         }
@@ -142,7 +146,6 @@ internal class AuctionImpl(
         resolver: AuctionResolver,
         demandAd: DemandAd,
         adTypeAdditionalData: AdTypeAdditional,
-        auctionData: AuctionResponse
     ) {
         val round = rounds.firstOrNull() ?: return
         roundsListener.roundStarted(round.id)
@@ -166,7 +169,6 @@ internal class AuctionImpl(
             resolver = resolver,
             demandAd = demandAd,
             adTypeAdditionalData = adTypeAdditionalData,
-            auctionData = auctionData
         )
     }
 
@@ -240,6 +242,10 @@ internal class AuctionImpl(
                 adUnitId = null
             )
         } ?: emptyList()
+
+        allRoundResults.forEach {
+            (it.adSource as StatisticsCollector).addAuctionConfigurationId(auctionConfigurationId)
+        }
 
         val roundStat = RoundStat(
             auctionId = auctionId,

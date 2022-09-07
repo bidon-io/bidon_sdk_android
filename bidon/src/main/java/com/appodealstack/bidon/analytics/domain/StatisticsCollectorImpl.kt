@@ -19,6 +19,9 @@ class StatisticsCollectorImpl(
     roundId: String,
     demandId: DemandId
 ) : StatisticsCollector {
+
+    private var auctionConfigurationId: Int = 0
+
     private val impressionId: String by lazy {
         UUID.randomUUID().toString()
     }
@@ -42,7 +45,7 @@ class StatisticsCollectorImpl(
     )
 
     override suspend fun sendShowImpression(adType: StatisticsCollector.AdType) {
-        if (isShowSent.getAndSet(true)) {
+        if (!isShowSent.getAndSet(true)) {
             val key = SendImpressionRequestUseCase.Type.Show.key
             val lastSegment = adType.asUrlPathAdType()
             sendImpression(
@@ -54,7 +57,7 @@ class StatisticsCollectorImpl(
     }
 
     override suspend fun sendClickImpression(adType: StatisticsCollector.AdType) {
-        if (isClickSent.getAndSet(true)) {
+        if (!isClickSent.getAndSet(true)) {
             val key = SendImpressionRequestUseCase.Type.Click.key
             val lastSegment = adType.asUrlPathAdType()
             sendImpression(
@@ -63,6 +66,10 @@ class StatisticsCollectorImpl(
                 body = createImpressionRequestBody(adType)
             )
         }
+    }
+
+    override fun addAuctionConfigurationId(auctionConfigurationId: Int) {
+        this.auctionConfigurationId = auctionConfigurationId
     }
 
     override fun markBidStarted(adUnitId: String?) {
@@ -98,7 +105,7 @@ class StatisticsCollectorImpl(
         val (banner, interstitial, rewarded) = getData(adType)
         return ImpressionRequestBody(
             auctionId = stat.auctionId,
-            auctionConfigurationId = 1,
+            auctionConfigurationId = auctionConfigurationId,
             impressionId = impressionId,
             demandId = stat.demandId.demandId,
             adUnitId = stat.adUnitId,
