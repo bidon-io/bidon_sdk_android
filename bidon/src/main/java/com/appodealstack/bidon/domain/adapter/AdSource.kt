@@ -53,6 +53,8 @@ sealed interface AdSource<T : AdAuctionParams> {
             onLineItemConsumed: (LineItem) -> Unit
         ): Result<AdAuctionParams>
 
-        fun getAdView(): View
+        fun getAdView(): AdViewHolder
     }
 }
+
+class AdViewHolder(val networkAdview: View, val widthPx: Int, val heightPx: Int)

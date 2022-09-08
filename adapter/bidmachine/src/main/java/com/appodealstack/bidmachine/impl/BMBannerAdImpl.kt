@@ -2,8 +2,8 @@ package com.appodealstack.bidmachine.impl
 
 import android.app.Activity
 import android.content.Context
-import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import com.appodealstack.bidmachine.BMAuctionResult
 import com.appodealstack.bidmachine.BMBannerAuctionParams
 import com.appodealstack.bidmachine.BidMachineBannerSize
@@ -11,10 +11,7 @@ import com.appodealstack.bidmachine.asBidonError
 import com.appodealstack.bidon.data.models.auction.LineItem
 import com.appodealstack.bidon.data.models.stats.RoundStatus
 import com.appodealstack.bidon.data.models.stats.asRoundStatus
-import com.appodealstack.bidon.domain.adapter.AdAuctionParams
-import com.appodealstack.bidon.domain.adapter.AdSource
-import com.appodealstack.bidon.domain.adapter.AdState
-import com.appodealstack.bidon.domain.adapter.WinLossNotifiable
+import com.appodealstack.bidon.domain.adapter.*
 import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.*
 import com.appodealstack.bidon.domain.common.ext.asFailure
@@ -22,6 +19,7 @@ import com.appodealstack.bidon.domain.common.ext.asSuccess
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.StatisticsCollectorImpl
 import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.view.helper.impl.dpToPx
 import io.bidmachine.AdRequest
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.banner.BannerListener
@@ -50,6 +48,7 @@ internal class BMBannerAdImpl(
     private var context: Context? = null
     private var adRequest: BannerRequest? = null
     private var bannerView: BannerView? = null
+    private var bannerSize: BannerSize? = null
 
     private val requestListener by lazy {
         object : AdRequest.AdRequestListener<BannerRequest> {
@@ -134,6 +133,7 @@ internal class BMBannerAdImpl(
         logInternal(Tag, "Starting with $adParams: $this")
         markBidStarted()
         context = adParams.context
+        bannerSize = adParams.bannerSize
         BannerRequest.Builder()
             .setSize(adParams.bannerSize.asBidMachineBannerSize())
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.priceFloor))
@@ -222,8 +222,19 @@ internal class BMBannerAdImpl(
         bannerView = null
     }
 
-    override fun getAdView(): View {
-        return requireNotNull(bannerView)
+    override fun getAdView(): AdViewHolder {
+        val adView = requireNotNull(bannerView)
+        return AdViewHolder(
+            networkAdview = adView,
+            widthPx = FrameLayout.LayoutParams.MATCH_PARENT,
+            heightPx = when (bannerSize) {
+                BannerSize.Adaptive,
+                BannerSize.Banner -> 50.dpToPx
+                BannerSize.LeaderBoard -> 90.dpToPx
+                BannerSize.MRec -> 250.dpToPx
+                null -> FrameLayout.LayoutParams.WRAP_CONTENT
+            }
+        )
     }
 
     private fun BannerView.asAd(): Ad {

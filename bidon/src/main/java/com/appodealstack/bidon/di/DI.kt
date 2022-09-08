@@ -39,12 +39,11 @@ import com.appodealstack.bidon.domain.auction.RoundsListener
 import com.appodealstack.bidon.domain.auction.impl.AuctionHolderImpl
 import com.appodealstack.bidon.domain.auction.impl.AuctionImpl
 import com.appodealstack.bidon.domain.auction.usecases.GetAuctionRequestUseCase
-import com.appodealstack.bidon.domain.common.AutoRefresher
 import com.appodealstack.bidon.domain.common.DemandAd
-import com.appodealstack.bidon.domain.common.impl.AutoRefresherImpl
 import com.appodealstack.bidon.domain.common.impl.BidOnSdkImpl
 import com.appodealstack.bidon.domain.common.usecases.CountDownTimer
-import com.appodealstack.bidon.domain.config.*
+import com.appodealstack.bidon.domain.config.AdapterInstanceCreator
+import com.appodealstack.bidon.domain.config.BidOnInitializer
 import com.appodealstack.bidon.domain.config.impl.AdapterInstanceCreatorImpl
 import com.appodealstack.bidon.domain.config.impl.BidOnInitializerImpl
 import com.appodealstack.bidon.domain.config.impl.InitAndRegisterAdaptersUseCaseImpl
@@ -53,8 +52,8 @@ import com.appodealstack.bidon.domain.config.usecases.InitAndRegisterAdaptersUse
 import com.appodealstack.bidon.domain.databinders.*
 import com.appodealstack.bidon.domain.stats.usecases.SendImpressionRequestUseCase
 import com.appodealstack.bidon.domain.stats.usecases.StatsRequestUseCase
-import com.appodealstack.bidon.view.BannerAd
-import com.appodealstack.bidon.view.helper.*
+import com.appodealstack.bidon.view.helper.GetOrientationUseCase
+import com.appodealstack.bidon.view.helper.PauseResumeObserver
 import com.appodealstack.bidon.view.helper.impl.ActivityLifecycleObserver
 import com.appodealstack.bidon.view.helper.impl.GetOrientationUseCaseImpl
 import com.appodealstack.bidon.view.helper.impl.PauseResumeObserverImpl
@@ -141,9 +140,6 @@ object DI {
                         getAuctionRequest = get(),
                         statsRequest = get(),
                     )
-                }
-                factoryWithParams<AutoRefresher> { param ->
-                    AutoRefresherImpl(autoRefreshable = param as BannerAd.AutoRefreshable)
                 }
                 factoryWithParams { param ->
                     CountDownTimer(

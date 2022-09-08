@@ -3,9 +3,9 @@ package com.appodealstack.admob.impl
 import android.app.Activity
 import android.content.Context
 import android.util.DisplayMetrics
-import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.FrameLayout
 import com.appodealstack.admob.AdmobBannerAuctionParams
 import com.appodealstack.admob.asBidonError
 import com.appodealstack.bidon.data.models.auction.LineItem
@@ -15,6 +15,7 @@ import com.appodealstack.bidon.data.models.stats.asRoundStatus
 import com.appodealstack.bidon.domain.adapter.AdAuctionParams
 import com.appodealstack.bidon.domain.adapter.AdSource
 import com.appodealstack.bidon.domain.adapter.AdState
+import com.appodealstack.bidon.domain.adapter.AdViewHolder
 import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.*
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
@@ -49,6 +50,7 @@ internal class AdmobBannerImpl(
 
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
 
+    private var adSize: AdSize? = null
     private var lineItem: LineItem? = null
     private var adView: AdView? = null
     private val requiredAdView: AdView get() = requireNotNull(adView)
@@ -160,6 +162,7 @@ internal class AdmobBannerImpl(
                 val adView = AdView(adParams.adContainer.context)
                     .apply {
                         val admobBannerSize = adParams.bannerSize.asAdmobAdSize(adParams.adContainer)
+                        this@AdmobBannerImpl.adSize = admobBannerSize
                         this.setAdSize(admobBannerSize)
                         this.adUnitId = adUnitId
                         this.adListener = requestListener
@@ -211,7 +214,11 @@ internal class AdmobBannerImpl(
 
     override fun show(activity: Activity) {}
 
-    override fun getAdView(): View = requiredAdView
+    override fun getAdView(): AdViewHolder = AdViewHolder(
+        networkAdview = requiredAdView,
+        widthPx = FrameLayout.LayoutParams.MATCH_PARENT,
+        heightPx = adSize?.getHeightInPixels(requiredAdView.context) ?: FrameLayout.LayoutParams.WRAP_CONTENT
+    )
 
     private fun AdView.asAd(): Ad {
         return Ad(

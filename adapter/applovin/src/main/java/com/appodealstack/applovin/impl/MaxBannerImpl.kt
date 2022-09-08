@@ -1,7 +1,6 @@
 package com.appodealstack.applovin.impl
 
 import android.app.Activity
-import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import com.applovin.mediation.MaxAd
@@ -19,12 +18,14 @@ import com.appodealstack.bidon.data.models.stats.asRoundStatus
 import com.appodealstack.bidon.domain.adapter.AdAuctionParams
 import com.appodealstack.bidon.domain.adapter.AdSource
 import com.appodealstack.bidon.domain.adapter.AdState
+import com.appodealstack.bidon.domain.adapter.AdViewHolder
 import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.*
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.StatisticsCollectorImpl
 import com.appodealstack.bidon.domain.stats.impl.logError
 import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.view.helper.impl.dpToPx
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 
@@ -42,6 +43,7 @@ internal class MaxBannerImpl(
 
     private var maxAdView: MaxAdView? = null
     private var maxAd: MaxAd? = null
+    private var bannerSize: BannerSize? = null
 
     private val maxAdListener by lazy {
         object : MaxAdViewAdListener {
@@ -127,13 +129,25 @@ internal class MaxBannerImpl(
         )
     }
 
-    override fun getAdView(): View {
-        return requireNotNull(maxAdView)
+    override fun getAdView(): AdViewHolder {
+        val adView = requireNotNull(maxAdView)
+        return AdViewHolder(
+            networkAdview = adView,
+            widthPx = FrameLayout.LayoutParams.MATCH_PARENT,
+            heightPx = when (bannerSize) {
+                BannerSize.Banner -> 50.dpToPx
+                BannerSize.LeaderBoard -> 90.dpToPx
+                BannerSize.MRec -> 250.dpToPx
+                BannerSize.Adaptive,
+                null -> FrameLayout.LayoutParams.WRAP_CONTENT
+            }
+        )
     }
 
     override suspend fun bid(adParams: MaxBannerAuctionParams): AuctionResult {
         logInternal(Tag, "Starting with $adParams")
         markBidStarted(adParams.lineItem.adUnitId)
+        bannerSize = adParams.bannerSize
         val maxAdView = if (adParams.bannerSize == BannerSize.Adaptive) {
             MaxAdView(
                 adParams.lineItem.adUnitId,

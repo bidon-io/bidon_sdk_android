@@ -3,6 +3,7 @@ package com.appodealstack.bidon.view
 import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
+import android.view.Gravity
 import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import com.appodealstack.bidon.BidON
@@ -49,10 +50,6 @@ interface BannerAd {
      */
     fun startAutoRefresh(timeoutMs: Long = DefaultAutoRefreshTimeoutMs)
     fun stopAutoRefresh()
-
-    interface AutoRefreshable {
-        fun onRefresh()
-    }
 }
 
 class BannerView @JvmOverloads constructor(
@@ -349,7 +346,13 @@ class BannerView @JvmOverloads constructor(
                 }
                 // add AdView to Screen
                 removeAllViews()
-                addView(adSource.getAdView())
+
+                val adViewHolder = adSource.getAdView()
+                val layoutParams = LayoutParams(adViewHolder.widthPx, adViewHolder.heightPx).apply {
+                    gravity = Gravity.CENTER
+                }
+                addView(adViewHolder.networkAdview, layoutParams)
+
                 sendAction(ShowAction.OnAdShown(winner, ad))
             } catch (e: Exception) {
             }

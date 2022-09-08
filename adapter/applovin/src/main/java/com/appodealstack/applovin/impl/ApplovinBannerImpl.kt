@@ -1,7 +1,6 @@
 package com.appodealstack.applovin.impl
 
 import android.app.Activity
-import android.view.View
 import android.view.ViewGroup
 import com.applovin.adview.AppLovinAdView
 import com.applovin.sdk.*
@@ -13,6 +12,7 @@ import com.appodealstack.bidon.data.models.stats.RoundStatus
 import com.appodealstack.bidon.domain.adapter.AdAuctionParams
 import com.appodealstack.bidon.domain.adapter.AdSource
 import com.appodealstack.bidon.domain.adapter.AdState
+import com.appodealstack.bidon.domain.adapter.AdViewHolder
 import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.*
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
@@ -170,7 +170,14 @@ internal class ApplovinBannerImpl(
     override fun show(activity: Activity) {
     }
 
-    override fun getAdView(): View = requireNotNull(adView)
+    override fun getAdView(): AdViewHolder {
+        val adView = requireNotNull(adView)
+        return AdViewHolder(
+            networkAdview = adView,
+            widthPx = adView.size.width,
+            heightPx = adView.size.height
+        )
+    }
 
     private fun AppLovinAdView?.asAd(): Ad {
         return Ad(
