@@ -33,6 +33,7 @@ class StatisticsCollectorImpl(
 
     private val isShowSent = AtomicBoolean(false)
     private val isClickSent = AtomicBoolean(false)
+    private val isRewardSent = AtomicBoolean(false)
 
     private var stat: BidStat = BidStat(
         auctionId = auctionId,
@@ -67,6 +68,17 @@ class StatisticsCollectorImpl(
                 urlPath = "$key/$lastSegment",
                 bodyKey = key,
                 body = createImpressionRequestBody(adType)
+            )
+        }
+    }
+
+    override suspend fun sendRewardImpression() {
+        if (!isRewardSent.getAndSet(true)) {
+            val key = SendImpressionRequestUseCase.Type.Reward.key
+            sendImpression(
+                urlPath = key,
+                bodyKey = key,
+                body = createImpressionRequestBody(StatisticsCollector.AdType.Rewarded)
             )
         }
     }

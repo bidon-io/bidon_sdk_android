@@ -12,6 +12,7 @@ internal interface SendImpressionRequestUseCase {
 
     enum class Type(val key: String) {
         Show("show"),
-        Click("click")
+        Click("click"),
+        Reward("reward"),
     }
 }

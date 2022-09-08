@@ -7,6 +7,7 @@ interface StatisticsCollector {
 
     suspend fun sendShowImpression(adType: AdType)
     suspend fun sendClickImpression(adType: AdType)
+    suspend fun sendRewardImpression()
 
     fun markBidStarted(adUnitId: String? = null)
     fun markBidFinished(roundStatus: RoundStatus, ecpm: Double?)

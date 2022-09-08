@@ -16,9 +16,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 
-/**
- * [DI.init] must be invoked before using all. Check if SDK is initialized with [isInitialized].
- */
 internal class BidOnSdkImpl : BidOnSdk {
 
     private val bidONInitializerDelegate = lazy { bidONInitializer }
@@ -35,6 +32,9 @@ internal class BidOnSdkImpl : BidOnSdk {
     }
 
     override fun init(activity: Activity, appKey: String, callback: InitializationCallback?) {
+        /**
+         * [DI.init] must be invoked before using all. Check if SDK is initialized with [isInitialized].
+         */
         DI.init(context = activity.applicationContext)
         scope.launch {
             runCatching {

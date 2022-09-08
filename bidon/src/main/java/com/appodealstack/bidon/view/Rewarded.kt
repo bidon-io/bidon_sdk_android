@@ -135,7 +135,10 @@ internal class RewardedImpl(
                 is AdState.Fill -> {
                     // do nothing
                 }
-                is AdState.OnReward -> listener.onUserRewarded(state.ad, state.reward)
+                is AdState.OnReward -> {
+                    sendStatsRewardAsync(adSource)
+                    listener.onUserRewarded(state.ad, state.reward)
+                }
                 is AdState.Clicked -> {
                     sendStatsClickedAsync(adSource)
                     listener.onAdClicked(state.ad)
@@ -227,6 +230,14 @@ internal class RewardedImpl(
                 (adSource as? StatisticsCollector)?.sendShowImpression(
                     StatisticsCollector.AdType.Rewarded
                 )
+            }
+        }
+    }
+
+    private suspend fun sendStatsRewardAsync(adSource: AdSource.Rewarded<*>) {
+        coroutineScope {
+            launch {
+                (adSource as? StatisticsCollector)?.sendRewardImpression()
             }
         }
     }
