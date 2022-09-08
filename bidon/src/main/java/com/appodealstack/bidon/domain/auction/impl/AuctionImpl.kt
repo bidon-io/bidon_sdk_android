@@ -192,7 +192,7 @@ internal class AuctionImpl(
     ) {
         val sortedResult = resolver.sortWinners(allResults)
         val successfulResults = sortedResult
-            .filter { (it.adSource as StatisticsCollector).buildBidStatistic().roundStatus == RoundStatus.SuccessfulBid }
+            .filter { (it.adSource as StatisticsCollector).buildBidStatistic().roundStatus == RoundStatus.Successful }
             .filter {
                 /**
                  * Received ecpm should not be less then initial one [minPriceFloor].
@@ -250,8 +250,10 @@ internal class AuctionImpl(
             DemandStat(
                 roundStatus = RoundStatus.UnknownAdapter,
                 demandId = DemandId(demandId),
-                startTs = null,
-                finishTs = null,
+                bidStartTs = null,
+                bidFinishTs = null,
+                fillStartTs = null,
+                fillFinishTs = null,
                 ecpm = null,
                 adUnitId = null
             )
@@ -291,15 +293,17 @@ internal class AuctionImpl(
                                 DemandStat(
                                     roundStatus = requireNotNull(it.roundStatus),
                                     demandId = it.demandId,
-                                    startTs = it.startTs,
-                                    finishTs = it.finishTs,
+                                    bidStartTs = it.bidStartTs,
+                                    bidFinishTs = it.bidFinishTs,
+                                    fillStartTs = it.fillStartTs,
+                                    fillFinishTs = it.fillFinishTs,
                                     ecpm = it.ecpm,
                                     adUnitId = it.adUnitId
                                 )
                             }
                         roundStat.copy(
                             demands = (succeedDemandStat + errorDemandStat).map { demandStat ->
-                                if (demandStat.roundStatus == RoundStatus.SuccessfulBid) {
+                                if (demandStat.roundStatus == RoundStatus.Successful) {
                                     demandStat.copy(
                                         roundStatus = RoundStatus.Loss
                                     )

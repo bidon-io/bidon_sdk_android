@@ -50,7 +50,7 @@ internal class ApplovinBannerImpl(
                 appLovinAd = ad
                 markBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
-                    roundStatus = RoundStatus.SuccessfulBid,
+                    roundStatus = RoundStatus.Successful,
                 )
                 adState.tryEmit(
                     AdState.Bid(
@@ -160,7 +160,9 @@ internal class ApplovinBannerImpl(
 
     override suspend fun fill(): Result<Ad> = runCatching {
         logInternal(Tag, "Starting fill: $this")
+        markFillStarted()
         requireNotNull(appLovinAd?.asAd()).also {
+            markFillFinished(RoundStatus.Successful)
             adState.tryEmit(AdState.Fill(it))
         }
     }

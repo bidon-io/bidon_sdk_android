@@ -23,7 +23,7 @@ enum class RoundStatus(val code: Int) {
     UnspecifiedException(14),
     BelowPricefloor(15),
 
-    SuccessfulBid(-1), // Internal status
+    Successful(-1), // Internal status
 }
 
 fun Throwable.asRoundStatus() = when (this as? BidonError) {

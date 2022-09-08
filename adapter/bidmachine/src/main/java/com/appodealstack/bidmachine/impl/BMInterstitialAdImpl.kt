@@ -59,7 +59,7 @@ internal class BMInterstitialAdImpl(
                 adRequest = request
                 markBidFinished(
                     ecpm = result.price,
-                    roundStatus = RoundStatus.SuccessfulBid,
+                    roundStatus = RoundStatus.Successful,
                 )
                 adState.tryEmit(
                     AdState.Bid(
@@ -175,6 +175,7 @@ internal class BMInterstitialAdImpl(
 
     override suspend fun fill(): Result<Ad> {
         logInternal(Tag, "Starting fill: $this")
+        markFillStarted()
         val context = context
         if (context == null) {
             adState.tryEmit(AdState.LoadFailed(DemandError.NoActivity(demandId)))
@@ -189,9 +190,18 @@ internal class BMInterstitialAdImpl(
             it is AdState.Fill || it is AdState.LoadFailed || it is AdState.Expired
         }
         return when (state) {
-            is AdState.Fill -> state.ad.asSuccess()
-            is AdState.LoadFailed -> state.cause.asFailure()
-            is AdState.Expired -> BidonError.FillTimedOut(demandId).asFailure()
+            is AdState.Fill -> {
+                markFillFinished(RoundStatus.Successful)
+                state.ad.asSuccess()
+            }
+            is AdState.LoadFailed -> {
+                markFillFinished(RoundStatus.NoFill)
+                state.cause.asFailure()
+            }
+            is AdState.Expired -> {
+                markFillFinished(RoundStatus.NoFill)
+                BidonError.FillTimedOut(demandId).asFailure()
+            }
             else -> error("unexpected: $state")
         }
     }

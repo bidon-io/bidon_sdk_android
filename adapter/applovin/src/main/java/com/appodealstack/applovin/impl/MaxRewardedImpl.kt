@@ -44,7 +44,7 @@ internal class MaxRewardedImpl(
                 maxAd = ad
                 markBidFinished(
                     ecpm = requireNotNull(ad.revenue),
-                    roundStatus = RoundStatus.SuccessfulBid,
+                    roundStatus = RoundStatus.Successful,
                 )
                 adState.tryEmit(
                     AdState.Bid(

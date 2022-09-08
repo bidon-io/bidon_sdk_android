@@ -71,8 +71,10 @@ internal class StatsRequestUseCaseImpl(
                             adUnitId = demandStat.adUnitId,
                             roundStatusCode = demandStat.roundStatus.code,
                             ecpm = demandStat.ecpm,
-                            startTs = demandStat.startTs,
-                            finishTs = demandStat.finishTs
+                            bidStartTs = demandStat.bidStartTs,
+                            bidFinishTs = demandStat.bidFinishTs,
+                            fillStartTs = demandStat.fillStartTs,
+                            fillFinishTs = demandStat.fillFinishTs,
                         )
                     }
                 )

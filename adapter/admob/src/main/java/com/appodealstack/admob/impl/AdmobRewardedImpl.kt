@@ -67,7 +67,7 @@ internal class AdmobRewardedImpl(
                 requiredRewardedAd.fullScreenContentCallback = rewardedListener
                 markBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
-                    roundStatus = RoundStatus.SuccessfulBid,
+                    roundStatus = RoundStatus.Successful,
                 )
                 adState.tryEmit(
                     AdState.Bid(
@@ -206,12 +206,16 @@ internal class AdmobRewardedImpl(
 
     override suspend fun fill(): Result<Ad> = runCatching {
         logInternal(Tag, "Starting fill: $this")
+        markFillStarted()
         /**
          * Admob fills the bid automatically. It's not needed to fill it manually.
          */
         AdState.Fill(
             requiredRewardedAd.asAd()
-        ).also { adState.tryEmit(it) }.ad
+        ).also {
+            markFillFinished(RoundStatus.Successful)
+            adState.tryEmit(it)
+        }.ad
     }
 
     override fun show(activity: Activity) {

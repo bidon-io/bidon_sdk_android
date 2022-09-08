@@ -70,7 +70,7 @@ internal class AdmobBannerImpl(
                 logInfo(Tag, "onAdLoaded: $this")
                 markBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
-                    roundStatus = RoundStatus.SuccessfulBid,
+                    roundStatus = RoundStatus.Successful,
                 )
                 adView?.run {
                     adState.tryEmit(
@@ -197,12 +197,16 @@ internal class AdmobBannerImpl(
 
     override suspend fun fill(): Result<Ad> = runCatching {
         logInternal(Tag, "Starting fill: $this")
+        markFillStarted()
         /**
          * Admob fills the bid automatically. It's not needed to fill it manually.
          */
         AdState.Fill(
             requireNotNull(adView?.asAd())
-        ).also { adState.tryEmit(it) }.ad
+        ).also {
+            markFillFinished(RoundStatus.Successful)
+            adState.tryEmit(it)
+        }.ad
     }
 
     override fun show(activity: Activity) {}

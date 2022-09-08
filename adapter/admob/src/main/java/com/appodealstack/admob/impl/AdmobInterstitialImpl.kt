@@ -69,7 +69,7 @@ internal class AdmobInterstitialImpl(
                 interstitialAd.fullScreenContentCallback = interstitialListener
                 markBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
-                    roundStatus = RoundStatus.SuccessfulBid,
+                    roundStatus = RoundStatus.Successful,
                 )
                 adState.tryEmit(
                     AdState.Bid(
@@ -197,12 +197,16 @@ internal class AdmobInterstitialImpl(
 
     override suspend fun fill(): Result<Ad> = runCatching {
         logInternal(Tag, "Starting fill: $this")
+        markFillStarted()
         /**
          * Admob fills the bid automatically. It's not needed to fill it manually.
          */
         AdState.Fill(
             requireNotNull(interstitialAd?.asAd())
-        ).also { adState.tryEmit(it) }.ad
+        ).also {
+            markFillFinished(RoundStatus.Successful)
+            adState.tryEmit(it)
+        }.ad
     }
 
     override fun show(activity: Activity) {

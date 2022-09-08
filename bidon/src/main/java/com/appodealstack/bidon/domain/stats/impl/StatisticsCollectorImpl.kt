@@ -38,9 +38,11 @@ class StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
         demandId = demandId,
-        startTs = null,
         adUnitId = null,
-        finishTs = null,
+        bidStartTs = null,
+        bidFinishTs = null,
+        fillStartTs = null,
+        fillFinishTs = null,
         roundStatus = null,
         ecpm = null
     )
@@ -75,16 +77,29 @@ class StatisticsCollectorImpl(
 
     override fun markBidStarted(adUnitId: String?) {
         stat = stat.copy(
-            startTs = SystemTimeNow,
+            bidStartTs = SystemTimeNow,
             adUnitId = adUnitId
         )
     }
 
     override fun markBidFinished(roundStatus: RoundStatus, ecpm: Double?) {
         stat = stat.copy(
-            finishTs = SystemTimeNow,
+            bidFinishTs = SystemTimeNow,
             roundStatus = roundStatus,
             ecpm = ecpm,
+        )
+    }
+
+    override fun markFillStarted() {
+        stat = stat.copy(
+            fillStartTs = SystemTimeNow,
+        )
+    }
+
+    override fun markFillFinished(roundStatus: RoundStatus) {
+        stat = stat.copy(
+            fillFinishTs = SystemTimeNow,
+            roundStatus = roundStatus,
         )
     }
 

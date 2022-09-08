@@ -13,8 +13,12 @@ data class Demand(
     val roundStatusCode: Int,
     @SerialName("ecpm")
     val ecpm: Double?,
-    @SerialName("start_ts")
-    val startTs: Long?,
-    @SerialName("finish_ts")
-    val finishTs: Long?,
+    @SerialName("bid_start_ts")
+    val bidStartTs: Long?,
+    @SerialName("bid_finish_ts")
+    val bidFinishTs: Long?,
+    @SerialName("fill_start_ts")
+    val fillStartTs: Long?,
+    @SerialName("fill_finish_ts")
+    val fillFinishTs: Long?,
 )
