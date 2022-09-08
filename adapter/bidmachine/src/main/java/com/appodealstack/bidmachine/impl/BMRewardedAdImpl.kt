@@ -87,7 +87,7 @@ internal class BMRewardedAdImpl(
                     ecpm = null,
                     roundStatus = RoundStatus.NoBid,
                 )
-                adState.tryEmit(AdState.LoadFailed(DemandError.Expired(demandId)))
+                adState.tryEmit(AdState.LoadFailed(BidonError.Expired(demandId)))
             }
         }
     }
@@ -187,7 +187,7 @@ internal class BMRewardedAdImpl(
         markFillStarted()
         val context = context
         if (context == null) {
-            adState.tryEmit(AdState.LoadFailed(DemandError.NoActivity(demandId)))
+            adState.tryEmit(AdState.LoadFailed(BidonError.NoContextFound))
         } else {
             val bmRewardedAd = RewardedAd(context).also {
                 rewardedAd = it

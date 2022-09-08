@@ -86,7 +86,7 @@ internal class BMBannerAdImpl(
                     ecpm = null,
                     roundStatus = RoundStatus.NoBid,
                 )
-                adState.tryEmit(AdState.LoadFailed(DemandError.Expired(demandId)))
+                adState.tryEmit(AdState.LoadFailed(BidonError.Expired(demandId)))
             }
         }
     }

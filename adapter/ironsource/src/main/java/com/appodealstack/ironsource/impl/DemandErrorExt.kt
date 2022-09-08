@@ -1,7 +1,6 @@
 package com.appodealstack.ironsource.impl
 
 import com.appodealstack.bidon.domain.common.BidonError
-import com.appodealstack.bidon.domain.common.DemandError
 import com.appodealstack.ironsource.IronSourceDemandId
 import com.ironsource.mediationsdk.logger.IronSourceError
 
@@ -14,5 +13,5 @@ internal fun IronSourceError?.asBidonError(): BidonError = when (this?.errorCode
     IronSourceError.ERROR_DO_IS_LOAD_MISSING_ACTIVITY,
     IronSourceError.ERROR_DO_BN_LOAD_MISSING_ACTIVITY -> BidonError.NoContextFound
 
-    else -> DemandError.Unspecified(IronSourceDemandId)
+    else -> BidonError.Unspecified(IronSourceDemandId)
 }

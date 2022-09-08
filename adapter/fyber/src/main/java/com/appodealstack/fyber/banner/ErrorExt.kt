@@ -1,17 +1,16 @@
 package com.appodealstack.fyber.banner
 
 import com.appodealstack.bidon.domain.common.BidonError
-import com.appodealstack.bidon.domain.common.DemandError
 import com.appodealstack.fyber.FairBidDemandId
 import com.fyber.fairbid.ads.RequestFailure
 
 internal fun RequestFailure?.asDemandError(): BidonError = when (this) {
     RequestFailure.TIMEOUT -> BidonError.NetworkError(FairBidDemandId)
     RequestFailure.NO_FILL -> BidonError.NoFill(FairBidDemandId)
-    RequestFailure.BAD_CREDENTIALS -> DemandError.BadCredential(FairBidDemandId)
+    RequestFailure.BAD_CREDENTIALS -> BidonError.Unspecified(FairBidDemandId)
     RequestFailure.REMOTE_ERROR,
     RequestFailure.NETWORK_ERROR -> BidonError.NetworkError(FairBidDemandId)
-    RequestFailure.UNAVAILABLE -> DemandError.Expired(FairBidDemandId)
+    RequestFailure.UNAVAILABLE -> BidonError.Expired(FairBidDemandId)
     RequestFailure.ADAPTER_NOT_STARTED,
     RequestFailure.CANCELED,
     RequestFailure.NOT_YET_REQUESTED,

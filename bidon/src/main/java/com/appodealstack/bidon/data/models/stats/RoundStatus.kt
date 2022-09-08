@@ -1,7 +1,6 @@
 package com.appodealstack.bidon.data.models.stats
 
 import com.appodealstack.bidon.domain.common.BidonError
-import com.appodealstack.bidon.domain.common.DemandError
 
 /**
  * @see https://appodeal.atlassian.net/wiki/spaces/SX/pages/4490264831/SDK+Server+Schema#SDK%3C%3EServerSchema-StatsRequest
@@ -33,22 +32,13 @@ fun Throwable.asRoundStatus() = when (this as? BidonError) {
     is BidonError.NetworkError -> RoundStatus.NetworkError
     BidonError.NoAppropriateAdUnitId -> RoundStatus.NoAppropriateAdUnitId
     is BidonError.NoFill -> RoundStatus.NoFill
+    is BidonError.NoBid -> RoundStatus.NoBid
 
     BidonError.FullscreenAdNotReady,
     BidonError.NoAuctionResults,
     BidonError.NoContextFound,
     BidonError.NoRoundResults,
+    is BidonError.Expired,
     is BidonError.Unspecified,
-    is DemandError.AdLoadFailed,
-    is DemandError.BadCredential,
-    is DemandError.BannerSizeNotSupported,
-    is DemandError.Expired,
-    is DemandError.FullscreenAdAlreadyShowing,
-    is DemandError.FullscreenAdNotReady,
-    is DemandError.NetworkError,
-    is DemandError.NetworkTimeout,
-    is DemandError.NoActivity,
-    is DemandError.NoPlacement,
-    is DemandError.Unspecified,
     null -> null
 } ?: RoundStatus.UnspecifiedException

@@ -4,12 +4,11 @@ import com.applovin.mediation.MaxError
 import com.applovin.mediation.MaxErrorCode
 import com.appodealstack.applovin.ApplovinDemandId
 import com.appodealstack.bidon.domain.common.BidonError
-import com.appodealstack.bidon.domain.common.DemandError
 
 internal fun MaxError.asBidonError(): BidonError = when (this.code) {
     MaxErrorCode.UNSPECIFIED -> BidonError.Unspecified(ApplovinDemandId)
     MaxErrorCode.NO_FILL -> BidonError.NoFill(ApplovinDemandId)
-    MaxErrorCode.AD_LOAD_FAILED -> DemandError.AdLoadFailed(ApplovinDemandId)
+    MaxErrorCode.AD_LOAD_FAILED -> BidonError.NoBid(ApplovinDemandId)
     MaxErrorCode.NO_NETWORK,
     MaxErrorCode.NETWORK_ERROR -> BidonError.NetworkError(ApplovinDemandId)
     MaxErrorCode.NETWORK_TIMEOUT -> BidonError.NetworkError(ApplovinDemandId)

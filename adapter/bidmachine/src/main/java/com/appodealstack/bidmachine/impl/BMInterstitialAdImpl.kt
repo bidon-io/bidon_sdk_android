@@ -88,7 +88,7 @@ internal class BMInterstitialAdImpl(
                     ecpm = null,
                     roundStatus = RoundStatus.NoBid,
                 )
-                adState.tryEmit(AdState.LoadFailed(DemandError.Expired(demandId)))
+                adState.tryEmit(AdState.LoadFailed(BidonError.Expired(demandId)))
             }
         }
     }
@@ -178,7 +178,7 @@ internal class BMInterstitialAdImpl(
         markFillStarted()
         val context = context
         if (context == null) {
-            adState.tryEmit(AdState.LoadFailed(DemandError.NoActivity(demandId)))
+            adState.tryEmit(AdState.LoadFailed(BidonError.NoContextFound))
         } else {
             val bmInterstitialAd = InterstitialAd(context).also {
                 interstitialAd = it
