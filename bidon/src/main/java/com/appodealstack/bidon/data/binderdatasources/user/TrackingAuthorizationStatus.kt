@@ -1,8 +1,8 @@
 package com.appodealstack.bidon.data.binderdatasources.user
 
-internal enum class TrackingAuthorizationStatus(val code: Int) {
-    // NotDetermined(0), iOS Specific
-    Restricted(1),
-    Denied(2),
-    Authorized(3),
+internal enum class TrackingAuthorizationStatus(val code: String) {
+    // NotDetermined("NOT_DETERMINED"), iOS Specific
+    Restricted("RESTRICTED"),
+    Denied("DENIED"),
+    Authorized("AUTHORIZED"),
 }

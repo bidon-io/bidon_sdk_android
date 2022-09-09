@@ -4,7 +4,6 @@ import android.app.Activity
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import com.appodealstack.bidon.domain.common.AdType
-import com.appodealstack.bidon.domain.common.AutoRefresh
 import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.fyber.banner.BNFyberBannerOption.Position
 import com.fyber.fairbid.ads.Banner
@@ -29,7 +28,6 @@ class FyberBannerImpl : FyberBanner {
     private val bannerViews = mutableMapOf<String, ViewGroup>()
     private val positions = mutableMapOf<String, Position>()
     private var fyberBannerListener: FyberBannerListener? = null
-    private var autoRefresh: AutoRefresh = AutoRefresh.On(timeoutMs = 12)
 
     override fun setBannerListener(fyberBannerListener: FyberBannerListener) {
         this.fyberBannerListener = fyberBannerListener
@@ -69,21 +67,16 @@ class FyberBannerImpl : FyberBanner {
     }
 
     override fun startAutoRefresh(placementId: String) {
-        if (autoRefresh == AutoRefresh.Off) {
-            autoRefresh = AutoRefresh.On(123)
-        }
         val demandAd = getDemandAd(placementId)
     }
 
     override fun stopAutoRefresh(placementId: String) {
         val demandAd = getDemandAd(placementId)
-        autoRefresh = AutoRefresh.Off
     }
 
     override fun setAutoRefreshTimeout(placementId: String, timeoutMs: Long) {
         if (timeoutMs < 0) return
         val demandAd = getDemandAd(placementId)
-        autoRefresh = if (timeoutMs == 0L) AutoRefresh.Off else AutoRefresh.On(timeoutMs)
     }
 
     private fun getDemandAd(placementId: String) = ads.getOrPut(placementId) {

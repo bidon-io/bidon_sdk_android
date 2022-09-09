@@ -8,7 +8,7 @@ data class User(
     @SerialName("idfa")
     var platformAdvertisingId: String, // idfa = iOS, AD_ID - Android.
     @SerialName("tracking_authorization_status")
-    var trackingAuthorizationStatus: Int,
+    var trackingAuthorizationStatus: String,
     @SerialName("idg")
     var applicationId: String?, // ID that app generates on the very first launch and send across session.
     @SerialName("consent")

@@ -5,24 +5,24 @@ import com.appodealstack.bidon.domain.common.BidonError
 /**
  * @see https://appodeal.atlassian.net/wiki/spaces/SX/pages/4490264831/SDK+Server+Schema#SDK%3C%3EServerSchema-StatsRequest
  */
-enum class RoundStatus(val code: Int) {
-    Win(1),
-    Loss(2),
-    NoBid(3),
-    NoFill(4), // for Admob only NoBid possible
-    UnknownAdapter(5),
-    AdapterNotInitialized(6),
-    BidTimeoutReached(7),
-    FillTimeoutReached(8),
-    NetworkError(9),
-    IncorrectAdUnitId(10),
-    NoAppropriateAdUnitId(11),
-    AuctionCancelled(12),
-    AdFormatNotSupported(13),
-    UnspecifiedException(14),
-    BelowPricefloor(15),
+enum class RoundStatus(val code: String) {
+    Win("WIN"),
+    Loss("LOSE"),
+    NoBid("NO_BID"),
+    NoFill("NO_FILL"), // for Admob only NoBid possible
+    UnknownAdapter("UNKNOWN_ADAPTER"),
+    AdapterNotInitialized("ADAPTER_NOT_INITIALIZED"),
+    BidTimeoutReached("BID_TIMEOUT_REACHED"),
+    FillTimeoutReached("FILL_TIMEOUT_REACHED"),
+    NetworkError("NETWORK_ERROR"),
+    IncorrectAdUnitId("INCORRECT_AD_UNIT"),
+    NoAppropriateAdUnitId("NO_APPROPRIATE_AD_UNIT_ID"),
+    AuctionCancelled("AUCTION_CANCELLED"),
+    AdFormatNotSupported("AD_FORMAT_NOT_SUPPORTED"),
+    UnspecifiedException("UNSPECIFIED_EXCEPTION"),
+    BelowPricefloor("BELOW_PRICEFLOOR"),
 
-    Successful(-1), // Internal status
+    Successful("INTERNAL_STATUS"), // Internal status
 }
 
 fun Throwable.asRoundStatus() = when (this as? BidonError) {

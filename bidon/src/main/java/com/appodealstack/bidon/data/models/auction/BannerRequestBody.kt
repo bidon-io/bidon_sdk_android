@@ -6,12 +6,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BannerRequestBody(
     @SerialName("format")
-    val formatCode: Int,
+    val formatCode: String,
 ) {
-    enum class Format(val code: Int) {
-        Banner320x50(0),
-        LeaderBoard728x90(1),
-        MRec300x250(2),
-        AdaptiveBanner320x50(3),
+    enum class Format(val code: String) {
+        Banner320x50("BANNER"),
+        LeaderBoard728x90("LEADERBOARD"),
+        MRec300x250("MREC"),
+        AdaptiveBanner320x50("ADAPTIVE"),
     }
 }

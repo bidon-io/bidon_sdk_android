@@ -37,5 +37,5 @@ data class Device(
     @SerialName("mccmnc")
     val mccmnc: String?,
     @SerialName("connection_type")
-    val connectionType: Int?,
+    val connectionType: String?,
 )

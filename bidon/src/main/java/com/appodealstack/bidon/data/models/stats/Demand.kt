@@ -10,7 +10,7 @@ data class Demand(
     @SerialName("ad_unit_id")
     val adUnitId: String?,
     @SerialName("status")
-    val roundStatusCode: Int,
+    val roundStatusCode: String,
     @SerialName("ecpm")
     val ecpm: Double?,
     @SerialName("bid_start_ts")

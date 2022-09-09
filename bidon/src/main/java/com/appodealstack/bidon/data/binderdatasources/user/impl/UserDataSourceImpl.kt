@@ -11,7 +11,7 @@ internal class UserDataSourceImpl(
     private val advertisingData: AdvertisingData,
 ) : UserDataSource {
 
-    override fun getTrackingAuthorizationStatus(): Int {
+    override fun getTrackingAuthorizationStatus(): String {
         val limited = when (val data = advertisingData.advertisingProfile) {
             is AdvertisingProfile.Amazon -> data.isLimitAdTrackingEnabled
             is AdvertisingProfile.Google -> data.isLimitAdTrackingEnabled

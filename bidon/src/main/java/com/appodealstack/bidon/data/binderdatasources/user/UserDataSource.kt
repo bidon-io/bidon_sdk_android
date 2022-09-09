@@ -3,7 +3,7 @@ package com.appodealstack.bidon.data.binderdatasources.user
 import com.appodealstack.bidon.data.binderdatasources.DataSource
 
 internal interface UserDataSource : DataSource {
-    fun getTrackingAuthorizationStatus(): Int
+    fun getTrackingAuthorizationStatus(): String
     fun getApplicationId(): String
     /**
      * @return Identifier for Advertisers. If it's not available by restrictions will return default

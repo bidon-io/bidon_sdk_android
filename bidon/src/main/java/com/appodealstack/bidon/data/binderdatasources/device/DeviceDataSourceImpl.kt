@@ -24,15 +24,15 @@ internal class DeviceDataSourceImpl(
         context.resources.displayMetrics
     }
 
-    enum class ConnectionType(val code: Int) {
-        Invalid(0),
-        Ethernet(1),
-        WiFI(2),
-        CellularUnknown(3),
-        Cellular2G(4),
-        Cellular3G(5),
-        Cellular4G(6),
-        Cellular5G(7),
+    enum class ConnectionType(val code: String) {
+        Invalid("INVALID"),
+        Ethernet("ETHERNET"),
+        WiFI("WIFI"),
+        CellularUnknown("CELLULAR"),
+        Cellular2G("CELLULAR_2G"),
+        Cellular3G("CELLULAR_3G"),
+        Cellular4G("CELLULAR_4G"),
+        Cellular5G("CELLULAR_5G"),
     }
 
     override fun getUserAgent(): String {
@@ -92,7 +92,7 @@ internal class DeviceDataSourceImpl(
         return null
     }
 
-    override fun getConnectionTypeCode(): Int {
+    override fun getConnectionTypeCode(): String {
         return getConnectionType(context).code
     }
 
