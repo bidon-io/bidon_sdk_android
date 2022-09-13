@@ -24,6 +24,7 @@ internal class StatsRequestUseCaseImpl(
         DataBinderType.Geo,
         DataBinderType.Session,
         DataBinderType.User,
+        DataBinderType.Segment,
     )
 
     override suspend operator fun invoke(

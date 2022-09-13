@@ -8,5 +8,6 @@ internal enum class DataBinderType {
     User,
     Token,
     Placement, // - not ready to use
-    AvailableAdapters
+    AvailableAdapters,
+    Segment
 }

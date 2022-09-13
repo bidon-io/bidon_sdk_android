@@ -1,5 +1,6 @@
 package com.appodealstack.bidon.data.networking.requests
 
+import com.appodealstack.bidon.data.binderdatasources.segment.SegmentDataSource
 import com.appodealstack.bidon.data.json.BidonJson
 import com.appodealstack.bidon.data.models.config.ConfigRequestBody
 import com.appodealstack.bidon.data.models.config.ConfigResponse
@@ -11,7 +12,8 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 
 internal class GetConfigRequestUseCaseImpl(
-    private val createRequestBody: CreateRequestBodyUseCase
+    private val createRequestBody: CreateRequestBodyUseCase,
+    private val segmentDataSource: SegmentDataSource,
 ) : GetConfigRequestUseCase {
     private val binders: List<DataBinderType> = listOf(
         DataBinderType.Device,
@@ -38,7 +40,11 @@ internal class GetConfigRequestUseCaseImpl(
         return get<JsonHttpRequest>().invoke(
             path = ConfigRequestPath,
             body = requestBody,
-        ).map { jsonResponse ->
+        ).mapCatching { jsonResponse ->
+            /**
+             * Save "segment_id"
+             */
+            segmentDataSource.saveSegmentId(segmentId = jsonResponse["segment_id"]?.toString())
             val config = jsonResponse.getValue("init")
             BidonJson.decodeFromJsonElement(ConfigResponse.serializer(), config)
         }

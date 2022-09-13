@@ -26,6 +26,7 @@ internal class GetAuctionRequestUseCaseImpl(
         DataBinderType.Geo,
         DataBinderType.Session,
         DataBinderType.User,
+        DataBinderType.Segment,
     )
 
     override suspend fun request(

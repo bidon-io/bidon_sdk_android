@@ -1,14 +1,6 @@
 package com.appodealstack.bidon.data.binderdatasources
 
-import com.appodealstack.bidon.domain.databinders.AdaptersBinder
-import com.appodealstack.bidon.domain.databinders.AppBinder
-import com.appodealstack.bidon.domain.databinders.DataBinderType
-import com.appodealstack.bidon.domain.databinders.DeviceBinder
-import com.appodealstack.bidon.domain.databinders.GeoBinder
-import com.appodealstack.bidon.domain.databinders.PlacementBinder
-import com.appodealstack.bidon.domain.databinders.SessionBinder
-import com.appodealstack.bidon.domain.databinders.TokenBinder
-import com.appodealstack.bidon.domain.databinders.UserBinder
+import com.appodealstack.bidon.domain.databinders.*
 import kotlinx.serialization.json.JsonElement
 
 internal class DataProviderImpl(
@@ -19,7 +11,8 @@ internal class DataProviderImpl(
     private val userBinder: UserBinder,
     private val tokenBinder: TokenBinder,
     private val placementBinder: PlacementBinder,
-    private val adaptersBinder: AdaptersBinder
+    private val adaptersBinder: AdaptersBinder,
+    private val segmentBinder: SegmentBinder,
 ) : DataProvider {
 
     override suspend fun provide(dataBinders: List<DataBinderType>): Map<String, JsonElement> {
@@ -33,6 +26,7 @@ internal class DataProviderImpl(
                 DataBinderType.Token -> tokenBinder
                 DataBinderType.Placement -> placementBinder
                 DataBinderType.AvailableAdapters -> adaptersBinder
+                DataBinderType.Segment -> segmentBinder
             }
             binder.fieldName to binder.getJsonElement()
         }

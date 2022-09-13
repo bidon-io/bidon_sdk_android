@@ -13,6 +13,8 @@ import com.appodealstack.bidon.data.binderdatasources.location.LocationDataSourc
 import com.appodealstack.bidon.data.binderdatasources.location.LocationDataSourceImpl
 import com.appodealstack.bidon.data.binderdatasources.placement.PlacementDataSource
 import com.appodealstack.bidon.data.binderdatasources.placement.PlacementDataSourceImpl
+import com.appodealstack.bidon.data.binderdatasources.segment.SegmentDataSource
+import com.appodealstack.bidon.data.binderdatasources.segment.SegmentDataSourceImpl
 import com.appodealstack.bidon.data.binderdatasources.session.SessionDataSource
 import com.appodealstack.bidon.data.binderdatasources.session.SessionDataSourceImpl
 import com.appodealstack.bidon.data.binderdatasources.session.SessionTracker
@@ -117,6 +119,9 @@ object DI {
                 }
                 singleton<NetworkStateObserver> { NetworkStateObserverImpl() }
 
+                // [SegmentDataSource] should be singleton per session
+                singleton<SegmentDataSource> { SegmentDataSourceImpl() }
+
                 /**
                  * Factories
                  */
@@ -164,6 +169,7 @@ object DI {
                 factory<GetConfigRequestUseCase> {
                     GetConfigRequestUseCaseImpl(
                         createRequestBody = get(),
+                        segmentDataSource = get()
                     )
                 }
                 factory<GetAuctionRequestUseCase> {
@@ -190,6 +196,7 @@ object DI {
                 factory<AppDataSource> { AppDataSourceImpl(context = get(), keyValueStorage = get()) }
                 factory<DeviceDataSource> { DeviceDataSourceImpl(context = get()) }
                 factory<TokenDataSource> { TokenDataSourceImpl(keyValueStorage = get()) }
+
                 factory<UserDataSource> {
                     UserDataSourceImpl(
                         keyValueStorage = get(),
@@ -212,7 +219,8 @@ object DI {
                         tokenBinder = TokenBinder(dataSource = get()),
                         userBinder = UserBinder(dataSource = get()),
                         placementBinder = PlacementBinder(dataSource = get()),
-                        adaptersBinder = AdaptersBinder(adaptersSource = get())
+                        adaptersBinder = AdaptersBinder(adaptersSource = get()),
+                        segmentBinder = SegmentBinder(dataSource = get()),
                     )
                 }
             }
