@@ -40,15 +40,15 @@ internal class SendImpressionRequestUseCaseImpl(
         logInfo(Tag, "Request body: $requestBody")
 
         get<JsonHttpRequest>().invoke(
-            path = urlPath,
-            body = requestBody,
-        ).map { jsonResponse ->
-            BidonJson.decodeFromJsonElement(BaseResponse.serializer(), jsonResponse)
-        }.onFailure {
-            logError(Tag, "Error while sending impression $urlPath", it)
-        }.onSuccess {
-            logInfo(Tag, "Impression $urlPath was sent successfully")
-        }
+                path = urlPath,
+                body = requestBody,
+            ).map { jsonResponse ->
+                BidonJson.decodeFromJsonElement(BaseResponse.serializer(), jsonResponse)
+            }.onFailure {
+                logError(Tag, "Error while sending impression $urlPath", it)
+            }.onSuccess {
+                logInfo(Tag, "Impression $urlPath was sent successfully")
+            }
     }
 }
 

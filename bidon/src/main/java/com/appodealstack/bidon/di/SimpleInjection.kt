@@ -11,10 +11,10 @@ internal inline fun <reified T : Any> get(): T = SimpleInjection.getInstance()
 
 /**
  * val instanceSomeClass = get<SomeClass> {
- *    params(someParamToSomeClass)
+ *    params(someParam1ToSomeClass, someParam2ToSomeClass)
  * }
  */
-internal inline fun <reified T : Any> get(params: ScopeParams.() -> Unit): T = SimpleInjection.getInstance(params)
+internal inline fun <reified T : Any> get(params: FactoryParams.() -> Unit): T = SimpleInjection.getInstance(params)
 
 /**
  * val instanceSomeClass by inject<SomeClass>()
@@ -36,56 +36,61 @@ internal fun registerDependencyInjection(module: Scope.() -> Unit) {
 
 internal object SimpleInjection {
 
-    private val factories = mutableMapOf<KClass<*>, Factory>()
-    private val paramFactories = mutableMapOf<KClass<*>, ParamFactory>()
-    private val singletons = mutableMapOf<KClass<*>, Singleton>()
+    private val factories = mutableMapOf<KClass<*>, Factory<*>>()
+    private val paramFactories = mutableMapOf<KClass<*>, ParamFactory<*>>()
+    private val singletons = mutableMapOf<KClass<*>, Singleton<*>>()
 
-    inline fun <reified T : Any> addFactory(noinline factory: () -> T) {
-        factories[T::class] = Factory(factory)
+    inline fun <reified T : Any> addFactory(factory: Factory<T>) {
+        factories[T::class] = factory
     }
 
-    inline fun <reified T : Any> addFactoryWithParams(noinline factory: (Any) -> T) {
-        paramFactories[T::class] = ParamFactory(factory)
+    inline fun <reified T : Any> addFactoryWithParams(factory: ParamFactory<T>) {
+        paramFactories[T::class] = factory
     }
 
-    inline fun <reified T : Any> addSingleton(noinline factory: () -> T) {
-        singletons[T::class] = Singleton(factory)
+    inline fun <reified T : Any> addSingleton(singleton: Factory<T>) {
+        singletons[T::class] = Singleton(singleton)
     }
 
     inline fun <reified T : Any> getInstance(): T {
-        val instance = (factories[T::class]?.factory?.invoke() as? T)
-            ?: (singletons[T::class]?.instance as? T)
+        val instance = (factories[T::class]?.invoke() as? T) ?: (singletons[T::class]?.instance as? T)
         return requireNotNull(instance) {
-            "No instance Singleton/Factory provided for class: ${T::class.java}"
+            "No factory provided for class: ${T::class.java}"
         }
     }
 
-    inline fun <reified T : Any> getInstance(parameters: ScopeParams.() -> Unit): T {
-        val scopeParams = ScopeParams().apply(parameters).getParameters()
-        val instance = (paramFactories[T::class]?.factory?.invoke(scopeParams) as? T)
+    inline fun <reified T : Any> getInstance(parameters: FactoryParams.() -> Unit): T {
+        val factoryParams = FactoryParams().apply(parameters).getParameters()
+        val instance = (paramFactories[T::class]?.invoke(*factoryParams) as? T)
         return requireNotNull(instance) {
-            "No instance Singleton/Factory provided for class: ${T::class.java}"
+            "No factory provided for class: ${T::class.java}"
         }
     }
 
-    internal class Factory(val factory: () -> Any)
-    internal class ParamFactory(val factory: (Any) -> Any)
-    internal class Singleton(private val factory: () -> Any) {
-        val instance: Any by lazy {
+    internal fun interface Factory<T> {
+        operator fun invoke(): T
+    }
+
+    internal fun interface ParamFactory<T> {
+        operator fun invoke(vararg params: Any): T
+    }
+
+    internal class Singleton<T>(private val factory: Factory<T>) {
+        val instance: T by lazy {
             factory()
         }
     }
 
     internal class Scope {
-        inline fun <reified T : Any> factory(noinline factory: () -> T) {
+        inline fun <reified T : Any> factory(factory: Factory<T>) {
             addFactory(factory)
         }
 
-        inline fun <reified T : Any> factoryWithParams(noinline factory: (Any) -> T) {
+        inline fun <reified T : Any> factoryWithParams(factory: ParamFactory<T>) {
             addFactoryWithParams(factory)
         }
 
-        inline fun <reified T : Any> singleton(noinline singleton: () -> T) {
+        inline fun <reified T : Any> singleton(singleton: Factory<T>) {
             addSingleton(singleton)
         }
     }

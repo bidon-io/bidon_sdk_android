@@ -41,7 +41,7 @@ internal class RewardedImpl(
     private var userListener: RewardedListener? = null
     private var observeCallbacksJob: Job? = null
     private val auctionHolder: AuctionHolder by lazy {
-        get { params(demandAd to listener) }
+        get { params(demandAd, listener) }
     }
 
     private val listener by lazy {

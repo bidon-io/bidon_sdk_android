@@ -44,7 +44,9 @@ internal class InterstitialAdImpl(
     private var userListener: InterstitialListener? = null
     private var observeCallbacksJob: Job? = null
     private val auctionHolder: AuctionHolder by lazy {
-        get { params(demandAd to listener) }
+        get {
+            params(demandAd, listener)
+        }
     }
 
     private val listener by lazy {

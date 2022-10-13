@@ -92,12 +92,9 @@ object DI {
                     )
                 }
                 singleton<PauseResumeObserver> {
-                    @Suppress("UNCHECKED_CAST")
-                    (
-                        PauseResumeObserverImpl(
-                            application = get<Context>() as Application
-                        )
-                        )
+                    PauseResumeObserverImpl(
+                        application = get<Context>() as Application
+                    )
                 }
                 singleton<AdvertisingData> {
                     AdvertisingDataImpl(
@@ -146,18 +143,16 @@ object DI {
                         statsRequest = get(),
                     )
                 }
-                factoryWithParams { param ->
+                factoryWithParams { (param) ->
                     CountDownTimer(
                         activityLifecycleObserver = param as ActivityLifecycleObserver
                     )
                 }
 
-                @Suppress("UNCHECKED_CAST")
-                factoryWithParams<AuctionHolder> { param ->
-                    val (demandAd, listener) = param as Pair<DemandAd, RoundsListener>
+                factoryWithParams<AuctionHolder> { (demandAd, listener) ->
                     AuctionHolderImpl(
-                        demandAd = demandAd,
-                        roundsListener = listener
+                        demandAd = demandAd as DemandAd,
+                        roundsListener = listener as RoundsListener
                     )
                 }
                 factory<GetOrientationUseCase> { GetOrientationUseCaseImpl(context = get()) }
