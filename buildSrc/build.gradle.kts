@@ -10,14 +10,13 @@ repositories {
 }
 
 dependencies {
-    val kotlinVersion = "1.7.10"
-    implementation("com.android.tools.build:gradle:7.2.2")
-    implementation("com.android.tools.build:gradle-api:7.2.2")
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+    implementation("com.android.tools.build:gradle:7.4.0")
+    implementation("com.android.tools.build:gradle-api:7.4.1")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10")
     implementation(kotlin("serialization"))
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }

@@ -59,16 +59,13 @@ import com.appodealstack.bidon.view.helper.PauseResumeObserver
 import com.appodealstack.bidon.view.helper.impl.ActivityLifecycleObserver
 import com.appodealstack.bidon.view.helper.impl.GetOrientationUseCaseImpl
 import com.appodealstack.bidon.view.helper.impl.PauseResumeObserverImpl
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Dependency Injection
  */
 object DI {
-    private val isInitialized = AtomicBoolean(false)
-
     fun init(context: Context) {
-        registerDependencyInjection {
+        module {
             singleton<Context> { context.applicationContext }
         }
     }
@@ -76,148 +73,146 @@ object DI {
     /**
      * Initializing Dependency Injection module
      */
-    fun initDependencyInjection() {
-        if (!isInitialized.getAndSet(true)) {
-            registerDependencyInjection {
-                /**
-                 * Singletons
-                 */
-                singleton<BidOnSdk> { BidOnSdkImpl() }
+    fun setFactories() {
+        module {
+            /**
+             * Singletons
+             */
+            singleton<BidOnSdk> { BidOnSdkImpl() }
 
-                singleton<AdaptersSource> { AdaptersSourceImpl() }
-                singleton<BidOnEndpoints> { BidOnEndpointsImpl() }
-                singleton<KeyValueStorage> {
-                    KeyValueStorageImpl(
-                        context = get()
-                    )
-                }
-                singleton<PauseResumeObserver> {
-                    PauseResumeObserverImpl(
-                        application = get<Context>() as Application
-                    )
-                }
-                singleton<AdvertisingData> {
-                    AdvertisingDataImpl(
-                        context = get()
-                    )
-                }
-                singleton<LocationDataSource> { LocationDataSourceImpl(context = get()) }
-                singleton<SessionDataSource> {
-                    SessionDataSourceImpl(
-                        context = get(),
-                        sessionTracker = get()
-                    )
-                }
-                singleton<SessionTracker> {
-                    SessionTrackerImpl(
-                        context = get(),
-                        pauseResumeObserver = get()
-                    )
-                }
-                singleton<NetworkStateObserver> { NetworkStateObserverImpl() }
+            singleton<AdaptersSource> { AdaptersSourceImpl() }
+            singleton<BidOnEndpoints> { BidOnEndpointsImpl() }
+            singleton<KeyValueStorage> {
+                KeyValueStorageImpl(
+                    context = get()
+                )
+            }
+            singleton<PauseResumeObserver> {
+                PauseResumeObserverImpl(
+                    application = get<Context>() as Application
+                )
+            }
+            singleton<AdvertisingData> {
+                AdvertisingDataImpl(
+                    context = get()
+                )
+            }
+            singleton<LocationDataSource> { LocationDataSourceImpl(context = get()) }
+            singleton<SessionDataSource> {
+                SessionDataSourceImpl(
+                    context = get(),
+                    sessionTracker = get()
+                )
+            }
+            singleton<SessionTracker> {
+                SessionTrackerImpl(
+                    context = get(),
+                    pauseResumeObserver = get()
+                )
+            }
+            singleton<NetworkStateObserver> { NetworkStateObserverImpl() }
 
-                // [SegmentDataSource] should be singleton per session
-                singleton<SegmentDataSource> { SegmentDataSourceImpl() }
+            // [SegmentDataSource] should be singleton per session
+            singleton<SegmentDataSource> { SegmentDataSourceImpl() }
 
-                /**
-                 * Factories
-                 */
-                factory<BidOnInitializer> {
-                    BidOnInitializerImpl(
-                        initAndRegisterAdapters = get(),
-                        getConfigRequest = get(),
-                        adapterInstanceCreator = get(),
-                        keyValueStorage = get(),
-                    )
-                }
-                factory<InitAndRegisterAdaptersUseCase> {
-                    InitAndRegisterAdaptersUseCaseImpl(
-                        adaptersSource = get()
-                    )
-                }
-                factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
-                factory<Auction> {
-                    AuctionImpl(
-                        adaptersSource = get(),
-                        getAuctionRequest = get(),
-                        statsRequest = get(),
-                    )
-                }
-                factoryWithParams { (param) ->
-                    CountDownTimer(
-                        activityLifecycleObserver = param as ActivityLifecycleObserver
-                    )
-                }
+            /**
+             * Factories
+             */
+            factory<BidOnInitializer> {
+                BidOnInitializerImpl(
+                    initAndRegisterAdapters = get(),
+                    getConfigRequest = get(),
+                    adapterInstanceCreator = get(),
+                    keyValueStorage = get(),
+                )
+            }
+            factory<InitAndRegisterAdaptersUseCase> {
+                InitAndRegisterAdaptersUseCaseImpl(
+                    adaptersSource = get()
+                )
+            }
+            factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
+            factory<Auction> {
+                AuctionImpl(
+                    adaptersSource = get(),
+                    getAuctionRequest = get(),
+                    statsRequest = get(),
+                )
+            }
+            factoryWithParams { (param) ->
+                CountDownTimer(
+                    activityLifecycleObserver = param as ActivityLifecycleObserver
+                )
+            }
 
-                factoryWithParams<AuctionHolder> { (demandAd, listener) ->
-                    AuctionHolderImpl(
-                        demandAd = demandAd as DemandAd,
-                        roundsListener = listener as RoundsListener
-                    )
-                }
-                factory<GetOrientationUseCase> { GetOrientationUseCaseImpl(context = get()) }
-                factory { JsonHttpRequest(keyValueStorage = get()) }
+            factoryWithParams<AuctionHolder> { (demandAd, listener) ->
+                AuctionHolderImpl(
+                    demandAd = demandAd as DemandAd,
+                    roundsListener = listener as RoundsListener
+                )
+            }
+            factory<GetOrientationUseCase> { GetOrientationUseCaseImpl(context = get()) }
+            factory { JsonHttpRequest(keyValueStorage = get()) }
 
-                /**
-                 * Requests
-                 */
-                factory<GetConfigRequestUseCase> {
-                    GetConfigRequestUseCaseImpl(
-                        createRequestBody = get(),
-                        segmentDataSource = get()
-                    )
-                }
-                factory<GetAuctionRequestUseCase> {
-                    GetAuctionRequestUseCaseImpl(
-                        createRequestBody = get(),
-                        getOrientation = get()
-                    )
-                }
-                factory<StatsRequestUseCase> {
-                    StatsRequestUseCaseImpl(
-                        createRequestBody = get(),
-                    )
-                }
-                factory<SendImpressionRequestUseCase> {
-                    SendImpressionRequestUseCaseImpl(
-                        createRequestBody = get(),
-                    )
-                }
+            /**
+             * Requests
+             */
+            factory<GetConfigRequestUseCase> {
+                GetConfigRequestUseCaseImpl(
+                    createRequestBody = get(),
+                    segmentDataSource = get()
+                )
+            }
+            factory<GetAuctionRequestUseCase> {
+                GetAuctionRequestUseCaseImpl(
+                    createRequestBody = get(),
+                    getOrientation = get()
+                )
+            }
+            factory<StatsRequestUseCase> {
+                StatsRequestUseCaseImpl(
+                    createRequestBody = get(),
+                )
+            }
+            factory<SendImpressionRequestUseCase> {
+                SendImpressionRequestUseCaseImpl(
+                    createRequestBody = get(),
+                )
+            }
 
-                /**
-                 * Binders
-                 */
+            /**
+             * Binders
+             */
 
-                factory<AppDataSource> { AppDataSourceImpl(context = get(), keyValueStorage = get()) }
-                factory<DeviceDataSource> { DeviceDataSourceImpl(context = get()) }
-                factory<TokenDataSource> { TokenDataSourceImpl(keyValueStorage = get()) }
+            factory<AppDataSource> { AppDataSourceImpl(context = get(), keyValueStorage = get()) }
+            factory<DeviceDataSource> { DeviceDataSourceImpl(context = get()) }
+            factory<TokenDataSource> { TokenDataSourceImpl(keyValueStorage = get()) }
 
-                factory<UserDataSource> {
-                    UserDataSourceImpl(
-                        keyValueStorage = get(),
-                        advertisingData = get()
-                    )
-                }
-                factory<PlacementDataSource> { PlacementDataSourceImpl() }
-                factory<CreateRequestBodyUseCase> {
-                    CreateRequestBodyUseCaseImpl(
-                        dataProvider = get()
-                    )
-                }
+            factory<UserDataSource> {
+                UserDataSourceImpl(
+                    keyValueStorage = get(),
+                    advertisingData = get()
+                )
+            }
+            factory<PlacementDataSource> { PlacementDataSourceImpl() }
+            factory<CreateRequestBodyUseCase> {
+                CreateRequestBodyUseCaseImpl(
+                    dataProvider = get()
+                )
+            }
 
-                factory<DataProvider> {
-                    DataProviderImpl(
-                        deviceBinder = DeviceBinder(dataSource = get()),
-                        appBinder = AppBinder(dataSource = get()),
-                        geoBinder = GeoBinder(dataSource = get()),
-                        sessionBinder = SessionBinder(dataSource = get()),
-                        tokenBinder = TokenBinder(dataSource = get()),
-                        userBinder = UserBinder(dataSource = get()),
-                        placementBinder = PlacementBinder(dataSource = get()),
-                        adaptersBinder = AdaptersBinder(adaptersSource = get()),
-                        segmentBinder = SegmentBinder(dataSource = get()),
-                    )
-                }
+            factory<DataProvider> {
+                DataProviderImpl(
+                    deviceBinder = DeviceBinder(dataSource = get()),
+                    appBinder = AppBinder(dataSource = get()),
+                    geoBinder = GeoBinder(dataSource = get()),
+                    sessionBinder = SessionBinder(dataSource = get()),
+                    tokenBinder = TokenBinder(dataSource = get()),
+                    userBinder = UserBinder(dataSource = get()),
+                    placementBinder = PlacementBinder(dataSource = get()),
+                    adaptersBinder = AdaptersBinder(adaptersSource = get()),
+                    segmentBinder = SegmentBinder(dataSource = get()),
+                )
             }
         }
     }

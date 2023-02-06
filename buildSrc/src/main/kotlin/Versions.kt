@@ -14,15 +14,15 @@ object Versions {
 object Dependencies {
 
     object SdkAdapter {
-        const val AppsflyerVersion = "6.7.0"
+        const val AppsflyerVersion = "6.9.0"
         const val Appsflyer = "com.appsflyer:af-android-sdk:$AppsflyerVersion"
-        const val AppsflyerAdRevenue = "com.appsflyer:adrevenue:6.5.4"
+        const val AppsflyerAdRevenue = "com.appsflyer:adrevenue:$AppsflyerVersion"
     }
 
     object Library {
-        const val PlayServicesAds = "com.google.android.gms:play-services-ads:21.1.0"
+        const val PlayServicesAds = "com.google.android.gms:play-services-ads:21.5.0"
 
-        private const val ktorVersion = "2.1.0"
+        private const val ktorVersion = "2.2.3"
         const val KtorClientCore = "io.ktor:ktor-client-core:$ktorVersion"
         const val KtorClientOkHttp = "io.ktor:ktor-client-okhttp:$ktorVersion"
         const val KtorClientLogging = "io.ktor:ktor-client-logging:$ktorVersion"
@@ -37,7 +37,7 @@ object Dependencies {
     }
 
     object Accompanist {
-        private const val accompanist = "0.24.13-rc"
+        private const val accompanist = "0.29.1-alpha"
         const val permissions = "com.google.accompanist:accompanist-permissions:$accompanist"
     }
 }
