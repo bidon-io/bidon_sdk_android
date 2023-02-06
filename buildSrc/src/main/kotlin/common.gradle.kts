@@ -37,7 +37,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0-RC")
     implementation("androidx.annotation:annotation:1.4.0")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.10")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.0")
 
     /**
      * Testing

@@ -1,4 +1,9 @@
 # BidOn SDK
+
+Public API
+- Initialization
+- Rewarded load/show
+- Interstitial load/show
   
 ## Decorators
 
