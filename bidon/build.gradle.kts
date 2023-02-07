@@ -7,12 +7,12 @@ plugins {
 
 project.extra.apply {
     this.set("AdapterArtifactId", "bidon-sdk")
-    this.set("AdapterVersionName", Versions.BidONVersionName)
+    this.set("AdapterVersionName", Versions.BidOnVersionName)
 }
 
 android {
     defaultConfig {
-        ADAPTER_VERSION = Versions.BidONVersionName
+        ADAPTER_VERSION = Versions.BidOnVersionName
     }
 }
 

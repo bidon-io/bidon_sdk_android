@@ -51,7 +51,7 @@ internal fun MainScreen(
             MainScreenState.Initializing -> {
                 H5Text(
                     modifier = Modifier.padding(bottom = 40.dp),
-                    text = "BidON"
+                    text = "BidOn"
                 )
                 if (state == MainScreenState.NotInitialized) {
                     AppButton(text = "Init") {

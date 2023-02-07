@@ -6,8 +6,9 @@ import com.appodealstack.bidon.domain.config.DefaultAdapters
 import com.appodealstack.bidon.domain.stats.impl.logError
 import com.appodealstack.bidon.domain.stats.impl.logInfo
 import com.appodealstack.bidon.domain.stats.impl.logInternal
+
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Aleksei Cherniaev on 10/08/2022.
  */
 internal class AdapterInstanceCreatorImpl : AdapterInstanceCreator {
     override fun createAvailableAdapters(): List<Adapter> {

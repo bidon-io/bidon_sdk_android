@@ -2,7 +2,6 @@ package com.appodealstack.bidon.di
 
 import android.app.Application
 import android.content.Context
-import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.data.binderdatasources.DataProvider
 import com.appodealstack.bidon.data.binderdatasources.DataProviderImpl
 import com.appodealstack.bidon.data.binderdatasources.app.AppDataSource
@@ -42,12 +41,9 @@ import com.appodealstack.bidon.domain.auction.impl.AuctionHolderImpl
 import com.appodealstack.bidon.domain.auction.impl.AuctionImpl
 import com.appodealstack.bidon.domain.auction.usecases.GetAuctionRequestUseCase
 import com.appodealstack.bidon.domain.common.DemandAd
-import com.appodealstack.bidon.domain.common.impl.BidOnSdkImpl
 import com.appodealstack.bidon.domain.common.usecases.CountDownTimer
 import com.appodealstack.bidon.domain.config.AdapterInstanceCreator
-import com.appodealstack.bidon.domain.config.BidOnInitializer
 import com.appodealstack.bidon.domain.config.impl.AdapterInstanceCreatorImpl
-import com.appodealstack.bidon.domain.config.impl.BidOnInitializerImpl
 import com.appodealstack.bidon.domain.config.impl.InitAndRegisterAdaptersUseCaseImpl
 import com.appodealstack.bidon.domain.config.usecases.GetConfigRequestUseCase
 import com.appodealstack.bidon.domain.config.usecases.InitAndRegisterAdaptersUseCase
@@ -59,6 +55,7 @@ import com.appodealstack.bidon.view.helper.PauseResumeObserver
 import com.appodealstack.bidon.view.helper.impl.ActivityLifecycleObserver
 import com.appodealstack.bidon.view.helper.impl.GetOrientationUseCaseImpl
 import com.appodealstack.bidon.view.helper.impl.PauseResumeObserverImpl
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  *
@@ -79,8 +76,6 @@ object DI {
             /**
              * Singletons
              */
-            singleton<BidOnSdk> { BidOnSdkImpl() }
-
             singleton<AdaptersSource> { AdaptersSourceImpl() }
             singleton<BidOnEndpoints> { BidOnEndpointsImpl() }
             singleton<KeyValueStorage> {
@@ -119,14 +114,6 @@ object DI {
             /**
              * Factories
              */
-            factory<BidOnInitializer> {
-                BidOnInitializerImpl(
-                    initAndRegisterAdapters = get(),
-                    getConfigRequest = get(),
-                    adapterInstanceCreator = get(),
-                    keyValueStorage = get(),
-                )
-            }
             factory<InitAndRegisterAdaptersUseCase> {
                 InitAndRegisterAdaptersUseCaseImpl(
                     adaptersSource = get()

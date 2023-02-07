@@ -459,7 +459,7 @@ internal class AuctionImpl(
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
         auctionId: String,
-        adapters: List<Adapter>
+        adapters: Set<Adapter>
     ): AuctionResponse {
         val auctionResponse = getAuctionRequest.request(
             placement = demandAd.placement,
