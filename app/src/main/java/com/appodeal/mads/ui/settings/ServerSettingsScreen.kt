@@ -31,7 +31,7 @@ internal fun ServerSettingsScreen(
     val host = remember {
         mutableStateOf(
             when (keyValueStorage.host) {
-                NetworkSettings.BaseBidOnUrl -> Host.Production
+                NetworkSettings.BidOnBaseUrl -> Host.Production
                 MockUrl -> Host.MockServer
                 else -> Host.Production
             }
@@ -70,7 +70,7 @@ internal fun ServerSettingsScreen(
                 .align(Alignment.CenterHorizontally),
             onClick = {
                 keyValueStorage.host = when (host.value) {
-                    Host.Production -> NetworkSettings.BaseBidOnUrl
+                    Host.Production -> NetworkSettings.BidOnBaseUrl
                     Host.MockServer -> MockUrl
                 }
                 navController.popBackStack()
@@ -116,7 +116,7 @@ private fun RenderHosts(hosts: List<Host>, selectedHost: Host, onClick: (Host) -
                     )
                     CaptionText(
                         text = when (host) {
-                            Host.Production -> NetworkSettings.BaseBidOnUrl
+                            Host.Production -> NetworkSettings.BidOnBaseUrl
                             Host.MockServer -> MockUrl
                         },
                         maxLines = 1

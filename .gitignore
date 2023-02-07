@@ -10,4 +10,3 @@ build/
 local.properties
 .safedk/
 github.properties
-/bidon/src/main/java/com/appodealstack/bidon/data/networking/impl/BidOnEndpointsImpl.kt

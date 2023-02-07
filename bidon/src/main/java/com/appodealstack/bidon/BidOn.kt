@@ -48,7 +48,7 @@ interface BidOnBuilder {
     fun setInitializationCallback(initializationCallback: InitializationCallback): BidOnBuilder
 
     /**
-     * Redefine BaseUrl for /action-requests. Default base url [NetworkSettings.BaseBidOnUrl]
+     * Redefine BaseUrl for /action-requests. Default base url [NetworkSettings.BidOnBaseUrl]
      */
     fun setBaseUrl(host: String?): BidOnBuilder
 
