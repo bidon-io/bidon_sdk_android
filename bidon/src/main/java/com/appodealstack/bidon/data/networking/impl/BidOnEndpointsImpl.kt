@@ -8,9 +8,6 @@ import java.security.NoSuchAlgorithmException
 import java.text.SimpleDateFormat
 import java.util.*
 
-/**
- * Created by Aleksei Cherniaev on 06/02/2023.
- */
 internal class BidOnEndpointsImpl : BidOnEndpoints {
     private val hosts: Queue<String> = LinkedList()
     private var defaultEndpoint: String = NetworkSettings.BaseBidOnUrl

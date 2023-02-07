@@ -21,6 +21,7 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
     override suspend operator fun invoke(
         activity: Activity,
         notInitializedAdapters: List<Adapter>,
+        publisherAdapters: List<Adapter>,
         configResponse: ConfigResponse
     ) {
         val timeout = configResponse.initializationTimeout
@@ -61,8 +62,9 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                 }
             }
         }
-        logInfo(Tag, "Registered adapters: ${readyAdapters.joinToString { it::class.java.simpleName }}")
-        adaptersSource.add(readyAdapters)
+        val adapters = readyAdapters + publisherAdapters
+        logInfo(Tag, "Registered adapters: ${adapters.joinToString { it::class.java.simpleName }}")
+        adaptersSource.add(adapters)
     }
 }
 
