@@ -1,14 +1,15 @@
+import org.gradle.api.JavaVersion
+
 plugins {
-    id("com.android.library")
     kotlin("android")
+    id("com.android.library")
     kotlin("plugin.serialization")
 }
 
 android {
-    compileSdk = 33
+    compileSdk = Dependencies.Android.compileSdkVersion
     defaultConfig {
-        minSdk = 21
-        targetSdk = 33
+        minSdk = Dependencies.Android.minSdkVersion
         consumerProguardFiles("consumer-rules.pro")
     }
     buildTypes {
@@ -21,7 +22,7 @@ android {
         }
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -30,14 +31,12 @@ android {
 }
 
 dependencies {
-    implementation(Dependencies.Library.KotlinxCoroutinesCore)
-    implementation(Dependencies.Library.KotlinxCoroutinesAndroid)
-
-    implementation("androidx.core:core-ktx:1.8.0")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0-RC")
-    implementation("androidx.annotation:annotation:1.4.0")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.0")
+    implementation(Dependencies.Kotlin.Coroutines.KotlinxCoroutinesCore)
+    implementation(Dependencies.Kotlin.Coroutines.KotlinxCoroutinesAndroid)
+    implementation(Dependencies.Kotlin.reflect)
+    implementation(Dependencies.Kotlin.Serialization.json)
+    implementation(Dependencies.Android.CoreKtx)
+    implementation(Dependencies.Android.Annotation)
 
     /**
      * Testing

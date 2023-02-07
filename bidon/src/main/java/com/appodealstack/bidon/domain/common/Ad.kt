@@ -1,7 +1,9 @@
 package com.appodealstack.bidon.domain.common
 
 import java.util.*
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 class Ad(
     val demandId: DemandId,
     val demandAd: DemandAd,

@@ -5,7 +5,9 @@ import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import com.appodealstack.bidon.data.models.auction.AdObjectRequestBody.Orientation
 import com.appodealstack.bidon.view.helper.GetOrientationUseCase
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class GetOrientationUseCaseImpl(
     private val context: Context
 ) : GetOrientationUseCase {

@@ -6,8 +6,9 @@ import com.appodealstack.bidon.view.helper.SdkDispatchers
 import com.appodealstack.bidon.view.helper.impl.ActivityLifecycleObserver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
-
 /**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ *
  * Timer stops if Application is in the background, and continues on the foregrounded.
  */
 internal class CountDownTimer(

@@ -28,12 +28,12 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
     buildFeatures {
         compose = true
@@ -55,7 +55,7 @@ dependencies {
     implementation(project(":adapter:bidmachine"))
     implementation(project(":adapter:admob"))
 
-    implementation(Dependencies.Accompanist.permissions)
+    implementation("com.google.accompanist:accompanist-permissions:0.29.1-alpha")
 
     implementation("androidx.multidex:multidex:2.0.1")
     implementation("androidx.core:core-ktx:1.9.0")
@@ -67,16 +67,17 @@ dependencies {
     implementation("androidx.annotation:annotation:1.5.0")
 
     // compose
-    implementation("androidx.compose.runtime:runtime:1.3.3")
-    implementation("androidx.compose.ui:ui:1.3.3")
-    implementation("androidx.compose.ui:ui-tooling:1.3.3")
-    implementation("androidx.compose.foundation:foundation:1.3.1")
-    implementation("androidx.compose.material:material:1.3.1")
-    implementation("androidx.compose.material:material-icons-core:1.3.1")
-    implementation("androidx.compose.material:material-icons-extended:1.3.1")
-    implementation("androidx.activity:activity-compose:1.6.1")
+    val composeVersion = "1.2.1"
+    implementation("androidx.compose.runtime:runtime:$composeVersion")
+    implementation("androidx.compose.ui:ui:$composeVersion")
+    implementation("androidx.compose.ui:ui-tooling:$composeVersion")
+    implementation("androidx.compose.foundation:foundation:$composeVersion")
+    implementation("androidx.compose.material:material:$composeVersion")
+    implementation("androidx.compose.material:material-icons-core:$composeVersion")
+    implementation("androidx.compose.material:material-icons-extended:$composeVersion")
+    implementation("androidx.activity:activity-compose:1.5.1")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha06")
-    implementation("androidx.navigation:navigation-compose:2.5.3")
+    implementation("androidx.navigation:navigation-compose:2.5.1")
     implementation("com.google.accompanist:accompanist-flowlayout:0.23.1")
     // Tests
     testImplementation("junit:junit:4.13.2")

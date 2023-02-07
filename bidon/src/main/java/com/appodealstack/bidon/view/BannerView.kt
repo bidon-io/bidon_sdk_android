@@ -35,7 +35,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 interface BannerAd {
     val placementId: String
 

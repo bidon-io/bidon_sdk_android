@@ -7,9 +7,12 @@ import com.appodealstack.bidon.BidONVersion
 import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.domain.stats.impl.logInternal
 
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class AppDataSourceImpl(
     private val context: Context,
-    private val keyValueStorage: KeyValueStorage
+    private val keyValueStorage: KeyValueStorage,
 ) : AppDataSource {
 
     override fun getVersionCode(): Number? {

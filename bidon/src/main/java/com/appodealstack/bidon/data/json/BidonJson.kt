@@ -4,8 +4,9 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
-
 /**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ *
  * Default Json - kotlinx.serialization encoder/decoder
  */
 @OptIn(ExperimentalSerializationApi::class)

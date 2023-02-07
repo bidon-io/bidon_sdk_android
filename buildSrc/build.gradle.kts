@@ -7,13 +7,14 @@ repositories {
     gradlePluginPortal()
     mavenCentral()
     google()
+    maven(url = "https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    maven(url = "https://plugins.gradle.org/m2/")
 }
 
 dependencies {
-    implementation("com.android.tools.build:gradle:7.4.0")
-    implementation("com.android.tools.build:gradle-api:7.4.1")
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0")
-    implementation(kotlin("serialization"))
+    implementation(GradleDependencies.Android.gradlePlugin)
+    implementation(GradleDependencies.Kotlin.gradlePlugin)
+    implementation(GradleDependencies.Kotlin.Serialization.gradlePlugin)
 }
 
 java {

@@ -13,8 +13,11 @@ import io.ktor.http.*
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class JsonHttpRequest(
-    private val keyValueStorage: KeyValueStorage
+    private val keyValueStorage: KeyValueStorage,
 ) {
     suspend operator fun invoke(
         path: String,

@@ -1,5 +1,8 @@
 package com.appodealstack.bidon.data.networking
 
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 enum class NetworkState {
     Enabled,
     Disabled,

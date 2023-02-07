@@ -59,8 +59,9 @@ import com.appodealstack.bidon.view.helper.PauseResumeObserver
 import com.appodealstack.bidon.view.helper.impl.ActivityLifecycleObserver
 import com.appodealstack.bidon.view.helper.impl.GetOrientationUseCaseImpl
 import com.appodealstack.bidon.view.helper.impl.PauseResumeObserverImpl
-
 /**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ *
  * Dependency Injection
  */
 object DI {

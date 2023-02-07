@@ -27,7 +27,9 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.*
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class AuctionImpl(
     private val adaptersSource: AdaptersSource,
     private val getAuctionRequest: GetAuctionRequestUseCase,

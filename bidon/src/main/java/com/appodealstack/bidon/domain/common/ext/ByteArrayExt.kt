@@ -1,5 +1,7 @@
 package com.appodealstack.bidon.domain.common.ext
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 fun ByteArray.toHexString(): String {
     val hexArray = "0123456789abcdef".toCharArray()
     val hexChars = CharArray(this.size * 2)

@@ -105,10 +105,6 @@ internal class BMBannerAdImpl(
                 adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
             }
 
-            @Deprecated("Source BidMachine deprecated callback")
-            override fun onAdShown(interstitialAd: BannerView) {
-            }
-
             override fun onAdImpression(bannerView: BannerView) {
                 logInternal(Tag, "onAdImpression: $this")
                 this@BMBannerAdImpl.bannerView = bannerView

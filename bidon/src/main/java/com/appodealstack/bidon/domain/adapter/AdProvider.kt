@@ -1,7 +1,9 @@
 package com.appodealstack.bidon.domain.adapter
 
 import com.appodealstack.bidon.domain.common.DemandAd
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 sealed interface AdProvider {
     interface Interstitial<T : AdAuctionParams> : AdProvider {
         fun interstitial(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Interstitial<T>

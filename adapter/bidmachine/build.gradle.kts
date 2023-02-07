@@ -18,8 +18,8 @@ android {
 
 dependencies {
     implementation(project(":bidon"))
-    implementation("io.bidmachine:ads:1.9.7")
-    implementation("io.bidmachine:ads.adapters.admanager:1.9.4.6")
+    implementation("io.bidmachine:ads:2.1.7")
+    implementation("io.bidmachine:ads.adapters.admanager:1.9.10.7")
 
 //    implementation("io.bidmachine:ads.adapters.admob:1.9.4.22")
 
@@ -33,5 +33,5 @@ dependencies {
 //    implementation("io.bidmachine:ads.networks.tapjoy:1.9.7.8")
 //    implementation("io.bidmachine:ads.networks.notsy:1.9.7.1")
 
-    implementation(Dependencies.Library.PlayServicesAds)
+    implementation(Dependencies.Google.PlayServicesAds)
 }

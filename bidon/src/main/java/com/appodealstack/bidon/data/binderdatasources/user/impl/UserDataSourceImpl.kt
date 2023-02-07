@@ -5,7 +5,9 @@ import com.appodealstack.bidon.data.binderdatasources.user.AdvertisingProfile
 import com.appodealstack.bidon.data.binderdatasources.user.TrackingAuthorizationStatus
 import com.appodealstack.bidon.data.binderdatasources.user.UserDataSource
 import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorage
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class UserDataSourceImpl(
     private val keyValueStorage: KeyValueStorage,
     private val advertisingData: AdvertisingData,

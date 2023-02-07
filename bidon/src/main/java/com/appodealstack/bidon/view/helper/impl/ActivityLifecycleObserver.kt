@@ -8,7 +8,9 @@ import com.appodealstack.bidon.view.helper.ActivityLifecycleState
 import com.appodealstack.bidon.view.helper.PauseResumeObserver
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.lang.ref.WeakReference
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class ActivityLifecycleObserver(activity: Activity) : PauseResumeObserver {
 
     override val lifecycleFlow = MutableStateFlow(getInitialState(activity))

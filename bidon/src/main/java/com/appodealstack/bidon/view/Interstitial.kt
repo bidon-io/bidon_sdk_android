@@ -20,8 +20,11 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 class Interstitial(
-    override val placementId: String = DefaultPlacement
+    override val placementId: String = DefaultPlacement,
 ) : InterstitialAd by InterstitialAdImpl(placementId)
 
 interface InterstitialAd {
@@ -135,7 +138,8 @@ internal class InterstitialAdImpl(
             when (state) {
                 is AdState.Bid,
                 is AdState.OnReward,
-                is AdState.Fill -> {
+                is AdState.Fill,
+                -> {
                     // do nothing
                 }
                 is AdState.Clicked -> {

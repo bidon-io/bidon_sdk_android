@@ -107,10 +107,6 @@ internal class BMInterstitialAdImpl(
                 adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
             }
 
-            @Deprecated("Source BidMachine deprecated callback. Use onAdImpression.")
-            override fun onAdShown(interstitialAd: InterstitialAd) {
-            }
-
             override fun onAdShowFailed(interstitialAd: InterstitialAd, bmError: BMError) {
                 logInternal(Tag, "onAdShowFailed: $this", bmError.asBidonError(demandId))
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd

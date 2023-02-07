@@ -2,7 +2,9 @@ package com.appodealstack.bidon.domain.stats
 
 import com.appodealstack.bidon.data.models.auction.BannerRequestBody
 import com.appodealstack.bidon.data.models.stats.RoundStatus
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 interface StatisticsCollector {
 
     suspend fun sendShowImpression(adType: AdType)

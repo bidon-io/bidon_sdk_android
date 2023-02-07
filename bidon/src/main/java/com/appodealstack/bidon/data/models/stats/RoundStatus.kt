@@ -3,6 +3,8 @@ package com.appodealstack.bidon.data.models.stats
 import com.appodealstack.bidon.domain.common.BidonError
 
 /**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ *
  * @see https://appodeal.atlassian.net/wiki/spaces/SX/pages/4490264831/SDK+Server+Schema#SDK%3C%3EServerSchema-StatsRequest
  */
 enum class RoundStatus(val code: String) {
@@ -40,5 +42,6 @@ fun Throwable.asRoundStatus() = when (this as? BidonError) {
     BidonError.NoRoundResults,
     is BidonError.Expired,
     is BidonError.Unspecified,
-    null -> null
+    null,
+    -> null
 } ?: RoundStatus.UnspecifiedException

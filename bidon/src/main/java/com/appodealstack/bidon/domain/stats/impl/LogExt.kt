@@ -2,8 +2,9 @@ package com.appodealstack.bidon.domain.stats.impl
 
 import android.util.Log
 import com.appodealstack.bidon.BuildConfig
-
 /**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ *
  * Log only while debugging SDK
  */
 fun logInternal(tag: String = DefaultTag, message: String, error: Throwable? = null) {

@@ -2,7 +2,9 @@ package com.appodealstack.bidon.domain.stats
 
 import com.appodealstack.bidon.data.models.stats.RoundStatus
 import com.appodealstack.bidon.domain.common.DemandId
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 data class BidStat(
     val roundStatus: RoundStatus?,
     val demandId: DemandId,

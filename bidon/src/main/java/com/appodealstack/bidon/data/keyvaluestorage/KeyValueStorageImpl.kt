@@ -2,7 +2,9 @@ package com.appodealstack.bidon.data.keyvaluestorage
 
 import android.content.Context
 import java.util.*
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 class KeyValueStorageImpl(private val context: Context) : KeyValueStorage {
     private val sharedPreferences by lazy {
         context.getSharedPreferences("bidon_preferences", Context.MODE_PRIVATE)

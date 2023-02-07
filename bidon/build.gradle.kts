@@ -17,12 +17,12 @@ android {
 }
 
 dependencies {
-    implementation(Dependencies.Library.PlayServicesAds)
-    implementation(Dependencies.Library.KtorClientCore)
-    implementation(Dependencies.Library.KtorClientOkHttp)
-    implementation(Dependencies.Library.KtorClientLogging)
-    implementation(Dependencies.Library.KtorClientLoggingLongBack)
-    implementation(Dependencies.Library.KtorClientEncoding)
-    implementation(Dependencies.Library.KtorClientNegotiation)
-    implementation(Dependencies.Library.KtorSerializationKotlinxJson)
+    implementation(Dependencies.Google.PlayServicesAds)
+    implementation(Dependencies.Ktor.KtorClientCore)
+    implementation(Dependencies.Ktor.KtorClientOkHttp)
+    implementation(Dependencies.Ktor.KtorClientLogging)
+    implementation(Dependencies.Ktor.KtorClientLoggingLongBack)
+    implementation(Dependencies.Ktor.KtorClientEncoding)
+    implementation(Dependencies.Ktor.KtorClientNegotiation)
+    implementation(Dependencies.Ktor.KtorSerializationKotlinxJson)
 }

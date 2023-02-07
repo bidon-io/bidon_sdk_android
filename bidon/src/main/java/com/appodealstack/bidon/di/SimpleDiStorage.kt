@@ -2,8 +2,10 @@ package com.appodealstack.bidon.di
 
 import com.appodealstack.bidon.di.InstanceType.ParamFactory.Params
 import kotlin.reflect.KClass
-
 /**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ *
+ *
  * val instanceSomeClass = get<SomeClass> {
  *    params(someParam1ToSomeClass, someParam2ToSomeClass)
  * }
@@ -35,7 +37,6 @@ object SimpleDiScope {
     }
 }
 
-
 sealed interface InstanceType<T> {
     fun interface Factory<T> : InstanceType<T> {
         fun build(): T
@@ -60,7 +61,6 @@ sealed interface InstanceType<T> {
         }
     }
 }
-
 
 @PublishedApi
 internal object SimpleDiStorage {

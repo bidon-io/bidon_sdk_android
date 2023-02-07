@@ -6,7 +6,9 @@ import com.appodealstack.bidon.domain.config.AdapterList
 import com.appodealstack.bidon.domain.stats.impl.logError
 import com.appodealstack.bidon.domain.stats.impl.logInfo
 import com.appodealstack.bidon.domain.stats.impl.logInternal
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class AdapterInstanceCreatorImpl : AdapterInstanceCreator {
     override fun createAvailableAdapters(): List<Adapter> {
         val adaptersClasses = AdapterList.values().mapNotNull { adapterItem ->

@@ -5,7 +5,9 @@ import com.appodealstack.bidon.data.json.BidonJson
 import com.appodealstack.bidon.data.models.config.User
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class UserBinder(
     private val dataSource: UserDataSource
 ) : DataBinder {

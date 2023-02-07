@@ -7,7 +7,9 @@ import com.appodealstack.bidon.data.models.config.Placement
 import com.appodealstack.bidon.data.models.config.Reward
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class PlacementBinder(
     val dataSource: PlacementDataSource,
 ) : DataBinder {
