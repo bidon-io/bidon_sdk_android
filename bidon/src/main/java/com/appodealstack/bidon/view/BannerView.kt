@@ -6,7 +6,7 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.widget.FrameLayout
 import androidx.annotation.AttrRes
-import com.appodealstack.bidon.BidON
+import com.appodealstack.bidon.BidOn
 import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.R
 import com.appodealstack.bidon.data.models.auction.BannerRequestBody.Format
@@ -173,7 +173,7 @@ class BannerView @JvmOverloads constructor(
      */
 
     private fun sendAction(action: ShowAction) {
-        if (!BidON.isInitialized()) {
+        if (!BidOn.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
             return
         }
@@ -181,7 +181,7 @@ class BannerView @JvmOverloads constructor(
     }
 
     private fun sendAction(action: LoadAction) {
-        if (!BidON.isInitialized()) {
+        if (!BidOn.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
             return
         }
@@ -267,7 +267,7 @@ class BannerView @JvmOverloads constructor(
                     is ShowAction.OnAdShown -> {
                         listener.onAdImpression(action.ad)
                         sendStatsShownAsync(action.winner.adSource)
-                        BidON.logRevenue(action.ad)
+                        BidOn.logRevenue(action.ad)
                         (state as? ShowState.Displaying)?.auctionResult?.adSource?.destroy()
                         launchDisplayingRefreshIfNeeded()
                         ShowState.Displaying(action.winner)

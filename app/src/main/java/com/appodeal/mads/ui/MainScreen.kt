@@ -27,7 +27,7 @@ import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppTextButton
 import com.appodeal.mads.component.H5Text
 import com.appodeal.mads.navigation.Screen
-import com.appodealstack.bidon.BidON
+import com.appodealstack.bidon.BidOn
 import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorageImpl
 
@@ -56,14 +56,16 @@ internal fun MainScreen(
                 if (state == MainScreenState.NotInitialized) {
                     AppButton(text = "Init") {
                         initState.value = MainScreenState.Initializing
-                        BidON
+                        BidOn
+                            .setDefaultAdapters()
                             .setBaseUrl(keyValueStorage.host)
+                            .setInitializationCallback {
+                                initState.value = MainScreenState.Initialized
+                            }
                             .init(
                                 activity = context as Activity,
                                 appKey = "d908f77a97ae0993514bc8edba7e776a36593c77e5f44994",
-                            ) {
-                                initState.value = MainScreenState.Initialized
-                            }
+                            )
                     }
                 } else {
                     CircularProgressIndicator()

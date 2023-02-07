@@ -2,7 +2,7 @@ package com.appodealstack.bidon.domain.config.impl
 
 import com.appodealstack.bidon.domain.adapter.Adapter
 import com.appodealstack.bidon.domain.config.AdapterInstanceCreator
-import com.appodealstack.bidon.domain.config.AdapterList
+import com.appodealstack.bidon.domain.config.DefaultAdapters
 import com.appodealstack.bidon.domain.stats.impl.logError
 import com.appodealstack.bidon.domain.stats.impl.logInfo
 import com.appodealstack.bidon.domain.stats.impl.logInternal
@@ -11,7 +11,7 @@ import com.appodealstack.bidon.domain.stats.impl.logInternal
  */
 internal class AdapterInstanceCreatorImpl : AdapterInstanceCreator {
     override fun createAvailableAdapters(): List<Adapter> {
-        val adaptersClasses = AdapterList.values().mapNotNull { adapterItem ->
+        val adaptersClasses = DefaultAdapters.values().mapNotNull { adapterItem ->
             obtainServiceClass(adapterItem.classPath)
         }
         logInfo(Tag, "Available adapters classes: ${adaptersClasses.joinToString { it.simpleName }}")

@@ -1,10 +1,11 @@
 package com.appodealstack.bidon.domain.config
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  *
  * Define adapters classes. Don't forget to add rules to proguard-files.
  */
-internal enum class AdapterList(val classPath: String) {
+internal enum class DefaultAdapters(val classPath: String) {
     AdmobAdapter(classPath = "com.appodealstack.admob.AdmobAdapter"),
     BidmachineAdapter(classPath = "com.appodealstack.bidmachine.BidMachineAdapter"),
     ApplovinAdapter(classPath = "com.appodealstack.applovin.ApplovinAdapter"),

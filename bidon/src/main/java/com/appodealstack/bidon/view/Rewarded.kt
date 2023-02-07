@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.view
 
 import android.app.Activity
-import com.appodealstack.bidon.BidON
+import com.appodealstack.bidon.BidOn
 import com.appodealstack.bidon.BidOnSdk.Companion.DefaultPlacement
 import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.domain.adapter.AdSource
@@ -51,7 +51,7 @@ internal class RewardedImpl(
     }
 
     override fun load(activity: Activity) {
-        if (!BidON.isInitialized()) {
+        if (!BidOn.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
             return
         }
@@ -171,7 +171,7 @@ internal class RewardedImpl(
         }
 
         override fun onAdImpression(ad: Ad) {
-            BidON.logRevenue(ad)
+            BidOn.logRevenue(ad)
             userListener?.onAdImpression(ad)
         }
 
