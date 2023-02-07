@@ -12,7 +12,9 @@ import com.appodealstack.bidon.domain.stats.impl.logError
 import com.appodealstack.bidon.domain.stats.impl.logInfo
 import com.appodealstack.bidon.view.helper.SdkDispatchers
 import kotlinx.coroutines.*
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class AuctionHolderImpl(
     private val demandAd: DemandAd,
     private val roundsListener: RoundsListener,

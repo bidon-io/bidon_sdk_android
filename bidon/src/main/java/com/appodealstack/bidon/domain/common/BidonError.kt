@@ -1,5 +1,7 @@
 package com.appodealstack.bidon.domain.common
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 sealed class BidonError : Throwable() {
     object NoContextFound : BidonError()
     object NoAuctionResults : BidonError()

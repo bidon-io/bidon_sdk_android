@@ -16,7 +16,9 @@ import com.appodealstack.bidon.view.helper.SdkDispatchers
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 class Rewarded(
     override val placementId: String = DefaultPlacement
 ) : RewardedAd by RewardedImpl(placementId)
@@ -41,7 +43,7 @@ internal class RewardedImpl(
     private var userListener: RewardedListener? = null
     private var observeCallbacksJob: Job? = null
     private val auctionHolder: AuctionHolder by lazy {
-        get { params(demandAd to listener) }
+        get { params(demandAd, listener) }
     }
 
     private val listener by lazy {

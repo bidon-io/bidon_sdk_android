@@ -1,6 +1,7 @@
 package com.appodealstack.bidon.domain.config
-
 /**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ *
  * Define adapters classes. Don't forget to add rules to proguard-files.
  */
 internal enum class AdapterList(val classPath: String) {

@@ -4,6 +4,9 @@ import android.content.Context
 import kotlinx.coroutines.flow.StateFlow
 
 /**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ *
+ *
  * Use [NetworkStatus] to determine current Network State.
  *
  * Example of using:

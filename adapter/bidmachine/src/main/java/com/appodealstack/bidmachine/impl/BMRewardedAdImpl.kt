@@ -117,10 +117,6 @@ internal class BMRewardedAdImpl(
                 adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
             }
 
-            @Deprecated("Source BidMachine deprecated callback")
-            override fun onAdShown(rewardedAd: RewardedAd) {
-            }
-
             override fun onAdShowFailed(rewardedAd: RewardedAd, bmError: BMError) {
                 logInternal(Tag, "onAdShowFailed: $this", bmError.asBidonError(demandId))
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd

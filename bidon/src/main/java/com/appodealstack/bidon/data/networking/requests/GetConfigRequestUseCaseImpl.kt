@@ -11,6 +11,9 @@ import com.appodealstack.bidon.domain.databinders.DataBinderType
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class GetConfigRequestUseCaseImpl(
     private val createRequestBody: CreateRequestBodyUseCase,
     private val segmentDataSource: SegmentDataSource,

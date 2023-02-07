@@ -23,5 +23,5 @@ android {
 
 dependencies {
     implementation(project(":bidon"))
-    implementation(Dependencies.Library.PlayServicesAds)
+    implementation(Dependencies.Google.PlayServicesAds)
 }

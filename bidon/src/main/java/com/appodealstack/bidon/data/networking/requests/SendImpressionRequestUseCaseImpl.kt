@@ -12,6 +12,9 @@ import com.appodealstack.bidon.domain.stats.usecases.SendImpressionRequestUseCas
 import com.appodealstack.bidon.view.helper.SdkDispatchers
 import kotlinx.coroutines.withContext
 
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class SendImpressionRequestUseCaseImpl(
     private val createRequestBody: CreateRequestBodyUseCase,
 ) : SendImpressionRequestUseCase {
@@ -29,7 +32,7 @@ internal class SendImpressionRequestUseCaseImpl(
     override suspend fun invoke(
         urlPath: String,
         bodyKey: String,
-        body: ImpressionRequestBody
+        body: ImpressionRequestBody,
     ): Result<BaseResponse> = withContext(SdkDispatchers.IO) {
         val requestBody = createRequestBody.invoke(
             binders = binders,

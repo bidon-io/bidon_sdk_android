@@ -7,17 +7,17 @@ repositories {
     gradlePluginPortal()
     mavenCentral()
     google()
+    maven(url = "https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    maven(url = "https://plugins.gradle.org/m2/")
 }
 
 dependencies {
-    val kotlinVersion = "1.7.10"
-    implementation("com.android.tools.build:gradle:7.2.2")
-    implementation("com.android.tools.build:gradle-api:7.2.2")
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-    implementation(kotlin("serialization"))
+    implementation(GradleDependencies.Android.gradlePlugin)
+    implementation(GradleDependencies.Kotlin.gradlePlugin)
+    implementation(GradleDependencies.Kotlin.Serialization.gradlePlugin)
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }

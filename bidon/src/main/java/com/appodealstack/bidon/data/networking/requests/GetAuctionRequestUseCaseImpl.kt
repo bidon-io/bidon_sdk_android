@@ -14,6 +14,9 @@ import com.appodealstack.bidon.domain.stats.impl.logError
 import com.appodealstack.bidon.domain.stats.impl.logInfo
 import com.appodealstack.bidon.view.helper.GetOrientationUseCase
 
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class GetAuctionRequestUseCaseImpl(
     private val createRequestBody: CreateRequestBodyUseCase,
     private val getOrientation: GetOrientationUseCase,
@@ -33,7 +36,7 @@ internal class GetAuctionRequestUseCaseImpl(
         placement: String,
         additionalData: AdTypeParam,
         auctionId: String,
-        adapters: Map<String, AdapterInfo>
+        adapters: Map<String, AdapterInfo>,
     ): Result<AuctionResponse> {
         val (banner, interstitial, rewarded) = getData(additionalData)
         val adObject = AdObjectRequestBody(

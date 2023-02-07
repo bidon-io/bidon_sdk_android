@@ -1,5 +1,7 @@
 package com.appodealstack.bidon.domain.common.ext
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 fun <T : Any> T.asSuccess() = Result.success(this)
 fun <T : Any> Throwable.asFailure() = Result.failure<T>(this)
 

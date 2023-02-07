@@ -11,7 +11,9 @@ import android.view.WindowManager
 import android.webkit.WebSettings
 import com.appodealstack.bidon.domain.stats.impl.logInternal
 import java.util.*
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class DeviceDataSourceImpl(
     private val context: Context,
 ) : DeviceDataSource {

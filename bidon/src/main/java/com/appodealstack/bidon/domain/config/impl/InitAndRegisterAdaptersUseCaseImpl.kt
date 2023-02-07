@@ -10,7 +10,9 @@ import com.appodealstack.bidon.domain.config.usecases.InitAndRegisterAdaptersUse
 import com.appodealstack.bidon.domain.stats.impl.logError
 import com.appodealstack.bidon.domain.stats.impl.logInfo
 import kotlinx.coroutines.withTimeoutOrNull
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 @Suppress("UNCHECKED_CAST")
 internal class InitAndRegisterAdaptersUseCaseImpl(
     private val adaptersSource: AdaptersSource

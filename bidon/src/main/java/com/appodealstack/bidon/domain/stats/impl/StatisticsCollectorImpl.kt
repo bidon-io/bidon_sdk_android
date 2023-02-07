@@ -14,7 +14,9 @@ import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.usecases.SendImpressionRequestUseCase
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 class StatisticsCollectorImpl(
     auctionId: String,
     roundId: String,

@@ -16,7 +16,9 @@ import com.appodealstack.bidon.view.helper.SdkDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class BidOnInitializerImpl(
     private val initAndRegisterAdapters: InitAndRegisterAdaptersUseCase,
     private val getConfigRequest: GetConfigRequestUseCase,

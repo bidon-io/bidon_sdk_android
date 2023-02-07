@@ -4,6 +4,9 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 
 @VisibleForTesting
 var defaultDispatcherOverridden: CoroutineDispatcher? = null

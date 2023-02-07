@@ -15,7 +15,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class BidOnSdkImpl : BidOnSdk {
 
     private val bidONInitializerDelegate = lazy { bidONInitializer }

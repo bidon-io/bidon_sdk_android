@@ -5,7 +5,9 @@ import com.appodealstack.bidon.data.models.config.AdapterInfo
 import com.appodealstack.bidon.domain.adapter.AdaptersSource
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class AdaptersBinder(
     private val adaptersSource: AdaptersSource
 ) : DataBinder {

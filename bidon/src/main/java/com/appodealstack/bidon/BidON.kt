@@ -1,13 +1,17 @@
 package com.appodealstack.bidon
 
 import android.app.Activity
-import com.appodealstack.bidon.di.DI.initDependencyInjection
+import com.appodealstack.bidon.di.DI
 import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.domain.common.Ad
 import com.appodealstack.bidon.domain.config.InitializationCallback
 
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
+
 val BidON: BidOnSdk by lazy {
-    initDependencyInjection()
+    DI.setFactories()
     get()
 }
 
@@ -19,7 +23,7 @@ interface BidOnSdk {
     fun init(
         activity: Activity,
         appKey: String,
-        callback: InitializationCallback? = null
+        callback: InitializationCallback? = null,
     )
 
     fun isInitialized(): Boolean

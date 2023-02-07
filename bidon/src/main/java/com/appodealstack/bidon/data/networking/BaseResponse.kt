@@ -3,6 +3,9 @@ package com.appodealstack.bidon.data.networking
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 @Serializable
 open class BaseResponse(
     @SerialName("success")
@@ -15,6 +18,6 @@ open class BaseResponse(
         @SerialName("code")
         val code: Int,
         @SerialName("message")
-        val message: String
+        val message: String,
     )
 }

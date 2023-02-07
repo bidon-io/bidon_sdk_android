@@ -5,13 +5,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ *
  * [orientationCode] is a [Orientation.code]
- *
  * [InterstitialRequestBody.formatCodes] is a list of [InterstitialRequestBody.Format.code]s
- *
  * [BannerRequestBody.formatCode] is a [BannerRequestBody.Format.code]
  */
-
 @Serializable
 internal data class AdObjectRequestBody(
     @SerialName("placement_id")

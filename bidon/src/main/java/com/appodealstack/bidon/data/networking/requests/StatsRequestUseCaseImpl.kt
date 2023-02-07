@@ -14,8 +14,11 @@ import com.appodealstack.bidon.domain.stats.impl.logError
 import com.appodealstack.bidon.domain.stats.impl.logInfo
 import com.appodealstack.bidon.domain.stats.usecases.StatsRequestUseCase
 
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class StatsRequestUseCaseImpl(
-    private val createRequestBody: CreateRequestBodyUseCase
+    private val createRequestBody: CreateRequestBodyUseCase,
 ) : StatsRequestUseCase {
     private val binders: List<DataBinderType> = listOf(
         DataBinderType.Device,

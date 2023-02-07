@@ -1,7 +1,9 @@
 package com.appodealstack.bidon.data.binderdatasources.user
 
 import com.appodealstack.bidon.data.binderdatasources.DataSource
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal interface UserDataSource : DataSource {
     fun getTrackingAuthorizationStatus(): String
     fun getApplicationId(): String

@@ -9,7 +9,9 @@ import com.appodealstack.bidon.domain.common.Ad
 import com.appodealstack.bidon.domain.common.BannerSize
 import com.appodealstack.bidon.domain.common.DemandId
 import kotlinx.coroutines.flow.SharedFlow
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 sealed interface AdSource<T : AdAuctionParams> {
     val demandId: DemandId
     val ad: Ad?

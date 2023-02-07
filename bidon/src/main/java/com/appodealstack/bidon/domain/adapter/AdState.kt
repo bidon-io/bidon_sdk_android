@@ -3,7 +3,9 @@ package com.appodealstack.bidon.domain.adapter
 import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.Ad
 import com.appodealstack.bidon.domain.common.Reward
-
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 sealed interface AdState {
     class Expired(val ad: Ad) : AdState
     class Bid(val result: AuctionResult) : AdState

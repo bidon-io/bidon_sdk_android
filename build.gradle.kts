@@ -11,11 +11,10 @@ buildscript {
         }
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:7.2.2")
-        val kotlinVersion = "1.7.10"
-        classpath(kotlin("gradle-plugin", version = kotlinVersion))
-        classpath(kotlin("serialization", version = kotlinVersion))
-        classpath("com.google.gms:google-services:4.3.13")
+        classpath(Dependencies.Android.gradlePlugin)
+        classpath(Dependencies.Kotlin.gradlePlugin)
+        classpath(Dependencies.Kotlin.Serialization.gradlePlugin)
+        classpath(Dependencies.Google.Services)
     }
 }
 

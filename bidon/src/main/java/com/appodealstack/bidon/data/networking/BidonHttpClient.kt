@@ -14,6 +14,9 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 @OptIn(ExperimentalSerializationApi::class)
 internal val BidonHttpClient by lazy {
     HttpClient(OkHttp) {

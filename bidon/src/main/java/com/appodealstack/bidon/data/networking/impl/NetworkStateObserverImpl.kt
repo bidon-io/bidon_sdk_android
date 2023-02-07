@@ -11,6 +11,9 @@ import com.appodealstack.bidon.data.networking.NetworkStateObserver
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.*
 
+/**
+ * Created by Aleksei Cherniaev on 06/02/2023.
+ */
 internal class NetworkStateObserverImpl : NetworkStateObserver {
     private var connectivityManager: ConnectivityManager? = null
     private val listeners = Collections.synchronizedSet(
