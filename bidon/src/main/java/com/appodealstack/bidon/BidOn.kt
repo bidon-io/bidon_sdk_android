@@ -1,23 +1,23 @@
 package com.appodealstack.bidon
 
 import android.app.Activity
-import com.appodealstack.bidon.di.DI
+import com.appodealstack.bidon.data.networking.NetworkSettings
 import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.domain.adapter.Adapter
 import com.appodealstack.bidon.domain.common.Ad
-import com.appodealstack.bidon.domain.config.InitializationCallback
+import com.appodealstack.bidon.domain.common.impl.BidOnSdkImpl
 import com.appodealstack.bidon.domain.config.DefaultAdapters
-import com.appodealstack.bidon.data.networking.NetworkSettings
+import com.appodealstack.bidon.domain.config.InitializationCallback
 
 /**
- * Created by Aleksei Cherniaev on 08/08/2023.
+ * Created by Aleksei Cherniaev on 08/08/2022.
  */
 
-val BidOn: BidOnSdk by lazy {
-    DI.setFactories()
-    get()
-}
+object BidOn : BidOnSdk by BidOnSdkImpl()
 
+/**
+ * [BidOn] SDK API
+ */
 interface BidOnSdk : BidOnBuilder {
     companion object {
         const val DefaultPlacement = "default"

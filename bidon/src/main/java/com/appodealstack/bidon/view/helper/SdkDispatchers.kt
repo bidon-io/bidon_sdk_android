@@ -22,7 +22,7 @@ var mainDispatcherOverridden: CoroutineDispatcher? = null
 
 object SdkDispatchers {
     val Single: CoroutineDispatcher
-        get() = singleDispatcherOverridden ?: newSingleThreadContext("BidON")
+        get() = singleDispatcherOverridden ?: newSingleThreadContext("BidOn")
 
     val Main: CoroutineDispatcher
         get() = mainDispatcherOverridden ?: Dispatchers.Main

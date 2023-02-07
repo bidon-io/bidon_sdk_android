@@ -1,5 +1,5 @@
 object Versions {
-    const val BidONVersionName = "0.0.3-alpha"
+    const val BidOnVersionName = "0.0.3-alpha"
 
     object Adapters {
         const val Admob = "0.0.1-alpha1"

@@ -78,7 +78,7 @@ internal class SessionTrackerImpl(
                 ActivityLifecycleState.Paused -> {
                     job?.cancel()
                     job = scope.launch {
-                        delay(SessionResetTtlMs)
+                        delay(SessionTtlMs)
                         shouldStartNewSession = true
                     }
                 }
@@ -90,6 +90,6 @@ internal class SessionTrackerImpl(
 /**
  * If application is paused for this time, then new session starts
  */
-private const val SessionResetTtlMs = 30_000L
+private const val SessionTtlMs = 30_000L
 
 private const val Tag = "SessionTracker"
