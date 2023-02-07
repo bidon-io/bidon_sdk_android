@@ -10,12 +10,14 @@ import com.appodealstack.bidon.data.networking.NetworkState
 import com.appodealstack.bidon.data.networking.NetworkStateObserver
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 internal class NetworkStateObserverImpl : NetworkStateObserver {
     private var connectivityManager: ConnectivityManager? = null
+    private var instantlyIsConnected = AtomicBoolean(false)
     private val listeners = Collections.synchronizedSet(
         mutableSetOf<NetworkStateObserver.ConnectionListener>()
     )
@@ -54,7 +56,7 @@ internal class NetworkStateObserverImpl : NetworkStateObserver {
         }
     }
 
-    override fun isConnected(): Boolean = connectivityManager?.activeNetworkInfo?.isConnected == true
+    override fun isConnected(): Boolean = instantlyIsConnected.get()
 
     override fun subscribe(listener: NetworkStateObserver.ConnectionListener) {
         listeners.add(listener)
@@ -65,7 +67,7 @@ internal class NetworkStateObserverImpl : NetworkStateObserver {
     }
 
     private fun syncState() {
-        networkStateFlow.value = if (isConnected()) {
+        networkStateFlow.value = if (checkConnected()) {
             listeners.forEach {
                 it.onConnectionUpdated(isConnected = true)
             }
@@ -75,6 +77,12 @@ internal class NetworkStateObserverImpl : NetworkStateObserver {
                 it.onConnectionUpdated(isConnected = false)
             }
             NetworkState.Disabled
+        }
+    }
+
+    private fun checkConnected(): Boolean {
+        return (connectivityManager?.activeNetworkInfo?.isConnected == true).also {
+            instantlyIsConnected.set(it)
         }
     }
 
