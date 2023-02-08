@@ -19,6 +19,8 @@ internal data class AdObjectRequestBody(
     val orientationCode: Int,
     @SerialName("auction_id")
     val auctionId: String,
+    @SerialName("min_price")
+    val minPrice: Double,
     @SerialName("banner")
     val banner: BannerRequestBody?,
     @SerialName("interstitial")

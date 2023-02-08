@@ -57,7 +57,8 @@ internal class AuctionImpl(
                 demandAd = demandAd,
                 adTypeParamData = adTypeParamData,
                 auctionId = UUID.randomUUID().toString(),
-                adapters = adaptersSource.adapters
+                adapters = adaptersSource.adapters,
+                priceFloor = adTypeParamData.priceFloor
             ).also {
                 _auctionDataResponse = it
             }
@@ -459,12 +460,14 @@ internal class AuctionImpl(
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
         auctionId: String,
+        priceFloor: Double,
         adapters: Set<Adapter>
     ): AuctionResponse {
         val auctionResponse = getAuctionRequest.request(
             placement = demandAd.placement,
             additionalData = adTypeParamData,
             auctionId = auctionId,
+            minPrice = priceFloor,
             adapters = adapters.associate {
                 it.demandId.demandId to it.adapterInfo
             }
