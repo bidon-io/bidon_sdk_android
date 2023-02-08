@@ -57,7 +57,7 @@ internal class AuctionImpl(
                 demandAd = demandAd,
                 adTypeParamData = adTypeParamData,
                 auctionId = UUID.randomUUID().toString(),
-                adapters = adaptersSource.adapters
+                adapters = adaptersSource.adapters,
             ).also {
                 _auctionDataResponse = it
             }

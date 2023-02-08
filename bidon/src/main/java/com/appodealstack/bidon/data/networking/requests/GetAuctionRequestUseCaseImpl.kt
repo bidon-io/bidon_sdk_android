@@ -45,7 +45,8 @@ internal class GetAuctionRequestUseCaseImpl(
             banner = banner,
             interstitial = interstitial,
             rewarded = rewarded,
-            orientationCode = getOrientation().code
+            orientationCode = getOrientation().code,
+            minPrice = additionalData.priceFloor
         )
         val requestBody = createRequestBody(
             binders = binders,
