@@ -15,11 +15,15 @@ import com.appodealstack.bidon.domain.adapter.AdAuctionParams
 import com.appodealstack.bidon.domain.adapter.AdSource
 import com.appodealstack.bidon.domain.adapter.AdState
 import com.appodealstack.bidon.domain.auction.AuctionResult
-import com.appodealstack.bidon.domain.common.*
+import com.appodealstack.bidon.domain.common.Ad
+import com.appodealstack.bidon.domain.common.BidonError
+import com.appodealstack.bidon.domain.common.DemandAd
+import com.appodealstack.bidon.domain.common.DemandId
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.StatisticsCollectorImpl
 import com.appodealstack.bidon.domain.stats.impl.logError
 import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.view.Reward
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 

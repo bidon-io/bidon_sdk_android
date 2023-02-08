@@ -9,10 +9,7 @@ import com.appodealstack.bidon.domain.adapter.AdState
 import com.appodealstack.bidon.domain.auction.AdTypeParam
 import com.appodealstack.bidon.domain.auction.AuctionHolder
 import com.appodealstack.bidon.domain.auction.AuctionResult
-import com.appodealstack.bidon.domain.common.Ad
-import com.appodealstack.bidon.domain.common.AdType
-import com.appodealstack.bidon.domain.common.BidonError
-import com.appodealstack.bidon.domain.common.DemandAd
+import com.appodealstack.bidon.domain.common.*
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.logInfo
 import com.appodealstack.bidon.view.helper.SdkDispatchers
@@ -87,7 +84,7 @@ internal class InterstitialAdImpl(
                              * Auction failed
                              */
                             listener.auctionFailed(error = it)
-                            listener.onAdLoadFailed(cause = it)
+                            listener.onAdLoadFailed(cause = it.asUnspecified())
                         }
                 }
             )
@@ -149,7 +146,7 @@ internal class InterstitialAdImpl(
                 is AdState.Closed -> listener.onAdClosed(state.ad)
                 is AdState.Impression -> {
                     sendStatsShownAsync(adSource)
-                    listener.onAdImpression(state.ad)
+                    listener.onAdShown(state.ad)
                 }
                 is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
                 is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
@@ -163,17 +160,17 @@ internal class InterstitialAdImpl(
             userListener?.onAdLoaded(ad)
         }
 
-        override fun onAdLoadFailed(cause: Throwable) {
+        override fun onAdLoadFailed(cause: BidonError) {
             userListener?.onAdLoadFailed(cause)
         }
 
-        override fun onAdShowFailed(cause: Throwable) {
+        override fun onAdShowFailed(cause: BidonError) {
             userListener?.onAdShowFailed(cause)
         }
 
-        override fun onAdImpression(ad: Ad) {
+        override fun onAdShown(ad: Ad) {
             BidOn.logRevenue(ad)
-            userListener?.onAdImpression(ad)
+            userListener?.onAdShown(ad)
         }
 
         override fun onAdClicked(ad: Ad) {

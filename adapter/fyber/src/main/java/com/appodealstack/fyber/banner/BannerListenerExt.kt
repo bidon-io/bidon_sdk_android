@@ -12,10 +12,10 @@ internal fun MutableSharedFlow<BannerInterceptor>.initBannerListener() {
     val bannerInterceptorFlow = this
     Banner.setBannerListener(object : BannerListener {
         override fun onError(placementId: String, bannerError: BannerError?) {
-            logInternal(Tag, "banner onError: $placementId", bannerError?.failure?.asDemandError())
+            logInternal(Tag, "banner onError: $placementId", bannerError?.failure?.asBidonError())
             Banner.destroy(placementId)
             bannerInterceptorFlow.tryEmit(
-                BannerInterceptor.Error(placementId, bannerError?.failure.asDemandError())
+                BannerInterceptor.Error(placementId, bannerError?.failure.asBidonError())
             )
         }
 

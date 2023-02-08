@@ -84,7 +84,7 @@ internal class RewardedImpl(
                              * Auction failed
                              */
                             listener.auctionFailed(error = it)
-                            listener.onAdLoadFailed(cause = it)
+                            listener.onAdLoadFailed(cause = it.asUnspecified())
                         }
                 }
             )
@@ -148,7 +148,7 @@ internal class RewardedImpl(
                 is AdState.Closed -> listener.onAdClosed(state.ad)
                 is AdState.Impression -> {
                     sendStatsShownAsync(adSource)
-                    listener.onAdImpression(state.ad)
+                    listener.onAdShown(state.ad)
                 }
                 is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
                 is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
@@ -162,17 +162,17 @@ internal class RewardedImpl(
             userListener?.onAdLoaded(ad)
         }
 
-        override fun onAdLoadFailed(cause: Throwable) {
+        override fun onAdLoadFailed(cause: BidonError) {
             userListener?.onAdLoadFailed(cause)
         }
 
-        override fun onAdShowFailed(cause: Throwable) {
+        override fun onAdShowFailed(cause: BidonError) {
             userListener?.onAdShowFailed(cause)
         }
 
-        override fun onAdImpression(ad: Ad) {
+        override fun onAdShown(ad: Ad) {
             BidOn.logRevenue(ad)
-            userListener?.onAdImpression(ad)
+            userListener?.onAdShown(ad)
         }
 
         override fun onAdClicked(ad: Ad) {

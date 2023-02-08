@@ -2,6 +2,7 @@ package com.appodealstack.bidon.view.helper
 
 import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.Ad
+import com.appodealstack.bidon.domain.common.BidonError
 import com.appodealstack.bidon.view.BannerListener
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -11,16 +12,16 @@ internal fun wrapUserBannerListener(userListener: () -> BannerListener?) = objec
         userListener()?.onAdLoaded(ad)
     }
 
-    override fun onAdLoadFailed(cause: Throwable) {
+    override fun onAdLoadFailed(cause: BidonError) {
         userListener()?.onAdLoadFailed(cause)
     }
 
-    override fun onAdShowFailed(cause: Throwable) {
+    override fun onAdShowFailed(cause: BidonError) {
         userListener()?.onAdShowFailed(cause)
     }
 
-    override fun onAdImpression(ad: Ad) {
-        userListener()?.onAdImpression(ad)
+    override fun onAdShown(ad: Ad) {
+        userListener()?.onAdShown(ad)
     }
 
     override fun onAdClicked(ad: Ad) {

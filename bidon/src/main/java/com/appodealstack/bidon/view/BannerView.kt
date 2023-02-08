@@ -16,10 +16,8 @@ import com.appodealstack.bidon.domain.adapter.AdState
 import com.appodealstack.bidon.domain.auction.AdTypeParam
 import com.appodealstack.bidon.domain.auction.Auction
 import com.appodealstack.bidon.domain.auction.impl.MaxEcpmAuctionResolver
-import com.appodealstack.bidon.domain.common.AdType
+import com.appodealstack.bidon.domain.common.*
 import com.appodealstack.bidon.domain.common.AutoRefresh
-import com.appodealstack.bidon.domain.common.BannerSize
-import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.bidon.domain.common.usecases.CountDownTimer
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.StatisticsCollector.AdType.Banner
@@ -35,6 +33,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
@@ -265,7 +264,7 @@ class BannerView @JvmOverloads constructor(
                         state
                     }
                     is ShowAction.OnAdShown -> {
-                        listener.onAdImpression(action.ad)
+                        listener.onAdShown(action.ad)
                         sendStatsShownAsync(action.winner.adSource)
                         BidOn.logRevenue(action.ad)
                         (state as? ShowState.Displaying)?.auctionResult?.adSource?.destroy()
@@ -375,7 +374,7 @@ class BannerView @JvmOverloads constructor(
             ).onSuccess { auctionResults ->
                 sendAction(LoadAction.OnAuctionSucceed(auctionResults))
             }.onFailure {
-                sendAction(LoadAction.OnAuctionFailed(it))
+                sendAction(LoadAction.OnAuctionFailed(it.asUnspecified()))
             }
         }
     }
@@ -396,7 +395,7 @@ class BannerView @JvmOverloads constructor(
                 }
                 is AdState.Closed -> listener.onAdClosed(state.ad)
                 is AdState.Impression -> {
-                    listener.onAdImpression(state.ad)
+                    listener.onAdShown(state.ad)
                 }
                 is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
                 is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
