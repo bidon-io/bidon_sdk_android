@@ -2,6 +2,7 @@ package com.appodealstack.bidon.view
 
 import android.app.Activity
 import com.appodealstack.bidon.BidOn
+import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.BidOnSdk.Companion.DefaultPlacement
 import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.domain.adapter.AdSource
@@ -26,7 +27,7 @@ class Rewarded(
 interface RewardedAd {
     val placementId: String
 
-    fun load(activity: Activity)
+    fun load(activity: Activity, minPrice: Double = BidOnSdk.DefaultMinPrice)
     fun destroy()
     fun show(activity: Activity)
     fun setRewardedListener(listener: RewardedListener)
@@ -50,7 +51,7 @@ internal class RewardedImpl(
         getRewardedListener()
     }
 
-    override fun load(activity: Activity) {
+    override fun load(activity: Activity, minPrice: Double) {
         if (!BidOn.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
             return
@@ -63,7 +64,8 @@ internal class RewardedImpl(
             listener.auctionStarted()
             auctionHolder.startAuction(
                 adTypeParam = AdTypeParam.Rewarded(
-                    activity = activity
+                    activity = activity,
+                    priceFloor = minPrice
                 ),
                 onResult = { result ->
                     result

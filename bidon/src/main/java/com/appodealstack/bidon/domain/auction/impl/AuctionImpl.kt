@@ -23,10 +23,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.*
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
@@ -50,47 +50,48 @@ internal class AuctionImpl(
         roundsListener: RoundsListener,
         adTypeParamData: AdTypeParam
     ): Result<List<AuctionResult>> = runCatching {
-        if (state.getAndUpdate { AuctionState.InProgress } == AuctionState.Initialized) {
+        if (state.compareAndSet(expect = AuctionState.Initialized, update = AuctionState.InProgress)) {
             logInfo(Tag, "Action started $this")
             // Request for Auction-data at /auction
-            val auctionData = requestActionData(
-                demandAd = demandAd,
-                adTypeParamData = adTypeParamData,
+            getAuctionRequest.request(
+                placement = demandAd.placement,
+                additionalData = adTypeParamData,
                 auctionId = UUID.randomUUID().toString(),
-                adapters = adaptersSource.adapters,
-            ).also {
-                _auctionDataResponse = it
-            }
-            mutableLineItems.addAll(auctionData.lineItems ?: emptyList())
+                adapters = adaptersSource.adapters.associate {
+                    it.demandId.demandId to it.adapterInfo
+                }
+            ).onSuccess { auctionData ->
+                _auctionDataResponse = auctionData
+                mutableLineItems.addAll(auctionData.lineItems ?: emptyList())
+                // Start auction
+                conductRounds(
+                    rounds = auctionData.rounds ?: listOf(),
+                    minPriceFloor = auctionData.minPrice ?: 0.0,
+                    priceFloor = auctionData.minPrice ?: 0.0,
+                    roundsListener = roundsListener,
+                    resolver = resolver,
+                    demandAd = demandAd,
+                    adTypeParamData = adTypeParamData
+                )
+                logInfo(Tag, "Rounds completed")
 
-            // Start auction
-            conductRounds(
-                rounds = auctionData.rounds ?: listOf(),
-                minPriceFloor = auctionData.minPrice ?: 0.0,
-                priceFloor = auctionData.minPrice ?: 0.0,
-                roundsListener = roundsListener,
-                resolver = resolver,
-                demandAd = demandAd,
-                adTypeParamData = adTypeParamData
-            )
-            logInfo(Tag, "Rounds completed")
+                // Finding winner
+                val finalResults = fillWinner(
+                    auctionResults = auctionResults.value,
+                    timeout = auctionData.fillTimeout ?: DefaultFillTimeoutMs
+                ).also {
+                    auctionResults.value = it
+                }
+                logInfo(Tag, "Action finished with ${finalResults.size} results")
+                finalResults.forEachIndexed { index, auctionResult ->
+                    logInfo(Tag, "Action result #$index: $auctionResult")
+                }
+                notifyLosers(finalResults)
 
-            // Finding winner
-            val finalResults = fillWinner(
-                auctionResults = auctionResults.value,
-                timeout = auctionData.fillTimeout ?: DefaultFillTimeoutMs
-            ).also {
-                auctionResults.value = it
-            }
-            logInfo(Tag, "Action finished with ${finalResults.size} results")
-            finalResults.forEachIndexed { index, auctionResult ->
-                logInfo(Tag, "Action result #$index: $auctionResult")
-            }
-            notifyLosers(finalResults)
-
-            // Finish auction
-            state.value = AuctionState.Finished
-            sendStatsAsync(demandAd.adType)
+                // Finish auction
+                state.value = AuctionState.Finished
+                sendStatsAsync(demandAd.adType)
+            }.getOrThrow()
         }
         state.first { it == AuctionState.Finished }
 
@@ -453,25 +454,6 @@ internal class AuctionImpl(
 
     private suspend fun saveAuctionResults(resolver: AuctionResolver, roundResults: List<AuctionResult>) {
         auctionResults.value = resolver.sortWinners(auctionResults.value + roundResults)
-    }
-
-    private suspend fun requestActionData(
-        demandAd: DemandAd,
-        adTypeParamData: AdTypeParam,
-        auctionId: String,
-        adapters: Set<Adapter>
-    ): AuctionResponse {
-        val auctionResponse = getAuctionRequest.request(
-            placement = demandAd.placement,
-            additionalData = adTypeParamData,
-            auctionId = auctionId,
-            adapters = adapters.associate {
-                it.demandId.demandId to it.adapterInfo
-            }
-        ).getOrNull()
-        return requireNotNull(auctionResponse) {
-            "No auction data response"
-        }
     }
 
     private fun List<LineItem>.filterBy(demandId: DemandId) =

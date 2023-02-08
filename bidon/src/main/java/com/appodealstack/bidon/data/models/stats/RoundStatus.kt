@@ -31,17 +31,18 @@ fun Throwable.asRoundStatus() = when (this as? BidonError) {
     is BidonError.AdFormatIsNotSupported -> RoundStatus.AdFormatNotSupported
     is BidonError.BidTimedOut -> RoundStatus.BidTimeoutReached
     is BidonError.FillTimedOut -> RoundStatus.FillTimeoutReached
+    is BidonError.InternalServerSdkError,
     is BidonError.NetworkError -> RoundStatus.NetworkError
     BidonError.NoAppropriateAdUnitId -> RoundStatus.NoAppropriateAdUnitId
     is BidonError.NoFill -> RoundStatus.NoFill
     is BidonError.NoBid -> RoundStatus.NoBid
 
+    is BidonError.AppKeyIsInvalid,
     BidonError.FullscreenAdNotReady,
     BidonError.NoAuctionResults,
     BidonError.NoContextFound,
     BidonError.NoRoundResults,
     is BidonError.Expired,
     is BidonError.Unspecified,
-    null,
-    -> null
+    null -> null
 } ?: RoundStatus.UnspecifiedException
