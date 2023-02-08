@@ -12,6 +12,5 @@ internal interface GetAuctionRequestUseCase {
         additionalData: AdTypeParam,
         auctionId: String,
         adapters: Map<String, AdapterInfo>,
-        minPrice: Double
     ): Result<AuctionResponse>
 }

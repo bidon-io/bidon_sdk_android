@@ -37,7 +37,6 @@ internal class GetAuctionRequestUseCaseImpl(
         additionalData: AdTypeParam,
         auctionId: String,
         adapters: Map<String, AdapterInfo>,
-        minPrice: Double,
     ): Result<AuctionResponse> {
         val (banner, interstitial, rewarded) = getData(additionalData)
         val adObject = AdObjectRequestBody(
@@ -47,7 +46,7 @@ internal class GetAuctionRequestUseCaseImpl(
             interstitial = interstitial,
             rewarded = rewarded,
             orientationCode = getOrientation().code,
-            minPrice = minPrice
+            minPrice = additionalData.priceFloor
         )
         val requestBody = createRequestBody(
             binders = binders,
