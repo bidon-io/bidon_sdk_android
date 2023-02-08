@@ -21,6 +21,7 @@ object BidOn : BidOnSdk by BidOnSdkImpl()
 interface BidOnSdk : BidOnBuilder {
     companion object {
         const val DefaultPlacement = "default"
+        const val DefaultMinPrice = 0.0
     }
 
     fun isInitialized(): Boolean

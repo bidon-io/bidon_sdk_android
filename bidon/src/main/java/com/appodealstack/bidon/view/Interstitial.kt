@@ -2,6 +2,7 @@ package com.appodealstack.bidon.view
 
 import android.app.Activity
 import com.appodealstack.bidon.BidOn
+import com.appodealstack.bidon.BidOnSdk.Companion.DefaultMinPrice
 import com.appodealstack.bidon.BidOnSdk.Companion.DefaultPlacement
 import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.domain.adapter.AdSource
@@ -9,10 +10,7 @@ import com.appodealstack.bidon.domain.adapter.AdState
 import com.appodealstack.bidon.domain.auction.AdTypeParam
 import com.appodealstack.bidon.domain.auction.AuctionHolder
 import com.appodealstack.bidon.domain.auction.AuctionResult
-import com.appodealstack.bidon.domain.common.Ad
-import com.appodealstack.bidon.domain.common.AdType
-import com.appodealstack.bidon.domain.common.BidonError
-import com.appodealstack.bidon.domain.common.DemandAd
+import com.appodealstack.bidon.domain.common.*
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.logInfo
 import com.appodealstack.bidon.view.helper.SdkDispatchers
@@ -30,7 +28,7 @@ class Interstitial(
 interface InterstitialAd {
     val placementId: String
 
-    fun load(activity: Activity)
+    fun load(activity: Activity, minPrice: Double = DefaultMinPrice)
     fun destroy()
     fun show(activity: Activity)
     fun setInterstitialListener(listener: InterstitialListener)
@@ -56,17 +54,18 @@ internal class InterstitialAdImpl(
         getInterstitialListener()
     }
 
-    override fun load(activity: Activity) {
+    override fun load(activity: Activity, minPrice: Double) {
         if (!BidOn.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
             return
         }
-        logInfo(Tag, "Load with placement: $placementId")
+        logInfo(Tag, "Load with placement=$placementId, minPrice=$minPrice")
         if (!auctionHolder.isActive) {
             listener.auctionStarted()
             auctionHolder.startAuction(
                 adTypeParam = AdTypeParam.Interstitial(
-                    activity = activity
+                    activity = activity,
+                    priceFloor = minPrice
                 ),
                 onResult = { result ->
                     result
@@ -87,7 +86,7 @@ internal class InterstitialAdImpl(
                              * Auction failed
                              */
                             listener.auctionFailed(error = it)
-                            listener.onAdLoadFailed(cause = it)
+                            listener.onAdLoadFailed(cause = it.asUnspecified())
                         }
                 }
             )
@@ -149,7 +148,7 @@ internal class InterstitialAdImpl(
                 is AdState.Closed -> listener.onAdClosed(state.ad)
                 is AdState.Impression -> {
                     sendStatsShownAsync(adSource)
-                    listener.onAdImpression(state.ad)
+                    listener.onAdShown(state.ad)
                 }
                 is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
                 is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
@@ -163,17 +162,17 @@ internal class InterstitialAdImpl(
             userListener?.onAdLoaded(ad)
         }
 
-        override fun onAdLoadFailed(cause: Throwable) {
+        override fun onAdLoadFailed(cause: BidonError) {
             userListener?.onAdLoadFailed(cause)
         }
 
-        override fun onAdShowFailed(cause: Throwable) {
+        override fun onAdShowFailed(cause: BidonError) {
             userListener?.onAdShowFailed(cause)
         }
 
-        override fun onAdImpression(ad: Ad) {
+        override fun onAdShown(ad: Ad) {
             BidOn.logRevenue(ad)
-            userListener?.onAdImpression(ad)
+            userListener?.onAdShown(ad)
         }
 
         override fun onAdClicked(ad: Ad) {

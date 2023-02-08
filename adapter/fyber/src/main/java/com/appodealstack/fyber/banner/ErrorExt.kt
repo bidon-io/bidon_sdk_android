@@ -4,7 +4,7 @@ import com.appodealstack.bidon.domain.common.BidonError
 import com.appodealstack.fyber.FairBidDemandId
 import com.fyber.fairbid.ads.RequestFailure
 
-internal fun RequestFailure?.asDemandError(): BidonError = when (this) {
+internal fun RequestFailure?.asBidonError(): BidonError = when (this) {
     RequestFailure.TIMEOUT -> BidonError.NetworkError(FairBidDemandId)
     RequestFailure.NO_FILL -> BidonError.NoFill(FairBidDemandId)
     RequestFailure.BAD_CREDENTIALS -> BidonError.Unspecified(FairBidDemandId)

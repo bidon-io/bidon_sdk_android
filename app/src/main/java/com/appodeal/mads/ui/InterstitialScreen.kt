@@ -19,6 +19,7 @@ import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.component.Body2Text
 import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.Ad
+import com.appodealstack.bidon.domain.common.BidonError
 import com.appodealstack.bidon.domain.stats.impl.logInternal
 import com.appodealstack.bidon.view.Interstitial
 import com.appodealstack.bidon.view.InterstitialListener
@@ -44,15 +45,15 @@ fun InterstitialScreen(
                         logFlow.log("onAdLoaded WINNER:\n$ad")
                     }
 
-                    override fun onAdLoadFailed(cause: Throwable) {
+                    override fun onAdLoadFailed(cause: BidonError) {
                         logFlow.log("onAdLoadFailed: $cause")
                     }
 
-                    override fun onAdShowFailed(cause: Throwable) {
+                    override fun onAdShowFailed(cause: BidonError) {
                         logFlow.log("onAdShowFailed: $cause")
                     }
 
-                    override fun onAdImpression(ad: Ad) {
+                    override fun onAdShown(ad: Ad) {
                         logFlow.log("onAdImpression: $ad")
                     }
 

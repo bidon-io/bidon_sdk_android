@@ -2,6 +2,8 @@ package com.appodealstack.bidon.view.helper
 
 import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.Ad
+import com.appodealstack.bidon.domain.common.BidonError
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
@@ -31,7 +33,7 @@ internal interface BannerState {
         object OnLoadInvoked : LoadAction
         object OnDestroyInvoked : LoadAction
         class OnAuctionSucceed(val auctionResults: List<AuctionResult>) : LoadAction
-        class OnAuctionFailed(val cause: Throwable) : LoadAction
+        class OnAuctionFailed(val cause: BidonError) : LoadAction
 
         object OnRefreshTimeoutFinished : LoadAction
         object OnWinnerTaken : LoadAction

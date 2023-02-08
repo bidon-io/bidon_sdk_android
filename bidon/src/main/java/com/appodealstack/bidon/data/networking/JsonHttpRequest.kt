@@ -3,6 +3,7 @@ package com.appodealstack.bidon.data.networking
 import com.appodealstack.bidon.data.json.BidonJson
 import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.di.get
+import com.appodealstack.bidon.domain.common.BidonError
 import com.appodealstack.bidon.domain.stats.impl.logError
 import com.appodealstack.bidon.domain.stats.impl.logInternal
 import com.appodealstack.bidon.view.helper.SdkDispatchers
@@ -49,16 +50,19 @@ internal class JsonHttpRequest(
             HttpStatusCode.InternalServerError -> {
                 val jsonResponse = response.body<JsonObject>()
                 val errorResponse = BidonJson.decodeFromJsonElement(BaseResponse.serializer(), jsonResponse)
-                throw BidonSdkError.InternalServerSdkError(errorResponse.error?.message)
+                throw BidonError.InternalServerSdkError(message = errorResponse.error?.message)
             }
             HttpStatusCode.UnprocessableEntity -> {
                 val jsonResponse = response.body<JsonObject>()
                 val errorResponse = BidonJson.decodeFromJsonElement(BaseResponse.serializer(), jsonResponse)
-                throw BidonSdkError.AppKeyIsInvalid(errorResponse.error?.message)
+                throw BidonError.AppKeyIsInvalid(message = errorResponse.error?.message)
             }
             else -> {
                 logError(Tag, "Unknown error: $response")
-                throw BidonSdkError.UnknownError(response.status.description)
+                throw BidonError.NetworkError(
+                    demandId = null,
+                    message = response.status.description
+                )
             }
         }
     }
