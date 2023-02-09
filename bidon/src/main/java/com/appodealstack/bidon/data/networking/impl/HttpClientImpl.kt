@@ -1,5 +1,6 @@
 package com.appodealstack.bidon.data.networking.impl
 
+import androidx.annotation.WorkerThread
 import com.appodealstack.bidon.BuildConfig
 import com.appodealstack.bidon.data.networking.HttpClient
 import com.appodealstack.bidon.data.networking.Method
@@ -8,7 +9,7 @@ import com.appodealstack.bidon.data.networking.encoders.RequestDataDecoder
 import com.appodealstack.bidon.data.networking.encoders.RequestDataEncoder
 import com.appodealstack.bidon.data.networking.encoders.ext.decodeWith
 import com.appodealstack.bidon.data.networking.encoders.ext.encodeWith
-import com.appodealstack.bidon.domain.stats.impl.logInfo
+import com.appodealstack.bidon.domain.stats.impl.logError
 import com.appodealstack.bidon.domain.stats.impl.logInternal
 import kotlinx.coroutines.delay
 
@@ -29,6 +30,7 @@ internal class HttpClientImpl(
     private val decoders: List<RequestDataDecoder>
 ) : HttpClient {
 
+    @WorkerThread
     override suspend fun enqueue(
         method: Method,
         url: String,
@@ -61,8 +63,9 @@ internal class HttpClientImpl(
                     is RawResponse.Failure -> {
                         if (rawResponse.headers.containsKey(RetryAfter)) {
                             val retryDelay = rawResponse.headers[RetryAfter]?.firstOrNull()?.toLongOrNull()
+                            val responseBody = rawResponse.responseBody?.let { String(it) }
                             retryDelay?.let {
-                                logInfo(Tag, "Request failed. Retry after $retryDelay ms.")
+                                logError(Tag, "Request failed. Retry after $retryDelay ms. $responseBody", rawResponse.httpError)
                                 delay(it)
                                 return enqueue(method, url, body)
                             }

@@ -55,7 +55,7 @@ fun RewardedScreen(
                     }
 
                     override fun onAdShown(ad: Ad) {
-                        logFlow.log("onAdImpression: $ad")
+                        logFlow.log("onAdShown: $ad")
                     }
 
                     override fun onAdClicked(ad: Ad) {
@@ -109,6 +109,10 @@ fun RewardedScreen(
 
                     override fun onUserRewarded(ad: Ad, reward: Reward?) {
                         logFlow.log("onUserRewarded: reward=$reward, ad=$ad")
+                    }
+
+                    override fun onRevenuePaid(ad: Ad) {
+                        logFlow.log("onRevenuePaid: ad=$ad")
                     }
                 }
             )

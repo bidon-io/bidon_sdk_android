@@ -196,7 +196,7 @@ fun BannerScreen(navController: NavHostController) {
                                 }
 
                                 override fun onAdShown(ad: Ad) {
-                                    logFlow.log("onAdImpression: $ad")
+                                    logFlow.log("onAdShown: $ad")
                                 }
 
                                 override fun onAdClicked(ad: Ad) {
@@ -246,6 +246,10 @@ fun BannerScreen(navController: NavHostController) {
 
                                 override fun roundFailed(roundId: String, error: Throwable) {
                                     logFlow.log("roundFailed: roundId=$roundId, $error")
+                                }
+
+                                override fun onRevenuePaid(ad: Ad) {
+                                    logFlow.log("onRevenuePaid: ad=$ad")
                                 }
                             }
                         )

@@ -9,7 +9,7 @@ import com.appodealstack.bidon.domain.common.BannerSize
 internal sealed interface AdTypeParam {
     val priceFloor: Double
 
-    class Banner(val adContainer: ViewGroup, val bannerSize: BannerSize, override val priceFloor: Double = TODO()) : AdTypeParam
+    class Banner(val adContainer: ViewGroup, val bannerSize: BannerSize, override val priceFloor: Double) : AdTypeParam
     class Interstitial(val activity: Activity, override val priceFloor: Double) : AdTypeParam
     class Rewarded(val activity: Activity, override val priceFloor: Double) : AdTypeParam
 }

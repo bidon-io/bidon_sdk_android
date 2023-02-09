@@ -2,7 +2,7 @@ package com.appodealstack.bidon.view
 
 import android.app.Activity
 import com.appodealstack.bidon.BidOn
-import com.appodealstack.bidon.BidOnSdk
+import com.appodealstack.bidon.BidOnSdk.Companion.DefaultMinPrice
 import com.appodealstack.bidon.BidOnSdk.Companion.DefaultPlacement
 import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.domain.adapter.AdSource
@@ -17,6 +17,7 @@ import com.appodealstack.bidon.view.helper.SdkDispatchers
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
@@ -27,7 +28,7 @@ class Rewarded(
 interface RewardedAd {
     val placementId: String
 
-    fun load(activity: Activity, minPrice: Double = BidOnSdk.DefaultMinPrice)
+    fun load(activity: Activity, minPrice: Double = DefaultMinPrice)
     fun destroy()
     fun show(activity: Activity)
     fun setRewardedListener(listener: RewardedListener)
@@ -152,6 +153,7 @@ internal class RewardedImpl(
                     sendStatsShownAsync(adSource)
                     listener.onAdShown(state.ad)
                 }
+                is AdState.PaidRevenue -> listener.onRevenuePaid(state.ad)
                 is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
                 is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
                 is AdState.Expired -> listener.onAdExpired(state.ad)
@@ -173,7 +175,6 @@ internal class RewardedImpl(
         }
 
         override fun onAdShown(ad: Ad) {
-            BidOn.logRevenue(ad)
             userListener?.onAdShown(ad)
         }
 

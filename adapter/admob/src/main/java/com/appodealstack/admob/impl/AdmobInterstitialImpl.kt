@@ -95,11 +95,21 @@ internal class AdmobInterstitialImpl(
                 3 -> "PUBLISHER_PROVIDED"
                 else -> "unknown type ${adValue.precisionType}"
             }
-            val valueMicros = adValue.valueMicros
-            val ecpm = adValue.valueMicros / 1_000_000L
-            logInternal(
-                tag = Tag,
-                message = "OnPaidEventListener( ValueMicros=$valueMicros, $ecpm ${adValue.currencyCode}, $type ). $this"
+            val ecpm = adValue.valueMicros / 1_000_000.0
+            adState.tryEmit(
+                AdState.PaidRevenue(
+                    ad = Ad(
+                        demandId = demandId,
+                        demandAd = demandAd,
+                        price = ecpm,
+                        sourceAd = requiredInterstitialAd,
+                        monetizationNetwork = demandId.demandId,
+                        dsp = null,
+                        roundId = roundId,
+                        currencyCode = "USD",
+                        auctionId = auctionId,
+                    )
+                )
             )
         }
     }
@@ -122,7 +132,7 @@ internal class AdmobInterstitialImpl(
             }
 
             override fun onAdImpression() {
-                logInternal(Tag, "onAdImpression: $this")
+                logInternal(Tag, "onAdShown: $this")
                 adState.tryEmit(AdState.Impression(requiredInterstitialAd.asAd()))
             }
 
