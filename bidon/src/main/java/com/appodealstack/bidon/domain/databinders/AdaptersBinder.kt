@@ -11,7 +11,7 @@ import org.json.JSONObject
  */
 internal class AdaptersBinder(
     private val adaptersSource: AdaptersSource
-) : DataBinder<JSONObject>  {
+) : DataBinder<JSONObject> {
     override val fieldName: String = "adapters"
 
     override suspend fun getJsonObject(): JSONObject = jsonObject {

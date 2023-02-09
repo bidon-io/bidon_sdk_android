@@ -10,7 +10,7 @@ import org.json.JSONObject
  */
 internal class DeviceBinder(
     private val dataSource: DeviceDataSource,
-) : DataBinder<JSONObject>  {
+) : DataBinder<JSONObject> {
     override val fieldName: String = "device"
 
     override suspend fun getJsonObject(): JSONObject = JsonParsers.serialize(createDevice())

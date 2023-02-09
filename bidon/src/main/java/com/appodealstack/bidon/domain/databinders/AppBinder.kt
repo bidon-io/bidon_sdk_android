@@ -10,7 +10,7 @@ import org.json.JSONObject
  */
 internal class AppBinder(
     private val dataSource: AppDataSource,
-) : DataBinder<JSONObject>  {
+) : DataBinder<JSONObject> {
     override val fieldName: String = "app"
 
     override suspend fun getJsonObject(): JSONObject = JsonParsers.serialize(createApp())

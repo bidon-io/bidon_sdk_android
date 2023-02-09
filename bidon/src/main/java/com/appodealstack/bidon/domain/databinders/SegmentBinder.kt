@@ -8,7 +8,7 @@ import org.json.JSONObject
  */
 internal class SegmentBinder(
     private val dataSource: SegmentDataSource
-) : DataBinder<JSONObject>  {
+) : DataBinder<JSONObject> {
     override val fieldName: String = "segment_id"
 
     override suspend fun getJsonObject(): JSONObject = JSONObject(dataSource.getSegmentId() ?: "")

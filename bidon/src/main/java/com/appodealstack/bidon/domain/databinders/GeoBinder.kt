@@ -10,7 +10,7 @@ import org.json.JSONObject
  */
 internal class GeoBinder(
     private val dataSource: LocationDataSource
-) : DataBinder<JSONObject>  {
+) : DataBinder<JSONObject> {
     override val fieldName: String = "geo"
 
     override suspend fun getJsonObject(): JSONObject = JsonParsers.serialize(createGeo())

@@ -10,7 +10,7 @@ import org.json.JSONObject
  */
 internal class SessionBinder(
     private val dataSource: SessionDataSource
-) : DataBinder<JSONObject>  {
+) : DataBinder<JSONObject> {
     override val fieldName: String = "session"
 
     override suspend fun getJsonObject(): JSONObject = JsonParsers.serialize(createSession())

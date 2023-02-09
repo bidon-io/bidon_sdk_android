@@ -12,7 +12,7 @@ import org.json.JSONObject
  */
 internal class PlacementBinder(
     val dataSource: PlacementDataSource,
-) : DataBinder<JSONObject>  {
+) : DataBinder<JSONObject> {
     override val fieldName: String = "placement"
 
     override suspend fun getJsonObject(): JSONObject = JsonParsers.serialize(createPlacement())

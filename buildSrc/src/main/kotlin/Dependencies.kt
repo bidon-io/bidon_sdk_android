@@ -33,16 +33,6 @@ object Dependencies {
         const val PlayServicesAds = "com.google.android.gms:play-services-ads:21.5.0"
     }
 
-    object Ktor {
-        private const val ktorVersion = "2.2.3"
-        const val KtorClientCore = "io.ktor:ktor-client-core:$ktorVersion"
-        const val KtorClientOkHttp = "io.ktor:ktor-client-okhttp:$ktorVersion"
-        const val KtorClientLogging = "io.ktor:ktor-client-logging:$ktorVersion"
-        const val KtorClientLoggingLongBack = "ch.qos.logback:logback-classic:1.3.0-beta0"
-        const val KtorClientEncoding = "io.ktor:ktor-client-encoding:$ktorVersion"
-        const val KtorClientNegotiation = "io.ktor:ktor-client-content-negotiation:$ktorVersion"
-    }
-
     object Accompanist {
         private const val accompanist = "0.29.1-alpha"
         const val permissions = "com.google.accompanist:accompanist-permissions:$accompanist"

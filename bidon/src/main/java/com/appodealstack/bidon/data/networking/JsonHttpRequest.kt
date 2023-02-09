@@ -2,15 +2,12 @@ package com.appodealstack.bidon.data.networking
 
 import com.appodealstack.bidon.data.json.JsonParsers
 import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorage
+import com.appodealstack.bidon.data.networking.impl.RawResponse
+import com.appodealstack.bidon.data.networking.impl.jsonZipHttpClient
 import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.domain.common.BidonError
-import com.appodealstack.bidon.domain.stats.impl.logError
 import com.appodealstack.bidon.domain.stats.impl.logInternal
 import com.appodealstack.bidon.view.helper.SdkDispatchers
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
@@ -23,46 +20,35 @@ internal class JsonHttpRequest(
     suspend operator fun invoke(
         path: String,
         body: JSONObject,
-        httpClient: HttpClient = BidonHttpClient,
+        httpClient: HttpClient = jsonZipHttpClient,
         bidOnEndpoints: BidOnEndpoints = get(),
-    ): Result<JSONObject> = runCatching {
-        val response = httpClient.post {
-            contentType(ContentType.Application.Json)
-            url {
-                protocol = URLProtocol.HTTPS
-                host = bidOnEndpoints.activeEndpoint.substringAfter("https://")
-                path("/$path")
-            }
-            setBody(body)
-        }
-        when (response.status) {
-            HttpStatusCode.OK -> {
-                @Suppress("RemoveExplicitTypeArguments")
-                response.body<JSONObject>().also { jsonResponse ->
-                    withContext(SdkDispatchers.IO) {
-                        jsonResponse.optString("token", "").takeIf { !it.isNullOrBlank() }?.let {
-                            logInternal(Tag, "New token saved: $it")
-                            keyValueStorage.token = it
-                        }
+    ): Result<String> {
+        val url = bidOnEndpoints.activeEndpoint + "/$path"
+        return httpClient.enqueue(
+            method = Method.POST,
+            url = url,
+            body = body.toString().toByteArray(charset = Charsets.UTF_8),
+        ).mapCatching { response ->
+            when (response) {
+                is RawResponse.Success -> {
+                    require(response.code in 200 until 300)
+                    response.requestBody?.let { String(it) }.orEmpty()
+                }
+                is RawResponse.Failure -> {
+                    val baseResponse = JsonParsers.parseOrNull<BaseResponse>(String(response.responseBody ?: byteArrayOf()))
+                    when (response.code) {
+                        422 -> throw BidonError.AppKeyIsInvalid(message = baseResponse?.error?.message)
+                        500 -> throw BidonError.InternalServerSdkError(message = baseResponse?.error?.message)
+                        else -> throw BidonError.Unspecified(demandId = null, sourceError = response.httpError)
                     }
                 }
             }
-            HttpStatusCode.InternalServerError -> {
-                val jsonResponse = response.body<String>()
-                val errorResponse = JsonParsers.parseOrNull<BaseResponse>(jsonResponse)
-                throw BidonError.InternalServerSdkError(message = errorResponse?.error?.message)
-            }
-            HttpStatusCode.UnprocessableEntity -> {
-                val jsonResponse = response.body<String>()
-                val errorResponse = JsonParsers.parseOrNull<BaseResponse>(jsonResponse)
-                throw BidonError.AppKeyIsInvalid(message = errorResponse?.error?.message)
-            }
-            else -> {
-                logError(Tag, "Unknown error: $response")
-                throw BidonError.NetworkError(
-                    demandId = null,
-                    message = response.status.description
-                )
+        }.onSuccess { jsonString ->
+            withContext(SdkDispatchers.IO) {
+                JSONObject(jsonString).optString("token", "").takeIf { !it.isNullOrBlank() }?.let {
+                    logInternal(Tag, "New token saved: $it")
+                    keyValueStorage.token = it
+                }
             }
         }
     }

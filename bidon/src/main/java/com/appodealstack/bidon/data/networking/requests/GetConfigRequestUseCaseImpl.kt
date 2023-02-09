@@ -9,6 +9,7 @@ import com.appodealstack.bidon.data.networking.JsonHttpRequest
 import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.domain.config.usecases.GetConfigRequestUseCase
 import com.appodealstack.bidon.domain.databinders.DataBinderType
+import org.json.JSONObject
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -33,7 +34,7 @@ internal class GetConfigRequestUseCaseImpl(
             data = null,
             dataSerializer = null,
         )
-        val requestBody = jsonObject {
+        val requestBody = jsonObject(putTo = bindersData) {
             "adapters" hasValue jsonObject {
                 body.adapters.forEach { (adapterName, data) ->
                     adapterName hasValue JsonParsers.serialize(data)
@@ -43,10 +44,11 @@ internal class GetConfigRequestUseCaseImpl(
         return get<JsonHttpRequest>().invoke(
             path = ConfigRequestPath,
             body = requestBody,
-        ).mapCatching { jsonResponse ->
+        ).mapCatching { jsonString ->
             /**
              * Save "segment_id"
              */
+            val jsonResponse = JSONObject(jsonString)
             segmentDataSource.saveSegmentId(
                 segmentId = jsonResponse.optString("segment_id", "").takeIf { !it.isNullOrBlank() }
             )

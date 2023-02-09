@@ -1,7 +1,6 @@
 package com.appodealstack.bidon.data.binderdatasources
 
 import com.appodealstack.bidon.domain.databinders.*
-import org.json.JSONObject
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
