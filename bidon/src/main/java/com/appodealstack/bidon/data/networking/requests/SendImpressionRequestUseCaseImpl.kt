@@ -1,6 +1,6 @@
 package com.appodealstack.bidon.data.networking.requests
 
-import com.appodealstack.bidon.data.json.BidonJson
+import com.appodealstack.bidon.data.json.JsonParsers
 import com.appodealstack.bidon.data.models.stats.ImpressionRequestBody
 import com.appodealstack.bidon.data.networking.BaseResponse
 import com.appodealstack.bidon.data.networking.JsonHttpRequest
@@ -38,15 +38,16 @@ internal class SendImpressionRequestUseCaseImpl(
             binders = binders,
             dataKeyName = bodyKey,
             data = body,
-            dataSerializer = ImpressionRequestBody.serializer(),
+            dataSerializer = JsonParsers.getSerializer(),
         )
         logInfo(Tag, "Request body: $requestBody")
 
         get<JsonHttpRequest>().invoke(
             path = urlPath,
             body = requestBody,
-        ).map { jsonResponse ->
-            BidonJson.decodeFromJsonElement(BaseResponse.serializer(), jsonResponse)
+        ).mapCatching { jsonResponse ->
+            val baseResponse = JsonParsers.parseOrNull<BaseResponse>(jsonResponse.toString())
+            requireNotNull(baseResponse)
         }.onFailure {
             logError(Tag, "Error while sending impression $urlPath", it)
         }.onSuccess {

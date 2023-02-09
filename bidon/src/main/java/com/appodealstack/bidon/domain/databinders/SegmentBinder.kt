@@ -1,21 +1,15 @@
 package com.appodealstack.bidon.domain.databinders
 
 import com.appodealstack.bidon.data.binderdatasources.segment.SegmentDataSource
-import com.appodealstack.bidon.data.json.BidonJson
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.encodeToJsonElement
+import org.json.JSONObject
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 internal class SegmentBinder(
     private val dataSource: SegmentDataSource
-) : DataBinder {
+) : DataBinder<JSONObject>  {
     override val fieldName: String = "segment_id"
 
-    override suspend fun getJsonElement(): JsonElement = BidonJson.encodeToJsonElement(createSegment())
-
-    private fun createSegment() =
-        dataSource.getSegmentId()?.let {
-            BidonJson.parseToJsonElement(it)
-        }
+    override suspend fun getJsonObject(): JSONObject = JSONObject(dataSource.getSegmentId() ?: "")
 }

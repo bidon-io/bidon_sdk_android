@@ -1,6 +1,5 @@
 package com.appodealstack.bidon.domain.databinders
 
-import kotlinx.serialization.json.JsonElement
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  *
@@ -8,7 +7,7 @@ import kotlinx.serialization.json.JsonElement
  *
  *  @see [DataBinderType] List of Binders
  */
-internal interface DataBinder {
+internal interface DataBinder<JsonElement> {
     val fieldName: String
-    suspend fun getJsonElement(): JsonElement
+    suspend fun getJsonObject(): JsonElement
 }

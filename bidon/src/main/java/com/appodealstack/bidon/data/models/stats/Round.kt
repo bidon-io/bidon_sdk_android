@@ -1,21 +1,35 @@
 package com.appodealstack.bidon.data.models.stats
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.appodealstack.bidon.data.json.JsonParsers
+import com.appodealstack.bidon.data.json.JsonSerializer
+import com.appodealstack.bidon.data.json.jsonArray
+import com.appodealstack.bidon.data.json.jsonObject
+import org.json.JSONObject
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-@Serializable
-data class Round(
-    @SerialName("id")
+internal data class Round(
     val id: String,
-    @SerialName("pricefloor")
     val pricefloor: Double,
-    @SerialName("winner_id")
     val winnerDemandId: String?,
-    @SerialName("winner_ecpm")
     val winnerEcpm: Double?,
-    @SerialName("demands")
     val demands: List<Demand>,
 )
+
+internal class RoundSerializer : JsonSerializer<Round> {
+    override fun serialize(data: Round): JSONObject {
+        return jsonObject {
+            "id" hasValue data.id
+            "pricefloor" hasValue data.pricefloor
+            "winner_id" hasValue data.winnerDemandId
+            "winner_ecpm" hasValue data.winnerEcpm
+            "demands" hasValue jsonArray {
+                val jsonObjects = data.demands.map {
+                    JsonParsers.serialize(it)
+                }
+                putValues(jsonObjects)
+            }
+        }
+    }
+}

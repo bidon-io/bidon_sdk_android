@@ -1,16 +1,29 @@
 package com.appodealstack.bidon.data.models.auction
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.appodealstack.bidon.data.json.JsonParser
+import org.json.JSONObject
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-@Serializable
 internal data class Round(
-    @SerialName("id")
     val id: String,
-    @SerialName("timeout")
     val timeoutMs: Long,
-    @SerialName("demands")
     val demandIds: List<String>
 )
+
+internal class RoundParser : JsonParser<Round> {
+    override fun parseOrNull(jsonString: String): Round? = runCatching {
+        val json = JSONObject(jsonString)
+        Round(
+            id = json.getString("id"),
+            timeoutMs = json.getLong("timeout"),
+            demandIds = buildList {
+                val jsonArray = json.getJSONArray("demands")
+                repeat(jsonArray.length()) { index ->
+                    add(jsonArray.getString(index))
+                }
+            }
+        )
+    }.getOrNull()
+}

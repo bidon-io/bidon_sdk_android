@@ -10,14 +10,10 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-@OptIn(ExperimentalSerializationApi::class)
 internal val BidonHttpClient by lazy {
     HttpClient(OkHttp) {
         install(ContentEncoding) {
@@ -28,14 +24,8 @@ internal val BidonHttpClient by lazy {
             level = LogLevel.ALL
         }
         install(ContentNegotiation) {
-            json(
-                Json {
-                    prettyPrint = true
-                    isLenient = true
-                    ignoreUnknownKeys = true
-                    explicitNulls = false
-                }
-            )
+            register(ContentType.Application.Json, CustomJsonConverter())
+            register(ContentType.Application.Xml, CustomXmlConverter())
         }
         install(HttpRequestRetry) {
             var retryDelay: Long? = null

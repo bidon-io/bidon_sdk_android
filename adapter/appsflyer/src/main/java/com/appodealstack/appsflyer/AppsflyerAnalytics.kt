@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Application
 import com.appodealstack.appsflyer.ext.adapterVersion
 import com.appodealstack.appsflyer.ext.sdkVersion
-import com.appodealstack.bidon.data.json.parse
 import com.appodealstack.bidon.data.models.config.AdapterInfo
 import com.appodealstack.bidon.domain.adapter.Adapter
 import com.appodealstack.bidon.domain.adapter.AdapterParameters
@@ -18,16 +17,11 @@ import com.appsflyer.AFLogger
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.adrevenue.AppsFlyerAdRevenue
 import com.appsflyer.adrevenue.adnetworks.generic.MediationNetwork
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
+import org.json.JSONObject
 import java.util.*
 
-@Serializable
 data class AppsflyerParameters(
-    @SerialName("dev_key")
     val devKey: String,
-    @SerialName("app_id")
     val appId: String
 ) : AdapterParameters
 
@@ -86,7 +80,13 @@ class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenu
         )
     }
 
-    override fun parseConfigParam(json: JsonObject): AppsflyerParameters = json.parse(AppsflyerParameters.serializer())
+    override fun parseConfigParam(json: String): AppsflyerParameters {
+        val jsonObject = JSONObject(json)
+        return AppsflyerParameters(
+            devKey = jsonObject.getString("dev_key"),
+            appId = jsonObject.getString("app_id"),
+        )
+    }
 }
 
 private const val Tag = "AppsflyerAdapter"

@@ -1,22 +1,30 @@
 package com.appodealstack.bidon.data.models.config
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.appodealstack.bidon.data.json.JsonSerializer
+import com.appodealstack.bidon.data.json.jsonObject
+import org.json.JSONObject
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-@Serializable
-data class App(
-    @SerialName("bundle")
+internal data class App(
     var bundle: String,
-    @SerialName("key")
     var key: String?,
-    @SerialName("framework")
     var framework: String,
-    @SerialName("version")
     var version: String?,
-    @SerialName("framework_version")
     var frameworkVersion: String?,
-    @SerialName("plugin_version")
     var pluginVersion: String?
 )
+
+internal class AppSerializer : JsonSerializer<App> {
+    override fun serialize(data: App): JSONObject {
+        return jsonObject {
+            "bundle" hasValue data.bundle
+            "key" hasValue data.key
+            "framework" hasValue data.framework
+            "version" hasValue data.version
+            "framework_version" hasValue data.frameworkVersion
+            "plugin_version" hasValue data.pluginVersion
+        }
+    }
+}

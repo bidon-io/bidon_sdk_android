@@ -6,12 +6,8 @@ import com.appodealstack.bidon.data.models.auction.LineItem
 import com.appodealstack.bidon.domain.adapter.AdAuctionParams
 import com.appodealstack.bidon.domain.adapter.AdapterParameters
 import com.appodealstack.bidon.domain.common.BannerSize
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 
-@Serializable
 data class MaxParameters(
-    @SerialName("app_key")
     val key: String
 ) : AdapterParameters
 

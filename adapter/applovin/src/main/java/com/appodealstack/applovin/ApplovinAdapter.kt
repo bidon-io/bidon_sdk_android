@@ -9,7 +9,6 @@ import com.appodealstack.applovin.ext.sdkVersion
 import com.appodealstack.applovin.impl.ApplovinBannerImpl
 import com.appodealstack.applovin.impl.ApplovinInterstitialImpl
 import com.appodealstack.applovin.impl.ApplovinRewardedImpl
-import com.appodealstack.bidon.data.json.parse
 import com.appodealstack.bidon.data.models.config.AdapterInfo
 import com.appodealstack.bidon.domain.adapter.AdProvider
 import com.appodealstack.bidon.domain.adapter.AdSource
@@ -18,7 +17,7 @@ import com.appodealstack.bidon.domain.adapter.Initializable
 import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.bidon.domain.common.DemandId
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.serialization.json.JsonObject
+import org.json.JSONObject
 import kotlin.coroutines.resume
 
 val ApplovinDemandId = DemandId("applovin")
@@ -58,7 +57,12 @@ class ApplovinAdapter :
             }
         }
 
-    override fun parseConfigParam(json: JsonObject): ApplovinParameters = json.parse(ApplovinParameters.serializer())
+    override fun parseConfigParam(json: String): ApplovinParameters {
+        val jsonObject = JSONObject(json)
+        return ApplovinParameters(
+            key = jsonObject.getString("app_key"),
+        )
+    }
 
     override fun interstitial(
         demandAd: DemandAd,

@@ -7,17 +7,13 @@ import com.appodealstack.bidmachine.ext.sdkVersion
 import com.appodealstack.bidmachine.impl.BMBannerAdImpl
 import com.appodealstack.bidmachine.impl.BMInterstitialAdImpl
 import com.appodealstack.bidmachine.impl.BMRewardedAdImpl
-import com.appodealstack.bidon.data.json.parse
 import com.appodealstack.bidon.data.models.config.AdapterInfo
-import com.appodealstack.bidon.domain.adapter.AdProvider
-import com.appodealstack.bidon.domain.adapter.AdSource
-import com.appodealstack.bidon.domain.adapter.Adapter
-import com.appodealstack.bidon.domain.adapter.Initializable
+import com.appodealstack.bidon.domain.adapter.*
 import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.bidon.domain.common.DemandId
 import io.bidmachine.BidMachine
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.serialization.json.JsonObject
+import org.json.JSONObject
 import kotlin.coroutines.resume
 
 val BidMachineDemandId = DemandId("bidmachine")
@@ -50,7 +46,20 @@ class BidMachineAdapter :
             }
         }
 
-    override fun parseConfigParam(json: JsonObject): BidMachineParameters = json.parse(BidMachineParameters.serializer())
+    override fun parseConfigParam(json: String): BidMachineParameters {
+        val jsonObject = JSONObject(json)
+        return BidMachineParameters(
+            sellerId = jsonObject.getString("seller_id"),
+            endpoint = jsonObject.optString("endpoint", "").takeIf { !it.isNullOrBlank() },
+            mediationConfig = jsonObject.optJSONArray("mediation_config")?.let {
+                buildList {
+                    repeat(it.length()) { index ->
+                        add(it.getString(index))
+                    }
+                }
+            },
+        )
+    }
 
     override fun interstitial(
         demandAd: DemandAd,

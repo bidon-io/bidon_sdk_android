@@ -1,18 +1,15 @@
 package com.appodealstack.bidon.data.models.auction
 
+import com.appodealstack.bidon.data.json.JsonParser
 import com.appodealstack.bidon.domain.common.DemandId
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import org.json.JSONObject
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-@Serializable
 data class LineItem(
-    @SerialName("id")
     val demandId: String?,
-    @SerialName("pricefloor")
     val priceFloor: Double = 0.0,
-    @SerialName("ad_unit_id")
     val adUnitId: String?,
 )
 
@@ -25,4 +22,15 @@ fun List<LineItem>.minByPricefloorOrNull(demandId: DemandId, priceFloor: Double)
         .filterNot { it.adUnitId.isNullOrBlank() }
         .sortedBy { it.priceFloor }
         .firstOrNull { it.priceFloor > priceFloor }
+}
+
+internal class LineItemParser : JsonParser<LineItem> {
+    override fun parseOrNull(jsonString: String): LineItem? = runCatching {
+        val json = JSONObject(jsonString)
+        LineItem(
+            demandId = json.optString("id"),
+            priceFloor = json.optDouble("pricefloor", 0.0),
+            adUnitId = json.optString("ad_unit_id")
+        )
+    }.getOrNull()
 }

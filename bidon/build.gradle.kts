@@ -24,5 +24,4 @@ dependencies {
     implementation(Dependencies.Ktor.KtorClientLoggingLongBack)
     implementation(Dependencies.Ktor.KtorClientEncoding)
     implementation(Dependencies.Ktor.KtorClientNegotiation)
-    implementation(Dependencies.Ktor.KtorSerializationKotlinxJson)
 }

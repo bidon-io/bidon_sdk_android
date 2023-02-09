@@ -1,27 +1,34 @@
 package com.appodealstack.bidon.data.models.stats
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.appodealstack.bidon.data.json.JsonSerializer
+import com.appodealstack.bidon.data.json.jsonObject
+import org.json.JSONObject
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-@Serializable
-data class Demand(
-    @SerialName("id")
+internal data class Demand(
     val demandId: String,
-    @SerialName("ad_unit_id")
     val adUnitId: String?,
-    @SerialName("status")
     val roundStatusCode: String,
-    @SerialName("ecpm")
     val ecpm: Double?,
-    @SerialName("bid_start_ts")
     val bidStartTs: Long?,
-    @SerialName("bid_finish_ts")
     val bidFinishTs: Long?,
-    @SerialName("fill_start_ts")
     val fillStartTs: Long?,
-    @SerialName("fill_finish_ts")
     val fillFinishTs: Long?,
 )
+
+internal class DemandSerializer : JsonSerializer<Demand> {
+    override fun serialize(data: Demand): JSONObject {
+        return jsonObject {
+            "id" hasValue data.demandId
+            "ad_unit_id" hasValue data.adUnitId
+            "status" hasValue data.roundStatusCode
+            "ecpm" hasValue data.ecpm
+            "bid_start_ts" hasValue data.bidStartTs
+            "bid_finish_ts" hasValue data.bidFinishTs
+            "fill_start_ts" hasValue data.fillStartTs
+            "fill_finish_ts" hasValue data.fillFinishTs
+        }
+    }
+}

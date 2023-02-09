@@ -1,24 +1,33 @@
 package com.appodealstack.bidon.data.models.auction
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.appodealstack.bidon.data.json.JsonParser
+import com.appodealstack.bidon.data.json.JsonParsers
+import org.json.JSONObject
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-@Serializable
 internal data class AuctionResponse(
-    @SerialName("rounds")
     val rounds: List<Round>?,
-    @SerialName("line_items")
     val lineItems: List<LineItem>?,
-    @SerialName("min_price")
     val minPrice: Double?,
-    @SerialName("fill_timeout")
     val fillTimeout: Long?,
-    @SerialName("token")
     val token: String?,
-    @SerialName("auction_id")
     val auctionId: String?,
-    @SerialName("auction_configuration_id")
     val auctionConfigurationId: Int?,
 )
+
+internal class AuctionResponseParser : JsonParser<AuctionResponse> {
+    override fun parseOrNull(jsonString: String): AuctionResponse? = runCatching {
+        val json = JSONObject(jsonString)
+        AuctionResponse(
+            rounds = JsonParsers.parseList(json.optJSONArray("rounds")),
+            auctionId = json.optString("auction_id"),
+            minPrice = json.optDouble("min_price"),
+            auctionConfigurationId = json.optInt("auction_configuration_id"),
+            fillTimeout = json.optLong("fill_timeout"),
+            lineItems = JsonParsers.parseList(json.optJSONArray("line_items")),
+            token = json.optString("token")
+        )
+    }.getOrNull()
+}

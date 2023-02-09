@@ -3,7 +3,6 @@ import org.gradle.api.JavaVersion
 plugins {
     kotlin("android")
     id("com.android.library")
-    kotlin("plugin.serialization")
 }
 
 android {
@@ -34,7 +33,6 @@ dependencies {
     implementation(Dependencies.Kotlin.Coroutines.KotlinxCoroutinesCore)
     implementation(Dependencies.Kotlin.Coroutines.KotlinxCoroutinesAndroid)
     implementation(Dependencies.Kotlin.reflect)
-    implementation(Dependencies.Kotlin.Serialization.json)
     implementation(Dependencies.Android.CoreKtx)
     implementation(Dependencies.Android.Annotation)
 
@@ -46,6 +44,7 @@ dependencies {
     testImplementation("com.google.truth:truth:1.1.3")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
+    testImplementation("org.json:json:20210307")
     androidTestImplementation("androidx.test.ext:junit:1.1.3")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
 }

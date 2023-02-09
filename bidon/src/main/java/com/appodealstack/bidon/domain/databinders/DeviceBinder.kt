@@ -1,20 +1,19 @@
 package com.appodealstack.bidon.domain.databinders
 
 import com.appodealstack.bidon.data.binderdatasources.device.DeviceDataSource
-import com.appodealstack.bidon.data.json.BidonJson
+import com.appodealstack.bidon.data.json.JsonParsers
 import com.appodealstack.bidon.data.models.config.Device
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.encodeToJsonElement
+import org.json.JSONObject
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 internal class DeviceBinder(
     private val dataSource: DeviceDataSource,
-) : DataBinder {
+) : DataBinder<JSONObject>  {
     override val fieldName: String = "device"
 
-    override suspend fun getJsonElement(): JsonElement =
-        BidonJson.encodeToJsonElement(createDevice())
+    override suspend fun getJsonObject(): JSONObject = JsonParsers.serialize(createDevice())
 
     private fun createDevice(): Device {
         return Device(

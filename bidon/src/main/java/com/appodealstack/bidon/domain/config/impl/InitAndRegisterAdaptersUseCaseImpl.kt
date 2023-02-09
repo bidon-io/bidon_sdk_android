@@ -36,7 +36,7 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                 .firstNotNullOfOrNull { (adapterName, json) ->
                     if (adapter.demandId.demandId == adapterName) {
                         try {
-                            adapter.parseConfigParam(json)
+                            adapter.parseConfigParam(json.toString())
                         } catch (e: Exception) {
                             logError(Tag, "Error while parsing AdapterParameters for ${adapter.demandId.demandId}: $json", e)
                             null

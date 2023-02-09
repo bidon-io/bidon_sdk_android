@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.config.domain
 
-import com.appodealstack.bidon.auctions.data.models.LineItem
-import com.appodealstack.bidon.auctions.data.models.minByPricefloorOrNull
+import com.appodealstack.bidon.data.models.auction.LineItem
+import com.appodealstack.bidon.data.models.auction.minByPricefloorOrNull
 import com.appodealstack.bidon.domain.common.DemandId
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test

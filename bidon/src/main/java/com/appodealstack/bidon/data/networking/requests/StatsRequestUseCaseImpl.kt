@@ -1,6 +1,6 @@
 package com.appodealstack.bidon.data.networking.requests
 
-import com.appodealstack.bidon.data.json.BidonJson
+import com.appodealstack.bidon.data.json.JsonParsers
 import com.appodealstack.bidon.data.models.stats.Demand
 import com.appodealstack.bidon.data.models.stats.Round
 import com.appodealstack.bidon.data.models.stats.StatsRequestBody
@@ -41,14 +41,15 @@ internal class StatsRequestUseCaseImpl(
             binders = binders,
             dataKeyName = "stats",
             data = body,
-            dataSerializer = StatsRequestBody.serializer(),
+            dataSerializer = JsonParsers.getSerializer(),
         )
         logInfo("", "$requestBody")
         return get<JsonHttpRequest>().invoke(
             path = "$StatsRequestPath/${adType.code}",
             body = requestBody,
-        ).map { jsonResponse ->
-            BidonJson.decodeFromJsonElement(BaseResponse.serializer(), jsonResponse)
+        ).mapCatching { jsonResponse ->
+            val baseResponse = JsonParsers.parseOrNull<BaseResponse>(jsonResponse.toString())
+            requireNotNull(baseResponse)
         }.onFailure {
             logError(Tag, "Error while sending stats", it)
         }.onSuccess {

@@ -1,7 +1,6 @@
 package com.appodealstack.ironsource
 
 import android.app.Activity
-import com.appodealstack.bidon.data.json.parse
 import com.appodealstack.bidon.data.models.config.AdapterInfo
 import com.appodealstack.bidon.domain.adapter.Adapter
 import com.appodealstack.bidon.domain.adapter.Initializable
@@ -19,7 +18,7 @@ import com.ironsource.mediationsdk.sdk.InitializationListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.serialization.json.JsonObject
+import org.json.JSONObject
 import kotlin.coroutines.resume
 
 val IronSourceDemandId = DemandId("ironsource")
@@ -179,7 +178,12 @@ class IronSourceAdapter :
 //        }
 //    }
 
-    override fun parseConfigParam(json: JsonObject): IronSourceParameters = json.parse(IronSourceParameters.serializer())
+    override fun parseConfigParam(json: String): IronSourceParameters {
+        val jsonObject = JSONObject(json)
+        return IronSourceParameters(
+            appKey = jsonObject.getString("app_key"),
+        )
+    }
 
 //    override fun interstitialParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdSource.AdParams {
 //        error("No additional params for IronSource interstitial")
