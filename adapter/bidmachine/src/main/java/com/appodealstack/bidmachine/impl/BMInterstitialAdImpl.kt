@@ -114,9 +114,10 @@ internal class BMInterstitialAdImpl(
             }
 
             override fun onAdImpression(interstitialAd: InterstitialAd) {
-                logInternal(Tag, "onAdImpression: $this")
+                logInternal(Tag, "onAdShown: $this")
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
                 adState.tryEmit(AdState.Impression(interstitialAd.asAd()))
+                adState.tryEmit(AdState.PaidRevenue(interstitialAd.asAd()))
             }
 
             override fun onAdClicked(interstitialAd: InterstitialAd) {

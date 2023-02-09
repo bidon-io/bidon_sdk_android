@@ -124,9 +124,10 @@ internal class BMRewardedAdImpl(
             }
 
             override fun onAdImpression(rewardedAd: RewardedAd) {
-                logInternal(Tag, "onAdImpression: $this")
+                logInternal(Tag, "onAdShown: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 adState.tryEmit(AdState.Impression(rewardedAd.asAd()))
+                adState.tryEmit(AdState.PaidRevenue(rewardedAd.asAd()))
             }
 
             override fun onAdClicked(rewardedAd: RewardedAd) {

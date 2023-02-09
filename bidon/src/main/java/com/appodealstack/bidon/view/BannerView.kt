@@ -8,6 +8,7 @@ import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import com.appodealstack.bidon.BidOn
 import com.appodealstack.bidon.BidOnSdk
+import com.appodealstack.bidon.BidOnSdk.Companion.DefaultMinPrice
 import com.appodealstack.bidon.R
 import com.appodealstack.bidon.data.models.auction.BannerRequestBody.Format
 import com.appodealstack.bidon.di.get
@@ -41,7 +42,7 @@ interface BannerAd {
     val placementId: String
 
     fun setAdSize(bannerSize: BannerSize)
-    fun load()
+    fun load(minPrice: Double = DefaultMinPrice)
     fun show()
     fun destroy()
     fun setBannerListener(listener: BannerListener)
@@ -97,6 +98,7 @@ class BannerView @JvmOverloads constructor(
     }
     private var showJob: Job? = null
     private var observeCallbacksJob: Job? = null
+    private var minPrice: Double = DefaultMinPrice
 
     init {
         context.theme.obtainStyledAttributes(attrs, R.styleable.BannerView, 0, 0).apply {
@@ -116,7 +118,7 @@ class BannerView @JvmOverloads constructor(
                 recycle()
             }
         }
-        launchLoadReducer()
+        launchLoadReducer(minPrice)
         launchShowReducer()
     }
 
@@ -130,7 +132,8 @@ class BannerView @JvmOverloads constructor(
         this.userListener = listener
     }
 
-    override fun load() {
+    override fun load(minPrice: Double) {
+        this.minPrice = minPrice
         logInfo(Tag, "Load with placement invoked: $placementId")
         sendAction(LoadAction.OnLoadInvoked)
     }
@@ -187,7 +190,7 @@ class BannerView @JvmOverloads constructor(
         loadActionFlow.tryEmit(action)
     }
 
-    private fun launchLoadReducer() {
+    private fun launchLoadReducer(minPrice: Double) {
         loadActionFlow.scan(
             initial = loadState.value,
             operation = { state, action ->
@@ -196,7 +199,7 @@ class BannerView @JvmOverloads constructor(
                     LoadAction.OnLoadInvoked -> {
                         when (state) {
                             LoadState.Idle -> {
-                                startAuction()
+                                startAuction(minPrice)
                                 LoadState.Loading
                             }
                             LoadState.Loading -> {
@@ -266,7 +269,6 @@ class BannerView @JvmOverloads constructor(
                     is ShowAction.OnAdShown -> {
                         listener.onAdShown(action.ad)
                         sendStatsShownAsync(action.winner.adSource)
-                        BidOn.logRevenue(action.ad)
                         (state as? ShowState.Displaying)?.auctionResult?.adSource?.destroy()
                         launchDisplayingRefreshIfNeeded()
                         ShowState.Displaying(action.winner)
@@ -360,7 +362,9 @@ class BannerView @JvmOverloads constructor(
         }
     }
 
-    private fun startAuction() {
+    private fun startAuction(
+        minPrice: Double
+    ) {
         listener.auctionStarted()
         scope.launch {
             get<Auction>().start(
@@ -368,7 +372,8 @@ class BannerView @JvmOverloads constructor(
                 resolver = MaxEcpmAuctionResolver,
                 adTypeParamData = AdTypeParam.Banner(
                     bannerSize = bannerSize,
-                    adContainer = this@BannerView
+                    adContainer = this@BannerView,
+                    priceFloor = minPrice
                 ),
                 roundsListener = listener
             ).onSuccess { auctionResults ->
@@ -397,6 +402,7 @@ class BannerView @JvmOverloads constructor(
                 is AdState.Impression -> {
                     listener.onAdShown(state.ad)
                 }
+                is AdState.PaidRevenue -> listener.onRevenuePaid(state.ad)
                 is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
                 is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
                 is AdState.Expired -> listener.onAdExpired(state.ad)

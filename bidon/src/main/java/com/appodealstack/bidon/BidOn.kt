@@ -2,9 +2,7 @@ package com.appodealstack.bidon
 
 import android.app.Activity
 import com.appodealstack.bidon.data.networking.NetworkSettings
-import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.domain.adapter.Adapter
-import com.appodealstack.bidon.domain.common.Ad
 import com.appodealstack.bidon.domain.common.impl.BidOnSdkImpl
 import com.appodealstack.bidon.domain.config.DefaultAdapters
 import com.appodealstack.bidon.domain.config.InitializationCallback
@@ -25,7 +23,6 @@ interface BidOnSdk : BidOnBuilder {
     }
 
     fun isInitialized(): Boolean
-    fun logRevenue(ad: Ad)
 }
 
 /**

@@ -150,6 +150,7 @@ internal class InterstitialAdImpl(
                     sendStatsShownAsync(adSource)
                     listener.onAdShown(state.ad)
                 }
+                is AdState.PaidRevenue -> listener.onRevenuePaid(state.ad)
                 is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
                 is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
                 is AdState.Expired -> listener.onAdExpired(state.ad)
@@ -171,7 +172,6 @@ internal class InterstitialAdImpl(
         }
 
         override fun onAdShown(ad: Ad) {
-            BidOn.logRevenue(ad)
             userListener?.onAdShown(ad)
         }
 

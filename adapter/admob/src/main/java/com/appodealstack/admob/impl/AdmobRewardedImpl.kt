@@ -105,11 +105,21 @@ internal class AdmobRewardedImpl(
                 3 -> "PUBLISHER_PROVIDED"
                 else -> "unknown type ${adValue.precisionType}"
             }
-            val valueMicros = adValue.valueMicros
-            val ecpm = adValue.valueMicros / 1_000_000L
-            logInternal(
-                tag = Tag,
-                message = "OnPaidEventListener( ValueMicros=$valueMicros, $ecpm ${adValue.currencyCode}, $type ). $this"
+            val ecpm = adValue.valueMicros / 1_000_000.0
+            adState.tryEmit(
+                AdState.PaidRevenue(
+                    ad = Ad(
+                        demandId = demandId,
+                        demandAd = demandAd,
+                        price = ecpm,
+                        sourceAd = requiredRewardedAd,
+                        monetizationNetwork = demandId.demandId,
+                        dsp = null,
+                        roundId = roundId,
+                        currencyCode = "USD",
+                        auctionId = auctionId,
+                    )
+                )
             )
         }
     }
@@ -132,7 +142,7 @@ internal class AdmobRewardedImpl(
             }
 
             override fun onAdImpression() {
-                logInternal(Tag, "onAdImpression: $this")
+                logInternal(Tag, "onAdShown: $this")
                 adState.tryEmit(AdState.Impression(requiredRewardedAd.asAd()))
             }
 

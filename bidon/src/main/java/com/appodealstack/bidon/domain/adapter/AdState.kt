@@ -16,6 +16,7 @@ sealed interface AdState {
     class Clicked(val ad: Ad) : AdState
     class Closed(val ad: Ad) : AdState
     class Impression(val ad: Ad) : AdState
+    class PaidRevenue(val ad: Ad) : AdState
     class OnReward(val ad: Ad, val reward: Reward?) : AdState
     class ShowFailed(val cause: BidonError) : AdState
 }
