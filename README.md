@@ -40,9 +40,9 @@ To provide control over advertising auctions to Publishers, while making it fair
 
 ## Getting started
 
--   [Integration](/docs/integration.md)
--   [Ad Formats](/docs/ad-formats)
--   [Advanced](/docs/advanced.md)
+-   [Integration](/doc/integration.md)
+-   [Ad Formats](/doc/ad-formats)
+-   [Advanced](/doc/advanced.md)
   
 ## Join us
 
