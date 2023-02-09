@@ -1,81 +1,47 @@
 # Integration
 
-This page is describes how to donwload, import and configure the BidOn SDK. 
+This page is describes how to import and configure the BidOn SDK. 
 
-- [Integration](#integration)
-  - [Download](#download)
-    - [CocoaPods (Recommended)](#cocoapods-recommended)
-    - [Manual](#manual)
-  - [Initialize the SDK](#initialize-the-sdk)
-  - [Configure Ad Types](#configure-ad-types)
+- [Getting Started](#getting-started) 
+- [Initialize the SDK](#initialize-the-sdk)
+- [Configure Ad Types](#configure-ad-types)
   
-## Download 
+## Getting Started 
 
-### CocoaPods (Recommended)
-
-To integrate the BidOn SDK through CocoaPods, first add the following lines to your Podfile:
+To integrate BidOn SDK through Dependencies, first add the following lines to your `build.gradle` (:app):
 
 ``` ruby
-pod 'BidOn'
+dependencies {
+    # BidOn SDK Library
+    implementation 'com.appodealstack.bidon:bidon-sdk:0.1.0'
 
-# For usage of Demand Sources uncomment following lines
-# pod 'BidOnAdapterBidMachine'
-# pod 'BidOnGoogleMobileAds'
-# pod 'BidOnAdapterAppLovin'
+    # Demand Sources (AdNetworks)
+    implementation 'com.appodealstack.bidon:bidmachine-adapter:0.1.0'
+    implementation 'com.appodealstack.bidon:admob-adapter:0.1.0'
+    
+    ... 
+}
 
 ```
+Then sync project.
 
-Then run the following on the command line:
-
-``` ruby
-pod install --repo-update
-```
-
-### Manual
-
-> TODO:// Manual integration guiode
 
 ## Initialize the SDK
 
-Receive your `app key` in the dashboard app settings. We highly recommend to initialize the BidOn SDK in app delegate's `application:applicationDidFinishLaunching:` method. 
+Receive your `app key` in the dashboard app settings. Init Bidon SDK in your MainActivity class.
 
-`swift`
-```swift
-import BidOn
-
-@UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate
-{
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
-    {
-        // Register all available demand source adapters.
-        BidOnSdk.registerDefaultAdapters()    
-        // Configure BidOn
-        BidOnSdk.logLevel = .debug
-        // Initialize
-        BidOnSdk.initialize(appKey: "APP KEY") {
-            // Load any ads
-        }
-
-        ⋮
-```
-
-```obj-c
-#import <BidOn/BidOn.h>
-
-@implementation AppDelegate
-
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Register all available demand source adapters.
-    [BDNSdk registerDefaultAdapters];
-    // Configure BidOn
-    [BDNSdk setLogLevel:BDNLoggerLevelDebug];
-    // Initialize
-    [BDNSdk initializeWithAppKey:@"APP KEY" completion:^{
-        // Load any ads
-    }];
-
-    ⋮
+`kotlin`
+```kotlin
+BidOn
+    .setDefaultAdapters()
+    // .setAdapters(YourOwnAdapter()) // use it if you have implemented your Adapter (AdNetwork)
+    .setInitializationCallback {
+        //  BidOn is initialized and ready to work
+    }
+    .init(
+        activity = this@MainActivity,
+        appKey = "APP_KEY",
+    )
 ```
 
 ## Configure Ad Types
