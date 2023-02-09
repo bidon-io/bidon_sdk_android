@@ -1,8 +1,8 @@
 package com.appodealstack.bidon.data.networking.requests
 
+import com.appodealstack.bidon.data.json.JsonSerializer
 import com.appodealstack.bidon.domain.databinders.DataBinderType
-import kotlinx.serialization.SerializationStrategy
-import kotlinx.serialization.json.JsonObject
+import org.json.JSONObject
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -12,6 +12,6 @@ internal interface CreateRequestBodyUseCase {
         binders: List<DataBinderType>,
         dataKeyName: String?,
         data: T?,
-        dataSerializer: SerializationStrategy<T>?,
-    ): JsonObject
+        dataSerializer: JsonSerializer<T>?,
+    ): JSONObject
 }

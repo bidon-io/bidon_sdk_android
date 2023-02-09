@@ -2,7 +2,6 @@ package com.appodealstack.fyber
 
 import android.app.Activity
 import android.content.Context
-import com.appodealstack.bidon.data.json.parse
 import com.appodealstack.bidon.data.models.config.AdapterInfo
 import com.appodealstack.bidon.domain.adapter.Adapter
 import com.appodealstack.bidon.domain.adapter.Initializable
@@ -23,7 +22,7 @@ import com.fyber.fairbid.ads.ImpressionData
 import com.fyber.fairbid.ads.Interstitial
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.serialization.json.JsonObject
+import org.json.JSONObject
 
 val FairBidDemandId = DemandId("fair_bid")
 
@@ -228,8 +227,12 @@ class FairBidAdapter :
         }
     }
 
-    override fun parseConfigParam(json: JsonObject): FairBidParameters =
-        requireNotNull(json[demandId.demandId]).parse(FairBidParameters.serializer())
+    override fun parseConfigParam(json: String): FairBidParameters {
+        val jsonObject = JSONObject(json)
+        return FairBidParameters(
+            appKey = jsonObject.getString("app_key"),
+        )
+    }
 }
 
 const val PlacementKey = "placement"

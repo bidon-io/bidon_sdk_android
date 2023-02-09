@@ -5,7 +5,6 @@ import com.appodealstack.bidon.data.models.config.AdapterInfo
 import com.appodealstack.bidon.domain.adapter.*
 import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.bidon.domain.common.DemandId
-import kotlinx.serialization.json.JsonObject
 
 internal object TestAdapterParameters : AdapterParameters
 
@@ -21,7 +20,7 @@ internal class TestAdapter(
         // do nothing, init emulation
     }
 
-    override fun parseConfigParam(json: JsonObject) = TestAdapterParameters
+    override fun parseConfigParam(json: String) = TestAdapterParameters
 
     override fun interstitial(
         demandAd: DemandAd,

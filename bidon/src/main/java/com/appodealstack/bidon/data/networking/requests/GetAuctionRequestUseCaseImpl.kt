@@ -1,6 +1,6 @@
 package com.appodealstack.bidon.data.networking.requests
 
-import com.appodealstack.bidon.data.json.BidonJson
+import com.appodealstack.bidon.data.json.JsonParsers
 import com.appodealstack.bidon.data.models.auction.*
 import com.appodealstack.bidon.data.models.config.AdapterInfo
 import com.appodealstack.bidon.data.networking.JsonHttpRequest
@@ -52,14 +52,14 @@ internal class GetAuctionRequestUseCaseImpl(
             binders = binders,
             dataKeyName = "ad_object",
             data = adObject,
-            dataSerializer = AdObjectRequestBody.serializer(),
+            dataSerializer = JsonParsers.getSerializer()
         )
         logInfo(Tag, "Request body: $requestBody")
         return get<JsonHttpRequest>().invoke(
             path = "$AuctionRequestPath/${additionalData.asAdType().code}",
             body = requestBody,
-        ).map { jsonResponse ->
-            BidonJson.decodeFromJsonElement(AuctionResponse.serializer(), jsonResponse)
+        ).mapCatching { jsonResponse ->
+            requireNotNull(JsonParsers.parseOrNull<AuctionResponse>(jsonResponse.toString()))
         }.onFailure {
             logError(Tag, "Error while loading auction data", it)
         }.onSuccess {

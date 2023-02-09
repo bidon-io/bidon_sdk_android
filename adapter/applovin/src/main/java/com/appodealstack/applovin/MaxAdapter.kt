@@ -8,7 +8,6 @@ import com.appodealstack.applovin.ext.sdkVersion
 import com.appodealstack.applovin.impl.MaxBannerImpl
 import com.appodealstack.applovin.impl.MaxInterstitialImpl
 import com.appodealstack.applovin.impl.MaxRewardedImpl
-import com.appodealstack.bidon.data.json.parse
 import com.appodealstack.bidon.data.models.config.AdapterInfo
 import com.appodealstack.bidon.domain.adapter.AdProvider
 import com.appodealstack.bidon.domain.adapter.AdSource
@@ -17,7 +16,7 @@ import com.appodealstack.bidon.domain.adapter.Initializable
 import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.bidon.domain.common.DemandId
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.serialization.json.JsonObject
+import org.json.JSONObject
 import kotlin.coroutines.resume
 
 val MaxDemandId = DemandId("max")
@@ -57,7 +56,12 @@ class MaxAdapter :
             }
         }
 
-    override fun parseConfigParam(json: JsonObject): MaxParameters = json.parse(MaxParameters.serializer())
+    override fun parseConfigParam(json: String): MaxParameters {
+        val jsonObject = JSONObject(json)
+        return MaxParameters(
+            key = jsonObject.getString("app_key"),
+        )
+    }
 
     override fun interstitial(
         demandAd: DemandAd,

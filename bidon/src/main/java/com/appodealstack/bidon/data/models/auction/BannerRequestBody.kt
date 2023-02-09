@@ -1,13 +1,13 @@
 package com.appodealstack.bidon.data.models.auction
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.appodealstack.bidon.data.json.JsonSerializer
+import com.appodealstack.bidon.data.json.jsonObject
+import org.json.JSONObject
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-@Serializable
 data class BannerRequestBody(
-    @SerialName("format")
     val formatCode: String,
 ) {
     enum class Format(val code: String) {
@@ -16,4 +16,11 @@ data class BannerRequestBody(
         MRec300x250("MREC"),
         AdaptiveBanner320x50("ADAPTIVE"),
     }
+}
+
+internal class BannerRequestBodySerializer : JsonSerializer<BannerRequestBody> {
+    override fun serialize(data: BannerRequestBody): JSONObject =
+        jsonObject {
+            "format" hasValue data.formatCode
+        }
 }

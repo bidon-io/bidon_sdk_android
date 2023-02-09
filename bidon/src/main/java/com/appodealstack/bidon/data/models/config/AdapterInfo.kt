@@ -1,13 +1,21 @@
 package com.appodealstack.bidon.data.models.config
 
-import kotlinx.serialization.*
+import com.appodealstack.bidon.data.json.JsonSerializer
+import com.appodealstack.bidon.data.json.jsonObject
+import org.json.JSONObject
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-@Serializable
 data class AdapterInfo(
-    @SerialName("version")
     val adapterVersion: String,
-    @SerialName("sdk_version")
     val sdkVersion: String
 )
+
+internal class AdapterInfoSerializer : JsonSerializer<AdapterInfo> {
+    override fun serialize(data: AdapterInfo): JSONObject =
+        jsonObject {
+            "version" hasValue data.adapterVersion
+            "sdk_version" hasValue data.sdkVersion
+        }
+}

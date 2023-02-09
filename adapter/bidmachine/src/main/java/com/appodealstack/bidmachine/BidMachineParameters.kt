@@ -4,16 +4,10 @@ import android.content.Context
 import com.appodealstack.bidon.domain.adapter.AdAuctionParams
 import com.appodealstack.bidon.domain.adapter.AdapterParameters
 import com.appodealstack.bidon.domain.common.BannerSize
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 
-@Serializable
 data class BidMachineParameters(
-    @SerialName("seller_id")
     val sellerId: String,
-    @SerialName("endpoint")
     val endpoint: String?,
-    @SerialName("mediation_config")
     val mediationConfig: List<String>?,
 ) : AdapterParameters
 

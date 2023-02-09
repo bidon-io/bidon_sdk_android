@@ -15,7 +15,6 @@ import com.appodealstack.bidon.domain.adapter.Initializable
 import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.bidon.domain.common.DemandId
 import com.google.android.gms.ads.*
-import kotlinx.serialization.json.JsonObject
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -82,5 +81,5 @@ class AdmobAdapter :
         )
     }
 
-    override fun parseConfigParam(json: JsonObject): AdmobInitParameters = AdmobInitParameters
+    override fun parseConfigParam(json: String): AdmobInitParameters = AdmobInitParameters
 }

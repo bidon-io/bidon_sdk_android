@@ -1,8 +1,10 @@
 package com.appodealstack.bidon.data.models.auction
 
+import com.appodealstack.bidon.data.json.JsonParsers
+import com.appodealstack.bidon.data.json.JsonSerializer
+import com.appodealstack.bidon.data.json.jsonObject
 import com.appodealstack.bidon.data.models.auction.AdObjectRequestBody.*
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import org.json.JSONObject
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -11,21 +13,13 @@ import kotlinx.serialization.Serializable
  * [InterstitialRequestBody.formatCodes] is a list of [InterstitialRequestBody.Format.code]s
  * [BannerRequestBody.formatCode] is a [BannerRequestBody.Format.code]
  */
-@Serializable
 internal data class AdObjectRequestBody(
-    @SerialName("placement_id")
     val placementId: String,
-    @SerialName("orientation")
     val orientationCode: Int,
-    @SerialName("auction_id")
     val auctionId: String,
-    @SerialName("min_price")
     val minPrice: Double,
-    @SerialName("banner")
     val banner: BannerRequestBody?,
-    @SerialName("interstitial")
     val interstitial: InterstitialRequestBody?,
-    @SerialName("rewarded")
     val rewarded: RewardedRequestBody?,
 ) {
 
@@ -33,4 +27,17 @@ internal data class AdObjectRequestBody(
         Portrait(0),
         Landscape(1)
     }
+}
+
+internal class AdObjectRequestBodySerializer : JsonSerializer<AdObjectRequestBody> {
+    override fun serialize(data: AdObjectRequestBody): JSONObject =
+        jsonObject {
+            "placement_id" hasValue data.placementId
+            "orientation" hasValue data.orientationCode
+            "auction_id" hasValue data.auctionId
+            "min_price" hasValue data.minPrice
+            "banner" hasValue JsonParsers.serializeOrNull(data.banner)
+            "interstitial" hasValue JsonParsers.serializeOrNull(data.interstitial)
+            "rewarded" hasValue JsonParsers.serializeOrNull(data.rewarded)
+        }
 }

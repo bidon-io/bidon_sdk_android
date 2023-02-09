@@ -1,43 +1,48 @@
 package com.appodealstack.bidon.data.models.config
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.appodealstack.bidon.data.json.JsonSerializer
+import com.appodealstack.bidon.data.json.jsonObject
+import org.json.JSONObject
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-@Serializable
 data class Device(
-    @SerialName("ua")
     val userAgent: String?,
-    @SerialName("make")
     val manufacturer: String?,
-    @SerialName("model")
     val deviceModel: String?,
-    @SerialName("os")
     val os: String?,
-    @SerialName("osv")
     val osVersion: String?,
-    @SerialName("hwv")
     val hardwareVersion: String?,
-
-    @SerialName("h")
     val height: Int?,
-    @SerialName("w")
     val width: Int?,
-    @SerialName("ppi")
     val ppi: Int?,
-
-    @SerialName("pxratio")
     val pxRatio: Float?,
-    @SerialName("js")
     val javaScriptSupport: Int?,
-
-    @SerialName("language")
     val language: String?,
-    @SerialName("carrier")
     val carrier: String?,
-    @SerialName("mccmnc")
     val mccmnc: String?,
-    @SerialName("connection_type")
     val connectionType: String?,
 )
+
+internal class DeviceSerializer : JsonSerializer<Device> {
+    override fun serialize(data: Device): JSONObject {
+        return jsonObject {
+            "ua" hasValue data.userAgent
+            "make" hasValue data.manufacturer
+            "model" hasValue data.deviceModel
+            "os" hasValue data.os
+            "osv" hasValue data.osVersion
+            "hwv" hasValue data.hardwareVersion
+            "h" hasValue data.height
+            "w" hasValue data.width
+            "ppi" hasValue data.ppi
+            "pxratio" hasValue data.pxRatio
+            "js" hasValue data.javaScriptSupport
+            "language" hasValue data.language
+            "carrier" hasValue data.carrier
+            "mccmnc" hasValue data.mccmnc
+            "connection_type" hasValue data.connectionType
+        }
+    }
+}

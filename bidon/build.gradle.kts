@@ -18,11 +18,4 @@ android {
 
 dependencies {
     implementation(Dependencies.Google.PlayServicesAds)
-    implementation(Dependencies.Ktor.KtorClientCore)
-    implementation(Dependencies.Ktor.KtorClientOkHttp)
-    implementation(Dependencies.Ktor.KtorClientLogging)
-    implementation(Dependencies.Ktor.KtorClientLoggingLongBack)
-    implementation(Dependencies.Ktor.KtorClientEncoding)
-    implementation(Dependencies.Ktor.KtorClientNegotiation)
-    implementation(Dependencies.Ktor.KtorSerializationKotlinxJson)
 }

@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.data.binderdatasources
 
 import com.appodealstack.bidon.domain.databinders.*
-import kotlinx.serialization.json.JsonElement
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
@@ -17,7 +17,7 @@ internal class DataProviderImpl(
     private val segmentBinder: SegmentBinder,
 ) : DataProvider {
 
-    override suspend fun provide(dataBinders: List<DataBinderType>): Map<String, JsonElement> {
+    override suspend fun provide(dataBinders: List<DataBinderType>): Map<String, Any> {
         return dataBinders.associate { type ->
             val binder = when (type) {
                 DataBinderType.Device -> deviceBinder
@@ -30,7 +30,7 @@ internal class DataProviderImpl(
                 DataBinderType.AvailableAdapters -> adaptersBinder
                 DataBinderType.Segment -> segmentBinder
             }
-            binder.fieldName to binder.getJsonElement()
+            binder.fieldName to binder.getJsonObject()
         }
     }
 }

@@ -47,7 +47,7 @@ internal class AuctionImplTest : ConcurrentTest() {
 
     @Before
     fun before() {
-        every { adaptersSource.adapters } returns listOf(
+        every { adaptersSource.adapters } returns setOf(
             TestAdapter(
                 demandName = Applovin,
                 interstitialData = TestAdapterInterstitialParameters(
@@ -150,7 +150,7 @@ internal class AuctionImplTest : ConcurrentTest() {
         testee.start(
             demandAd = DemandAd(AdType.Interstitial, PlacementId),
             roundsListener = roundsListener,
-            adTypeParamData = AdTypeParam.Interstitial(activity),
+            adTypeParamData = AdTypeParam.Interstitial(activity, priceFloor = 1.0),
             resolver = MaxEcpmAuctionResolver
         ).onSuccess {
             println(it)

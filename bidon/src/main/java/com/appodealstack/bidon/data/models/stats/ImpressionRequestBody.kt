@@ -1,32 +1,40 @@
 package com.appodealstack.bidon.data.models.stats
 
+import com.appodealstack.bidon.data.json.JsonParsers
+import com.appodealstack.bidon.data.json.JsonSerializer
+import com.appodealstack.bidon.data.json.jsonObject
 import com.appodealstack.bidon.data.models.auction.BannerRequestBody
 import com.appodealstack.bidon.data.models.auction.InterstitialRequestBody
 import com.appodealstack.bidon.data.models.auction.RewardedRequestBody
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import org.json.JSONObject
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-@Serializable
 internal data class ImpressionRequestBody(
-    @SerialName("auction_id")
     val auctionId: String,
-    @SerialName("auction_configuration_id")
     val auctionConfigurationId: Int,
-    @SerialName("imp_id")
     val impressionId: String,
-    @SerialName("demand_id")
     val demandId: String,
-    @SerialName("ad_unit_id")
     val adUnitId: String?,
-    @SerialName("ecpm")
     val ecpm: Double,
-    @SerialName("banner")
     val banner: BannerRequestBody?,
-    @SerialName("interstitial")
     val interstitial: InterstitialRequestBody?,
-    @SerialName("rewarded")
     val rewarded: RewardedRequestBody?,
 )
+
+internal class ImpressionRequestBodySerializer : JsonSerializer<ImpressionRequestBody> {
+    override fun serialize(data: ImpressionRequestBody): JSONObject {
+        return jsonObject {
+            "auction_id" hasValue data.auctionId
+            "auction_configuration_id" hasValue data.auctionConfigurationId
+            "imp_id" hasValue data.impressionId
+            "demand_id" hasValue data.demandId
+            "ad_unit_id" hasValue data.adUnitId
+            "ecpm" hasValue data.ecpm
+            "banner" hasValue JsonParsers.serializeOrNull(data.banner)
+            "interstitial" hasValue JsonParsers.serializeOrNull(data.interstitial)
+            "rewarded" hasValue JsonParsers.serializeOrNull(data.rewarded)
+        }
+    }
+}
