@@ -12,7 +12,7 @@ import com.appodealstack.bidon.domain.analytic.AdRevenueLogger
 import com.appodealstack.bidon.domain.common.Ad
 import com.appodealstack.bidon.domain.common.DemandId
 import com.appodealstack.bidon.domain.common.UsdCurrencyCode
-import com.appodealstack.bidon.domain.stats.impl.logInfo
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appsflyer.AFLogger
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.adrevenue.AppsFlyerAdRevenue

@@ -43,6 +43,11 @@ BidOn
     )
 ```
 
+Set logging.
+```kotlin
+BidOn.setLogLevel(Logger.Level.Verbose)
+```
+
 ## Configure Ad Types
 
 - [Interstitials](ad-formats/interstitial.md)

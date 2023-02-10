@@ -4,7 +4,7 @@ import com.appodealstack.bidon.data.binderdatasources.DataProvider
 import com.appodealstack.bidon.data.json.JsonSerializer
 import com.appodealstack.bidon.data.json.jsonObject
 import com.appodealstack.bidon.domain.databinders.DataBinderType
-import com.appodealstack.bidon.domain.stats.impl.logInfo
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import org.json.JSONObject
 
 /**

@@ -16,9 +16,9 @@ import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.*
 import com.appodealstack.bidon.domain.common.ext.asFailure
 import com.appodealstack.bidon.domain.common.ext.asSuccess
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.StatisticsCollectorImpl
-import com.appodealstack.bidon.domain.stats.impl.logInternal
 import io.bidmachine.AdRequest
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.rewarded.RewardedAd
@@ -54,7 +54,7 @@ internal class BMRewardedAdImpl(
                 request: RewardedRequest,
                 result: BMAuctionResult
             ) {
-                logInternal(Tag, "onRequestSuccess $result: $this")
+                logInfo(Tag, "onRequestSuccess $result: $this")
                 adRequest = request
                 markBidFinished(
                     ecpm = result.price,
@@ -71,7 +71,7 @@ internal class BMRewardedAdImpl(
             }
 
             override fun onRequestFailed(request: RewardedRequest, bmError: BMError) {
-                logInternal(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
+                logInfo(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
                 adRequest = request
                 markBidFinished(
                     ecpm = null,
@@ -81,7 +81,7 @@ internal class BMRewardedAdImpl(
             }
 
             override fun onRequestExpired(request: RewardedRequest) {
-                logInternal(Tag, "onRequestExpired: $this")
+                logInfo(Tag, "onRequestExpired: $this")
                 adRequest = request
                 markBidFinished(
                     ecpm = null,
@@ -95,7 +95,7 @@ internal class BMRewardedAdImpl(
     private val rewardedListener by lazy {
         object : RewardedListener {
             override fun onAdRewarded(rewardedAd: RewardedAd) {
-                logInternal(Tag, "onAdRewarded $rewardedAd: $this")
+                logInfo(Tag, "onAdRewarded $rewardedAd: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 adState.tryEmit(
                     AdState.OnReward(
@@ -106,44 +106,44 @@ internal class BMRewardedAdImpl(
             }
 
             override fun onAdLoaded(rewardedAd: RewardedAd) {
-                logInternal(Tag, "onAdLoaded: $this")
+                logInfo(Tag, "onAdLoaded: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 adState.tryEmit(AdState.Fill(rewardedAd.asAd()))
             }
 
             override fun onAdLoadFailed(rewardedAd: RewardedAd, bmError: BMError) {
-                logInternal(Tag, "onAdLoadFailed: $this", bmError.asBidonError(demandId))
+                logInfo(Tag, "onAdLoadFailed: $this", bmError.asBidonError(demandId))
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
             }
 
             override fun onAdShowFailed(rewardedAd: RewardedAd, bmError: BMError) {
-                logInternal(Tag, "onAdShowFailed: $this", bmError.asBidonError(demandId))
+                logInfo(Tag, "onAdShowFailed: $this", bmError.asBidonError(demandId))
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 adState.tryEmit(AdState.ShowFailed(bmError.asBidonError(demandId)))
             }
 
             override fun onAdImpression(rewardedAd: RewardedAd) {
-                logInternal(Tag, "onAdShown: $this")
+                logInfo(Tag, "onAdShown: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 adState.tryEmit(AdState.Impression(rewardedAd.asAd()))
                 adState.tryEmit(AdState.PaidRevenue(rewardedAd.asAd()))
             }
 
             override fun onAdClicked(rewardedAd: RewardedAd) {
-                logInternal(Tag, "onAdClicked: $this")
+                logInfo(Tag, "onAdClicked: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 adState.tryEmit(AdState.Clicked(rewardedAd.asAd()))
             }
 
             override fun onAdExpired(rewardedAd: RewardedAd) {
-                logInternal(Tag, "onAdExpired: $this")
+                logInfo(Tag, "onAdExpired: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 adState.tryEmit(AdState.Expired(rewardedAd.asAd()))
             }
 
             override fun onAdClosed(rewardedAd: RewardedAd, boolean: Boolean) {
-                logInternal(Tag, "onAdClosed: $this")
+                logInfo(Tag, "onAdClosed: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 adState.tryEmit(AdState.Closed(rewardedAd.asAd()))
             }
@@ -151,7 +151,7 @@ internal class BMRewardedAdImpl(
     }
 
     override suspend fun bid(adParams: BMFullscreenAuctionParams): AuctionResult {
-        logInternal(Tag, "Starting with $adParams: $this")
+        logInfo(Tag, "Starting with $adParams: $this")
         markBidStarted()
         this.context = adParams.context
         RewardedRequest.Builder()
@@ -180,7 +180,7 @@ internal class BMRewardedAdImpl(
     }
 
     override suspend fun fill(): Result<Ad> {
-        logInternal(Tag, "Starting fill: $this")
+        logInfo(Tag, "Starting fill: $this")
         markFillStarted()
         val context = context
         if (context == null) {
@@ -213,7 +213,7 @@ internal class BMRewardedAdImpl(
     }
 
     override fun show(activity: Activity) {
-        logInternal(Tag, "Starting show: $this")
+        logInfo(Tag, "Starting show: $this")
         if (rewardedAd?.canShow() == true) {
             rewardedAd?.show()
         } else {
@@ -240,7 +240,7 @@ internal class BMRewardedAdImpl(
     }
 
     override fun destroy() {
-        logInternal(Tag, "destroy $this")
+        logInfo(Tag, "destroy $this")
         adRequest?.destroy()
         adRequest = null
         rewardedAd?.destroy()

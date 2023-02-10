@@ -16,9 +16,8 @@ import com.appodealstack.bidon.domain.auction.impl.MaxEcpmAuctionResolver
 import com.appodealstack.bidon.domain.auction.usecases.GetAuctionRequestUseCase
 import com.appodealstack.bidon.domain.common.AdType
 import com.appodealstack.bidon.domain.common.DemandAd
-import com.appodealstack.bidon.domain.stats.impl.logError
-import com.appodealstack.bidon.domain.stats.impl.logInfo
-import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.domain.logging.impl.logError
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -116,10 +115,10 @@ internal class AuctionImplTest : ConcurrentTest() {
 //        ).asSuccess()
 
         mockkStatic(Log::class)
-        mockkStatic(::logInfo)
+        mockkStatic(::com.appodealstack.bidon.domain.logging.impl.logInfo)
         every { logInfo(any(), any()) } returns Unit
 //        mockkStatic(::logInternal)
-        every { logInternal(any(), any(), any()) } returns Unit
+        every { logInfo(any(), any(), any()) } returns Unit
 //        mockkStatic(::logError)
         every { logError(any(), any(), any()) } returns Unit
     }

@@ -30,6 +30,7 @@ import com.appodeal.mads.navigation.Screen
 import com.appodealstack.bidon.BidOn
 import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorageImpl
+import com.appodealstack.bidon.domain.logging.Logger
 
 @Composable
 internal fun MainScreen(
@@ -56,6 +57,7 @@ internal fun MainScreen(
                 if (state == MainScreenState.NotInitialized) {
                     AppButton(text = "Init") {
                         initState.value = MainScreenState.Initializing
+                        BidOn.setLogLevel(Logger.Level.Verbose)
                         BidOn
                             .setDefaultAdapters()
                             .setBaseUrl(keyValueStorage.host)

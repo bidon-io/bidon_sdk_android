@@ -15,10 +15,10 @@ import com.appodealstack.bidon.domain.common.Ad
 import com.appodealstack.bidon.domain.common.BidonError
 import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.bidon.domain.common.DemandId
+import com.appodealstack.bidon.domain.logging.impl.logError
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.StatisticsCollectorImpl
-import com.appodealstack.bidon.domain.stats.impl.logError
-import com.appodealstack.bidon.domain.stats.impl.logInternal
 import com.appodealstack.bidon.view.helper.SdkDispatchers
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -54,7 +54,7 @@ internal class AdmobInterstitialImpl(
     private val requestListener by lazy {
         object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                logInternal(Tag, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
+                logInfo(Tag, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
                 markBidFinished(
                     ecpm = null,
                     roundStatus = loadAdError.asBidonError().asRoundStatus(),
@@ -63,7 +63,7 @@ internal class AdmobInterstitialImpl(
             }
 
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                logInternal(Tag, "onAdLoaded: $this")
+                logInfo(Tag, "onAdLoaded: $this")
                 this@AdmobInterstitialImpl.interstitialAd = interstitialAd
                 interstitialAd.onPaidEventListener = paidListener
                 interstitialAd.fullScreenContentCallback = interstitialListener
@@ -117,12 +117,12 @@ internal class AdmobInterstitialImpl(
     private val interstitialListener by lazy {
         object : FullScreenContentCallback() {
             override fun onAdClicked() {
-                logInternal(Tag, "onAdClicked: $this")
+                logInfo(Tag, "onAdClicked: $this")
                 adState.tryEmit(AdState.Clicked(requiredInterstitialAd.asAd()))
             }
 
             override fun onAdDismissedFullScreenContent() {
-                logInternal(Tag, "onAdDismissedFullScreenContent: $this")
+                logInfo(Tag, "onAdDismissedFullScreenContent: $this")
                 adState.tryEmit(AdState.Closed(requiredInterstitialAd.asAd()))
             }
 
@@ -132,7 +132,7 @@ internal class AdmobInterstitialImpl(
             }
 
             override fun onAdImpression() {
-                logInternal(Tag, "onAdShown: $this")
+                logInfo(Tag, "onAdShown: $this")
                 adState.tryEmit(AdState.Impression(requiredInterstitialAd.asAd()))
             }
 
@@ -146,7 +146,7 @@ internal class AdmobInterstitialImpl(
     override val adState = MutableSharedFlow<AdState>(Int.MAX_VALUE)
 
     override fun destroy() {
-        logInternal(Tag, "destroy $this")
+        logInfo(Tag, "destroy $this")
         interstitialAd?.onPaidEventListener = null
         interstitialAd?.fullScreenContentCallback = null
         interstitialAd = null
@@ -171,7 +171,7 @@ internal class AdmobInterstitialImpl(
     }
 
     override suspend fun bid(adParams: AdmobFullscreenAdAuctionParams): AuctionResult {
-        logInternal(Tag, "Starting with $adParams: $this")
+        logInfo(Tag, "Starting with $adParams: $this")
         markBidStarted(adParams.lineItem.adUnitId)
         return withContext(dispatcher) {
             lineItem = adParams.lineItem
@@ -206,7 +206,7 @@ internal class AdmobInterstitialImpl(
     }
 
     override suspend fun fill(): Result<Ad> = runCatching {
-        logInternal(Tag, "Starting fill: $this")
+        logInfo(Tag, "Starting fill: $this")
         markFillStarted()
         /**
          * Admob fills the bid automatically. It's not needed to fill it manually.
@@ -220,7 +220,7 @@ internal class AdmobInterstitialImpl(
     }
 
     override fun show(activity: Activity) {
-        logInternal(Tag, "Starting show: $this")
+        logInfo(Tag, "Starting show: $this")
         if (interstitialAd == null) {
             adState.tryEmit(AdState.ShowFailed(BidonError.FullscreenAdNotReady))
         } else {

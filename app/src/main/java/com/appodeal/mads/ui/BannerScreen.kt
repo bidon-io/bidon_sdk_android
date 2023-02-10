@@ -27,7 +27,7 @@ import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.Ad
 import com.appodealstack.bidon.domain.common.BannerSize
 import com.appodealstack.bidon.domain.common.BidonError
-import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.view.BannerListener
 import com.appodealstack.bidon.view.BannerView
 import com.appodealstack.bidon.view.DefaultAutoRefreshTimeoutMs
@@ -334,7 +334,7 @@ private fun MutableState<List<String>>.log(string: String) {
     synchronized(this) {
         this.value = this.value + string
     }
-    logInternal(Tag, string)
+    logInfo(Tag, string)
 }
 
 private const val Tag = "BannerScreen"

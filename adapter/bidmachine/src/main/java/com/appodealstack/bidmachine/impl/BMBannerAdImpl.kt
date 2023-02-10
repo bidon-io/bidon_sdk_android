@@ -16,9 +16,9 @@ import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.*
 import com.appodealstack.bidon.domain.common.ext.asFailure
 import com.appodealstack.bidon.domain.common.ext.asSuccess
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.StatisticsCollectorImpl
-import com.appodealstack.bidon.domain.stats.impl.logInternal
 import com.appodealstack.bidon.view.helper.impl.dpToPx
 import io.bidmachine.AdRequest
 import io.bidmachine.PriceFloorParams
@@ -53,7 +53,7 @@ internal class BMBannerAdImpl(
     private val requestListener by lazy {
         object : AdRequest.AdRequestListener<BannerRequest> {
             override fun onRequestSuccess(request: BannerRequest, result: BMAuctionResult) {
-                logInternal(Tag, "onRequestSuccess $result: $this")
+                logInfo(Tag, "onRequestSuccess $result: $this")
                 adRequest = request
                 markBidFinished(
                     ecpm = result.price,
@@ -70,7 +70,7 @@ internal class BMBannerAdImpl(
             }
 
             override fun onRequestFailed(request: BannerRequest, bmError: BMError) {
-                logInternal(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
+                logInfo(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
                 adRequest = request
                 markBidFinished(
                     ecpm = null,
@@ -80,7 +80,7 @@ internal class BMBannerAdImpl(
             }
 
             override fun onRequestExpired(request: BannerRequest) {
-                logInternal(Tag, "onRequestExpired: $this")
+                logInfo(Tag, "onRequestExpired: $this")
                 adRequest = request
                 markBidFinished(
                     ecpm = null,
@@ -94,32 +94,32 @@ internal class BMBannerAdImpl(
     private val bannerListener by lazy {
         object : BannerListener {
             override fun onAdLoaded(bannerView: BannerView) {
-                logInternal(Tag, "onAdLoaded: $this")
+                logInfo(Tag, "onAdLoaded: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 adState.tryEmit(AdState.Fill(bannerView.asAd()))
             }
 
             override fun onAdLoadFailed(bannerView: BannerView, bmError: BMError) {
-                logInternal(Tag, "onAdLoadFailed: $this", bmError.asBidonError(demandId))
+                logInfo(Tag, "onAdLoadFailed: $this", bmError.asBidonError(demandId))
                 this@BMBannerAdImpl.bannerView = bannerView
                 adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
             }
 
             override fun onAdImpression(bannerView: BannerView) {
-                logInternal(Tag, "onAdShown: $this")
+                logInfo(Tag, "onAdShown: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 adState.tryEmit(AdState.Impression(bannerView.asAd()))
                 adState.tryEmit(AdState.PaidRevenue(bannerView.asAd()))
             }
 
             override fun onAdClicked(bannerView: BannerView) {
-                logInternal(Tag, "onAdClicked: $this")
+                logInfo(Tag, "onAdClicked: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 adState.tryEmit(AdState.Clicked(bannerView.asAd()))
             }
 
             override fun onAdExpired(bannerView: BannerView) {
-                logInternal(Tag, "onAdExpired: $this")
+                logInfo(Tag, "onAdExpired: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 adState.tryEmit(AdState.Expired(bannerView.asAd()))
             }
@@ -127,7 +127,7 @@ internal class BMBannerAdImpl(
     }
 
     override suspend fun bid(adParams: BMBannerAuctionParams): AuctionResult {
-        logInternal(Tag, "Starting with $adParams: $this")
+        logInfo(Tag, "Starting with $adParams: $this")
         markBidStarted()
         context = adParams.context
         bannerSize = adParams.bannerSize
@@ -158,7 +158,7 @@ internal class BMBannerAdImpl(
     }
 
     override suspend fun fill(): Result<Ad> {
-        logInternal(Tag, "Starting fill: $this")
+        logInfo(Tag, "Starting fill: $this")
         markFillStarted()
         val context = context
         if (context == null) {
@@ -212,7 +212,7 @@ internal class BMBannerAdImpl(
     }
 
     override fun destroy() {
-        logInternal(Tag, "destroy $this")
+        logInfo(Tag, "destroy $this")
         adRequest?.destroy()
         adRequest = null
         bannerView?.destroy()

@@ -12,11 +12,11 @@ import com.appodealstack.bidon.domain.common.BidonError
 import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.bidon.domain.common.DemandId
 import com.appodealstack.bidon.domain.common.ext.asFailure
+import com.appodealstack.bidon.domain.logging.impl.logError
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.domain.stats.DemandStat
 import com.appodealstack.bidon.domain.stats.RoundStat
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
-import com.appodealstack.bidon.domain.stats.impl.logError
-import com.appodealstack.bidon.domain.stats.impl.logInfo
 import com.appodealstack.bidon.domain.stats.usecases.StatsRequestUseCase
 import com.appodealstack.bidon.view.helper.SdkDispatchers
 import kotlinx.coroutines.async

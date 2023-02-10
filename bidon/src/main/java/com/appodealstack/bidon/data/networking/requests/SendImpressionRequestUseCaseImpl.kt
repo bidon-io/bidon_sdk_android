@@ -6,8 +6,8 @@ import com.appodealstack.bidon.data.networking.BaseResponse
 import com.appodealstack.bidon.data.networking.JsonHttpRequest
 import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.domain.databinders.DataBinderType
-import com.appodealstack.bidon.domain.stats.impl.logError
-import com.appodealstack.bidon.domain.stats.impl.logInfo
+import com.appodealstack.bidon.domain.logging.impl.logError
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.domain.stats.usecases.SendImpressionRequestUseCase
 import com.appodealstack.bidon.view.helper.SdkDispatchers
 import kotlinx.coroutines.withContext

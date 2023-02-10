@@ -5,7 +5,7 @@ import android.content.pm.PackageInfo
 import android.os.Build
 import com.appodealstack.bidon.BidOnVersion
 import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorage
-import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -38,8 +38,10 @@ internal class AppDataSourceImpl(
         try {
             packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
         } catch (throwable: Throwable) {
-            logInternal(message = throwable.message ?: "", error = throwable)
+            logInfo(Tag, message = throwable.message ?: "", error = throwable)
         }
         return packageInfo
     }
 }
+
+private const val Tag = "AppDataSource"

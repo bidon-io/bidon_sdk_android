@@ -16,9 +16,9 @@ import com.appodealstack.bidon.domain.common.Ad
 import com.appodealstack.bidon.domain.common.BidonError
 import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.bidon.domain.common.DemandId
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.StatisticsCollectorImpl
-import com.appodealstack.bidon.domain.stats.impl.logInternal
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 
@@ -47,7 +47,7 @@ internal class ApplovinRewardedImpl(
     private val requestListener by lazy {
         object : AppLovinAdLoadListener {
             override fun adReceived(ad: AppLovinAd) {
-                logInternal(Tag, "adReceived: $this")
+                logInfo(Tag, "adReceived: $this")
                 appLovinAd = ad
                 markBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
@@ -64,7 +64,7 @@ internal class ApplovinRewardedImpl(
             }
 
             override fun failedToReceiveAd(errorCode: Int) {
-                logInternal(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
+                logInfo(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
                 markBidFinished(
                     ecpm = null,
                     roundStatus = RoundStatus.NoBid,
@@ -84,22 +84,22 @@ internal class ApplovinRewardedImpl(
             override fun videoPlaybackEnded(ad: AppLovinAd, percentViewed: Double, fullyWatched: Boolean) {}
 
             override fun adDisplayed(ad: AppLovinAd) {
-                logInternal(Tag, "adDisplayed: $this")
+                logInfo(Tag, "adDisplayed: $this")
                 adState.tryEmit(AdState.Impression(ad.asAd()))
             }
 
             override fun adHidden(ad: AppLovinAd) {
-                logInternal(Tag, "adHidden: $this")
+                logInfo(Tag, "adHidden: $this")
                 adState.tryEmit(AdState.Closed(ad.asAd()))
             }
 
             override fun adClicked(ad: AppLovinAd) {
-                logInternal(Tag, "adClicked: $this")
+                logInfo(Tag, "adClicked: $this")
                 adState.tryEmit(AdState.Clicked(ad.asAd()))
             }
 
             override fun userRewardVerified(ad: AppLovinAd, response: MutableMap<String, String>?) {
-                logInternal(Tag, "userRewardVerified: $this")
+                logInfo(Tag, "userRewardVerified: $this")
                 adState.tryEmit(AdState.OnReward(ad.asAd(), reward = null))
             }
 
@@ -115,7 +115,7 @@ internal class ApplovinRewardedImpl(
         get() = appLovinAd?.asAd() ?: rewardedAd?.asAd()
 
     override fun destroy() {
-        logInternal(Tag, "destroy $this")
+        logInfo(Tag, "destroy $this")
         rewardedAd = null
         appLovinAd = null
     }
@@ -138,7 +138,7 @@ internal class ApplovinRewardedImpl(
     }
 
     override suspend fun bid(adParams: ApplovinFullscreenAdAuctionParams): AuctionResult {
-        logInternal(Tag, "Starting with $adParams: $this")
+        logInfo(Tag, "Starting with $adParams: $this")
         markBidStarted(adParams.lineItem.adUnitId)
         lineItem = adParams.lineItem
         val incentivizedInterstitial = AppLovinIncentivizedInterstitial.create(adParams.lineItem.adUnitId, appLovinSdk).also {
@@ -161,7 +161,7 @@ internal class ApplovinRewardedImpl(
     }
 
     override suspend fun fill(): Result<Ad> = runCatching {
-        logInternal(Tag, "Starting fill: $this")
+        logInfo(Tag, "Starting fill: $this")
         markFillStarted()
         requireNotNull(appLovinAd?.asAd()).also {
             markFillFinished(RoundStatus.Successful)
@@ -170,7 +170,7 @@ internal class ApplovinRewardedImpl(
     }
 
     override fun show(activity: Activity) {
-        logInternal(Tag, "Starting show: $this")
+        logInfo(Tag, "Starting show: $this")
         val appLovinAd = appLovinAd
         if (rewardedAd?.isAdReadyToDisplay == true && appLovinAd != null) {
             rewardedAd?.show(appLovinAd, activity, listener, listener, listener, listener)

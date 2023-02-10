@@ -2,8 +2,8 @@ package com.appodealstack.bidon.data.networking.impl
 
 import com.appodealstack.bidon.data.networking.HttpError
 import com.appodealstack.bidon.domain.common.ext.toHexString
-import com.appodealstack.bidon.domain.stats.impl.logError
-import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.domain.logging.impl.logError
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -114,7 +114,7 @@ internal class RawRequestClient {
     }
 
     private fun logResponseResult(request: RawRequest, responseCode: Int, url: URL, rawResponse: ByteArray?) {
-        logInternal(
+        logInfo(
             Tag,
             " <-- ${request.method} $responseCode $url, raw response(size: ${rawResponse?.size}, data: ${rawResponse?.toHexString()})"
         )

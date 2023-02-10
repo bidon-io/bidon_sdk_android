@@ -9,6 +9,7 @@ import com.appodealstack.applovin.ext.sdkVersion
 import com.appodealstack.applovin.impl.ApplovinBannerImpl
 import com.appodealstack.applovin.impl.ApplovinInterstitialImpl
 import com.appodealstack.applovin.impl.ApplovinRewardedImpl
+import com.appodealstack.bidon.BidOn
 import com.appodealstack.bidon.data.models.config.AdapterInfo
 import com.appodealstack.bidon.domain.adapter.AdProvider
 import com.appodealstack.bidon.domain.adapter.AdSource
@@ -16,6 +17,7 @@ import com.appodealstack.bidon.domain.adapter.Adapter
 import com.appodealstack.bidon.domain.adapter.Initializable
 import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.bidon.domain.common.DemandId
+import com.appodealstack.bidon.domain.logging.Logger
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
 import kotlin.coroutines.resume
@@ -47,7 +49,7 @@ class ApplovinAdapter :
             val instance = AppLovinSdk.getInstance(configParams.key, AppLovinSdkSettings(context), context).also {
                 appLovinSdk = it
             }
-            instance.settings.setVerboseLogging(true)
+            instance.settings.setVerboseLogging(BidOn.loggerLevel != Logger.Level.Off)
             if (!instance.isInitialized) {
                 instance.initializeSdk {
                     continuation.resume(Unit)

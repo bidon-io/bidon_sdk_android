@@ -1,6 +1,6 @@
 package com.appodealstack.fyber.banner
 
-import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.fyber.fairbid.ads.Banner
 import com.fyber.fairbid.ads.ImpressionData
 import com.fyber.fairbid.ads.banner.BannerError
@@ -12,7 +12,7 @@ internal fun MutableSharedFlow<BannerInterceptor>.initBannerListener() {
     val bannerInterceptorFlow = this
     Banner.setBannerListener(object : BannerListener {
         override fun onError(placementId: String, bannerError: BannerError?) {
-            logInternal(Tag, "banner onError: $placementId", bannerError?.failure?.asBidonError())
+            logInfo(Tag, "banner onError: $placementId", bannerError?.failure?.asBidonError())
             Banner.destroy(placementId)
             bannerInterceptorFlow.tryEmit(
                 BannerInterceptor.Error(placementId, bannerError?.failure.asBidonError())
@@ -20,28 +20,28 @@ internal fun MutableSharedFlow<BannerInterceptor>.initBannerListener() {
         }
 
         override fun onLoad(placementId: String) {
-            logInternal(Tag, "banner onLoad: $placementId")
+            logInfo(Tag, "banner onLoad: $placementId")
             bannerInterceptorFlow.tryEmit(
                 BannerInterceptor.Loaded(placementId)
             )
         }
 
         override fun onShow(placementId: String, impressionData: ImpressionData) {
-            logInternal(Tag, "banner onShow: $placementId")
+            logInfo(Tag, "banner onShow: $placementId")
             bannerInterceptorFlow.tryEmit(
                 BannerInterceptor.Shown(placementId, impressionData)
             )
         }
 
         override fun onClick(placementId: String) {
-            logInternal(Tag, "banner onClick: $placementId")
+            logInfo(Tag, "banner onClick: $placementId")
             bannerInterceptorFlow.tryEmit(
                 BannerInterceptor.Clicked(placementId)
             )
         }
 
         override fun onRequestStart(placementId: String) {
-            logInternal(Tag, "banner onRequestStart: $placementId")
+            logInfo(Tag, "banner onRequestStart: $placementId")
             bannerInterceptorFlow.tryEmit(
                 BannerInterceptor.RequestStarted(placementId)
             )

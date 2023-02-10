@@ -21,10 +21,10 @@ import com.appodealstack.bidon.domain.adapter.AdState
 import com.appodealstack.bidon.domain.adapter.AdViewHolder
 import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.*
+import com.appodealstack.bidon.domain.logging.impl.logError
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.StatisticsCollectorImpl
-import com.appodealstack.bidon.domain.stats.impl.logError
-import com.appodealstack.bidon.domain.stats.impl.logInternal
 import com.appodealstack.bidon.view.helper.impl.dpToPx
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
@@ -103,7 +103,7 @@ internal class MaxBannerImpl(
         get() = maxAd?.asAd() ?: maxAdView?.asAd()
 
     override fun destroy() {
-        logInternal(Tag, "destroy")
+        logInfo(Tag, "destroy")
         maxAdView?.setListener(null)
         maxAdView?.destroy()
         maxAdView = null
@@ -145,7 +145,7 @@ internal class MaxBannerImpl(
     }
 
     override suspend fun bid(adParams: MaxBannerAuctionParams): AuctionResult {
-        logInternal(Tag, "Starting with $adParams")
+        logInfo(Tag, "Starting with $adParams")
         markBidStarted(adParams.lineItem.adUnitId)
         bannerSize = adParams.bannerSize
         val maxAdView = if (adParams.bannerSize == BannerSize.Adaptive) {

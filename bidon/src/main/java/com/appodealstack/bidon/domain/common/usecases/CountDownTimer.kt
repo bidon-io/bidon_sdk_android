@@ -1,6 +1,6 @@
 package com.appodealstack.bidon.domain.common.usecases
 
-import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.view.helper.ActivityLifecycleState
 import com.appodealstack.bidon.view.helper.SdkDispatchers
 import com.appodealstack.bidon.view.helper.impl.ActivityLifecycleObserver
@@ -18,13 +18,13 @@ internal class CountDownTimer(
     private var timerDeferred: Deferred<Unit>? = null
 
     fun stop() {
-        logInternal(Tag, "Canceled")
+        logInfo(Tag, "Canceled")
         timerDeferred?.cancel()
     }
 
     fun startTimer(timeoutMs: Long, onFinish: () -> Unit) {
         scope.launch {
-            logInternal(Tag, "Started")
+            logInfo(Tag, "Started")
             val deferred = timerDeferred ?: async {
                 val seconds = (timeoutMs / OneSecond).toInt()
                 repeat(seconds) { second ->
@@ -32,13 +32,13 @@ internal class CountDownTimer(
                     activityLifecycleObserver.lifecycleFlow.first { state ->
                         state == ActivityLifecycleState.Resumed
                     }
-                    logInternal(Tag, "Tick ${second + 1}/$seconds")
+                    logInfo(Tag, "Tick ${second + 1}/$seconds")
                 }
             }.also { timerDeferred = it }
             try {
                 deferred.await()
                 onFinish()
-                logInternal(Tag, "Finished")
+                logInfo(Tag, "Finished")
             } finally {
                 timerDeferred = null
             }

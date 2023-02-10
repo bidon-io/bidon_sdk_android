@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.res.Configuration
 import com.appodealstack.bidon.data.time.ElapsedMonotonicTimeNow
 import com.appodealstack.bidon.data.time.SystemTimeNow
-import com.appodealstack.bidon.domain.stats.impl.logInfo
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.view.helper.ActivityLifecycleState
 import com.appodealstack.bidon.view.helper.PauseResumeObserver
 import kotlinx.coroutines.*

@@ -18,11 +18,10 @@ import com.appodealstack.bidon.domain.adapter.AdState
 import com.appodealstack.bidon.domain.adapter.AdViewHolder
 import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.*
+import com.appodealstack.bidon.domain.logging.impl.logError
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.StatisticsCollectorImpl
-import com.appodealstack.bidon.domain.stats.impl.logError
-import com.appodealstack.bidon.domain.stats.impl.logInfo
-import com.appodealstack.bidon.domain.stats.impl.logInternal
 import com.appodealstack.bidon.view.helper.SdkDispatchers
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.AdListener
@@ -87,17 +86,17 @@ internal class AdmobBannerImpl(
             }
 
             override fun onAdClicked() {
-                logInternal(Tag, "onAdClicked: $this")
+                logInfo(Tag, "onAdClicked: $this")
                 adState.tryEmit(AdState.Clicked(requiredAdView.asAd()))
             }
 
             override fun onAdClosed() {
-                logInternal(Tag, "onAdClosed: $this")
+                logInfo(Tag, "onAdClosed: $this")
                 adState.tryEmit(AdState.Closed(requiredAdView.asAd()))
             }
 
             override fun onAdImpression() {
-                logInternal(Tag, "onAdShown: $this")
+                logInfo(Tag, "onAdShown: $this")
                 adState.tryEmit(AdState.Impression(requiredAdView.asAd()))
             }
 
@@ -137,7 +136,7 @@ internal class AdmobBannerImpl(
     }
 
     override fun destroy() {
-        logInternal(Tag, "destroy $this")
+        logInfo(Tag, "destroy $this")
         adView?.onPaidEventListener = null
         adView = null
         lineItem = null
@@ -163,7 +162,7 @@ internal class AdmobBannerImpl(
     }
 
     override suspend fun bid(adParams: AdmobBannerAuctionParams): AuctionResult {
-        logInternal(Tag, "Starting with $adParams")
+        logInfo(Tag, "Starting with $adParams")
         markBidStarted(adParams.lineItem.adUnitId)
         return withContext(dispatcher) {
             lineItem = adParams.lineItem
@@ -209,7 +208,7 @@ internal class AdmobBannerImpl(
     }
 
     override suspend fun fill(): Result<Ad> = runCatching {
-        logInternal(Tag, "Starting fill: $this")
+        logInfo(Tag, "Starting fill: $this")
         markFillStarted()
         /**
          * Admob fills the bid automatically. It's not needed to fill it manually.
