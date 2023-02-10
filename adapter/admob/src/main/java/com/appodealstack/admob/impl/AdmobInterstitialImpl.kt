@@ -54,7 +54,7 @@ internal class AdmobInterstitialImpl(
     private val requestListener by lazy {
         object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                logInfo(Tag, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
+                logError(Tag, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
                 markBidFinished(
                     ecpm = null,
                     roundStatus = loadAdError.asBidonError().asRoundStatus(),

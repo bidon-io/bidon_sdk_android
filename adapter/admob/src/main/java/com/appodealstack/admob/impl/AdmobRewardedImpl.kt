@@ -53,7 +53,7 @@ internal class AdmobRewardedImpl(
     private val requestListener by lazy {
         object : RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                logInfo(Tag, "Error while loading ad: $loadAdError. $this", loadAdError.asBidonError())
+                logError(Tag, "Error while loading ad: $loadAdError. $this", loadAdError.asBidonError())
                 markBidFinished(
                     ecpm = null,
                     roundStatus = loadAdError.asBidonError().asRoundStatus(),

@@ -13,9 +13,13 @@ import com.appodealstack.bidon.domain.adapter.AdSource
 import com.appodealstack.bidon.domain.adapter.AdState
 import com.appodealstack.bidon.domain.adapter.WinLossNotifiable
 import com.appodealstack.bidon.domain.auction.AuctionResult
-import com.appodealstack.bidon.domain.common.*
+import com.appodealstack.bidon.domain.common.Ad
+import com.appodealstack.bidon.domain.common.BidonError
+import com.appodealstack.bidon.domain.common.DemandAd
+import com.appodealstack.bidon.domain.common.DemandId
 import com.appodealstack.bidon.domain.common.ext.asFailure
 import com.appodealstack.bidon.domain.common.ext.asSuccess
+import com.appodealstack.bidon.domain.logging.impl.logError
 import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.StatisticsCollectorImpl
@@ -72,7 +76,7 @@ internal class BMInterstitialAdImpl(
             }
 
             override fun onRequestFailed(request: InterstitialRequest, bmError: BMError) {
-                logInfo(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
+                logError(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
                 adRequest = request
                 markBidFinished(
                     ecpm = null,
@@ -102,13 +106,13 @@ internal class BMInterstitialAdImpl(
             }
 
             override fun onAdLoadFailed(interstitialAd: InterstitialAd, bmError: BMError) {
-                logInfo(Tag, "onAdLoadFailed: $this", bmError.asBidonError(demandId))
+                logError(Tag, "onAdLoadFailed: $this", bmError.asBidonError(demandId))
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
                 adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
             }
 
             override fun onAdShowFailed(interstitialAd: InterstitialAd, bmError: BMError) {
-                logInfo(Tag, "onAdShowFailed: $this", bmError.asBidonError(demandId))
+                logError(Tag, "onAdShowFailed: $this", bmError.asBidonError(demandId))
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
                 adState.tryEmit(AdState.ShowFailed(bmError.asBidonError(demandId)))
             }

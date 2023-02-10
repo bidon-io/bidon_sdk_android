@@ -5,7 +5,7 @@ import android.content.pm.PackageInfo
 import android.os.Build
 import com.appodealstack.bidon.BidOnVersion
 import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorage
-import com.appodealstack.bidon.domain.logging.impl.logInfo
+import com.appodealstack.bidon.domain.logging.impl.logError
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -38,7 +38,7 @@ internal class AppDataSourceImpl(
         try {
             packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
         } catch (throwable: Throwable) {
-            logInfo(Tag, message = throwable.message ?: "", error = throwable)
+            logError(Tag, message = throwable.message ?: "", error = throwable)
         }
         return packageInfo
     }

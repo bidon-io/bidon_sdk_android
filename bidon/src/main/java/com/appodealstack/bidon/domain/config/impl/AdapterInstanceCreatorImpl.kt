@@ -30,7 +30,7 @@ internal class AdapterInstanceCreatorImpl : AdapterInstanceCreator {
         return try {
             Class.forName(requiredClass, initialize, classLoader) as Class<Adapter>
         } catch (e: Exception) {
-            logInfo(Tag, "Adapter class not found: $requiredClass", e)
+            logError(Tag, "Adapter class not found: $requiredClass", e)
             null
         }
     }

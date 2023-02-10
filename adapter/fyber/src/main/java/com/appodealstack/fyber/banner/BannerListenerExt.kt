@@ -1,5 +1,6 @@
 package com.appodealstack.fyber.banner
 
+import com.appodealstack.bidon.domain.logging.impl.logError
 import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.fyber.fairbid.ads.Banner
 import com.fyber.fairbid.ads.ImpressionData
@@ -12,7 +13,7 @@ internal fun MutableSharedFlow<BannerInterceptor>.initBannerListener() {
     val bannerInterceptorFlow = this
     Banner.setBannerListener(object : BannerListener {
         override fun onError(placementId: String, bannerError: BannerError?) {
-            logInfo(Tag, "banner onError: $placementId", bannerError?.failure?.asBidonError())
+            logError(Tag, "banner onError: $placementId", bannerError?.failure?.asBidonError())
             Banner.destroy(placementId)
             bannerInterceptorFlow.tryEmit(
                 BannerInterceptor.Error(placementId, bannerError?.failure.asBidonError())

@@ -9,7 +9,7 @@ import android.telephony.TelephonyManager
 import android.view.Display
 import android.view.WindowManager
 import android.webkit.WebSettings
-import com.appodealstack.bidon.domain.logging.impl.logInfo
+import com.appodealstack.bidon.domain.logging.impl.logError
 import java.util.*
 
 /**
@@ -161,7 +161,7 @@ internal class DeviceDataSourceImpl(
                 val pi = pm.getPackageInfo("com.google.android.webview", 0)
                 builder.append(" Chrome/").append(pi.versionName)
             } catch (throwable: Throwable) {
-                logInfo(Tag, throwable.message ?: "", throwable)
+                logError(Tag, throwable.message ?: "", throwable)
             }
             builder.append(" Mobile")
             try {
@@ -176,11 +176,11 @@ internal class DeviceDataSourceImpl(
                     .append("/")
                     .append(packageInfo.versionName)
             } catch (throwable: Throwable) {
-                logInfo(Tag, throwable.message ?: "", throwable)
+                logError(Tag, throwable.message ?: "", throwable)
             }
             builder.toString()
         } catch (throwable: Throwable) {
-            logInfo(Tag, throwable.message ?: "", throwable)
+            logError(Tag, throwable.message ?: "", throwable)
             null
         }
     }
@@ -190,7 +190,7 @@ internal class DeviceDataSourceImpl(
         try {
             result = System.getProperty("http.agent", "")
         } catch (throwable: Throwable) {
-            logInfo(Tag, throwable.message ?: "", throwable)
+            logError(Tag, throwable.message ?: "", throwable)
         }
         return result
     }

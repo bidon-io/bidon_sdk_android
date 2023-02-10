@@ -16,6 +16,7 @@ import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.*
 import com.appodealstack.bidon.domain.common.ext.asFailure
 import com.appodealstack.bidon.domain.common.ext.asSuccess
+import com.appodealstack.bidon.domain.logging.impl.logError
 import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.StatisticsCollectorImpl
@@ -70,7 +71,7 @@ internal class BMBannerAdImpl(
             }
 
             override fun onRequestFailed(request: BannerRequest, bmError: BMError) {
-                logInfo(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
+                logError(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
                 adRequest = request
                 markBidFinished(
                     ecpm = null,
@@ -100,7 +101,7 @@ internal class BMBannerAdImpl(
             }
 
             override fun onAdLoadFailed(bannerView: BannerView, bmError: BMError) {
-                logInfo(Tag, "onAdLoadFailed: $this", bmError.asBidonError(demandId))
+                logError(Tag, "onAdLoadFailed: $this", bmError.asBidonError(demandId))
                 this@BMBannerAdImpl.bannerView = bannerView
                 adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
             }

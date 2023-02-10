@@ -10,23 +10,15 @@ import com.appodealstack.bidon.domain.logging.Logger.Level
  *
  * Set log level with [Logger]
  */
-fun logInfo(tag: String, message: String, error: Throwable? = null) {
+fun logInfo(tag: String, message: String) {
     if (BidOn.loggerLevel in arrayOf(Level.Error, Level.Verbose)) {
-        val msg = "[$tag] $message"
-        val title = DefaultTag
-        if (error != null) {
-            Log.e(title, msg, error)
-        } else {
-            Log.d(title, msg)
-        }
+        Log.d(DefaultTag, "[$tag] $message")
     }
 }
 
 fun logError(tag: String, message: String, error: Throwable?) {
-    if (BidOn.loggerLevel in arrayOf(Level.Error)) {
-        val msg = if (tag == DefaultTag) message else "[$tag] $message"
-        val title = DefaultTag
-        Log.e(title, msg, error)
+    if (BidOn.loggerLevel == Level.Error) {
+        Log.e(DefaultTag, "[$tag] $message", error)
     }
 }
 
