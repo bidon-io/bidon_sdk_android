@@ -19,10 +19,10 @@ import com.appodealstack.bidon.domain.common.Ad
 import com.appodealstack.bidon.domain.common.BidonError
 import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.bidon.domain.common.DemandId
+import com.appodealstack.bidon.domain.logging.impl.logError
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.StatisticsCollectorImpl
-import com.appodealstack.bidon.domain.stats.impl.logError
-import com.appodealstack.bidon.domain.stats.impl.logInternal
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 
@@ -96,7 +96,7 @@ internal class MaxInterstitialImpl(
         get() = maxAd?.asAd() ?: interstitialAd?.asAd()
 
     override fun destroy() {
-        logInternal(Tag, "destroy")
+        logInfo(Tag, "destroy")
         interstitialAd?.setListener(null)
         interstitialAd?.destroy()
         interstitialAd = null
@@ -121,7 +121,7 @@ internal class MaxInterstitialImpl(
     }
 
     override suspend fun bid(adParams: MaxFullscreenAdAuctionParams): AuctionResult {
-        logInternal(Tag, "Starting with $adParams")
+        logInfo(Tag, "Starting with $adParams")
         markBidStarted(adParams.lineItem.adUnitId)
         val maxInterstitialAd = MaxInterstitialAd(adParams.lineItem.adUnitId, adParams.activity).also {
             it.setListener(maxAdListener)

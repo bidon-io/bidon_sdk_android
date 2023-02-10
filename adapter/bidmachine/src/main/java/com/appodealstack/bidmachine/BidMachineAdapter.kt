@@ -7,10 +7,12 @@ import com.appodealstack.bidmachine.ext.sdkVersion
 import com.appodealstack.bidmachine.impl.BMBannerAdImpl
 import com.appodealstack.bidmachine.impl.BMInterstitialAdImpl
 import com.appodealstack.bidmachine.impl.BMRewardedAdImpl
+import com.appodealstack.bidon.BidOn
 import com.appodealstack.bidon.data.models.config.AdapterInfo
 import com.appodealstack.bidon.domain.adapter.*
 import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.bidon.domain.common.DemandId
+import com.appodealstack.bidon.domain.logging.Logger
 import io.bidmachine.BidMachine
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
@@ -40,7 +42,7 @@ class BidMachineAdapter :
         suspendCancellableCoroutine { continuation ->
             this.context = activity.applicationContext
             val sourceId = configParams.sellerId
-            BidMachine.setLoggingEnabled(true)
+            BidMachine.setLoggingEnabled(BidOn.loggerLevel != Logger.Level.Off)
             BidMachine.initialize(context, sourceId) {
                 continuation.resume(Unit)
             }

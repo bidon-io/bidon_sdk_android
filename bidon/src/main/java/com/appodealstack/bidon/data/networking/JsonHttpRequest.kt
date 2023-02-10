@@ -6,7 +6,7 @@ import com.appodealstack.bidon.data.networking.impl.RawResponse
 import com.appodealstack.bidon.data.networking.impl.jsonZipHttpClient
 import com.appodealstack.bidon.di.get
 import com.appodealstack.bidon.domain.common.BidonError
-import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.view.helper.SdkDispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -34,12 +34,12 @@ internal class JsonHttpRequest(
                     is RawResponse.Success -> {
                         require(response.code in 200 until 300)
                         response.requestBody?.let { String(it) }.orEmpty().also {
-                            logInternal(Tag, "Response: $it")
+                            logInfo(Tag, "Response: $it")
                         }
                     }
                     is RawResponse.Failure -> {
                         val baseResponse = JsonParsers.parseOrNull<BaseResponse>(String(response.responseBody ?: byteArrayOf()))
-                        logInternal(Tag, "Request failed $baseResponse")
+                        logInfo(Tag, "Request failed $baseResponse")
                         when (response.code) {
                             422 -> throw BidonError.AppKeyIsInvalid(message = baseResponse?.error?.message)
                             500 -> throw BidonError.InternalServerSdkError(message = baseResponse?.error?.message)
@@ -50,7 +50,7 @@ internal class JsonHttpRequest(
             }.onSuccess { jsonString ->
                 withContext(SdkDispatchers.IO) {
                     JSONObject(jsonString).optString("token", "").takeIf { !it.isNullOrBlank() }?.let {
-                        logInternal(Tag, "New token saved: $it")
+                        logInfo(Tag, "New token saved: $it")
                         keyValueStorage.token = it
                     }
                 }

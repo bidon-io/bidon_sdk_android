@@ -16,9 +16,9 @@ import com.appodealstack.bidon.domain.common.Ad
 import com.appodealstack.bidon.domain.common.BidonError
 import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.bidon.domain.common.DemandId
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.impl.StatisticsCollectorImpl
-import com.appodealstack.bidon.domain.stats.impl.logInternal
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 
@@ -47,7 +47,7 @@ internal class ApplovinInterstitialImpl(
     private val requestListener by lazy {
         object : AppLovinAdLoadListener {
             override fun adReceived(ad: AppLovinAd) {
-                logInternal(Tag, "adReceived: $this")
+                logInfo(Tag, "adReceived: $this")
                 appLovinAd = ad
                 markBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
@@ -64,7 +64,7 @@ internal class ApplovinInterstitialImpl(
             }
 
             override fun failedToReceiveAd(errorCode: Int) {
-                logInternal(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
+                logInfo(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
                 markBidFinished(
                     ecpm = null,
                     roundStatus = RoundStatus.NoBid,
@@ -83,17 +83,17 @@ internal class ApplovinInterstitialImpl(
             override fun videoPlaybackEnded(ad: AppLovinAd, percentViewed: Double, fullyWatched: Boolean) {}
 
             override fun adDisplayed(ad: AppLovinAd) {
-                logInternal(Tag, "adDisplayed: $this")
+                logInfo(Tag, "adDisplayed: $this")
                 adState.tryEmit(AdState.Impression(ad.asAd()))
             }
 
             override fun adHidden(ad: AppLovinAd) {
-                logInternal(Tag, "adHidden: $this")
+                logInfo(Tag, "adHidden: $this")
                 adState.tryEmit(AdState.Closed(ad.asAd()))
             }
 
             override fun adClicked(ad: AppLovinAd) {
-                logInternal(Tag, "adClicked: $this")
+                logInfo(Tag, "adClicked: $this")
                 adState.tryEmit(AdState.Clicked(ad.asAd()))
             }
         }
@@ -105,7 +105,7 @@ internal class ApplovinInterstitialImpl(
         get() = appLovinAd?.asAd() ?: interstitialAd?.asAd()
 
     override fun destroy() {
-        logInternal(Tag, "destroy")
+        logInfo(Tag, "destroy")
         interstitialAd = null
         appLovinAd = null
     }
@@ -130,7 +130,7 @@ internal class ApplovinInterstitialImpl(
     override suspend fun bid(
         adParams: ApplovinFullscreenAdAuctionParams
     ): AuctionResult {
-        logInternal(Tag, "Starting with $adParams: $this")
+        logInfo(Tag, "Starting with $adParams: $this")
         markBidStarted(adParams.lineItem.adUnitId)
         lineItem = adParams.lineItem
         val incentivizedInterstitial = AppLovinIncentivizedInterstitial.create(adParams.lineItem.adUnitId, appLovinSdk).also {
@@ -153,7 +153,7 @@ internal class ApplovinInterstitialImpl(
     }
 
     override suspend fun fill(): Result<Ad> = runCatching {
-        logInternal(Tag, "Starting fill: $this")
+        logInfo(Tag, "Starting fill: $this")
         markFillStarted()
         requireNotNull(appLovinAd?.asAd()).also {
             markFillFinished(RoundStatus.Successful)
@@ -162,7 +162,7 @@ internal class ApplovinInterstitialImpl(
     }
 
     override fun show(activity: Activity) {
-        logInternal(Tag, "Starting show: $this")
+        logInfo(Tag, "Starting show: $this")
         val appLovinAd = appLovinAd
         if (interstitialAd?.isAdReadyToDisplay == true && appLovinAd != null) {
             interstitialAd?.show(appLovinAd, activity, null, listener, listener, listener)

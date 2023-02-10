@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.app.Application
 import android.os.Bundle
-import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.view.helper.ActivityLifecycleState
 import com.appodealstack.bidon.view.helper.PauseResumeObserver
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,22 +31,22 @@ internal class PauseResumeObserverImpl(
 
                 override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
                 override fun onActivityDestroyed(activity: Activity) {
-                    logInternal(Tag, "Activity Destroyed (current: ${weakActivity?.get()}) $activity")
+                    logInfo(Tag, "Activity Destroyed (current: ${weakActivity?.get()}) $activity")
                     if (activity == weakActivity?.get()) {
                         weakActivity = null
                     }
                 }
 
                 override fun onActivityResumed(activity: Activity) {
-                    logInternal(Tag, "Activity Resumed (current: ${weakActivity?.get()}) $activity")
+                    logInfo(Tag, "Activity Resumed (current: ${weakActivity?.get()}) $activity")
                     weakActivity = WeakReference(activity)
                     lifecycleFlow.value = ActivityLifecycleState.Resumed
                 }
 
                 override fun onActivityPaused(activity: Activity) {
-                    logInternal(Tag, "Activity <Paused> (current: ${weakActivity?.get()}) $activity")
+                    logInfo(Tag, "Activity <Paused> (current: ${weakActivity?.get()}) $activity")
                     if (activity == weakActivity?.get()) {
-                        logInternal(Tag, "Activity Paused $activity")
+                        logInfo(Tag, "Activity Paused $activity")
                         lifecycleFlow.value = ActivityLifecycleState.Paused
                     }
                 }

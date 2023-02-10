@@ -6,6 +6,7 @@ import com.appodealstack.bidon.domain.adapter.Adapter
 import com.appodealstack.bidon.domain.common.impl.BidOnSdkImpl
 import com.appodealstack.bidon.domain.config.DefaultAdapters
 import com.appodealstack.bidon.domain.config.InitializationCallback
+import com.appodealstack.bidon.domain.logging.Logger
 
 /**
  * Created by Aleksei Cherniaev on 08/08/2022.
@@ -16,12 +17,13 @@ object BidOn : BidOnSdk by BidOnSdkImpl()
 /**
  * [BidOn] SDK API
  */
-interface BidOnSdk : BidOnBuilder {
+interface BidOnSdk : BidOnBuilder, Logger {
     companion object {
         const val DefaultPlacement = "default"
         const val DefaultMinPrice = 0.0
     }
 
+    override fun setLogLevel(logLevel: Logger.Level)
     fun isInitialized(): Boolean
 }
 

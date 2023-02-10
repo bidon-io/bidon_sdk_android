@@ -7,8 +7,8 @@ import com.appodealstack.bidon.domain.adapter.AdapterParameters
 import com.appodealstack.bidon.domain.adapter.AdaptersSource
 import com.appodealstack.bidon.domain.adapter.Initializable
 import com.appodealstack.bidon.domain.config.usecases.InitAndRegisterAdaptersUseCase
-import com.appodealstack.bidon.domain.stats.impl.logError
-import com.appodealstack.bidon.domain.stats.impl.logInfo
+import com.appodealstack.bidon.domain.logging.impl.logError
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import kotlinx.coroutines.withTimeoutOrNull
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -47,7 +47,7 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                 }
 
             if (adapterParameters == null) {
-                logError(Tag, "Config parameters is null. Adapter not initialized: $adapter")
+                logError(Tag, "Config parameters is null. Adapter not initialized: $adapter", null)
                 null
             } else {
                 withTimeoutOrNull(timeout) {
@@ -57,7 +57,7 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                     )
                     adapter
                 } ?: run {
-                    logError(Tag, "Adapter's initializing timed out. Adapter not initialized: $adapter")
+                    logError(Tag, "Adapter's initializing timed out. Adapter not initialized: $adapter", null)
                     null
                 }
             }
@@ -68,4 +68,4 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
     }
 }
 
-private const val Tag = "Initializer"
+private const val Tag = "InitAndRegisterUserCase"

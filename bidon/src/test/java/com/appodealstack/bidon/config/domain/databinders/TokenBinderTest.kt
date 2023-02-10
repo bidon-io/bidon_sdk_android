@@ -6,9 +6,8 @@ import com.appodealstack.bidon.data.binderdatasources.token.TokenDataSource
 import com.appodealstack.bidon.data.json.jsonObject
 import com.appodealstack.bidon.data.models.config.Token
 import com.appodealstack.bidon.domain.databinders.TokenBinder
-import com.appodealstack.bidon.domain.stats.impl.logError
-import com.appodealstack.bidon.domain.stats.impl.logInfo
-import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.domain.logging.impl.logError
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
@@ -28,9 +27,9 @@ class TokenBinderTest : ConcurrentTest() {
     fun before() {
         every { dataSource.getCachedToken() } returns Token(token)
         mockkStatic(Log::class)
-        mockkStatic(::logInfo)
+        mockkStatic(::com.appodealstack.bidon.domain.logging.impl.logInfo)
         every { logInfo(any(), any()) } returns Unit
-        every { logInternal(any(), any(), any()) } returns Unit
+        every { logInfo(any(), any(), any()) } returns Unit
         every { logError(any(), any(), any()) } returns Unit
     }
 

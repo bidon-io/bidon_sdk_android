@@ -3,9 +3,8 @@ package com.appodealstack.bidon.domain.config.impl
 import com.appodealstack.bidon.domain.adapter.Adapter
 import com.appodealstack.bidon.domain.config.AdapterInstanceCreator
 import com.appodealstack.bidon.domain.config.DefaultAdapters
-import com.appodealstack.bidon.domain.stats.impl.logError
-import com.appodealstack.bidon.domain.stats.impl.logInfo
-import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.domain.logging.impl.logError
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 
 /**
  * Created by Aleksei Cherniaev on 10/08/2022.
@@ -15,7 +14,10 @@ internal class AdapterInstanceCreatorImpl : AdapterInstanceCreator {
         val adaptersClasses = DefaultAdapters.values().mapNotNull { adapterItem ->
             obtainServiceClass(adapterItem.classPath)
         }
-        logInfo(Tag, "Available adapters classes: ${adaptersClasses.joinToString { it.simpleName }}")
+        logInfo(
+            Tag,
+            "Available adapters classes: ${adaptersClasses.joinToString { it.simpleName }}"
+        )
 
         return adaptersClasses.mapNotNull {
             getAdapterInstance(clazz = it)
@@ -28,7 +30,7 @@ internal class AdapterInstanceCreatorImpl : AdapterInstanceCreator {
         return try {
             Class.forName(requiredClass, initialize, classLoader) as Class<Adapter>
         } catch (e: Exception) {
-            logInternal(Tag, "Adapter class not found: $requiredClass", e)
+            logError(Tag, "Adapter class not found: $requiredClass", e)
             null
         }
     }

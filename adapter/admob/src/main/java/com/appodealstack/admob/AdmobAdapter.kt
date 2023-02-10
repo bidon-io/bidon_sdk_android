@@ -14,8 +14,8 @@ import com.appodealstack.bidon.domain.adapter.Adapter
 import com.appodealstack.bidon.domain.adapter.Initializable
 import com.appodealstack.bidon.domain.common.DemandAd
 import com.appodealstack.bidon.domain.common.DemandId
-import com.google.android.gms.ads.*
-import java.util.*
+import com.appodealstack.bidon.view.BannerView
+import com.google.android.gms.ads.MobileAds
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -39,7 +39,7 @@ class AdmobAdapter :
         this.context = activity.applicationContext
         /**
          * Don't forget set Automatic refresh is Disabled for each AdUnit.
-         * Manage refresh rate with [AutoRefresher.setAutoRefresh].
+         * Manage refresh rate with [BannerView.startAutoRefresh].
          */
         MobileAds.initialize(context) {
             continuation.resume(Unit)

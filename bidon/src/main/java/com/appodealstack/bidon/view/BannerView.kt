@@ -20,10 +20,9 @@ import com.appodealstack.bidon.domain.auction.impl.MaxEcpmAuctionResolver
 import com.appodealstack.bidon.domain.common.*
 import com.appodealstack.bidon.domain.common.AutoRefresh
 import com.appodealstack.bidon.domain.common.usecases.CountDownTimer
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
 import com.appodealstack.bidon.domain.stats.StatisticsCollector.AdType.Banner
-import com.appodealstack.bidon.domain.stats.impl.logInfo
-import com.appodealstack.bidon.domain.stats.impl.logInternal
 import com.appodealstack.bidon.view.helper.ActivityLifecycleState
 import com.appodealstack.bidon.view.helper.BannerState.*
 import com.appodealstack.bidon.view.helper.SdkDispatchers
@@ -145,7 +144,10 @@ class BannerView @JvmOverloads constructor(
 
     override fun startAutoRefresh(timeoutMs: Long) {
         if (activityLifecycleObserver == null) {
-            logInfo(Tag, "Auto-refresh is disabled, because BannerView created not with Activity context.")
+            logInfo(
+                Tag,
+                "Auto-refresh is disabled, because BannerView created not with Activity context."
+            )
             refresh = AutoRefresh.Off
             return
         }
@@ -194,7 +196,10 @@ class BannerView @JvmOverloads constructor(
         loadActionFlow.scan(
             initial = loadState.value,
             operation = { state, action ->
-                logInternal(Tag, "Load Action: ${action.javaClass.simpleName}. Current State: ${state.javaClass.simpleName}.")
+                logInfo(
+                    Tag,
+                    "Load Action: ${action.javaClass.simpleName}. Current State: ${state.javaClass.simpleName}."
+                )
                 when (action) {
                     LoadAction.OnLoadInvoked -> {
                         when (state) {
@@ -203,11 +208,17 @@ class BannerView @JvmOverloads constructor(
                                 LoadState.Loading
                             }
                             LoadState.Loading -> {
-                                logInternal(Tag, "Auction already in progress. Placement($placementId).")
+                                logInfo(
+                                    Tag,
+                                    "Auction already in progress. Placement($placementId)."
+                                )
                                 state
                             }
                             is LoadState.Loaded -> {
-                                logInternal(Tag, "Auction is completed and winner exists. Placement($placementId).")
+                                logInfo(
+                                    Tag,
+                                    "Auction is completed and winner exists. Placement($placementId)."
+                                )
                                 state
                             }
                         }
@@ -251,7 +262,7 @@ class BannerView @JvmOverloads constructor(
                 }
             }
         ).onEach {
-            logInternal(Tag, "New Load state: ${it.javaClass.simpleName}")
+            logInfo(Tag, "New Load state: ${it.javaClass.simpleName}")
             loadState.value = it
         }.launchIn(scope = scope)
     }
@@ -260,7 +271,10 @@ class BannerView @JvmOverloads constructor(
         showActionFlow.scan(
             initial = showState.value,
             operation = { state, action ->
-                logInternal(Tag, "Show Action: ${action.javaClass.simpleName}. Current State: ${state.javaClass.simpleName}.")
+                logInfo(
+                    Tag,
+                    "Show Action: ${action.javaClass.simpleName}. Current State: ${state.javaClass.simpleName}."
+                )
                 when (action) {
                     ShowAction.OnShowInvoked -> {
                         proceedShow()
@@ -299,14 +313,14 @@ class BannerView @JvmOverloads constructor(
                 }
             }
         ).onEach {
-            logInternal(Tag, "New Show state: ${it.javaClass.simpleName}")
+            logInfo(Tag, "New Show state: ${it.javaClass.simpleName}")
             showState.value = it
         }.launchIn(scope = scope)
     }
 
     private fun launchLoadingRefreshIfNeeded() {
         (refresh as? AutoRefresh.On)?.timeoutMs?.let { timeoutMs ->
-            logInternal(Tag, "Launching Loading CountDownTimer: $timeoutMs ms")
+            logInfo(Tag, "Launching Loading CountDownTimer: $timeoutMs ms")
             loadingRefreshTimer?.startTimer(timeoutMs) {
                 sendAction(LoadAction.OnRefreshTimeoutFinished)
             }
@@ -315,7 +329,7 @@ class BannerView @JvmOverloads constructor(
 
     private fun launchDisplayingRefreshIfNeeded() {
         (refresh as? AutoRefresh.On)?.timeoutMs?.let { timeoutMs ->
-            logInternal(Tag, "Launching Display CountDownTimer: $timeoutMs ms")
+            logInfo(Tag, "Launching Display CountDownTimer: $timeoutMs ms")
             displayingRefreshTimer?.startTimer(timeoutMs) {
                 sendAction(ShowAction.OnRefreshTimeoutFinished)
             }
@@ -325,7 +339,10 @@ class BannerView @JvmOverloads constructor(
     private fun proceedShow() {
         showJob?.cancel()
         if (refresh is AutoRefresh.Off && loadState.value !is LoadState.Loaded) {
-            logInternal(Tag, "AutoRefresh is OFF and no banner loaded. Unable to show banner.")
+            logInfo(
+                Tag,
+                "AutoRefresh is OFF and no banner loaded. Unable to show banner."
+            )
             return
         }
         showJob = scope.launch {
@@ -343,7 +360,10 @@ class BannerView @JvmOverloads constructor(
                 activityLifecycleObserver?.lifecycleFlow?.first {
                     val isResumed = it == ActivityLifecycleState.Resumed
                     if (!isResumed) {
-                        logInternal(Tag, "Showing is waiting for Activity Resumed state. Current: $it")
+                        logInfo(
+                            Tag,
+                            "Showing is waiting for Activity Resumed state. Current: $it"
+                        )
                     }
                     isResumed
                 }
@@ -387,7 +407,7 @@ class BannerView @JvmOverloads constructor(
     private fun subscribeToWinner(adSource: AdSource<*>) {
         observeCallbacksJob?.cancel()
         observeCallbacksJob = adSource.adState.onEach { state ->
-            logInternal(Tag, "$state")
+            logInfo(Tag, "$state")
             when (state) {
                 is AdState.Bid,
                 is AdState.OnReward,

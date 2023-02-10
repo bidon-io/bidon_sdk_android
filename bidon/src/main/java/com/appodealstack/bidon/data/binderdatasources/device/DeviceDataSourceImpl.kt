@@ -9,8 +9,9 @@ import android.telephony.TelephonyManager
 import android.view.Display
 import android.view.WindowManager
 import android.webkit.WebSettings
-import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.domain.logging.impl.logError
 import java.util.*
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
@@ -160,7 +161,7 @@ internal class DeviceDataSourceImpl(
                 val pi = pm.getPackageInfo("com.google.android.webview", 0)
                 builder.append(" Chrome/").append(pi.versionName)
             } catch (throwable: Throwable) {
-                logInternal(message = throwable.message ?: "", error = throwable)
+                logError(Tag, throwable.message ?: "", throwable)
             }
             builder.append(" Mobile")
             try {
@@ -175,11 +176,11 @@ internal class DeviceDataSourceImpl(
                     .append("/")
                     .append(packageInfo.versionName)
             } catch (throwable: Throwable) {
-                logInternal(message = throwable.message ?: "", error = throwable)
+                logError(Tag, throwable.message ?: "", throwable)
             }
             builder.toString()
         } catch (throwable: Throwable) {
-            logInternal(message = throwable.message ?: "", error = throwable)
+            logError(Tag, throwable.message ?: "", throwable)
             null
         }
     }
@@ -189,10 +190,11 @@ internal class DeviceDataSourceImpl(
         try {
             result = System.getProperty("http.agent", "")
         } catch (throwable: Throwable) {
-            logInternal(message = throwable.message ?: "", error = throwable)
+            logError(Tag, throwable.message ?: "", throwable)
         }
         return result
     }
 }
 
 private const val AndroidPlatform = "android"
+private const val Tag = "DeviceDataSource"

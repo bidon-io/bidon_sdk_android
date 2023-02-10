@@ -11,8 +11,8 @@ import com.appodealstack.bidon.domain.auction.AdTypeParam
 import com.appodealstack.bidon.domain.auction.AuctionHolder
 import com.appodealstack.bidon.domain.auction.AuctionResult
 import com.appodealstack.bidon.domain.common.*
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.domain.stats.StatisticsCollector
-import com.appodealstack.bidon.domain.stats.impl.logInfo
 import com.appodealstack.bidon.view.helper.SdkDispatchers
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn

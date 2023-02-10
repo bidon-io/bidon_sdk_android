@@ -9,7 +9,7 @@ import android.os.Debug
 import android.os.Environment
 import android.os.StatFs
 import android.text.TextUtils
-import com.appodealstack.bidon.domain.stats.impl.logError
+import com.appodealstack.bidon.domain.logging.impl.logError
 import java.io.*
 import java.lang.ref.WeakReference
 import java.util.regex.Pattern
@@ -119,7 +119,7 @@ internal class SessionDataSourceImpl(
                 }
             }
         } catch (throwable: Throwable) {
-            logError(message = throwable.message ?: "", error = throwable)
+            logError(Tag, throwable.message ?: "", throwable)
         }
         return NoBatteryData
     }
@@ -147,7 +147,7 @@ internal class SessionDataSourceImpl(
                 totalStorageSize = stat.blockCountLong * stat.blockSizeLong
             }
         } catch (throwable: Throwable) {
-            logError(message = throwable.message ?: "", error = throwable)
+            logError(Tag, throwable.message ?: "", throwable)
         }
         return totalStorageSize
     }
@@ -196,7 +196,7 @@ internal class SessionDataSourceImpl(
                 coreCount = it
             }
         } catch (throwable: Throwable) {
-            logError(message = throwable.message ?: "", error = throwable)
+            logError(Tag, throwable.message ?: "", throwable)
             Runtime.getRuntime().availableProcessors().also {
                 coreCount = it
             }
@@ -286,11 +286,10 @@ internal class SessionDataSourceImpl(
         try {
             closeable?.close()
         } catch (e: Throwable) {
-            logError(message = e.message ?: "", error = e)
+            logError(Tag, e.message ?: "", e)
         }
     }
 }
 
 private const val Tag = "SessionDataSource"
-
 private const val NoBatteryData = -1f

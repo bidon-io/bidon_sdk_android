@@ -9,8 +9,8 @@ import com.appodealstack.bidon.data.networking.encoders.RequestDataDecoder
 import com.appodealstack.bidon.data.networking.encoders.RequestDataEncoder
 import com.appodealstack.bidon.data.networking.encoders.ext.decodeWith
 import com.appodealstack.bidon.data.networking.encoders.ext.encodeWith
-import com.appodealstack.bidon.domain.stats.impl.logError
-import com.appodealstack.bidon.domain.stats.impl.logInternal
+import com.appodealstack.bidon.domain.logging.impl.logError
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import kotlinx.coroutines.delay
 
 internal val jsonZipHttpClient by lazy {
@@ -36,7 +36,7 @@ internal class HttpClientImpl(
         url: String,
         body: ByteArray?,
     ): Result<RawResponse> {
-        logInternal(Tag, "--> $method $url, request body: ${String(body ?: byteArrayOf())}")
+        logInfo(Tag, "--> $method $url, request body: ${String(body ?: byteArrayOf())}")
         // getting headers from encoders
         val allHeaders = encoders
             .fold(

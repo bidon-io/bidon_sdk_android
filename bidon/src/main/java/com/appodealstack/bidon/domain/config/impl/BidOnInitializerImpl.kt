@@ -15,8 +15,8 @@ import com.appodealstack.bidon.domain.config.BidOnInitializer
 import com.appodealstack.bidon.domain.config.InitializationCallback
 import com.appodealstack.bidon.domain.config.usecases.GetConfigRequestUseCase
 import com.appodealstack.bidon.domain.config.usecases.InitAndRegisterAdaptersUseCase
-import com.appodealstack.bidon.domain.stats.impl.logError
-import com.appodealstack.bidon.domain.stats.impl.logInfo
+import com.appodealstack.bidon.domain.logging.impl.logError
+import com.appodealstack.bidon.domain.logging.impl.logInfo
 import com.appodealstack.bidon.view.helper.SdkDispatchers
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -90,7 +90,7 @@ internal class BidOnInitializerImpl : BidOnInitializer, BidOnBuilder {
                 runCatching {
                     initialize(activity, appKey)
                 }.onFailure {
-                    logError(message = "Error while initialization", error = it)
+                    logError(Tag, "Error while initialization", it)
                     initializationState.value = SdkState.InitializationFailed
                 }.onSuccess {
                     initializationState.value = SdkState.Initialized
