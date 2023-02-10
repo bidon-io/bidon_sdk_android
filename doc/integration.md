@@ -45,6 +45,6 @@ BidOn
 
 ## Configure Ad Types
 
-- [Interstitials](/ad-formats/interstitials.md)
-- [Rewarded Ads](/ad-formats/rewarded.md)
-- [Banners](/ad-formats/banner.md)
+- [Interstitials](ad-formats/interstitial.md)
+- [Rewarded Ads](ad-formats/rewarded.md)
+- [Banners](ad-formats/banner.md)
