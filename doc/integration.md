@@ -28,13 +28,12 @@ Then sync project.
 
 ## Initialize the SDK
 
-Receive your `app key` in the dashboard app settings. Init Bidon SDK in your MainActivity class.
+Receive your `APP_KEY` in the dashboard app settings. Init Bidon SDK in your MainActivity class.
 
-`kotlin`
 ```kotlin
 BidOn
     .setDefaultAdapters()
-    // .setAdapters(YourOwnAdapter()) // use it if you have implemented your Adapter (AdNetwork)
+    // .setAdapters(YourOwnAdapter()) // for registering your custom Adapter (AdNetwork)
     .setInitializationCallback {
         //  BidOn is initialized and ready to work
     }

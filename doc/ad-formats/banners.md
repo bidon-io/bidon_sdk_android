@@ -2,98 +2,59 @@
 
 ## Loading an Banners
 
-To load banner, create a `BDNBanner`.  Implement `BDNAdViewDelegate` that you are notified when your ad is ready and of other ad-related events. This argument can be ad revenue value from mediaton.
+To load a banner, create a `BannerView` instance. Add (optional) placement if needed, otherwise placement = "default" will be used. 
+Important: for a single instance of a banner, load() and show() can only be called once. Create new instance for every new banner (in case refreshing banner by timeout as well).
 
-> Set `rootViewController` property before attemp to call loadAd method!
+```kotlin
+val banner = BannerView(context, placement = "your_placement")
+```
 
-```swift
-class ViewController: UIViewController {
-    var banner: BidOn.Banner!
-    
-    func loadBanner() {
-        banner = BidOn.Banner(frame: .zero)
-        banner.rootViewController = self
-        banner.format = .banner
-        banner.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(banner)
-        NSLayoutConstraint.activate([
-            banner.heightAnchor.constraint(equalToConstant: 50),
-            banner.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            banner.leftAnchor.constraint(equalTo: view.leftAnchor),
-            banner.rightAnchor.constraint(equalTo: view.rightAnchor)
-        ])
-        
-        banner.loadAd(with: 0.1)
+Set `BannerListener` for receiving all-related events, including loading/displaying and revenue callbacks.
+
+```kotlin
+banner.setBannerListener(object : BannerListener {
+    override fun onAdLoaded(ad: Ad) {
+        // ready to show
     }
-}
 
+    override fun onAdLoadFailed(cause: BidonError) {
+    }
 
-extension ViewController: BidOn.AdViewDelegate {
-    func adView(_ adView: UIView & BidOn.AdView, willPresentScreen ad: BidOn.Ad) {}
-    
-    func adView(_ adView: UIView & BidOn.AdView, didDismissScreen ad: BidOn.Ad) {}
-    
-    func adView(_ adView: UIView & BidOn.AdView, willLeaveApplication ad: BidOn.Ad) {}
-    
-    func adObject(_ adObject: BidOn.AdObject, didLoadAd ad: BidOn.Ad) {}
-    
-    func adObject(_ adObject: BidOn.AdObject, didFailToLoadAd error: Error) {}
-}
+    override fun onAdShowFailed(cause: BidonError) {
+    }
+
+    override fun onAdShown(ad: Ad) {
+    }
+
+    override fun onAdClicked(ad: Ad) {
+    }
+
+    override fun onAdClosed(ad: Ad) {
+    }
+
+    override fun onAdExpired(ad: Ad) {
+    }
+
+    override fun onRevenuePaid(ad: Ad) {
+        // ad.price - ad revenue from mediation
+    }
+})
+banner.setAdSize(BannerSize.Banner)
+banner.load(minPrice = otherMediationEcpm) // or use DefaultMinPrice
 ```
 
-```obj-c
-#import "ViewController.h"
-#import <AppLovinSDK/AppLovinSDK.h>
-#import <BidOn/BidOn.h>
+## Displaying banners
+To show banner, place it to you AdContainer and invoke `show()`
 
-
-@interface ViewController() <BDNAdViewDelegate>
-
-@property (nonatomic, strong) BDNBanner *banner;
-
-@end
-
-
-@implementation ViewController
-
-- (void)createBanner {
-    self.banner = [[BDNBanner alloc] initWithFrame: CGRectZero];
-    self.banner.format = BDNAdViewFormatBanner;
-    self.banner.rootViewController = self;
-    self.banner.delegate = self;
-    self.banner.translatesAutoresizingMaskIntoConstraints = NO;
-    
-    [self.view addSubview: self.banner];
-    [NSLayoutConstraint activateConstraints:@[
-        [self.banner.heightAnchor constraintEqualToConstant:50],
-        [self.banner.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
-        [self.banner.leftAnchor constraintEqualToAnchor:self.view.leftAnchor],
-        [self.banner.rightAnchor constraintEqualToAnchor:self.view.rightAnchor]
-    ]];
-    
-    [self.banner loadAdWith:0.1];
-}
-
-#pragma mark - BDNAdViewDelegate Protocol
-
-- (void)adObject:(id<BDNAdObject>)adObject didFailToLoadAd:(NSError *)error {}
-
-- (void)adObject:(id<BDNAdObject>)adObject didLoadAd:(id<BNAd>)ad {}
-
-- (void)adView:(UIView<BDNAdView> *)adView didDismissScreen:(id<BNAd>)ad {}
-
-- (void)adView:(UIView<BDNAdView> *)adView willLeaveApplication:(id<BNAd>)ad {}
-
-- (void)adView:(UIView<BDNAdView> *)adView willPresentScreen:(id<BNAd>)ad {}
-
-@end
+```kotlin
+banner.show()
 ```
 
-## Ad View Format
+## BannerSize
 
-| Ad View Format | Size | Description  |
-|---|---|---|
-| banner  | 320 x 50   | Fixed size banner for phones |
-| leaderboard | 728 x 90  | Fixed size banner for pads  |
-| mrec | 300 x 250 | Fixed medium rectangle banners  |
-| adaptive | -/- x 50/90 | Flexible width banners |
+| Ad View Format | Size        | Description                    |
+|----------------|-------------|--------------------------------|
+| Banner         | 320 x 50    | Fixed size banner for phones   |
+| LeaderBoard    | 728 x 90    | Fixed size banner for pads     |
+| MRec           | 300 x 250   | Fixed medium rectangle banners |
+| Adaptive       | -/- x 50/90 | Flexible width banners         |
