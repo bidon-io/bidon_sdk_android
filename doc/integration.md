@@ -46,7 +46,8 @@ Receive your `APP_KEY` in the dashboard app settings. Init Bidon SDK in your Mai
 ```kotlin
 BidOn
     .setDefaultAdapters()
-    // .setAdapters(YourOwnAdapter()) // for registering your custom Adapter (AdNetwork)
+    // .setAdapters("com.example.YourOwnAdapterClass") // for registering your custom Adapter (AdNetwork) by class name
+    // .setAdapters(YourOwnAdapter()) // for registering your custom Adapter (AdNetwork) by instance. Instance should be initialized and ready to work
     .setInitializationCallback {
         //  BidOn is initialized and ready to work
     }
