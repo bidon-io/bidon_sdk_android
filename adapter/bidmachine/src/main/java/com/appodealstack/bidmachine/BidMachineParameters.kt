@@ -1,9 +1,9 @@
 package com.appodealstack.bidmachine
 
 import android.content.Context
-import com.appodealstack.bidon.domain.adapter.AdAuctionParams
-import com.appodealstack.bidon.domain.adapter.AdapterParameters
-import com.appodealstack.bidon.domain.common.BannerSize
+import com.appodealstack.bidon.adapter.AdAuctionParams
+import com.appodealstack.bidon.adapter.AdapterParameters
+import com.appodealstack.bidon.ads.banner.BannerSize
 
 data class BidMachineParameters(
     val sellerId: String,

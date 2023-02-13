@@ -1,7 +1,7 @@
 package com.appodealstack.fyber.banner
 
-import com.appodealstack.bidon.domain.logging.impl.logError
-import com.appodealstack.bidon.domain.logging.impl.logInfo
+import com.appodealstack.bidon.logs.logging.impl.logError
+import com.appodealstack.bidon.logs.logging.impl.logInfo
 import com.fyber.fairbid.ads.Banner
 import com.fyber.fairbid.ads.ImpressionData
 import com.fyber.fairbid.ads.banner.BannerError

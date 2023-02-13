@@ -3,6 +3,7 @@ package com.appodeal.mads.ui
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,14 +29,14 @@ import com.appodeal.mads.component.AppTextButton
 import com.appodeal.mads.component.H5Text
 import com.appodeal.mads.navigation.Screen
 import com.appodealstack.bidon.BidOn
-import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorage
-import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorageImpl
-import com.appodealstack.bidon.domain.logging.Logger
+import com.appodealstack.bidon.logs.logging.Logger
+import com.appodealstack.bidon.utils.networking.NetworkSettings
 
 @Composable
 internal fun MainScreen(
     navController: NavHostController,
     initState: MutableState<MainScreenState>,
+    sharedPreferences: SharedPreferences
 ) {
     Column(
         modifier = Modifier
@@ -46,7 +47,6 @@ internal fun MainScreen(
         verticalArrangement = Arrangement.Center
     ) {
         val context = LocalContext.current
-        val keyValueStorage: KeyValueStorage = KeyValueStorageImpl(context)
         when (val state = initState.value) {
             MainScreenState.NotInitialized,
             MainScreenState.Initializing -> {
@@ -60,7 +60,7 @@ internal fun MainScreen(
                         BidOn.setLogLevel(Logger.Level.Verbose)
                         BidOn
                             .setDefaultAdapters()
-                            .setBaseUrl(keyValueStorage.host)
+                            .setBaseUrl(sharedPreferences.getString("host", NetworkSettings.BidOnBaseUrl))
                             .setInitializationCallback {
                                 initState.value = MainScreenState.Initialized
                             }

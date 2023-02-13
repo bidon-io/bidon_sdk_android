@@ -1,6 +1,6 @@
 package com.appodealstack.fyber.interstitial
 
-import com.appodealstack.bidon.domain.common.Ad
+import com.appodealstack.bidon.ads.Ad
 
 interface FyberInterstitialListener {
     fun onAvailable(placementId: String, ad: Ad)

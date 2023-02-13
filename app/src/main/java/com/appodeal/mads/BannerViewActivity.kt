@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.appodealstack.bidon.view.BannerView
+import com.appodealstack.bidon.ads.banner.BannerView
 
 class BannerViewActivity : AppCompatActivity(R.layout.banner_view_layout) {
 

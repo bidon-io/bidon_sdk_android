@@ -7,20 +7,21 @@ import com.appodealstack.admob.ext.sdkVersion
 import com.appodealstack.admob.impl.AdmobBannerImpl
 import com.appodealstack.admob.impl.AdmobInterstitialImpl
 import com.appodealstack.admob.impl.AdmobRewardedImpl
-import com.appodealstack.bidon.data.models.config.AdapterInfo
-import com.appodealstack.bidon.domain.adapter.AdProvider
-import com.appodealstack.bidon.domain.adapter.AdSource
-import com.appodealstack.bidon.domain.adapter.Adapter
-import com.appodealstack.bidon.domain.adapter.Initializable
-import com.appodealstack.bidon.domain.common.DemandAd
-import com.appodealstack.bidon.domain.common.DemandId
-import com.appodealstack.bidon.view.BannerView
+import com.appodealstack.bidon.adapter.AdProvider
+import com.appodealstack.bidon.adapter.AdSource
+import com.appodealstack.bidon.adapter.Adapter
+import com.appodealstack.bidon.adapter.Initializable
+import com.appodealstack.bidon.ads.DemandAd
+import com.appodealstack.bidon.ads.DemandId
+import com.appodealstack.bidon.ads.banner.BannerView
+import com.appodealstack.bidon.config.models.AdapterInfo
 import com.google.android.gms.ads.MobileAds
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 val AdmobDemandId = DemandId("admob")
 
+@Suppress("unused")
 class AdmobAdapter :
     Adapter,
     Initializable<AdmobInitParameters>,

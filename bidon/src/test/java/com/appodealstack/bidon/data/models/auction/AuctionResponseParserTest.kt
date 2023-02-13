@@ -1,6 +1,9 @@
 package com.appodealstack.bidon.data.models.auction
 
-import com.appodealstack.bidon.data.json.JsonParsers
+import com.appodealstack.bidon.auction.models.AuctionResponse
+import com.appodealstack.bidon.auction.models.LineItem
+import com.appodealstack.bidon.auction.models.Round
+import com.appodealstack.bidon.utils.json.JsonParsers
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 

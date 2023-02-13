@@ -1,5 +1,6 @@
 package com.appodeal.mads
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +21,7 @@ class MainActivity : FragmentActivity() {
                 val navController = rememberNavController()
                 NavigationGraph(
                     navController = navController,
+                    shared = this@MainActivity.getSharedPreferences("app_test", Context.MODE_PRIVATE)
                 )
             }
 

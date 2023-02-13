@@ -1,6 +1,6 @@
 package com.appodealstack.ironsource.impl
 
-import com.appodealstack.bidon.domain.common.BidonError
+import com.appodealstack.bidon.ads.BidonError
 import com.appodealstack.ironsource.IronSourceDemandId
 import com.ironsource.mediationsdk.logger.IronSourceError
 

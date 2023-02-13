@@ -58,6 +58,8 @@ dependencies {
     implementation(project(":adapter:admob"))
 //    implementation(project(":adapter:applovin"))
 //    implementation(project(":adapter:appsflyer"))
+//    implementation(project(":adapter:fyber"))
+//    implementation(project(":adapter:ironsource"))
 
     implementation("com.google.accompanist:accompanist-permissions:0.29.1-alpha")
 

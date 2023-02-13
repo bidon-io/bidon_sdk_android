@@ -1,12 +1,12 @@
 package com.appodealstack.bidon
 
 import android.app.Activity
-import com.appodealstack.bidon.data.networking.NetworkSettings
-import com.appodealstack.bidon.domain.adapter.Adapter
-import com.appodealstack.bidon.domain.common.impl.BidOnSdkImpl
-import com.appodealstack.bidon.domain.config.DefaultAdapters
-import com.appodealstack.bidon.domain.config.InitializationCallback
-import com.appodealstack.bidon.domain.logging.Logger
+import com.appodealstack.bidon.adapter.Adapter
+import com.appodealstack.bidon.config.DefaultAdapters
+import com.appodealstack.bidon.config.InitializationCallback
+import com.appodealstack.bidon.config.impl.BidOnSdkImpl
+import com.appodealstack.bidon.logs.logging.Logger
+import com.appodealstack.bidon.utils.networking.NetworkSettings
 
 /**
  * Created by Aleksei Cherniaev on 08/08/2022.

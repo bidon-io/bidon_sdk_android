@@ -2,10 +2,10 @@ package com.appodealstack.applovin
 
 import android.app.Activity
 import android.content.Context
-import com.appodealstack.bidon.data.models.auction.LineItem
-import com.appodealstack.bidon.domain.adapter.AdAuctionParams
-import com.appodealstack.bidon.domain.adapter.AdapterParameters
-import com.appodealstack.bidon.domain.common.BannerSize
+import com.appodealstack.bidon.adapter.AdAuctionParams
+import com.appodealstack.bidon.adapter.AdapterParameters
+import com.appodealstack.bidon.ads.banner.BannerSize
+import com.appodealstack.bidon.auction.models.LineItem
 
 data class MaxParameters(
     val key: String

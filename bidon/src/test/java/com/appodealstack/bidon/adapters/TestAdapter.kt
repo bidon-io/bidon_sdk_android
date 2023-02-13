@@ -1,15 +1,15 @@
 package com.appodealstack.bidon.adapters
 
 import android.app.Activity
-import com.appodealstack.bidon.data.models.config.AdapterInfo
-import com.appodealstack.bidon.domain.adapter.*
-import com.appodealstack.bidon.domain.common.DemandAd
-import com.appodealstack.bidon.domain.common.DemandId
+import com.appodealstack.bidon.adapter.*
+import com.appodealstack.bidon.ads.DemandAd
+import com.appodealstack.bidon.ads.DemandId
+import com.appodealstack.bidon.config.models.AdapterInfo
 
 internal object TestAdapterParameters : AdapterParameters
 
 internal class TestAdapter(
-    private val demandName: String,
+    demandName: String,
     private val interstitialData: TestAdapterInterstitialParameters,
 ) : Adapter,
     Initializable<TestAdapterParameters>,

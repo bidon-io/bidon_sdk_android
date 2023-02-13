@@ -2,13 +2,13 @@ package com.appodealstack.fyber
 
 import android.app.Activity
 import android.content.Context
-import com.appodealstack.bidon.data.models.config.AdapterInfo
-import com.appodealstack.bidon.domain.adapter.Adapter
-import com.appodealstack.bidon.domain.adapter.Initializable
-import com.appodealstack.bidon.domain.common.Ad
-import com.appodealstack.bidon.domain.common.DemandAd
-import com.appodealstack.bidon.domain.common.DemandId
-import com.appodealstack.bidon.view.helper.SdkDispatchers
+import com.appodealstack.bidon.adapter.Adapter
+import com.appodealstack.bidon.adapter.Initializable
+import com.appodealstack.bidon.ads.Ad
+import com.appodealstack.bidon.ads.DemandAd
+import com.appodealstack.bidon.ads.DemandId
+import com.appodealstack.bidon.config.models.AdapterInfo
+import com.appodealstack.bidon.utils.SdkDispatchers
 import com.appodealstack.fyber.banner.BannerInterceptor
 import com.appodealstack.fyber.banner.initBannerListener
 import com.appodealstack.fyber.ext.adapterVersion

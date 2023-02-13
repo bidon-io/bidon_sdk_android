@@ -2,8 +2,8 @@ package com.appodealstack.fyber.rewarded
 
 import android.app.Activity
 import androidx.core.os.bundleOf
-import com.appodealstack.bidon.domain.common.AdType
-import com.appodealstack.bidon.domain.common.DemandAd
+import com.appodealstack.bidon.ads.AdType
+import com.appodealstack.bidon.ads.DemandAd
 import com.appodealstack.fyber.PlacementKey
 import com.fyber.fairbid.ads.ImpressionData
 import com.fyber.fairbid.ads.Interstitial

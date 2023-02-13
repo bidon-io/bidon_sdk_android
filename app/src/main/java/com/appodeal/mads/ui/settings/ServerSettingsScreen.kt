@@ -1,5 +1,6 @@
 package com.appodeal.mads.ui.settings
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
@@ -17,20 +18,18 @@ import androidx.navigation.NavController
 import com.appodeal.mads.component.*
 import com.appodeal.mads.theme.getShapeByPositionFor
 import com.appodeal.mads.ui.settings.data.Host
-import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorage
-import com.appodealstack.bidon.data.keyvaluestorage.KeyValueStorageImpl
-import com.appodealstack.bidon.data.networking.NetworkSettings
+import com.appodealstack.bidon.utils.networking.NetworkSettings
 
 private const val MockUrl = "https://ef5347ef-7389-4095-8a57-cc78c827f8b2.mock.pstmn.io"
 
 @Composable
 internal fun ServerSettingsScreen(
     navController: NavController,
-    keyValueStorage: KeyValueStorage = KeyValueStorageImpl(navController.context)
+    sharedPreferences: SharedPreferences
 ) {
     val host = remember {
         mutableStateOf(
-            when (keyValueStorage.host) {
+            when (sharedPreferences.getString("host", "")) {
                 NetworkSettings.BidOnBaseUrl -> Host.Production
                 MockUrl -> Host.MockServer
                 else -> Host.Production
@@ -69,10 +68,11 @@ internal fun ServerSettingsScreen(
                 .padding(16.dp)
                 .align(Alignment.CenterHorizontally),
             onClick = {
-                keyValueStorage.host = when (host.value) {
+                val hostValue = when (host.value) {
                     Host.Production -> NetworkSettings.BidOnBaseUrl
                     Host.MockServer -> MockUrl
                 }
+                sharedPreferences.edit().putString("host", hostValue).apply()
                 navController.popBackStack()
             },
             text = "Apply"
