@@ -25,6 +25,8 @@ internal class LocationDataSourceImpl(
         try {
             if (deviceLocation == null) return@lazy null
             val location = requireNotNull(deviceLocation)
+
+            @Suppress("DEPRECATION")
             val addresses = Geocoder(context, Locale.getDefault()).getFromLocation(location.latitude, location.longitude, 1)
             addresses?.first()
         } catch (e: Exception) {

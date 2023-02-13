@@ -81,6 +81,7 @@ internal class NetworkStateObserverImpl : NetworkStateObserver {
     }
 
     private fun checkConnected(): Boolean {
+        @Suppress("DEPRECATION")
         return (connectivityManager?.activeNetworkInfo?.isConnected == true).also {
             instantlyIsConnected.set(it)
         }

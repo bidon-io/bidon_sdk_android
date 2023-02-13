@@ -36,6 +36,7 @@ internal class AppDataSourceImpl(
     private fun getPackageInfo(context: Context): PackageInfo? {
         var packageInfo: PackageInfo? = null
         try {
+            @Suppress("DEPRECATION")
             packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
         } catch (throwable: Throwable) {
             logError(Tag, message = throwable.message ?: "", error = throwable)
