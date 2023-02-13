@@ -15,10 +15,10 @@ afterEvaluate {
         repositories {
             maven {
                 name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/appodeal/BidOn-SDK-Android")
+                url = uri("https://maven.pkg.github.com/bidon-io/bidon-sdk-android")
                 credentials {
                     username = githubProperties["gpr.usr"] as? String ?: System.getenv("GPR_USER")
-                    password = githubProperties["gpr.key"] as? String ?: System.getenv("GPR_API_KEY")
+                    password = githubProperties["gpr.key"] as? String ?: System.getenv("GPR_TOKEN")
                 }
             }
         }
@@ -28,10 +28,9 @@ afterEvaluate {
                 afterEvaluate {
                     from(components["release"])
                 }
-                groupId = "com.appodealstack.bidon" // Replace with group ID
+                groupId = "io.bidon" // Replace with group ID
                 artifactId = getArtifactId
                 version = getVersionName
-                artifact("$buildDir/outputs/aar/${project.name}-release.aar")
             }
         }
     }

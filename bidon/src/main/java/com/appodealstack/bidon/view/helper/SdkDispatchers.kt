@@ -2,8 +2,10 @@ package com.appodealstack.bidon.view.helper
 
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
@@ -21,6 +23,7 @@ var singleDispatcherOverridden: CoroutineDispatcher? = null
 var mainDispatcherOverridden: CoroutineDispatcher? = null
 
 object SdkDispatchers {
+    @OptIn(DelicateCoroutinesApi::class)
     val Single: CoroutineDispatcher
         get() = singleDispatcherOverridden ?: newSingleThreadContext("BidOn")
 

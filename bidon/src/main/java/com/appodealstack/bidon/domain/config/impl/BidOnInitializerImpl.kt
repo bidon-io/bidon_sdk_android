@@ -25,8 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 internal class BidOnInitializerImpl : BidOnInitializer, BidOnBuilder {
-    @OptIn(DelicateCoroutinesApi::class)
-    private val dispatcher by lazy { newSingleThreadContext("BidOnInitializer") }
+    private val dispatcher by lazy { SdkDispatchers.Single }
     private val scope get() = CoroutineScope(dispatcher)
 
     private var useDefaultAdapters = false

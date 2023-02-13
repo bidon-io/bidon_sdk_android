@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.appodealstack.bidon.data.binderdatasources.device
 
 import android.content.Context
@@ -91,6 +93,7 @@ internal class DeviceDataSourceImpl(
                 )
             }
         } catch (e: Exception) {
+            // do nothing
         }
         return null
     }

@@ -8,16 +8,29 @@ This page is describes how to import and configure the BidOn SDK.
   
 ## Getting Started 
 
-To integrate BidOn SDK through Dependencies, first add the following lines to your `build.gradle` (:app):
+To integrate BidOn SDK through Dependencies, firstly add repository fo BidOn SDK dependencies
+```ruby
+repositories {
+    maven {
+        url = uri("https://maven.pkg.github.com/bidon-io/bidon-sdk-android")
+        credentials {
+            username = YOUR_GITHUB_USERNAME
+            password = YOUR_GITHUB_TOKEN
+        }
+    }
+}        
+```
+
+secondly add the following lines to your `build.gradle` (:app):
 
 ``` ruby
 dependencies {
     # BidOn SDK Library
-    implementation 'com.appodealstack.bidon:bidon-sdk:0.1.0'
+    implementation 'io.bidon:bidon-sdk:0.1.0-Beta'
 
     # Demand Sources (AdNetworks)
-    implementation 'com.appodealstack.bidon:bidmachine-adapter:0.1.0'
-    implementation 'com.appodealstack.bidon:admob-adapter:0.1.0'
+    implementation 'io.bidon:bidmachine-adapter:0.1.0.1-Beta'
+    implementation 'io.bidon:admob-adapter:0.1.0.1-Beta'
     
     ... 
 }

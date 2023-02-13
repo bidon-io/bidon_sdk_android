@@ -28,6 +28,7 @@ internal class AdapterInstanceCreatorImpl : AdapterInstanceCreator {
         val initialize = false
         val classLoader = this.javaClass.classLoader
         return try {
+            @Suppress("UNCHECKED_CAST")
             Class.forName(requiredClass, initialize, classLoader) as Class<Adapter>
         } catch (e: Exception) {
             logError(Tag, "Adapter class not found: $requiredClass", e)
