@@ -60,6 +60,7 @@ internal fun MainScreen(
                         BidOn.setLogLevel(Logger.Level.Verbose)
                         BidOn
                             .setDefaultAdapters()
+                            .setAdapters("com.appodealstack.admob.AdmobAdapter")
                             .setBaseUrl(sharedPreferences.getString("host", NetworkSettings.BidOnBaseUrl))
                             .setInitializationCallback {
                                 initState.value = MainScreenState.Initialized

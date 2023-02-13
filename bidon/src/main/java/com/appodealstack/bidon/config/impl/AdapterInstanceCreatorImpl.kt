@@ -1,6 +1,7 @@
 package com.appodealstack.bidon.config.impl
 
 import com.appodealstack.bidon.adapter.Adapter
+import com.appodealstack.bidon.config.DefaultAdapters
 import com.appodealstack.bidon.logs.logging.impl.logError
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 
@@ -8,15 +9,12 @@ import com.appodealstack.bidon.logs.logging.impl.logInfo
  * Created by Aleksei Cherniaev on 10/08/2022.
  */
 internal class AdapterInstanceCreatorImpl : com.appodealstack.bidon.config.AdapterInstanceCreator {
-    override fun createAvailableAdapters(): List<Adapter> {
-        val adaptersClasses = com.appodealstack.bidon.config.DefaultAdapters.values().mapNotNull { adapterItem ->
-            obtainServiceClass(adapterItem.classPath)
+    override fun createAvailableAdapters(useDefaultAdapters: Boolean, adapterClasses: MutableSet<String>): List<Adapter> {
+        val classes = adapterClasses + DefaultAdapters.values().map { it.classPath }.takeIf { useDefaultAdapters }.orEmpty()
+        val adaptersClasses = classes.mapNotNull { clazz ->
+            obtainServiceClass(clazz)
         }
-        logInfo(
-            Tag,
-            "Available adapters classes: ${adaptersClasses.joinToString { it.simpleName }}"
-        )
-
+        logInfo(Tag, "Available adapters classes: ${adaptersClasses.joinToString { it.simpleName }}")
         return adaptersClasses.mapNotNull {
             getAdapterInstance(clazz = it)
         }

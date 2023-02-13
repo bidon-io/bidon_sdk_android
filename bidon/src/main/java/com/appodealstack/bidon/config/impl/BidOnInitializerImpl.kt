@@ -15,8 +15,10 @@ import com.appodealstack.bidon.utils.di.DI
 import com.appodealstack.bidon.utils.di.get
 import com.appodealstack.bidon.utils.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utils.networking.BidOnEndpoints
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -27,6 +29,7 @@ internal class BidOnInitializerImpl : com.appodealstack.bidon.config.BidOnInitia
 
     private var useDefaultAdapters = false
     private var publisherAdapters = mutableMapOf<Class<out Adapter>, Adapter>()
+    private var publisherAdapterClasses = mutableSetOf<String>()
     private var initializationCallback: com.appodealstack.bidon.config.InitializationCallback? = null
     private val initializationState = MutableStateFlow(SdkState.NotInitialized)
 
@@ -52,6 +55,11 @@ internal class BidOnInitializerImpl : com.appodealstack.bidon.config.BidOnInitia
         adapters.forEach { adapter ->
             publisherAdapters[adapter::class.java] = adapter
         }
+        return this
+    }
+
+    override fun setAdapters(adaptersClassName: String): BidOnBuilder {
+        publisherAdapterClasses.add(adaptersClassName)
         return this
     }
 
@@ -101,8 +109,10 @@ internal class BidOnInitializerImpl : com.appodealstack.bidon.config.BidOnInitia
         withContext(SdkDispatchers.IO) {
             keyValueStorage.appKey = appKey
         }
-        val defaultAdapters = emptyList<Adapter>().takeIf { useDefaultAdapters.not() }
-            ?: adapterInstanceCreator.createAvailableAdapters()
+        val defaultAdapters = adapterInstanceCreator.createAvailableAdapters(
+            useDefaultAdapters = useDefaultAdapters,
+            adapterClasses = publisherAdapterClasses
+        )
 
         logInfo(Tag, "Created adapters instances: $defaultAdapters")
         val body = ConfigRequestBody(

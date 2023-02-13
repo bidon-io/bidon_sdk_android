@@ -58,4 +58,3 @@ internal class SendImpressionRequestUseCaseImpl(
 }
 
 private const val Tag = "ImpressionRequestUseCase"
-

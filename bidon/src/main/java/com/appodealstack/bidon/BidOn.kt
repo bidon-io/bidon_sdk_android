@@ -42,6 +42,11 @@ interface BidOnBuilder {
     fun setAdapters(vararg adapters: Adapter): BidOnBuilder
 
     /**
+     * Registering custom Adapters by full class name
+     */
+    fun setAdapters(adaptersClassName: String): BidOnBuilder
+
+    /**
      * BidOn SDK always invokes [InitializationCallback.onFinished] callback.
      * If error occurs, it will be logged.
      */
