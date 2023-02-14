@@ -7,7 +7,10 @@ import com.appodealstack.bidon.ads.banner.BannerSize
  */
 sealed class BidonError : Throwable() {
 
-    class AppKeyIsInvalid(override val message: String?) : BidonError()
+    object AppKeyIsInvalid : BidonError() {
+        override val message: String = "App key is invalid"
+    }
+
     class InternalServerSdkError(override val message: String?) : BidonError()
     class NetworkError(val demandId: DemandId?, override val message: String? = null) : BidonError()
     object NoAuctionResults : BidonError()

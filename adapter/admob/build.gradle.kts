@@ -16,11 +16,6 @@ android {
     }
 }
 
-// publishInfo {
-//    versionName = "0.0.1"
-//    artifactId = "admob-adapter"
-// }
-
 dependencies {
     implementation(project(":bidon"))
     implementation(Dependencies.Google.PlayServicesAds)

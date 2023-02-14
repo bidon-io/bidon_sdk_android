@@ -41,7 +41,13 @@ internal class JsonHttpRequest(
                         val baseResponse = JsonParsers.parseOrNull<BaseResponse>(String(response.responseBody ?: byteArrayOf()))
                         logInfo(Tag, "Request failed $baseResponse")
                         when (response.code) {
-                            422 -> throw BidonError.AppKeyIsInvalid(message = baseResponse?.error?.message)
+                            422 -> {
+                                if ((baseResponse?.error?.message == BidonError.AppKeyIsInvalid.message)) {
+                                    throw BidonError.AppKeyIsInvalid
+                                } else {
+                                    throw BidonError.NetworkError(demandId = null, message = baseResponse?.error?.message)
+                                }
+                            }
                             500 -> throw BidonError.InternalServerSdkError(message = baseResponse?.error?.message)
                             else -> throw BidonError.Unspecified(demandId = null, sourceError = response.httpError)
                         }

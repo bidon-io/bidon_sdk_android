@@ -19,8 +19,8 @@ internal val jsonZipHttpClient by lazy {
             "Content-Type" to listOf("application/json; charset=UTF-8"),
             "X-BidOn-Version" to listOf(BidOnSdkVersion),
         ),
-        encoders = listOf(GZIPRequestDataEncoder),
-        decoders = listOf(GZIPRequestDataEncoder),
+        encoders = listOf(),
+        decoders = listOf(),
     )
 }
 
