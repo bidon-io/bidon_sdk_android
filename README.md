@@ -53,3 +53,7 @@ contribute.
 -   Blog
 -   Discord
 -   Telegram
+
+## License
+
+BidOn is distributed under the terms of the Apache License (Version 2.0). See [license folder](LICENSE.md) for details.
