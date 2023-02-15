@@ -210,6 +210,10 @@ internal class InterstitialAdImpl(
         override fun roundFailed(roundId: String, error: Throwable) {
             userListener?.roundFailed(roundId, error)
         }
+
+        override fun onRevenuePaid(ad: Ad) {
+            userListener?.onRevenuePaid(ad)
+        }
     }
 
     private suspend fun sendStatsClickedAsync(adSource: AdSource<*>) {

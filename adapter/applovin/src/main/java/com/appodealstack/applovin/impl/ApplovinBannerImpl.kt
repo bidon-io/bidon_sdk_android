@@ -34,7 +34,7 @@ internal class ApplovinBannerImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
     private val roundId: String,
-    private val appLovinSdk: AppLovinSdk,
+    private val applovinSdk: AppLovinSdk,
     private val auctionId: String
 ) : AdSource.Banner<ApplovinBannerAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
@@ -44,14 +44,14 @@ internal class ApplovinBannerImpl(
     ) {
 
     private var adView: AppLovinAdView? = null
-    private var appLovinAd: AppLovinAd? = null
+    private var applovinAd: AppLovinAd? = null
     private var lineItem: LineItem? = null
 
     private val requestListener by lazy {
         object : AppLovinAdLoadListener {
             override fun adReceived(ad: AppLovinAd) {
                 logInfo(Tag, "adReceived: $this")
-                appLovinAd = ad
+                applovinAd = ad
                 markBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
                     roundStatus = RoundStatus.Successful,
@@ -80,17 +80,18 @@ internal class ApplovinBannerImpl(
     private val listener by lazy {
         object : AppLovinAdDisplayListener, AppLovinAdClickListener {
             override fun adDisplayed(ad: AppLovinAd) {
-                logInfo(Tag, "adDisplayed: $this")
+                logInfo(Tag, "adDisplayed: $ad")
                 adState.tryEmit(AdState.Impression(ad.asAd()))
+                adState.tryEmit(AdState.PaidRevenue(ad.asAd()))
             }
 
             override fun adHidden(ad: AppLovinAd) {
-                logInfo(Tag, "adHidden: $this")
+                logInfo(Tag, "adHidden: $ad")
                 adState.tryEmit(AdState.Closed(ad.asAd()))
             }
 
             override fun adClicked(ad: AppLovinAd) {
-                logInfo(Tag, "adClicked: $this")
+                logInfo(Tag, "adClicked: $ad")
                 adState.tryEmit(AdState.Clicked(ad.asAd()))
             }
         }
@@ -99,12 +100,12 @@ internal class ApplovinBannerImpl(
     override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
 
     override val ad: Ad?
-        get() = appLovinAd?.asAd() ?: adView?.asAd()
+        get() = applovinAd?.asAd() ?: adView?.asAd()
 
     override fun destroy() {
         logInfo(Tag, "destroy $this")
         adView = null
-        appLovinAd = null
+        applovinAd = null
     }
 
     override fun getAuctionParams(
@@ -132,13 +133,13 @@ internal class ApplovinBannerImpl(
         logInfo(Tag, "Starting with $adParams: $this")
         markBidStarted(adParams.lineItem.adUnitId)
         lineItem = adParams.lineItem
-        val adSize = adParams.bannerSize.asAppLovinAdSize() ?: error(
+        val adSize = adParams.bannerSize.asApplovinAdSize() ?: error(
             BidonError.AdFormatIsNotSupported(
                 demandId.demandId,
                 adParams.bannerSize
             )
         )
-        val bannerView = AppLovinAdView(appLovinSdk, adSize, adParams.lineItem.adUnitId, adParams.context).also {
+        val bannerView = AppLovinAdView(applovinSdk, adSize, adParams.lineItem.adUnitId, adParams.context).also {
             it.setAdClickListener(listener)
             it.setAdDisplayListener(listener)
             adView = it
@@ -165,7 +166,7 @@ internal class ApplovinBannerImpl(
     override suspend fun fill(): Result<Ad> = runCatching {
         logInfo(Tag, "Starting fill: $this")
         markFillStarted()
-        requireNotNull(appLovinAd?.asAd()).also {
+        requireNotNull(applovinAd?.asAd()).also {
             markFillFinished(RoundStatus.Successful)
             adState.tryEmit(AdState.Fill(it))
         }
@@ -211,7 +212,7 @@ internal class ApplovinBannerImpl(
         )
     }
 
-    private fun BannerSize.asAppLovinAdSize() = when (this) {
+    private fun BannerSize.asApplovinAdSize() = when (this) {
         BannerSize.Banner -> AppLovinAdSize.BANNER
         BannerSize.Adaptive -> AppLovinAdSize.BANNER
         BannerSize.LeaderBoard -> AppLovinAdSize.LEADER
@@ -219,5 +220,5 @@ internal class ApplovinBannerImpl(
     }
 }
 
-private const val Tag = "Applovin Banner"
+private const val Tag = "ApplovinBanner"
 private const val USD = "USD"

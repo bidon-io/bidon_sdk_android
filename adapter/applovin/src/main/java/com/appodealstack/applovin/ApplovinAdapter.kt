@@ -33,7 +33,7 @@ class ApplovinAdapter :
     AdProvider.Rewarded<ApplovinFullscreenAdAuctionParams> {
 
     private lateinit var context: Context
-    private var appLovinSdk: AppLovinSdk? = null
+    private var applovinSdk: AppLovinSdk? = null
 
     override val demandId: DemandId = ApplovinDemandId
     override val adapterInfo = AdapterInfo(
@@ -47,7 +47,7 @@ class ApplovinAdapter :
                 context = it
             }
             val instance = AppLovinSdk.getInstance(configParams.key, AppLovinSdkSettings(context), context).also {
-                appLovinSdk = it
+                applovinSdk = it
             }
             instance.settings.setVerboseLogging(BidOn.loggerLevel != Logger.Level.Off)
             if (!instance.isInitialized) {
@@ -75,7 +75,7 @@ class ApplovinAdapter :
             demandId = demandId,
             demandAd = demandAd,
             roundId = roundId,
-            appLovinSdk = requireNotNull(appLovinSdk),
+            applovinSdk = requireNotNull(applovinSdk),
             auctionId = auctionId
         )
     }
@@ -89,7 +89,7 @@ class ApplovinAdapter :
             demandId = demandId,
             demandAd = demandAd,
             roundId = roundId,
-            appLovinSdk = requireNotNull(appLovinSdk),
+            applovinSdk = requireNotNull(applovinSdk),
             auctionId = auctionId
         )
     }
@@ -99,7 +99,7 @@ class ApplovinAdapter :
             demandId = demandId,
             demandAd = demandAd,
             roundId = roundId,
-            appLovinSdk = requireNotNull(appLovinSdk),
+            applovinSdk = requireNotNull(applovinSdk),
             auctionId = auctionId
         )
     }

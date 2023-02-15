@@ -422,9 +422,7 @@ class BannerView @JvmOverloads constructor(
                     listener.onAdClicked(state.ad)
                 }
                 is AdState.Closed -> listener.onAdClosed(state.ad)
-                is AdState.Impression -> {
-                    listener.onAdShown(state.ad)
-                }
+                is AdState.Impression -> listener.onAdShown(state.ad)
                 is AdState.PaidRevenue -> listener.onRevenuePaid(state.ad)
                 is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
                 is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)

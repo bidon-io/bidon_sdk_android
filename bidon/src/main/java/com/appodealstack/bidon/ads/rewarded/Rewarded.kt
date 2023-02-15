@@ -217,6 +217,10 @@ internal class RewardedImpl(
         override fun onUserRewarded(ad: Ad, reward: Reward?) {
             userListener?.onUserRewarded(ad, reward)
         }
+
+        override fun onRevenuePaid(ad: Ad) {
+            userListener?.onRevenuePaid(ad)
+        }
     }
 
     private suspend fun sendStatsClickedAsync(adSource: AdSource<*>) {

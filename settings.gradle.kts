@@ -40,7 +40,7 @@ include(
     ":bidon",
     ":adapter:bidmachine",
     ":adapter:admob",
-//    ":adapter:applovin",
+    ":adapter:applovin",
 //    ":adapter:fyber",
 //    ":adapter:ironsource",
 //    ":adapter:appsflyer"

@@ -9,8 +9,8 @@ package com.appodealstack.bidon.config
 internal enum class DefaultAdapters(val classPath: String) {
     AdmobAdapter(classPath = "com.appodealstack.admob.AdmobAdapter"),
     BidmachineAdapter(classPath = "com.appodealstack.bidmachine.BidMachineAdapter"),
+    ApplovinAdapter(classPath = "com.appodealstack.applovin.ApplovinAdapter"),
 
-//    ApplovinAdapter(classPath = "com.appodealstack.applovin.ApplovinAdapter"),
 //    AppsflyerAdapter(classPath = "com.appodealstack.appsflyer.AppsflyerAnalytics"),
 //    FyberFairBidAdapter(classPath = "com.appodealstack.fyber.FairBidAdapter"),
 //    IronSourceAdapter(classPath = "com.appodealstack.ironsource.IronSourceAdapter"),

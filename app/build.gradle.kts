@@ -56,7 +56,7 @@ dependencies {
     implementation(project(":bidon"))
     implementation(project(":adapter:bidmachine"))
     implementation(project(":adapter:admob"))
-//    implementation(project(":adapter:applovin"))
+    implementation(project(":adapter:applovin"))
 //    implementation(project(":adapter:appsflyer"))
 //    implementation(project(":adapter:fyber"))
 //    implementation(project(":adapter:ironsource"))
