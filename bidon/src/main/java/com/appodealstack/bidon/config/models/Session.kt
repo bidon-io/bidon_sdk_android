@@ -1,6 +1,7 @@
 package com.appodealstack.bidon.config.models
 
 import com.appodealstack.bidon.utils.json.JsonSerializer
+import com.appodealstack.bidon.utils.json.jsonArray
 import com.appodealstack.bidon.utils.json.jsonObject
 import org.json.JSONObject
 
@@ -35,8 +36,12 @@ internal class SessionSerializer : JsonSerializer<Session> {
             "start_monotonic_ts" hasValue data.monotonicStartTs
             "ts" hasValue data.ts
             "monotonic_ts" hasValue data.monotonicTs
-            "memory_warnings_ts" hasValue data.memoryWarningsTs
-            "memory_warnings_monotonic_ts" hasValue data.memoryWarningsMonotonicTs
+            "memory_warnings_ts" hasValue jsonArray {
+                putValues(data.memoryWarningsTs)
+            }
+            "memory_warnings_monotonic_ts" hasValue jsonArray {
+                putValues(data.memoryWarningsMonotonicTs)
+            }
             "ram_used" hasValue data.ramUsed
             "ram_size" hasValue data.ramSize
             "storage_free" hasValue data.storageFree

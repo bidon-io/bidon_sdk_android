@@ -6,7 +6,6 @@ import com.appodealstack.bidon.logs.logging.impl.logError
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import com.appodealstack.bidon.utils.networking.HttpClient
 import com.appodealstack.bidon.utils.networking.Method
-import com.appodealstack.bidon.utils.networking.encoders.GZIPRequestDataEncoder
 import com.appodealstack.bidon.utils.networking.encoders.RequestDataDecoder
 import com.appodealstack.bidon.utils.networking.encoders.RequestDataEncoder
 import com.appodealstack.bidon.utils.networking.encoders.ext.decodeWith
@@ -19,8 +18,8 @@ internal val jsonZipHttpClient by lazy {
             "Content-Type" to listOf("application/json; charset=UTF-8"),
             "X-BidOn-Version" to listOf(BidOnSdkVersion),
         ),
-        encoders = listOf(GZIPRequestDataEncoder),
-        decoders = listOf(GZIPRequestDataEncoder),
+        encoders = listOf(),
+        decoders = listOf(),
     )
 }
 
