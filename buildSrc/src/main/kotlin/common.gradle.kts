@@ -9,14 +9,17 @@ android {
     compileSdk = Dependencies.Android.compileSdkVersion
     defaultConfig {
         minSdk = Dependencies.Android.minSdkVersion
-        consumerProguardFiles("consumer-rules.pro")
+        consumerProguardFiles("proguard-rules-consumer.pro")
     }
     buildTypes {
-        release {
+        debug {
             isMinifyEnabled = false
+        }
+        release {
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile(name = "proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules-consumer.pro"
             )
         }
     }

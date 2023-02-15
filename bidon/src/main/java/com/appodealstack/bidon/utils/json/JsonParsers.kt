@@ -1,5 +1,6 @@
 package com.appodealstack.bidon.utils.json
 
+import com.appodealstack.bidon.adapter.AdapterInfoSerializer
 import com.appodealstack.bidon.auction.models.*
 import com.appodealstack.bidon.config.models.*
 import com.appodealstack.bidon.stats.models.DemandSerializer

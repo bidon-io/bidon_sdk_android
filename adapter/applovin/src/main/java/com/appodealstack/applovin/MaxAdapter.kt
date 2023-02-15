@@ -14,7 +14,7 @@ import com.appodealstack.bidon.adapter.Adapter
 import com.appodealstack.bidon.adapter.Initializable
 import com.appodealstack.bidon.ads.DemandAd
 import com.appodealstack.bidon.ads.DemandId
-import com.appodealstack.bidon.config.models.AdapterInfo
+import com.appodealstack.bidon.adapter.AdapterInfo
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
 import kotlin.coroutines.resume

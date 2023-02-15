@@ -1,4 +1,4 @@
-package com.appodealstack.bidon.config.models
+package com.appodealstack.bidon.adapter
 
 import com.appodealstack.bidon.utils.json.JsonSerializer
 import com.appodealstack.bidon.utils.json.jsonObject

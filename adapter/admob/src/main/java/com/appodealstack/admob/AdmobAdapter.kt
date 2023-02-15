@@ -14,7 +14,7 @@ import com.appodealstack.bidon.adapter.Initializable
 import com.appodealstack.bidon.ads.DemandAd
 import com.appodealstack.bidon.ads.DemandId
 import com.appodealstack.bidon.ads.banner.BannerView
-import com.appodealstack.bidon.config.models.AdapterInfo
+import com.appodealstack.bidon.adapter.AdapterInfo
 import com.google.android.gms.ads.MobileAds
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
