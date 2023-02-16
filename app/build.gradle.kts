@@ -59,15 +59,15 @@ dependencies {
 //    implementation("com.appsflyer:af-android-sdk:6.9.4")
 //    implementation("com.appsflyer:adrevenue:6.9.1")/
 
-    implementation("io.bidon:bidon-sdk:0.1.0-Beta")
-    implementation("io.bidon:admob-adapter:0.1.0.1-Beta")
-    implementation("io.bidon:bidmachine-adapter:0.1.0.1-Beta")
-    implementation("io.bidon:applovin-adapter:0.1.0.1-Beta")
+//    implementation("io.bidon:bidon-sdk:0.1.0-Beta")
+//    implementation("io.bidon:admob-adapter:0.1.0.1-Beta")
+//    implementation("io.bidon:bidmachine-adapter:0.1.0.1-Beta")
+//    implementation("io.bidon:applovin-adapter:0.1.0.1-Beta")
 
-//    implementation(project(":bidon"))
-//    implementation(project(":adapter:bidmachine"))
-//    implementation(project(":adapter:admob"))
-//    implementation(project(":adapter:applovin"))
+    implementation(project(":bidon"))
+    implementation(project(":adapter:bidmachine"))
+    implementation(project(":adapter:admob"))
+    implementation(project(":adapter:applovin"))
 //    implementation(project(":adapter:appsflyer"))
 //    implementation(project(":adapter:fyber"))
 //    implementation(project(":adapter:ironsource"))
