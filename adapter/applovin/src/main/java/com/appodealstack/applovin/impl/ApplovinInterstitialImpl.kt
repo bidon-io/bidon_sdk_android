@@ -5,16 +5,12 @@ import com.applovin.adview.AppLovinIncentivizedInterstitial
 import com.applovin.sdk.*
 import com.appodealstack.applovin.ApplovinDemandId
 import com.appodealstack.applovin.ApplovinFullscreenAdAuctionParams
-import com.appodealstack.bidon.adapter.AdAuctionParams
-import com.appodealstack.bidon.adapter.AdSource
-import com.appodealstack.bidon.adapter.AdState
+import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.ads.Ad
-import com.appodealstack.bidon.ads.BidonError
-import com.appodealstack.bidon.ads.DemandAd
-import com.appodealstack.bidon.ads.DemandId
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.auction.models.LineItem
 import com.appodealstack.bidon.auction.models.minByPricefloorOrNull
+import com.appodealstack.bidon.config.BidonError
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import com.appodealstack.bidon.stats.StatisticsCollector
 import com.appodealstack.bidon.stats.impl.StatisticsCollectorImpl
@@ -31,7 +27,7 @@ internal class ApplovinInterstitialImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
     private val roundId: String,
-    private val appLovinSdk: AppLovinSdk,
+    private val applovinSdk: AppLovinSdk,
     private val auctionId: String
 ) : AdSource.Interstitial<ApplovinFullscreenAdAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
@@ -41,14 +37,14 @@ internal class ApplovinInterstitialImpl(
     ) {
 
     private var interstitialAd: AppLovinIncentivizedInterstitial? = null
-    private var appLovinAd: AppLovinAd? = null
+    private var applovinAd: AppLovinAd? = null
     private var lineItem: LineItem? = null
 
     private val requestListener by lazy {
         object : AppLovinAdLoadListener {
             override fun adReceived(ad: AppLovinAd) {
                 logInfo(Tag, "adReceived: $this")
-                appLovinAd = ad
+                applovinAd = ad
                 markBidFinished(
                     ecpm = requireNotNull(lineItem?.priceFloor),
                     roundStatus = RoundStatus.Successful,
@@ -85,6 +81,7 @@ internal class ApplovinInterstitialImpl(
             override fun adDisplayed(ad: AppLovinAd) {
                 logInfo(Tag, "adDisplayed: $this")
                 adState.tryEmit(AdState.Impression(ad.asAd()))
+                adState.tryEmit(AdState.PaidRevenue(ad.asAd()))
             }
 
             override fun adHidden(ad: AppLovinAd) {
@@ -102,12 +99,12 @@ internal class ApplovinInterstitialImpl(
     override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
 
     override val ad: Ad?
-        get() = appLovinAd?.asAd() ?: interstitialAd?.asAd()
+        get() = applovinAd?.asAd() ?: interstitialAd?.asAd()
 
     override fun destroy() {
         logInfo(Tag, "destroy")
         interstitialAd = null
-        appLovinAd = null
+        applovinAd = null
     }
 
     override fun getAuctionParams(
@@ -133,7 +130,7 @@ internal class ApplovinInterstitialImpl(
         logInfo(Tag, "Starting with $adParams: $this")
         markBidStarted(adParams.lineItem.adUnitId)
         lineItem = adParams.lineItem
-        val incentivizedInterstitial = AppLovinIncentivizedInterstitial.create(adParams.lineItem.adUnitId, appLovinSdk).also {
+        val incentivizedInterstitial = AppLovinIncentivizedInterstitial.create(adParams.lineItem.adUnitId, applovinSdk).also {
             interstitialAd = it
         }
         incentivizedInterstitial.preload(requestListener)
@@ -155,7 +152,7 @@ internal class ApplovinInterstitialImpl(
     override suspend fun fill(): Result<Ad> = runCatching {
         logInfo(Tag, "Starting fill: $this")
         markFillStarted()
-        requireNotNull(appLovinAd?.asAd()).also {
+        requireNotNull(applovinAd?.asAd()).also {
             markFillFinished(RoundStatus.Successful)
             adState.tryEmit(AdState.Fill(it))
         }
@@ -163,7 +160,7 @@ internal class ApplovinInterstitialImpl(
 
     override fun show(activity: Activity) {
         logInfo(Tag, "Starting show: $this")
-        val appLovinAd = appLovinAd
+        val appLovinAd = applovinAd
         if (interstitialAd?.isAdReadyToDisplay == true && appLovinAd != null) {
             interstitialAd?.show(appLovinAd, activity, null, listener, listener, listener)
         } else {
@@ -200,5 +197,5 @@ internal class ApplovinInterstitialImpl(
     }
 }
 
-private const val Tag = "Applovin Interstitial"
+private const val Tag = "ApplovinInterstitial"
 private const val USD = "USD"

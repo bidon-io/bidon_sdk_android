@@ -1,6 +1,6 @@
 package com.appodealstack.bidon.auction.models
 
-import com.appodealstack.bidon.ads.DemandId
+import com.appodealstack.bidon.adapter.DemandId
 import com.appodealstack.bidon.utils.json.JsonParser
 import org.json.JSONObject
 

@@ -19,7 +19,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":bidon"))
+    compileOnly(project(":bidon"))
 
     implementation(Dependencies.SdkAdapter.Appsflyer)
     implementation(Dependencies.SdkAdapter.AppsflyerAdRevenue)

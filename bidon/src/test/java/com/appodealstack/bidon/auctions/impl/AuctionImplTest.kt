@@ -3,11 +3,11 @@ package com.appodealstack.bidon.auctions.impl
 import android.app.Activity
 import android.util.Log
 import com.appodealstack.bidon.adapter.AdaptersSource
+import com.appodealstack.bidon.adapter.DemandAd
 import com.appodealstack.bidon.adapters.Process
 import com.appodealstack.bidon.adapters.TestAdapter
 import com.appodealstack.bidon.adapters.TestAdapterInterstitialParameters
 import com.appodealstack.bidon.ads.AdType
-import com.appodealstack.bidon.ads.DemandAd
 import com.appodealstack.bidon.auction.AdTypeParam
 import com.appodealstack.bidon.auction.Auction
 import com.appodealstack.bidon.auction.AuctionResult

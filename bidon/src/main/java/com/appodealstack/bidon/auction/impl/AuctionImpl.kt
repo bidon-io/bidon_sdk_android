@@ -2,10 +2,9 @@ package com.appodealstack.bidon.auction.impl
 
 import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.adapter.AdaptersSource
+import com.appodealstack.bidon.adapter.DemandAd
+import com.appodealstack.bidon.adapter.DemandId
 import com.appodealstack.bidon.ads.AdType
-import com.appodealstack.bidon.ads.BidonError
-import com.appodealstack.bidon.ads.DemandAd
-import com.appodealstack.bidon.ads.DemandId
 import com.appodealstack.bidon.auction.*
 import com.appodealstack.bidon.auction.AdTypeParam
 import com.appodealstack.bidon.auction.Auction
@@ -14,6 +13,7 @@ import com.appodealstack.bidon.auction.models.AuctionResponse
 import com.appodealstack.bidon.auction.models.LineItem
 import com.appodealstack.bidon.auction.models.Round
 import com.appodealstack.bidon.auction.usecases.GetAuctionRequestUseCase
+import com.appodealstack.bidon.config.BidonError
 import com.appodealstack.bidon.logs.logging.impl.logError
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import com.appodealstack.bidon.stats.DemandStat

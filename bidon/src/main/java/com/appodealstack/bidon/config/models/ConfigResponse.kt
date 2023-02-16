@@ -6,7 +6,7 @@ import org.json.JSONObject
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-data class ConfigResponse(
+internal data class ConfigResponse(
     val initializationTimeout: Long,
     val adapters: Map<String, JSONObject>
 )

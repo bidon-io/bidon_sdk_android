@@ -86,6 +86,7 @@ internal class RawRequestClient {
             } else {
                 // failed
                 val rawResponse = connection.getResponseBody(streamType = StreamType.Error)
+                    ?: connection.getResponseBody(streamType = StreamType.Normal)
                 logResponseResult(
                     request = request,
                     responseCode = responseCode,

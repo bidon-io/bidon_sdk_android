@@ -1,9 +1,10 @@
 package com.appodealstack.bidon.ads.banner.helper
 
 import com.appodealstack.bidon.ads.Ad
-import com.appodealstack.bidon.ads.BidonError
 import com.appodealstack.bidon.ads.banner.BannerListener
 import com.appodealstack.bidon.auction.AuctionResult
+import com.appodealstack.bidon.config.BidonError
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
@@ -58,5 +59,9 @@ internal fun wrapUserBannerListener(userListener: () -> BannerListener?) = objec
 
     override fun roundFailed(roundId: String, error: Throwable) {
         userListener()?.roundFailed(roundId, error)
+    }
+
+    override fun onRevenuePaid(ad: Ad) {
+        userListener()?.onRevenuePaid(ad)
     }
 }

@@ -4,18 +4,18 @@ import android.app.Activity
 import android.view.View
 import android.view.ViewGroup
 import com.appodealstack.bidon.ads.Ad
-import com.appodealstack.bidon.ads.DemandId
 import com.appodealstack.bidon.ads.banner.BannerSize
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.auction.models.LineItem
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.Flow
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 sealed interface AdSource<T : AdAuctionParams> {
     val demandId: DemandId
     val ad: Ad?
-    val adState: SharedFlow<AdState>
+    val adState: Flow<AdState>
 
     /**
      * Applovin needs Activity instance for interstitial 🤦‍️

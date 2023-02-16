@@ -7,7 +7,7 @@ import org.json.JSONObject
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-open class BaseResponse(
+data class BaseResponse(
     val success: Boolean?,
     val error: Error?,
 ) {

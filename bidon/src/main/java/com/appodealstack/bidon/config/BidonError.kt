@@ -1,5 +1,6 @@
-package com.appodealstack.bidon.ads
+package com.appodealstack.bidon.config
 
+import com.appodealstack.bidon.adapter.DemandId
 import com.appodealstack.bidon.ads.banner.BannerSize
 
 /**
@@ -7,7 +8,10 @@ import com.appodealstack.bidon.ads.banner.BannerSize
  */
 sealed class BidonError : Throwable() {
 
-    class AppKeyIsInvalid(override val message: String?) : BidonError()
+    object AppKeyIsInvalid : BidonError() {
+        override val message: String = "App key is invalid"
+    }
+
     class InternalServerSdkError(override val message: String?) : BidonError()
     class NetworkError(val demandId: DemandId?, override val message: String? = null) : BidonError()
     object NoAuctionResults : BidonError()
@@ -25,11 +29,4 @@ sealed class BidonError : Throwable() {
     object NoAppropriateAdUnitId : BidonError()
 
     class Expired(val demandId: DemandId?) : BidonError()
-}
-
-internal fun Throwable.asUnspecified(): BidonError {
-    return (this as? BidonError) ?: BidonError.Unspecified(
-        demandId = null,
-        sourceError = this
-    )
 }

@@ -8,13 +8,13 @@ import com.appodealstack.bidmachine.asBidonError
 import com.appodealstack.bidon.adapter.AdAuctionParams
 import com.appodealstack.bidon.adapter.AdSource
 import com.appodealstack.bidon.adapter.AdState
+import com.appodealstack.bidon.adapter.DemandAd
+import com.appodealstack.bidon.adapter.DemandId
 import com.appodealstack.bidon.adapter.WinLossNotifiable
 import com.appodealstack.bidon.ads.Ad
-import com.appodealstack.bidon.ads.BidonError
-import com.appodealstack.bidon.ads.DemandAd
-import com.appodealstack.bidon.ads.DemandId
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.auction.models.LineItem
+import com.appodealstack.bidon.config.BidonError
 import com.appodealstack.bidon.logs.logging.impl.logError
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import com.appodealstack.bidon.stats.StatisticsCollector

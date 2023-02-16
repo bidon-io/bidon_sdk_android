@@ -1,12 +1,12 @@
 package com.appodealstack.bidon.auction.impl
 
+import com.appodealstack.bidon.adapter.AdapterInfo
 import com.appodealstack.bidon.ads.AdType
 import com.appodealstack.bidon.ads.banner.BannerSize
 import com.appodealstack.bidon.ads.banner.helper.GetOrientationUseCase
 import com.appodealstack.bidon.auction.AdTypeParam
 import com.appodealstack.bidon.auction.models.*
 import com.appodealstack.bidon.auction.usecases.GetAuctionRequestUseCase
-import com.appodealstack.bidon.config.models.AdapterInfo
 import com.appodealstack.bidon.databinders.DataBinderType
 import com.appodealstack.bidon.logs.logging.impl.logError
 import com.appodealstack.bidon.logs.logging.impl.logInfo

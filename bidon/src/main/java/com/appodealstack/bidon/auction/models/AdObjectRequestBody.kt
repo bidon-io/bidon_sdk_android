@@ -14,7 +14,7 @@ import org.json.JSONObject
  */
 internal data class AdObjectRequestBody(
     val placementId: String,
-    val orientationCode: Int,
+    val orientationCode: String,
     val auctionId: String,
     val minPrice: Double,
     val banner: BannerRequestBody?,
@@ -22,9 +22,9 @@ internal data class AdObjectRequestBody(
     val rewarded: RewardedRequestBody?,
 ) {
 
-    enum class Orientation(val code: Int) {
-        Portrait(0),
-        Landscape(1)
+    enum class Orientation(val code: String) {
+        Portrait("PORTRAIT"),
+        Landscape("LANDSCAPE")
     }
 }
 

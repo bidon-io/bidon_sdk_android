@@ -11,6 +11,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
+        mavenLocal()
         mavenCentral()
         maven {
             url = uri("https://artifacts.applovin.com/android")
@@ -40,7 +41,7 @@ include(
     ":bidon",
     ":adapter:bidmachine",
     ":adapter:admob",
-//    ":adapter:applovin",
+    ":adapter:applovin",
 //    ":adapter:fyber",
 //    ":adapter:ironsource",
 //    ":adapter:appsflyer"

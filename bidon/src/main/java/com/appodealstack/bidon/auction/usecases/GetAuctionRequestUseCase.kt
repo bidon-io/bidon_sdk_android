@@ -1,8 +1,8 @@
 package com.appodealstack.bidon.auction.usecases
 
+import com.appodealstack.bidon.adapter.AdapterInfo
 import com.appodealstack.bidon.auction.AdTypeParam
 import com.appodealstack.bidon.auction.models.AuctionResponse
-import com.appodealstack.bidon.config.models.AdapterInfo
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */

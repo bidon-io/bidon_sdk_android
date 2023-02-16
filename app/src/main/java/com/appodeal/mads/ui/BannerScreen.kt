@@ -24,12 +24,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
 import com.appodeal.mads.component.*
 import com.appodealstack.bidon.ads.Ad
-import com.appodealstack.bidon.ads.BidonError
 import com.appodealstack.bidon.ads.banner.BannerListener
 import com.appodealstack.bidon.ads.banner.BannerSize
 import com.appodealstack.bidon.ads.banner.BannerView
-import com.appodealstack.bidon.ads.banner.DefaultAutoRefreshTimeoutMs
 import com.appodealstack.bidon.auction.AuctionResult
+import com.appodealstack.bidon.config.BidonError
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -50,7 +49,7 @@ fun BannerScreen(navController: NavHostController) {
         mutableStateOf(false)
     }
     val autoRefreshTtl = remember {
-        mutableStateOf(DefaultAutoRefreshTimeoutMs)
+        mutableStateOf(10_000L)
     }
     val bannerView = remember {
         mutableStateOf<BannerView?>(null)
@@ -338,3 +337,4 @@ private fun MutableState<List<String>>.log(string: String) {
 }
 
 private const val Tag = "BannerScreen"
+private const val DefaultAutoRefreshTimeoutMs = 10000L

@@ -12,8 +12,8 @@ import com.appodealstack.bidon.BidOnSdk.Companion.DefaultMinPrice
 import com.appodealstack.bidon.R
 import com.appodealstack.bidon.adapter.AdSource
 import com.appodealstack.bidon.adapter.AdState
+import com.appodealstack.bidon.adapter.DemandAd
 import com.appodealstack.bidon.ads.AdType
-import com.appodealstack.bidon.ads.DemandAd
 import com.appodealstack.bidon.ads.asUnspecified
 import com.appodealstack.bidon.ads.banner.helper.ActivityLifecycleState
 import com.appodealstack.bidon.ads.banner.helper.BannerState.*
@@ -422,9 +422,7 @@ class BannerView @JvmOverloads constructor(
                     listener.onAdClicked(state.ad)
                 }
                 is AdState.Closed -> listener.onAdClosed(state.ad)
-                is AdState.Impression -> {
-                    listener.onAdShown(state.ad)
-                }
+                is AdState.Impression -> listener.onAdShown(state.ad)
                 is AdState.PaidRevenue -> listener.onRevenuePaid(state.ad)
                 is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
                 is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)

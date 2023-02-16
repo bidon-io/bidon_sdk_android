@@ -21,11 +21,22 @@ android {
         multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    signingConfigs {
+        create("myConfig") {
+            storeFile = file("bidon_keystore")
+            storePassword = "123456"
+            keyAlias = "bidon_alias"
+            keyPassword = "123456"
+        }
+    }
     buildTypes {
-        release {
+        debug {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        release {
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules-consumer.pro")
+            signingConfig = signingConfigs.getByName("myConfig")
         }
     }
     kotlinOptions {
@@ -44,28 +55,28 @@ android {
 }
 
 dependencies {
-    implementation("com.google.android.gms:play-services-ads-identifier:18.0.1")
-    implementation("com.applovin:applovin-sdk:11.6.1")
-    implementation("com.appsflyer:af-android-sdk:6.9.4")
-    implementation("com.appsflyer:adrevenue:6.9.1")
+//    implementation("com.applovin:applovin-sdk:11.6.1")
+//    implementation("com.appsflyer:af-android-sdk:6.9.4")
+//    implementation("com.appsflyer:adrevenue:6.9.1")/
 
-//    implementation("io.bidon:bidon-sdk:0.1.0-Beta")
-//    implementation("io.bidon:admob-adapter:0.1.0.1-Beta")
-//    implementation("io.bidon:bidmachine-adapter:0.1.0.1-Beta")
+    implementation("io.bidon:bidon-sdk:0.1.0-Beta")
+    implementation("io.bidon:admob-adapter:0.1.0.1-Beta")
+    implementation("io.bidon:bidmachine-adapter:0.1.0.1-Beta")
+    implementation("io.bidon:applovin-adapter:0.1.0.1-Beta")
 
-    implementation(project(":bidon"))
-    implementation(project(":adapter:bidmachine"))
-    implementation(project(":adapter:admob"))
+//    implementation(project(":bidon"))
+//    implementation(project(":adapter:bidmachine"))
+//    implementation(project(":adapter:admob"))
 //    implementation(project(":adapter:applovin"))
 //    implementation(project(":adapter:appsflyer"))
 //    implementation(project(":adapter:fyber"))
 //    implementation(project(":adapter:ironsource"))
 
+    implementation("com.google.android.gms:play-services-ads-identifier:18.0.1")
     implementation("com.google.accompanist:accompanist-permissions:0.29.1-alpha")
-
     implementation("androidx.multidex:multidex:2.0.1")
     implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.6.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.8.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.fragment:fragment-ktx:1.5.5")

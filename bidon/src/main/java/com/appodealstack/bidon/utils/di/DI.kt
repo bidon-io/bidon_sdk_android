@@ -3,8 +3,8 @@ package com.appodealstack.bidon.utils.di
 import android.app.Application
 import android.content.Context
 import com.appodealstack.bidon.adapter.AdaptersSource
+import com.appodealstack.bidon.adapter.DemandAd
 import com.appodealstack.bidon.adapter.impl.AdaptersSourceImpl
-import com.appodealstack.bidon.ads.DemandAd
 import com.appodealstack.bidon.ads.banner.helper.CountDownTimer
 import com.appodealstack.bidon.ads.banner.helper.GetOrientationUseCase
 import com.appodealstack.bidon.ads.banner.helper.PauseResumeObserver
