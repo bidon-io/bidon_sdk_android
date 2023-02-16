@@ -1,6 +1,7 @@
-package com.appodealstack.bidon.ads
+package com.appodealstack.bidon.adapter
 
 import com.appodealstack.bidon.BidOnSdk
+import com.appodealstack.bidon.ads.AdType
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.

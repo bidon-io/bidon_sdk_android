@@ -11,13 +11,13 @@ import com.appodealstack.bidon.logs.logging.Logger.Level
  * Set log level with [Logger]
  */
 fun logInfo(tag: String, message: String) {
-    if (BidOn.loggerLevel in arrayOf(Level.Error, Level.Verbose)) {
+    if (BidOn.loggerLevel == Level.Verbose) {
         Log.d(DefaultTag, "[$tag] $message")
     }
 }
 
 fun logError(tag: String, message: String, error: Throwable?) {
-    if (BidOn.loggerLevel == Level.Error) {
+    if (BidOn.loggerLevel in arrayOf(Level.Error, Level.Verbose)) {
         Log.e(DefaultTag, "[$tag] $message", error)
     }
 }

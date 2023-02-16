@@ -18,11 +18,11 @@ import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.component.Body2Text
 import com.appodealstack.bidon.ads.Ad
-import com.appodealstack.bidon.ads.BidonError
 import com.appodealstack.bidon.ads.rewarded.Reward
 import com.appodealstack.bidon.ads.rewarded.Rewarded
 import com.appodealstack.bidon.ads.rewarded.RewardedListener
 import com.appodealstack.bidon.auction.AuctionResult
+import com.appodealstack.bidon.config.BidonError
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import kotlinx.coroutines.launch
 

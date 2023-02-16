@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.auction.impl
 
 import com.appodealstack.bidon.adapter.AdSource
-import com.appodealstack.bidon.ads.DemandAd
+import com.appodealstack.bidon.adapter.DemandAd
 import com.appodealstack.bidon.auction.*
 import com.appodealstack.bidon.auction.AdTypeParam
 import com.appodealstack.bidon.auction.Auction

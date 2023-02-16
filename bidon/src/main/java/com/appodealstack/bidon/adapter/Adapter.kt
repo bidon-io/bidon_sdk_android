@@ -1,7 +1,5 @@
 package com.appodealstack.bidon.adapter
 
-import com.appodealstack.bidon.ads.DemandId
-
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */

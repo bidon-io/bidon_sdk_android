@@ -11,10 +11,10 @@ import com.appodealstack.bidon.BidOn
 import com.appodealstack.bidon.adapter.AdProvider
 import com.appodealstack.bidon.adapter.AdSource
 import com.appodealstack.bidon.adapter.Adapter
-import com.appodealstack.bidon.adapter.Initializable
-import com.appodealstack.bidon.ads.DemandAd
-import com.appodealstack.bidon.ads.DemandId
 import com.appodealstack.bidon.adapter.AdapterInfo
+import com.appodealstack.bidon.adapter.DemandAd
+import com.appodealstack.bidon.adapter.DemandId
+import com.appodealstack.bidon.adapter.Initializable
 import com.appodealstack.bidon.logs.logging.Logger
 import io.bidmachine.BidMachine
 import kotlinx.coroutines.suspendCancellableCoroutine

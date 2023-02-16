@@ -4,7 +4,6 @@ import android.app.Activity
 import android.view.View
 import android.view.ViewGroup
 import com.appodealstack.bidon.ads.Ad
-import com.appodealstack.bidon.ads.DemandId
 import com.appodealstack.bidon.ads.banner.BannerSize
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.auction.models.LineItem

@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.databinders.adapters
 
-import com.appodealstack.bidon.adapter.AdaptersSource
 import com.appodealstack.bidon.adapter.AdapterInfo
+import com.appodealstack.bidon.adapter.AdaptersSource
 import com.appodealstack.bidon.databinders.DataBinder
 import com.appodealstack.bidon.utils.json.JsonParsers
 import com.appodealstack.bidon.utils.json.jsonObject

@@ -1,5 +1,6 @@
-package com.appodealstack.bidon.ads
+package com.appodealstack.bidon.config
 
+import com.appodealstack.bidon.adapter.DemandId
 import com.appodealstack.bidon.ads.banner.BannerSize
 
 /**
@@ -28,11 +29,4 @@ sealed class BidonError : Throwable() {
     object NoAppropriateAdUnitId : BidonError()
 
     class Expired(val demandId: DemandId?) : BidonError()
-}
-
-internal fun Throwable.asUnspecified(): BidonError {
-    return (this as? BidonError) ?: BidonError.Unspecified(
-        demandId = null,
-        sourceError = this
-    )
 }

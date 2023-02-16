@@ -1,6 +1,6 @@
 package com.appodealstack.bidon.utils.networking
 
-import com.appodealstack.bidon.ads.BidonError
+import com.appodealstack.bidon.config.BidonError
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import com.appodealstack.bidon.utils.SdkDispatchers
 import com.appodealstack.bidon.utils.di.get
@@ -39,6 +39,7 @@ internal class JsonHttpRequest(
                     }
                     is RawResponse.Failure -> {
                         val baseResponse = JsonParsers.parseOrNull<BaseResponse>(String(response.responseBody ?: byteArrayOf()))
+                        logInfo(Tag, "Request failed ${String(response.responseBody ?: byteArrayOf())}")
                         logInfo(Tag, "Request failed $baseResponse")
                         when (response.code) {
                             422 -> {

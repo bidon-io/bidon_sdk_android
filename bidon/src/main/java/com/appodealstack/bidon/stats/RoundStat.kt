@@ -1,6 +1,6 @@
 package com.appodealstack.bidon.stats
 
-import com.appodealstack.bidon.ads.DemandId
+import com.appodealstack.bidon.adapter.DemandId
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */

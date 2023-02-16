@@ -1,6 +1,6 @@
 package com.appodealstack.bidon.config.domain
 
-import com.appodealstack.bidon.ads.DemandId
+import com.appodealstack.bidon.adapter.DemandId
 import com.appodealstack.bidon.auction.models.LineItem
 import com.appodealstack.bidon.auction.models.minByPricefloorOrNull
 import com.google.common.truth.Truth.assertThat

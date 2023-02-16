@@ -1,13 +1,12 @@
 package com.appodealstack.bidon.adapters
 
 import android.app.Activity
-import com.appodealstack.bidon.adapter.AdAuctionParams
-import com.appodealstack.bidon.adapter.AdSource
-import com.appodealstack.bidon.adapter.AdState
+import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.ads.*
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.auction.models.LineItem
 import com.appodealstack.bidon.auctions.impl.PlacementId
+import com.appodealstack.bidon.config.BidonError
 import com.appodealstack.bidon.utils.ext.asFailure
 import com.appodealstack.bidon.utils.ext.asSuccess
 import kotlinx.coroutines.delay

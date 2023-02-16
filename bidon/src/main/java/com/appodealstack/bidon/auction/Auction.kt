@@ -1,6 +1,6 @@
 package com.appodealstack.bidon.auction
 
-import com.appodealstack.bidon.ads.DemandAd
+import com.appodealstack.bidon.adapter.DemandAd
 
 /**
  * Created by Aleksei Cherniaev on 07/09/2022.

@@ -1,6 +1,8 @@
 package com.appodealstack.bidon.ads
 
 import com.appodealstack.bidon.auction.AuctionListener
+import com.appodealstack.bidon.config.BidonError
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */

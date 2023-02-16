@@ -1,5 +1,7 @@
 package com.appodealstack.bidon.ads
 
+import com.appodealstack.bidon.adapter.DemandAd
+import com.appodealstack.bidon.adapter.DemandId
 import java.util.*
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.

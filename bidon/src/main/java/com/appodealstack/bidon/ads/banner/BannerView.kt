@@ -12,8 +12,8 @@ import com.appodealstack.bidon.BidOnSdk.Companion.DefaultMinPrice
 import com.appodealstack.bidon.R
 import com.appodealstack.bidon.adapter.AdSource
 import com.appodealstack.bidon.adapter.AdState
+import com.appodealstack.bidon.adapter.DemandAd
 import com.appodealstack.bidon.ads.AdType
-import com.appodealstack.bidon.ads.DemandAd
 import com.appodealstack.bidon.ads.asUnspecified
 import com.appodealstack.bidon.ads.banner.helper.ActivityLifecycleState
 import com.appodealstack.bidon.ads.banner.helper.BannerState.*

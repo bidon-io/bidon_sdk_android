@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.stats.impl
 
+import com.appodealstack.bidon.adapter.DemandId
 import com.appodealstack.bidon.ads.AdType
-import com.appodealstack.bidon.ads.DemandId
 import com.appodealstack.bidon.auction.models.BannerRequestBody
 import com.appodealstack.bidon.auction.models.InterstitialRequestBody
 import com.appodealstack.bidon.auction.models.RewardedRequestBody
