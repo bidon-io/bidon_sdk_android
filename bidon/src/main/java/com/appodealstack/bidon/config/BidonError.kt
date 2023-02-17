@@ -1,7 +1,7 @@
 package com.appodealstack.bidon.config
 
 import com.appodealstack.bidon.adapter.DemandId
-import com.appodealstack.bidon.ads.banner.BannerSize
+import com.appodealstack.bidon.ads.banner.BannerFormat
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -22,7 +22,7 @@ sealed class BidonError : Throwable() {
     class NoFill(val demandId: DemandId) : BidonError()
     class BidTimedOut(val demandId: DemandId) : BidonError()
     class FillTimedOut(val demandId: DemandId) : BidonError()
-    class AdFormatIsNotSupported(val demandId: String, val bannerSize: BannerSize) : BidonError()
+    class AdFormatIsNotSupported(val demandId: String, val bannerFormat: BannerFormat) : BidonError()
     class Unspecified(val demandId: DemandId?, val sourceError: Throwable? = null) : BidonError()
 
     object FullscreenAdNotReady : BidonError()

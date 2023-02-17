@@ -46,7 +46,7 @@ internal class LocationDataSourceImpl(
     override fun getUtcOffset(): Int {
         val tz = TimeZone.getDefault()
         val now = Date()
-        return tz.getOffset(now.time) / 1000
+        return tz.getOffset(now.time) / HourInMs
     }
 
     /**
@@ -62,15 +62,16 @@ internal class LocationDataSourceImpl(
             return null
         }
         val locationManager: LocationManager = getLocationManager(context)
-        logInfo(Tag, "locationManager: $locationManager")
         return locationManager.getBestProvider(Criteria(), false)?.let {
             try {
-                locationManager.getLastKnownLocation(it)
+                locationManager.getLastKnownLocation(it).also {
+                    logInfo(Tag, "Location $it")
+                }
             } catch (e: SecurityException) {
-                logInfo(Tag, "failed to retrieve GPS location: permission not granted")
+                logError(Tag, "failed to retrieve GPS location: permission not granted", e)
                 null
             } catch (e: IllegalArgumentException) {
-                logInfo(Tag, "failed to retrieve GPS location: device has no GPS provider")
+                logError(Tag, "failed to retrieve GPS location: device has no GPS provider", e)
                 null
             }
         }
@@ -99,3 +100,4 @@ internal class LocationDataSourceImpl(
 }
 
 private const val Tag = "Location"
+private const val HourInMs = 1000 * 60 * 60

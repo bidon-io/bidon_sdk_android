@@ -7,7 +7,7 @@ import com.appodealstack.bidmachine.ext.sdkVersion
 import com.appodealstack.bidmachine.impl.BMBannerAdImpl
 import com.appodealstack.bidmachine.impl.BMInterstitialAdImpl
 import com.appodealstack.bidmachine.impl.BMRewardedAdImpl
-import com.appodealstack.bidon.BidOn
+import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.adapter.AdProvider
 import com.appodealstack.bidon.adapter.AdSource
 import com.appodealstack.bidon.adapter.Adapter
@@ -45,7 +45,7 @@ class BidMachineAdapter :
         suspendCancellableCoroutine { continuation ->
             this.context = activity.applicationContext
             val sourceId = configParams.sellerId
-            BidMachine.setLoggingEnabled(BidOn.loggerLevel != Logger.Level.Off)
+            BidMachine.setLoggingEnabled(BidOnSdk.loggerLevel != Logger.Level.Off)
             BidMachine.initialize(context, sourceId) {
                 continuation.resume(Unit)
             }

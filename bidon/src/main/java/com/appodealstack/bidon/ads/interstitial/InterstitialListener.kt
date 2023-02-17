@@ -1,6 +1,7 @@
 package com.appodealstack.bidon.ads.interstitial
 
 import com.appodealstack.bidon.ads.AdListener
+import com.appodealstack.bidon.ads.FullscreenAdListener
 import com.appodealstack.bidon.auction.AuctionListener
 import com.appodealstack.bidon.auction.RoundsListener
 import com.appodealstack.bidon.logs.analytic.AdRevenueListener
@@ -12,4 +13,5 @@ interface InterstitialListener :
     AdListener,
     AdRevenueListener,
     AuctionListener,
-    RoundsListener
+    RoundsListener,
+    FullscreenAdListener

@@ -25,7 +25,7 @@ internal class AuctionResponseParser : JsonParser<AuctionResponse> {
             auctionId = json.optString("auction_id"),
             minPrice = json.optDouble("min_price"),
             auctionConfigurationId = json.optInt("auction_configuration_id"),
-            fillTimeout = json.optLong("fill_timeout"),
+            fillTimeout = json.optLong("fill_timeout").takeIf { json.has("fill_timeout") },
             lineItems = JsonParsers.parseList(json.optJSONArray("line_items")),
             token = json.optString("token")
         )

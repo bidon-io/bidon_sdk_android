@@ -3,6 +3,7 @@ package com.appodealstack.bidon.config.impl
 import android.app.Activity
 import com.appodealstack.bidon.BidOnBuilder
 import com.appodealstack.bidon.adapter.Adapter
+import com.appodealstack.bidon.config.BidOnInitializer
 import com.appodealstack.bidon.config.SdkState
 import com.appodealstack.bidon.config.models.ConfigRequestBody
 import com.appodealstack.bidon.config.usecases.GetConfigRequestUseCase
@@ -23,7 +24,7 @@ import kotlinx.coroutines.withContext
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-internal class BidOnInitializerImpl : com.appodealstack.bidon.config.BidOnInitializer, BidOnBuilder {
+internal class BidOnInitializerImpl : BidOnInitializer, BidOnBuilder {
     private val dispatcher by lazy { SdkDispatchers.Single }
     private val scope get() = CoroutineScope(dispatcher)
 
@@ -46,19 +47,19 @@ internal class BidOnInitializerImpl : com.appodealstack.bidon.config.BidOnInitia
     override val isInitialized: Boolean
         get() = initializationState.value == SdkState.Initialized
 
-    override fun setDefaultAdapters(): BidOnBuilder {
+    override fun registerDefaultAdapters(): BidOnBuilder {
         useDefaultAdapters = true
         return this
     }
 
-    override fun setAdapters(vararg adapters: Adapter): BidOnBuilder {
+    override fun registerAdapters(vararg adapters: Adapter): BidOnBuilder {
         adapters.forEach { adapter ->
             publisherAdapters[adapter::class.java] = adapter
         }
         return this
     }
 
-    override fun setAdapters(adaptersClassName: String): BidOnBuilder {
+    override fun registerAdapters(adaptersClassName: String): BidOnBuilder {
         publisherAdapterClasses.add(adaptersClassName)
         return this
     }
@@ -68,14 +69,12 @@ internal class BidOnInitializerImpl : com.appodealstack.bidon.config.BidOnInitia
         return this
     }
 
-    override fun setBaseUrl(host: String?): BidOnBuilder {
-        host?.let {
-            bidOnEndpoints.init(host, setOf())
-        }
+    override fun setBaseUrl(host: String): BidOnBuilder {
+        bidOnEndpoints.init(host, setOf())
         return this
     }
 
-    override fun init(activity: Activity, appKey: String) {
+    override fun initialize(activity: Activity, appKey: String) {
         if (initializationState.value == SdkState.Initialized) {
             notifyInitialized()
             return
@@ -92,7 +91,7 @@ internal class BidOnInitializerImpl : com.appodealstack.bidon.config.BidOnInitia
             DI.init(context = activity.applicationContext)
             scope.launch {
                 runCatching {
-                    initialize(activity, appKey)
+                    init(activity, appKey)
                 }.onFailure {
                     logError(Tag, "Error while initialization", it)
                     initializationState.value = SdkState.InitializationFailed
@@ -104,7 +103,7 @@ internal class BidOnInitializerImpl : com.appodealstack.bidon.config.BidOnInitia
         }
     }
 
-    private suspend fun initialize(activity: Activity, appKey: String): Result<Unit> {
+    private suspend fun init(activity: Activity, appKey: String): Result<Unit> {
         startSession()
         withContext(SdkDispatchers.IO) {
             keyValueStorage.appKey = appKey

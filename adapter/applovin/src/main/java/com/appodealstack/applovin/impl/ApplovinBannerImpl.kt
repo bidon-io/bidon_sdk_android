@@ -5,10 +5,9 @@ import android.view.ViewGroup
 import com.applovin.adview.AppLovinAdView
 import com.applovin.sdk.*
 import com.appodealstack.applovin.ApplovinBannerAuctionParams
-import com.appodealstack.applovin.ApplovinDemandId
 import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.ads.Ad
-import com.appodealstack.bidon.ads.banner.BannerSize
+import com.appodealstack.bidon.ads.banner.BannerFormat
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.auction.models.LineItem
 import com.appodealstack.bidon.auction.models.minByPricefloorOrNull
@@ -51,8 +50,8 @@ internal class ApplovinBannerImpl(
                     ecpm = requireNotNull(lineItem?.priceFloor),
                     roundStatus = RoundStatus.Successful,
                 )
-                adState.tryEmit(
-                    AdState.Bid(
+                adEvent.tryEmit(
+                    AdEvent.Bid(
                         AuctionResult(
                             ecpm = lineItem?.priceFloor ?: 0.0,
                             adSource = this@ApplovinBannerImpl,
@@ -67,7 +66,7 @@ internal class ApplovinBannerImpl(
                     ecpm = null,
                     roundStatus = RoundStatus.NoBid,
                 )
-                adState.tryEmit(AdState.LoadFailed(BidonError.NoFill(demandId)))
+                adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
     }
@@ -76,23 +75,23 @@ internal class ApplovinBannerImpl(
         object : AppLovinAdDisplayListener, AppLovinAdClickListener {
             override fun adDisplayed(ad: AppLovinAd) {
                 logInfo(Tag, "adDisplayed: $ad")
-                adState.tryEmit(AdState.Impression(ad.asAd()))
-                adState.tryEmit(AdState.PaidRevenue(ad.asAd()))
+                adEvent.tryEmit(AdEvent.Shown(ad.asAd()))
+                adEvent.tryEmit(AdEvent.PaidRevenue(ad.asAd()))
             }
 
             override fun adHidden(ad: AppLovinAd) {
                 logInfo(Tag, "adHidden: $ad")
-                adState.tryEmit(AdState.Closed(ad.asAd()))
+                adEvent.tryEmit(AdEvent.Closed(ad.asAd()))
             }
 
             override fun adClicked(ad: AppLovinAd) {
                 logInfo(Tag, "adClicked: $ad")
-                adState.tryEmit(AdState.Clicked(ad.asAd()))
+                adEvent.tryEmit(AdEvent.Clicked(ad.asAd()))
             }
         }
     }
 
-    override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
 
     override val ad: Ad?
         get() = applovinAd?.asAd() ?: adView?.asAd()
@@ -108,7 +107,7 @@ internal class ApplovinBannerImpl(
         priceFloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
-        bannerSize: BannerSize,
+        bannerFormat: BannerFormat,
         onLineItemConsumed: (LineItem) -> Unit
     ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
@@ -118,7 +117,7 @@ internal class ApplovinBannerImpl(
             context = adContainer.context,
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
             adaptiveBannerHeight = null,
-            bannerSize = bannerSize
+            bannerFormat = bannerFormat
         )
     }
 
@@ -128,10 +127,10 @@ internal class ApplovinBannerImpl(
         logInfo(Tag, "Starting with $adParams: $this")
         markBidStarted(adParams.lineItem.adUnitId)
         lineItem = adParams.lineItem
-        val adSize = adParams.bannerSize.asApplovinAdSize() ?: error(
+        val adSize = adParams.bannerFormat.asApplovinAdSize() ?: error(
             BidonError.AdFormatIsNotSupported(
                 demandId.demandId,
-                adParams.bannerSize
+                adParams.bannerFormat
             )
         )
         val bannerView = AppLovinAdView(applovinSdk, adSize, adParams.lineItem.adUnitId, adParams.context).also {
@@ -143,17 +142,17 @@ internal class ApplovinBannerImpl(
         bannerView.setAdLoadListener(requestListener)
         bannerView.loadNextAd()
 
-        val state = adState.first {
-            it is AdState.Bid || it is AdState.LoadFailed
+        val state = adEvent.first {
+            it is AdEvent.Bid || it is AdEvent.LoadFailed
         }
         return when (state) {
-            is AdState.LoadFailed -> {
+            is AdEvent.LoadFailed -> {
                 AuctionResult(
                     ecpm = 0.0,
                     adSource = this
                 )
             }
-            is AdState.Bid -> state.result
+            is AdEvent.Bid -> state.result
             else -> error("unexpected: $state")
         }
     }
@@ -163,7 +162,7 @@ internal class ApplovinBannerImpl(
         markFillStarted()
         requireNotNull(applovinAd?.asAd()).also {
             markFillFinished(RoundStatus.Successful)
-            adState.tryEmit(AdState.Fill(it))
+            adEvent.tryEmit(AdEvent.Fill(it))
         }
     }
 
@@ -181,11 +180,10 @@ internal class ApplovinBannerImpl(
 
     private fun AppLovinAdView?.asAd(): Ad {
         return Ad(
-            demandId = ApplovinDemandId,
             demandAd = demandAd,
             price = lineItem?.priceFloor ?: 0.0,
             sourceAd = this ?: demandAd,
-            monetizationNetwork = demandId.demandId,
+            networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = USD,
@@ -195,11 +193,10 @@ internal class ApplovinBannerImpl(
 
     private fun AppLovinAd?.asAd(): Ad {
         return Ad(
-            demandId = ApplovinDemandId,
             demandAd = demandAd,
             price = lineItem?.priceFloor ?: 0.0,
             sourceAd = this ?: demandAd,
-            monetizationNetwork = demandId.demandId,
+            networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = USD,
@@ -207,11 +204,11 @@ internal class ApplovinBannerImpl(
         )
     }
 
-    private fun BannerSize.asApplovinAdSize() = when (this) {
-        BannerSize.Banner -> AppLovinAdSize.BANNER
-        BannerSize.Adaptive -> AppLovinAdSize.BANNER
-        BannerSize.LeaderBoard -> AppLovinAdSize.LEADER
-        BannerSize.MRec -> AppLovinAdSize.MREC
+    private fun BannerFormat.asApplovinAdSize() = when (this) {
+        BannerFormat.Banner -> AppLovinAdSize.BANNER
+        BannerFormat.Adaptive -> AppLovinAdSize.BANNER
+        BannerFormat.LeaderBoard -> AppLovinAdSize.LEADER
+        BannerFormat.MRec -> AppLovinAdSize.MREC
     }
 }
 

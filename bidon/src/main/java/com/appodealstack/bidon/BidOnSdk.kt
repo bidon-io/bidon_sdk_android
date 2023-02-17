@@ -4,7 +4,7 @@ import android.app.Activity
 import com.appodealstack.bidon.adapter.Adapter
 import com.appodealstack.bidon.config.DefaultAdapters
 import com.appodealstack.bidon.config.InitializationCallback
-import com.appodealstack.bidon.config.impl.BidOnSdkImpl
+import com.appodealstack.bidon.config.impl.BidOnImpl
 import com.appodealstack.bidon.logs.logging.Logger
 import com.appodealstack.bidon.utils.networking.NetworkSettings
 
@@ -12,17 +12,16 @@ import com.appodealstack.bidon.utils.networking.NetworkSettings
  * Created by Aleksei Cherniaev on 08/08/2022.
  */
 
-object BidOn : BidOnSdk by BidOnSdkImpl()
+object BidOnSdk : BidOn by BidOnImpl() {
+    const val DefaultPlacement = "default"
+    const val DefaultMinPrice = 0.0
+    const val SdkVersion = BuildConfig.ADAPTER_VERSION
+}
 
 /**
- * [BidOn] SDK API
+ * [BidOnSdk] SDK API
  */
-interface BidOnSdk : BidOnBuilder, Logger {
-    companion object {
-        const val DefaultPlacement = "default"
-        const val DefaultMinPrice = 0.0
-    }
-
+interface BidOn : BidOnBuilder, Logger {
     override fun setLogLevel(logLevel: Logger.Level)
     fun isInitialized(): Boolean
 }
@@ -34,17 +33,17 @@ interface BidOnBuilder {
     /**
      * Default adapters is in [DefaultAdapters]
      */
-    fun setDefaultAdapters(): BidOnBuilder
+    fun registerDefaultAdapters(): BidOnBuilder
 
     /**
      * Registering custom Adapters
      */
-    fun setAdapters(vararg adapters: Adapter): BidOnBuilder
+    fun registerAdapters(vararg adapters: Adapter): BidOnBuilder
 
     /**
      * Registering custom Adapters by full class name
      */
-    fun setAdapters(adaptersClassName: String): BidOnBuilder
+    fun registerAdapters(adaptersClassName: String): BidOnBuilder
 
     /**
      * BidOn SDK always invokes [InitializationCallback.onFinished] callback.
@@ -55,7 +54,7 @@ interface BidOnBuilder {
     /**
      * Redefine BaseUrl for /action-requests. Default base url [NetworkSettings.BidOnBaseUrl]
      */
-    fun setBaseUrl(host: String?): BidOnBuilder
+    fun setBaseUrl(host: String): BidOnBuilder
 
-    fun init(activity: Activity, appKey: String)
+    fun initialize(activity: Activity, appKey: String)
 }

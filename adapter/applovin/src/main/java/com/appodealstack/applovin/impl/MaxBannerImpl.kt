@@ -13,7 +13,7 @@ import com.appodealstack.applovin.ApplovinDemandId
 import com.appodealstack.applovin.MaxBannerAuctionParams
 import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.ads.Ad
-import com.appodealstack.bidon.ads.banner.BannerSize
+import com.appodealstack.bidon.ads.banner.BannerFormat
 import com.appodealstack.bidon.ads.banner.helper.impl.dpToPx
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.auction.models.LineItem
@@ -42,7 +42,7 @@ internal class MaxBannerImpl(
 
     private var maxAdView: MaxAdView? = null
     private var maxAd: MaxAd? = null
-    private var bannerSize: BannerSize? = null
+    private var bannerFormat: BannerFormat? = null
 
     private val maxAdListener by lazy {
         object : MaxAdViewAdListener {
@@ -52,8 +52,8 @@ internal class MaxBannerImpl(
                     ecpm = requireNotNull(ad.revenue),
                     roundStatus = RoundStatus.Successful,
                 )
-                adState.tryEmit(
-                    AdState.Bid(
+                adEvent.tryEmit(
+                    AdEvent.Bid(
                         AuctionResult(
                             ecpm = ad.revenue,
                             adSource = this@MaxBannerImpl,
@@ -71,32 +71,32 @@ internal class MaxBannerImpl(
                     ecpm = null,
                     roundStatus = error.asBidonError().asRoundStatus(),
                 )
-                adState.tryEmit(AdState.LoadFailed(error.asBidonError()))
+                adEvent.tryEmit(AdEvent.LoadFailed(error.asBidonError()))
             }
 
             override fun onAdDisplayed(ad: MaxAd) {
                 maxAd = ad
-                adState.tryEmit(AdState.Impression(ad.asAd()))
+                adEvent.tryEmit(AdEvent.Shown(ad.asAd()))
             }
 
             override fun onAdHidden(ad: MaxAd) {
                 maxAd = ad
-                adState.tryEmit(AdState.Closed(ad.asAd()))
+                adEvent.tryEmit(AdEvent.Closed(ad.asAd()))
             }
 
             override fun onAdClicked(ad: MaxAd) {
                 maxAd = ad
-                adState.tryEmit(AdState.Clicked(ad.asAd()))
+                adEvent.tryEmit(AdEvent.Clicked(ad.asAd()))
             }
 
             override fun onAdDisplayFailed(ad: MaxAd, error: MaxError) {
                 maxAd = ad
-                adState.tryEmit(AdState.ShowFailed(error.asBidonError()))
+                adEvent.tryEmit(AdEvent.ShowFailed(error.asBidonError()))
             }
         }
     }
 
-    override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
 
     override val ad: Ad?
         get() = maxAd?.asAd() ?: maxAdView?.asAd()
@@ -114,7 +114,7 @@ internal class MaxBannerImpl(
         priceFloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
-        bannerSize: BannerSize,
+        bannerFormat: BannerFormat,
         onLineItemConsumed: (LineItem) -> Unit,
     ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
@@ -123,7 +123,7 @@ internal class MaxBannerImpl(
         MaxBannerAuctionParams(
             context = adContainer.context,
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
-            bannerSize = bannerSize,
+            bannerFormat = bannerFormat,
             adaptiveBannerHeight = null
         )
     }
@@ -133,11 +133,11 @@ internal class MaxBannerImpl(
         return AdViewHolder(
             networkAdview = adView,
             widthPx = FrameLayout.LayoutParams.MATCH_PARENT,
-            heightPx = when (bannerSize) {
-                BannerSize.Banner -> 50.dpToPx
-                BannerSize.LeaderBoard -> 90.dpToPx
-                BannerSize.MRec -> 250.dpToPx
-                BannerSize.Adaptive,
+            heightPx = when (bannerFormat) {
+                BannerFormat.Banner -> 50.dpToPx
+                BannerFormat.LeaderBoard -> 90.dpToPx
+                BannerFormat.MRec -> 250.dpToPx
+                BannerFormat.Adaptive,
                 null -> FrameLayout.LayoutParams.WRAP_CONTENT
             }
         )
@@ -146,8 +146,8 @@ internal class MaxBannerImpl(
     override suspend fun bid(adParams: MaxBannerAuctionParams): AuctionResult {
         logInfo(Tag, "Starting with $adParams")
         markBidStarted(adParams.lineItem.adUnitId)
-        bannerSize = adParams.bannerSize
-        val maxAdView = if (adParams.bannerSize == BannerSize.Adaptive) {
+        bannerFormat = adParams.bannerFormat
+        val maxAdView = if (adParams.bannerFormat == BannerFormat.Adaptive) {
             MaxAdView(
                 adParams.lineItem.adUnitId,
                 adParams.context,
@@ -161,7 +161,7 @@ internal class MaxBannerImpl(
         } else {
             MaxAdView(
                 adParams.lineItem.adUnitId,
-                adParams.bannerSize.asMaxAdFormat(),
+                adParams.bannerFormat.asMaxAdFormat(),
                 adParams.context,
             )
         }
@@ -177,17 +177,17 @@ internal class MaxBannerImpl(
             this.maxAdView = it
         }
         maxAdView.loadAd()
-        val state = adState.first {
-            it is AdState.Bid || it is AdState.LoadFailed
+        val state = adEvent.first {
+            it is AdEvent.Bid || it is AdEvent.LoadFailed
         }
         return when (state) {
-            is AdState.LoadFailed -> {
+            is AdEvent.LoadFailed -> {
                 AuctionResult(
                     ecpm = 0.0,
                     adSource = this
                 )
             }
-            is AdState.Bid -> state.result
+            is AdEvent.Bid -> state.result
             else -> error("unexpected: $state")
         }
     }
@@ -196,9 +196,9 @@ internal class MaxBannerImpl(
         /**
          * Applovin fills the bid automatically. It's not needed to fill it manually.
          */
-        AdState.Fill(
+        AdEvent.Fill(
             requireNotNull(maxAdView?.asAd())
-        ).also { adState.tryEmit(it) }.ad
+        ).also { adEvent.tryEmit(it) }.ad
     }
 
     override fun show(activity: Activity) {}
@@ -209,11 +209,10 @@ internal class MaxBannerImpl(
     private fun MaxAd?.asAd(): Ad {
         val maxAd = this
         return Ad(
-            demandId = ApplovinDemandId,
             demandAd = demandAd,
             price = maxAd?.revenue ?: 0.0,
             sourceAd = maxAd ?: demandAd,
-            monetizationNetwork = maxAd?.networkName,
+            networkName = maxAd?.networkName,
             dsp = maxAd?.dspId,
             roundId = roundId,
             currencyCode = USD,
@@ -227,11 +226,10 @@ internal class MaxBannerImpl(
     private fun MaxAdView?.asAd(): Ad {
         val maxAd = this
         return Ad(
-            demandId = ApplovinDemandId,
             demandAd = demandAd,
             price = 0.0,
             sourceAd = maxAd ?: demandAd,
-            monetizationNetwork = null,
+            networkName = ApplovinDemandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = USD,
@@ -239,11 +237,11 @@ internal class MaxBannerImpl(
         )
     }
 
-    private fun BannerSize.asMaxAdFormat() = when (this) {
-        BannerSize.Banner -> MaxAdFormat.BANNER
-        BannerSize.LeaderBoard -> MaxAdFormat.LEADER
-        BannerSize.MRec -> MaxAdFormat.MREC
-        else -> error(BidonError.AdFormatIsNotSupported(demandId.demandId, bannerSize = this))
+    private fun BannerFormat.asMaxAdFormat() = when (this) {
+        BannerFormat.Banner -> MaxAdFormat.BANNER
+        BannerFormat.LeaderBoard -> MaxAdFormat.LEADER
+        BannerFormat.MRec -> MaxAdFormat.MREC
+        else -> error(BidonError.AdFormatIsNotSupported(demandId.demandId, bannerFormat = this))
     }
 }
 

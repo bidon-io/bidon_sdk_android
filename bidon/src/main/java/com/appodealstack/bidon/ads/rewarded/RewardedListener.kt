@@ -2,6 +2,7 @@ package com.appodealstack.bidon.ads.rewarded
 
 import com.appodealstack.bidon.ads.Ad
 import com.appodealstack.bidon.ads.AdListener
+import com.appodealstack.bidon.ads.FullscreenAdListener
 import com.appodealstack.bidon.auction.AuctionListener
 import com.appodealstack.bidon.auction.RoundsListener
 import com.appodealstack.bidon.logs.analytic.AdRevenueListener
@@ -14,6 +15,7 @@ interface RewardedListener :
     AdRevenueListener,
     AuctionListener,
     RoundsListener,
+    FullscreenAdListener,
     RewardedAdListener
 
 interface RewardedAdListener {

@@ -45,8 +45,8 @@ internal class MaxInterstitialImpl(
                     ecpm = requireNotNull(ad.revenue),
                     roundStatus = RoundStatus.Successful,
                 )
-                adState.tryEmit(
-                    AdState.Bid(
+                adEvent.tryEmit(
+                    AdEvent.Bid(
                         AuctionResult(
                             ecpm = ad.revenue,
                             adSource = this@MaxInterstitialImpl,
@@ -61,32 +61,32 @@ internal class MaxInterstitialImpl(
                     ecpm = null,
                     roundStatus = error.asBidonError().asRoundStatus(),
                 )
-                adState.tryEmit(AdState.LoadFailed(error.asBidonError()))
+                adEvent.tryEmit(AdEvent.LoadFailed(error.asBidonError()))
             }
 
             override fun onAdDisplayed(ad: MaxAd) {
                 maxAd = ad
-                adState.tryEmit(AdState.Impression(ad.asAd()))
+                adEvent.tryEmit(AdEvent.Shown(ad.asAd()))
             }
 
             override fun onAdHidden(ad: MaxAd) {
                 maxAd = ad
-                adState.tryEmit(AdState.Closed(ad.asAd()))
+                adEvent.tryEmit(AdEvent.Closed(ad.asAd()))
             }
 
             override fun onAdClicked(ad: MaxAd) {
                 maxAd = ad
-                adState.tryEmit(AdState.Clicked(ad.asAd()))
+                adEvent.tryEmit(AdEvent.Clicked(ad.asAd()))
             }
 
             override fun onAdDisplayFailed(ad: MaxAd, error: MaxError) {
                 maxAd = ad
-                adState.tryEmit(AdState.ShowFailed(error.asBidonError()))
+                adEvent.tryEmit(AdEvent.ShowFailed(error.asBidonError()))
             }
         }
     }
 
-    override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
 
     override val ad: Ad?
         get() = maxAd?.asAd() ?: interstitialAd?.asAd()
@@ -124,17 +124,17 @@ internal class MaxInterstitialImpl(
             interstitialAd = it
         }
         maxInterstitialAd.loadAd()
-        val state = adState.first {
-            it is AdState.Bid || it is AdState.LoadFailed
+        val state = adEvent.first {
+            it is AdEvent.Bid || it is AdEvent.LoadFailed
         }
         return when (state) {
-            is AdState.LoadFailed -> {
+            is AdEvent.LoadFailed -> {
                 AuctionResult(
                     ecpm = 0.0,
                     adSource = this
                 )
             }
-            is AdState.Bid -> state.result
+            is AdEvent.Bid -> state.result
             else -> error("unexpected: $state")
         }
     }
@@ -143,16 +143,16 @@ internal class MaxInterstitialImpl(
         /**
          * Applovin fills the bid automatically. It's not needed to fill it manually.
          */
-        AdState.Fill(
+        AdEvent.Fill(
             requireNotNull(interstitialAd?.asAd())
-        ).also { adState.tryEmit(it) }.ad
+        ).also { adEvent.tryEmit(it) }.ad
     }
 
     override fun show(activity: Activity) {
         if (interstitialAd?.isReady == true) {
             interstitialAd?.showAd()
         } else {
-            adState.tryEmit(AdState.ShowFailed(BidonError.FullscreenAdNotReady))
+            adEvent.tryEmit(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
         }
     }
 
@@ -162,11 +162,10 @@ internal class MaxInterstitialImpl(
     private fun MaxAd?.asAd(): Ad {
         val maxAd = this
         return Ad(
-            demandId = ApplovinDemandId,
             demandAd = demandAd,
             price = maxAd?.revenue ?: 0.0,
             sourceAd = maxAd ?: demandAd,
-            monetizationNetwork = maxAd?.networkName,
+            networkName = ApplovinDemandId.demandId,
             dsp = maxAd?.dspId,
             roundId = roundId,
             currencyCode = USD,
@@ -180,11 +179,10 @@ internal class MaxInterstitialImpl(
     private fun MaxInterstitialAd?.asAd(): Ad {
         val maxAd = this
         return Ad(
-            demandId = ApplovinDemandId,
             demandAd = demandAd,
             price = 0.0,
             sourceAd = maxAd ?: demandAd,
-            monetizationNetwork = null,
+            networkName = ApplovinDemandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = USD,

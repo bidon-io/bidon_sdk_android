@@ -2,7 +2,7 @@ package com.appodealstack.bidon.auction.impl
 
 import com.appodealstack.bidon.adapter.AdapterInfo
 import com.appodealstack.bidon.ads.AdType
-import com.appodealstack.bidon.ads.banner.BannerSize
+import com.appodealstack.bidon.ads.banner.BannerFormat
 import com.appodealstack.bidon.ads.banner.helper.GetOrientationUseCase
 import com.appodealstack.bidon.auction.AdTypeParam
 import com.appodealstack.bidon.auction.models.*
@@ -72,11 +72,11 @@ internal class GetAuctionRequestUseCaseImpl(
         return when (data) {
             is AdTypeParam.Banner -> {
                 val banner = BannerRequestBody(
-                    formatCode = when (data.bannerSize) {
-                        BannerSize.Banner -> BannerRequestBody.Format.Banner320x50
-                        BannerSize.LeaderBoard -> BannerRequestBody.Format.LeaderBoard728x90
-                        BannerSize.MRec -> BannerRequestBody.Format.MRec300x250
-                        BannerSize.Adaptive -> BannerRequestBody.Format.AdaptiveBanner320x50
+                    formatCode = when (data.bannerFormat) {
+                        BannerFormat.Banner -> BannerRequestBody.Format.Banner320x50
+                        BannerFormat.LeaderBoard -> BannerRequestBody.Format.LeaderBoard728x90
+                        BannerFormat.MRec -> BannerRequestBody.Format.MRec300x250
+                        BannerFormat.Adaptive -> BannerRequestBody.Format.AdaptiveBanner320x50
                     }.code,
                 )
                 Triple(first = banner, second = null, third = null)

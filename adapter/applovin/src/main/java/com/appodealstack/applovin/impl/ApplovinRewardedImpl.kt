@@ -3,7 +3,6 @@ package com.appodealstack.applovin.impl
 import android.app.Activity
 import com.applovin.adview.AppLovinIncentivizedInterstitial
 import com.applovin.sdk.*
-import com.appodealstack.applovin.ApplovinDemandId
 import com.appodealstack.applovin.ApplovinFullscreenAdAuctionParams
 import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.ads.Ad
@@ -49,8 +48,8 @@ internal class ApplovinRewardedImpl(
                     ecpm = requireNotNull(lineItem?.priceFloor),
                     roundStatus = RoundStatus.Successful,
                 )
-                adState.tryEmit(
-                    AdState.Bid(
+                adEvent.tryEmit(
+                    AdEvent.Bid(
                         AuctionResult(
                             ecpm = lineItem?.priceFloor ?: 0.0,
                             adSource = this@ApplovinRewardedImpl,
@@ -65,7 +64,7 @@ internal class ApplovinRewardedImpl(
                     ecpm = null,
                     roundStatus = RoundStatus.NoBid,
                 )
-                adState.tryEmit(AdState.LoadFailed(BidonError.NoFill(demandId)))
+                adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
     }
@@ -81,23 +80,23 @@ internal class ApplovinRewardedImpl(
 
             override fun adDisplayed(ad: AppLovinAd) {
                 logInfo(Tag, "adDisplayed: $this")
-                adState.tryEmit(AdState.Impression(ad.asAd()))
-                adState.tryEmit(AdState.PaidRevenue(ad.asAd()))
+                adEvent.tryEmit(AdEvent.Shown(ad.asAd()))
+                adEvent.tryEmit(AdEvent.PaidRevenue(ad.asAd()))
             }
 
             override fun adHidden(ad: AppLovinAd) {
                 logInfo(Tag, "adHidden: $this")
-                adState.tryEmit(AdState.Closed(ad.asAd()))
+                adEvent.tryEmit(AdEvent.Closed(ad.asAd()))
             }
 
             override fun adClicked(ad: AppLovinAd) {
                 logInfo(Tag, "adClicked: $this")
-                adState.tryEmit(AdState.Clicked(ad.asAd()))
+                adEvent.tryEmit(AdEvent.Clicked(ad.asAd()))
             }
 
             override fun userRewardVerified(ad: AppLovinAd, response: MutableMap<String, String>?) {
                 logInfo(Tag, "userRewardVerified: $this")
-                adState.tryEmit(AdState.OnReward(ad.asAd(), reward = null))
+                adEvent.tryEmit(AdEvent.OnReward(ad.asAd(), reward = null))
             }
 
             override fun userOverQuota(ad: AppLovinAd?, response: MutableMap<String, String>?) {}
@@ -106,7 +105,7 @@ internal class ApplovinRewardedImpl(
         }
     }
 
-    override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
 
     override val ad: Ad?
         get() = applovinAd?.asAd() ?: rewardedAd?.asAd()
@@ -142,17 +141,17 @@ internal class ApplovinRewardedImpl(
             rewardedAd = it
         }
         incentivizedInterstitial.preload(requestListener)
-        val state = adState.first {
-            it is AdState.Bid || it is AdState.LoadFailed
+        val state = adEvent.first {
+            it is AdEvent.Bid || it is AdEvent.LoadFailed
         }
         return when (state) {
-            is AdState.LoadFailed -> {
+            is AdEvent.LoadFailed -> {
                 AuctionResult(
                     ecpm = 0.0,
                     adSource = this
                 )
             }
-            is AdState.Bid -> state.result
+            is AdEvent.Bid -> state.result
             else -> error("unexpected: $state")
         }
     }
@@ -162,7 +161,7 @@ internal class ApplovinRewardedImpl(
         markFillStarted()
         requireNotNull(applovinAd?.asAd()).also {
             markFillFinished(RoundStatus.Successful)
-            adState.tryEmit(AdState.Fill(it))
+            adEvent.tryEmit(AdEvent.Fill(it))
         }
     }
 
@@ -172,17 +171,16 @@ internal class ApplovinRewardedImpl(
         if (rewardedAd?.isAdReadyToDisplay == true && appLovinAd != null) {
             rewardedAd?.show(appLovinAd, activity, listener, listener, listener, listener)
         } else {
-            adState.tryEmit(AdState.ShowFailed(BidonError.FullscreenAdNotReady))
+            adEvent.tryEmit(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
         }
     }
 
     private fun AppLovinIncentivizedInterstitial?.asAd(): Ad {
         return Ad(
-            demandId = ApplovinDemandId,
             demandAd = demandAd,
             price = lineItem?.priceFloor ?: 0.0,
             sourceAd = this ?: demandAd,
-            monetizationNetwork = demandId.demandId,
+            networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = USD,
@@ -192,11 +190,10 @@ internal class ApplovinRewardedImpl(
 
     private fun AppLovinAd?.asAd(): Ad {
         return Ad(
-            demandId = ApplovinDemandId,
             demandAd = demandAd,
             price = lineItem?.priceFloor ?: 0.0,
             sourceAd = this ?: demandAd,
-            monetizationNetwork = demandId.demandId,
+            networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = USD,

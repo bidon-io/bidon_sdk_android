@@ -158,7 +158,7 @@ internal class AuctionImpl(
         adTypeParamData: AdTypeParam,
     ) {
         val round = rounds.firstOrNull() ?: return
-        roundsListener.roundStarted(round.id)
+        roundsListener.onRoundStarted(round.id, minPriceFloor)
 
         val allRoundResults = executeRound(
             round = round,
@@ -230,13 +230,13 @@ internal class AuctionImpl(
                 resolver = resolver,
                 roundResults = successfulResults
             )
-            roundsListener.roundSucceed(
+            roundsListener.onRoundSucceed(
                 roundId = round.id,
                 roundResults = successfulResults
             )
         } else {
             logError(Tag, "Round '${round.id}' failed", BidonError.NoRoundResults)
-            roundsListener.roundFailed(
+            roundsListener.onRoundFailed(
                 roundId = round.id,
                 error = BidonError.NoRoundResults
             )
@@ -424,7 +424,7 @@ internal class AuctionImpl(
                 timeout = timeout,
                 lineItems = availableLineItemsForDemand,
                 adContainer = adTypeParamData.adContainer,
-                bannerSize = adTypeParamData.bannerSize,
+                bannerFormat = adTypeParamData.bannerFormat,
                 onLineItemConsumed = { lineItem ->
                     mutableLineItems.remove(lineItem)
                 },

@@ -6,12 +6,12 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.widget.FrameLayout
 import androidx.annotation.AttrRes
-import com.appodealstack.bidon.BidOn
 import com.appodealstack.bidon.BidOnSdk
-import com.appodealstack.bidon.BidOnSdk.Companion.DefaultMinPrice
+import com.appodealstack.bidon.BidOnSdk.DefaultMinPrice
+import com.appodealstack.bidon.BidOnSdk.DefaultPlacement
 import com.appodealstack.bidon.R
+import com.appodealstack.bidon.adapter.AdEvent
 import com.appodealstack.bidon.adapter.AdSource
-import com.appodealstack.bidon.adapter.AdState
 import com.appodealstack.bidon.adapter.DemandAd
 import com.appodealstack.bidon.ads.AdType
 import com.appodealstack.bidon.ads.asUnspecified
@@ -42,10 +42,15 @@ import kotlinx.coroutines.launch
 interface BannerAd {
     val placementId: String
 
-    fun setAdSize(bannerSize: BannerSize)
-    fun load(minPrice: Double = DefaultMinPrice)
-    fun show()
-    fun destroy()
+    fun setBannerFormat(bannerFormat: BannerFormat)
+    fun loadAd(minPrice: Double = DefaultMinPrice)
+
+    /**
+     * Shows if banner is ready to show
+     */
+    fun isReady()
+    fun showAd()
+    fun destroyAd()
     fun setBannerListener(listener: BannerListener)
 
     /**
@@ -55,14 +60,14 @@ interface BannerAd {
     fun stopAutoRefresh()
 }
 
-class BannerView @JvmOverloads constructor(
+class BannerView(
     context: Context,
     attrs: AttributeSet? = null,
     @AttrRes defStyleAtt: Int = 0
 ) : FrameLayout(context, attrs, defStyleAtt), BannerAd {
 
-    override var placementId: String = BidOnSdk.DefaultPlacement
-    private var bannerSize: BannerSize = BannerSize.Banner
+    override var placementId: String = DefaultPlacement
+    private var bannerFormat: BannerFormat = BannerFormat.Banner
     private var userListener: BannerListener? = null
     private val activityLifecycleObserver by lazy { (context as? Activity)?.let { ActivityLifecycleObserver(it) } }
     private var refresh: AutoRefresh = if (activityLifecycleObserver == null) {
@@ -71,7 +76,8 @@ class BannerView @JvmOverloads constructor(
         AutoRefresh.On(DefaultAutoRefreshTimeoutMs)
     }
 
-    constructor(context: Context, placementId: String) : this(context, null, 0) {
+    @JvmOverloads
+    constructor(context: Context, placementId: String = DefaultPlacement) : this(context, null, 0) {
         this.placementId = placementId
     }
 
@@ -109,10 +115,10 @@ class BannerView @JvmOverloads constructor(
                 }
                 getInteger(R.styleable.BannerView_bannerSize, 0).let {
                     when (it) {
-                        1 -> setAdSize(BannerSize.Banner)
-                        3 -> setAdSize(BannerSize.LeaderBoard)
-                        4 -> setAdSize(BannerSize.MRec)
-                        5 -> setAdSize(BannerSize.Adaptive)
+                        1 -> setBannerFormat(BannerFormat.Banner)
+                        3 -> setBannerFormat(BannerFormat.LeaderBoard)
+                        4 -> setBannerFormat(BannerFormat.MRec)
+                        5 -> setBannerFormat(BannerFormat.Adaptive)
                     }
                 }
             } finally {
@@ -123,9 +129,9 @@ class BannerView @JvmOverloads constructor(
         launchShowReducer()
     }
 
-    override fun setAdSize(bannerSize: BannerSize) {
-        logInfo(Tag, "BannerSize set: $bannerSize")
-        this.bannerSize = bannerSize
+    override fun setBannerFormat(bannerFormat: BannerFormat) {
+        logInfo(Tag, "BannerSize set: $bannerFormat")
+        this.bannerFormat = bannerFormat
     }
 
     override fun setBannerListener(listener: BannerListener) {
@@ -133,13 +139,17 @@ class BannerView @JvmOverloads constructor(
         this.userListener = listener
     }
 
-    override fun load(minPrice: Double) {
+    override fun isReady() {
+        TODO("Not yet implemented")
+    }
+
+    override fun loadAd(minPrice: Double) {
         this.minPrice = minPrice
         logInfo(Tag, "Load with placement invoked: $placementId")
         sendAction(LoadAction.OnLoadInvoked)
     }
 
-    override fun show() {
+    override fun showAd() {
         logInfo(Tag, "Show with placement invoked: $placementId")
         sendAction(ShowAction.OnShowInvoked)
     }
@@ -166,10 +176,10 @@ class BannerView @JvmOverloads constructor(
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        destroy()
+        destroyAd()
     }
 
-    override fun destroy() {
+    override fun destroyAd() {
         sendAction(LoadAction.OnDestroyInvoked)
         sendAction(ShowAction.OnDestroyInvoked)
     }
@@ -179,7 +189,7 @@ class BannerView @JvmOverloads constructor(
      */
 
     private fun sendAction(action: ShowAction) {
-        if (!BidOn.isInitialized()) {
+        if (!BidOnSdk.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
             return
         }
@@ -187,7 +197,7 @@ class BannerView @JvmOverloads constructor(
     }
 
     private fun sendAction(action: LoadAction) {
-        if (!BidOn.isInitialized()) {
+        if (!BidOnSdk.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
             return
         }
@@ -233,7 +243,7 @@ class BannerView @JvmOverloads constructor(
                         val ad = requireNotNull(winner.adSource.ad) {
                             "[Ad] should exist when an Action succeeds"
                         }
-                        listener.auctionSucceed(action.auctionResults)
+                        listener.onAuctionSuccess(action.auctionResults)
                         listener.onAdLoaded(ad)
                         LoadState.Loaded(winner)
                     }
@@ -241,7 +251,7 @@ class BannerView @JvmOverloads constructor(
                         /**
                          * Auction failed
                          */
-                        listener.auctionFailed(error = action.cause)
+                        listener.onAuctionFailed(error = action.cause)
                         listener.onAdLoadFailed(cause = action.cause)
                         launchLoadingRefreshIfNeeded()
                         LoadState.Idle
@@ -388,13 +398,13 @@ class BannerView @JvmOverloads constructor(
     private fun startAuction(
         minPrice: Double
     ) {
-        listener.auctionStarted()
+        listener.onAuctionStarted()
         scope.launch {
             get<Auction>().start(
                 demandAd = demandAd,
                 resolver = MaxEcpmAuctionResolver,
                 adTypeParamData = AdTypeParam.Banner(
-                    bannerSize = bannerSize,
+                    bannerFormat = bannerFormat,
                     adContainer = this@BannerView,
                     priceFloor = minPrice
                 ),
@@ -409,24 +419,24 @@ class BannerView @JvmOverloads constructor(
 
     private fun subscribeToWinner(adSource: AdSource<*>) {
         observeCallbacksJob?.cancel()
-        observeCallbacksJob = adSource.adState.onEach { state ->
+        observeCallbacksJob = adSource.adEvent.onEach { state ->
             logInfo(Tag, "$state")
             when (state) {
-                is AdState.Bid,
-                is AdState.OnReward,
-                is AdState.Fill -> {
+                is AdEvent.Bid,
+                is AdEvent.OnReward,
+                is AdEvent.Closed,
+                is AdEvent.LoadFailed,
+                is AdEvent.Fill -> {
                     // do nothing
                 }
-                is AdState.Clicked -> {
+                is AdEvent.Clicked -> {
                     sendStatsClickedAsync(adSource)
                     listener.onAdClicked(state.ad)
                 }
-                is AdState.Closed -> listener.onAdClosed(state.ad)
-                is AdState.Impression -> listener.onAdShown(state.ad)
-                is AdState.PaidRevenue -> listener.onRevenuePaid(state.ad)
-                is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
-                is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
-                is AdState.Expired -> listener.onAdExpired(state.ad)
+                is AdEvent.Shown -> listener.onAdShown(state.ad)
+                is AdEvent.PaidRevenue -> listener.onRevenuePaid(state.ad)
+                is AdEvent.ShowFailed -> listener.onAdLoadFailed(state.cause)
+                is AdEvent.Expired -> listener.onAdExpired(state.ad)
             }
         }.launchIn(scope)
     }
@@ -435,7 +445,7 @@ class BannerView @JvmOverloads constructor(
         coroutineScope {
             launch {
                 (adSource as? StatisticsCollector)?.sendClickImpression(
-                    Banner(format = bannerSize.asBannerFormat())
+                    Banner(format = bannerFormat.asBannerFormat())
                 )
             }
         }
@@ -445,17 +455,17 @@ class BannerView @JvmOverloads constructor(
         coroutineScope {
             launch {
                 (adSource as? StatisticsCollector)?.sendShowImpression(
-                    Banner(format = bannerSize.asBannerFormat())
+                    Banner(format = bannerFormat.asBannerFormat())
                 )
             }
         }
     }
 
-    private fun BannerSize.asBannerFormat() = when (this) {
-        BannerSize.Banner -> Format.Banner320x50
-        BannerSize.LeaderBoard -> Format.LeaderBoard728x90
-        BannerSize.MRec -> Format.MRec300x250
-        BannerSize.Adaptive -> Format.AdaptiveBanner320x50
+    private fun BannerFormat.asBannerFormat() = when (this) {
+        BannerFormat.Banner -> Format.Banner320x50
+        BannerFormat.LeaderBoard -> Format.LeaderBoard728x90
+        BannerFormat.MRec -> Format.MRec300x250
+        BannerFormat.Adaptive -> Format.AdaptiveBanner320x50
     }
 }
 

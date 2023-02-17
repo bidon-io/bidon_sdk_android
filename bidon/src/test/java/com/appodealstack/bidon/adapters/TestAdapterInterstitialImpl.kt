@@ -39,14 +39,14 @@ internal class TestAdapterInterstitialImpl(
             demandAd = demandAd,
             price = 1.5,
             roundId = roundId,
-            monetizationNetwork = "monetizationNetwork-Appodeal",
+            networkName = "monetizationNetwork-Appodeal",
             dsp = "DSP-bidmachine",
             sourceAd = this,
             currencyCode = "USD",
             auctionId = "auctionId-12312"
         )
 
-    override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
 
     override suspend fun bid(adParams: TestAdapterInterstitialParameters): AuctionResult {
         this.adParams = adParams

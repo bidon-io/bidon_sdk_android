@@ -28,7 +28,7 @@ import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppTextButton
 import com.appodeal.mads.component.H5Text
 import com.appodeal.mads.navigation.Screen
-import com.appodealstack.bidon.BidOn
+import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.logs.logging.Logger
 import com.appodealstack.bidon.utils.networking.NetworkSettings
 
@@ -56,16 +56,18 @@ internal fun MainScreen(
                 )
                 if (state == MainScreenState.NotInitialized) {
                     AppButton(text = "Init") {
+                        val baseUrl =
+                            sharedPreferences.getString("host", NetworkSettings.BidOnBaseUrl) ?: NetworkSettings.BidOnBaseUrl
                         initState.value = MainScreenState.Initializing
-                        BidOn.setLogLevel(Logger.Level.Verbose)
-                        BidOn
-                            .setDefaultAdapters()
-                            .setAdapters("com.appodealstack.admob.AdmobAdapter")
-                            .setBaseUrl(sharedPreferences.getString("host", NetworkSettings.BidOnBaseUrl))
+                        BidOnSdk.setLogLevel(Logger.Level.Verbose)
+                        BidOnSdk
+                            .registerDefaultAdapters()
+                            .registerAdapters("com.appodealstack.admob.AdmobAdapter")
+                            .setBaseUrl(baseUrl)
                             .setInitializationCallback {
                                 initState.value = MainScreenState.Initialized
                             }
-                            .init(
+                            .initialize(
                                 activity = context as Activity,
                                 appKey = "d908f77a97ae0993514bc8edba7e776a36593c77e5f44994",
                             )
