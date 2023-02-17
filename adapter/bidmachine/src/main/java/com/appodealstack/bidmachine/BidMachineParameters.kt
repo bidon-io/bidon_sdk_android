@@ -3,7 +3,7 @@ package com.appodealstack.bidmachine
 import android.content.Context
 import com.appodealstack.bidon.adapter.AdAuctionParams
 import com.appodealstack.bidon.adapter.AdapterParameters
-import com.appodealstack.bidon.ads.banner.BannerSize
+import com.appodealstack.bidon.ads.banner.BannerFormat
 
 data class BidMachineParameters(
     val sellerId: String,
@@ -13,7 +13,7 @@ data class BidMachineParameters(
 
 data class BMBannerAuctionParams(
     val context: Context,
-    val bannerSize: BannerSize,
+    val bannerFormat: BannerFormat,
     val priceFloor: Double,
     val timeout: Long,
 ) : AdAuctionParams

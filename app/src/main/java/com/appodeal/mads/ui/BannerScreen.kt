@@ -24,8 +24,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
 import com.appodeal.mads.component.*
 import com.appodealstack.bidon.ads.Ad
+import com.appodealstack.bidon.ads.banner.BannerFormat
 import com.appodealstack.bidon.ads.banner.BannerListener
-import com.appodealstack.bidon.ads.banner.BannerSize
 import com.appodealstack.bidon.ads.banner.BannerView
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.config.BidonError
@@ -42,8 +42,8 @@ fun BannerScreen(navController: NavHostController) {
     val logFlow = remember {
         mutableStateOf(listOf("Log"))
     }
-    val bannerSize = remember {
-        mutableStateOf(BannerSize.Banner)
+    val bannerFormat = remember {
+        mutableStateOf(BannerFormat.Banner)
     }
     val showOnLoad = remember {
         mutableStateOf(false)
@@ -101,19 +101,19 @@ fun BannerScreen(navController: NavHostController) {
         }
         Column(modifier = Modifier.padding(8.dp)) {
             ItemSelector(
-                items = BannerSize.values().toList(),
-                selectedItem = bannerSize.value,
+                items = BannerFormat.values().toList(),
+                selectedItem = bannerFormat.value,
                 getItemTitle = {
                     when (it) {
-                        BannerSize.Banner -> "Banner 320x50"
-                        BannerSize.LeaderBoard -> "Leader Board 728x90"
-                        BannerSize.MRec -> "MRec 300x250"
-                        BannerSize.Adaptive -> "Smart/Adaptive 320x50"
+                        BannerFormat.Banner -> "Banner 320x50"
+                        BannerFormat.LeaderBoard -> "Leader Board 728x90"
+                        BannerFormat.MRec -> "MRec 300x250"
+                        BannerFormat.Adaptive -> "Smart/Adaptive 320x50"
                     }
                 },
                 onItemClicked = {
-                    bannerSize.value = it
-                    bannerView.value?.setAdSize(it)
+                    bannerFormat.value = it
+                    bannerView.value?.setBannerFormat(it)
                 }
             )
             Spacer(modifier = Modifier.padding(top = 2.dp))
@@ -174,7 +174,7 @@ fun BannerScreen(navController: NavHostController) {
                         context = context,
                         placementId = "some_placement_id"
                     ).apply {
-                        setAdSize(bannerSize.value)
+                        setBannerFormat(bannerFormat.value)
                         if (autoRefreshTtl.value == 0L) {
                             stopAutoRefresh()
                         } else {
@@ -190,10 +190,6 @@ fun BannerScreen(navController: NavHostController) {
                                     logFlow.log("onAdLoadFailed: $cause")
                                 }
 
-                                override fun onAdShowFailed(cause: BidonError) {
-                                    logFlow.log("onAdShowFailed: $cause")
-                                }
-
                                 override fun onAdShown(ad: Ad) {
                                     logFlow.log("onAdShown: $ad")
                                 }
@@ -202,19 +198,15 @@ fun BannerScreen(navController: NavHostController) {
                                     logFlow.log("onAdClicked: $ad")
                                 }
 
-                                override fun onAdClosed(ad: Ad) {
-                                    logFlow.log("onAdClosed: $ad")
-                                }
-
                                 override fun onAdExpired(ad: Ad) {
                                     logFlow.log("onAdExpired: $ad")
                                 }
 
-                                override fun auctionStarted() {
+                                override fun onAuctionStarted() {
                                     logFlow.log("auctionStarted")
                                 }
 
-                                override fun auctionSucceed(auctionResults: List<AuctionResult>) {
+                                override fun onAuctionSuccess(auctionResults: List<AuctionResult>) {
                                     val log = buildString {
                                         appendLine("AuctionSucceed (${auctionResults.size} items)")
                                         auctionResults.forEachIndexed { index, auctionResult ->
@@ -224,15 +216,15 @@ fun BannerScreen(navController: NavHostController) {
                                     logFlow.log(log)
                                 }
 
-                                override fun auctionFailed(error: Throwable) {
+                                override fun onAuctionFailed(error: Throwable) {
                                     logFlow.log("auctionFailed: $error")
                                 }
 
-                                override fun roundStarted(roundId: String) {
-                                    logFlow.log("RoundStarted(roundId=$roundId)")
+                                override fun onRoundStarted(roundId: String, priceFloor: Double) {
+                                    logFlow.log("RoundStarted(roundId=$roundId, priceFloor=$priceFloor)")
                                 }
 
-                                override fun roundSucceed(roundId: String, roundResults: List<AuctionResult>) {
+                                override fun onRoundSucceed(roundId: String, roundResults: List<AuctionResult>) {
                                     logFlow.log(
                                         buildString {
                                             appendLine("roundSucceed($roundId)")
@@ -243,7 +235,7 @@ fun BannerScreen(navController: NavHostController) {
                                     )
                                 }
 
-                                override fun roundFailed(roundId: String, error: Throwable) {
+                                override fun onRoundFailed(roundId: String, error: Throwable) {
                                     logFlow.log("roundFailed: roundId=$roundId, $error")
                                 }
 
@@ -258,9 +250,9 @@ fun BannerScreen(navController: NavHostController) {
                 AppButton(
                     text = "Load",
                 ) {
-                    bannerView.value?.load()
+                    bannerView.value?.loadAd()
                     if (showOnLoad.value) {
-                        bannerView.value?.show()
+                        bannerView.value?.showAd()
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
@@ -274,11 +266,11 @@ fun BannerScreen(navController: NavHostController) {
             }
             Row {
                 AppButton(text = "Show") {
-                    bannerView.value?.show()
+                    bannerView.value?.showAd()
                 }
                 Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                 AppButton(text = "Destroy") {
-                    bannerView.value?.destroy()
+                    bannerView.value?.destroyAd()
                     bannerView.value = null
                 }
             }

@@ -1,12 +1,8 @@
 package com.appodealstack.ironsource
 
 import android.app.Activity
-import com.appodealstack.bidon.adapter.Adapter
-import com.appodealstack.bidon.adapter.Initializable
-import com.appodealstack.bidon.config.models.AdapterInfo
+import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.ads.Ad
-import com.appodealstack.bidon.ads.DemandAd
-import com.appodealstack.bidon.ads.DemandId
 import com.appodealstack.bidon.utils.SdkDispatchers
 import com.appodealstack.ironsource.ext.adapterVersion
 import com.appodealstack.ironsource.ext.sdkVersion
@@ -227,14 +223,13 @@ class IronSourceAdapter :
     private fun AdInfo?.asAd(demandAd: DemandAd): Ad {
         val adInfo = this
         return Ad(
-            demandId = demandId,
             demandAd = demandAd,
             price = adInfo?.revenue ?: 0.0,
             sourceAd = adInfo ?: demandAd,
             currencyCode = null,
             roundId = "Ad.AuctionRound.Mediation",
             dsp = null,
-            monetizationNetwork = adInfo?.adNetwork,
+            networkName = adInfo?.adNetwork,
             auctionId = "auctionId",
         )
     }

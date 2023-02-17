@@ -2,12 +2,8 @@ package com.appodealstack.fyber
 
 import android.app.Activity
 import android.content.Context
-import com.appodealstack.bidon.adapter.Adapter
-import com.appodealstack.bidon.adapter.Initializable
+import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.ads.Ad
-import com.appodealstack.bidon.ads.DemandAd
-import com.appodealstack.bidon.ads.DemandId
-import com.appodealstack.bidon.config.models.AdapterInfo
 import com.appodealstack.bidon.utils.SdkDispatchers
 import com.appodealstack.fyber.banner.BannerInterceptor
 import com.appodealstack.fyber.banner.initBannerListener
@@ -64,11 +60,10 @@ class FairBidAdapter :
 
     private fun ImpressionData?.asAd(demandAd: DemandAd, placementId: String): Ad {
         return Ad(
-            demandId = demandId,
             demandAd = demandAd,
             price = this?.netPayout ?: 0.0,
             sourceAd = placementId, // Cause FairBid is a Singleton
-            monetizationNetwork = this?.networkInstanceId,
+            networkName = this?.networkInstanceId,
             dsp = this?.demandSource,
             roundId = "Ad.AuctionRound.Mediation",
             currencyCode = this?.currency,

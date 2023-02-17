@@ -1,5 +1,6 @@
 package com.appodealstack.admob.impl
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.util.DisplayMetrics
@@ -8,14 +9,9 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import com.appodealstack.admob.AdmobBannerAuctionParams
 import com.appodealstack.admob.asBidonError
-import com.appodealstack.bidon.adapter.AdAuctionParams
-import com.appodealstack.bidon.adapter.AdSource
-import com.appodealstack.bidon.adapter.AdState
-import com.appodealstack.bidon.adapter.AdViewHolder
-import com.appodealstack.bidon.adapter.DemandAd
-import com.appodealstack.bidon.adapter.DemandId
+import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.ads.Ad
-import com.appodealstack.bidon.ads.banner.BannerSize
+import com.appodealstack.bidon.ads.banner.BannerFormat
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.auction.models.LineItem
 import com.appodealstack.bidon.auction.models.minByPricefloorOrNull
@@ -48,7 +44,9 @@ internal class AdmobBannerImpl(
     override val ad: Ad?
         get() = adView?.asAd()
 
-    override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+
+    override var isAdReadyToShow: Boolean = false
 
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
 
@@ -65,8 +63,8 @@ internal class AdmobBannerImpl(
                     ecpm = null,
                     roundStatus = loadAdError.asBidonError().asRoundStatus(),
                 )
-                adState.tryEmit(
-                    AdState.LoadFailed(loadAdError.asBidonError())
+                adEvent.tryEmit(
+                    AdEvent.LoadFailed(loadAdError.asBidonError())
                 )
             }
 
@@ -77,8 +75,9 @@ internal class AdmobBannerImpl(
                     roundStatus = RoundStatus.Successful,
                 )
                 adView?.run {
-                    adState.tryEmit(
-                        AdState.Bid(
+                    isAdReadyToShow = true
+                    adEvent.tryEmit(
+                        AdEvent.Bid(
                             AuctionResult(
                                 ecpm = requireNotNull(lineItem?.priceFloor),
                                 adSource = this@AdmobBannerImpl,
@@ -90,17 +89,17 @@ internal class AdmobBannerImpl(
 
             override fun onAdClicked() {
                 logInfo(Tag, "onAdClicked: $this")
-                adState.tryEmit(AdState.Clicked(requiredAdView.asAd()))
+                adEvent.tryEmit(AdEvent.Clicked(requiredAdView.asAd()))
             }
 
             override fun onAdClosed() {
                 logInfo(Tag, "onAdClosed: $this")
-                adState.tryEmit(AdState.Closed(requiredAdView.asAd()))
+                adEvent.tryEmit(AdEvent.Closed(requiredAdView.asAd()))
             }
 
             override fun onAdImpression() {
                 logInfo(Tag, "onAdShown: $this")
-                adState.tryEmit(AdState.Impression(requiredAdView.asAd()))
+                adEvent.tryEmit(AdEvent.Shown(requiredAdView.asAd()))
             }
 
             override fun onAdOpened() {}
@@ -120,14 +119,13 @@ internal class AdmobBannerImpl(
                 else -> "unknown type ${adValue.precisionType}"
             }
             val ecpm = adValue.valueMicros / 1_000_000.0
-            adState.tryEmit(
-                AdState.PaidRevenue(
+            adEvent.tryEmit(
+                AdEvent.PaidRevenue(
                     ad = Ad(
-                        demandId = demandId,
                         demandAd = demandAd,
                         price = ecpm,
                         sourceAd = requiredAdView,
-                        monetizationNetwork = demandId.demandId,
+                        networkName = demandId.demandId,
                         dsp = null,
                         roundId = roundId,
                         currencyCode = "USD",
@@ -150,7 +148,7 @@ internal class AdmobBannerImpl(
         priceFloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
-        bannerSize: BannerSize,
+        bannerFormat: BannerFormat,
         onLineItemConsumed: (LineItem) -> Unit,
     ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
@@ -158,12 +156,13 @@ internal class AdmobBannerImpl(
             ?.also(onLineItemConsumed)
         AdmobBannerAuctionParams(
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
-            bannerSize = bannerSize,
+            bannerFormat = bannerFormat,
             adContainer = adContainer,
             priceFloor = priceFloor
         )
     }
 
+    @SuppressLint("MissingPermission")
     override suspend fun bid(adParams: AdmobBannerAuctionParams): AuctionResult {
         logInfo(Tag, "Starting with $adParams")
         markBidStarted(adParams.lineItem.adUnitId)
@@ -173,7 +172,7 @@ internal class AdmobBannerImpl(
             if (!adUnitId.isNullOrBlank()) {
                 val adView = AdView(adParams.adContainer.context)
                     .apply {
-                        val admobBannerSize = adParams.bannerSize.asAdmobAdSize(adParams.adContainer)
+                        val admobBannerSize = adParams.bannerFormat.asAdmobAdSize(adParams.adContainer)
                         this@AdmobBannerImpl.adSize = admobBannerSize
                         this.setAdSize(admobBannerSize)
                         this.adUnitId = adUnitId
@@ -192,19 +191,19 @@ internal class AdmobBannerImpl(
                     message = "No appropriate AdUnitId found for price_floor=${adParams.lineItem.priceFloor}",
                     error = error
                 )
-                adState.tryEmit(AdState.LoadFailed(error))
+                adEvent.tryEmit(AdEvent.LoadFailed(error))
             }
-            val state = adState.first {
-                it is AdState.Bid || it is AdState.LoadFailed
+            val state = adEvent.first {
+                it is AdEvent.Bid || it is AdEvent.LoadFailed
             }
             when (state) {
-                is AdState.LoadFailed -> {
+                is AdEvent.LoadFailed -> {
                     AuctionResult(
                         ecpm = 0.0,
                         adSource = this@AdmobBannerImpl
                     )
                 }
-                is AdState.Bid -> state.result
+                is AdEvent.Bid -> state.result
                 else -> error("unexpected: $state")
             }
         }
@@ -216,11 +215,11 @@ internal class AdmobBannerImpl(
         /**
          * Admob fills the bid automatically. It's not needed to fill it manually.
          */
-        AdState.Fill(
+        AdEvent.Fill(
             requireNotNull(adView?.asAd())
         ).also {
             markFillFinished(RoundStatus.Successful)
-            adState.tryEmit(it)
+            adEvent.tryEmit(it)
         }.ad
     }
 
@@ -234,11 +233,10 @@ internal class AdmobBannerImpl(
 
     private fun AdView.asAd(): Ad {
         return Ad(
-            demandId = demandId,
             demandAd = demandAd,
             price = lineItem?.priceFloor ?: 0.0,
             sourceAd = this,
-            monetizationNetwork = demandId.demandId,
+            networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = "USD",
@@ -246,11 +244,11 @@ internal class AdmobBannerImpl(
         )
     }
 
-    private fun BannerSize.asAdmobAdSize(adContainer: ViewGroup) = when (this) {
-        BannerSize.Banner -> AdSize.BANNER
-        BannerSize.LeaderBoard -> AdSize.LEADERBOARD
-        BannerSize.MRec -> AdSize.MEDIUM_RECTANGLE
-        BannerSize.Adaptive -> adContainer.adaptiveAdSize()
+    private fun BannerFormat.asAdmobAdSize(adContainer: ViewGroup) = when (this) {
+        BannerFormat.Banner -> AdSize.BANNER
+        BannerFormat.LeaderBoard -> AdSize.LEADERBOARD
+        BannerFormat.MRec -> AdSize.MEDIUM_RECTANGLE
+        BannerFormat.Adaptive -> adContainer.adaptiveAdSize()
     }
 
     @Suppress("DEPRECATION")

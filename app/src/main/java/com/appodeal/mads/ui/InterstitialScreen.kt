@@ -69,11 +69,11 @@ fun InterstitialScreen(
                         logFlow.log("onAdExpired: $ad")
                     }
 
-                    override fun auctionStarted() {
+                    override fun onAuctionStarted() {
                         logFlow.log("auctionStarted")
                     }
 
-                    override fun auctionSucceed(auctionResults: List<AuctionResult>) {
+                    override fun onAuctionSuccess(auctionResults: List<AuctionResult>) {
                         val log = buildString {
                             appendLine("AuctionSucceed (${auctionResults.size} items)")
                             auctionResults.forEachIndexed { index, auctionResult ->
@@ -83,15 +83,15 @@ fun InterstitialScreen(
                         logFlow.log(log)
                     }
 
-                    override fun auctionFailed(error: Throwable) {
+                    override fun onAuctionFailed(error: Throwable) {
                         logFlow.log("auctionFailed: $error")
                     }
 
-                    override fun roundStarted(roundId: String) {
-                        logFlow.log("RoundStarted(roundId=$roundId)")
+                    override fun onRoundStarted(roundId: String, priceFloor: Double) {
+                        logFlow.log("RoundStarted(roundId=$roundId, priceFloor=$priceFloor)")
                     }
 
-                    override fun roundSucceed(roundId: String, roundResults: List<AuctionResult>) {
+                    override fun onRoundSucceed(roundId: String, roundResults: List<AuctionResult>) {
                         logFlow.log(
                             buildString {
                                 appendLine("roundSucceed($roundId)")
@@ -102,7 +102,7 @@ fun InterstitialScreen(
                         )
                     }
 
-                    override fun roundFailed(roundId: String, error: Throwable) {
+                    override fun onRoundFailed(roundId: String, error: Throwable) {
                         logFlow.log("roundFailed: roundId=$roundId, $error")
                     }
 
@@ -129,13 +129,13 @@ fun InterstitialScreen(
                 .padding(start = 24.dp, end = 24.dp, top = 24.dp)
         ) {
             AppButton(text = "Load") {
-                interstitial.load(activity)
+                interstitial.loadAd(activity)
             }
             AppButton(text = "Show") {
-                interstitial.show(activity)
+                interstitial.showAd(activity)
             }
             AppButton(text = "Destroy") {
-                interstitial.destroy()
+                interstitial.destroyAd()
             }
             LazyColumn(
                 modifier = Modifier

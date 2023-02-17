@@ -4,7 +4,6 @@
 }
 -keep class com.appodealstack.bidon.BidOn { *; }
 -keep public interface com.appodealstack.bidon.BidOnSdk { *; }
--keep public interface com.appodealstack.bidon.BidOnSdk$Companion { *; }
 -keep public interface com.appodealstack.bidon.BidOnBuilder { *; }
 -keep public interface com.appodealstack.bidon.logs.logging.Logger { *; }
 -keep public enum com.appodealstack.bidon.logs.logging.Logger$Level { *; }
@@ -15,12 +14,12 @@
 
 # Ad types
 -keep public interface com.appodealstack.bidon.ads.AdListener { *; }
-
+-keep public interface com.appodealstack.bidon.ads.FullscreenAdListener { *; }
 -keep public interface com.appodealstack.bidon.auction.AuctionListener { *; }
 -keep public interface com.appodealstack.bidon.auction.RoundsListener { *; }
 
 -keep public interface com.appodealstack.bidon.ads.banner.BannerAd { *; }
--keep public enum com.appodealstack.bidon.ads.banner.BannerSize { *; }
+-keep public enum com.appodealstack.bidon.ads.banner.BannerFormat { *; }
 -keep public class com.appodealstack.bidon.ads.banner.BannerView { *; }
 -keep public interface com.appodealstack.bidon.ads.banner.BannerListener { *; }
 

@@ -14,6 +14,7 @@ import com.appodealstack.bidon.utils.ext.asFailure
 import com.appodealstack.bidon.utils.ext.asSuccess
 import com.appodealstack.bidon.utils.ext.onAny
 import kotlinx.coroutines.*
+
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
@@ -89,6 +90,10 @@ internal class AuctionHolderImpl(
         displayingWinner = null
         nextWinner?.adSource?.destroy()
         nextWinner = null
+    }
+
+    override fun isAdReady(): Boolean {
+        return nextWinner?.adSource?.isAdReadyToShow == true
     }
 }
 

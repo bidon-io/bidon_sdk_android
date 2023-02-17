@@ -31,11 +31,11 @@ class BannerViewActivity : AppCompatActivity(R.layout.banner_view_layout) {
 
     private fun initViews() {
         loadButton.setOnClickListener {
-            bannerView.load()
-            bannerView.show()
+            bannerView.loadAd()
+            bannerView.showAd()
         }
         destroyButton.setOnClickListener {
-            bannerView.destroy()
+            bannerView.destroyAd()
         }
         closeButton.setOnClickListener {
             onBackPressed()

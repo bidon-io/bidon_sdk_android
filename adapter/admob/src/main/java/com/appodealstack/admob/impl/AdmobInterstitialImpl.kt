@@ -3,11 +3,7 @@ package com.appodealstack.admob.impl
 import android.app.Activity
 import com.appodealstack.admob.AdmobFullscreenAdAuctionParams
 import com.appodealstack.admob.asBidonError
-import com.appodealstack.bidon.adapter.AdAuctionParams
-import com.appodealstack.bidon.adapter.AdSource
-import com.appodealstack.bidon.adapter.AdState
-import com.appodealstack.bidon.adapter.DemandAd
-import com.appodealstack.bidon.adapter.DemandId
+import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.ads.Ad
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.auction.models.LineItem
@@ -59,7 +55,7 @@ internal class AdmobInterstitialImpl(
                     ecpm = null,
                     roundStatus = loadAdError.asBidonError().asRoundStatus(),
                 )
-                adState.tryEmit(AdState.LoadFailed(loadAdError.asBidonError()))
+                adEvent.tryEmit(AdEvent.LoadFailed(loadAdError.asBidonError()))
             }
 
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
@@ -71,8 +67,8 @@ internal class AdmobInterstitialImpl(
                     ecpm = requireNotNull(lineItem?.priceFloor),
                     roundStatus = RoundStatus.Successful,
                 )
-                adState.tryEmit(
-                    AdState.Bid(
+                adEvent.tryEmit(
+                    AdEvent.Bid(
                         AuctionResult(
                             ecpm = requireNotNull(lineItem?.priceFloor),
                             adSource = this@AdmobInterstitialImpl,
@@ -96,14 +92,13 @@ internal class AdmobInterstitialImpl(
                 else -> "unknown type ${adValue.precisionType}"
             }
             val ecpm = adValue.valueMicros / 1_000_000.0
-            adState.tryEmit(
-                AdState.PaidRevenue(
+            adEvent.tryEmit(
+                AdEvent.PaidRevenue(
                     ad = Ad(
-                        demandId = demandId,
                         demandAd = demandAd,
                         price = ecpm,
                         sourceAd = requiredInterstitialAd,
-                        monetizationNetwork = demandId.demandId,
+                        networkName = demandId.demandId,
                         dsp = null,
                         roundId = roundId,
                         currencyCode = "USD",
@@ -118,22 +113,22 @@ internal class AdmobInterstitialImpl(
         object : FullScreenContentCallback() {
             override fun onAdClicked() {
                 logInfo(Tag, "onAdClicked: $this")
-                adState.tryEmit(AdState.Clicked(requiredInterstitialAd.asAd()))
+                adEvent.tryEmit(AdEvent.Clicked(requiredInterstitialAd.asAd()))
             }
 
             override fun onAdDismissedFullScreenContent() {
                 logInfo(Tag, "onAdDismissedFullScreenContent: $this")
-                adState.tryEmit(AdState.Closed(requiredInterstitialAd.asAd()))
+                adEvent.tryEmit(AdEvent.Closed(requiredInterstitialAd.asAd()))
             }
 
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
                 logError(Tag, "onAdFailedToShowFullScreenContent: $this", error.asBidonError())
-                adState.tryEmit(AdState.ShowFailed(error.asBidonError()))
+                adEvent.tryEmit(AdEvent.ShowFailed(error.asBidonError()))
             }
 
             override fun onAdImpression() {
                 logInfo(Tag, "onAdShown: $this")
-                adState.tryEmit(AdState.Impression(requiredInterstitialAd.asAd()))
+                adEvent.tryEmit(AdEvent.Shown(requiredInterstitialAd.asAd()))
             }
 
             override fun onAdShowedFullScreenContent() {}
@@ -143,7 +138,9 @@ internal class AdmobInterstitialImpl(
     override val ad: Ad?
         get() = interstitialAd?.asAd()
 
-    override val adState = MutableSharedFlow<AdState>(Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(Int.MAX_VALUE)
+    override val isAdReadyToShow: Boolean
+        get() = interstitialAd != null
 
     override fun destroy() {
         logInfo(Tag, "destroy $this")
@@ -184,22 +181,22 @@ internal class AdmobInterstitialImpl(
                 logError(
                     tag = Tag,
                     message = "No appropriate AdUnitId found. PriceFloor=${adParams.priceFloor}, " +
-                        "but LineItem with max priceFloor=${lineItem?.priceFloor}",
+                            "but LineItem with max priceFloor=${lineItem?.priceFloor}",
                     error = error
                 )
-                adState.tryEmit(AdState.LoadFailed(error))
+                adEvent.tryEmit(AdEvent.LoadFailed(error))
             }
-            val state = adState.first {
-                it is AdState.Bid || it is AdState.LoadFailed
+            val state = adEvent.first {
+                it is AdEvent.Bid || it is AdEvent.LoadFailed
             }
             when (state) {
-                is AdState.LoadFailed -> {
+                is AdEvent.LoadFailed -> {
                     AuctionResult(
                         ecpm = 0.0,
                         adSource = this@AdmobInterstitialImpl
                     )
                 }
-                is AdState.Bid -> state.result
+                is AdEvent.Bid -> state.result
                 else -> error("unexpected: $state")
             }
         }
@@ -211,18 +208,18 @@ internal class AdmobInterstitialImpl(
         /**
          * Admob fills the bid automatically. It's not needed to fill it manually.
          */
-        AdState.Fill(
+        AdEvent.Fill(
             requireNotNull(interstitialAd?.asAd())
         ).also {
             markFillFinished(RoundStatus.Successful)
-            adState.tryEmit(it)
+            adEvent.tryEmit(it)
         }.ad
     }
 
     override fun show(activity: Activity) {
         logInfo(Tag, "Starting show: $this")
         if (interstitialAd == null) {
-            adState.tryEmit(AdState.ShowFailed(BidonError.FullscreenAdNotReady))
+            adEvent.tryEmit(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
         } else {
             interstitialAd?.show(activity)
         }
@@ -230,11 +227,10 @@ internal class AdmobInterstitialImpl(
 
     private fun InterstitialAd.asAd(): Ad {
         return Ad(
-            demandId = demandId,
             demandAd = demandAd,
             price = lineItem?.priceFloor ?: 0.0,
             sourceAd = this,
-            monetizationNetwork = demandId.demandId,
+            networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = "USD",

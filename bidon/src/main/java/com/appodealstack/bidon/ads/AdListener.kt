@@ -10,7 +10,7 @@ interface AdListener {
 
     /**
      * Callback invokes after auction completed and winner is selected.
-     * Calls immediately after [AuctionListener.auctionSucceed]
+     * Calls immediately after [AuctionListener.onAuctionSuccess]
      */
     fun onAdLoaded(ad: Ad)
 
@@ -18,9 +18,8 @@ interface AdListener {
      * Callback invokes after auction completed, but no winner found.
      */
     fun onAdLoadFailed(cause: BidonError)
-    fun onAdShowFailed(cause: BidonError)
-    fun onAdShown(ad: Ad)
-    fun onAdClicked(ad: Ad)
-    fun onAdClosed(ad: Ad)
-    fun onAdExpired(ad: Ad)
+
+    fun onAdShown(ad: Ad) // equals onAdImpression()
+    fun onAdClicked(ad: Ad) {}
+    fun onAdExpired(ad: Ad) {}
 }

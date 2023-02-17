@@ -9,7 +9,7 @@ import com.appodealstack.applovin.ext.sdkVersion
 import com.appodealstack.applovin.impl.ApplovinBannerImpl
 import com.appodealstack.applovin.impl.ApplovinInterstitialImpl
 import com.appodealstack.applovin.impl.ApplovinRewardedImpl
-import com.appodealstack.bidon.BidOn
+import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.logs.logging.Logger
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -43,7 +43,7 @@ class ApplovinAdapter :
             val instance = AppLovinSdk.getInstance(configParams.key, AppLovinSdkSettings(context), context).also {
                 applovinSdk = it
             }
-            instance.settings.setVerboseLogging(BidOn.loggerLevel != Logger.Level.Off)
+            instance.settings.setVerboseLogging(BidOnSdk.loggerLevel != Logger.Level.Off)
             if (!instance.isInitialized) {
                 instance.initializeSdk {
                     continuation.resume(Unit)

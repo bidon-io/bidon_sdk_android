@@ -1,9 +1,9 @@
 package com.appodealstack.bidon.ads.rewarded
 
 import android.app.Activity
-import com.appodealstack.bidon.BidOn
+import com.appodealstack.bidon.BidOnSdk
+import com.appodealstack.bidon.adapter.AdEvent
 import com.appodealstack.bidon.adapter.AdSource
-import com.appodealstack.bidon.adapter.AdState
 import com.appodealstack.bidon.adapter.DemandAd
 import com.appodealstack.bidon.ads.*
 import com.appodealstack.bidon.auction.AdTypeParam
@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.onEach
 internal class RewardedImpl(
     override val placementId: String,
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Default,
-) : RewardedAd {
+) : Rewarded {
 
     private val demandAd by lazy {
         DemandAd(AdType.Rewarded, placementId)
@@ -35,8 +35,12 @@ internal class RewardedImpl(
         getRewardedListener()
     }
 
-    override fun load(activity: Activity, minPrice: Double) {
-        if (!BidOn.isInitialized()) {
+    override fun isReady(): Boolean {
+        return auctionHolder.isAdReady()
+    }
+
+    override fun loadAd(activity: Activity, minPrice: Double) {
+        if (!BidOnSdk.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
             return
         }
@@ -45,7 +49,7 @@ internal class RewardedImpl(
         observeCallbacksJob = null
 
         if (!auctionHolder.isActive) {
-            listener.auctionStarted()
+            listener.onAuctionStarted()
             auctionHolder.startAuction(
                 adTypeParam = AdTypeParam.Rewarded(
                     activity = activity,
@@ -59,7 +63,7 @@ internal class RewardedImpl(
                              */
                             val winner = auctionResults.first()
                             subscribeToWinner(winner.adSource)
-                            listener.auctionSucceed(auctionResults)
+                            listener.onAuctionSuccess(auctionResults)
                             listener.onAdLoaded(
                                 requireNotNull(winner.adSource.ad) {
                                     "[Ad] should exist when the Action succeeds"
@@ -69,7 +73,7 @@ internal class RewardedImpl(
                             /**
                              * Auction failed
                              */
-                            listener.auctionFailed(error = it)
+                            listener.onAuctionFailed(error = it)
                             listener.onAdLoadFailed(cause = it.asUnspecified())
                         }
                 }
@@ -79,7 +83,7 @@ internal class RewardedImpl(
         }
     }
 
-    override fun show(activity: Activity) {
+    override fun showAd(activity: Activity) {
         logInfo(Tag, "Show with placement: $placementId")
         if (auctionHolder.isActive) {
             logInfo(Tag, "Show failed. Auction in progress.")
@@ -105,7 +109,7 @@ internal class RewardedImpl(
         this.userListener = listener
     }
 
-    override fun destroy() {
+    override fun destroyAd() {
         auctionHolder.destroy()
         observeCallbacksJob?.cancel()
         observeCallbacksJob = null
@@ -117,29 +121,29 @@ internal class RewardedImpl(
 
     private fun subscribeToWinner(adSource: AdSource<*>) {
         require(adSource is AdSource.Rewarded<*>)
-        observeCallbacksJob = adSource.adState.onEach { state ->
+        observeCallbacksJob = adSource.adEvent.onEach { state ->
             when (state) {
-                is AdState.Bid,
-                is AdState.Fill -> {
+                is AdEvent.Bid,
+                is AdEvent.Fill -> {
                     // do nothing
                 }
-                is AdState.OnReward -> {
+                is AdEvent.OnReward -> {
                     sendStatsRewardAsync(adSource)
                     listener.onUserRewarded(state.ad, state.reward)
                 }
-                is AdState.Clicked -> {
+                is AdEvent.Clicked -> {
                     sendStatsClickedAsync(adSource)
                     listener.onAdClicked(state.ad)
                 }
-                is AdState.Closed -> listener.onAdClosed(state.ad)
-                is AdState.Impression -> {
+                is AdEvent.Closed -> listener.onAdClosed(state.ad)
+                is AdEvent.Shown -> {
                     sendStatsShownAsync(adSource)
                     listener.onAdShown(state.ad)
                 }
-                is AdState.PaidRevenue -> listener.onRevenuePaid(state.ad)
-                is AdState.ShowFailed -> listener.onAdLoadFailed(state.cause)
-                is AdState.LoadFailed -> listener.onAdShowFailed(state.cause)
-                is AdState.Expired -> listener.onAdExpired(state.ad)
+                is AdEvent.PaidRevenue -> listener.onRevenuePaid(state.ad)
+                is AdEvent.ShowFailed -> listener.onAdLoadFailed(state.cause)
+                is AdEvent.LoadFailed -> listener.onAdShowFailed(state.cause)
+                is AdEvent.Expired -> listener.onAdExpired(state.ad)
             }
         }.launchIn(CoroutineScope(dispatcher))
     }
@@ -173,28 +177,28 @@ internal class RewardedImpl(
             userListener?.onAdExpired(ad)
         }
 
-        override fun auctionStarted() {
-            userListener?.auctionStarted()
+        override fun onAuctionStarted() {
+            userListener?.onAuctionStarted()
         }
 
-        override fun auctionSucceed(auctionResults: List<AuctionResult>) {
-            userListener?.auctionSucceed(auctionResults)
+        override fun onAuctionSuccess(auctionResults: List<AuctionResult>) {
+            userListener?.onAuctionSuccess(auctionResults)
         }
 
-        override fun auctionFailed(error: Throwable) {
-            userListener?.auctionFailed(error)
+        override fun onAuctionFailed(error: Throwable) {
+            userListener?.onAuctionFailed(error)
         }
 
-        override fun roundStarted(roundId: String) {
-            userListener?.roundStarted(roundId)
+        override fun onRoundStarted(roundId: String, priceFloor: Double) {
+            userListener?.onRoundStarted(roundId, priceFloor)
         }
 
-        override fun roundSucceed(roundId: String, roundResults: List<AuctionResult>) {
-            userListener?.roundSucceed(roundId, roundResults)
+        override fun onRoundSucceed(roundId: String, roundResults: List<AuctionResult>) {
+            userListener?.onRoundSucceed(roundId, roundResults)
         }
 
-        override fun roundFailed(roundId: String, error: Throwable) {
-            userListener?.roundFailed(roundId, error)
+        override fun onRoundFailed(roundId: String, error: Throwable) {
+            userListener?.onRoundFailed(roundId, error)
         }
 
         override fun onUserRewarded(ad: Ad, reward: Reward?) {

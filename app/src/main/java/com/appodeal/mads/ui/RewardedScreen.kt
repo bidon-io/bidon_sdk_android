@@ -19,7 +19,7 @@ import com.appodeal.mads.component.AppToolbar
 import com.appodeal.mads.component.Body2Text
 import com.appodealstack.bidon.ads.Ad
 import com.appodealstack.bidon.ads.rewarded.Reward
-import com.appodealstack.bidon.ads.rewarded.Rewarded
+import com.appodealstack.bidon.ads.rewarded.RewardedAd
 import com.appodealstack.bidon.ads.rewarded.RewardedListener
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.config.BidonError
@@ -38,8 +38,8 @@ fun RewardedScreen(
         mutableStateOf(listOf("Log"))
     }
 
-    val rewarded by lazy {
-        Rewarded("some_placement_id").apply {
+    val rewardedAd by lazy {
+        RewardedAd("some_placement_id").apply {
             setRewardedListener(
                 object : RewardedListener {
                     override fun onAdLoaded(ad: Ad) {
@@ -70,11 +70,11 @@ fun RewardedScreen(
                         logFlow.log("onAdExpired: $ad")
                     }
 
-                    override fun auctionStarted() {
+                    override fun onAuctionStarted() {
                         logFlow.log("auctionStarted")
                     }
 
-                    override fun auctionSucceed(auctionResults: List<AuctionResult>) {
+                    override fun onAuctionSuccess(auctionResults: List<AuctionResult>) {
                         val log = buildString {
                             appendLine("AuctionSucceed (${auctionResults.size} items)")
                             auctionResults.forEachIndexed { index, auctionResult ->
@@ -84,15 +84,15 @@ fun RewardedScreen(
                         logFlow.log(log)
                     }
 
-                    override fun auctionFailed(error: Throwable) {
+                    override fun onAuctionFailed(error: Throwable) {
                         logFlow.log("auctionFailed: $error")
                     }
 
-                    override fun roundStarted(roundId: String) {
-                        logFlow.log("RoundStarted(roundId=$roundId)")
+                    override fun onRoundStarted(roundId: String, priceFloor: Double) {
+                        logFlow.log("RoundStarted(roundId=$roundId, priceFloor=$priceFloor)")
                     }
 
-                    override fun roundSucceed(roundId: String, roundResults: List<AuctionResult>) {
+                    override fun onRoundSucceed(roundId: String, roundResults: List<AuctionResult>) {
                         logFlow.log(
                             buildString {
                                 appendLine("roundSucceed($roundId)")
@@ -103,7 +103,7 @@ fun RewardedScreen(
                         )
                     }
 
-                    override fun roundFailed(roundId: String, error: Throwable) {
+                    override fun onRoundFailed(roundId: String, error: Throwable) {
                         logFlow.log("roundFailed: roundId=$roundId, $error")
                     }
 
@@ -134,13 +134,13 @@ fun RewardedScreen(
                 .padding(start = 24.dp, end = 24.dp, top = 24.dp)
         ) {
             AppButton(text = "Load") {
-                rewarded.load(activity)
+                rewardedAd.loadAd(activity)
             }
             AppButton(text = "Show") {
-                rewarded.show(activity)
+                rewardedAd.showAd(activity)
             }
             AppButton(text = "Destroy") {
-                rewarded.destroy()
+                rewardedAd.destroyAd()
             }
             LazyColumn(
                 modifier = Modifier

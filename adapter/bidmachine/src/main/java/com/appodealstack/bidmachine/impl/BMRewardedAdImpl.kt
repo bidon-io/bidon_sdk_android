@@ -6,8 +6,8 @@ import com.appodealstack.bidmachine.BMAuctionResult
 import com.appodealstack.bidmachine.BMFullscreenAuctionParams
 import com.appodealstack.bidmachine.asBidonError
 import com.appodealstack.bidon.adapter.AdAuctionParams
+import com.appodealstack.bidon.adapter.AdEvent
 import com.appodealstack.bidon.adapter.AdSource
-import com.appodealstack.bidon.adapter.AdState
 import com.appodealstack.bidon.adapter.DemandAd
 import com.appodealstack.bidon.adapter.DemandId
 import com.appodealstack.bidon.adapter.WinLossNotifiable
@@ -45,12 +45,14 @@ internal class BMRewardedAdImpl(
         demandId = demandId
     ) {
 
-    override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
     override val ad: Ad? get() = rewardedAd?.asAd()
 
     private var context: Context? = null
     private var adRequest: RewardedRequest? = null
     private var rewardedAd: RewardedAd? = null
+    override val isAdReadyToShow: Boolean
+        get() = rewardedAd?.canShow() == true
 
     private val requestListener by lazy {
         object : AdRequest.AdRequestListener<RewardedRequest> {
@@ -64,8 +66,8 @@ internal class BMRewardedAdImpl(
                     ecpm = result.price,
                     roundStatus = RoundStatus.Successful,
                 )
-                adState.tryEmit(
-                    AdState.Bid(
+                adEvent.tryEmit(
+                    AdEvent.Bid(
                         AuctionResult(
                             ecpm = result.price,
                             adSource = this@BMRewardedAdImpl,
@@ -81,7 +83,7 @@ internal class BMRewardedAdImpl(
                     ecpm = null,
                     roundStatus = bmError.asBidonError(demandId).asRoundStatus(),
                 )
-                adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
+                adEvent.tryEmit(AdEvent.LoadFailed(bmError.asBidonError(demandId)))
             }
 
             override fun onRequestExpired(request: RewardedRequest) {
@@ -91,7 +93,7 @@ internal class BMRewardedAdImpl(
                     ecpm = null,
                     roundStatus = RoundStatus.NoBid,
                 )
-                adState.tryEmit(AdState.LoadFailed(BidonError.Expired(demandId)))
+                adEvent.tryEmit(AdEvent.LoadFailed(BidonError.Expired(demandId)))
             }
         }
     }
@@ -101,8 +103,8 @@ internal class BMRewardedAdImpl(
             override fun onAdRewarded(rewardedAd: RewardedAd) {
                 logInfo(Tag, "onAdRewarded $rewardedAd: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                adState.tryEmit(
-                    AdState.OnReward(
+                adEvent.tryEmit(
+                    AdEvent.OnReward(
                         ad = rewardedAd.asAd(),
                         reward = null
                     )
@@ -112,44 +114,44 @@ internal class BMRewardedAdImpl(
             override fun onAdLoaded(rewardedAd: RewardedAd) {
                 logInfo(Tag, "onAdLoaded: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                adState.tryEmit(AdState.Fill(rewardedAd.asAd()))
+                adEvent.tryEmit(AdEvent.Fill(rewardedAd.asAd()))
             }
 
             override fun onAdLoadFailed(rewardedAd: RewardedAd, bmError: BMError) {
                 logError(Tag, "onAdLoadFailed: $this", bmError.asBidonError(demandId))
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                adState.tryEmit(AdState.LoadFailed(bmError.asBidonError(demandId)))
+                adEvent.tryEmit(AdEvent.LoadFailed(bmError.asBidonError(demandId)))
             }
 
             override fun onAdShowFailed(rewardedAd: RewardedAd, bmError: BMError) {
                 logError(Tag, "onAdShowFailed: $this", bmError.asBidonError(demandId))
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                adState.tryEmit(AdState.ShowFailed(bmError.asBidonError(demandId)))
+                adEvent.tryEmit(AdEvent.ShowFailed(bmError.asBidonError(demandId)))
             }
 
             override fun onAdImpression(rewardedAd: RewardedAd) {
                 logInfo(Tag, "onAdShown: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                adState.tryEmit(AdState.Impression(rewardedAd.asAd()))
-                adState.tryEmit(AdState.PaidRevenue(rewardedAd.asAd()))
+                adEvent.tryEmit(AdEvent.Shown(rewardedAd.asAd()))
+                adEvent.tryEmit(AdEvent.PaidRevenue(rewardedAd.asAd()))
             }
 
             override fun onAdClicked(rewardedAd: RewardedAd) {
                 logInfo(Tag, "onAdClicked: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                adState.tryEmit(AdState.Clicked(rewardedAd.asAd()))
+                adEvent.tryEmit(AdEvent.Clicked(rewardedAd.asAd()))
             }
 
             override fun onAdExpired(rewardedAd: RewardedAd) {
                 logInfo(Tag, "onAdExpired: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                adState.tryEmit(AdState.Expired(rewardedAd.asAd()))
+                adEvent.tryEmit(AdEvent.Expired(rewardedAd.asAd()))
             }
 
             override fun onAdClosed(rewardedAd: RewardedAd, boolean: Boolean) {
                 logInfo(Tag, "onAdClosed: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                adState.tryEmit(AdState.Closed(rewardedAd.asAd()))
+                adEvent.tryEmit(AdEvent.Closed(rewardedAd.asAd()))
             }
         }
     }
@@ -168,17 +170,17 @@ internal class BMRewardedAdImpl(
                 adRequest = it
             }
             .request(adParams.context)
-        val state = adState.first {
-            it is AdState.Bid || it is AdState.LoadFailed
+        val state = adEvent.first {
+            it is AdEvent.Bid || it is AdEvent.LoadFailed
         }
         return when (state) {
-            is AdState.LoadFailed -> {
+            is AdEvent.LoadFailed -> {
                 AuctionResult(
                     ecpm = 0.0,
                     adSource = this
                 )
             }
-            is AdState.Bid -> state.result
+            is AdEvent.Bid -> state.result
             else -> error("unexpected: $state")
         }
     }
@@ -188,7 +190,7 @@ internal class BMRewardedAdImpl(
         markFillStarted()
         val context = context
         if (context == null) {
-            adState.tryEmit(AdState.LoadFailed(BidonError.NoContextFound))
+            adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoContextFound))
         } else {
             val bmRewardedAd = RewardedAd(context).also {
                 rewardedAd = it
@@ -196,19 +198,19 @@ internal class BMRewardedAdImpl(
             bmRewardedAd.setListener(rewardedListener)
             bmRewardedAd.load(adRequest)
         }
-        val state = adState.first {
-            it is AdState.Fill || it is AdState.LoadFailed || it is AdState.Expired
+        val state = adEvent.first {
+            it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
         }
         return when (state) {
-            is AdState.Fill -> {
+            is AdEvent.Fill -> {
                 markFillFinished(RoundStatus.Successful)
                 state.ad.asSuccess()
             }
-            is AdState.LoadFailed -> {
+            is AdEvent.LoadFailed -> {
                 markFillFinished(RoundStatus.NoFill)
                 state.cause.asFailure()
             }
-            is AdState.Expired -> {
+            is AdEvent.Expired -> {
                 markFillFinished(RoundStatus.NoFill)
                 BidonError.FillTimedOut(demandId).asFailure()
             }
@@ -221,7 +223,7 @@ internal class BMRewardedAdImpl(
         if (rewardedAd?.canShow() == true) {
             rewardedAd?.show()
         } else {
-            adState.tryEmit(AdState.ShowFailed(BidonError.FullscreenAdNotReady))
+            adEvent.tryEmit(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
         }
     }
 
@@ -253,14 +255,13 @@ internal class BMRewardedAdImpl(
 
     private fun RewardedAd.asAd(): Ad {
         return Ad(
-            demandId = demandId,
             demandAd = demandAd,
             price = this.auctionResult?.price ?: 0.0,
             sourceAd = this,
             currencyCode = "USD",
             roundId = roundId,
             dsp = this.auctionResult?.demandSource,
-            monetizationNetwork = demandId.demandId,
+            networkName = demandId.demandId,
             auctionId = auctionId,
         )
     }
