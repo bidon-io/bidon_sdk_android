@@ -113,7 +113,7 @@ internal class InterstitialAdImpl(
     }
 
     override fun isReady(): Boolean {
-        TODO("Not yet implemented")
+        return auctionHolder.isAdReady()
     }
 
     /**

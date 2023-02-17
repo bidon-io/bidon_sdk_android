@@ -92,6 +92,8 @@ internal class ApplovinBannerImpl(
     }
 
     override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+    override val isAdReadyToShow: Boolean
+        get() = applovinAd != null
 
     override val ad: Ad?
         get() = applovinAd?.asAd() ?: adView?.asAd()

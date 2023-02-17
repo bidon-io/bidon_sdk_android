@@ -54,6 +54,8 @@ internal class BMBannerAdImpl(
     private var adRequest: BannerRequest? = null
     private var bannerView: BannerView? = null
     private var bannerFormat: BannerFormat? = null
+    override val isAdReadyToShow: Boolean
+        get() = bannerView?.canShow() == true
 
     private val requestListener by lazy {
         object : AdRequest.AdRequestListener<BannerRequest> {
@@ -213,7 +215,12 @@ internal class BMBannerAdImpl(
         bannerFormat: BannerFormat,
         onLineItemConsumed: (LineItem) -> Unit,
     ): Result<AdAuctionParams> = runCatching {
-        BMBannerAuctionParams(priceFloor = priceFloor, timeout = timeout, context = adContainer.context, bannerFormat = bannerFormat)
+        BMBannerAuctionParams(
+            priceFloor = priceFloor,
+            timeout = timeout,
+            context = adContainer.context,
+            bannerFormat = bannerFormat
+        )
     }
 
     override fun destroy() {

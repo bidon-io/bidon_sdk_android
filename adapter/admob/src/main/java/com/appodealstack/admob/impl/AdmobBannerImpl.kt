@@ -46,6 +46,8 @@ internal class AdmobBannerImpl(
 
     override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
 
+    override var isAdReadyToShow: Boolean = false
+
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
 
     private var adSize: AdSize? = null
@@ -73,6 +75,7 @@ internal class AdmobBannerImpl(
                     roundStatus = RoundStatus.Successful,
                 )
                 adView?.run {
+                    isAdReadyToShow = true
                     adEvent.tryEmit(
                         AdEvent.Bid(
                             AuctionResult(

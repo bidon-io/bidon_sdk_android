@@ -51,6 +51,8 @@ internal class BMRewardedAdImpl(
     private var context: Context? = null
     private var adRequest: RewardedRequest? = null
     private var rewardedAd: RewardedAd? = null
+    override val isAdReadyToShow: Boolean
+        get() = rewardedAd?.canShow() == true
 
     private val requestListener by lazy {
         object : AdRequest.AdRequestListener<RewardedRequest> {

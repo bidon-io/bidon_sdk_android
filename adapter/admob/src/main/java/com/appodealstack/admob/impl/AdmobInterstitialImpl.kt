@@ -139,6 +139,8 @@ internal class AdmobInterstitialImpl(
         get() = interstitialAd?.asAd()
 
     override val adEvent = MutableSharedFlow<AdEvent>(Int.MAX_VALUE)
+    override val isAdReadyToShow: Boolean
+        get() = interstitialAd != null
 
     override fun destroy() {
         logInfo(Tag, "destroy $this")
@@ -179,7 +181,7 @@ internal class AdmobInterstitialImpl(
                 logError(
                     tag = Tag,
                     message = "No appropriate AdUnitId found. PriceFloor=${adParams.priceFloor}, " +
-                        "but LineItem with max priceFloor=${lineItem?.priceFloor}",
+                            "but LineItem with max priceFloor=${lineItem?.priceFloor}",
                     error = error
                 )
                 adEvent.tryEmit(AdEvent.LoadFailed(error))

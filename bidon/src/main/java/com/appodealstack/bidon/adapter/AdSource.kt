@@ -16,6 +16,7 @@ sealed interface AdSource<T : AdAuctionParams> {
     val demandId: DemandId
     val ad: Ad?
     val adEvent: Flow<AdEvent>
+    val isAdReadyToShow: Boolean
 
     /**
      * Applovin needs Activity instance for interstitial 🤦‍️

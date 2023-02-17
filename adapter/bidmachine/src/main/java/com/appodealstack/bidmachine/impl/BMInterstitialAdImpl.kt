@@ -52,6 +52,8 @@ internal class BMInterstitialAdImpl(
     private var context: Context? = null
     private var adRequest: InterstitialRequest? = null
     private var interstitialAd: InterstitialAd? = null
+    override val isAdReadyToShow: Boolean
+        get() = interstitialAd?.canShow() == true
 
     private val requestListener by lazy {
         object : AdRequest.AdRequestListener<InterstitialRequest> {

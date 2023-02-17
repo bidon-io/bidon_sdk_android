@@ -36,7 +36,7 @@ internal class RewardedImpl(
     }
 
     override fun isReady(): Boolean {
-        TODO("Not yet implemented")
+        return auctionHolder.isAdReady()
     }
 
     override fun loadAd(activity: Activity, minPrice: Double) {

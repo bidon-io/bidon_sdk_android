@@ -156,6 +156,8 @@ internal class AdmobRewardedImpl(
         get() = rewardedAd?.asAd()
 
     override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+    override val isAdReadyToShow: Boolean
+        get() = rewardedAd != null
 
     override fun destroy() {
         logInfo(Tag, "destroy $this")
@@ -196,7 +198,7 @@ internal class AdmobRewardedImpl(
                 logError(
                     tag = Tag,
                     message = "No appropriate AdUnitId found. PriceFloor=${adParams.priceFloor}, " +
-                        "but LineItem with max priceFloor=${lineItem?.priceFloor}",
+                            "but LineItem with max priceFloor=${lineItem?.priceFloor}",
                     error = error
                 )
                 adEvent.tryEmit(AdEvent.LoadFailed(error))

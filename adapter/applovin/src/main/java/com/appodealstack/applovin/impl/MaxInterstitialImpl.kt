@@ -88,6 +88,9 @@ internal class MaxInterstitialImpl(
 
     override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
 
+    override val isAdReadyToShow: Boolean
+        get() = interstitialAd?.isReady == true
+
     override val ad: Ad?
         get() = maxAd?.asAd() ?: interstitialAd?.asAd()
 

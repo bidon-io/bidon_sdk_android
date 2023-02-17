@@ -97,6 +97,8 @@ internal class MaxBannerImpl(
     }
 
     override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+    override val isAdReadyToShow: Boolean
+        get() = maxAd != null
 
     override val ad: Ad?
         get() = maxAd?.asAd() ?: maxAdView?.asAd()
