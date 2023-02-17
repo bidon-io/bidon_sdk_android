@@ -3,8 +3,8 @@ package com.appodealstack.fyber.banner
 import android.app.Activity
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import com.appodealstack.bidon.adapter.DemandAd
 import com.appodealstack.bidon.ads.AdType
-import com.appodealstack.bidon.ads.DemandAd
 import com.appodealstack.fyber.banner.BNFyberBannerOption.Position
 import com.fyber.fairbid.ads.Banner
 

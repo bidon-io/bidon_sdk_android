@@ -4,13 +4,8 @@ import android.app.Activity
 import android.app.Application
 import com.appodealstack.appsflyer.ext.adapterVersion
 import com.appodealstack.appsflyer.ext.sdkVersion
-import com.appodealstack.bidon.adapter.Adapter
-import com.appodealstack.bidon.adapter.AdapterParameters
-import com.appodealstack.bidon.adapter.Initializable
-import com.appodealstack.bidon.config.models.AdapterInfo
+import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.ads.Ad
-import com.appodealstack.bidon.ads.DemandId
-import com.appodealstack.bidon.ads.UsdCurrencyCode
 import com.appodealstack.bidon.logs.analytic.AdRevenueLogger
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import com.appsflyer.AFLogger
@@ -67,9 +62,9 @@ class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenu
             this["ad_type"] = ad.demandAd.adType.code
             this["auction_round"] = ad.roundId
         }
-        val monetizationNetwork = ad.monetizationNetwork ?: "unknown"
+        val monetizationNetwork = ad.networkName ?: "unknown"
         val eventRevenue = ad.price
-        val eventRevenueCurrency = ad.currency ?: Currency.getInstance(UsdCurrencyCode)
+        val eventRevenueCurrency = ad.currency ?: Currency.getInstance("USD")
 
         AppsFlyerAdRevenue.logAdRevenue(
             monetizationNetwork, // demandId
