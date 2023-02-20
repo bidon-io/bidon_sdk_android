@@ -26,7 +26,7 @@ internal class DataProviderImpl(
 ) : DataProvider {
 
     override suspend fun provide(dataBinders: List<DataBinderType>): Map<String, Any> {
-        return dataBinders.associate { type ->
+        return dataBinders.mapNotNull { type ->
             val binder = when (type) {
                 DataBinderType.Device -> deviceBinder
                 DataBinderType.App -> appBinder
@@ -38,7 +38,7 @@ internal class DataProviderImpl(
                 DataBinderType.AvailableAdapters -> adaptersBinder
                 DataBinderType.Segment -> segmentBinder
             }
-            binder.fieldName to binder.getJsonObject()
-        }
+            binder.getJsonObject()?.let { binder.fieldName to it }
+        }.toMap()
     }
 }

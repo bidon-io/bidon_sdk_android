@@ -56,7 +56,7 @@ class StatisticsCollectorImpl(
             val lastSegment = adType.asAdType().code
             sendImpression(
                 urlPath = "$key/$lastSegment",
-                bodyKey = key,
+                bodyKey = "show",
                 body = createImpressionRequestBody(adType)
             )
         }
@@ -68,7 +68,7 @@ class StatisticsCollectorImpl(
             val lastSegment = adType.asAdType().code
             sendImpression(
                 urlPath = "$key/$lastSegment",
-                bodyKey = key,
+                bodyKey = "show",
                 body = createImpressionRequestBody(adType)
             )
         }
@@ -79,7 +79,7 @@ class StatisticsCollectorImpl(
             val key = SendImpressionRequestUseCase.Type.Reward.key
             sendImpression(
                 urlPath = key,
-                bodyKey = key,
+                bodyKey = "show",
                 body = createImpressionRequestBody(StatisticsCollector.AdType.Rewarded)
             )
         }

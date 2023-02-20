@@ -10,5 +10,5 @@ internal class SegmentBinder(
 ) : DataBinder<String> {
     override val fieldName: String = "segment_id"
 
-    override suspend fun getJsonObject(): String = dataSource.getSegmentId() ?: ""
+    override suspend fun getJsonObject(): String? = dataSource.getSegmentId()
 }
