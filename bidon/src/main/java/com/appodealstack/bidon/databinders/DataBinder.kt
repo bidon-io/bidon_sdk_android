@@ -9,5 +9,5 @@ package com.appodealstack.bidon.databinders
  */
 internal interface DataBinder<JsonElement> {
     val fieldName: String
-    suspend fun getJsonObject(): JsonElement
+    suspend fun getJsonObject(): JsonElement?
 }

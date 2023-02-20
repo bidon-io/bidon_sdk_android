@@ -14,6 +14,11 @@ sealed class BidonError : Throwable() {
 
     class InternalServerSdkError(override val message: String?) : BidonError()
     class NetworkError(val demandId: DemandId?, override val message: String? = null) : BidonError()
+
+    /**
+     * Only one auction per instance of an ad is possible
+     */
+    object AuctionAlreadyExecuted : BidonError()
     object NoAuctionResults : BidonError()
     object NoRoundResults : BidonError()
 
