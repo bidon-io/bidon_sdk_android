@@ -181,7 +181,7 @@ internal class AdmobInterstitialImpl(
                 logError(
                     tag = Tag,
                     message = "No appropriate AdUnitId found. PriceFloor=${adParams.priceFloor}, " +
-                            "but LineItem with max priceFloor=${lineItem?.priceFloor}",
+                        "but LineItem with max priceFloor=${lineItem?.priceFloor}",
                     error = error
                 )
                 adEvent.tryEmit(AdEvent.LoadFailed(error))

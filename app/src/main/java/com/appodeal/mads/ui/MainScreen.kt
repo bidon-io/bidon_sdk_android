@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.appodeal.mads.BannerViewActivity
 import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppTextButton
 import com.appodeal.mads.component.H5Text
@@ -90,14 +89,14 @@ internal fun MainScreen(
                 AppButton(text = "Rewarded") {
                     navController.navigate(Screen.Rewarded.route)
                 }
-                AppButton(text = "Banner") {
-                    navController.navigate(Screen.Banners.route)
-                }
-                AppButton(text = "Banner in XML-Layout") {
-                    (context as Activity).startActivity(
-                        Intent(context, BannerViewActivity::class.java)
-                    )
-                }
+//                AppButton(text = "Banner") {
+//                    navController.navigate(Screen.Banners.route)
+//                }
+//                AppButton(text = "Banner in XML-Layout") {
+//                    (context as Activity).startActivity(
+//                        Intent(context, BannerViewActivity::class.java)
+//                    )
+//                }
                 TextButton(modifier = Modifier.padding(top = 100.dp), onClick = {
                     val packageManager: PackageManager = context.packageManager
                     val intent: Intent = packageManager.getLaunchIntentForPackage(context.packageName)!!

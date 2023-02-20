@@ -2,21 +2,26 @@ package com.appodeal.mads.ui
 
 import android.app.Activity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppToolbar
+import com.appodeal.mads.component.Body1Text
 import com.appodeal.mads.component.Body2Text
+import com.appodealstack.bidon.BidOnSdk
 import com.appodealstack.bidon.ads.Ad
 import com.appodealstack.bidon.ads.interstitial.Interstitial
 import com.appodealstack.bidon.ads.interstitial.InterstitialListener
@@ -35,6 +40,9 @@ fun InterstitialScreen(
 
     val logFlow = remember {
         mutableStateOf(listOf("Log"))
+    }
+    val priceFloor = remember {
+        mutableStateOf("0.01")
     }
 
     val interstitial by lazy {
@@ -128,8 +136,36 @@ fun InterstitialScreen(
                 .fillMaxSize()
                 .padding(start = 24.dp, end = 24.dp, top = 24.dp)
         ) {
-            AppButton(text = "Load") {
-                interstitial.loadAd(activity)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                AppButton(text = "Load") {
+                    val minPrice = priceFloor.value.toDoubleOrNull()
+                    if (minPrice == null) {
+                        priceFloor.value = BidOnSdk.DefaultMinPrice.toString()
+                    }
+                    interstitial.loadAd(activity, minPrice = minPrice ?: BidOnSdk.DefaultMinPrice)
+                }
+                Body1Text(
+                    text = "Min price $", modifier = Modifier.padding(start = 16.dp)
+                )
+                BasicTextField(
+                    value = priceFloor.value,
+                    onValueChange = { newValue ->
+                        priceFloor.value = newValue
+                    },
+                    textStyle = MaterialTheme.typography.body1.copy(
+                        color = MaterialTheme.colors.onPrimary,
+                        background = MaterialTheme.colors.surface
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp),
+                    cursorBrush = SolidColor(MaterialTheme.colors.onBackground),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    maxLines = 1
+                )
             }
             AppButton(text = "Show") {
                 interstitial.showAd(activity)
