@@ -3,6 +3,7 @@ package com.appodeal.mads
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.LaunchedEffect
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.compose.rememberNavController
@@ -19,10 +20,12 @@ class MainActivity : FragmentActivity() {
         setContent {
             AppTheme {
                 val navController = rememberNavController()
-                NavigationGraph(
-                    navController = navController,
-                    shared = this@MainActivity.getSharedPreferences("app_test", Context.MODE_PRIVATE)
-                )
+                Column {
+                    NavigationGraph(
+                        navController = navController,
+                        shared = this@MainActivity.getSharedPreferences("app_test", Context.MODE_PRIVATE)
+                    )
+                }
             }
 
             val permissionsState = rememberMultiplePermissionsState(

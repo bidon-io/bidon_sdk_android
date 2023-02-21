@@ -20,12 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.appodeal.mads.BuildConfig
 import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppTextButton
+import com.appodeal.mads.component.CaptionText
 import com.appodeal.mads.component.H5Text
 import com.appodeal.mads.navigation.Screen
 import com.appodealstack.bidon.BidOnSdk
@@ -50,9 +52,11 @@ internal fun MainScreen(
         when (val state = initState.value) {
             MainScreenState.NotInitialized,
             MainScreenState.Initializing -> {
-                H5Text(
-                    modifier = Modifier.padding(bottom = 40.dp),
-                    text = "BidOn"
+                H5Text(text = "BidOn")
+                CaptionText(
+                    text = BuildConfig.APPLICATION_ID,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 40.dp),
+                    color = Color.White.copy(alpha = 0.4f)
                 )
                 if (state == MainScreenState.NotInitialized) {
                     AppButton(text = "Init") {
@@ -80,9 +84,11 @@ internal fun MainScreen(
                 }
             }
             MainScreenState.Initialized -> {
-                H5Text(
-                    modifier = Modifier.padding(bottom = 24.dp),
-                    text = "Ad types"
+                H5Text(text = "Ad types")
+                CaptionText(
+                    text = BuildConfig.APPLICATION_ID,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 24.dp),
+                    color = Color.White.copy(alpha = 0.4f)
                 )
                 AppButton(text = "Interstitial") {
                     navController.navigate(Screen.Interstitial.route)

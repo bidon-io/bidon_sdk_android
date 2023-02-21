@@ -93,12 +93,13 @@ fun CaptionText(
     text: String,
     modifier: Modifier = Modifier,
     maxLines: Int = 10,
+    color: Color = Color.White
 ) {
     Text(
         modifier = modifier,
         text = text,
         style = AppTypography.caption,
-        color = Color.White,
+        color = color,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis
     )
