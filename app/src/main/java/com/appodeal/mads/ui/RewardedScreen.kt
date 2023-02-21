@@ -28,6 +28,7 @@ import com.appodealstack.bidon.ads.rewarded.RewardedAd
 import com.appodealstack.bidon.ads.rewarded.RewardedListener
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.config.BidonError
+import com.appodealstack.bidon.logs.analytic.AdValue
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import kotlinx.coroutines.launch
 
@@ -119,8 +120,8 @@ fun RewardedScreen(
                         logFlow.log("onUserRewarded: reward=$reward, ad=$ad")
                     }
 
-                    override fun onRevenuePaid(ad: Ad) {
-                        logFlow.log("onRevenuePaid: ad=$ad")
+                    override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
+                        logFlow.log("onRevenuePaid: ad=$ad, adValue=$adValue")
                     }
                 }
             )
@@ -141,7 +142,6 @@ fun RewardedScreen(
                 .fillMaxSize()
                 .padding(start = 24.dp, end = 24.dp, top = 24.dp)
         ) {
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()

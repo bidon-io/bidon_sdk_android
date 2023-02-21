@@ -29,6 +29,7 @@ import com.appodealstack.bidon.ads.banner.BannerListener
 import com.appodealstack.bidon.ads.banner.BannerView
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.config.BidonError
+import com.appodealstack.bidon.logs.analytic.AdValue
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -239,8 +240,8 @@ fun BannerScreen(navController: NavHostController) {
                                     logFlow.log("roundFailed: roundId=$roundId, $error")
                                 }
 
-                                override fun onRevenuePaid(ad: Ad) {
-                                    logFlow.log("onRevenuePaid: ad=$ad")
+                                override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
+                                    logFlow.log("onRevenuePaid: ad=$ad, adValue=$adValue")
                                 }
                             }
                         )

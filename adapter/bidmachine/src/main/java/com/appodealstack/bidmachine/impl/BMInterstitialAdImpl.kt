@@ -5,6 +5,7 @@ import android.content.Context
 import com.appodealstack.bidmachine.BMAuctionResult
 import com.appodealstack.bidmachine.BMFullscreenAuctionParams
 import com.appodealstack.bidmachine.asBidonError
+import com.appodealstack.bidmachine.ext.asBidonAdValue
 import com.appodealstack.bidon.adapter.AdAuctionParams
 import com.appodealstack.bidon.adapter.AdEvent
 import com.appodealstack.bidon.adapter.AdSource
@@ -123,7 +124,12 @@ internal class BMInterstitialAdImpl(
                 logInfo(Tag, "onAdShown: $this")
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
                 adEvent.tryEmit(AdEvent.Shown(interstitialAd.asAd()))
-                adEvent.tryEmit(AdEvent.PaidRevenue(interstitialAd.asAd()))
+                adEvent.tryEmit(
+                    AdEvent.PaidRevenue(
+                        ad = interstitialAd.asAd(),
+                        adValue = interstitialAd.auctionResult.asBidonAdValue()
+                    )
+                )
             }
 
             override fun onAdClicked(interstitialAd: InterstitialAd) {
@@ -251,13 +257,14 @@ internal class BMInterstitialAdImpl(
     private fun InterstitialAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            price = this.auctionResult?.price ?: 0.0,
+            eCPM = this.auctionResult?.price ?: 0.0,
             sourceAd = this,
             currencyCode = "USD",
             roundId = roundId,
             dsp = this.auctionResult?.demandSource,
             networkName = demandId.demandId,
             auctionId = auctionId,
+            adUnitId = null
         )
     }
 }

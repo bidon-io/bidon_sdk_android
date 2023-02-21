@@ -37,7 +37,7 @@ internal class TestAdapterInterstitialImpl(
         get() = Ad(
             demandId = demandId,
             demandAd = demandAd,
-            price = 1.5,
+            eCPM = 1.5,
             roundId = roundId,
             networkName = "monetizationNetwork-Appodeal",
             dsp = "DSP-bidmachine",

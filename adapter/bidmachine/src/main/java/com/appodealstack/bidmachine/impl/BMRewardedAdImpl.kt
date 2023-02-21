@@ -5,6 +5,7 @@ import android.content.Context
 import com.appodealstack.bidmachine.BMAuctionResult
 import com.appodealstack.bidmachine.BMFullscreenAuctionParams
 import com.appodealstack.bidmachine.asBidonError
+import com.appodealstack.bidmachine.ext.asBidonAdValue
 import com.appodealstack.bidon.adapter.AdAuctionParams
 import com.appodealstack.bidon.adapter.AdEvent
 import com.appodealstack.bidon.adapter.AdSource
@@ -133,7 +134,12 @@ internal class BMRewardedAdImpl(
                 logInfo(Tag, "onAdShown: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 adEvent.tryEmit(AdEvent.Shown(rewardedAd.asAd()))
-                adEvent.tryEmit(AdEvent.PaidRevenue(rewardedAd.asAd()))
+                adEvent.tryEmit(
+                    AdEvent.PaidRevenue(
+                        ad = rewardedAd.asAd(),
+                        adValue = rewardedAd.auctionResult.asBidonAdValue()
+                    )
+                )
             }
 
             override fun onAdClicked(rewardedAd: RewardedAd) {
@@ -256,13 +262,14 @@ internal class BMRewardedAdImpl(
     private fun RewardedAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            price = this.auctionResult?.price ?: 0.0,
+            eCPM = this.auctionResult?.price ?: 0.0,
             sourceAd = this,
             currencyCode = "USD",
             roundId = roundId,
             dsp = this.auctionResult?.demandSource,
             networkName = demandId.demandId,
             auctionId = auctionId,
+            adUnitId = null
         )
     }
 }

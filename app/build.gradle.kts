@@ -11,7 +11,7 @@ android {
     compileSdk = 33
 
     defaultConfig {
-        // applicationId "com.bidon.demo"
+//        applicationId = "org.bidon.demo"
         applicationId = "com.appodealstack.demo"
         minSdk = 21
         targetSdk = 33

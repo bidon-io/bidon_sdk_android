@@ -419,9 +419,9 @@ class BannerView(
 
     private fun subscribeToWinner(adSource: AdSource<*>) {
         observeCallbacksJob?.cancel()
-        observeCallbacksJob = adSource.adEvent.onEach { state ->
-            logInfo(Tag, "$state")
-            when (state) {
+        observeCallbacksJob = adSource.adEvent.onEach { adEvent ->
+            logInfo(Tag, "$adEvent")
+            when (adEvent) {
                 is AdEvent.Bid,
                 is AdEvent.OnReward,
                 is AdEvent.Closed,
@@ -431,12 +431,12 @@ class BannerView(
                 }
                 is AdEvent.Clicked -> {
                     sendStatsClickedAsync(adSource)
-                    listener.onAdClicked(state.ad)
+                    listener.onAdClicked(adEvent.ad)
                 }
-                is AdEvent.Shown -> listener.onAdShown(state.ad)
-                is AdEvent.PaidRevenue -> listener.onRevenuePaid(state.ad)
-                is AdEvent.ShowFailed -> listener.onAdLoadFailed(state.cause)
-                is AdEvent.Expired -> listener.onAdExpired(state.ad)
+                is AdEvent.Shown -> listener.onAdShown(adEvent.ad)
+                is AdEvent.PaidRevenue -> listener.onRevenuePaid(adEvent.ad, adEvent.adValue)
+                is AdEvent.ShowFailed -> listener.onAdLoadFailed(adEvent.cause)
+                is AdEvent.Expired -> listener.onAdExpired(adEvent.ad)
             }
         }.launchIn(scope)
     }
