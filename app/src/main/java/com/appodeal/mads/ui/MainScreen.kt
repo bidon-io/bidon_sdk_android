@@ -69,6 +69,7 @@ internal fun MainScreen(
                             .initialize(
                                 activity = context as Activity,
                                 appKey = "d908f77a97ae0993514bc8edba7e776a36593c77e5f44994",
+                                //appKey = "b1689e101a2555084e08c2ba7375783bde166625bbeae00f", // bidon
                             )
                     }
                 } else {
