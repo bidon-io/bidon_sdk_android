@@ -73,7 +73,7 @@ internal class AdmobBannerImpl(
             override fun onAdLoaded() {
                 logInfo(Tag, "onAdLoaded: $this")
                 markBidFinished(
-                    ecpm = requireNotNull(lineItem?.priceFloor),
+                    ecpm = requireNotNull(lineItem?.pricefloor),
                     roundStatus = RoundStatus.Successful,
                 )
                 adView?.run {
@@ -81,7 +81,7 @@ internal class AdmobBannerImpl(
                     adEvent.tryEmit(
                         AdEvent.Bid(
                             AuctionResult(
-                                ecpm = requireNotNull(lineItem?.priceFloor),
+                                ecpm = requireNotNull(lineItem?.pricefloor),
                                 adSource = this@AdmobBannerImpl,
                             )
                         )
@@ -117,7 +117,7 @@ internal class AdmobBannerImpl(
                 AdEvent.PaidRevenue(
                     ad = Ad(
                         demandAd = demandAd,
-                        eCPM = lineItem?.priceFloor ?: 0.0,
+                        eCPM = lineItem?.pricefloor ?: 0.0,
                         sourceAd = requiredAdView,
                         networkName = demandId.demandId,
                         dsp = null,
@@ -141,20 +141,20 @@ internal class AdmobBannerImpl(
 
     override fun getAuctionParams(
         adContainer: ViewGroup,
-        priceFloor: Double,
+        pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         bannerFormat: BannerFormat,
         onLineItemConsumed: (LineItem) -> Unit,
     ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
-            .minByPricefloorOrNull(demandId, priceFloor)
+            .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed)
         AdmobBannerAuctionParams(
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
             bannerFormat = bannerFormat,
             adContainer = adContainer,
-            priceFloor = priceFloor
+            pricefloor = pricefloor
         )
     }
 
@@ -184,7 +184,7 @@ internal class AdmobBannerImpl(
                 val error = BidonError.NoAppropriateAdUnitId
                 logError(
                     tag = Tag,
-                    message = "No appropriate AdUnitId found for price_floor=${adParams.lineItem.priceFloor}",
+                    message = "No appropriate AdUnitId found for price_floor=${adParams.lineItem.pricefloor}",
                     error = error
                 )
                 adEvent.tryEmit(AdEvent.LoadFailed(error))
@@ -230,7 +230,7 @@ internal class AdmobBannerImpl(
     private fun AdView.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            eCPM = lineItem?.priceFloor ?: 0.0,
+            eCPM = lineItem?.pricefloor ?: 0.0,
             sourceAd = this,
             networkName = demandId.demandId,
             dsp = null,

@@ -9,19 +9,19 @@ import org.json.JSONObject
  */
 data class LineItem(
     val demandId: String?,
-    val priceFloor: Double = 0.0,
+    val pricefloor: Double = 0.0,
     val adUnitId: String?,
 )
 
 /**
- * Finding first [LineItem], which has the minimum LineItem.pricefloor, but greater then given [priceFloor].
+ * Finding first [LineItem], which has the minimum LineItem.pricefloor, but greater then given [pricefloor].
  */
-fun List<LineItem>.minByPricefloorOrNull(demandId: DemandId, priceFloor: Double): LineItem? {
+fun List<LineItem>.minByPricefloorOrNull(demandId: DemandId, pricefloor: Double): LineItem? {
     return this
         .filter { it.demandId == demandId.demandId }
         .filterNot { it.adUnitId.isNullOrBlank() }
-        .sortedBy { it.priceFloor }
-        .firstOrNull { it.priceFloor > priceFloor }
+        .sortedBy { it.pricefloor }
+        .firstOrNull { it.pricefloor > pricefloor }
 }
 
 internal class LineItemParser : JsonParser<LineItem> {
@@ -29,7 +29,7 @@ internal class LineItemParser : JsonParser<LineItem> {
         val json = JSONObject(jsonString)
         LineItem(
             demandId = json.optString("id"),
-            priceFloor = json.optDouble("pricefloor", 0.0),
+            pricefloor = json.optDouble("pricefloor", 0.0),
             adUnitId = json.optString("ad_unit_id")
         )
     }.getOrNull()

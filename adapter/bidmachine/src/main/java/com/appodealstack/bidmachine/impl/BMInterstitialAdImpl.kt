@@ -158,7 +158,7 @@ internal class BMInterstitialAdImpl(
         context = adParams.context
         InterstitialRequest.Builder()
             .setAdContentType(AdContentType.All)
-            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.priceFloor))
+            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
             .setLoadingTimeOut(adParams.timeout.toInt())
             .setListener(requestListener)
             .setPlacementId(demandAd.placement)
@@ -234,13 +234,13 @@ internal class BMInterstitialAdImpl(
 
     override fun getAuctionParams(
         activity: Activity,
-        priceFloor: Double,
+        pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit,
     ): Result<AdAuctionParams> {
         return BMFullscreenAuctionParams(
-            priceFloor = priceFloor,
+            pricefloor = pricefloor,
             timeout = timeout,
             context = activity.applicationContext
         ).asSuccess()

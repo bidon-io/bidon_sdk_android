@@ -29,7 +29,7 @@ sealed interface AdSource<T : AdAuctionParams> {
     interface Interstitial<T : AdAuctionParams> : AdSource<T> {
         fun getAuctionParams(
             activity: Activity,
-            priceFloor: Double,
+            pricefloor: Double,
             timeout: Long,
             lineItems: List<LineItem>,
             onLineItemConsumed: (LineItem) -> Unit
@@ -39,7 +39,7 @@ sealed interface AdSource<T : AdAuctionParams> {
     interface Rewarded<T : AdAuctionParams> : AdSource<T> {
         fun getAuctionParams(
             activity: Activity,
-            priceFloor: Double,
+            pricefloor: Double,
             timeout: Long,
             lineItems: List<LineItem>,
             onLineItemConsumed: (LineItem) -> Unit
@@ -49,7 +49,7 @@ sealed interface AdSource<T : AdAuctionParams> {
     interface Banner<T : AdAuctionParams> : AdSource<T> {
         fun getAuctionParams(
             adContainer: ViewGroup,
-            priceFloor: Double,
+            pricefloor: Double,
             timeout: Long,
             lineItems: List<LineItem>,
             bannerFormat: BannerFormat,

@@ -12,32 +12,32 @@ class LineItemTest {
         val list = listOf(
             LineItem(
                 demandId = "demand id123",
-                priceFloor = 0.1,
+                pricefloor = 0.1,
                 adUnitId = "unit 0.1"
             ),
             LineItem(
                 demandId = null,
-                priceFloor = 1.6,
+                pricefloor = 1.6,
                 adUnitId = "unit 1.6"
             ),
             LineItem(
                 demandId = "demand id123",
-                priceFloor = 2.9,
+                pricefloor = 2.9,
                 adUnitId = "unit 2.9"
             ),
             LineItem(
                 demandId = "demand id123",
-                priceFloor = 1.5,
+                pricefloor = 1.5,
                 adUnitId = "unit 1.5"
             ),
             LineItem(
                 demandId = "demand id123",
-                priceFloor = 1.71,
+                pricefloor = 1.71,
                 adUnitId = "unit 1.71"
             ),
             LineItem(
                 demandId = "demand id321",
-                priceFloor = 1.7,
+                pricefloor = 1.7,
                 adUnitId = "unit 1.7"
             ),
         )
@@ -46,7 +46,7 @@ class LineItemTest {
         assertThat(result).isEqualTo(
             LineItem(
                 demandId = "demand id123",
-                priceFloor = 1.71,
+                pricefloor = 1.71,
                 adUnitId = "unit 1.71"
             )
         )
@@ -57,38 +57,38 @@ class LineItemTest {
         val list = listOf(
             LineItem(
                 demandId = "demand id123",
-                priceFloor = 0.1,
+                pricefloor = 0.1,
                 adUnitId = "unit 0.1"
             ),
             LineItem(
                 demandId = null,
-                priceFloor = 1.6,
+                pricefloor = 1.6,
                 adUnitId = "unit 1.6"
             ),
             LineItem(
                 demandId = "demand id123",
-                priceFloor = 2.9,
+                pricefloor = 2.9,
                 adUnitId = "unit 2.9"
             ),
             LineItem(
                 demandId = "demand id123",
-                priceFloor = 1.5,
+                pricefloor = 1.5,
                 adUnitId = "unit 1.5"
             ),
             LineItem(
                 demandId = "demand id123",
-                priceFloor = 1.71,
+                pricefloor = 1.71,
                 adUnitId = "unit 1.71"
             ),
             LineItem(
                 demandId = "demand id321",
-                priceFloor = 1.7,
+                pricefloor = 1.7,
                 adUnitId = "unit 1.7"
             ),
         )
         val result = list.minByPricefloorOrNull(
             demandId = DemandId(demandId = "demand id123"),
-            priceFloor = 2.9
+            pricefloor = 2.9
         )
         assertThat(result).isEqualTo(
             null

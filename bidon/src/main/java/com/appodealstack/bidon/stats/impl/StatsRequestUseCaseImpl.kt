@@ -70,7 +70,7 @@ internal class StatsRequestUseCaseImpl(
                     id = stat.roundId,
                     winnerEcpm = stat.winnerEcpm,
                     winnerDemandId = stat.winnerDemandId?.demandId,
-                    pricefloor = stat.priceFloor,
+                    pricefloor = stat.pricefloor,
                     demands = stat.demands.map { demandStat ->
                         Demand(
                             demandId = demandStat.demandId.demandId,

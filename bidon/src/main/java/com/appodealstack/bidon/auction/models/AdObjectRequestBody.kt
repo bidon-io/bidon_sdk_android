@@ -16,7 +16,7 @@ internal data class AdObjectRequestBody(
     val placementId: String,
     val orientationCode: String,
     val auctionId: String,
-    val minPrice: Double,
+    val pricefloor: Double,
     val banner: BannerRequestBody?,
     val interstitial: InterstitialRequestBody?,
     val rewarded: RewardedRequestBody?,
@@ -34,7 +34,7 @@ internal class AdObjectRequestBodySerializer : JsonSerializer<AdObjectRequestBod
             "placement_id" hasValue data.placementId
             "orientation" hasValue data.orientationCode
             "auction_id" hasValue data.auctionId
-            "min_price" hasValue data.minPrice
+            "pricefloor" hasValue data.pricefloor
             "banner" hasValue JsonParsers.serializeOrNull(data.banner)
             "interstitial" hasValue JsonParsers.serializeOrNull(data.interstitial)
             "rewarded" hasValue JsonParsers.serializeOrNull(data.rewarded)

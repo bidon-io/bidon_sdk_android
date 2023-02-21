@@ -42,7 +42,7 @@ fun InterstitialScreen(
     val logFlow = remember {
         mutableStateOf(listOf("Log"))
     }
-    val priceFloor = remember {
+    val pricefloorState = remember {
         mutableStateOf("0.01")
     }
 
@@ -96,8 +96,8 @@ fun InterstitialScreen(
                         logFlow.log("auctionFailed: $error")
                     }
 
-                    override fun onRoundStarted(roundId: String, priceFloor: Double) {
-                        logFlow.log("RoundStarted(roundId=$roundId, priceFloor=$priceFloor)")
+                    override fun onRoundStarted(roundId: String, pricefloor: Double) {
+                        logFlow.log("RoundStarted(roundId=$roundId, pricefloor=$pricefloor)")
                     }
 
                     override fun onRoundSucceed(roundId: String, roundResults: List<AuctionResult>) {
@@ -142,19 +142,19 @@ fun InterstitialScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 AppButton(text = "Load") {
-                    val minPrice = priceFloor.value.toDoubleOrNull()
-                    if (minPrice == null) {
-                        priceFloor.value = BidOnSdk.DefaultMinPrice.toString()
+                    val pricefloor = pricefloorState.value.toDoubleOrNull()
+                    if (pricefloor == null) {
+                        pricefloorState.value = BidOnSdk.DefaultPricefloor.toString()
                     }
-                    interstitial.loadAd(activity, minPrice = minPrice ?: BidOnSdk.DefaultMinPrice)
+                    interstitial.loadAd(activity, pricefloor = pricefloor ?: BidOnSdk.DefaultPricefloor)
                 }
                 Body1Text(
-                    text = "Min price $", modifier = Modifier.padding(start = 16.dp)
+                    text = "Pricefloor $", modifier = Modifier.padding(start = 16.dp)
                 )
                 BasicTextField(
-                    value = priceFloor.value,
+                    value = pricefloorState.value,
                     onValueChange = { newValue ->
-                        priceFloor.value = newValue
+                        pricefloorState.value = newValue
                     },
                     textStyle = MaterialTheme.typography.body1.copy(
                         color = MaterialTheme.colors.onPrimary,

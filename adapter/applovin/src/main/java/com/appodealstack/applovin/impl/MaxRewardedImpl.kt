@@ -126,12 +126,12 @@ internal class MaxRewardedImpl(
 
     override fun getAuctionParams(
         activity: Activity,
-        priceFloor: Double,
+        pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit,
     ): Result<AdAuctionParams> = runCatching {
-        val lineItem = lineItems.minByOrNull { it.priceFloor }
+        val lineItem = lineItems.minByOrNull { it.pricefloor }
             ?.also(onLineItemConsumed)
         MaxFullscreenAdAuctionParams(
             lineItem = requireNotNull(lineItem),

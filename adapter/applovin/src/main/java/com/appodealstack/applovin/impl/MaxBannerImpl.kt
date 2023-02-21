@@ -121,14 +121,14 @@ internal class MaxBannerImpl(
 
     override fun getAuctionParams(
         adContainer: ViewGroup,
-        priceFloor: Double,
+        pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         bannerFormat: BannerFormat,
         onLineItemConsumed: (LineItem) -> Unit,
     ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
-            .minByPricefloorOrNull(demandId, priceFloor)
+            .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed)
         MaxBannerAuctionParams(
             context = adContainer.context,

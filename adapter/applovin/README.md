@@ -52,13 +52,13 @@ AppLovinDecorator
         AdmobAdapter::class.java,
         AdmobParameters(
             interstitials = mapOf(
-                priceFloor1Float to "AdMob interstitial ad unit id",
+                pricefloor1Float to "AdMob interstitial ad unit id",
             ),
             rewarded = mapOf(
-                priceFloor2Float to "AdMob rewarded ad unit id",
+                pricefloor2Float to "AdMob rewarded ad unit id",
             ),
             banners = mapOf(
-                priceFloor3Float to "AdMob banner ad unit id",
+                pricefloor3Float to "AdMob banner ad unit id",
             ),
         )
     )
@@ -103,13 +103,13 @@ AppLovinDecorator
         AdmobAdapter::class.java,
         AdmobParameters(
             interstitials = mapOf(
-                priceFloor1Float to "AdMob interstitial ad unit id",
+                pricefloor1Float to "AdMob interstitial ad unit id",
             ),
             rewarded = mapOf(
-                priceFloor2Float to "AdMob rewarded ad unit id",
+                pricefloor2Float to "AdMob rewarded ad unit id",
             ),
             banners = mapOf(
-                priceFloor3Float to "AdMob banner ad unit id",
+                pricefloor3Float to "AdMob banner ad unit id",
             ),
         )
     )

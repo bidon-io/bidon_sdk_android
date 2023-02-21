@@ -1,8 +1,8 @@
 package com.appodealstack.bidon.ads.interstitial
 
 import android.app.Activity
-import com.appodealstack.bidon.BidOnSdk.DefaultMinPrice
 import com.appodealstack.bidon.BidOnSdk.DefaultPlacement
+import com.appodealstack.bidon.BidOnSdk.DefaultPricefloor
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -14,7 +14,7 @@ class Interstitial @JvmOverloads constructor(
 interface InterstitialAd {
     val placementId: String
 
-    fun loadAd(activity: Activity, minPrice: Double = DefaultMinPrice)
+    fun loadAd(activity: Activity, pricefloor: Double = DefaultPricefloor)
     fun destroyAd()
     fun isReady(): Boolean
     fun showAd(activity: Activity)

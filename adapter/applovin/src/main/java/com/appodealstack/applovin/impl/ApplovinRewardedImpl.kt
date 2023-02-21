@@ -47,13 +47,13 @@ internal class ApplovinRewardedImpl(
                 logInfo(Tag, "adReceived: $this")
                 applovinAd = ad
                 markBidFinished(
-                    ecpm = requireNotNull(lineItem?.priceFloor),
+                    ecpm = requireNotNull(lineItem?.pricefloor),
                     roundStatus = RoundStatus.Successful,
                 )
                 adEvent.tryEmit(
                     AdEvent.Bid(
                         AuctionResult(
-                            ecpm = lineItem?.priceFloor ?: 0.0,
+                            ecpm = lineItem?.pricefloor ?: 0.0,
                             adSource = this@ApplovinRewardedImpl,
                         )
                     )
@@ -86,7 +86,7 @@ internal class ApplovinRewardedImpl(
                 adEvent.tryEmit(
                     AdEvent.PaidRevenue(
                         ad = ad.asAd(),
-                        adValue = lineItem?.priceFloor.asBidonAdValue()
+                        adValue = lineItem?.pricefloor.asBidonAdValue()
                     )
                 )
             }
@@ -127,13 +127,13 @@ internal class ApplovinRewardedImpl(
 
     override fun getAuctionParams(
         activity: Activity,
-        priceFloor: Double,
+        pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit,
     ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
-            .minByPricefloorOrNull(demandId, priceFloor)
+            .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed)
         ApplovinFullscreenAdAuctionParams(
             activity = activity,
@@ -187,7 +187,7 @@ internal class ApplovinRewardedImpl(
     private fun AppLovinIncentivizedInterstitial?.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            eCPM = lineItem?.priceFloor ?: 0.0,
+            eCPM = lineItem?.pricefloor ?: 0.0,
             sourceAd = this ?: demandAd,
             networkName = demandId.demandId,
             dsp = null,
@@ -201,7 +201,7 @@ internal class ApplovinRewardedImpl(
     private fun AppLovinAd?.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            eCPM = lineItem?.priceFloor ?: 0.0,
+            eCPM = lineItem?.pricefloor ?: 0.0,
             sourceAd = this ?: demandAd,
             networkName = demandId.demandId,
             dsp = null,

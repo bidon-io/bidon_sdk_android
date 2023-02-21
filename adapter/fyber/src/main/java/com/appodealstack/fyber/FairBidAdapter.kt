@@ -201,16 +201,16 @@ class FairBidAdapter :
 //        }
 //    }
 //
-//    override fun interstitialParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdSource.AdParams {
+//    override fun interstitialParams(pricefloor: Double, timeout: Long, lineItems: List<LineItem>): AdSource.AdParams {
 //        error("No additional params for FairBid interstitial")
 //    }
 //
-//    override fun rewardedParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdSource.AdParams {
+//    override fun rewardedParams(pricefloor: Double, timeout: Long, lineItems: List<LineItem>): AdSource.AdParams {
 //        error("No additional params for FairBid rewarded")
 //    }
 //
 //    override fun bannerParams(
-//        priceFloor: Double,
+//        pricefloor: Double,
 //        lineItems: List<LineItem>,
 //        bannerSize: BannerSize,
 //        adContainer: ViewGroup?

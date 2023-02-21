@@ -13,11 +13,11 @@ data class AdmobBannerAuctionParams(
     val adContainer: ViewGroup,
     val bannerFormat: BannerFormat,
     val lineItem: LineItem,
-    val priceFloor: Double
+    val pricefloor: Double
 ) : AdAuctionParams
 
 data class AdmobFullscreenAdAuctionParams(
     val context: Context,
     val lineItem: LineItem,
-    val priceFloor: Double
+    val pricefloor: Double
 ) : AdAuctionParams
