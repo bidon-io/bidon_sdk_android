@@ -40,7 +40,7 @@ internal class RewardedImpl(
         return auctionHolder.isAdReady()
     }
 
-    override fun loadAd(activity: Activity, minPrice: Double) {
+    override fun loadAd(activity: Activity, pricefloor: Double) {
         if (!BidOnSdk.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
             return
@@ -54,7 +54,7 @@ internal class RewardedImpl(
             auctionHolder.startAuction(
                 adTypeParam = AdTypeParam.Rewarded(
                     activity = activity,
-                    priceFloor = minPrice
+                    pricefloor = pricefloor
                 ),
                 onResult = { result ->
                     result
@@ -190,8 +190,8 @@ internal class RewardedImpl(
             userListener?.onAuctionFailed(error)
         }
 
-        override fun onRoundStarted(roundId: String, priceFloor: Double) {
-            userListener?.onRoundStarted(roundId, priceFloor)
+        override fun onRoundStarted(roundId: String, pricefloor: Double) {
+            userListener?.onRoundStarted(roundId, pricefloor)
         }
 
         override fun onRoundSucceed(roundId: String, roundResults: List<AuctionResult>) {

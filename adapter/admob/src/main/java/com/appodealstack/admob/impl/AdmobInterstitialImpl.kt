@@ -65,13 +65,13 @@ internal class AdmobInterstitialImpl(
                 interstitialAd.onPaidEventListener = paidListener
                 interstitialAd.fullScreenContentCallback = interstitialListener
                 markBidFinished(
-                    ecpm = requireNotNull(lineItem?.priceFloor),
+                    ecpm = requireNotNull(lineItem?.pricefloor),
                     roundStatus = RoundStatus.Successful,
                 )
                 adEvent.tryEmit(
                     AdEvent.Bid(
                         AuctionResult(
-                            ecpm = requireNotNull(lineItem?.priceFloor),
+                            ecpm = requireNotNull(lineItem?.pricefloor),
                             adSource = this@AdmobInterstitialImpl,
                         )
                     )
@@ -89,7 +89,7 @@ internal class AdmobInterstitialImpl(
                 AdEvent.PaidRevenue(
                     ad = Ad(
                         demandAd = demandAd,
-                        eCPM = lineItem?.priceFloor ?: 0.0,
+                        eCPM = lineItem?.pricefloor ?: 0.0,
                         sourceAd = requiredInterstitialAd,
                         networkName = demandId.demandId,
                         dsp = null,
@@ -147,17 +147,17 @@ internal class AdmobInterstitialImpl(
 
     override fun getAuctionParams(
         activity: Activity,
-        priceFloor: Double,
+        pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit,
     ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
-            .minByPricefloorOrNull(demandId, priceFloor)
+            .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed)
         AdmobFullscreenAdAuctionParams(
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
-            priceFloor = priceFloor,
+            pricefloor = pricefloor,
             context = activity.applicationContext
         )
     }
@@ -175,8 +175,8 @@ internal class AdmobInterstitialImpl(
                 val error = BidonError.NoAppropriateAdUnitId
                 logError(
                     tag = Tag,
-                    message = "No appropriate AdUnitId found. PriceFloor=${adParams.priceFloor}, " +
-                        "but LineItem with max priceFloor=${lineItem?.priceFloor}",
+                    message = "No appropriate AdUnitId found. PriceFloor=${adParams.pricefloor}, " +
+                        "but LineItem with max pricefloor=${lineItem?.pricefloor}",
                     error = error
                 )
                 adEvent.tryEmit(AdEvent.LoadFailed(error))
@@ -223,7 +223,7 @@ internal class AdmobInterstitialImpl(
     private fun InterstitialAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            eCPM = lineItem?.priceFloor ?: 0.0,
+            eCPM = lineItem?.pricefloor ?: 0.0,
             sourceAd = this,
             networkName = demandId.demandId,
             dsp = null,

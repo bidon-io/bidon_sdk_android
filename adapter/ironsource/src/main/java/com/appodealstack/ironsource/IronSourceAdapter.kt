@@ -181,16 +181,16 @@ class IronSourceAdapter :
         )
     }
 
-//    override fun interstitialParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdSource.AdParams {
+//    override fun interstitialParams(pricefloor: Double, timeout: Long, lineItems: List<LineItem>): AdSource.AdParams {
 //        error("No additional params for IronSource interstitial")
 //    }
 //
-//    override fun rewardedParams(priceFloor: Double, timeout: Long, lineItems: List<LineItem>): AdSource.AdParams {
+//    override fun rewardedParams(pricefloor: Double, timeout: Long, lineItems: List<LineItem>): AdSource.AdParams {
 //        error("No additional params for IronSource rewarded")
 //    }
 //
 //    override fun bannerParams(
-//        priceFloor: Double,
+//        pricefloor: Double,
 //        lineItems: List<LineItem>,
 //        bannerSize: BannerSize,
 //        adContainer: ViewGroup?

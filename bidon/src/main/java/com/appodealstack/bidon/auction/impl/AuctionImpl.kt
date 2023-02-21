@@ -70,8 +70,8 @@ internal class AuctionImpl(
                 // Start auction
                 conductRounds(
                     rounds = auctionData.rounds ?: listOf(),
-                    minPriceFloor = auctionData.minPrice ?: 0.0,
-                    priceFloor = auctionData.minPrice ?: 0.0,
+                    sourcePriceFloor = auctionData.pricefloor ?: 0.0,
+                    pricefloor = auctionData.pricefloor ?: 0.0,
                     roundsListener = roundsListener,
                     resolver = resolver,
                     demandAd = demandAd,
@@ -150,19 +150,19 @@ internal class AuctionImpl(
 
     private suspend fun conductRounds(
         rounds: List<Round>,
-        minPriceFloor: Double,
-        priceFloor: Double,
+        sourcePriceFloor: Double,
+        pricefloor: Double,
         roundsListener: RoundsListener,
         resolver: AuctionResolver,
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
     ) {
         val round = rounds.firstOrNull() ?: return
-        roundsListener.onRoundStarted(round.id, minPriceFloor)
+        roundsListener.onRoundStarted(round.id, sourcePriceFloor)
 
         val allRoundResults = executeRound(
             round = round,
-            priceFloor = priceFloor,
+            pricefloor = pricefloor,
             demandAd = demandAd,
             adTypeParamData = adTypeParamData,
             timeout = round.timeoutMs
@@ -171,17 +171,17 @@ internal class AuctionImpl(
         proceedRoundResults(
             resolver = resolver,
             allResults = allRoundResults,
-            minPriceFloor = minPriceFloor,
+            sourcePriceFloor = sourcePriceFloor,
             round = round,
-            priceFloor = priceFloor,
+            pricefloor = pricefloor,
             roundsListener = roundsListener
         )
 
-        val nextPriceFloor = auctionResults.value.firstOrNull()?.ecpm ?: priceFloor
+        val nextPriceFloor = auctionResults.value.firstOrNull()?.ecpm ?: pricefloor
         conductRounds(
             rounds = rounds.drop(1),
-            minPriceFloor = minPriceFloor,
-            priceFloor = nextPriceFloor,
+            sourcePriceFloor = sourcePriceFloor,
+            pricefloor = nextPriceFloor,
             roundsListener = roundsListener,
             resolver = resolver,
             demandAd = demandAd,
@@ -192,9 +192,9 @@ internal class AuctionImpl(
     private suspend fun proceedRoundResults(
         resolver: AuctionResolver,
         allResults: List<AuctionResult>,
-        minPriceFloor: Double,
+        sourcePriceFloor: Double,
         round: Round,
-        priceFloor: Double,
+        pricefloor: Double,
         roundsListener: RoundsListener
     ) {
         val sortedResult = resolver.sortWinners(allResults)
@@ -202,9 +202,9 @@ internal class AuctionImpl(
             .filter { (it.adSource as StatisticsCollector).buildBidStatistic().roundStatus == RoundStatus.Successful }
             .filter {
                 /**
-                 * Received ecpm should not be less then initial one [minPriceFloor].
+                 * Received ecpm should not be less then initial one [sourcePriceFloor].
                  */
-                val isAbovePricefloor = it.ecpm >= minPriceFloor
+                val isAbovePricefloor = it.ecpm >= sourcePriceFloor
                 if (!isAbovePricefloor) {
                     (it.adSource as StatisticsCollector).markBelowPricefloor()
                 }
@@ -216,7 +216,7 @@ internal class AuctionImpl(
          */
         saveStatistics(
             round = round,
-            priceFloor = priceFloor,
+            pricefloor = pricefloor,
             allRoundResults = allResults,
             sortedRoundResult = sortedResult,
             successfulRoundResults = successfulResults,
@@ -245,7 +245,7 @@ internal class AuctionImpl(
 
     private fun saveStatistics(
         round: Round,
-        priceFloor: Double,
+        pricefloor: Double,
         allRoundResults: List<AuctionResult>,
         sortedRoundResult: List<AuctionResult>,
         successfulRoundResults: List<AuctionResult>,
@@ -275,7 +275,7 @@ internal class AuctionImpl(
         val roundStat = RoundStat(
             auctionId = auctionDataResponse.auctionId ?: "",
             roundId = round.id,
-            priceFloor = priceFloor,
+            pricefloor = pricefloor,
             winnerDemandId = winner?.adSource?.demandId,
             winnerEcpm = winner?.ecpm,
             demands = unknownDemandId
@@ -329,7 +329,7 @@ internal class AuctionImpl(
 
     private suspend fun executeRound(
         round: Round,
-        priceFloor: Double,
+        pricefloor: Double,
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
         timeout: Long
@@ -372,14 +372,14 @@ internal class AuctionImpl(
                     logInfo(
                         tag = Tag,
                         message = "Round '${round.id}'. Adapter ${adSource.demandId.demandId} starts bidding. " +
-                            "Min PriceFloor=$priceFloor. LineItems: $availableLineItemsForDemand."
+                            "PriceFloor=$pricefloor. LineItems: $availableLineItemsForDemand."
                     )
                     async {
                         withTimeoutOrNull(round.timeoutMs) {
                             val adParam = obtainAdParamByType(
                                 adSource = adSource,
                                 adTypeParamData = adTypeParamData,
-                                priceFloor = priceFloor,
+                                pricefloor = pricefloor,
                                 timeout = timeout,
                                 availableLineItemsForDemand = availableLineItemsForDemand,
                             )
@@ -413,14 +413,14 @@ internal class AuctionImpl(
     private fun obtainAdParamByType(
         adSource: AdSource<AdAuctionParams>,
         adTypeParamData: AdTypeParam,
-        priceFloor: Double,
+        pricefloor: Double,
         timeout: Long,
         availableLineItemsForDemand: List<LineItem>,
     ) = when (adSource) {
         is AdSource.Banner -> {
             check(adTypeParamData is AdTypeParam.Banner)
             adSource.getAuctionParams(
-                priceFloor = priceFloor,
+                pricefloor = pricefloor,
                 timeout = timeout,
                 lineItems = availableLineItemsForDemand,
                 adContainer = adTypeParamData.adContainer,
@@ -433,7 +433,7 @@ internal class AuctionImpl(
         is AdSource.Interstitial -> {
             check(adTypeParamData is AdTypeParam.Interstitial)
             adSource.getAuctionParams(
-                priceFloor = priceFloor,
+                pricefloor = pricefloor,
                 timeout = timeout,
                 lineItems = availableLineItemsForDemand,
                 activity = adTypeParamData.activity,
@@ -445,7 +445,7 @@ internal class AuctionImpl(
         is AdSource.Rewarded -> {
             check(adTypeParamData is AdTypeParam.Rewarded)
             adSource.getAuctionParams(
-                priceFloor = priceFloor,
+                pricefloor = pricefloor,
                 timeout = timeout,
                 lineItems = availableLineItemsForDemand,
                 activity = adTypeParamData.activity,

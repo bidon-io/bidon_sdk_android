@@ -14,7 +14,7 @@ import com.appodealstack.bidon.utils.networking.NetworkSettings
 
 object BidOnSdk : BidOn by BidOnImpl() {
     const val DefaultPlacement = "default"
-    const val DefaultMinPrice = 0.0
+    const val DefaultPricefloor = 0.0
     const val SdkVersion = BuildConfig.ADAPTER_VERSION
 }
 

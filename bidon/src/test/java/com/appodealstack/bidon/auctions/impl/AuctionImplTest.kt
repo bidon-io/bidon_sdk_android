@@ -90,22 +90,22 @@ internal class AuctionImplTest : ConcurrentTest() {
 //            lineItems = listOf(
 //                LineItem(
 //                    demandId = Applovin,
-//                    priceFloor = 1.0,
+//                    pricefloor = 1.0,
 //                    adUnitId = "-"
 //                ),
 //                LineItem(
 //                    demandId = Applovin,
-//                    priceFloor = 0.1,
+//                    pricefloor = 0.1,
 //                    adUnitId = "-"
 //                ),
 //                LineItem(
 //                    demandId = Applovin,
-//                    priceFloor = 2.0,
+//                    pricefloor = 2.0,
 //                    adUnitId = "-"
 //                ),
 //                LineItem(
 //                    demandId = Admob,
-//                    priceFloor = 1.5,
+//                    pricefloor = 1.5,
 //                    adUnitId = "-"
 //                ),
 //            ),
@@ -148,7 +148,7 @@ internal class AuctionImplTest : ConcurrentTest() {
         testee.start(
             demandAd = DemandAd(AdType.Interstitial, PlacementId),
             roundsListener = roundsListener,
-            adTypeParamData = AdTypeParam.Interstitial(activity, priceFloor = 1.0),
+            adTypeParamData = AdTypeParam.Interstitial(activity, pricefloor = 1.0),
             resolver = MaxEcpmAuctionResolver
         ).onSuccess {
             println(it)

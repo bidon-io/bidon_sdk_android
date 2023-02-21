@@ -167,7 +167,7 @@ internal class BMRewardedAdImpl(
         markBidStarted()
         this.context = adParams.context
         RewardedRequest.Builder()
-            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.priceFloor))
+            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
             .setLoadingTimeOut(adParams.timeout.toInt())
             .setListener(requestListener)
             .setPlacementId(demandAd.placement)
@@ -243,12 +243,12 @@ internal class BMRewardedAdImpl(
 
     override fun getAuctionParams(
         activity: Activity,
-        priceFloor: Double,
+        pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit,
     ): Result<AdAuctionParams> = runCatching {
-        BMFullscreenAuctionParams(priceFloor = priceFloor, timeout = timeout, context = activity.applicationContext)
+        BMFullscreenAuctionParams(pricefloor = pricefloor, timeout = timeout, context = activity.applicationContext)
     }
 
     override fun destroy() {

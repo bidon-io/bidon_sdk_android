@@ -10,7 +10,7 @@ import org.json.JSONObject
 internal data class AuctionResponse(
     val rounds: List<Round>?,
     val lineItems: List<LineItem>?,
-    val minPrice: Double?,
+    val pricefloor: Double?,
     val fillTimeout: Long?,
     val token: String?,
     val auctionId: String?,
@@ -23,7 +23,7 @@ internal class AuctionResponseParser : JsonParser<AuctionResponse> {
         AuctionResponse(
             rounds = JsonParsers.parseList(json.optJSONArray("rounds")),
             auctionId = json.optString("auction_id"),
-            minPrice = json.optDouble("min_price"),
+            pricefloor = json.optDouble("pricefloor"),
             auctionConfigurationId = json.optInt("auction_configuration_id"),
             fillTimeout = json.optLong("fill_timeout").takeIf { json.has("fill_timeout") },
             lineItems = JsonParsers.parseList(json.optJSONArray("line_items")),

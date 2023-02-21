@@ -1,8 +1,8 @@
 package com.appodealstack.bidon.ads.rewarded
 
 import android.app.Activity
-import com.appodealstack.bidon.BidOnSdk.DefaultMinPrice
 import com.appodealstack.bidon.BidOnSdk.DefaultPlacement
+import com.appodealstack.bidon.BidOnSdk.DefaultPricefloor
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -15,7 +15,7 @@ interface Rewarded {
     val placementId: String
 
     fun isReady(): Boolean // for show
-    fun loadAd(activity: Activity, minPrice: Double = DefaultMinPrice)
+    fun loadAd(activity: Activity, pricefloor: Double = DefaultPricefloor)
     fun destroyAd()
     fun showAd(activity: Activity)
     fun setRewardedListener(listener: RewardedListener)

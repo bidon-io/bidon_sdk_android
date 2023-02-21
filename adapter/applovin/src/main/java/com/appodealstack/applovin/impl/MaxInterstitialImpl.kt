@@ -112,13 +112,13 @@ internal class MaxInterstitialImpl(
 
     override fun getAuctionParams(
         activity: Activity,
-        priceFloor: Double,
+        pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit,
     ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
-            .minByPricefloorOrNull(demandId, priceFloor)
+            .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed)
         MaxFullscreenAdAuctionParams(
             activity = activity,

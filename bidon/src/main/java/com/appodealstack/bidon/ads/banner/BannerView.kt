@@ -7,8 +7,8 @@ import android.view.Gravity
 import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import com.appodealstack.bidon.BidOnSdk
-import com.appodealstack.bidon.BidOnSdk.DefaultMinPrice
 import com.appodealstack.bidon.BidOnSdk.DefaultPlacement
+import com.appodealstack.bidon.BidOnSdk.DefaultPricefloor
 import com.appodealstack.bidon.R
 import com.appodealstack.bidon.adapter.AdEvent
 import com.appodealstack.bidon.adapter.AdSource
@@ -43,7 +43,7 @@ interface BannerAd {
     val placementId: String
 
     fun setBannerFormat(bannerFormat: BannerFormat)
-    fun loadAd(minPrice: Double = DefaultMinPrice)
+    fun loadAd(pricefloor: Double = DefaultPricefloor)
 
     /**
      * Shows if banner is ready to show
@@ -105,7 +105,7 @@ class BannerView(
     }
     private var showJob: Job? = null
     private var observeCallbacksJob: Job? = null
-    private var minPrice: Double = DefaultMinPrice
+    private var pricefloor: Double = DefaultPricefloor
 
     init {
         context.theme.obtainStyledAttributes(attrs, R.styleable.BannerView, 0, 0).apply {
@@ -125,7 +125,7 @@ class BannerView(
                 recycle()
             }
         }
-        launchLoadReducer(minPrice)
+        launchLoadReducer(pricefloor)
         launchShowReducer()
     }
 
@@ -143,8 +143,8 @@ class BannerView(
         TODO("Not yet implemented")
     }
 
-    override fun loadAd(minPrice: Double) {
-        this.minPrice = minPrice
+    override fun loadAd(pricefloor: Double) {
+        this.pricefloor = pricefloor
         logInfo(Tag, "Load with placement invoked: $placementId")
         sendAction(LoadAction.OnLoadInvoked)
     }
@@ -204,7 +204,7 @@ class BannerView(
         loadActionFlow.tryEmit(action)
     }
 
-    private fun launchLoadReducer(minPrice: Double) {
+    private fun launchLoadReducer(pricefloor: Double) {
         loadActionFlow.scan(
             initial = loadState.value,
             operation = { state, action ->
@@ -216,7 +216,7 @@ class BannerView(
                     LoadAction.OnLoadInvoked -> {
                         when (state) {
                             LoadState.Idle -> {
-                                startAuction(minPrice)
+                                startAuction(pricefloor)
                                 LoadState.Loading
                             }
                             LoadState.Loading -> {
@@ -396,7 +396,7 @@ class BannerView(
     }
 
     private fun startAuction(
-        minPrice: Double
+        pricefloor: Double
     ) {
         listener.onAuctionStarted()
         scope.launch {
@@ -406,7 +406,7 @@ class BannerView(
                 adTypeParamData = AdTypeParam.Banner(
                     bannerFormat = bannerFormat,
                     adContainer = this@BannerView,
-                    priceFloor = minPrice
+                    pricefloor = pricefloor
                 ),
                 roundsListener = listener
             ).onSuccess { auctionResults ->

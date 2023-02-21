@@ -43,7 +43,7 @@ fun RewardedScreen(
     val logFlow = remember {
         mutableStateOf(listOf("Log"))
     }
-    val priceFloor = remember {
+    val pricefloor = remember {
         mutableStateOf("0.01")
     }
 
@@ -97,8 +97,8 @@ fun RewardedScreen(
                         logFlow.log("auctionFailed: $error")
                     }
 
-                    override fun onRoundStarted(roundId: String, priceFloor: Double) {
-                        logFlow.log("RoundStarted(roundId=$roundId, priceFloor=$priceFloor)")
+                    override fun onRoundStarted(roundId: String, pricefloor: Double) {
+                        logFlow.log("RoundStarted(roundId=$roundId, pricefloor=$pricefloor)")
                     }
 
                     override fun onRoundSucceed(roundId: String, roundResults: List<AuctionResult>) {
@@ -147,19 +147,19 @@ fun RewardedScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 AppButton(text = "Load") {
-                    val minPrice = priceFloor.value.toDoubleOrNull()
+                    val minPrice = pricefloor.value.toDoubleOrNull()
                     if (minPrice == null) {
-                        priceFloor.value = BidOnSdk.DefaultMinPrice.toString()
+                        pricefloor.value = BidOnSdk.DefaultPricefloor.toString()
                     }
-                    rewardedAd.loadAd(activity, minPrice = minPrice ?: BidOnSdk.DefaultMinPrice)
+                    rewardedAd.loadAd(activity, pricefloor = minPrice ?: BidOnSdk.DefaultPricefloor)
                 }
                 Body1Text(
-                    text = "Min price $", modifier = Modifier.padding(start = 16.dp)
+                    text = "Pricefloor $", modifier = Modifier.padding(start = 16.dp)
                 )
                 BasicTextField(
-                    value = priceFloor.value,
+                    value = pricefloor.value,
                     onValueChange = { newValue ->
-                        priceFloor.value = newValue
+                        pricefloor.value = newValue
                     },
                     textStyle = MaterialTheme.typography.body1.copy(
                         color = MaterialTheme.colors.onPrimary,

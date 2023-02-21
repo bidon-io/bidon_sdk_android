@@ -14,12 +14,12 @@ data class BidMachineParameters(
 data class BMBannerAuctionParams(
     val context: Context,
     val bannerFormat: BannerFormat,
-    val priceFloor: Double,
+    val pricefloor: Double,
     val timeout: Long,
 ) : AdAuctionParams
 
 data class BMFullscreenAuctionParams(
     val context: Context,
-    val priceFloor: Double,
+    val pricefloor: Double,
     val timeout: Long,
 ) : AdAuctionParams

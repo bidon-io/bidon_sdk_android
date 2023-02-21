@@ -146,7 +146,7 @@ internal class BMBannerAdImpl(
         bannerFormat = adParams.bannerFormat
         BannerRequest.Builder()
             .setSize(adParams.bannerFormat.asBidMachineBannerSize())
-            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.priceFloor))
+            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
             .setLoadingTimeOut(adParams.timeout.toInt())
             .setListener(requestListener)
             .setPlacementId(demandAd.placement)
@@ -215,14 +215,14 @@ internal class BMBannerAdImpl(
 
     override fun getAuctionParams(
         adContainer: ViewGroup,
-        priceFloor: Double,
+        pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         bannerFormat: BannerFormat,
         onLineItemConsumed: (LineItem) -> Unit,
     ): Result<AdAuctionParams> = runCatching {
         BMBannerAuctionParams(
-            priceFloor = priceFloor,
+            pricefloor = pricefloor,
             timeout = timeout,
             context = adContainer.context,
             bannerFormat = bannerFormat

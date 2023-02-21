@@ -71,13 +71,13 @@ internal class AdmobRewardedImpl(
                 requiredRewardedAd.onPaidEventListener = paidListener
                 requiredRewardedAd.fullScreenContentCallback = rewardedListener
                 markBidFinished(
-                    ecpm = requireNotNull(lineItem?.priceFloor),
+                    ecpm = requireNotNull(lineItem?.pricefloor),
                     roundStatus = RoundStatus.Successful,
                 )
                 adEvent.tryEmit(
                     AdEvent.Bid(
                         AuctionResult(
-                            ecpm = requireNotNull(lineItem?.priceFloor),
+                            ecpm = requireNotNull(lineItem?.pricefloor),
                             adSource = this@AdmobRewardedImpl,
                         )
                     )
@@ -106,7 +106,7 @@ internal class AdmobRewardedImpl(
                 AdEvent.PaidRevenue(
                     ad = Ad(
                         demandAd = demandAd,
-                        eCPM = lineItem?.priceFloor ?: 0.0,
+                        eCPM = lineItem?.pricefloor ?: 0.0,
                         sourceAd = requiredRewardedAd,
                         networkName = demandId.demandId,
                         dsp = null,
@@ -164,17 +164,17 @@ internal class AdmobRewardedImpl(
 
     override fun getAuctionParams(
         activity: Activity,
-        priceFloor: Double,
+        pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit,
     ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
-            .minByPricefloorOrNull(demandId, priceFloor)
+            .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed)
         AdmobFullscreenAdAuctionParams(
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
-            priceFloor = priceFloor,
+            pricefloor = pricefloor,
             context = activity.applicationContext
         )
     }
@@ -192,8 +192,8 @@ internal class AdmobRewardedImpl(
                 val error = BidonError.NoAppropriateAdUnitId
                 logError(
                     tag = Tag,
-                    message = "No appropriate AdUnitId found. PriceFloor=${adParams.priceFloor}, " +
-                        "but LineItem with max priceFloor=${lineItem?.priceFloor}",
+                    message = "No appropriate AdUnitId found. PriceFloor=${adParams.pricefloor}, " +
+                        "but LineItem with max pricefloor=${lineItem?.pricefloor}",
                     error = error
                 )
                 adEvent.tryEmit(AdEvent.LoadFailed(error))
@@ -240,7 +240,7 @@ internal class AdmobRewardedImpl(
     private fun RewardedAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            eCPM = lineItem?.priceFloor ?: 0.0,
+            eCPM = lineItem?.pricefloor ?: 0.0,
             sourceAd = this,
             networkName = demandId.demandId,
             dsp = null,

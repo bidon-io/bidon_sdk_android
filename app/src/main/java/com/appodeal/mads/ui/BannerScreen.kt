@@ -221,8 +221,8 @@ fun BannerScreen(navController: NavHostController) {
                                     logFlow.log("auctionFailed: $error")
                                 }
 
-                                override fun onRoundStarted(roundId: String, priceFloor: Double) {
-                                    logFlow.log("RoundStarted(roundId=$roundId, priceFloor=$priceFloor)")
+                                override fun onRoundStarted(roundId: String, pricefloor: Double) {
+                                    logFlow.log("RoundStarted(roundId=$roundId, pricefloor=$pricefloor)")
                                 }
 
                                 override fun onRoundSucceed(roundId: String, roundResults: List<AuctionResult>) {
