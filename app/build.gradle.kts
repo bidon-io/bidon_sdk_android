@@ -18,7 +18,7 @@ android {
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "org.bidon.demo"
+        applicationId = keystoreProperties["demoApplicationId"] as String
         minSdk = 21
         targetSdk = 33
         versionCode = 1
