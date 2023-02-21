@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.appodeal.mads.BuildConfig
 import com.appodeal.mads.component.AppButton
 import com.appodeal.mads.component.AppTextButton
 import com.appodeal.mads.component.H5Text
@@ -68,7 +69,7 @@ internal fun MainScreen(
                             }
                             .initialize(
                                 activity = context as Activity,
-                                appKey = "d908f77a97ae0993514bc8edba7e776a36593c77e5f44994",
+                                appKey = BuildConfig.BIDON_API_KEY,
                             )
                     }
                 } else {

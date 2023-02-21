@@ -61,3 +61,5 @@
 
 -keep public interface com.appodealstack.bidon.logs.analytic.AdRevenueListener { *; }
 -keep public interface com.appodealstack.bidon.logs.analytic.AdRevenueLogger { *; }
+-keep public interface com.appodealstack.bidon.logs.analytic.AdValue { *; }
+-keep public interface com.appodealstack.bidon.logs.analytic.Precision { *; }
