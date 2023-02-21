@@ -8,12 +8,14 @@ import com.applovin.mediation.MaxRewardedAdListener
 import com.applovin.mediation.ads.MaxRewardedAd
 import com.appodealstack.applovin.ApplovinDemandId
 import com.appodealstack.applovin.MaxFullscreenAdAuctionParams
+import com.appodealstack.applovin.ext.asBidonAdValue
 import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.ads.Ad
 import com.appodealstack.bidon.ads.rewarded.Reward
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.auction.models.LineItem
 import com.appodealstack.bidon.config.BidonError
+import com.appodealstack.bidon.logs.analytic.AdValue
 import com.appodealstack.bidon.logs.logging.impl.logError
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import com.appodealstack.bidon.stats.StatisticsCollector
@@ -68,6 +70,12 @@ internal class MaxRewardedImpl(
             override fun onAdDisplayed(ad: MaxAd) {
                 maxAd = ad
                 adEvent.tryEmit(AdEvent.Shown(ad.asAd()))
+                adEvent.tryEmit(
+                    AdEvent.PaidRevenue(
+                        ad = ad.asAd(),
+                        adValue = ad.asBidonAdValue()
+                    )
+                )
             }
 
             override fun onAdHidden(ad: MaxAd) {
@@ -179,13 +187,14 @@ internal class MaxRewardedImpl(
         val maxAd = this
         return Ad(
             demandAd = demandAd,
-            price = maxAd?.revenue ?: 0.0,
+            eCPM = maxAd?.revenue ?: 0.0,
             sourceAd = maxAd ?: demandAd,
             networkName = maxAd?.networkName,
             dsp = maxAd?.dspId,
             roundId = roundId,
-            currencyCode = USD,
+            currencyCode = AdValue.DefaultCurrency,
             auctionId = auctionId,
+            adUnitId = this?.adUnitId
         )
     }
 
@@ -196,16 +205,16 @@ internal class MaxRewardedImpl(
         val maxAd = this
         return Ad(
             demandAd = demandAd,
-            price = 0.0,
+            eCPM = 0.0,
             sourceAd = maxAd ?: demandAd,
             networkName = ApplovinDemandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD,
+            currencyCode = AdValue.DefaultCurrency,
             auctionId = auctionId,
+            adUnitId = this?.adUnitId
         )
     }
 }
 
 private const val Tag = "Max Rewarded"
-private const val USD = "USD"

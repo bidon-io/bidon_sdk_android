@@ -4,12 +4,14 @@ import android.app.Activity
 import com.applovin.adview.AppLovinIncentivizedInterstitial
 import com.applovin.sdk.*
 import com.appodealstack.applovin.ApplovinFullscreenAdAuctionParams
+import com.appodealstack.applovin.ext.asBidonAdValue
 import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.ads.Ad
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.auction.models.LineItem
 import com.appodealstack.bidon.auction.models.minByPricefloorOrNull
 import com.appodealstack.bidon.config.BidonError
+import com.appodealstack.bidon.logs.analytic.AdValue
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import com.appodealstack.bidon.stats.StatisticsCollector
 import com.appodealstack.bidon.stats.impl.StatisticsCollectorImpl
@@ -81,7 +83,12 @@ internal class ApplovinRewardedImpl(
             override fun adDisplayed(ad: AppLovinAd) {
                 logInfo(Tag, "adDisplayed: $this")
                 adEvent.tryEmit(AdEvent.Shown(ad.asAd()))
-                adEvent.tryEmit(AdEvent.PaidRevenue(ad.asAd()))
+                adEvent.tryEmit(
+                    AdEvent.PaidRevenue(
+                        ad = ad.asAd(),
+                        adValue = lineItem?.priceFloor.asBidonAdValue()
+                    )
+                )
             }
 
             override fun adHidden(ad: AppLovinAd) {
@@ -180,29 +187,30 @@ internal class ApplovinRewardedImpl(
     private fun AppLovinIncentivizedInterstitial?.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            price = lineItem?.priceFloor ?: 0.0,
+            eCPM = lineItem?.priceFloor ?: 0.0,
             sourceAd = this ?: demandAd,
             networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD,
+            currencyCode = AdValue.DefaultCurrency,
             auctionId = auctionId,
+            adUnitId = lineItem?.adUnitId
         )
     }
 
     private fun AppLovinAd?.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            price = lineItem?.priceFloor ?: 0.0,
+            eCPM = lineItem?.priceFloor ?: 0.0,
             sourceAd = this ?: demandAd,
             networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = USD,
+            currencyCode = AdValue.DefaultCurrency,
             auctionId = auctionId,
+            adUnitId = lineItem?.adUnitId
         )
     }
 }
 
 private const val Tag = "Applovin Rewarded"
-private const val USD = "USD"

@@ -28,7 +28,7 @@ afterEvaluate {
                 afterEvaluate {
                     from(components["release"])
                 }
-                groupId = "io.bidon" // Replace with group ID
+                groupId = "org.bidon" // Replace with group ID
                 artifactId = getArtifactId
                 version = getVersionName
             }

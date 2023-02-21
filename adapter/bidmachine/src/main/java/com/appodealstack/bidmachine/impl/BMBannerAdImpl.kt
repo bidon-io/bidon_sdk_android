@@ -8,6 +8,7 @@ import com.appodealstack.bidmachine.BMAuctionResult
 import com.appodealstack.bidmachine.BMBannerAuctionParams
 import com.appodealstack.bidmachine.BidMachineBannerSize
 import com.appodealstack.bidmachine.asBidonError
+import com.appodealstack.bidmachine.ext.asBidonAdValue
 import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.adapter.DemandAd
 import com.appodealstack.bidon.adapter.DemandId
@@ -116,7 +117,12 @@ internal class BMBannerAdImpl(
                 logInfo(Tag, "onAdShown: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 adEvent.tryEmit(AdEvent.Shown(bannerView.asAd()))
-                adEvent.tryEmit(AdEvent.PaidRevenue(bannerView.asAd()))
+                adEvent.tryEmit(
+                    AdEvent.PaidRevenue(
+                        ad = bannerView.asAd(),
+                        adValue = bannerView.auctionResult.asBidonAdValue()
+                    )
+                )
             }
 
             override fun onAdClicked(bannerView: BannerView) {
@@ -249,13 +255,14 @@ internal class BMBannerAdImpl(
     private fun BannerView.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            price = this.auctionResult?.price ?: 0.0,
+            eCPM = this.auctionResult?.price ?: 0.0,
             sourceAd = this,
             currencyCode = "USD",
             roundId = roundId,
             dsp = this.auctionResult?.demandSource,
             networkName = demandId.demandId,
             auctionId = auctionId,
+            adUnitId = null
         )
     }
 

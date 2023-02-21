@@ -4,6 +4,7 @@ import com.appodealstack.bidon.ads.Ad
 import com.appodealstack.bidon.ads.banner.BannerListener
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.config.BidonError
+import com.appodealstack.bidon.logs.analytic.AdValue
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -53,7 +54,7 @@ internal fun wrapUserBannerListener(userListener: () -> BannerListener?) = objec
         userListener()?.onRoundFailed(roundId, error)
     }
 
-    override fun onRevenuePaid(ad: Ad) {
-        userListener()?.onRevenuePaid(ad)
+    override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
+        userListener()?.onRevenuePaid(ad, adValue)
     }
 }

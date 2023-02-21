@@ -3,6 +3,7 @@ package com.appodealstack.admob.impl
 import android.app.Activity
 import com.appodealstack.admob.AdmobFullscreenAdAuctionParams
 import com.appodealstack.admob.asBidonError
+import com.appodealstack.admob.ext.asBidonAdValue
 import com.appodealstack.bidon.adapter.AdAuctionParams
 import com.appodealstack.bidon.adapter.AdEvent
 import com.appodealstack.bidon.adapter.AdSource
@@ -101,26 +102,20 @@ internal class AdmobRewardedImpl(
      */
     private val paidListener by lazy {
         OnPaidEventListener { adValue ->
-            val type = when (adValue.precisionType) {
-                0 -> "UNKNOWN"
-                1 -> "PRECISE"
-                2 -> "ESTIMATED"
-                3 -> "PUBLISHER_PROVIDED"
-                else -> "unknown type ${adValue.precisionType}"
-            }
-            val ecpm = adValue.valueMicros / 1_000_000.0
             adEvent.tryEmit(
                 AdEvent.PaidRevenue(
                     ad = Ad(
                         demandAd = demandAd,
-                        price = ecpm,
+                        eCPM = lineItem?.priceFloor ?: 0.0,
                         sourceAd = requiredRewardedAd,
                         networkName = demandId.demandId,
                         dsp = null,
                         roundId = roundId,
                         currencyCode = "USD",
                         auctionId = auctionId,
-                    )
+                        adUnitId = lineItem?.adUnitId
+                    ),
+                    adValue = adValue.asBidonAdValue()
                 )
             )
         }
@@ -245,13 +240,14 @@ internal class AdmobRewardedImpl(
     private fun RewardedAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            price = lineItem?.priceFloor ?: 0.0,
+            eCPM = lineItem?.priceFloor ?: 0.0,
             sourceAd = this,
             networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = "USD",
             auctionId = auctionId,
+            adUnitId = lineItem?.adUnitId
         )
     }
 }

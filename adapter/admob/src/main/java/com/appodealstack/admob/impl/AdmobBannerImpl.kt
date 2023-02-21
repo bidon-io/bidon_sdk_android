@@ -9,6 +9,7 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import com.appodealstack.admob.AdmobBannerAuctionParams
 import com.appodealstack.admob.asBidonError
+import com.appodealstack.admob.ext.asBidonAdValue
 import com.appodealstack.bidon.adapter.*
 import com.appodealstack.bidon.ads.Ad
 import com.appodealstack.bidon.ads.banner.BannerFormat
@@ -16,6 +17,7 @@ import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.auction.models.LineItem
 import com.appodealstack.bidon.auction.models.minByPricefloorOrNull
 import com.appodealstack.bidon.config.BidonError
+import com.appodealstack.bidon.logs.analytic.AdValue
 import com.appodealstack.bidon.logs.logging.impl.logError
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import com.appodealstack.bidon.stats.StatisticsCollector
@@ -111,26 +113,20 @@ internal class AdmobBannerImpl(
      */
     private val paidListener by lazy {
         OnPaidEventListener { adValue ->
-            val type = when (adValue.precisionType) {
-                0 -> "UNKNOWN"
-                1 -> "PRECISE"
-                2 -> "ESTIMATED"
-                3 -> "PUBLISHER_PROVIDED"
-                else -> "unknown type ${adValue.precisionType}"
-            }
-            val ecpm = adValue.valueMicros / 1_000_000.0
             adEvent.tryEmit(
                 AdEvent.PaidRevenue(
                     ad = Ad(
                         demandAd = demandAd,
-                        price = ecpm,
+                        eCPM = lineItem?.priceFloor ?: 0.0,
                         sourceAd = requiredAdView,
                         networkName = demandId.demandId,
                         dsp = null,
                         roundId = roundId,
-                        currencyCode = "USD",
+                        currencyCode = AdValue.DefaultCurrency,
                         auctionId = auctionId,
-                    )
+                        adUnitId = lineItem?.adUnitId
+                    ),
+                    adValue = adValue.asBidonAdValue()
                 )
             )
         }
@@ -234,13 +230,14 @@ internal class AdmobBannerImpl(
     private fun AdView.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            price = lineItem?.priceFloor ?: 0.0,
+            eCPM = lineItem?.priceFloor ?: 0.0,
             sourceAd = this,
             networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = "USD",
+            currencyCode = AdValue.DefaultCurrency,
             auctionId = auctionId,
+            adUnitId = adUnitId
         )
     }
 

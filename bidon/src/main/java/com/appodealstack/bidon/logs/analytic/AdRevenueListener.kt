@@ -9,5 +9,5 @@ import com.appodealstack.bidon.ads.Ad
  * This data includes information about network name, revenue, ad type, etc.
  */
 interface AdRevenueListener {
-    fun onRevenuePaid(ad: Ad) {}
+    fun onRevenuePaid(ad: Ad, adValue: AdValue) {}
 }

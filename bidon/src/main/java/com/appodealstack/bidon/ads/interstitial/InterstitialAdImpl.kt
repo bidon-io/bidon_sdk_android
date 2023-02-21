@@ -12,6 +12,7 @@ import com.appodealstack.bidon.auction.AdTypeParam
 import com.appodealstack.bidon.auction.AuctionHolder
 import com.appodealstack.bidon.auction.AuctionResult
 import com.appodealstack.bidon.config.BidonError
+import com.appodealstack.bidon.logs.analytic.AdValue
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import com.appodealstack.bidon.stats.StatisticsCollector
 import com.appodealstack.bidon.utils.SdkDispatchers
@@ -122,27 +123,26 @@ internal class InterstitialAdImpl(
 
     private fun subscribeToWinner(adSource: AdSource<*>) {
         require(adSource is AdSource.Interstitial<*>)
-        observeCallbacksJob = adSource.adEvent.onEach { state ->
-            when (state) {
+        observeCallbacksJob = adSource.adEvent.onEach { adEvent ->
+            when (adEvent) {
                 is AdEvent.Bid,
                 is AdEvent.OnReward,
-                is AdEvent.Fill,
-                -> {
+                is AdEvent.Fill -> {
                     // do nothing
                 }
                 is AdEvent.Clicked -> {
                     sendStatsClickedAsync(adSource)
-                    listener.onAdClicked(state.ad)
+                    listener.onAdClicked(adEvent.ad)
                 }
-                is AdEvent.Closed -> listener.onAdClosed(state.ad)
+                is AdEvent.Closed -> listener.onAdClosed(adEvent.ad)
                 is AdEvent.Shown -> {
                     sendStatsShownAsync(adSource)
-                    listener.onAdShown(state.ad)
+                    listener.onAdShown(adEvent.ad)
                 }
-                is AdEvent.PaidRevenue -> listener.onRevenuePaid(state.ad)
-                is AdEvent.ShowFailed -> listener.onAdLoadFailed(state.cause)
-                is AdEvent.LoadFailed -> listener.onAdShowFailed(state.cause)
-                is AdEvent.Expired -> listener.onAdExpired(state.ad)
+                is AdEvent.PaidRevenue -> listener.onRevenuePaid(adEvent.ad, adEvent.adValue)
+                is AdEvent.ShowFailed -> listener.onAdLoadFailed(adEvent.cause)
+                is AdEvent.LoadFailed -> listener.onAdShowFailed(adEvent.cause)
+                is AdEvent.Expired -> listener.onAdExpired(adEvent.ad)
             }
         }.launchIn(CoroutineScope(dispatcher))
     }
@@ -200,8 +200,8 @@ internal class InterstitialAdImpl(
             userListener?.onRoundFailed(roundId, error)
         }
 
-        override fun onRevenuePaid(ad: Ad) {
-            userListener?.onRevenuePaid(ad)
+        override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
+            userListener?.onRevenuePaid(ad, adValue)
         }
     }
 
