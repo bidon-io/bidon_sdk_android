@@ -1,11 +1,12 @@
 package com.appodealstack.bidon.utils.networking
 
 import com.appodealstack.bidon.config.BidonError
+import com.appodealstack.bidon.config.models.Token
+import com.appodealstack.bidon.databinders.token.TokenDataSource
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import com.appodealstack.bidon.utils.SdkDispatchers
 import com.appodealstack.bidon.utils.di.get
 import com.appodealstack.bidon.utils.json.JsonParsers
-import com.appodealstack.bidon.utils.keyvaluestorage.KeyValueStorage
 import com.appodealstack.bidon.utils.networking.impl.RawResponse
 import com.appodealstack.bidon.utils.networking.impl.jsonZipHttpClient
 import kotlinx.coroutines.withContext
@@ -15,7 +16,7 @@ import org.json.JSONObject
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 internal class JsonHttpRequest(
-    private val keyValueStorage: KeyValueStorage,
+    private val tokenDataSource: TokenDataSource,
 ) {
     suspend operator fun invoke(
         path: String,
@@ -58,7 +59,7 @@ internal class JsonHttpRequest(
                 withContext(SdkDispatchers.IO) {
                     JSONObject(jsonString).optString("token", "").takeIf { !it.isNullOrBlank() }?.let {
                         logInfo(Tag, "New token saved: $it")
-                        keyValueStorage.token = it
+                        tokenDataSource.token = Token(token = it)
                     }
                 }
             }

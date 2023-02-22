@@ -116,6 +116,7 @@ internal object DI {
 
             // [SegmentDataSource] should be singleton per session
             singleton<SegmentDataSource> { SegmentDataSourceImpl() }
+            singleton<TokenDataSource> { TokenDataSourceImpl(keyValueStorage = get()) }
 
             /**
              * Factories
@@ -146,7 +147,7 @@ internal object DI {
                 )
             }
             factory<GetOrientationUseCase> { GetOrientationUseCaseImpl(context = get()) }
-            factory { JsonHttpRequest(keyValueStorage = get()) }
+            factory { JsonHttpRequest(tokenDataSource = get()) }
 
             /**
              * Requests
@@ -179,7 +180,6 @@ internal object DI {
              */
             factory<AppDataSource> { AppDataSourceImpl(context = get(), keyValueStorage = get()) }
             factory<DeviceDataSource> { DeviceDataSourceImpl(context = get()) }
-            factory<TokenDataSource> { TokenDataSourceImpl(keyValueStorage = get()) }
 
             factory<UserDataSource> {
                 UserDataSourceImpl(
