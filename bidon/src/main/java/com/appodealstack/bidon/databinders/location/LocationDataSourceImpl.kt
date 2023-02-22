@@ -34,6 +34,8 @@ internal class LocationDataSourceImpl(
             null
         }
     }
+    override val isLocationAvailable: Boolean
+        get() = deviceLocation != null
 
     override fun getLatitude(): Double? = deviceLocation?.latitude
     override fun getLongitude(): Double? = deviceLocation?.longitude

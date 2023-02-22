@@ -14,18 +14,22 @@ internal class GeoBinder(
 ) : DataBinder<JSONObject> {
     override val fieldName: String = "geo"
 
-    override suspend fun getJsonObject(): JSONObject = JsonParsers.serialize(createGeo())
+    override suspend fun getJsonObject(): JSONObject? = createGeo()?.let { JsonParsers.serialize(it) }
 
-    private fun createGeo(): Geo {
-        return Geo(
-            lat = dataSource.getLatitude(),
-            lon = dataSource.getLongitude(),
-            accuracy = dataSource.getAccuracy(),
-            lastfix = dataSource.getLastFix(),
-            country = dataSource.getCountry(),
-            city = dataSource.getCity(),
-            zip = dataSource.getZip(),
-            utcOffset = dataSource.getUtcOffset()
-        )
+    private fun createGeo(): Geo? {
+        return if (dataSource.isLocationAvailable) {
+            Geo(
+                lat = dataSource.getLatitude(),
+                lon = dataSource.getLongitude(),
+                accuracy = dataSource.getAccuracy(),
+                lastfix = dataSource.getLastFix(),
+                country = dataSource.getCountry(),
+                city = dataSource.getCity(),
+                zip = dataSource.getZip(),
+                utcOffset = dataSource.getUtcOffset()
+            )
+        } else {
+            null
+        }
     }
 }
