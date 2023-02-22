@@ -9,11 +9,13 @@ import com.appodealstack.bidon.stats.models.Demand
 import com.appodealstack.bidon.stats.models.Round
 import com.appodealstack.bidon.stats.models.StatsRequestBody
 import com.appodealstack.bidon.stats.usecases.StatsRequestUseCase
+import com.appodealstack.bidon.utils.SdkDispatchers
 import com.appodealstack.bidon.utils.di.get
 import com.appodealstack.bidon.utils.json.JsonParsers
 import com.appodealstack.bidon.utils.networking.BaseResponse
 import com.appodealstack.bidon.utils.networking.JsonHttpRequest
 import com.appodealstack.bidon.utils.networking.requests.CreateRequestBodyUseCase
+import kotlinx.coroutines.withContext
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -37,24 +39,26 @@ internal class StatsRequestUseCaseImpl(
         results: List<RoundStat>,
         adType: AdType,
     ): Result<BaseResponse> = runCatching {
-        val body = results.asStatsRequestBody(auctionId, auctionConfigurationId)
-        val requestBody = createRequestBody(
-            binders = binders,
-            dataKeyName = "stats",
-            data = body,
-            dataSerializer = JsonParsers.getSerializer(),
-        )
-        logInfo("", "$requestBody")
-        return get<JsonHttpRequest>().invoke(
-            path = "$StatsRequestPath/${adType.code}",
-            body = requestBody,
-        ).mapCatching { jsonResponse ->
-            val baseResponse = JsonParsers.parseOrNull<BaseResponse>(jsonResponse)
-            requireNotNull(baseResponse)
-        }.onFailure {
-            logError(Tag, "Error while sending stats", it)
-        }.onSuccess {
-            logInfo(Tag, "Stats was sent successfully")
+        return withContext(SdkDispatchers.IO) {
+            val body = results.asStatsRequestBody(auctionId, auctionConfigurationId)
+            val requestBody = createRequestBody(
+                binders = binders,
+                dataKeyName = "stats",
+                data = body,
+                dataSerializer = JsonParsers.getSerializer(),
+            )
+            logInfo("", "$requestBody")
+            get<JsonHttpRequest>().invoke(
+                path = "$StatsRequestPath/${adType.code}",
+                body = requestBody,
+            ).mapCatching { jsonResponse ->
+                val baseResponse = JsonParsers.parseOrNull<BaseResponse>(jsonResponse)
+                requireNotNull(baseResponse)
+            }.onFailure {
+                logError(Tag, "Error while sending stats", it)
+            }.onSuccess {
+                logInfo(Tag, "Stats was sent successfully")
+            }
         }
     }
 

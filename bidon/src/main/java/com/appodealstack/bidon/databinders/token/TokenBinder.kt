@@ -10,5 +10,5 @@ internal class TokenBinder(
 ) : DataBinder<String> {
     override val fieldName: String = "token"
 
-    override suspend fun getJsonObject(): String = dataSource.getCachedToken()?.token ?: ""
+    override suspend fun getJsonObject(): String? = dataSource.token?.token
 }

@@ -18,14 +18,14 @@ import org.junit.Test
 
 class TokenBinderTest : ConcurrentTest() {
 
-    private val token = """"{\"some_key\":\"some_token_data\"}""""
+    private val sourceResponseJson = "{\"name\":\"Error\",\"message\":\"hello\"}"
 
     private val dataSource = mockk<TokenDataSource>()
     private val tokenBinder by lazy { TokenBinder(dataSource) }
 
     @Before
     fun before() {
-        every { dataSource.getCachedToken() } returns Token(token)
+        every { dataSource.token } returns Token(sourceResponseJson)
         mockkStatic(Log::class)
         mockkStatic(::logInfo)
         every { logInfo(any(), any()) } returns Unit
@@ -39,6 +39,6 @@ class TokenBinderTest : ConcurrentTest() {
         val json = jsonObject {
             tokenBinder.fieldName hasValue token
         }
-        assertThat(json.toString()).isEqualTo("""{"token":"{\"some_key\":\"some_token_data\"}"}""")
+        assertThat(json.toString()).isEqualTo("""{"token":"{\"name\":\"Error\",\"message\":\"hello\"}"}""".trimIndent())
     }
 }

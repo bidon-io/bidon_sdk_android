@@ -133,7 +133,7 @@ internal class AuctionImplTest : ConcurrentTest() {
 //            )
 //        } returns BidonError.NoAuctionResults.asFailure()
         val roundsListener = object : RoundsListener {
-            override fun onRoundStarted(roundId: String) {
+            override fun onRoundStarted(roundId: String, pricefloor: Double) {
                 println("roundStarted: $roundId")
             }
 

@@ -35,7 +35,6 @@ internal class TestAdapterInterstitialImpl(
 
     override val ad: Ad
         get() = Ad(
-            demandId = demandId,
             demandAd = demandAd,
             eCPM = 1.5,
             roundId = roundId,
@@ -43,10 +42,14 @@ internal class TestAdapterInterstitialImpl(
             dsp = "DSP-bidmachine",
             sourceAd = this,
             currencyCode = "USD",
-            auctionId = "auctionId-12312"
+            auctionId = "auctionId-12312",
+            adUnitId = "adUnitId_123"
         )
 
     override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+
+    override val isAdReadyToShow: Boolean
+        get() = true
 
     override suspend fun bid(adParams: TestAdapterInterstitialParameters): AuctionResult {
         this.adParams = adParams

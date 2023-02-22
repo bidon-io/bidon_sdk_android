@@ -18,7 +18,7 @@ sealed class BidonError : Throwable() {
     /**
      * Only one auction per instance of an ad is possible
      */
-    object AuctionAlreadyExecuted : BidonError()
+    object AuctionInProgress : BidonError()
     object NoAuctionResults : BidonError()
     object NoRoundResults : BidonError()
 

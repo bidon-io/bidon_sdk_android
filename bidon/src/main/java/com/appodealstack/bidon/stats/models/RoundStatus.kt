@@ -44,6 +44,6 @@ fun Throwable.asRoundStatus() = when (this as? BidonError) {
     BidonError.NoRoundResults,
     is BidonError.Expired,
     is BidonError.Unspecified,
-    BidonError.AuctionAlreadyExecuted,
+    BidonError.AuctionInProgress,
     null -> null
 } ?: RoundStatus.UnspecifiedException
