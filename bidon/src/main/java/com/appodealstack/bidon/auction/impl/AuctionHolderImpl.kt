@@ -69,10 +69,12 @@ internal class AuctionHolderImpl(
     }
 
     override fun popWinner(): AdSource<*>? {
-        displayingWinner?.adSource?.destroy()
-        displayingWinner = nextWinner
-        nextWinner = null
-        return displayingWinner?.adSource
+        synchronized(this) {
+            displayingWinner?.adSource?.destroy()
+            displayingWinner = nextWinner
+            nextWinner = null
+            return displayingWinner?.adSource
+        }
     }
 
     override fun destroy() {
