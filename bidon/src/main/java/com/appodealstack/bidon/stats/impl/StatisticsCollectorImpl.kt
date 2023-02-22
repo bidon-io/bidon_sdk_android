@@ -78,7 +78,7 @@ class StatisticsCollectorImpl(
         if (!isRewardSent.getAndSet(true)) {
             val key = SendImpressionRequestUseCase.Type.Reward.key
             sendImpression(
-                urlPath = key,
+                urlPath = "$key/rewarded",
                 bodyKey = "show",
                 body = createImpressionRequestBody(StatisticsCollector.AdType.Rewarded)
             )
