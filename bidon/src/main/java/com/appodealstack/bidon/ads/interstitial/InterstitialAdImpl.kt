@@ -16,6 +16,7 @@ import com.appodealstack.bidon.logs.analytic.AdValue
 import com.appodealstack.bidon.logs.logging.impl.logInfo
 import com.appodealstack.bidon.stats.StatisticsCollector
 import com.appodealstack.bidon.utils.SdkDispatchers
+import com.appodealstack.bidon.utils.di.get
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -31,7 +32,7 @@ internal class InterstitialAdImpl(
     private var userListener: InterstitialListener? = null
     private var observeCallbacksJob: Job? = null
     private val auctionHolder: AuctionHolder by lazy {
-        com.appodealstack.bidon.utils.di.get {
+        get {
             params(demandAd, listener)
         }
     }
@@ -45,7 +46,7 @@ internal class InterstitialAdImpl(
             logInfo(Tag, "Sdk is not initialized")
             return
         }
-        logInfo(Tag, "Load with placement=$placementId, minPrice=$pricefloor")
+        logInfo(Tag, "Load with placement=$placementId, pricefloor=$pricefloor")
         if (!auctionHolder.isActive) {
             listener.onAuctionStarted()
             auctionHolder.startAuction(

@@ -10,10 +10,12 @@ import com.appodealstack.bidon.auction.usecases.GetAuctionRequestUseCase
 import com.appodealstack.bidon.databinders.DataBinderType
 import com.appodealstack.bidon.logs.logging.impl.logError
 import com.appodealstack.bidon.logs.logging.impl.logInfo
+import com.appodealstack.bidon.utils.SdkDispatchers
 import com.appodealstack.bidon.utils.di.get
 import com.appodealstack.bidon.utils.json.JsonParsers
 import com.appodealstack.bidon.utils.networking.JsonHttpRequest
 import com.appodealstack.bidon.utils.networking.requests.CreateRequestBodyUseCase
+import kotlinx.coroutines.withContext
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -39,32 +41,34 @@ internal class GetAuctionRequestUseCaseImpl(
         auctionId: String,
         adapters: Map<String, AdapterInfo>,
     ): Result<AuctionResponse> {
-        val (banner, interstitial, rewarded) = getData(additionalData)
-        val adObject = AdObjectRequestBody(
-            placementId = placement,
-            auctionId = auctionId,
-            banner = banner,
-            interstitial = interstitial,
-            rewarded = rewarded,
-            orientationCode = getOrientation().code,
-            pricefloor = additionalData.pricefloor
-        )
-        val requestBody = createRequestBody(
-            binders = binders,
-            dataKeyName = "ad_object",
-            data = adObject,
-            dataSerializer = JsonParsers.getSerializer()
-        )
-        logInfo(Tag, "Request body: $requestBody")
-        return get<JsonHttpRequest>().invoke(
-            path = "$AuctionRequestPath/${additionalData.asAdType().code}",
-            body = requestBody,
-        ).mapCatching { jsonResponse ->
-            requireNotNull(JsonParsers.parseOrNull<AuctionResponse>(jsonResponse))
-        }.onFailure {
-            logError(Tag, "Error while loading auction data", it)
-        }.onSuccess {
-            logInfo(Tag, "Loaded auction data: $it")
+        return withContext(SdkDispatchers.IO) {
+            val (banner, interstitial, rewarded) = getData(additionalData)
+            val adObject = AdObjectRequestBody(
+                placementId = placement,
+                auctionId = auctionId,
+                banner = banner,
+                interstitial = interstitial,
+                rewarded = rewarded,
+                orientationCode = getOrientation().code,
+                pricefloor = additionalData.pricefloor
+            )
+            val requestBody = createRequestBody(
+                binders = binders,
+                dataKeyName = "ad_object",
+                data = adObject,
+                dataSerializer = JsonParsers.getSerializer()
+            )
+            logInfo(Tag, "Request body: $requestBody")
+            get<JsonHttpRequest>().invoke(
+                path = "$AuctionRequestPath/${additionalData.asAdType().code}",
+                body = requestBody,
+            ).mapCatching { jsonResponse ->
+                requireNotNull(JsonParsers.parseOrNull<AuctionResponse>(jsonResponse))
+            }.onFailure {
+                logError(Tag, "Error while loading auction data", it)
+            }.onSuccess {
+                logInfo(Tag, "Loaded auction data: $it")
+            }
         }
     }
 

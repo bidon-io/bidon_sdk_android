@@ -5,11 +5,13 @@ import com.appodealstack.bidon.config.models.ConfigResponse
 import com.appodealstack.bidon.config.usecases.GetConfigRequestUseCase
 import com.appodealstack.bidon.databinders.DataBinderType
 import com.appodealstack.bidon.databinders.segment.SegmentDataSource
+import com.appodealstack.bidon.utils.SdkDispatchers
 import com.appodealstack.bidon.utils.di.get
 import com.appodealstack.bidon.utils.json.JsonParsers
 import com.appodealstack.bidon.utils.json.jsonObject
 import com.appodealstack.bidon.utils.networking.JsonHttpRequest
 import com.appodealstack.bidon.utils.networking.requests.CreateRequestBodyUseCase
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 /**
@@ -29,32 +31,34 @@ internal class GetConfigRequestUseCaseImpl(
     )
 
     override suspend fun request(body: ConfigRequestBody): Result<ConfigResponse> {
-        val bindersData = createRequestBody(
-            binders = binders,
-            dataKeyName = null,
-            data = null,
-            dataSerializer = null,
-        )
-        val requestBody = jsonObject(putTo = bindersData) {
-            "adapters" hasValue jsonObject {
-                body.adapters.forEach { (adapterName, data) ->
-                    adapterName hasValue JsonParsers.serialize(data)
+        return withContext(SdkDispatchers.IO) {
+            val bindersData = createRequestBody(
+                binders = binders,
+                dataKeyName = null,
+                data = null,
+                dataSerializer = null,
+            )
+            val requestBody = jsonObject(putTo = bindersData) {
+                "adapters" hasValue jsonObject {
+                    body.adapters.forEach { (adapterName, data) ->
+                        adapterName hasValue JsonParsers.serialize(data)
+                    }
                 }
             }
-        }
-        return get<JsonHttpRequest>().invoke(
-            path = ConfigRequestPath,
-            body = requestBody,
-        ).mapCatching { jsonString ->
-            /**
-             * Save "segment_id"
-             */
-            val jsonResponse = JSONObject(jsonString)
-            segmentDataSource.saveSegmentId(
-                segmentId = jsonResponse.optString("segment_id", "").takeIf { !it.isNullOrBlank() }
-            )
-            val config = jsonResponse.getString("init")
-            requireNotNull(JsonParsers.parseOrNull(config))
+            get<JsonHttpRequest>().invoke(
+                path = ConfigRequestPath,
+                body = requestBody,
+            ).mapCatching { jsonString ->
+                /**
+                 * Save "segment_id"
+                 */
+                val jsonResponse = JSONObject(jsonString)
+                segmentDataSource.saveSegmentId(
+                    segmentId = jsonResponse.optString("segment_id", "").takeIf { !it.isNullOrBlank() }
+                )
+                val config = jsonResponse.getString("init")
+                requireNotNull(JsonParsers.parseOrNull(config))
+            }
         }
     }
 }
