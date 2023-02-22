@@ -77,8 +77,9 @@ class StatisticsCollectorImpl(
     override suspend fun sendRewardImpression() {
         if (!isRewardSent.getAndSet(true)) {
             val key = SendImpressionRequestUseCase.Type.Reward.key
+            val lastSegment = StatisticsCollector.AdType.Rewarded.asAdType().code
             sendImpression(
-                urlPath = "$key/rewarded",
+                urlPath = "$key/$lastSegment",
                 bodyKey = "show",
                 body = createImpressionRequestBody(StatisticsCollector.AdType.Rewarded)
             )
