@@ -25,10 +25,6 @@
         <activity android:name=".BannerViewActivity" />
 
         <meta-data
-            android:name="applovin.sdk.key"
-            android:value="${APPLOVIN_SDK_KEY}" />
-
-        <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="${MOBILE_ADS_APPLICATION_ID}" />
     </application>
