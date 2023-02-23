@@ -1,5 +1,5 @@
--keeppackagenames com.appodealstack.**
+-keeppackagenames org.bidon.**
 
--keep class com.appodealstack.appsflyer.AppsflyerAnalytics { *; }
+-keep class org.bidon.appsflyer.AppsflyerAnalytics { *; }
 -keep class com.appsflyer.** { *; }
 -keep public class com.android.installreferrer.** { *; }

@@ -11,7 +11,7 @@ project.extra.apply {
 }
 
 android {
-    namespace = "com.appodealstack.bidmachine"
+    namespace = "org.bidon.bidmachine"
     defaultConfig {
         ADAPTER_VERSION = Versions.Adapters.BidMachine
     }

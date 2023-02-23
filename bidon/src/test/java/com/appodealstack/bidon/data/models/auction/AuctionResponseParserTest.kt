@@ -1,9 +1,9 @@
-package com.appodealstack.bidon.data.models.auction
+package org.bidon.sdk.data.models.auction
 
-import com.appodealstack.bidon.auction.models.AuctionResponse
-import com.appodealstack.bidon.auction.models.LineItem
-import com.appodealstack.bidon.auction.models.Round
-import com.appodealstack.bidon.utils.json.JsonParsers
+import org.bidon.sdk.auction.models.AuctionResponse
+import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.Round
+import org.bidon.sdk.utils.json.JsonParsers
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 

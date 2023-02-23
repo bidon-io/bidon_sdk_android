@@ -1,8 +1,8 @@
-package com.appodealstack.bidon.config.domain
+package org.bidon.sdk.config.domain
 
-import com.appodealstack.bidon.adapter.DemandId
-import com.appodealstack.bidon.auction.models.LineItem
-import com.appodealstack.bidon.auction.models.minByPricefloorOrNull
+import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 

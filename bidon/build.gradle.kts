@@ -11,7 +11,7 @@ project.extra.apply {
 }
 
 android {
-    namespace = "com.appodealstack.bidon"
+    namespace = "org.bidon.sdk"
     defaultConfig {
         ADAPTER_VERSION = Versions.BidOnVersionName
     }

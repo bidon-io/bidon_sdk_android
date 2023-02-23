@@ -1,7 +1,7 @@
-package com.appodealstack.bidmachine.ext
+package org.bidon.bidmachine.ext
 
-import com.appodealstack.bidmachine.BidMachineAdapter
-import com.appodealstack.bidmachine.BidMachineParameters
+import org.bidon.bidmachine.BidMachineAdapter
+import org.bidon.bidmachine.BidMachineParameters
 import com.google.common.truth.Truth.assertThat
 import org.json.JSONObject
 import org.junit.Test

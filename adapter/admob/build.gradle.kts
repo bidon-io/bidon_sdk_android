@@ -11,7 +11,7 @@ project.extra.apply {
 }
 
 android {
-    namespace = "com.appodealstack.admob"
+    namespace = "org.bidon.admob"
     defaultConfig {
         ADAPTER_VERSION = Versions.Adapters.Admob
     }
