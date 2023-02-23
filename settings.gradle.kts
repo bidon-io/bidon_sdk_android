@@ -11,7 +11,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
-        mavenLocal()
+//        mavenLocal()
         mavenCentral()
         maven {
             url = uri("https://artifacts.applovin.com/android")
@@ -23,13 +23,13 @@ dependencyResolutionManagement {
         maven {
             url = uri("https://android-sdk.is.com/")
         }
-//        maven {
-//            url = uri("https://maven.pkg.github.com/bidon-io/bidon-sdk-android")
-//            credentials {
-//                username = ""
-//                password = ""
-//            }
-//        }
+        maven {
+            url = uri("https://maven.pkg.github.com/bidon-io/bidon-sdk-android")
+            credentials {
+                username = System.getenv("GPR_USER")
+                password = System.getenv("GPR_TOKEN")
+            }
+        }
     }
 }
 rootProject.name = "BidOn SDK"

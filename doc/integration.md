@@ -31,6 +31,7 @@ dependencies {
     # Demand Sources (AdNetworks)
     implementation 'org.bidon:bidmachine-adapter:0.1.0.1-Beta'
     implementation 'org.bidon:admob-adapter:0.1.0.1-Beta'
+    implementation 'org.bidon:applovin-adapter:0.1.0.1-Beta'
     
     ... 
 }

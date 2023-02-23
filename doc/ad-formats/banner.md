@@ -40,7 +40,7 @@ banner.setBannerListener(object : BannerListener {
     }
 })
 banner.setAdSize(BannerSize.Banner)
-banner.load(minPrice = otherMediationEcpm) // or use DefaultMinPrice
+banner.load(pricefloor = otherMediationEcpm) // or use DefaultMinPrice
 ```
 
 ## Displaying banners

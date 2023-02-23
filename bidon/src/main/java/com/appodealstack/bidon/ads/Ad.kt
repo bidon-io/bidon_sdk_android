@@ -12,10 +12,10 @@ class Ad(
     val eCPM: Double,
     val roundId: String,
     val auctionId: String,
-    val dsp: String?,
-    val sourceAd: Any,
-    val currencyCode: String?,
     val adUnitId: String?,
+    val dsp: String?,
+    val currencyCode: String?,
+    val sourceAd: Any,
 ) {
     val currency: Currency?
         get() = currencyCode?.let { Currency.getInstance(it) }

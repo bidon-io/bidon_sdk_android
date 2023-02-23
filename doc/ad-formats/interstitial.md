@@ -39,7 +39,7 @@ interstitial.setInterstitialListener(object : InterstitialListener {
         // adValue.revenue - ad revenue from mediation
     }
 })
-interstitial.loadAd(activity = this, minPrice = otherMediationEcpm) // or use DefaultMinPrice
+interstitial.loadAd(activity = this, pricefloor = otherMediationEcpm) // or use DefaultMinPrice
 ```
 
 ## Displaying interstitial ad

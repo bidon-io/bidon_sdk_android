@@ -43,7 +43,7 @@ rewarded.setRewardedListener(object : RewardedListener {
         // adValue.revenue - ad revenue from mediation
     }
 })
-rewarded.loadAd(activity = this, minPrice = otherMediationEcpm) // or use DefaultMinPrice
+rewarded.loadAd(activity = this, pricefloor = otherMediationEcpm) // or use DefaultMinPrice
 ```
 
 ## Displaying interstitial ad
