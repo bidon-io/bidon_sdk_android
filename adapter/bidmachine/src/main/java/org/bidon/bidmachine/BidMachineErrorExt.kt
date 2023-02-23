@@ -1,8 +1,8 @@
 package org.bidon.bidmachine
 
+import io.bidmachine.utils.BMError
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.config.BidonError
-import io.bidmachine.utils.BMError
 
 internal fun BMError.asBidonError(demandId: DemandId): BidonError = when (this) {
     BMError.Request,

@@ -2,9 +2,11 @@ package org.bidon.fyber
 
 import android.app.Activity
 import android.content.Context
-import org.bidon.sdk.adapter.*
-import org.bidon.sdk.ads.Ad
-import org.bidon.sdk.utils.SdkDispatchers
+import com.fyber.FairBid
+import com.fyber.fairbid.ads.ImpressionData
+import com.fyber.fairbid.ads.Interstitial
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.fyber.banner.BannerInterceptor
 import org.bidon.fyber.banner.initBannerListener
 import org.bidon.fyber.ext.adapterVersion
@@ -13,11 +15,9 @@ import org.bidon.fyber.interstitial.InterstitialInterceptor
 import org.bidon.fyber.interstitial.initInterstitialListener
 import org.bidon.fyber.rewarded.RewardedInterceptor
 import org.bidon.fyber.rewarded.initRewardedListener
-import com.fyber.FairBid
-import com.fyber.fairbid.ads.ImpressionData
-import com.fyber.fairbid.ads.Interstitial
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
+import org.bidon.sdk.adapter.*
+import org.bidon.sdk.ads.Ad
+import org.bidon.sdk.utils.SdkDispatchers
 import org.json.JSONObject
 
 val FairBidDemandId = DemandId("fair_bid")

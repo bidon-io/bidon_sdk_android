@@ -3,13 +3,13 @@ package org.bidon.applovin
 import android.app.Activity
 import android.content.Context
 import com.applovin.sdk.AppLovinSdk
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.applovin.ext.adapterVersion
 import org.bidon.applovin.ext.sdkVersion
 import org.bidon.applovin.impl.MaxBannerImpl
 import org.bidon.applovin.impl.MaxInterstitialImpl
 import org.bidon.applovin.impl.MaxRewardedImpl
 import org.bidon.sdk.adapter.*
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
 import kotlin.coroutines.resume
 

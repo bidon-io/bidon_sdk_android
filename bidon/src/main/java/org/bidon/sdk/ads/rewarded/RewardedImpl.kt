@@ -1,6 +1,9 @@
 package org.bidon.sdk.ads.rewarded
 
 import android.app.Activity
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.bidon.sdk.BidOnSdk
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
@@ -14,9 +17,6 @@ import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.utils.SdkDispatchers
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
 internal class RewardedImpl(
     override val placementId: String,
@@ -142,8 +142,8 @@ internal class RewardedImpl(
                     listener.onAdShown(adEvent.ad)
                 }
                 is AdEvent.PaidRevenue -> listener.onRevenuePaid(adEvent.ad, adEvent.adValue)
-                is AdEvent.ShowFailed -> listener.onAdLoadFailed(adEvent.cause)
-                is AdEvent.LoadFailed -> listener.onAdShowFailed(adEvent.cause)
+                is AdEvent.ShowFailed -> listener.onAdShowFailed(adEvent.cause)
+                is AdEvent.LoadFailed -> listener.onAdLoadFailed(adEvent.cause)
                 is AdEvent.Expired -> listener.onAdExpired(adEvent.ad)
             }
         }.launchIn(CoroutineScope(dispatcher))

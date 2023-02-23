@@ -1,12 +1,12 @@
 package org.bidon.sdk.base
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.test.resetMain
 import org.bidon.sdk.utils.defaultDispatcherOverridden
 import org.bidon.sdk.utils.ioDispatcherOverridden
 import org.bidon.sdk.utils.mainDispatcherOverridden
 import org.bidon.sdk.utils.singleDispatcherOverridden
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.coroutines.test.resetMain
 import org.junit.After
 import org.junit.Before
 

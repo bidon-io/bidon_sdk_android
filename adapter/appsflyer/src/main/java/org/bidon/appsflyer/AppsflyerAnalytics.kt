@@ -2,16 +2,16 @@ package org.bidon.appsflyer
 
 import android.app.Activity
 import android.app.Application
+import com.appsflyer.AFLogger
+import com.appsflyer.AppsFlyerLib
+import com.appsflyer.adrevenue.AppsFlyerAdRevenue
+import com.appsflyer.adrevenue.adnetworks.generic.MediationNetwork
 import org.bidon.appsflyer.ext.adapterVersion
 import org.bidon.appsflyer.ext.sdkVersion
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.logs.analytic.AdRevenueLogger
 import org.bidon.sdk.logs.logging.impl.logInfo
-import com.appsflyer.AFLogger
-import com.appsflyer.AppsFlyerLib
-import com.appsflyer.adrevenue.AppsFlyerAdRevenue
-import com.appsflyer.adrevenue.adnetworks.generic.MediationNetwork
 import org.json.JSONObject
 import java.util.*
 

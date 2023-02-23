@@ -1,6 +1,7 @@
 package org.bidon.sdk.utils.networking
 
 import androidx.annotation.WorkerThread
+import kotlinx.coroutines.withContext
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.config.models.Token
 import org.bidon.sdk.databinders.token.TokenDataSource
@@ -10,7 +11,6 @@ import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.json.JsonParsers
 import org.bidon.sdk.utils.networking.impl.RawResponse
 import org.bidon.sdk.utils.networking.impl.jsonZipHttpClient
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 /**

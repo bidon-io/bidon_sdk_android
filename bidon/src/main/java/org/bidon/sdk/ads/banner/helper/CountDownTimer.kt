@@ -1,10 +1,10 @@
 package org.bidon.sdk.ads.banner.helper
 
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.first
 import org.bidon.sdk.ads.banner.helper.impl.ActivityLifecycleObserver
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.SdkDispatchers
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.first
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.

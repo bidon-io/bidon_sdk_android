@@ -1,12 +1,12 @@
 package org.bidon.fyber.banner
 
-import org.bidon.sdk.logs.logging.impl.logError
-import org.bidon.sdk.logs.logging.impl.logInfo
 import com.fyber.fairbid.ads.Banner
 import com.fyber.fairbid.ads.ImpressionData
 import com.fyber.fairbid.ads.banner.BannerError
 import com.fyber.fairbid.ads.banner.BannerListener
 import kotlinx.coroutines.flow.MutableSharedFlow
+import org.bidon.sdk.logs.logging.impl.logError
+import org.bidon.sdk.logs.logging.impl.logInfo
 
 private const val Tag = "BannerListener"
 internal fun MutableSharedFlow<BannerInterceptor>.initBannerListener() {

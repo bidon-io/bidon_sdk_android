@@ -1,5 +1,7 @@
 package org.bidon.sdk.auction.impl
 
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.auction.*
@@ -10,8 +12,7 @@ import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.ext.asFailure
 import org.bidon.sdk.utils.ext.asSuccess
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
+import org.bidon.sdk.utils.ext.onAny
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -54,13 +55,14 @@ internal class AuctionHolderImpl(
                         "Auction succeed if results is not empty"
                     }
                     logInfo(Tag, "Auction completed successfully: $results")
-                    auctionState.value = AuctionHolderState.Idle
                     nextWinner = results.first()
                     onResult.invoke(results.asSuccess())
                 }.onFailure {
                     nextWinner = null
                     logError(Tag, "Auction failed", it)
                     onResult.invoke(it.asFailure())
+                }.onAny {
+                    auctionState.value = AuctionHolderState.Idle
                 }
             }
         } else {

@@ -1,8 +1,8 @@
 package org.bidon.bidmachine.ext
 
+import io.bidmachine.models.AuctionResult
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
-import io.bidmachine.models.AuctionResult
 
 /**
  * Created by Aleksei Cherniaev on 21/02/2023.

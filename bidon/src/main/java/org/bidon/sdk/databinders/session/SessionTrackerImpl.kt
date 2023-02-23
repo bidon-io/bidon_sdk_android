@@ -4,14 +4,14 @@ import android.app.Application
 import android.content.ComponentCallbacks2
 import android.content.Context
 import android.content.res.Configuration
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.bidon.sdk.ads.banner.helper.ActivityLifecycleState
 import org.bidon.sdk.ads.banner.helper.PauseResumeObserver
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.time.ElapsedMonotonicTimeNow
 import org.bidon.sdk.utils.time.SystemTimeNow
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import java.util.*
 
 internal class SessionTrackerImpl(

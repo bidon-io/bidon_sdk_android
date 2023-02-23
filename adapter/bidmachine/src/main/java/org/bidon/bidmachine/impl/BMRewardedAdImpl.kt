@@ -2,6 +2,14 @@ package org.bidon.bidmachine.impl
 
 import android.app.Activity
 import android.content.Context
+import io.bidmachine.AdRequest
+import io.bidmachine.PriceFloorParams
+import io.bidmachine.rewarded.RewardedAd
+import io.bidmachine.rewarded.RewardedListener
+import io.bidmachine.rewarded.RewardedRequest
+import io.bidmachine.utils.BMError
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
 import org.bidon.bidmachine.BMAuctionResult
 import org.bidon.bidmachine.BMFullscreenAuctionParams
 import org.bidon.bidmachine.asBidonError
@@ -24,14 +32,6 @@ import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.asRoundStatus
 import org.bidon.sdk.utils.ext.asFailure
 import org.bidon.sdk.utils.ext.asSuccess
-import io.bidmachine.AdRequest
-import io.bidmachine.PriceFloorParams
-import io.bidmachine.rewarded.RewardedAd
-import io.bidmachine.rewarded.RewardedListener
-import io.bidmachine.rewarded.RewardedRequest
-import io.bidmachine.utils.BMError
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 
 internal class BMRewardedAdImpl(
     override val demandId: DemandId,
