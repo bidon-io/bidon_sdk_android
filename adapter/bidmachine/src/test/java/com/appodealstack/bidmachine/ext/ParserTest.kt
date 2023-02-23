@@ -1,8 +1,8 @@
 package org.bidon.bidmachine.ext
 
+import com.google.common.truth.Truth.assertThat
 import org.bidon.bidmachine.BidMachineAdapter
 import org.bidon.bidmachine.BidMachineParameters
-import com.google.common.truth.Truth.assertThat
 import org.json.JSONObject
 import org.junit.Test
 

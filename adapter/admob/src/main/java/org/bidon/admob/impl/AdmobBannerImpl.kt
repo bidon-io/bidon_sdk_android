@@ -7,6 +7,11 @@ import android.util.DisplayMetrics
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
+import com.google.android.gms.ads.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import org.bidon.admob.AdmobBannerAuctionParams
 import org.bidon.admob.asBidonError
 import org.bidon.admob.ext.asBidonAdValue
@@ -25,11 +30,6 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.asRoundStatus
 import org.bidon.sdk.utils.SdkDispatchers
-import com.google.android.gms.ads.*
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 
 internal class AdmobBannerImpl(
     override val demandId: DemandId,

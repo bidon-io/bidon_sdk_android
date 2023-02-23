@@ -1,6 +1,13 @@
 package org.bidon.admob.impl
 
 import android.app.Activity
+import com.google.android.gms.ads.*
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import org.bidon.admob.AdmobFullscreenAdAuctionParams
 import org.bidon.admob.asBidonError
 import org.bidon.admob.ext.asBidonAdValue
@@ -17,13 +24,6 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.asRoundStatus
 import org.bidon.sdk.utils.SdkDispatchers
-import com.google.android.gms.ads.*
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 
 // $0.1 ca-app-pub-9630071911882835/9299488830
 // $0.5 ca-app-pub-9630071911882835/4234864416

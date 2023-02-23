@@ -1,10 +1,10 @@
 package org.bidon.sdk.data.models.stats
 
+import com.google.common.truth.Truth.assertThat
 import org.bidon.sdk.auction.models.BannerRequestBody
 import org.bidon.sdk.auction.models.InterstitialRequestBody
 import org.bidon.sdk.stats.models.ImpressionRequestBody
 import org.bidon.sdk.utils.json.JsonParsers
-import com.google.common.truth.Truth.assertThat
 import org.json.JSONObject
 import org.junit.Test
 

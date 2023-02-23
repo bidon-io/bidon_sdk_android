@@ -1,6 +1,11 @@
 package org.bidon.sdk.config.domain.databinders
 
 import android.util.Log
+import com.google.common.truth.Truth.assertThat
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import kotlinx.coroutines.test.runTest
 import org.bidon.sdk.base.ConcurrentTest
 import org.bidon.sdk.config.models.Token
 import org.bidon.sdk.databinders.token.TokenBinder
@@ -8,11 +13,6 @@ import org.bidon.sdk.databinders.token.TokenDataSource
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.json.jsonObject
-import com.google.common.truth.Truth.assertThat
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkStatic
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 

@@ -5,6 +5,8 @@ import com.applovin.mediation.MaxAd
 import com.applovin.mediation.MaxAdListener
 import com.applovin.mediation.MaxError
 import com.applovin.mediation.ads.MaxInterstitialAd
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
 import org.bidon.applovin.ApplovinDemandId
 import org.bidon.applovin.MaxFullscreenAdAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
@@ -21,8 +23,6 @@ import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.asRoundStatus
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 
 internal class MaxInterstitialImpl(
     override val demandId: DemandId,

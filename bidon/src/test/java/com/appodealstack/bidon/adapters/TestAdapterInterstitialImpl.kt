@@ -1,6 +1,8 @@
 package org.bidon.sdk.adapters
 
 import android.app.Activity
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.*
 import org.bidon.sdk.auction.AuctionResult
@@ -9,8 +11,6 @@ import org.bidon.sdk.auctions.impl.PlacementId
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.utils.ext.asFailure
 import org.bidon.sdk.utils.ext.asSuccess
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 
 internal data class TestAdapterInterstitialParameters(
     val bid: Process = Process.Succeed,

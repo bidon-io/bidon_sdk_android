@@ -6,6 +6,8 @@ import com.applovin.mediation.MaxError
 import com.applovin.mediation.MaxReward
 import com.applovin.mediation.MaxRewardedAdListener
 import com.applovin.mediation.ads.MaxRewardedAd
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
 import org.bidon.applovin.ApplovinDemandId
 import org.bidon.applovin.MaxFullscreenAdAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
@@ -22,8 +24,6 @@ import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.asRoundStatus
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 
 internal class MaxRewardedImpl(
     override val demandId: DemandId,

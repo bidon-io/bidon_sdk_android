@@ -1,5 +1,7 @@
 package org.bidon.sdk.auction.impl
 
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.auction.*
@@ -10,8 +12,6 @@ import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.ext.asFailure
 import org.bidon.sdk.utils.ext.asSuccess
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.

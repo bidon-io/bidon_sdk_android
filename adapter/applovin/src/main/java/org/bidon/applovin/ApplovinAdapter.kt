@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import com.applovin.sdk.AppLovinSdk
 import com.applovin.sdk.AppLovinSdkSettings
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.applovin.ext.adapterVersion
 import org.bidon.applovin.ext.sdkVersion
 import org.bidon.applovin.impl.ApplovinBannerImpl
@@ -12,7 +13,6 @@ import org.bidon.applovin.impl.ApplovinRewardedImpl
 import org.bidon.sdk.BidOnSdk
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.logs.logging.Logger
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
 import kotlin.coroutines.resume
 

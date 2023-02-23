@@ -2,13 +2,13 @@ package org.bidon.fyber.rewarded
 
 import android.app.Activity
 import androidx.core.os.bundleOf
-import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.ads.AdType
-import org.bidon.fyber.PlacementKey
 import com.fyber.fairbid.ads.ImpressionData
 import com.fyber.fairbid.ads.Interstitial
 import com.fyber.fairbid.ads.LossNotificationReason
 import com.fyber.fairbid.ads.ShowOptions
+import org.bidon.fyber.PlacementKey
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.ads.AdType
 
 object BNFyberRewarded : FyberRewarded by FyberRewardedImpl()
 

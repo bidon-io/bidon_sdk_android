@@ -3,11 +3,11 @@ package org.bidon.sdk.adapter
 import android.app.Activity
 import android.view.View
 import android.view.ViewGroup
+import kotlinx.coroutines.flow.Flow
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
-import kotlinx.coroutines.flow.Flow
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.

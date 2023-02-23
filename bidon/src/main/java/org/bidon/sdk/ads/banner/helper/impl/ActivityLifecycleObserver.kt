@@ -3,10 +3,10 @@ package org.bidon.sdk.ads.banner.helper.impl
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.bidon.sdk.ads.banner.helper.ActivityLifecycleState
 import org.bidon.sdk.ads.banner.helper.PauseResumeObserver
 import org.bidon.sdk.logs.logging.impl.logInfo
-import kotlinx.coroutines.flow.MutableStateFlow
 import java.lang.ref.WeakReference
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.

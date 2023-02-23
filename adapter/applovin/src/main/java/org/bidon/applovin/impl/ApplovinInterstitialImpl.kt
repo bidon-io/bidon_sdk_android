@@ -2,7 +2,10 @@ package org.bidon.applovin.impl
 
 import android.app.Activity
 import com.applovin.adview.AppLovinIncentivizedInterstitial
+import com.applovin.adview.AppLovinInterstitialAd
 import com.applovin.sdk.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
 import org.bidon.applovin.ApplovinFullscreenAdAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
 import org.bidon.sdk.adapter.*
@@ -16,8 +19,6 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 
 /**
  * I have no idea how it works. There is no documentation.
@@ -37,7 +38,6 @@ internal class ApplovinInterstitialImpl(
         demandId = demandId
     ) {
 
-    private var interstitialAd: AppLovinIncentivizedInterstitial? = null
     private var applovinAd: AppLovinAd? = null
     private var lineItem: LineItem? = null
 
@@ -107,11 +107,10 @@ internal class ApplovinInterstitialImpl(
         get() = applovinAd != null
 
     override val ad: Ad?
-        get() = applovinAd?.asAd() ?: interstitialAd?.asAd()
+        get() = applovinAd?.asAd()
 
     override fun destroy() {
         logInfo(Tag, "destroy")
-        interstitialAd = null
         applovinAd = null
     }
 
@@ -138,10 +137,13 @@ internal class ApplovinInterstitialImpl(
         logInfo(Tag, "Starting with $adParams: $this")
         markBidStarted(adParams.lineItem.adUnitId)
         lineItem = adParams.lineItem
-        val incentivizedInterstitial = AppLovinIncentivizedInterstitial.create(adParams.lineItem.adUnitId, applovinSdk).also {
-            interstitialAd = it
+        val adService: AppLovinAdService = applovinSdk.adService
+        val zoneId = adParams.lineItem.adUnitId
+        if (zoneId.isNullOrEmpty()) {
+            adService.loadNextAd(AppLovinAdSize.INTERSTITIAL, requestListener)
+        } else {
+            adService.loadNextAdForZoneId(zoneId, requestListener)
         }
-        incentivizedInterstitial.preload(requestListener)
         val state = adEvent.first {
             it is AdEvent.Bid || it is AdEvent.LoadFailed
         }
@@ -168,9 +170,13 @@ internal class ApplovinInterstitialImpl(
 
     override fun show(activity: Activity) {
         logInfo(Tag, "Starting show: $this")
-        val appLovinAd = applovinAd
-        if (interstitialAd?.isAdReadyToDisplay == true && appLovinAd != null) {
-            interstitialAd?.show(appLovinAd, activity, null, listener, listener, listener)
+        val applovinAd = applovinAd
+        if (applovinAd != null) {
+            val adDialog = AppLovinInterstitialAd.create(applovinSdk, activity).apply {
+                setAdDisplayListener(listener)
+                setAdClickListener(listener)
+            }
+            adDialog.showAndRender(applovinAd)
         } else {
             adEvent.tryEmit(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
         }

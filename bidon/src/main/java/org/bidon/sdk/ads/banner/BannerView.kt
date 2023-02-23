@@ -6,6 +6,11 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.widget.FrameLayout
 import androidx.annotation.AttrRes
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import org.bidon.sdk.BidOnSdk
 import org.bidon.sdk.BidOnSdk.DefaultPlacement
 import org.bidon.sdk.BidOnSdk.DefaultPricefloor
@@ -30,11 +35,6 @@ import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.StatisticsCollector.AdType.Banner
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.

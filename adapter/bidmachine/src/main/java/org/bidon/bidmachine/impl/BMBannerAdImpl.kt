@@ -4,6 +4,14 @@ import android.app.Activity
 import android.content.Context
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import io.bidmachine.AdRequest
+import io.bidmachine.PriceFloorParams
+import io.bidmachine.banner.BannerListener
+import io.bidmachine.banner.BannerRequest
+import io.bidmachine.banner.BannerView
+import io.bidmachine.utils.BMError
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
 import org.bidon.bidmachine.BMAuctionResult
 import org.bidon.bidmachine.BMBannerAuctionParams
 import org.bidon.bidmachine.BidMachineBannerSize
@@ -26,14 +34,6 @@ import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.asRoundStatus
 import org.bidon.sdk.utils.ext.asFailure
 import org.bidon.sdk.utils.ext.asSuccess
-import io.bidmachine.AdRequest
-import io.bidmachine.PriceFloorParams
-import io.bidmachine.banner.BannerListener
-import io.bidmachine.banner.BannerRequest
-import io.bidmachine.banner.BannerView
-import io.bidmachine.utils.BMError
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 
 internal class BMBannerAdImpl(
     override val demandId: DemandId,

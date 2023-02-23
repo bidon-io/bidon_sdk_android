@@ -1,10 +1,10 @@
 package org.bidon.sdk.data.models.stats
 
+import com.google.common.truth.Truth.assertThat
 import org.bidon.sdk.stats.models.Demand
 import org.bidon.sdk.stats.models.Round
 import org.bidon.sdk.stats.models.StatsRequestBody
 import org.bidon.sdk.utils.json.JsonParsers
-import com.google.common.truth.Truth.assertThat
 import org.json.JSONObject
 import org.junit.Test
 

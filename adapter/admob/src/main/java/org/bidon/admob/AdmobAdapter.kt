@@ -2,6 +2,7 @@ package org.bidon.admob
 
 import android.app.Activity
 import android.content.Context
+import com.google.android.gms.ads.MobileAds
 import org.bidon.admob.ext.adapterVersion
 import org.bidon.admob.ext.sdkVersion
 import org.bidon.admob.impl.AdmobBannerImpl
@@ -9,7 +10,6 @@ import org.bidon.admob.impl.AdmobInterstitialImpl
 import org.bidon.admob.impl.AdmobRewardedImpl
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.banner.BannerView
-import com.google.android.gms.ads.MobileAds
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 

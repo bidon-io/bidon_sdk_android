@@ -2,6 +2,8 @@ package org.bidon.bidmachine
 
 import android.app.Activity
 import android.content.Context
+import io.bidmachine.BidMachine
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.bidmachine.ext.adapterVersion
 import org.bidon.bidmachine.ext.sdkVersion
 import org.bidon.bidmachine.impl.BMBannerAdImpl
@@ -16,8 +18,6 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Initializable
 import org.bidon.sdk.logs.logging.Logger
-import io.bidmachine.BidMachine
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
 import kotlin.coroutines.resume
 
