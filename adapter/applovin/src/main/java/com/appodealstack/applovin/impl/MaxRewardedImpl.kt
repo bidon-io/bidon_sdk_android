@@ -93,7 +93,9 @@ internal class MaxRewardedImpl(
                 adEvent.tryEmit(AdEvent.ShowFailed(error.asBidonError()))
             }
 
+            @Deprecated("Deprecated in Java")
             override fun onRewardedVideoStarted(ad: MaxAd?) {}
+            @Deprecated("Deprecated in Java")
             override fun onRewardedVideoCompleted(ad: MaxAd?) {}
 
             override fun onUserRewarded(ad: MaxAd, reward: MaxReward?) {
