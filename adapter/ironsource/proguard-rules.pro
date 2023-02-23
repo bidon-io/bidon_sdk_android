@@ -16,26 +16,26 @@
     @android.webkit.JavascriptInterface <methods>;
 }
 
--keeppackagenames com.appodealstack.ironsource.**
--keep class com.appodealstack.ironsource.**
--keep interface com.appodealstack.ironsource.ISDecorator {*;}
--keep interface com.appodealstack.ironsource.ISDecorator$Banner {*;}
--keep interface com.appodealstack.ironsource.ISDecorator$Banner$BannerView {*;}
--keep interface com.appodealstack.ironsource.ISDecorator$Impressions {*;}
--keep interface com.appodealstack.ironsource.ISDecorator$Initializer {*;}
--keep interface com.appodealstack.ironsource.ISDecorator$Interstitial {*;}
--keep interface com.appodealstack.ironsource.ISDecorator$Rewarded {*;}
--keep class com.appodealstack.ironsource.IronSourceDecorator {*;}
--keep class com.appodealstack.ironsource.IronSourceAdapter {*;}
--keep class com.appodealstack.ironsource.IronSourceParameters {*;}
+-keeppackagenames org.bidon.ironsource.**
+-keep class org.bidon.ironsource.**
+-keep interface org.bidon.ironsource.ISDecorator {*;}
+-keep interface org.bidon.ironsource.ISDecorator$Banner {*;}
+-keep interface org.bidon.ironsource.ISDecorator$Banner$BannerView {*;}
+-keep interface org.bidon.ironsource.ISDecorator$Impressions {*;}
+-keep interface org.bidon.ironsource.ISDecorator$Initializer {*;}
+-keep interface org.bidon.ironsource.ISDecorator$Interstitial {*;}
+-keep interface org.bidon.ironsource.ISDecorator$Rewarded {*;}
+-keep class org.bidon.ironsource.IronSourceDecorator {*;}
+-keep class org.bidon.ironsource.IronSourceAdapter {*;}
+-keep class org.bidon.ironsource.IronSourceParameters {*;}
 
--keep interface com.appodealstack.ironsource.rewarded.IronSourceRewardedListener {*;}
--keep interface com.appodealstack.ironsource.rewarded.IronSourceLevelPlayRewardedListener {*;}
--keep interface com.appodealstack.ironsource.interstitial.IronSourceInterstitialListener {*;}
--keep interface com.appodealstack.ironsource.interstitial.IronSourceLevelPlayInterstitialListener {*;}
+-keep interface org.bidon.ironsource.rewarded.IronSourceRewardedListener {*;}
+-keep interface org.bidon.ironsource.rewarded.IronSourceLevelPlayRewardedListener {*;}
+-keep interface org.bidon.ironsource.interstitial.IronSourceInterstitialListener {*;}
+-keep interface org.bidon.ironsource.interstitial.IronSourceLevelPlayInterstitialListener {*;}
 
--keep interface com.appodealstack.ironsource.banner.IronSourceBannerListener.** {*;}
--keep interface com.appodealstack.ironsource.banner.IronSourceLevelPlayBannerListener {
+-keep interface org.bidon.ironsource.banner.IronSourceBannerListener.** {*;}
+-keep interface org.bidon.ironsource.banner.IronSourceLevelPlayBannerListener {
     **[] $VALUES;
     public *;
 }

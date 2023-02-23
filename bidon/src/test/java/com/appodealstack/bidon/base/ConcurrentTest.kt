@@ -1,9 +1,9 @@
-package com.appodealstack.bidon.base
+package org.bidon.sdk.base
 
-import com.appodealstack.bidon.utils.defaultDispatcherOverridden
-import com.appodealstack.bidon.utils.ioDispatcherOverridden
-import com.appodealstack.bidon.utils.mainDispatcherOverridden
-import com.appodealstack.bidon.utils.singleDispatcherOverridden
+import org.bidon.sdk.utils.defaultDispatcherOverridden
+import org.bidon.sdk.utils.ioDispatcherOverridden
+import org.bidon.sdk.utils.mainDispatcherOverridden
+import org.bidon.sdk.utils.singleDispatcherOverridden
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.test.resetMain

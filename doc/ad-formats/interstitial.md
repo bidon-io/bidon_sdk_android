@@ -35,15 +35,17 @@ interstitial.setInterstitialListener(object : InterstitialListener {
     override fun onAdExpired(ad: Ad) {
     }
 
-    override fun onRevenuePaid(ad: Ad) {
-        // ad.price - ad revenue from mediation
+    override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
+        // adValue.revenue - ad revenue from mediation
     }
 })
-interstitial.load(activity = this, minPrice = otherMediationEcpm) // or use DefaultMinPrice
+interstitial.loadAd(activity = this, pricefloor = otherMediationEcpm) // or use DefaultMinPrice
 ```
 
 ## Displaying interstitial ad
 
 ```kotlin
-interstitial.show(activity = this)
+if (interstitial.isReady()) {
+    interstitial.showAd(activity = this)
+}
 ```

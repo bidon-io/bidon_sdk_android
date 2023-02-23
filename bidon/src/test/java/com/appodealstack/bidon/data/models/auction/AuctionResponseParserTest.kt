@@ -1,9 +1,9 @@
-package com.appodealstack.bidon.data.models.auction
+package org.bidon.sdk.data.models.auction
 
-import com.appodealstack.bidon.auction.models.AuctionResponse
-import com.appodealstack.bidon.auction.models.LineItem
-import com.appodealstack.bidon.auction.models.Round
-import com.appodealstack.bidon.utils.json.JsonParsers
+import org.bidon.sdk.auction.models.AuctionResponse
+import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.Round
+import org.bidon.sdk.utils.json.JsonParsers
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
@@ -41,17 +41,17 @@ internal class AuctionResponseParserTest {
         lineItems = listOf(
             LineItem(
                 demandId = "admob",
-                priceFloor = 0.25,
+                pricefloor = 0.25,
                 adUnitId = "AAAA2"
             ),
             LineItem(
                 demandId = "bidmachine",
-                priceFloor = 1.2235,
+                pricefloor = 1.2235,
                 adUnitId = "AAAA1"
             ),
         ),
         fillTimeout = 10000,
-        minPrice = 0.01
+        pricefloor = 0.01
     )
 
     private val responseJsonStr = """
@@ -87,7 +87,7 @@ internal class AuctionResponseParserTest {
           ],
           "token": "asdsad",
           "fill_timeout": 10000,
-          "min_price": 0.01,
+          "pricefloor": 0.01,
           "auction_id":"49975154-b82a-444b-a7f0-30bd749e7fce",
           "auction_configuration_id":10
         }

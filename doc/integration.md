@@ -26,11 +26,12 @@ secondly add the following lines to your `build.gradle` (:app):
 ``` ruby
 dependencies {
     # BidOn SDK Library
-    implementation 'io.bidon:bidon-sdk:0.1.0-Beta'
+    implementation 'org.bidon:bidon-sdk:0.1.0-Beta'
 
     # Demand Sources (AdNetworks)
-    implementation 'io.bidon:bidmachine-adapter:0.1.0.1-Beta'
-    implementation 'io.bidon:admob-adapter:0.1.0.1-Beta'
+    implementation 'org.bidon:bidmachine-adapter:0.1.0.1-Beta'
+    implementation 'org.bidon:admob-adapter:0.1.0.1-Beta'
+    implementation 'org.bidon:applovin-adapter:0.1.0.1-Beta'
     
     ... 
 }
@@ -45,13 +46,13 @@ Receive your `APP_KEY` in the dashboard app settings. Init Bidon SDK in your Mai
 
 ```kotlin
 BidOn
-    .setDefaultAdapters()
-    // .setAdapters("com.example.YourOwnAdapterClass") // for registering your custom Adapter (AdNetwork) by class name
-    // .setAdapters(YourOwnAdapter()) // for registering your custom Adapter (AdNetwork) by instance. Instance should be initialized and ready to work
+    .registerDefaultAdapters()
+    // .registerAdapters("com.example.YourOwnAdapterClass") // for registering your custom Adapter (AdNetwork) by class name
+    // .registerAdapters(YourOwnAdapter()) // for registering your custom Adapter (AdNetwork) by instance. Instance should be initialized and ready to work
     .setInitializationCallback {
         //  BidOn is initialized and ready to work
     }
-    .init(
+    .initialize(
         activity = this@MainActivity,
         appKey = "APP_KEY",
     )

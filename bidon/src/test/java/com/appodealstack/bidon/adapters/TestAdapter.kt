@@ -1,10 +1,10 @@
-package com.appodealstack.bidon.adapters
+package org.bidon.sdk.adapters
 
 import android.app.Activity
-import com.appodealstack.bidon.adapter.*
-import com.appodealstack.bidon.ads.DemandAd
-import com.appodealstack.bidon.ads.DemandId
-import com.appodealstack.bidon.config.models.AdapterInfo
+import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdapterInfo
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 
 internal object TestAdapterParameters : AdapterParameters
 

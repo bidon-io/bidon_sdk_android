@@ -1,9 +1,9 @@
-package com.appodealstack.bidon.data.models.stats
+package org.bidon.sdk.data.models.stats
 
-import com.appodealstack.bidon.stats.models.Demand
-import com.appodealstack.bidon.stats.models.Round
-import com.appodealstack.bidon.stats.models.StatsRequestBody
-import com.appodealstack.bidon.utils.json.JsonParsers
+import org.bidon.sdk.stats.models.Demand
+import org.bidon.sdk.stats.models.Round
+import org.bidon.sdk.stats.models.StatsRequestBody
+import org.bidon.sdk.utils.json.JsonParsers
 import com.google.common.truth.Truth.assertThat
 import org.json.JSONObject
 import org.junit.Test

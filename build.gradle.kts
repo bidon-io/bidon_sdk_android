@@ -14,6 +14,7 @@ buildscript {
         classpath(Dependencies.Android.gradlePlugin)
         classpath(Dependencies.Kotlin.gradlePlugin)
         classpath(Dependencies.Google.Services)
+        classpath(Dependencies.Google.Secrets.gradlePlugin)
     }
 }
 

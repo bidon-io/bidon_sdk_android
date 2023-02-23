@@ -1,15 +1,14 @@
-package com.appodealstack.bidon.adapters
+package org.bidon.sdk.adapters
 
 import android.app.Activity
-import com.appodealstack.bidon.adapter.AdAuctionParams
-import com.appodealstack.bidon.adapter.AdSource
-import com.appodealstack.bidon.adapter.AdState
-import com.appodealstack.bidon.ads.*
-import com.appodealstack.bidon.auction.AuctionResult
-import com.appodealstack.bidon.auction.models.LineItem
-import com.appodealstack.bidon.auctions.impl.PlacementId
-import com.appodealstack.bidon.utils.ext.asFailure
-import com.appodealstack.bidon.utils.ext.asSuccess
+import org.bidon.sdk.adapter.*
+import org.bidon.sdk.ads.*
+import org.bidon.sdk.auction.AuctionResult
+import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auctions.impl.PlacementId
+import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.utils.ext.asFailure
+import org.bidon.sdk.utils.ext.asSuccess
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 
@@ -36,18 +35,21 @@ internal class TestAdapterInterstitialImpl(
 
     override val ad: Ad
         get() = Ad(
-            demandId = demandId,
             demandAd = demandAd,
-            price = 1.5,
+            eCPM = 1.5,
             roundId = roundId,
-            monetizationNetwork = "monetizationNetwork-Appodeal",
+            networkName = "monetizationNetwork-Appodeal",
             dsp = "DSP-bidmachine",
             sourceAd = this,
             currencyCode = "USD",
-            auctionId = "auctionId-12312"
+            auctionId = "auctionId-12312",
+            adUnitId = "adUnitId_123"
         )
 
-    override val adState = MutableSharedFlow<AdState>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+
+    override val isAdReadyToShow: Boolean
+        get() = true
 
     override suspend fun bid(adParams: TestAdapterInterstitialParameters): AuctionResult {
         this.adParams = adParams
@@ -88,7 +90,7 @@ internal class TestAdapterInterstitialImpl(
 
     override fun getAuctionParams(
         activity: Activity,
-        priceFloor: Double,
+        pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit

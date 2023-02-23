@@ -11,12 +11,13 @@ project.extra.apply {
 }
 
 android {
+    namespace = "org.bidon.applovin"
     defaultConfig {
         ADAPTER_VERSION = Versions.Adapters.Applovin
     }
 }
 
 dependencies {
-    implementation(project(":bidon"))
-    implementation("com.applovin:applovin-sdk:11.4.4")
+    compileOnly(project(":bidon"))
+    implementation("com.applovin:applovin-sdk:11.6.1")
 }

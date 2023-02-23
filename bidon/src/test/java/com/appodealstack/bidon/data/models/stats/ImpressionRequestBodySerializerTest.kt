@@ -1,9 +1,9 @@
-package com.appodealstack.bidon.data.models.stats
+package org.bidon.sdk.data.models.stats
 
-import com.appodealstack.bidon.auction.models.BannerRequestBody
-import com.appodealstack.bidon.auction.models.InterstitialRequestBody
-import com.appodealstack.bidon.stats.models.ImpressionRequestBody
-import com.appodealstack.bidon.utils.json.JsonParsers
+import org.bidon.sdk.auction.models.BannerRequestBody
+import org.bidon.sdk.auction.models.InterstitialRequestBody
+import org.bidon.sdk.stats.models.ImpressionRequestBody
+import org.bidon.sdk.utils.json.JsonParsers
 import com.google.common.truth.Truth.assertThat
 import org.json.JSONObject
 import org.junit.Test

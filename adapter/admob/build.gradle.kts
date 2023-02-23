@@ -11,12 +11,13 @@ project.extra.apply {
 }
 
 android {
+    namespace = "org.bidon.admob"
     defaultConfig {
         ADAPTER_VERSION = Versions.Adapters.Admob
     }
 }
 
 dependencies {
-    implementation(project(":bidon"))
+    compileOnly(project(":bidon"))
     implementation(Dependencies.Google.PlayServicesAds)
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.appodeal.mads">
+    package="org.bidon.demoapp">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
@@ -25,18 +25,8 @@
         <activity android:name=".BannerViewActivity" />
 
         <meta-data
-            android:name="applovin.sdk.key"
-            android:value="8M_ro4EHQZexs13KI8fEI0cw7s57D11LN1AA5PRW-4Sq6W9OepdypFtx5z2J-4fM5rWBEziD2918fBXJ-AFoP7" />
-
-<!--        admob for com.appodealstack.demo -->
-<!--        <meta-data-->
-<!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
-<!--            android:value="ca-app-pub-9630071911882835~1859982518" />-->
-
-        <!--        old unknown info -->
-        <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="${MOBILE_ADS_APPLICATION_ID}" />
     </application>
 
 </manifest>
