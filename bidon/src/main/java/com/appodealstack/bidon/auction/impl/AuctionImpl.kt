@@ -39,7 +39,7 @@ internal class AuctionImpl(
     private val getAuctionRequest: GetAuctionRequestUseCase,
     private val statsRequest: StatsRequestUseCase,
 ) : Auction {
-    override val state = MutableStateFlow(AuctionState.Initialized)
+    private val state = MutableStateFlow(AuctionState.Initialized)
     private val auctionResults = MutableStateFlow(listOf<AuctionResult>())
     private val statsRound = mutableListOf<RoundStat>()
     private val statsAuctionResults = mutableListOf<AuctionResult>()

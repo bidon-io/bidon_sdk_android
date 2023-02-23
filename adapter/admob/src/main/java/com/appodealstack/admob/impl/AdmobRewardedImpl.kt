@@ -57,7 +57,7 @@ internal class AdmobRewardedImpl(
     private val requestListener by lazy {
         object : RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                logError(Tag, "Error while loading ad: $loadAdError. $this", loadAdError.asBidonError())
+                logError(Tag, "Error while loading ad. LoadAdError=$loadAdError.\n$this", loadAdError.asBidonError())
                 markBidFinished(
                     ecpm = null,
                     roundStatus = loadAdError.asBidonError().asRoundStatus(),
@@ -66,7 +66,7 @@ internal class AdmobRewardedImpl(
             }
 
             override fun onAdLoaded(rewardedAd: RewardedAd) {
-                logInfo(Tag, "onAdLoaded: $this")
+                logInfo(Tag, "onAdLoaded. RewardedAd=$rewardedAd, $this")
                 this@AdmobRewardedImpl.rewardedAd = rewardedAd
                 requiredRewardedAd.onPaidEventListener = paidListener
                 requiredRewardedAd.fullScreenContentCallback = rewardedListener
