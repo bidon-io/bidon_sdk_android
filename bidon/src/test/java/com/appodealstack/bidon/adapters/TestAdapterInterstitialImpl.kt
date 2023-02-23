@@ -1,14 +1,14 @@
-package com.appodealstack.bidon.adapters
+package org.bidon.sdk.adapters
 
 import android.app.Activity
-import com.appodealstack.bidon.adapter.*
-import com.appodealstack.bidon.ads.*
-import com.appodealstack.bidon.auction.AuctionResult
-import com.appodealstack.bidon.auction.models.LineItem
-import com.appodealstack.bidon.auctions.impl.PlacementId
-import com.appodealstack.bidon.config.BidonError
-import com.appodealstack.bidon.utils.ext.asFailure
-import com.appodealstack.bidon.utils.ext.asSuccess
+import org.bidon.sdk.adapter.*
+import org.bidon.sdk.ads.*
+import org.bidon.sdk.auction.AuctionResult
+import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auctions.impl.PlacementId
+import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.utils.ext.asFailure
+import org.bidon.sdk.utils.ext.asSuccess
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 

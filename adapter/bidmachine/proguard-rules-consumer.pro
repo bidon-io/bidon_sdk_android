@@ -1,3 +1,3 @@
--keeppackagenames com.appodealstack.**
+-keeppackagenames org.bidon.**
 
--keep class com.appodealstack.bidmachine.BidMachineAdapter { *; }
+-keep class org.bidon.bidmachine.BidMachineAdapter { *; }

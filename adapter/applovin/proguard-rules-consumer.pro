@@ -1,3 +1,3 @@
--keeppackagenames com.appodealstack.**
+-keeppackagenames org.bidon.**
 
--keep class com.appodealstack.applovin.ApplovinAdapter { *; }
+-keep class org.bidon.applovin.ApplovinAdapter { *; }

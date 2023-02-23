@@ -11,7 +11,7 @@ project.extra.apply {
 }
 
 android {
-    namespace = "com.appodealstack.applovin"
+    namespace = "org.bidon.applovin"
     defaultConfig {
         ADAPTER_VERSION = Versions.Adapters.Applovin
     }

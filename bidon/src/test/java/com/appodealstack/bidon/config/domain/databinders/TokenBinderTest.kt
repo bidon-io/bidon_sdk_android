@@ -1,13 +1,13 @@
-package com.appodealstack.bidon.config.domain.databinders
+package org.bidon.sdk.config.domain.databinders
 
 import android.util.Log
-import com.appodealstack.bidon.base.ConcurrentTest
-import com.appodealstack.bidon.config.models.Token
-import com.appodealstack.bidon.databinders.token.TokenBinder
-import com.appodealstack.bidon.databinders.token.TokenDataSource
-import com.appodealstack.bidon.logs.logging.impl.logError
-import com.appodealstack.bidon.logs.logging.impl.logInfo
-import com.appodealstack.bidon.utils.json.jsonObject
+import org.bidon.sdk.base.ConcurrentTest
+import org.bidon.sdk.config.models.Token
+import org.bidon.sdk.databinders.token.TokenBinder
+import org.bidon.sdk.databinders.token.TokenDataSource
+import org.bidon.sdk.logs.logging.impl.logError
+import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.utils.json.jsonObject
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
