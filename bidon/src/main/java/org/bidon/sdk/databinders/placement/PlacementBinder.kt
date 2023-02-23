@@ -4,7 +4,7 @@ import org.bidon.sdk.config.models.Capping
 import org.bidon.sdk.config.models.Placement
 import org.bidon.sdk.config.models.Reward
 import org.bidon.sdk.databinders.DataBinder
-import org.bidon.sdk.utils.json.JsonParsers
+import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONObject
 
 /**
@@ -15,7 +15,7 @@ internal class PlacementBinder(
 ) : DataBinder<JSONObject> {
     override val fieldName: String = "placement"
 
-    override suspend fun getJsonObject(): JSONObject = JsonParsers.serialize(createPlacement())
+    override suspend fun getJsonObject(): JSONObject = createPlacement().serialize()
 
     private fun createPlacement(): Placement {
         val type = dataSource.getRewardType()

@@ -5,6 +5,7 @@ import org.bidon.sdk.stats.models.Round
 import org.bidon.sdk.stats.models.StatsRequestBody
 import org.bidon.sdk.utils.json.JsonParsers
 import com.google.common.truth.Truth.assertThat
+import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONObject
 import org.junit.Test
 
@@ -55,49 +56,48 @@ class StatsRequestBodySerializerTest {
 
     @Test
     fun `it should serialize stat request`() {
-        val json = testee.serialize(
-            StatsRequestBody(
-                auctionId = "id123",
-                auctionConfigurationId = 4,
-                rounds = listOf(
-                    Round(
-                        id = "id43",
-                        demands = listOf(
-                            Demand(
-                                demandId = "d345",
-                                adUnitId = "asd223",
-                                ecpm = 1.2,
-                                bidFinishTs = 1,
-                                bidStartTs = 2,
-                                fillFinishTs = 3,
-                                fillStartTs = 4,
-                                roundStatusCode = "code"
-                            ),
-                            Demand(
-                                demandId = "d6",
-                                roundStatusCode = "code2",
-                                adUnitId = null,
-                                ecpm = null,
-                                bidFinishTs = null,
-                                bidStartTs = null,
-                                fillFinishTs = null,
-                                fillStartTs = null,
-                            )
+        val json = StatsRequestBody(
+            auctionId = "id123",
+            auctionConfigurationId = 4,
+            rounds = listOf(
+                Round(
+                    id = "id43",
+                    demands = listOf(
+                        Demand(
+                            demandId = "d345",
+                            adUnitId = "asd223",
+                            ecpm = 1.2,
+                            bidFinishTs = 1,
+                            bidStartTs = 2,
+                            fillFinishTs = 3,
+                            fillStartTs = 4,
+                            roundStatusCode = "code"
                         ),
-                        pricefloor = 34.2,
-                        winnerDemandId = "asd",
-                        winnerEcpm = 234.1
+                        Demand(
+                            demandId = "d6",
+                            roundStatusCode = "code2",
+                            adUnitId = null,
+                            ecpm = null,
+                            bidFinishTs = null,
+                            bidStartTs = null,
+                            fillFinishTs = null,
+                            fillStartTs = null,
+                        )
                     ),
-                    Round(
-                        id = "id43",
-                        demands = listOf(),
-                        pricefloor = 34.2,
-                        winnerDemandId = null,
-                        winnerEcpm = null
-                    ),
-                )
+                    pricefloor = 34.2,
+                    winnerDemandId = "asd",
+                    winnerEcpm = 234.1
+                ),
+                Round(
+                    id = "id43",
+                    demands = listOf(),
+                    pricefloor = 34.2,
+                    winnerDemandId = null,
+                    winnerEcpm = null
+                ),
             )
-        )
+        ).serialize()
+
         assertThat(json.toString()).isEqualTo(JSONObject(statRequestJsonStr).toString())
     }
 }

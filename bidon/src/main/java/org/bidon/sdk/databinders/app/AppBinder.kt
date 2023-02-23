@@ -3,6 +3,7 @@ package org.bidon.sdk.databinders.app
 import org.bidon.sdk.config.models.App
 import org.bidon.sdk.databinders.DataBinder
 import org.bidon.sdk.utils.json.JsonParsers
+import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONObject
 
 /**
@@ -13,7 +14,7 @@ internal class AppBinder(
 ) : DataBinder<JSONObject> {
     override val fieldName: String = "app"
 
-    override suspend fun getJsonObject(): JSONObject = JsonParsers.serialize(createApp())
+    override suspend fun getJsonObject(): JSONObject = createApp().serialize()
 
     private fun createApp(): App {
         return App(

@@ -1,25 +1,16 @@
 package org.bidon.sdk.config.models
 
-import org.bidon.sdk.utils.json.JsonParsers
-import org.bidon.sdk.utils.json.JsonSerializer
-import org.bidon.sdk.utils.json.jsonObject
-import org.json.JSONObject
+import org.bidon.sdk.utils.serializer.JsonName
+import org.bidon.sdk.utils.serializer.Serializable
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-data class Placement(
+internal data class Placement(
+    @field:JsonName("name")
     val name: String,
+    @field:JsonName("reward")
     val reward: Reward?,
+    @field:JsonName("capping")
     val capping: Capping?,
-)
-
-internal class PlacementSerializer : JsonSerializer<Placement> {
-    override fun serialize(data: Placement): JSONObject {
-        return jsonObject {
-            "name" hasValue data.name
-            "reward" hasValue JsonParsers.serializeOrNull(data.reward)
-            "capping" hasValue JsonParsers.serializeOrNull(data.capping)
-        }
-    }
-}
+): Serializable

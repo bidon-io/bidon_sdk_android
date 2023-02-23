@@ -5,6 +5,7 @@ import org.bidon.sdk.auction.models.InterstitialRequestBody
 import org.bidon.sdk.stats.models.ImpressionRequestBody
 import org.bidon.sdk.utils.json.JsonParsers
 import com.google.common.truth.Truth.assertThat
+import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONObject
 import org.junit.Test
 
@@ -33,19 +34,18 @@ class ImpressionRequestBodySerializerTest {
 
     @Test
     fun `it should serialize impression request`() {
-        val json = testee.serialize(
-            ImpressionRequestBody(
-                auctionId = "id123",
-                auctionConfigurationId = 4,
-                impressionId = "impr123",
-                ecpm = 2.33,
-                demandId = "demandId123",
-                rewarded = null,
-                interstitial = InterstitialRequestBody(),
-                banner = BannerRequestBody(formatCode = "1"),
-                adUnitId = "adUnitId43"
-            )
-        )
+        val json = ImpressionRequestBody(
+            auctionId = "id123",
+            auctionConfigurationId = 4,
+            impressionId = "impr123",
+            ecpm = 2.33,
+            demandId = "demandId123",
+            rewarded = null,
+            interstitial = InterstitialRequestBody(),
+            banner = BannerRequestBody(formatCode = "1"),
+            adUnitId = "adUnitId43"
+        ).serialize()
+
         assertThat(json.toString()).isEqualTo(JSONObject(testJsonStr).toString())
     }
 }

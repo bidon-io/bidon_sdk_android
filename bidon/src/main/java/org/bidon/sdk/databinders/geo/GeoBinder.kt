@@ -3,7 +3,7 @@ package org.bidon.sdk.databinders.geo
 import org.bidon.sdk.config.models.Geo
 import org.bidon.sdk.databinders.DataBinder
 import org.bidon.sdk.databinders.location.LocationDataSource
-import org.bidon.sdk.utils.json.JsonParsers
+import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONObject
 
 /**
@@ -14,7 +14,7 @@ internal class GeoBinder(
 ) : DataBinder<JSONObject> {
     override val fieldName: String = "geo"
 
-    override suspend fun getJsonObject(): JSONObject? = createGeo()?.let { JsonParsers.serialize(it) }
+    override suspend fun getJsonObject(): JSONObject? = createGeo()?.serialize()
 
     private fun createGeo(): Geo? {
         return if (dataSource.isLocationAvailable) {

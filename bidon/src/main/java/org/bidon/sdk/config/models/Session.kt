@@ -1,53 +1,40 @@
 package org.bidon.sdk.config.models
 
-import org.bidon.sdk.utils.json.JsonSerializer
-import org.bidon.sdk.utils.json.jsonArray
-import org.bidon.sdk.utils.json.jsonObject
-import org.json.JSONObject
+import org.bidon.sdk.utils.serializer.JsonName
+import org.bidon.sdk.utils.serializer.Serializable
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 data class Session(
+    @field:JsonName("id")
     var id: String,
+    @field:JsonName("launch_ts")
     var launchTs: Long,
+    @field:JsonName("launch_monotonic_ts")
     var launchMonotonicTs: Long,
+    @field:JsonName("start_ts")
     var startTs: Long,
+    @field:JsonName("start_monotonic_ts")
     var monotonicStartTs: Long,
+    @field:JsonName("ts")
     var ts: Long,
+    @field:JsonName("monotonic_ts")
     var monotonicTs: Long,
+    @field:JsonName("memory_warnings_ts")
     var memoryWarningsTs: List<Long>,
+    @field:JsonName("memory_warnings_monotonic_ts")
     var memoryWarningsMonotonicTs: List<Long>,
+    @field:JsonName("ram_used")
     var ramUsed: Long,
+    @field:JsonName("ram_size")
     var ramSize: Long,
+    @field:JsonName("storage_free")
     var storageFree: Long,
+    @field:JsonName("storage_used")
     var storageUsed: Long,
+    @field:JsonName("battery")
     var battery: Float,
+    @field:JsonName("cpu_usage")
     var cpuUsage: Float
-)
-
-internal class SessionSerializer : JsonSerializer<Session> {
-    override fun serialize(data: Session): JSONObject {
-        return jsonObject {
-            "id" hasValue data.id
-            "launch_ts" hasValue data.launchTs
-            "launch_monotonic_ts" hasValue data.launchMonotonicTs
-            "start_ts" hasValue data.startTs
-            "start_monotonic_ts" hasValue data.monotonicStartTs
-            "ts" hasValue data.ts
-            "monotonic_ts" hasValue data.monotonicTs
-            "memory_warnings_ts" hasValue jsonArray {
-                putValues(data.memoryWarningsTs)
-            }
-            "memory_warnings_monotonic_ts" hasValue jsonArray {
-                putValues(data.memoryWarningsMonotonicTs)
-            }
-            "ram_used" hasValue data.ramUsed
-            "ram_size" hasValue data.ramSize
-            "storage_free" hasValue data.storageFree
-            "storage_used" hasValue data.storageUsed
-            "battery" hasValue data.battery
-            "cpu_usage" hasValue data.cpuUsage
-        }
-    }
-}
+): Serializable

@@ -56,7 +56,6 @@ internal class GetAuctionRequestUseCaseImpl(
                 binders = binders,
                 dataKeyName = "ad_object",
                 data = adObject,
-                dataSerializer = JsonParsers.getSerializer()
             )
             logInfo(Tag, "Request body: $requestBody")
             get<JsonHttpRequest>().invoke(

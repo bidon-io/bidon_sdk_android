@@ -1,34 +1,25 @@
 package org.bidon.sdk.config.models
 
-import org.bidon.sdk.utils.json.JsonParsers
-import org.bidon.sdk.utils.json.JsonSerializer
-import org.bidon.sdk.utils.json.jsonObject
-import org.json.JSONObject
+import org.bidon.sdk.utils.serializer.JsonName
+import org.bidon.sdk.utils.serializer.Serializable
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-data class User(
+internal data class User(
+    @field:JsonName("idfa")
     var platformAdvertisingId: String, // idfa = iOS, AD_ID - Android.
+    @field:JsonName("tracking_authorization_status")
     var trackingAuthorizationStatus: String,
+    @field:JsonName("idg")
     var applicationId: String?, // ID that app generates on the very first launch and send across session.
+    @field:JsonName("consent")
     var consent: Consent? = null, // TODO do not use it until ConsentManager is integrated
+    @field:JsonName("coppa")
     var coppa: Boolean
-)
+) : Serializable
 
-internal class UserSerializer : JsonSerializer<User> {
-    override fun serialize(data: User): JSONObject {
-        return jsonObject {
-            "idfa" hasValue data.platformAdvertisingId
-            "tracking_authorization_status" hasValue data.trackingAuthorizationStatus
-            "idg" hasValue data.applicationId
-            "consent" hasValue JsonParsers.serializeOrNull(data.consent)
-            "coppa" hasValue data.coppa
-        }
-    }
-}
-
-data class Consent(
+internal data class Consent(
     var status: String,
     var acceptedVendors: List<AcceptedVendors>?,
     var vendorListVersion: Int?,
@@ -38,7 +29,7 @@ data class Consent(
     var iab: Iab
 )
 
-data class Iab(
+internal data class Iab(
     var IABUSPrivacyString: String?,
     var IABConsentConsentString: String?,
     var IABConsentParsedPurposeConsents: String?,
@@ -46,7 +37,7 @@ data class Iab(
     var IABConsentSubjectToGDPR: String?
 )
 
-data class AcceptedVendors(
+internal data class AcceptedVendors(
     var apdId: Int,
     var status: String
 )

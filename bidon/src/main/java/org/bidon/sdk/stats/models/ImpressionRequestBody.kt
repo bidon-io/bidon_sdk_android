@@ -3,38 +3,29 @@ package org.bidon.sdk.stats.models
 import org.bidon.sdk.auction.models.BannerRequestBody
 import org.bidon.sdk.auction.models.InterstitialRequestBody
 import org.bidon.sdk.auction.models.RewardedRequestBody
-import org.bidon.sdk.utils.json.JsonParsers
-import org.bidon.sdk.utils.json.JsonSerializer
-import org.bidon.sdk.utils.json.jsonObject
-import org.json.JSONObject
+import org.bidon.sdk.utils.serializer.JsonName
+import org.bidon.sdk.utils.serializer.Serializable
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 internal data class ImpressionRequestBody(
+    @field:JsonName("auction_id")
     val auctionId: String,
+    @field:JsonName("auction_configuration_id")
     val auctionConfigurationId: Int,
+    @field:JsonName("imp_id")
     val impressionId: String,
+    @field:JsonName("demand_id")
     val demandId: String,
+    @field:JsonName("ad_unit_id")
     val adUnitId: String?,
+    @field:JsonName("ecpm")
     val ecpm: Double,
+    @field:JsonName("banner")
     val banner: BannerRequestBody?,
+    @field:JsonName("interstitial")
     val interstitial: InterstitialRequestBody?,
+    @field:JsonName("rewarded")
     val rewarded: RewardedRequestBody?,
-)
-
-internal class ImpressionRequestBodySerializer : JsonSerializer<ImpressionRequestBody> {
-    override fun serialize(data: ImpressionRequestBody): JSONObject {
-        return jsonObject {
-            "auction_id" hasValue data.auctionId
-            "auction_configuration_id" hasValue data.auctionConfigurationId
-            "imp_id" hasValue data.impressionId
-            "demand_id" hasValue data.demandId
-            "ad_unit_id" hasValue data.adUnitId
-            "ecpm" hasValue data.ecpm
-            "banner" hasValue JsonParsers.serializeOrNull(data.banner)
-            "interstitial" hasValue JsonParsers.serializeOrNull(data.interstitial)
-            "rewarded" hasValue JsonParsers.serializeOrNull(data.rewarded)
-        }
-    }
-}
+): Serializable

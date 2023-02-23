@@ -1,19 +1,11 @@
 package org.bidon.sdk.config.models
 
-import org.bidon.sdk.utils.json.JsonSerializer
-import org.bidon.sdk.utils.json.jsonObject
-import org.json.JSONObject
+import org.bidon.sdk.utils.serializer.JsonName
+import org.bidon.sdk.utils.serializer.Serializable
 
 data class Reward(
+    @field:JsonName("title")
     val currency: String,
+    @field:JsonName("value")
     val amount: Int,
-)
-
-internal class RewardSerializer : JsonSerializer<Reward> {
-    override fun serialize(data: Reward): JSONObject {
-        return jsonObject {
-            "title" hasValue data.currency
-            "value" hasValue data.amount
-        }
-    }
-}
+): Serializable

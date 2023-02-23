@@ -1,6 +1,10 @@
 package com.appodealstack.bidon.utils.serializer
 
 import com.google.common.truth.Truth.assertThat
+import org.bidon.sdk.utils.serializer.BidonParser
+import org.bidon.sdk.utils.serializer.BidonSerializer
+import org.bidon.sdk.utils.serializer.JsonName
+import org.bidon.sdk.utils.serializer.Serializable
 import org.junit.Test
 
 /**
@@ -13,28 +17,28 @@ internal class BidonSerializerTest {
     }
 
     data class TestClass(
-        @field:JsonFieldName("title")
+        @field:JsonName("title")
         val title: String,
-        @field:JsonFieldName("d")
+        @field:JsonName("d")
         val doubleTrouble: Double,
-        @field:JsonFieldName("i2")
+        @field:JsonName("i2")
         val intFields: Int,
-        @field:JsonFieldName("boo_lean")
+        @field:JsonName("boo_lean")
         val boo: Boolean,
-        @field:JsonFieldName("list_array")
+        @field:JsonName("list_array")
         val list: List<String>,
-        @field:JsonFieldName("list_array2")
+        @field:JsonName("list_array2")
         val listInners: List<InnerTestClass>,
 //        @field:JsonFieldName("inner_test")
 //        val inner: InnerTestClass,
-        @field:JsonFieldName("flo_at")
+        @field:JsonName("flo_at")
         val ignoreMe: Float
     ) : Serializable {
 
         data class InnerTestClass(
-            @field:JsonFieldName("msg")
+            @field:JsonName("msg")
             val message: String,
-            @field:JsonFieldName("loop")
+            @field:JsonName("loop")
             val loop: Double,
         ) : Serializable
     }
@@ -43,7 +47,7 @@ internal class BidonSerializerTest {
     fun `it should parse`() {
         val srcJson =
             """{"flo_at":44.234,"d":1.234,"list_array":["abc","def"],"list_array2":[{"msg":"message2","loop":111.9},{"msg":"message3","loop":112.9}],"i2":28,"inner_test":{"msg":"message1","loop":999.9},"title":"str","boo_lean":true}"""
-        val result = testee.parse<TestClass>(srcJson)
+        val result = BidonParser.parse<TestClass>(srcJson)
         println(result)
         assertThat(result).isEqualTo(
             TestClass(
@@ -74,7 +78,7 @@ internal class BidonSerializerTest {
 
     @Test
     fun `it should serialize`() {
-        val result = testee.serialize(
+        val result = BidonSerializer.serialize(
             TestClass(
                 title = "str",
                 doubleTrouble = 1.234,
