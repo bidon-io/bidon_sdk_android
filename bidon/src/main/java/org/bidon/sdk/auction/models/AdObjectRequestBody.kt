@@ -1,10 +1,8 @@
 package org.bidon.sdk.auction.models
 
 import org.bidon.sdk.auction.models.AdObjectRequestBody.*
-import org.bidon.sdk.utils.json.JsonParsers
-import org.bidon.sdk.utils.json.JsonSerializer
-import org.bidon.sdk.utils.json.jsonObject
-import org.json.JSONObject
+import org.bidon.sdk.utils.serializer.JsonName
+import org.bidon.sdk.utils.serializer.Serializable
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -13,30 +11,24 @@ import org.json.JSONObject
  * [BannerRequestBody.formatCode] is a [BannerRequestBody.Format.code]
  */
 internal data class AdObjectRequestBody(
+    @field:JsonName("placement_id")
     val placementId: String,
+    @field:JsonName("orientation")
     val orientationCode: String,
+    @field:JsonName("auction_id")
     val auctionId: String,
+    @field:JsonName("pricefloor")
     val pricefloor: Double,
+    @field:JsonName("banner")
     val banner: BannerRequestBody?,
+    @field:JsonName("interstitial")
     val interstitial: InterstitialRequestBody?,
+    @field:JsonName("rewarded")
     val rewarded: RewardedRequestBody?,
-) {
+) : Serializable {
 
     enum class Orientation(val code: String) {
         Portrait("PORTRAIT"),
         Landscape("LANDSCAPE")
     }
-}
-
-internal class AdObjectRequestBodySerializer : JsonSerializer<AdObjectRequestBody> {
-    override fun serialize(data: AdObjectRequestBody): JSONObject =
-        jsonObject {
-            "placement_id" hasValue data.placementId
-            "orientation" hasValue data.orientationCode
-            "auction_id" hasValue data.auctionId
-            "pricefloor" hasValue data.pricefloor
-            "banner" hasValue JsonParsers.serializeOrNull(data.banner)
-            "interstitial" hasValue JsonParsers.serializeOrNull(data.interstitial)
-            "rewarded" hasValue JsonParsers.serializeOrNull(data.rewarded)
-        }
 }

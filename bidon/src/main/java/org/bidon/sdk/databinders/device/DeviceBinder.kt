@@ -2,7 +2,7 @@ package org.bidon.sdk.databinders.device
 
 import org.bidon.sdk.config.models.Device
 import org.bidon.sdk.databinders.DataBinder
-import org.bidon.sdk.utils.json.JsonParsers
+import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONObject
 
 /**
@@ -13,7 +13,7 @@ internal class DeviceBinder(
 ) : DataBinder<JSONObject> {
     override val fieldName: String = "device"
 
-    override suspend fun getJsonObject(): JSONObject = JsonParsers.serialize(createDevice())
+    override suspend fun getJsonObject(): JSONObject = createDevice().serialize()
 
     private fun createDevice(): Device {
         return Device(

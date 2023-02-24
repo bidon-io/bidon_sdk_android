@@ -1,16 +1,12 @@
 package org.bidon.sdk.utils.json
 
-import org.bidon.sdk.adapter.AdapterInfoSerializer
-import org.bidon.sdk.auction.models.*
-import org.bidon.sdk.config.models.*
-import org.bidon.sdk.stats.models.DemandSerializer
-import org.bidon.sdk.stats.models.ImpressionRequestBodySerializer
-import org.bidon.sdk.stats.models.RoundSerializer
-import org.bidon.sdk.stats.models.StatsRequestBodySerializer
+import org.bidon.sdk.auction.models.AuctionResponseParser
+import org.bidon.sdk.auction.models.LineItemParser
+import org.bidon.sdk.auction.models.RoundParser
+import org.bidon.sdk.config.models.ConfigResponseParser
 import org.bidon.sdk.utils.networking.BaseResponseErrorParser
 import org.bidon.sdk.utils.networking.BaseResponseParser
 import org.json.JSONArray
-import org.json.JSONObject
 import kotlin.reflect.KClass
 
 /**
@@ -20,49 +16,14 @@ import kotlin.reflect.KClass
 internal object JsonParsers {
 
     private val parsersFactories = mutableMapOf<KClass<*>, ParserFactory<*>>()
-    private val serializersFactories = mutableMapOf<KClass<*>, SerializerFactory<*>>()
 
     init {
-        addSerializer { AdObjectRequestBodySerializer() }
-        addSerializer { BannerRequestBodySerializer() }
-        addSerializer { InterstitialRequestBodySerializer() }
-        addSerializer { RewardedRequestBodySerializer() }
-        addSerializer { AdapterInfoSerializer() }
-        addSerializer { SessionSerializer() }
-        addSerializer { UserSerializer() }
-        addSerializer { GeoSerializer() }
-        addSerializer { PlacementSerializer() }
-        addSerializer { RewardSerializer() }
-        addSerializer { CappingSerializer() }
-        addSerializer { DeviceSerializer() }
-        addSerializer { ImpressionRequestBodySerializer() }
-        addSerializer { StatsRequestBodySerializer() }
-        addSerializer { RoundSerializer() }
-        addSerializer { DemandSerializer() }
-        addSerializer { AppSerializer() }
-
         addParser { BaseResponseParser() }
         addParser { BaseResponseErrorParser() }
         addParser { ConfigResponseParser() }
         addParser { AuctionResponseParser() }
         addParser { RoundParser() }
         addParser { LineItemParser() }
-    }
-
-    inline fun <reified T : Any> serializeOrNull(data: T?): JSONObject? {
-        return if (data == null) {
-            null
-        } else {
-            (serializersFactories[T::class] as SerializerFactory<T>).instance.serialize(data)
-        }
-    }
-
-    inline fun <reified T : Any> serialize(data: T): JSONObject {
-        return (serializersFactories[T::class] as SerializerFactory<T>).instance.serialize(data)
-    }
-
-    inline fun <reified T : Any> getSerializer(): JsonSerializer<T> {
-        return (serializersFactories[T::class] as SerializerFactory<T>).instance
     }
 
     inline fun <reified T : Any> parseOrNull(jsonString: String): T? {
@@ -81,11 +42,6 @@ internal object JsonParsers {
         }
     }
 
-    private inline fun <reified T : Any> addSerializer(noinline serializer: () -> JsonSerializer<T>): JsonParsers {
-        serializersFactories[T::class] = SerializerFactory(factory = serializer)
-        return this
-    }
-
     private inline fun <reified T : Any> addParser(noinline parser: () -> JsonParser<T>): JsonParsers {
         parsersFactories[T::class] = ParserFactory(factory = parser)
         return this
@@ -93,9 +49,5 @@ internal object JsonParsers {
 
     internal class ParserFactory<T>(private val factory: () -> JsonParser<T>) {
         val instance: JsonParser<T> get() = factory.invoke()
-    }
-
-    internal class SerializerFactory<T>(private val factory: () -> JsonSerializer<T>) {
-        val instance: JsonSerializer<T> get() = factory.invoke()
     }
 }

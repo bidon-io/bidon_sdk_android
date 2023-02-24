@@ -1,34 +1,26 @@
 package org.bidon.sdk.config.models
 
-import org.bidon.sdk.utils.json.JsonSerializer
-import org.bidon.sdk.utils.json.jsonObject
-import org.json.JSONObject
+import org.bidon.sdk.utils.serializer.JsonName
+import org.bidon.sdk.utils.serializer.Serializable
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 data class Geo(
+    @field:JsonName("lat")
     var lat: Double?,
+    @field:JsonName("lon")
     var lon: Double?,
+    @field:JsonName("accuracy")
     var accuracy: Float?,
+    @field:JsonName("lastfix")
     var lastfix: Long?,
+    @field:JsonName("country")
     var country: String?,
+    @field:JsonName("city")
     var city: String?,
+    @field:JsonName("zip")
     var zip: String?,
+    @field:JsonName("utcoffset")
     var utcOffset: Int
-)
-
-internal class GeoSerializer : JsonSerializer<Geo> {
-    override fun serialize(data: Geo): JSONObject {
-        return jsonObject {
-            "lat" hasValue data.lat
-            "lon" hasValue data.lon
-            "accuracy" hasValue data.accuracy
-            "lastfix" hasValue data.lastfix
-            "country" hasValue data.country
-            "city" hasValue data.city
-            "zip" hasValue data.zip
-            "utcoffset" hasValue data.utcOffset
-        }
-    }
-}
+) : Serializable

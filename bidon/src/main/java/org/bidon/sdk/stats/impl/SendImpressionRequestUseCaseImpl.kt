@@ -39,7 +39,6 @@ internal class SendImpressionRequestUseCaseImpl(
             binders = binders,
             dataKeyName = bodyKey,
             data = body,
-            dataSerializer = JsonParsers.getSerializer(),
         )
         logInfo(Tag, "Request body: $requestBody")
 

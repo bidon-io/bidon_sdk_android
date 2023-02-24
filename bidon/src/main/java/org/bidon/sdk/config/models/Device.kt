@@ -1,48 +1,40 @@
 package org.bidon.sdk.config.models
 
-import org.bidon.sdk.utils.json.JsonSerializer
-import org.bidon.sdk.utils.json.jsonObject
-import org.json.JSONObject
+import org.bidon.sdk.utils.serializer.JsonName
+import org.bidon.sdk.utils.serializer.Serializable
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-data class Device(
+internal data class Device(
+    @field:JsonName("ua")
     val userAgent: String?,
+    @field:JsonName("make")
     val manufacturer: String?,
+    @field:JsonName("model")
     val deviceModel: String?,
+    @field:JsonName("os")
     val os: String?,
+    @field:JsonName("osv")
     val osVersion: String?,
+    @field:JsonName("hwv")
     val hardwareVersion: String?,
+    @field:JsonName("h")
     val height: Int?,
+    @field:JsonName("w")
     val width: Int?,
+    @field:JsonName("ppi")
     val ppi: Int?,
+    @field:JsonName("pxratio")
     val pxRatio: Float?,
+    @field:JsonName("js")
     val javaScriptSupport: Int?,
+    @field:JsonName("language")
     val language: String?,
+    @field:JsonName("carrier")
     val carrier: String?,
+    @field:JsonName("mccmnc")
     val mccmnc: String?,
+    @field:JsonName("connection_type")
     val connectionType: String?,
-)
-
-internal class DeviceSerializer : JsonSerializer<Device> {
-    override fun serialize(data: Device): JSONObject {
-        return jsonObject {
-            "ua" hasValue data.userAgent
-            "make" hasValue data.manufacturer
-            "model" hasValue data.deviceModel
-            "os" hasValue data.os
-            "osv" hasValue data.osVersion
-            "hwv" hasValue data.hardwareVersion
-            "h" hasValue data.height
-            "w" hasValue data.width
-            "ppi" hasValue data.ppi
-            "pxratio" hasValue data.pxRatio
-            "js" hasValue data.javaScriptSupport
-            "language" hasValue data.language
-            "carrier" hasValue data.carrier
-            "mccmnc" hasValue data.mccmnc
-            "connection_type" hasValue data.connectionType
-        }
-    }
-}
+) : Serializable

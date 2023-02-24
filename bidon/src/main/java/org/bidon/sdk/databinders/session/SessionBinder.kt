@@ -2,7 +2,7 @@ package org.bidon.sdk.databinders.session
 
 import org.bidon.sdk.config.models.Session
 import org.bidon.sdk.databinders.DataBinder
-import org.bidon.sdk.utils.json.JsonParsers
+import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONObject
 
 /**
@@ -13,7 +13,7 @@ internal class SessionBinder(
 ) : DataBinder<JSONObject> {
     override val fieldName: String = "session"
 
-    override suspend fun getJsonObject(): JSONObject = JsonParsers.serialize(createSession())
+    override suspend fun getJsonObject(): JSONObject = createSession().serialize()
 
     private fun createSession(): Session {
         return Session(

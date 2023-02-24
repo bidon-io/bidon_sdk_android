@@ -3,8 +3,8 @@ package org.bidon.sdk.databinders.adapters
 import org.bidon.sdk.adapter.AdapterInfo
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.databinders.DataBinder
-import org.bidon.sdk.utils.json.JsonParsers
 import org.bidon.sdk.utils.json.jsonObject
+import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONObject
 
 /**
@@ -17,7 +17,7 @@ internal class AdaptersBinder(
 
     override suspend fun getJsonObject(): JSONObject = jsonObject {
         createDevice().forEach { (key, value) ->
-            key hasValue JsonParsers.serialize(value)
+            key hasValue value.serialize()
         }
     }
 

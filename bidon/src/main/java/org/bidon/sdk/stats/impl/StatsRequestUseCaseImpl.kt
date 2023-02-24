@@ -45,9 +45,8 @@ internal class StatsRequestUseCaseImpl(
                 binders = binders,
                 dataKeyName = "stats",
                 data = body,
-                dataSerializer = JsonParsers.getSerializer(),
             )
-            logInfo("", "$requestBody")
+            logInfo(Tag, "$requestBody")
             get<JsonHttpRequest>().invoke(
                 path = "$StatsRequestPath/${adType.code}",
                 body = requestBody,

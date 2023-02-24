@@ -7,8 +7,8 @@ import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.*
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
-import org.bidon.sdk.auctions.impl.PlacementId
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.config.models.auctions.impl.PlacementId
 import org.bidon.sdk.utils.ext.asFailure
 import org.bidon.sdk.utils.ext.asSuccess
 

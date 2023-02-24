@@ -1,4 +1,4 @@
-package org.bidon.sdk.data.models.auction
+package org.bidon.sdk.config.models.data.models.auction
 
 import com.google.common.truth.Truth.assertThat
 import org.bidon.sdk.auction.models.AuctionResponse

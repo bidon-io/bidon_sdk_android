@@ -2,7 +2,7 @@ package org.bidon.sdk.databinders.user
 
 import org.bidon.sdk.config.models.User
 import org.bidon.sdk.databinders.DataBinder
-import org.bidon.sdk.utils.json.JsonParsers
+import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONObject
 
 /**
@@ -13,7 +13,7 @@ internal class UserBinder(
 ) : DataBinder<JSONObject> {
     override val fieldName: String = "user"
 
-    override suspend fun getJsonObject(): JSONObject = JsonParsers.serialize(createUser())
+    override suspend fun getJsonObject(): JSONObject = createUser().serialize()
 
     private fun createUser(): User {
         return User(

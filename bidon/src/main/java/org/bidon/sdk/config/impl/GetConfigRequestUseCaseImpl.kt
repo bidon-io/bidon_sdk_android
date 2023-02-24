@@ -12,6 +12,7 @@ import org.bidon.sdk.utils.json.JsonParsers
 import org.bidon.sdk.utils.json.jsonObject
 import org.bidon.sdk.utils.networking.JsonHttpRequest
 import org.bidon.sdk.utils.networking.requests.CreateRequestBodyUseCase
+import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONObject
 
 /**
@@ -36,12 +37,11 @@ internal class GetConfigRequestUseCaseImpl(
                 binders = binders,
                 dataKeyName = null,
                 data = null,
-                dataSerializer = null,
             )
             val requestBody = jsonObject(putTo = bindersData) {
                 "adapters" hasValue jsonObject {
                     body.adapters.forEach { (adapterName, data) ->
-                        adapterName hasValue JsonParsers.serialize(data)
+                        adapterName hasValue data.serialize()
                     }
                 }
             }

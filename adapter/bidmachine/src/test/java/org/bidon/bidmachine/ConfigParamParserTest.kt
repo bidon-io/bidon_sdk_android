@@ -1,12 +1,10 @@
-package org.bidon.bidmachine.ext
+package org.bidon.bidmachine
 
 import com.google.common.truth.Truth.assertThat
-import org.bidon.bidmachine.BidMachineAdapter
-import org.bidon.bidmachine.BidMachineParameters
 import org.json.JSONObject
 import org.junit.Test
 
-class ParserTest {
+internal class ConfigParamParserTest {
 
     @Test
     fun `it should parse ConfigRequest to BidMachineParameters`() {
