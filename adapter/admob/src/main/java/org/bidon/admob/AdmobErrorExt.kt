@@ -1,9 +1,9 @@
 package org.bidon.admob
 
-import org.bidon.sdk.config.BidonError
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest.*
 import com.google.android.gms.ads.LoadAdError
+import org.bidon.sdk.config.BidonError
 
 internal fun LoadAdError.asBidonError(): BidonError = when (this.code) {
     ERROR_CODE_NO_FILL,

@@ -9,7 +9,7 @@ import org.bidon.sdk.utils.serializer.Serializable
 data class BannerRequestBody(
     @field:JsonName("format")
     val formatCode: String,
-): Serializable {
+) : Serializable {
     enum class Format(val code: String) {
         Banner320x50("BANNER"),
         LeaderBoard728x90("LEADERBOARD"),

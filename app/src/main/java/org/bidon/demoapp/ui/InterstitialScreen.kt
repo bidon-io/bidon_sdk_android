@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.launch
 import org.bidon.demoapp.component.AppButton
 import org.bidon.demoapp.component.AppToolbar
 import org.bidon.demoapp.component.Body1Text
@@ -29,7 +30,6 @@ import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
-import kotlinx.coroutines.launch
 
 @Composable
 fun InterstitialScreen(

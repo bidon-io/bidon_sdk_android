@@ -1,11 +1,6 @@
 package org.bidon.ironsource
 
 import android.app.Activity
-import org.bidon.sdk.adapter.*
-import org.bidon.sdk.ads.Ad
-import org.bidon.sdk.utils.SdkDispatchers
-import org.bidon.ironsource.ext.adapterVersion
-import org.bidon.ironsource.ext.sdkVersion
 import com.ironsource.mediationsdk.IronSource
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
 import com.ironsource.mediationsdk.logger.IronSourceError
@@ -14,6 +9,11 @@ import com.ironsource.mediationsdk.sdk.InitializationListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.bidon.ironsource.ext.adapterVersion
+import org.bidon.ironsource.ext.sdkVersion
+import org.bidon.sdk.adapter.*
+import org.bidon.sdk.ads.Ad
+import org.bidon.sdk.utils.SdkDispatchers
 import org.json.JSONObject
 import kotlin.coroutines.resume
 

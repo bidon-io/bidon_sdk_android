@@ -37,4 +37,4 @@ internal data class Device(
     val mccmnc: String?,
     @field:JsonName("connection_type")
     val connectionType: String?,
-): Serializable
+) : Serializable

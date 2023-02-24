@@ -1,8 +1,8 @@
 package org.bidon.fyber.banner
 
-import org.bidon.sdk.config.BidonError
-import org.bidon.fyber.FairBidDemandId
 import com.fyber.fairbid.ads.RequestFailure
+import org.bidon.fyber.FairBidDemandId
+import org.bidon.sdk.config.BidonError
 
 internal fun RequestFailure?.asBidonError(): BidonError = when (this) {
     RequestFailure.TIMEOUT -> BidonError.NetworkError(FairBidDemandId)

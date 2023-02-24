@@ -1,5 +1,6 @@
 package org.bidon.sdk.stats.impl
 
+import kotlinx.coroutines.withContext
 import org.bidon.sdk.databinders.DataBinderType
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -11,7 +12,6 @@ import org.bidon.sdk.utils.json.JsonParsers
 import org.bidon.sdk.utils.networking.BaseResponse
 import org.bidon.sdk.utils.networking.JsonHttpRequest
 import org.bidon.sdk.utils.networking.requests.CreateRequestBodyUseCase
-import kotlinx.coroutines.withContext
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.

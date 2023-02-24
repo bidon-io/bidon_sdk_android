@@ -6,9 +6,9 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.bidon.sdk.utils.networking.NetworkState
 import org.bidon.sdk.utils.networking.NetworkStateObserver
-import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 

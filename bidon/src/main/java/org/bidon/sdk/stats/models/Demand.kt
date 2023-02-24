@@ -23,4 +23,4 @@ internal data class Demand(
     val fillStartTs: Long?,
     @field:JsonName("fill_finish_ts")
     val fillFinishTs: Long?,
-): Serializable
+) : Serializable

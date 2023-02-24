@@ -23,4 +23,4 @@ data class Geo(
     var zip: String?,
     @field:JsonName("utcoffset")
     var utcOffset: Int
-): Serializable
+) : Serializable

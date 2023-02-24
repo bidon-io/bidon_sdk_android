@@ -3,10 +3,10 @@ package org.bidon.sdk.databinders.user.impl
 import android.content.Context
 import android.os.Build
 import android.provider.Settings
-import org.bidon.sdk.databinders.user.AdvertisingData
-import org.bidon.sdk.databinders.user.AdvertisingProfile
 import com.google.android.gms.ads.identifier.AdvertisingIdClient
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.bidon.sdk.databinders.user.AdvertisingData
+import org.bidon.sdk.databinders.user.AdvertisingProfile
 import java.util.*
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.

@@ -34,23 +34,20 @@ internal object BidonParser {
                     val arg = parseParams.parameter.type.arguments[0]
                     if (arg.type?.isSubtypeOf(Serializable::class.starProjectedType) == true) {
                         jsonArrayToList(json.getJSONArray(parseParams.fieldName), parser = { jsonStr ->
-                            //parse<>(jsonStr)
+                            // parse<>(jsonStr)
                         })
                     } else {
-
                     }
                     println("it")
-                    //defaultType()parseParams.parameter.type.arguments is Serializable)
+                    // defaultType()parseParams.parameter.type.arguments is Serializable)
                     val array = json.getJSONArray(parseParams.fieldName)
-
                 }
                 else -> {
-                    println("Type: ${parseParams.parameter.type.toString()}")
+                    println("Type: ${parseParams.parameter.type}")
                     json.get(parseParams.fieldName)
                 }
             }
             parseParams.parameter to value
-
         }.onEach {
             println("${it.key.index}>>> ${it.value} -> ${it.key}")
         }
@@ -59,7 +56,6 @@ internal object BidonParser {
     }.onFailure {
         it.printStackTrace()
     }.getOrNull()
-
 
     private fun KClass<*>.getParseParams(): List<ParseParams> {
         val primaryConstructor = this.primaryConstructor!!

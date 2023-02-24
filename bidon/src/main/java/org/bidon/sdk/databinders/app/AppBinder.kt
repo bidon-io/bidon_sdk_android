@@ -2,7 +2,6 @@ package org.bidon.sdk.databinders.app
 
 import org.bidon.sdk.config.models.App
 import org.bidon.sdk.databinders.DataBinder
-import org.bidon.sdk.utils.json.JsonParsers
 import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONObject
 

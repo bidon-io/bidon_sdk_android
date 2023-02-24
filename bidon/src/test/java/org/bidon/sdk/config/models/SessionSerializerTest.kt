@@ -1,7 +1,7 @@
 package org.bidon.sdk.config.models
 
-import com.appodealstack.bidon.json_scheme_utils.assertEquals
-import com.appodealstack.bidon.json_scheme_utils.expectedJsonStructure
+import org.bidon.sdk.config.models.json_scheme_utils.assertEquals
+import org.bidon.sdk.config.models.json_scheme_utils.expectedJsonStructure
 import org.bidon.sdk.utils.json.jsonArray
 import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONArray

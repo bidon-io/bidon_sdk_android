@@ -4,7 +4,7 @@ import org.bidon.sdk.utils.serializer.JsonName
 import org.bidon.sdk.utils.serializer.Serializable
 
 // TODO clarify model
-data class Capping(
+internal data class Capping(
     @field:JsonName("setting")
     val setting: String,
     @field:JsonName("value")

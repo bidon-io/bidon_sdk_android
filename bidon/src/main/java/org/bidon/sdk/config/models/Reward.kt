@@ -5,7 +5,7 @@ import org.bidon.sdk.utils.serializer.Serializable
 
 data class Reward(
     @field:JsonName("title")
-    val currency: String,
+    val title: String,
     @field:JsonName("value")
     val amount: Int,
-): Serializable
+) : Serializable

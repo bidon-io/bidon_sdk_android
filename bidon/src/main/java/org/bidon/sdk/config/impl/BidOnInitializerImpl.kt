@@ -1,6 +1,10 @@
 package org.bidon.sdk.config.impl
 
 import android.app.Activity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.bidon.sdk.BidOnBuilder
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.config.BidOnInitializer
@@ -16,10 +20,6 @@ import org.bidon.sdk.utils.di.DI
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
 import org.bidon.sdk.utils.networking.BidOnEndpoints
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.

@@ -28,4 +28,4 @@ internal data class ImpressionRequestBody(
     val interstitial: InterstitialRequestBody?,
     @field:JsonName("rewarded")
     val rewarded: RewardedRequestBody?,
-): Serializable
+) : Serializable

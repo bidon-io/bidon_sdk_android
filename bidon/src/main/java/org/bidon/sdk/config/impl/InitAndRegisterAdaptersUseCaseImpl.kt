@@ -1,6 +1,7 @@
 package org.bidon.sdk.config.impl
 
 import android.app.Activity
+import kotlinx.coroutines.withTimeoutOrNull
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.adapter.AdapterParameters
 import org.bidon.sdk.adapter.AdaptersSource
@@ -9,7 +10,6 @@ import org.bidon.sdk.config.models.ConfigResponse
 import org.bidon.sdk.config.usecases.InitAndRegisterAdaptersUseCase
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
-import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.

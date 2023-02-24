@@ -21,7 +21,7 @@ internal class PlacementBinder(
         val type = dataSource.getRewardType()
         val amount = dataSource.getRewardAmount()
         val reward = amount?.let {
-            Reward(currency = type ?: "", amount = it)
+            Reward(title = type ?: "", amount = it)
         }
         return Placement(
             name = dataSource.getName(),

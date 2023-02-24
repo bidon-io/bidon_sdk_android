@@ -1,6 +1,7 @@
 package org.bidon.sdk.utils.networking.impl
 
 import androidx.annotation.WorkerThread
+import kotlinx.coroutines.delay
 import org.bidon.sdk.BuildConfig
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -10,7 +11,6 @@ import org.bidon.sdk.utils.networking.encoders.RequestDataDecoder
 import org.bidon.sdk.utils.networking.encoders.RequestDataEncoder
 import org.bidon.sdk.utils.networking.encoders.ext.decodeWith
 import org.bidon.sdk.utils.networking.encoders.ext.encodeWith
-import kotlinx.coroutines.delay
 
 internal val jsonZipHttpClient by lazy {
     HttpClientImpl(

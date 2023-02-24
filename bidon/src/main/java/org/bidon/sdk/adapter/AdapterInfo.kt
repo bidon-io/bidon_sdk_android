@@ -11,4 +11,4 @@ data class AdapterInfo(
     val adapterVersion: String,
     @field:JsonName("sdk_version")
     val sdkVersion: String
-): Serializable
+) : Serializable

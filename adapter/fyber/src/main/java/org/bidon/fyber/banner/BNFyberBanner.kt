@@ -3,10 +3,10 @@ package org.bidon.fyber.banner
 import android.app.Activity
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import com.fyber.fairbid.ads.Banner
+import org.bidon.fyber.banner.BNFyberBannerOption.Position
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.ads.AdType
-import org.bidon.fyber.banner.BNFyberBannerOption.Position
-import com.fyber.fairbid.ads.Banner
 
 object BNFyberBanner : FyberBanner by FyberBannerImpl()
 

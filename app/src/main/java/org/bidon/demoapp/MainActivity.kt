@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.LaunchedEffect
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.compose.rememberNavController
-import org.bidon.demoapp.navigation.NavigationGraph
-import org.bidon.demoapp.theme.AppTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import org.bidon.demoapp.navigation.NavigationGraph
+import org.bidon.demoapp.theme.AppTheme
 
 class MainActivity : FragmentActivity() {
     @OptIn(ExperimentalPermissionsApi::class)

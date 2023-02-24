@@ -3,7 +3,6 @@ package org.bidon.sdk.utils.networking.requests
 import org.bidon.sdk.databinders.DataBinderType
 import org.bidon.sdk.databinders.DataProvider
 import org.bidon.sdk.logs.logging.impl.logInfo
-import org.bidon.sdk.utils.json.JsonSerializer
 import org.bidon.sdk.utils.json.jsonObject
 import org.bidon.sdk.utils.serializer.Serializable
 import org.bidon.sdk.utils.serializer.serialize
@@ -15,7 +14,7 @@ import org.json.JSONObject
 internal class CreateRequestBodyUseCaseImpl(
     private val dataProvider: DataProvider,
 ) : CreateRequestBodyUseCase {
-    override suspend operator fun <T: Serializable> invoke(
+    override suspend operator fun <T : Serializable> invoke(
         binders: List<DataBinderType>,
         dataKeyName: String?,
         data: T?,

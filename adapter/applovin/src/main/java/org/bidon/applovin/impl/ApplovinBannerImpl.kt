@@ -4,6 +4,8 @@ import android.app.Activity
 import android.view.ViewGroup
 import com.applovin.adview.AppLovinAdView
 import com.applovin.sdk.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
 import org.bidon.applovin.ApplovinBannerAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
 import org.bidon.sdk.adapter.*
@@ -18,8 +20,6 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 
 /**
  * I have no idea how it works. There is no documentation.

@@ -1,5 +1,6 @@
 package org.bidon.sdk.config.impl
 
+import kotlinx.coroutines.withContext
 import org.bidon.sdk.config.models.ConfigRequestBody
 import org.bidon.sdk.config.models.ConfigResponse
 import org.bidon.sdk.config.usecases.GetConfigRequestUseCase
@@ -11,7 +12,6 @@ import org.bidon.sdk.utils.json.JsonParsers
 import org.bidon.sdk.utils.json.jsonObject
 import org.bidon.sdk.utils.networking.JsonHttpRequest
 import org.bidon.sdk.utils.networking.requests.CreateRequestBodyUseCase
-import kotlinx.coroutines.withContext
 import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONObject
 

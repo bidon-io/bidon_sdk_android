@@ -37,4 +37,4 @@ data class Session(
     var battery: Float,
     @field:JsonName("cpu_usage")
     var cpuUsage: Float
-): Serializable
+) : Serializable

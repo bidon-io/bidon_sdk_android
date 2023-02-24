@@ -13,4 +13,4 @@ internal data class Placement(
     val reward: Reward?,
     @field:JsonName("capping")
     val capping: Capping?,
-): Serializable
+) : Serializable
