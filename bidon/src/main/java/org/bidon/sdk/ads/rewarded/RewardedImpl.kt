@@ -142,8 +142,8 @@ internal class RewardedImpl(
                     listener.onAdShown(adEvent.ad)
                 }
                 is AdEvent.PaidRevenue -> listener.onRevenuePaid(adEvent.ad, adEvent.adValue)
-                is AdEvent.ShowFailed -> listener.onAdLoadFailed(adEvent.cause)
-                is AdEvent.LoadFailed -> listener.onAdShowFailed(adEvent.cause)
+                is AdEvent.ShowFailed -> listener.onAdShowFailed(adEvent.cause)
+                is AdEvent.LoadFailed -> listener.onAdLoadFailed(adEvent.cause)
                 is AdEvent.Expired -> listener.onAdExpired(adEvent.ad)
             }
         }.launchIn(CoroutineScope(dispatcher))

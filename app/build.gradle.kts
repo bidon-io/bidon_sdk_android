@@ -74,9 +74,9 @@ dependencies {
     implementation(project(":adapter:bidmachine"))
     implementation(project(":adapter:admob"))
     implementation(project(":adapter:applovin"))
-    implementation(project(":adapter:appsflyer"))
-    implementation(project(":adapter:fyber"))
-    implementation(project(":adapter:ironsource"))
+//    implementation(project(":adapter:appsflyer"))
+//    implementation(project(":adapter:fyber"))
+//    implementation(project(":adapter:ironsource"))
 
     implementation("com.google.android.gms:play-services-ads-identifier:18.0.1")
     implementation("com.google.accompanist:accompanist-permissions:0.29.1-alpha")

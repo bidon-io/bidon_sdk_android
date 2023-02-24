@@ -14,10 +14,7 @@
             <option value="$PROJECT_DIR$/adapter" />
             <option value="$PROJECT_DIR$/adapter/admob" />
             <option value="$PROJECT_DIR$/adapter/applovin" />
-            <option value="$PROJECT_DIR$/adapter/appsflyer" />
             <option value="$PROJECT_DIR$/adapter/bidmachine" />
-            <option value="$PROJECT_DIR$/adapter/fyber" />
-            <option value="$PROJECT_DIR$/adapter/ironsource" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/bidon" />
             <option value="$PROJECT_DIR$/buildSrc" />
