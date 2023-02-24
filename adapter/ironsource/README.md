@@ -32,15 +32,15 @@ To integrate the ironSource Decorator through Dependencies, first add the follow
 
 ``` ruby
 dependencies {
-    implementation 'com.appodealstack.bidon:bidon-sdk:1.0.0'
-    implementation 'com.appodealstack.bidon:ironsource-decorator:1.0.0'
+    implementation 'org.bidon.sdk:bidon-sdk:1.0.0'
+    implementation 'org.bidon.sdk:ironsource-decorator:1.0.0'
 
     # Demand Sources
-    implementation 'com.appodealstack.bidon:bidmachine-adapter:1.0.0'
-    implementation 'com.appodealstack.bidon:admob-adapter:1.0.0'
+    implementation 'org.bidon.sdk:bidmachine-adapter:1.0.0'
+    implementation 'org.bidon.sdk:admob-adapter:1.0.0'
 
     # MMP
-    implementation 'com.appodealstack.bidon:appsflyer-adapter:1.0.0'
+    implementation 'org.bidon.sdk:appsflyer-adapter:1.0.0'
    
     ...
 }
@@ -64,13 +64,13 @@ IronSourceDecorator
         AdmobAdapter::class.java,
         AdmobParameters(
             interstitials = mapOf(
-                priceFloor1Float to "AdMob interstitial ad unit id",
+                pricefloor1Float to "AdMob interstitial ad unit id",
             ),
             rewarded = mapOf(
-                priceFloor2Float to "AdMob rewarded ad unit id",
+                pricefloor2Float to "AdMob rewarded ad unit id",
             ),
             banners = mapOf(
-                priceFloor3Float to "AdMob banner ad unit id",
+                pricefloor3Float to "AdMob banner ad unit id",
             ),
         )
     )
@@ -117,13 +117,13 @@ IronSourceDecorator
         AdmobAdapter::class.java,
         AdmobParameters(
             interstitials = mapOf(
-                priceFloor1Float to "AdMob interstitial ad unit id",
+                pricefloor1Float to "AdMob interstitial ad unit id",
             ),
             rewarded = mapOf(
-                priceFloor2Float to "AdMob rewarded ad unit id",
+                pricefloor2Float to "AdMob rewarded ad unit id",
             ),
             banners = mapOf(
-                priceFloor3Float to "AdMob banner ad unit id",
+                pricefloor3Float to "AdMob banner ad unit id",
             ),
         )
     )
@@ -160,8 +160,8 @@ or
 ```kotlin
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
-import com.appodealstack.ironsource.IronSourceDecorator
-import com.appodealstack.ironsource.interstitial.IronSourceLevelPlayInterstitialListener
+import org.bidon.ironsource.IronSourceDecorator
+import org.bidon.ironsource.interstitial.IronSourceLevelPlayInterstitialListener
 import com.appodealstack.mads.demands.Ad
 
 class MainActivity : FragmentActivity() {
@@ -209,8 +209,8 @@ or
 ```kotlin
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
-import com.appodealstack.ironsource.IronSourceDecorator
-import com.appodealstack.ironsource.rewarded.IronSourceLevelPlayRewardedListener
+import org.bidon.ironsource.IronSourceDecorator
+import org.bidon.ironsource.rewarded.IronSourceLevelPlayRewardedListener
 import com.appodealstack.mads.demands.Ad
 import com.appodealstack.mads.demands.RewardedAdListener.Reward
 
@@ -361,8 +361,8 @@ You are now all set up to serve Banners in your application.
 ```kotlin
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
-import com.appodealstack.ironsource.IronSourceDecorator
-import com.appodealstack.ironsource.banner.IronSourceLevelPlayBannerListener
+import org.bidon.ironsource.IronSourceDecorator
+import org.bidon.ironsource.banner.IronSourceLevelPlayBannerListener
 import com.appodealstack.mads.demands.Ad
 import com.appodealstack.mads.demands.banners.BannerSize
 

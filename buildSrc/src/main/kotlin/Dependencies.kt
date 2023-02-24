@@ -11,14 +11,6 @@ object Dependencies {
         const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         const val reflect = "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
-        object Serialization {
-            const val gradlePlugin = "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
-
-            private const val version = "1.4.1"
-            const val serialization = "org.jetbrains.kotlinx:kotlinx-serialization-core:$version"
-            const val json = "org.jetbrains.kotlinx:kotlinx-serialization-json:$version"
-        }
-
         object Coroutines {
             private const val coroutinesVersion = "1.6.4"
             const val KotlinxCoroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
@@ -39,17 +31,10 @@ object Dependencies {
     object Google {
         const val Services = "com.google.gms:google-services:4.3.15"
         const val PlayServicesAds = "com.google.android.gms:play-services-ads:21.5.0"
-    }
 
-    object Ktor {
-        private const val ktorVersion = "2.2.3"
-        const val KtorClientCore = "io.ktor:ktor-client-core:$ktorVersion"
-        const val KtorClientOkHttp = "io.ktor:ktor-client-okhttp:$ktorVersion"
-        const val KtorClientLogging = "io.ktor:ktor-client-logging:$ktorVersion"
-        const val KtorClientLoggingLongBack = "ch.qos.logback:logback-classic:1.3.0-beta0"
-        const val KtorClientEncoding = "io.ktor:ktor-client-encoding:$ktorVersion"
-        const val KtorClientNegotiation = "io.ktor:ktor-client-content-negotiation:$ktorVersion"
-        const val KtorSerializationKotlinxJson = "io.ktor:ktor-serialization-kotlinx-json:$ktorVersion"
+        object Secrets {
+            const val gradlePlugin = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1"
+        }
     }
 
     object Accompanist {

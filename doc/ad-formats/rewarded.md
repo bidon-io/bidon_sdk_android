@@ -1,106 +1,55 @@
-# Rewarded Ads
+# Rewarded Ad
 
 ## Loading an Rewarded Ad
 
-To load an interstitial ad, instantiate an `BDNRewardedAd` with `placement` configured in the app settings. Implement `BDNRewardedAdDelegate` that you are notified when your ad is ready and of other ad-related events. In the load method you will need to specify the pricefloor. This argument can be ad revenue value from mediaton.
+To load an rewarded ad, create a `RewardedAd` instance. Add (optional) placement if needed, otherwise placement = "default" will be used.
+Important: for a single instance of an RewardedAd, load() and show() can only be called once. Create new instance for every new interstitial ad.
 
-```swift
-class ViewController: UIViewController {
-    var rewardedAd: BidOn.RewardedAd!
-    
-    func loadRewardedAd() {
-        rewardedAd = BidOn.RewardedAd(placement: "PLACEMENT")
-        rewardedAd.delegate = self
-        
-        rewardedAd.loadAd(with: 0.1)
+```kotlin
+val rewarded = RewardedAd(placement = "your_placement")
+```
+
+Set `RewardedListener` for receiving all-related events, including loading/displaying and revenue callbacks.
+
+```kotlin
+rewarded.setRewardedListener(object : RewardedListener {
+    override fun onAdLoaded(ad: Ad) {
+        // ready to show
     }
-}
 
-
-extension ViewController: BidOn.RewardedAdDelegate {
-    func adObject(_ adObject: BidOn.AdObject, didLoadAd ad: BidOn.Ad) {}
-    
-    func adObject(_ adObject: BidOn.AdObject, didFailToLoadAd error: Error) {}
-    
-    func fullscreenAd(_ fullscreenAd: BidOn.FullscreenAdObject, willPresentAd ad: BidOn.Ad) {}
-    
-    func fullscreenAd(_ fullscreenAd: BidOn.FullscreenAdObject, didFailToPresentAd error: Error) {}
-    
-    func fullscreenAd(_ fullscreenAd: BidOn.FullscreenAdObject, didDismissAd ad: BidOn.Ad) {}
-    
-    func rewardedAd(_ rewardedAd: BidOn.RewardedAdObject, didRewardUser reward: BidOn.Reward) {}
-}
-```
-
-```obj-c
-#import "ViewController.h"
-#import <BidOn/BidOn.h>
-
-
-@interface ViewController() <BDNRewardedAdDelegate>
-
-@property (nonatomic, strong) BDNRewardedAd *rewardedAd;
-
-@end
-
-
-@implementation ViewController
-
-- (void)loadRewardedAd {
-    self.rewardedAd = [[BDNRewardedAd alloc] initWithPlacement:@"PLACEMENT"];
-    self.rewardedAd.delegate = self;
-
-    [self.rewardedAd loadAdWith:0.1];
-}
-
-#pragma mark - BDNRewardedAdDelegate
-
-- (void)adObject:(id<BDNAdObject>)adObject didFailToLoadAd:(NSError *)error {}
-
-- (void)adObject:(id<BDNAdObject>)adObject didLoadAd:(id<BNAd>)ad {}
-
-- (void)fullscreenAd:(id<BDNFullscreenAd>)fullscreenAd didDismissAd:(id<BNAd>)ad {}
-
-- (void)fullscreenAd:(id<BDNFullscreenAd>)fullscreenAd didFailToPresentAd:(NSError *)error {}
-
-- (void)fullscreenAd:(id<BDNFullscreenAd>)fullscreenAd willPresentAd:(id<BNAd>)ad {}
-
-- (void)rewardedAd:(id<BDNRewardedAd>)rewardedAd didRewardUser:(id<BNReward>)reward {}
-
-@end
-```
-
-## Showing an Rewarded Ad
-
-```swift
-func showRewardedAd() {
-    guard rewardedAd.isReady else { return }
-    rewardedAd.show(from: self)
-}
-```
-
-```obj-c
-- (void)showRewardedAd {
-    if ([self.rewardedAd isReady]) {
-        [self.rewardedAd showFrom:self];
+    override fun onAdLoadFailed(cause: BidonError) {
     }
-}
+
+    override fun onAdShowFailed(cause: BidonError) {
+    }
+
+    override fun onAdShown(ad: Ad) {
+    }
+
+    override fun onAdClicked(ad: Ad) {
+    }
+
+    override fun onAdClosed(ad: Ad) {
+    }
+
+    override fun onAdExpired(ad: Ad) {
+    }
+
+    override fun onUserRewarded(ad: Ad, reward: Reward?) {
+        // reward - contains reward data if exist
+    }
+    
+    override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
+        // adValue.revenue - ad revenue from mediation
+    }
+})
+rewarded.loadAd(activity = this, pricefloor = otherMediationEcpm) // or use DefaultMinPrice
 ```
 
-## Handle a User Reward
+## Displaying interstitial ad
 
-Once a Rewarded Ad did reward user, delegate method `rewardedAd:didRewardUser` will fire. You will be able to receive reward amount and currency.
-
-```swift
-func rewardedAd(_ rewardedAd: BidOn.RewardedAdObject, didRewardUser reward: BidOn.Reward) {
-    let amount: Int = reward.amount
-    let currency: String = reward.label
-} 
-```
-
-```obj-c
-- (void)rewardedAd:(id<BDNRewardedAd>)rewardedAd didRewardUser:(id<BNReward>)reward {
-    NSInteger amount = [reward amount];
-    NSString *currenct = [reward label];
+```kotlin
+if (rewarded.isReady()) {
+    rewarded.showAd(activity = this)
 }
 ```

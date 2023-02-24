@@ -13,8 +13,8 @@ buildscript {
     dependencies {
         classpath(Dependencies.Android.gradlePlugin)
         classpath(Dependencies.Kotlin.gradlePlugin)
-        classpath(Dependencies.Kotlin.Serialization.gradlePlugin)
         classpath(Dependencies.Google.Services)
+        classpath(Dependencies.Google.Secrets.gradlePlugin)
     }
 }
 

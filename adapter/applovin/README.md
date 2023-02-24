@@ -20,15 +20,15 @@ To integrate the AppLovin Decorator through Dependencies, first add the followin
 
 ``` ruby
 dependencies {
-    implementation 'com.appodealstack.bidon:bidon-sdk:1.0.0'
-    implementation 'com.appodealstack.bidon:applovin-decorator:1.0.0'
+    implementation 'org.bidon.sdk:bidon-sdk:1.0.0'
+    implementation 'org.bidon.sdk:applovin-decorator:1.0.0'
 
     # Demand Sources
-    implementation 'com.appodealstack.bidon:bidmachine-adapter:1.0.0'
-    implementation 'com.appodealstack.bidon:admob-adapter:1.0.0'
+    implementation 'org.bidon.sdk:bidmachine-adapter:1.0.0'
+    implementation 'org.bidon.sdk:admob-adapter:1.0.0'
 
     # MMP
-    implementation 'com.appodealstack.bidon:appsflyer-adapter:1.0.0'
+    implementation 'org.bidon.sdk:appsflyer-adapter:1.0.0'
    
     ...
 }
@@ -52,13 +52,13 @@ AppLovinDecorator
         AdmobAdapter::class.java,
         AdmobParameters(
             interstitials = mapOf(
-                priceFloor1Float to "AdMob interstitial ad unit id",
+                pricefloor1Float to "AdMob interstitial ad unit id",
             ),
             rewarded = mapOf(
-                priceFloor2Float to "AdMob rewarded ad unit id",
+                pricefloor2Float to "AdMob rewarded ad unit id",
             ),
             banners = mapOf(
-                priceFloor3Float to "AdMob banner ad unit id",
+                pricefloor3Float to "AdMob banner ad unit id",
             ),
         )
     )
@@ -103,13 +103,13 @@ AppLovinDecorator
         AdmobAdapter::class.java,
         AdmobParameters(
             interstitials = mapOf(
-                priceFloor1Float to "AdMob interstitial ad unit id",
+                pricefloor1Float to "AdMob interstitial ad unit id",
             ),
             rewarded = mapOf(
-                priceFloor2Float to "AdMob rewarded ad unit id",
+                pricefloor2Float to "AdMob rewarded ad unit id",
             ),
             banners = mapOf(
-                priceFloor3Float to "AdMob banner ad unit id",
+                pricefloor3Float to "AdMob banner ad unit id",
             ),
         )
     )
@@ -142,8 +142,8 @@ Add listener to be notified when your ad is ready and of other ad-related events
 ```kotlin
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
-import com.appodealstack.applovin.interstitial.BNInterstitialListener
-import com.appodealstack.applovin.interstitial.BNMaxInterstitialAd
+import org.bidon.applovin.interstitial.BNInterstitialListener
+import org.bidon.applovin.interstitial.BNMaxInterstitialAd
 import com.appodealstack.mads.demands.Ad
 
 class MainActivity : FragmentActivity() {
@@ -195,8 +195,8 @@ To load a rewarded ad, get an instance of a `BNMaxRewardedAd` object that corres
 ```kotlin
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
-import com.appodealstack.applovin.rewarded.BNMaxRewardedAd
-import com.appodealstack.applovin.rewarded.BNRewardedListener
+import org.bidon.applovin.rewarded.BNMaxRewardedAd
+import org.bidon.applovin.rewarded.BNRewardedListener
 import com.appodealstack.mads.demands.Ad
 import com.appodealstack.mads.demands.RewardedAdListener
 
@@ -279,8 +279,8 @@ To load a banner AdView, get an instance of a `BNMaxAdView` class that correspon
 ```kotlin
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
-import com.appodealstack.applovin.banner.BNMaxAdView
-import com.appodealstack.applovin.impl.BNMaxAdViewAdListener
+import org.bidon.applovin.banner.BNMaxAdView
+import org.bidon.applovin.impl.BNMaxAdViewAdListener
 import com.appodealstack.mads.demands.Ad
 
 class MainActivity : FragmentActivity() {
@@ -310,7 +310,7 @@ class MainActivity : FragmentActivity() {
 Alternatively, you can add BNMaxAdView banners to your view layout XML. 
 
 ```xml
-<com.appodealstack.applovin.banner.BNMaxAdView
+<org.bidon.applovin.banner.BNMaxAdView
     android:id="@+id/bannerAdView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

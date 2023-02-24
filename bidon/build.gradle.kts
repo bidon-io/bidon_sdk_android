@@ -7,22 +7,16 @@ plugins {
 
 project.extra.apply {
     this.set("AdapterArtifactId", "bidon-sdk")
-    this.set("AdapterVersionName", Versions.BidONVersionName)
+    this.set("AdapterVersionName", Versions.BidOnVersionName)
 }
 
 android {
+    namespace = "org.bidon.sdk"
     defaultConfig {
-        ADAPTER_VERSION = Versions.BidONVersionName
+        ADAPTER_VERSION = Versions.BidOnVersionName
     }
 }
 
 dependencies {
     implementation(Dependencies.Google.PlayServicesAds)
-    implementation(Dependencies.Ktor.KtorClientCore)
-    implementation(Dependencies.Ktor.KtorClientOkHttp)
-    implementation(Dependencies.Ktor.KtorClientLogging)
-    implementation(Dependencies.Ktor.KtorClientLoggingLongBack)
-    implementation(Dependencies.Ktor.KtorClientEncoding)
-    implementation(Dependencies.Ktor.KtorClientNegotiation)
-    implementation(Dependencies.Ktor.KtorSerializationKotlinxJson)
 }

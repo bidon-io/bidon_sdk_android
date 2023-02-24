@@ -2,83 +2,50 @@
 
 ## Loading an Interstitial Ad
 
-To load an interstitial ad, instantiate an `BDNInterstitial` with `placement` configured in the app settings. Implement `BDNFullscreenAdDelegate` that you are notified when your ad is ready and of other ad-related events. In the load method you will need to specify the pricefloor. This argument can be ad revenue value from mediaton.
+To load an interstitial ad, create a `Interstitial` instance. Add (optional) placement if needed, otherwise placement = "default" will be used.
+Important: for a single instance of an Interstitial, load() and show() can only be called once. Create new instance for every new interstitial ad.
 
-```swift
-class ViewController: UIViewController {
-    var interstitialAd: BidOn.Interstitial!
-    
-    func loadInterstitialAd() {
-        interstitialAd = BidOn.Interstitial(placement: "PLACEMENT")
-        interstitialAd.delegate = self
-        
-        interstitialAd.loadAd(with: 0.1)
+```kotlin
+val interstitial = Interstitial(placement = "your_placement")
+```
+
+Set `InterstitialListener` for receiving all-related events, including loading/displaying and revenue callbacks.
+
+```kotlin
+interstitial.setInterstitialListener(object : InterstitialListener {
+    override fun onAdLoaded(ad: Ad) {
+        // ready to show
     }
-}
 
-
-extension ViewController: BidOn.FullscreenAdDelegate {
-    func adObject(_ adObject: BidOn.AdObject, didLoadAd ad: BidOn.Ad) {}
-    
-    func adObject(_ adObject: BidOn.AdObject, didFailToLoadAd error: Error) {}
-    
-    func fullscreenAd(_ fullscreenAd: BidOn.FullscreenAdObject, willPresentAd ad: BidOn.Ad) {}
-    
-    func fullscreenAd(_ fullscreenAd: BidOn.FullscreenAdObject, didFailToPresentAd error: Error) {}
-    
-    func fullscreenAd(_ fullscreenAd: BidOn.FullscreenAdObject, didDismissAd ad: BidOn.Ad) {}
-}
-```
-
-```obj-c
-#import "ViewController.h"
-#import <BidOn/BidOn.h>
-
-
-@interface ViewController() <BDNFullscreenAdDelegate>
-
-@property (nonatomic, strong) BDNInterstitial *interstitial;
-
-@end
-
-
-@implementation ViewController
-
-- (void)loadInterstitialAd {
-    self.interstitial = [[BDNInterstitial alloc] initWithPlacement:@"PLACEMENT"];
-    self.interstitial.delegate = self;
-
-    [self.interstitial loadAdWith:0.1];
-}
-
-#pragma mark - BDNFullscreenAdDelegate
-
-- (void)adObject:(id<BDNAdObject>)adObject didFailToLoadAd:(NSError *)error {}
-
-- (void)adObject:(id<BDNAdObject>)adObject didLoadAd:(id<BNAd>)ad {}
-
-- (void)fullscreenAd:(id<BDNFullscreenAd>)fullscreenAd didDismissAd:(id<BNAd>)ad {}
-
-- (void)fullscreenAd:(id<BDNFullscreenAd>)fullscreenAd didFailToPresentAd:(NSError *)error {}
-
-- (void)fullscreenAd:(id<BDNFullscreenAd>)fullscreenAd willPresentAd:(id<BNAd>)ad {}
-
-@end
-```
-
-## Showing an Interstitial Ad
-
-```swift
-func showInterstitialAd() {
-    guard interstitialAd.isReady else { return }
-    interstitialAd.show(from: self)
-}
-```
-
-```obj-c
-- (void)showInterstitialAd {
-    if ([self.interstitial isReady]) {
-        [self.interstitial showFrom:self];
+    override fun onAdLoadFailed(cause: BidonError) {
     }
+
+    override fun onAdShowFailed(cause: BidonError) {
+    }
+
+    override fun onAdShown(ad: Ad) {
+    }
+
+    override fun onAdClicked(ad: Ad) {
+    }
+
+    override fun onAdClosed(ad: Ad) {
+    }
+
+    override fun onAdExpired(ad: Ad) {
+    }
+
+    override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
+        // adValue.revenue - ad revenue from mediation
+    }
+})
+interstitial.loadAd(activity = this, pricefloor = otherMediationEcpm) // or use DefaultMinPrice
+```
+
+## Displaying interstitial ad
+
+```kotlin
+if (interstitial.isReady()) {
+    interstitial.showAd(activity = this)
 }
 ```

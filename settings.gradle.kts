@@ -8,10 +8,10 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
-    // repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
+//        mavenLocal()
         mavenCentral()
         maven {
             url = uri("https://artifacts.applovin.com/android")
@@ -23,6 +23,13 @@ dependencyResolutionManagement {
         maven {
             url = uri("https://android-sdk.is.com/")
         }
+        maven {
+            url = uri("https://maven.pkg.github.com/bidon-io/bidon-sdk-android")
+            credentials {
+                username = System.getenv("GPR_USER")
+                password = System.getenv("GPR_TOKEN")
+            }
+        }
     }
 }
 rootProject.name = "BidOn SDK"
@@ -32,10 +39,10 @@ include(
 )
 include(
     ":bidon",
-    ":adapter:applovin",
     ":adapter:bidmachine",
     ":adapter:admob",
-    ":adapter:fyber",
-    ":adapter:ironsource",
-    ":adapter:appsflyer"
+    ":adapter:applovin",
+//    ":adapter:fyber",
+//    ":adapter:ironsource",
+//    ":adapter:appsflyer"
 )

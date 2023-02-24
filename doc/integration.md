@@ -1,85 +1,70 @@
 # Integration
 
-This page is describes how to donwload, import and configure the BidOn SDK. 
+This page is describes how to import and configure the BidOn SDK. 
 
-- [Integration](#integration)
-  - [Download](#download)
-    - [CocoaPods (Recommended)](#cocoapods-recommended)
-    - [Manual](#manual)
-  - [Initialize the SDK](#initialize-the-sdk)
-  - [Configure Ad Types](#configure-ad-types)
+- [Getting Started](#getting-started) 
+- [Initialize the SDK](#initialize-the-sdk)
+- [Configure Ad Types](#configure-ad-types)
   
-## Download 
+## Getting Started 
 
-### CocoaPods (Recommended)
-
-To integrate the BidOn SDK through CocoaPods, first add the following lines to your Podfile:
-
-``` ruby
-pod 'BidOn'
-
-# For usage of Demand Sources uncomment following lines
-# pod 'BidOnAdapterBidMachine'
-# pod 'BidOnGoogleMobileAds'
-# pod 'BidOnAdapterAppLovin'
-
+To integrate BidOn SDK through Dependencies, firstly add repository fo BidOn SDK dependencies
+```ruby
+repositories {
+    maven {
+        url = uri("https://maven.pkg.github.com/bidon-io/bidon-sdk-android")
+        credentials {
+            username = YOUR_GITHUB_USERNAME
+            password = YOUR_GITHUB_TOKEN
+        }
+    }
+}        
 ```
 
-Then run the following on the command line:
+secondly add the following lines to your `build.gradle` (:app):
 
 ``` ruby
-pod install --repo-update
+dependencies {
+    # BidOn SDK Library
+    implementation 'org.bidon:bidon-sdk:0.1.0-Beta'
+
+    # Demand Sources (AdNetworks)
+    implementation 'org.bidon:bidmachine-adapter:0.1.0.1-Beta'
+    implementation 'org.bidon:admob-adapter:0.1.0.1-Beta'
+    implementation 'org.bidon:applovin-adapter:0.1.0.1-Beta'
+    
+    ... 
+}
+
 ```
+Then sync project.
 
-### Manual
-
-> TODO:// Manual integration guiode
 
 ## Initialize the SDK
 
-Receive your `app key` in the dashboard app settings. We highly recommend to initialize the BidOn SDK in app delegate's `application:applicationDidFinishLaunching:` method. 
+Receive your `APP_KEY` in the dashboard app settings. Init Bidon SDK in your MainActivity class.
 
-`swift`
-```swift
-import BidOn
-
-@UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate
-{
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
-    {
-        // Register all available demand source adapters.
-        BidOnSdk.registerDefaultAdapters()    
-        // Configure BidOn
-        BidOnSdk.logLevel = .debug
-        // Initialize
-        BidOnSdk.initialize(appKey: "APP KEY") {
-            // Load any ads
-        }
-
-        ⋮
+```kotlin
+BidOn
+    .registerDefaultAdapters()
+    // .registerAdapters("com.example.YourOwnAdapterClass") // for registering your custom Adapter (AdNetwork) by class name
+    // .registerAdapters(YourOwnAdapter()) // for registering your custom Adapter (AdNetwork) by instance. Instance should be initialized and ready to work
+    .setInitializationCallback {
+        //  BidOn is initialized and ready to work
+    }
+    .initialize(
+        activity = this@MainActivity,
+        appKey = "APP_KEY",
+    )
 ```
 
-```obj-c
-#import <BidOn/BidOn.h>
-
-@implementation AppDelegate
-
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Register all available demand source adapters.
-    [BDNSdk registerDefaultAdapters];
-    // Configure BidOn
-    [BDNSdk setLogLevel:BDNLoggerLevelDebug];
-    // Initialize
-    [BDNSdk initializeWithAppKey:@"APP KEY" completion:^{
-        // Load any ads
-    }];
-
-    ⋮
+Set logging.
+```kotlin
+BidOn.setLogLevel(Logger.Level.Verbose)
 ```
 
 ## Configure Ad Types
 
-- [Interstitials](/ad-formats/interstitials.md)
-- [Rewarded Ads](/ad-formats/rewarded.md)
-- [Banners](/ad-formats/banner.md)
+- [Interstitials](ad-formats/interstitial.md)
+- [Rewarded Ads](ad-formats/rewarded.md)
+- [Banners](ad-formats/banner.md)
