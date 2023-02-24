@@ -124,8 +124,7 @@ internal class BidOnInitializerImpl : BidOnInitializer, BidOnBuilder {
                 logInfo(Tag, "Config data: $configResponse")
                 initAndRegisterAdapters(
                     activity = activity,
-                    notInitializedAdapters = defaultAdapters,
-                    publisherAdapters = publisherAdapters.values.toList(),
+                    adapters = defaultAdapters + publisherAdapters.values,
                     configResponse = configResponse,
                 )
             }.onFailure {

@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import org.bidon.bidmachine.BidMachineAdapter
 import org.bidon.demoapp.BuildConfig
 import org.bidon.demoapp.component.AppButton
 import org.bidon.demoapp.component.AppTextButton
@@ -66,6 +67,7 @@ internal fun MainScreen(
                         BidOnSdk.setLogLevel(Logger.Level.Verbose)
                         BidOnSdk
                             .registerDefaultAdapters()
+                            .registerAdapters(BidMachineAdapter())
                             .registerAdapters("org.bidon.admob.AdmobAdapter")
                             .setBaseUrl(baseUrl)
                             .setInitializationCallback {

@@ -10,8 +10,7 @@ import org.bidon.sdk.config.models.ConfigResponse
 internal interface InitAndRegisterAdaptersUseCase {
     suspend operator fun invoke(
         activity: Activity,
-        notInitializedAdapters: List<Adapter>,
-        publisherAdapters: List<Adapter>,
+        adapters: List<Adapter>,
         configResponse: ConfigResponse
     )
 }

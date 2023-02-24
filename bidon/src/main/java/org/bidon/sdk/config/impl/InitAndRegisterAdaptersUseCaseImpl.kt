@@ -21,12 +21,11 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
 
     override suspend operator fun invoke(
         activity: Activity,
-        notInitializedAdapters: List<Adapter>,
-        publisherAdapters: List<Adapter>,
+        adapters: List<Adapter>,
         configResponse: ConfigResponse
     ) {
         val timeout = configResponse.initializationTimeout
-        val readyAdapters = notInitializedAdapters.mapNotNull { adapter ->
+        val readyAdapters = adapters.mapNotNull { adapter ->
             val initializable = adapter as? Initializable<AdapterParameters>
                 ?: return@mapNotNull run {
                     // Adapter is not Initializable. It's ready to use
@@ -37,7 +36,7 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                 .firstNotNullOfOrNull { (adapterName, json) ->
                     if (adapter.demandId.demandId == adapterName) {
                         try {
-                            adapter.parseConfigParam(json.toString())
+                            initializable.parseConfigParam(json.toString())
                         } catch (e: Exception) {
                             logError(Tag, "Error while parsing AdapterParameters for ${adapter.demandId.demandId}: $json", e)
                             null
@@ -48,24 +47,25 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                 }
 
             if (adapterParameters == null) {
-                logError(Tag, "Config parameters is null. Adapter not initialized: $adapter", null)
+                logError(Tag, "Config parameters is null. Adapter not initialized: $initializable", null)
                 null
             } else {
                 withTimeoutOrNull(timeout) {
-                    initializable.init(
-                        activity = activity,
-                        configParams = adapterParameters
-                    )
-                    adapter
+                    runCatching {
+                        initializable.init(
+                            activity = activity,
+                            configParams = adapterParameters
+                        )
+                        adapter
+                    }.getOrNull()
                 } ?: run {
-                    logError(Tag, "Adapter's initializing timed out. Adapter not initialized: $adapter", null)
+                    logError(Tag, "Adapter's initializing timed out. Adapter not initialized: $initializable", null)
                     null
                 }
             }
         }
-        val adapters = readyAdapters + publisherAdapters
-        logInfo(Tag, "Registered adapters: ${adapters.joinToString { it::class.java.simpleName }}")
-        adaptersSource.add(adapters)
+        logInfo(Tag, "Registered adapters: ${readyAdapters.joinToString { it::class.java.simpleName }}")
+        adaptersSource.add(readyAdapters)
     }
 }
 
