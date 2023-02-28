@@ -89,7 +89,7 @@ internal class AdmobInterstitialImpl(
                 AdEvent.PaidRevenue(
                     ad = Ad(
                         demandAd = demandAd,
-                        eCPM = lineItem?.pricefloor ?: 0.0,
+                        ecpm = lineItem?.pricefloor ?: 0.0,
                         sourceAd = requiredInterstitialAd,
                         networkName = demandId.demandId,
                         dsp = null,
@@ -223,7 +223,7 @@ internal class AdmobInterstitialImpl(
     private fun InterstitialAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            eCPM = lineItem?.pricefloor ?: 0.0,
+            ecpm = lineItem?.pricefloor ?: 0.0,
             sourceAd = this,
             networkName = demandId.demandId,
             dsp = null,

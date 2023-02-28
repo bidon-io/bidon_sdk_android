@@ -106,7 +106,7 @@ internal class AdmobRewardedImpl(
                 AdEvent.PaidRevenue(
                     ad = Ad(
                         demandAd = demandAd,
-                        eCPM = lineItem?.pricefloor ?: 0.0,
+                        ecpm = lineItem?.pricefloor ?: 0.0,
                         sourceAd = requiredRewardedAd,
                         networkName = demandId.demandId,
                         dsp = null,
@@ -240,7 +240,7 @@ internal class AdmobRewardedImpl(
     private fun RewardedAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            eCPM = lineItem?.pricefloor ?: 0.0,
+            ecpm = lineItem?.pricefloor ?: 0.0,
             sourceAd = this,
             networkName = demandId.demandId,
             dsp = null,

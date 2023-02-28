@@ -262,7 +262,7 @@ internal class BMRewardedAdImpl(
     private fun RewardedAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            eCPM = this.auctionResult?.price ?: 0.0,
+            ecpm = this.auctionResult?.price ?: 0.0,
             sourceAd = this,
             currencyCode = "USD",
             roundId = roundId,

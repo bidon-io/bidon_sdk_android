@@ -24,7 +24,7 @@ import org.bidon.demoapp.component.Body1Text
 import org.bidon.demoapp.component.Body2Text
 import org.bidon.sdk.BidOnSdk
 import org.bidon.sdk.ads.Ad
-import org.bidon.sdk.ads.interstitial.Interstitial
+import org.bidon.sdk.ads.interstitial.InterstitialAd
 import org.bidon.sdk.ads.interstitial.InterstitialListener
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.config.BidonError
@@ -47,7 +47,7 @@ fun InterstitialScreen(
     }
 
     val interstitial by lazy {
-        Interstitial("some_placement_id").apply {
+        InterstitialAd("some_placement_id").apply {
             setInterstitialListener(
                 object : InterstitialListener {
                     override fun onAdLoaded(ad: Ad) {

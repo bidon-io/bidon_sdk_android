@@ -190,7 +190,7 @@ internal class ApplovinBannerImpl(
     private fun AppLovinAdView?.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            eCPM = lineItem?.pricefloor ?: 0.0,
+            ecpm = lineItem?.pricefloor ?: 0.0,
             sourceAd = this ?: demandAd,
             networkName = demandId.demandId,
             dsp = null,
@@ -204,7 +204,7 @@ internal class ApplovinBannerImpl(
     private fun AppLovinAd?.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            eCPM = lineItem?.pricefloor ?: 0.0,
+            ecpm = lineItem?.pricefloor ?: 0.0,
             sourceAd = this ?: demandAd,
             networkName = demandId.demandId,
             dsp = null,

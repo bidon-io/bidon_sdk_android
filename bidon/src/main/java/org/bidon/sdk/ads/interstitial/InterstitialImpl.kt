@@ -21,10 +21,10 @@ import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 
-internal class InterstitialAdImpl(
+internal class InterstitialImpl(
     override val placementId: String,
     dispatcher: CoroutineDispatcher = SdkDispatchers.Main,
-) : InterstitialAd {
+) : Interstitial {
     private val demandAd by lazy {
         DemandAd(AdType.Interstitial, placementId)
     }
@@ -99,7 +99,9 @@ internal class InterstitialAdImpl(
                 require(adSource is AdSource.Interstitial<*>) {
                     "Unexpected AdSource type. Expected: AdSource.Interstitial. Actual: ${adSource::class.java}."
                 }
-                adSource.show(activity)
+                scope.launch(Dispatchers.Main.immediate) {
+                    adSource.show(activity)
+                }
             }
         }
     }

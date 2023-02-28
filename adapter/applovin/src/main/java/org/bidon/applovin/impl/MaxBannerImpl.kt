@@ -220,7 +220,7 @@ internal class MaxBannerImpl(
         val maxAd = this
         return Ad(
             demandAd = demandAd,
-            eCPM = maxAd?.revenue ?: 0.0,
+            ecpm = maxAd?.revenue ?: 0.0,
             sourceAd = maxAd ?: demandAd,
             networkName = maxAd?.networkName,
             dsp = maxAd?.dspId,
@@ -238,7 +238,7 @@ internal class MaxBannerImpl(
         val maxAd = this
         return Ad(
             demandAd = demandAd,
-            eCPM = 0.0,
+            ecpm = 0.0,
             sourceAd = maxAd ?: demandAd,
             networkName = ApplovinDemandId.demandId,
             dsp = null,

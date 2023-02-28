@@ -117,7 +117,7 @@ internal class AdmobBannerImpl(
                 AdEvent.PaidRevenue(
                     ad = Ad(
                         demandAd = demandAd,
-                        eCPM = lineItem?.pricefloor ?: 0.0,
+                        ecpm = lineItem?.pricefloor ?: 0.0,
                         sourceAd = requiredAdView,
                         networkName = demandId.demandId,
                         dsp = null,
@@ -230,7 +230,7 @@ internal class AdmobBannerImpl(
     private fun AdView.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            eCPM = lineItem?.pricefloor ?: 0.0,
+            ecpm = lineItem?.pricefloor ?: 0.0,
             sourceAd = this,
             networkName = demandId.demandId,
             dsp = null,

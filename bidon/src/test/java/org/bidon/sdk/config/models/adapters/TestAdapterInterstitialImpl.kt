@@ -36,7 +36,7 @@ internal class TestAdapterInterstitialImpl(
     override val ad: Ad
         get() = Ad(
             demandAd = demandAd,
-            eCPM = 1.5,
+            ecpm = 1.5,
             roundId = roundId,
             networkName = "monetizationNetwork-Appodeal",
             dsp = "DSP-bidmachine",

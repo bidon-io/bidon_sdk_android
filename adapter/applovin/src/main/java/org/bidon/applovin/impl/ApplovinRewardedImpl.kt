@@ -187,7 +187,7 @@ internal class ApplovinRewardedImpl(
     private fun AppLovinIncentivizedInterstitial?.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            eCPM = lineItem?.pricefloor ?: 0.0,
+            ecpm = lineItem?.pricefloor ?: 0.0,
             sourceAd = this ?: demandAd,
             networkName = demandId.demandId,
             dsp = null,
@@ -201,7 +201,7 @@ internal class ApplovinRewardedImpl(
     private fun AppLovinAd?.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            eCPM = lineItem?.pricefloor ?: 0.0,
+            ecpm = lineItem?.pricefloor ?: 0.0,
             sourceAd = this ?: demandAd,
             networkName = demandId.demandId,
             dsp = null,

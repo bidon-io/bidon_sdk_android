@@ -104,7 +104,9 @@ internal class RewardedImpl(
                 require(adSource is AdSource.Rewarded<*>) {
                     "Unexpected AdSource type. Expected: AdSource.Rewarded. Actual: ${adSource::class.java}."
                 }
-                adSource.show(activity)
+                scope.launch(Dispatchers.Main.immediate) {
+                    adSource.show(activity)
+                }
             }
         }
     }

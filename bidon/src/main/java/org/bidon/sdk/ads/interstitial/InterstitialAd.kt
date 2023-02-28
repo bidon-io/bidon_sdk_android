@@ -7,11 +7,11 @@ import org.bidon.sdk.BidOnSdk.DefaultPricefloor
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-class Interstitial @JvmOverloads constructor(
+class InterstitialAd @JvmOverloads constructor(
     override val placementId: String = DefaultPlacement,
-) : InterstitialAd by InterstitialAdImpl(placementId)
+) : Interstitial by InterstitialImpl(placementId)
 
-interface InterstitialAd {
+interface Interstitial {
     val placementId: String
 
     fun loadAd(activity: Activity, pricefloor: Double = DefaultPricefloor)

@@ -2,9 +2,7 @@
 -keep class org.bidon.sdk.adapter.Adapter {
     public <methods>;
 }
--keep class org.bidon.sdk.BidOn { *; }
--keep public interface org.bidon.sdk.BidOnSdk { *; }
--keep public interface org.bidon.sdk.BidOnBuilder { *; }
+-keep public class org.bidon.sdk.BidOnSdk { *; }
 -keep public interface org.bidon.sdk.logs.logging.Logger { *; }
 -keep public enum org.bidon.sdk.logs.logging.Logger$Level { *; }
 -keep enum org.bidon.sdk.config.DefaultAdapters { *; }
@@ -23,13 +21,13 @@
 -keep public class org.bidon.sdk.ads.banner.BannerView { *; }
 -keep public interface org.bidon.sdk.ads.banner.BannerListener { *; }
 
--keep public class org.bidon.sdk.ads.interstitial.Interstitial { *; }
--keep public interface org.bidon.sdk.ads.interstitial.InterstitialAd { *; }
+-keep public interface org.bidon.sdk.ads.interstitial.Interstitial { *; }
+-keep public class org.bidon.sdk.ads.interstitial.InterstitialAd { *; }
 -keep public class org.bidon.sdk.ads.interstitial.InterstitialAd$DefaultImpls { *; }
 -keep public interface org.bidon.sdk.ads.interstitial.InterstitialListener { *; }
 
--keep public class org.bidon.sdk.ads.rewarded.Rewarded { *; }
--keep public interface org.bidon.sdk.ads.rewarded.RewardedAd { *; }
+-keep public interface org.bidon.sdk.ads.rewarded.Rewarded { *; }
+-keep public class org.bidon.sdk.ads.rewarded.RewardedAd { *; }
 -keep public class org.bidon.sdk.ads.rewarded.RewardedAd$DefaultImpls { *; }
 -keep public interface org.bidon.sdk.ads.rewarded.RewardedListener { *; }
 -keep public interface org.bidon.sdk.ads.rewarded.RewardedAdListener { *; }

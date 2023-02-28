@@ -13,7 +13,7 @@ import org.bidon.sdk.auction.models.LineItem
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 sealed interface AdSource<T : AdAuctionParams> {
-    val demandId: DemandId
+    public val demandId: DemandId
     val ad: Ad?
     val adEvent: Flow<AdEvent>
     val isAdReadyToShow: Boolean
