@@ -5,7 +5,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.bidon.sdk.BidOnBuilder
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.config.BidOnInitializer
 import org.bidon.sdk.config.SdkState
@@ -24,7 +23,7 @@ import org.bidon.sdk.utils.networking.BidOnEndpoints
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-internal class BidOnInitializerImpl : BidOnInitializer, BidOnBuilder {
+internal class BidOnInitializerImpl : BidOnInitializer {
     private val dispatcher by lazy { SdkDispatchers.Single }
     private val scope get() = CoroutineScope(dispatcher)
 
@@ -47,31 +46,26 @@ internal class BidOnInitializerImpl : BidOnInitializer, BidOnBuilder {
     override val isInitialized: Boolean
         get() = initializationState.value == SdkState.Initialized
 
-    override fun registerDefaultAdapters(): BidOnBuilder {
+    override fun registerDefaultAdapters() {
         useDefaultAdapters = true
-        return this
     }
 
-    override fun registerAdapters(vararg adapters: Adapter): BidOnBuilder {
+    override fun registerAdapters(vararg adapters: Adapter) {
         adapters.forEach { adapter ->
             publisherAdapters[adapter::class.java] = adapter
         }
-        return this
     }
 
-    override fun registerAdapters(adaptersClassName: String): BidOnBuilder {
+    override fun registerAdapter(adaptersClassName: String) {
         publisherAdapterClasses.add(adaptersClassName)
-        return this
     }
 
-    override fun setInitializationCallback(initializationCallback: org.bidon.sdk.config.InitializationCallback): BidOnBuilder {
+    override fun setInitializationCallback(initializationCallback: org.bidon.sdk.config.InitializationCallback) {
         this.initializationCallback = initializationCallback
-        return this
     }
 
-    override fun setBaseUrl(host: String): BidOnBuilder {
+    override fun setBaseUrl(host: String) {
         bidOnEndpoints.init(host, setOf())
-        return this
     }
 
     override fun initialize(activity: Activity, appKey: String) {

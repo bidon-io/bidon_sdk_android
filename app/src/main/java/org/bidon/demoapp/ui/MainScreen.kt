@@ -64,11 +64,11 @@ internal fun MainScreen(
                         val baseUrl =
                             sharedPreferences.getString("host", NetworkSettings.BidOnBaseUrl) ?: NetworkSettings.BidOnBaseUrl
                         initState.value = MainScreenState.Initializing
-                        BidOnSdk.setLogLevel(Logger.Level.Verbose)
                         BidOnSdk
+                            .setLoggerLevel(Logger.Level.Verbose)
                             .registerDefaultAdapters()
                             .registerAdapters(BidMachineAdapter())
-                            .registerAdapters("org.bidon.admob.AdmobAdapter")
+                            .registerAdapter("org.bidon.admob.AdmobAdapter")
                             .setBaseUrl(baseUrl)
                             .setInitializationCallback {
                                 initState.value = MainScreenState.Initialized

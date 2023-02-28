@@ -8,7 +8,9 @@ import org.bidon.sdk.BidOnSdk
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.ads.*
+import org.bidon.sdk.ads.Ad
+import org.bidon.sdk.ads.AdType
+import org.bidon.sdk.ads.asUnspecified
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.AuctionHolder
 import org.bidon.sdk.auction.AuctionResult
@@ -20,7 +22,7 @@ import org.bidon.sdk.utils.SdkDispatchers
 
 internal class RewardedImpl(
     override val placementId: String,
-    private val dispatcher: CoroutineDispatcher = SdkDispatchers.Default,
+    dispatcher: CoroutineDispatcher = SdkDispatchers.Main,
 ) : Rewarded {
 
     private val demandAd by lazy {
@@ -31,9 +33,11 @@ internal class RewardedImpl(
     private val auctionHolder: AuctionHolder by lazy {
         org.bidon.sdk.utils.di.get { params(demandAd, listener) }
     }
-
     private val listener by lazy {
         getRewardedListener()
+    }
+    private val scope by lazy {
+        CoroutineScope(dispatcher)
     }
 
     override fun isReady(): Boolean {
@@ -146,7 +150,7 @@ internal class RewardedImpl(
                 is AdEvent.LoadFailed -> listener.onAdLoadFailed(adEvent.cause)
                 is AdEvent.Expired -> listener.onAdExpired(adEvent.ad)
             }
-        }.launchIn(CoroutineScope(dispatcher))
+        }.launchIn(scope)
     }
 
     private fun getRewardedListener() = object : RewardedListener {

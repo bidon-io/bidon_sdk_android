@@ -23,9 +23,8 @@ import org.bidon.sdk.utils.di.get
 
 internal class InterstitialAdImpl(
     override val placementId: String,
-    private val dispatcher: CoroutineDispatcher = SdkDispatchers.Default,
+    dispatcher: CoroutineDispatcher = SdkDispatchers.Main,
 ) : InterstitialAd {
-
     private val demandAd by lazy {
         DemandAd(AdType.Interstitial, placementId)
     }
@@ -36,9 +35,11 @@ internal class InterstitialAdImpl(
             params(demandAd, listener)
         }
     }
-
     private val listener by lazy {
         getInterstitialListener()
+    }
+    private val scope by lazy {
+        CoroutineScope(dispatcher)
     }
 
     override fun loadAd(activity: Activity, pricefloor: Double) {
@@ -145,7 +146,7 @@ internal class InterstitialAdImpl(
                 is AdEvent.LoadFailed -> listener.onAdLoadFailed(adEvent.cause)
                 is AdEvent.Expired -> listener.onAdExpired(adEvent.ad)
             }
-        }.launchIn(CoroutineScope(dispatcher))
+        }.launchIn(scope)
     }
 
     private fun getInterstitialListener() = object : InterstitialListener {
