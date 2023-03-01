@@ -9,10 +9,10 @@ package org.bidon.sdk.logs.analytic
  */
 data class AdValue(
     val adRevenue: Double,
-    val currency: String = DefaultCurrency,
+    val currency: String = USD,
     val precision: Precision
 ) {
     companion object {
-        const val DefaultCurrency = "USD"
+        const val USD = "USD"
     }
 }

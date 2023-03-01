@@ -42,6 +42,7 @@ include(
     ":adapter:bidmachine",
     ":adapter:admob",
     ":adapter:applovin",
+    ":adapter:dtexchange",
 //    ":adapter:fyber",
 //    ":adapter:ironsource",
 //    ":adapter:appsflyer"

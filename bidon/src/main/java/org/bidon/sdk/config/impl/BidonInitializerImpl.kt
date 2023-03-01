@@ -6,7 +6,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.bidon.sdk.adapter.Adapter
+import org.bidon.sdk.config.AdapterInstanceCreator
 import org.bidon.sdk.config.BidonInitializer
+import org.bidon.sdk.config.InitializationCallback
 import org.bidon.sdk.config.SdkState
 import org.bidon.sdk.config.models.ConfigRequestBody
 import org.bidon.sdk.config.usecases.GetConfigRequestUseCase
@@ -30,12 +32,12 @@ internal class BidonInitializerImpl : BidonInitializer {
     private var useDefaultAdapters = false
     private var publisherAdapters = mutableMapOf<Class<out Adapter>, Adapter>()
     private var publisherAdapterClasses = mutableSetOf<String>()
-    private var initializationCallback: org.bidon.sdk.config.InitializationCallback? = null
+    private var initializationCallback: InitializationCallback? = null
     private val initializationState = MutableStateFlow(SdkState.NotInitialized)
 
     private val initAndRegisterAdapters: InitAndRegisterAdaptersUseCase get() = get()
     private val getConfigRequest: GetConfigRequestUseCase get() = get()
-    private val adapterInstanceCreator: org.bidon.sdk.config.AdapterInstanceCreator get() = get()
+    private val adapterInstanceCreator: AdapterInstanceCreator get() = get()
     private val keyValueStorage: KeyValueStorage get() = get()
     private val bidOnEndpoints: BidonEndpoints get() = get()
 
@@ -60,7 +62,7 @@ internal class BidonInitializerImpl : BidonInitializer {
         publisherAdapterClasses.add(adaptersClassName)
     }
 
-    override fun setInitializationCallback(initializationCallback: org.bidon.sdk.config.InitializationCallback) {
+    override fun setInitializationCallback(initializationCallback: InitializationCallback) {
         this.initializationCallback = initializationCallback
     }
 
@@ -118,7 +120,7 @@ internal class BidonInitializerImpl : BidonInitializer {
                 logInfo(Tag, "Config data: $configResponse")
                 initAndRegisterAdapters(
                     activity = activity,
-                    adapters = defaultAdapters + publisherAdapters.values,
+                    adapters = (defaultAdapters + publisherAdapters.values).distinctBy { it::class },
                     configResponse = configResponse,
                 )
             }.onFailure {

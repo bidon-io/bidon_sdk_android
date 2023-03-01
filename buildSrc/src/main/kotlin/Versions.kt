@@ -7,7 +7,8 @@ object Versions {
         const val Appsflyer = "0.1.0.1-Beta"
         const val BidMachine = "0.1.0.1-Beta"
         const val IronSource = "0.1.0.1-Beta"
-        const val FairBid = "0.1.0.1-Beta"
+        const val Fyber = "0.1.0.1-Beta"
+        const val DTExchange = "0.1.0.1-Beta"
     }
 }
 

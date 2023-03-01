@@ -256,7 +256,7 @@ internal class BMBannerAdImpl(
         return Ad(
             demandAd = demandAd,
             ecpm = this.auctionResult?.price ?: 0.0,
-            sourceAd = this,
+            demandAdObject = this,
             currencyCode = "USD",
             roundId = roundId,
             dsp = this.auctionResult?.demandSource,

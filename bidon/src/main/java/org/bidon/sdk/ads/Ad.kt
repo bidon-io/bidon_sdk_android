@@ -15,12 +15,15 @@ class Ad(
     val adUnitId: String?,
     val dsp: String?,
     val currencyCode: String?,
-    val sourceAd: Any,
+    /**
+     * Source demand's ad object (instance)
+     */
+    val demandAdObject: Any,
 ) {
     val currency: Currency?
         get() = currencyCode?.let { Currency.getInstance(it) }
 
     override fun toString(): String {
-        return "Ad(network=$networkName, adType=${demandAd.adType}, ecpm=$ecpm, auctionId=$auctionId, round=$roundId, dsp=$dsp, currency=${currency?.currencyCode}, adUnitId=$adUnitId, sourceAdObject=${sourceAd::class.java.simpleName})"
+        return "Ad(network=$networkName, adType=${demandAd.adType}, price=$ecpm, auctionId=$auctionId, round=$roundId, dsp=$dsp, currency=${currency?.currencyCode}, adUnitId=$adUnitId, demandAdObject=${demandAdObject::class.java.simpleName})"
     }
 }

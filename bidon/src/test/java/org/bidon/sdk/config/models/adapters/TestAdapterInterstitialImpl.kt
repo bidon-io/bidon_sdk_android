@@ -40,7 +40,7 @@ internal class TestAdapterInterstitialImpl(
             roundId = roundId,
             networkName = "monetizationNetwork-Appodeal",
             dsp = "DSP-bidmachine",
-            sourceAd = this,
+            demandAdObject = this,
             currencyCode = "USD",
             auctionId = "auctionId-12312",
             adUnitId = "adUnitId_123"

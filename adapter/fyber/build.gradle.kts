@@ -6,19 +6,23 @@ plugins {
 }
 
 project.extra.apply {
-    this.set("AdapterArtifactId", "fairbid-decorator")
-    this.set("AdapterVersionName", Versions.Adapters.FairBid)
+    this.set("AdapterArtifactId", "fyber-adapter")
+    this.set("AdapterVersionName", Versions.Adapters.Fyber)
 }
 
 android {
     defaultConfig {
-        ADAPTER_VERSION = Versions.Adapters.FairBid
+        ADAPTER_VERSION = Versions.Adapters.Fyber
     }
 }
 
 dependencies {
     compileOnly(project(":bidon"))
-    implementation("com.fyber.omsdk:om-sdk:1.3.28")
+
+    val fyberMarketplaceVersion = "8.2.1"
+
+    implementation("com.fyber.omsdk:om-sdk:1.3.30")
     implementation("com.fyber:fairbid-sdk:3.28.1")
-    implementation("com.fyber:marketplace-sdk:8.1.3")
+    implementation("com.fyber:marketplace-sdk:$fyberMarketplaceVersion")
+    implementation(Dependencies.Google.PlayServicesAdsIdentifier)
 }

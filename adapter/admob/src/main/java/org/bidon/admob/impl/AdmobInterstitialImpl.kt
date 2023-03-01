@@ -90,7 +90,7 @@ internal class AdmobInterstitialImpl(
                     ad = Ad(
                         demandAd = demandAd,
                         ecpm = lineItem?.pricefloor ?: 0.0,
-                        sourceAd = requiredInterstitialAd,
+                        demandAdObject = requiredInterstitialAd,
                         networkName = demandId.demandId,
                         dsp = null,
                         roundId = roundId,
@@ -224,7 +224,7 @@ internal class AdmobInterstitialImpl(
         return Ad(
             demandAd = demandAd,
             ecpm = lineItem?.pricefloor ?: 0.0,
-            sourceAd = this,
+            demandAdObject = this,
             networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
@@ -235,4 +235,4 @@ internal class AdmobInterstitialImpl(
     }
 }
 
-private const val Tag = "Admob Interstitial"
+private const val Tag = "AdmobInterstitial"

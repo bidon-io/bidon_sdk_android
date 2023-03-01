@@ -118,11 +118,11 @@ internal class AdmobBannerImpl(
                     ad = Ad(
                         demandAd = demandAd,
                         ecpm = lineItem?.pricefloor ?: 0.0,
-                        sourceAd = requiredAdView,
+                        demandAdObject = requiredAdView,
                         networkName = demandId.demandId,
                         dsp = null,
                         roundId = roundId,
-                        currencyCode = AdValue.DefaultCurrency,
+                        currencyCode = AdValue.USD,
                         auctionId = auctionId,
                         adUnitId = lineItem?.adUnitId
                     ),
@@ -231,11 +231,11 @@ internal class AdmobBannerImpl(
         return Ad(
             demandAd = demandAd,
             ecpm = lineItem?.pricefloor ?: 0.0,
-            sourceAd = this,
+            demandAdObject = this,
             networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = AdValue.DefaultCurrency,
+            currencyCode = AdValue.USD,
             auctionId = auctionId,
             adUnitId = adUnitId
         )

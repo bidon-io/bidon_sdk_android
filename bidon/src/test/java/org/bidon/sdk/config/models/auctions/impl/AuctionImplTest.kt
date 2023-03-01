@@ -26,6 +26,7 @@ import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.Round
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
 import org.bidon.sdk.base.ConcurrentTest
+import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.ext.asSuccess
@@ -171,7 +172,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 println("roundSucceed: $roundId")
             }
 
-            override fun onRoundFailed(roundId: String, error: Throwable) {
+            override fun onRoundFailed(roundId: String, cause: BidonError) {
                 println("roundFailed: $roundId")
             }
         }

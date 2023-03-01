@@ -107,7 +107,7 @@ internal class AdmobRewardedImpl(
                     ad = Ad(
                         demandAd = demandAd,
                         ecpm = lineItem?.pricefloor ?: 0.0,
-                        sourceAd = requiredRewardedAd,
+                        demandAdObject = requiredRewardedAd,
                         networkName = demandId.demandId,
                         dsp = null,
                         roundId = roundId,
@@ -241,7 +241,7 @@ internal class AdmobRewardedImpl(
         return Ad(
             demandAd = demandAd,
             ecpm = lineItem?.pricefloor ?: 0.0,
-            sourceAd = this,
+            demandAdObject = this,
             networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,

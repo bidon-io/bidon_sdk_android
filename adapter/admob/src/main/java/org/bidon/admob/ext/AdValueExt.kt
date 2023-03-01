@@ -19,6 +19,6 @@ internal fun GoogleAdValue.asBidonAdValue(): AdValue {
             3 -> Precision.Precise // "PUBLISHER_PROVIDED"
             else -> Precision.Estimated // "unknown type ${adValue.precisionType}"
         },
-        currency = AdValue.DefaultCurrency,
+        currency = AdValue.USD,
     )
 }

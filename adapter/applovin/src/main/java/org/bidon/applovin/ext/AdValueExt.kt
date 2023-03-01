@@ -11,7 +11,7 @@ internal fun Double?.asBidonAdValue(): AdValue {
     return AdValue(
         adRevenue = (this ?: 0.0) / 1000.0,
         precision = Precision.Estimated,
-        currency = AdValue.DefaultCurrency
+        currency = AdValue.USD
     )
 }
 
@@ -22,6 +22,6 @@ internal fun MaxAd.asBidonAdValue(): AdValue {
             "exact" -> Precision.Precise
             else -> Precision.Estimated
         },
-        currency = AdValue.DefaultCurrency
+        currency = AdValue.USD
     )
 }

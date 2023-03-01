@@ -191,11 +191,11 @@ internal class ApplovinBannerImpl(
         return Ad(
             demandAd = demandAd,
             ecpm = lineItem?.pricefloor ?: 0.0,
-            sourceAd = this ?: demandAd,
+            demandAdObject = this ?: demandAd,
             networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = AdValue.DefaultCurrency,
+            currencyCode = AdValue.USD,
             auctionId = auctionId,
             adUnitId = lineItem?.adUnitId
         )
@@ -205,11 +205,11 @@ internal class ApplovinBannerImpl(
         return Ad(
             demandAd = demandAd,
             ecpm = lineItem?.pricefloor ?: 0.0,
-            sourceAd = this ?: demandAd,
+            demandAdObject = this ?: demandAd,
             networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
-            currencyCode = AdValue.DefaultCurrency,
+            currencyCode = AdValue.USD,
             auctionId = auctionId,
             adUnitId = lineItem?.adUnitId
         )

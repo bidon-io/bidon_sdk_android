@@ -12,6 +12,6 @@ internal fun AuctionResult?.asBidonAdValue(): AdValue {
     return AdValue(
         adRevenue = (this?.price ?: 0.0) / 1000.0,
         precision = Precision.Precise,
-        currency = AdValue.DefaultCurrency
+        currency = AdValue.USD
     )
 }
