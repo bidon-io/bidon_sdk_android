@@ -22,7 +22,7 @@ import org.bidon.demoapp.component.AppButton
 import org.bidon.demoapp.component.AppToolbar
 import org.bidon.demoapp.component.Body1Text
 import org.bidon.demoapp.component.Body2Text
-import org.bidon.sdk.BidOnSdk
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.interstitial.InterstitialAd
 import org.bidon.sdk.ads.interstitial.InterstitialListener
@@ -92,8 +92,8 @@ fun InterstitialScreen(
                         logFlow.log(log)
                     }
 
-                    override fun onAuctionFailed(error: Throwable) {
-                        logFlow.log("auctionFailed: $error")
+                    override fun onAuctionFailed(cause: BidonError) {
+                        logFlow.log("auctionFailed: $cause")
                     }
 
                     override fun onRoundStarted(roundId: String, pricefloor: Double) {
@@ -111,8 +111,8 @@ fun InterstitialScreen(
                         )
                     }
 
-                    override fun onRoundFailed(roundId: String, error: Throwable) {
-                        logFlow.log("roundFailed: roundId=$roundId, $error")
+                    override fun onRoundFailed(roundId: String, cause: BidonError) {
+                        logFlow.log("roundFailed: roundId=$roundId, $cause")
                     }
 
                     override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
@@ -144,9 +144,9 @@ fun InterstitialScreen(
                 AppButton(text = "Load") {
                     val pricefloor = pricefloorState.value.toDoubleOrNull()
                     if (pricefloor == null) {
-                        pricefloorState.value = BidOnSdk.DefaultPricefloor.toString()
+                        pricefloorState.value = BidonSdk.DefaultPricefloor.toString()
                     }
-                    interstitial.loadAd(activity, pricefloor = pricefloor ?: BidOnSdk.DefaultPricefloor)
+                    interstitial.loadAd(activity, pricefloor = pricefloor ?: BidonSdk.DefaultPricefloor)
                 }
                 Body1Text(
                     text = "Pricefloor $", modifier = Modifier.padding(start = 16.dp)

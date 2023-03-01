@@ -217,8 +217,8 @@ fun BannerScreen(navController: NavHostController) {
                                     logFlow.log(log)
                                 }
 
-                                override fun onAuctionFailed(error: Throwable) {
-                                    logFlow.log("auctionFailed: $error")
+                                override fun onAuctionFailed(cause: BidonError) {
+                                    logFlow.log("auctionFailed: $cause")
                                 }
 
                                 override fun onRoundStarted(roundId: String, pricefloor: Double) {
@@ -236,8 +236,8 @@ fun BannerScreen(navController: NavHostController) {
                                     )
                                 }
 
-                                override fun onRoundFailed(roundId: String, error: Throwable) {
-                                    logFlow.log("roundFailed: roundId=$roundId, $error")
+                                override fun onRoundFailed(roundId: String, cause: BidonError) {
+                                    logFlow.log("roundFailed: roundId=$roundId, $cause")
                                 }
 
                                 override fun onRevenuePaid(ad: Ad, adValue: AdValue) {

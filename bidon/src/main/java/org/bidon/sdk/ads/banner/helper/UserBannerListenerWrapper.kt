@@ -38,8 +38,8 @@ internal fun wrapUserBannerListener(userListener: () -> BannerListener?) = objec
         userListener()?.onAuctionSuccess(auctionResults)
     }
 
-    override fun onAuctionFailed(error: Throwable) {
-        userListener()?.onAuctionFailed(error)
+    override fun onAuctionFailed(cause: BidonError) {
+        userListener()?.onAuctionFailed(cause)
     }
 
     override fun onRoundStarted(roundId: String, pricefloor: Double) {
@@ -50,8 +50,8 @@ internal fun wrapUserBannerListener(userListener: () -> BannerListener?) = objec
         userListener()?.onRoundSucceed(roundId, roundResults)
     }
 
-    override fun onRoundFailed(roundId: String, error: Throwable) {
-        userListener()?.onRoundFailed(roundId, error)
+    override fun onRoundFailed(roundId: String, cause: BidonError) {
+        userListener()?.onRoundFailed(roundId, cause)
     }
 
     override fun onRevenuePaid(ad: Ad, adValue: AdValue) {

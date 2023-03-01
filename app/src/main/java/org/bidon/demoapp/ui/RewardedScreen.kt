@@ -22,7 +22,7 @@ import org.bidon.demoapp.component.AppButton
 import org.bidon.demoapp.component.AppToolbar
 import org.bidon.demoapp.component.Body1Text
 import org.bidon.demoapp.component.Body2Text
-import org.bidon.sdk.BidOnSdk
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.rewarded.Reward
 import org.bidon.sdk.ads.rewarded.RewardedAd
@@ -93,8 +93,8 @@ fun RewardedScreen(
                         logFlow.log(log)
                     }
 
-                    override fun onAuctionFailed(error: Throwable) {
-                        logFlow.log("auctionFailed: $error")
+                    override fun onAuctionFailed(cause: BidonError) {
+                        logFlow.log("auctionFailed: $cause")
                     }
 
                     override fun onRoundStarted(roundId: String, pricefloor: Double) {
@@ -112,8 +112,8 @@ fun RewardedScreen(
                         )
                     }
 
-                    override fun onRoundFailed(roundId: String, error: Throwable) {
-                        logFlow.log("roundFailed: roundId=$roundId, $error")
+                    override fun onRoundFailed(roundId: String, cause: BidonError) {
+                        logFlow.log("roundFailed: roundId=$roundId, $cause")
                     }
 
                     override fun onUserRewarded(ad: Ad, reward: Reward?) {
@@ -149,9 +149,9 @@ fun RewardedScreen(
                 AppButton(text = "Load") {
                     val minPrice = pricefloor.value.toDoubleOrNull()
                     if (minPrice == null) {
-                        pricefloor.value = BidOnSdk.DefaultPricefloor.toString()
+                        pricefloor.value = BidonSdk.DefaultPricefloor.toString()
                     }
-                    rewardedAd.loadAd(activity, pricefloor = minPrice ?: BidOnSdk.DefaultPricefloor)
+                    rewardedAd.loadAd(activity, pricefloor = minPrice ?: BidonSdk.DefaultPricefloor)
                 }
                 Body1Text(
                     text = "Pricefloor $", modifier = Modifier.padding(start = 16.dp)

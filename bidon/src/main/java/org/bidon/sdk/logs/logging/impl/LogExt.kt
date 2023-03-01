@@ -1,7 +1,7 @@
 package org.bidon.sdk.logs.logging.impl
 
 import android.util.Log
-import org.bidon.sdk.BidOnSdk
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.logs.logging.Logger
 import org.bidon.sdk.logs.logging.Logger.Level
 
@@ -11,15 +11,15 @@ import org.bidon.sdk.logs.logging.Logger.Level
  * Set log level with [Logger]
  */
 fun logInfo(tag: String, message: String) {
-    if (BidOnSdk.loggerLevel == Level.Verbose) {
+    if (BidonSdk.loggerLevel == Level.Verbose) {
         Log.d(DefaultTag, "[$tag] $message")
     }
 }
 
 fun logError(tag: String, message: String, error: Throwable?) {
-    if (BidOnSdk.loggerLevel in arrayOf(Level.Error, Level.Verbose)) {
+    if (BidonSdk.loggerLevel in arrayOf(Level.Error, Level.Verbose)) {
         Log.e(DefaultTag, "[$tag] $message", error)
     }
 }
 
-private const val DefaultTag = "BidOnLog"
+private const val DefaultTag = "BidonLog"

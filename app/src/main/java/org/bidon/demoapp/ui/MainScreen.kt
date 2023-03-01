@@ -31,7 +31,7 @@ import org.bidon.demoapp.component.AppTextButton
 import org.bidon.demoapp.component.CaptionText
 import org.bidon.demoapp.component.H5Text
 import org.bidon.demoapp.navigation.Screen
-import org.bidon.sdk.BidOnSdk
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.logs.logging.Logger
 import org.bidon.sdk.utils.networking.NetworkSettings
 
@@ -53,7 +53,7 @@ internal fun MainScreen(
         when (val state = initState.value) {
             MainScreenState.NotInitialized,
             MainScreenState.Initializing -> {
-                H5Text(text = "BidOn")
+                H5Text(text = "Bidon")
                 CaptionText(
                     text = BuildConfig.APPLICATION_ID,
                     modifier = Modifier.padding(top = 4.dp, bottom = 40.dp),
@@ -62,9 +62,9 @@ internal fun MainScreen(
                 if (state == MainScreenState.NotInitialized) {
                     AppButton(text = "Init") {
                         val baseUrl =
-                            sharedPreferences.getString("host", NetworkSettings.BidOnBaseUrl) ?: NetworkSettings.BidOnBaseUrl
+                            sharedPreferences.getString("host", NetworkSettings.BidonBaseUrl) ?: NetworkSettings.BidonBaseUrl
                         initState.value = MainScreenState.Initializing
-                        BidOnSdk
+                        BidonSdk
                             .setLoggerLevel(Logger.Level.Verbose)
                             .registerDefaultAdapters()
                             .registerAdapters(BidMachineAdapter())

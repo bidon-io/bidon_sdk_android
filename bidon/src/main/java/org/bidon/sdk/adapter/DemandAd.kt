@@ -1,6 +1,6 @@
 package org.bidon.sdk.adapter
 
-import org.bidon.sdk.BidOnSdk.DefaultPlacement
+import org.bidon.sdk.BidonSdk.DefaultPlacement
 import org.bidon.sdk.ads.AdType
 
 /**

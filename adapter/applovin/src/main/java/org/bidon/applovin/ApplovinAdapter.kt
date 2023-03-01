@@ -10,7 +10,7 @@ import org.bidon.applovin.ext.sdkVersion
 import org.bidon.applovin.impl.ApplovinBannerImpl
 import org.bidon.applovin.impl.ApplovinInterstitialImpl
 import org.bidon.applovin.impl.ApplovinRewardedImpl
-import org.bidon.sdk.BidOnSdk
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.logs.logging.Logger
 import org.json.JSONObject
@@ -43,7 +43,7 @@ class ApplovinAdapter :
             val instance = AppLovinSdk.getInstance(configParams.key, AppLovinSdkSettings(context), context).also {
                 applovinSdk = it
             }
-            instance.settings.setVerboseLogging(BidOnSdk.loggerLevel != Logger.Level.Off)
+            instance.settings.setVerboseLogging(BidonSdk.loggerLevel != Logger.Level.Off)
             if (!instance.isInitialized) {
                 instance.initializeSdk {
                     continuation.resume(Unit)

@@ -5,7 +5,7 @@ package org.bidon.sdk.utils.networking
  *
  * Endpoint Manager
  */
-interface BidOnEndpoints {
+interface BidonEndpoints {
     val activeEndpoint: String
 
     fun init(defaultBaseUrl: String, loadedUrls: Set<String>)

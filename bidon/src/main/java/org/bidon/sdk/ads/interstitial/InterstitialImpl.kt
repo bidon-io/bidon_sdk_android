@@ -4,7 +4,7 @@ import android.app.Activity
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.bidon.sdk.BidOnSdk
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
@@ -43,7 +43,7 @@ internal class InterstitialImpl(
     }
 
     override fun loadAd(activity: Activity, pricefloor: Double) {
-        if (!BidOnSdk.isInitialized()) {
+        if (!BidonSdk.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
             return
         }
@@ -73,7 +73,7 @@ internal class InterstitialImpl(
                             /**
                              * Auction failed
                              */
-                            listener.onAuctionFailed(error = it)
+                            listener.onAuctionFailed(cause = it.asUnspecified())
                             listener.onAdLoadFailed(cause = it.asUnspecified())
                         }
                 }
@@ -112,9 +112,11 @@ internal class InterstitialImpl(
     }
 
     override fun destroyAd() {
-        auctionHolder.destroy()
-        observeCallbacksJob?.cancel()
-        observeCallbacksJob = null
+        scope.launch(Dispatchers.Main.immediate) {
+            auctionHolder.destroy()
+            observeCallbacksJob?.cancel()
+            observeCallbacksJob = null
+        }
     }
 
     override fun isReady(): Boolean {
@@ -188,8 +190,8 @@ internal class InterstitialImpl(
             userListener?.onAuctionSuccess(auctionResults)
         }
 
-        override fun onAuctionFailed(error: Throwable) {
-            userListener?.onAuctionFailed(error)
+        override fun onAuctionFailed(cause: BidonError) {
+            userListener?.onAuctionFailed(cause)
         }
 
         override fun onRoundStarted(roundId: String, pricefloor: Double) {
@@ -200,8 +202,8 @@ internal class InterstitialImpl(
             userListener?.onRoundSucceed(roundId, roundResults)
         }
 
-        override fun onRoundFailed(roundId: String, error: Throwable) {
-            userListener?.onRoundFailed(roundId, error)
+        override fun onRoundFailed(roundId: String, cause: BidonError) {
+            userListener?.onRoundFailed(roundId, cause)
         }
 
         override fun onRevenuePaid(ad: Ad, adValue: AdValue) {

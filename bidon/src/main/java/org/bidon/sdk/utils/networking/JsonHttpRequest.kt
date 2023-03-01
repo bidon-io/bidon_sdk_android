@@ -24,7 +24,7 @@ internal class JsonHttpRequest(
         path: String,
         body: JSONObject,
         httpClient: HttpClient = jsonZipHttpClient,
-        bidOnEndpoints: BidOnEndpoints = get(),
+        bidOnEndpoints: BidonEndpoints = get(),
     ): Result<String> {
         val url = bidOnEndpoints.activeEndpoint + "/$path"
         return httpClient.enqueue(

@@ -16,7 +16,7 @@ internal val jsonZipHttpClient by lazy {
     HttpClientImpl(
         headers = mapOf(
             "Content-Type" to listOf("application/json; charset=UTF-8"),
-            "X-BidOn-Version" to listOf(BidOnSdkVersion),
+            "X-Bidon-Version" to listOf(BidonSdkVersion),
         ),
         encoders = listOf(),
         decoders = listOf(),
@@ -90,6 +90,6 @@ internal class HttpClientImpl(
     }
 }
 
-private val BidOnSdkVersion by lazy { BuildConfig.ADAPTER_VERSION }
+private val BidonSdkVersion by lazy { BuildConfig.ADAPTER_VERSION }
 private const val RetryAfter = "Retry-After"
 private const val Tag = "HttpClient"

@@ -9,7 +9,7 @@ import org.bidon.bidmachine.ext.sdkVersion
 import org.bidon.bidmachine.impl.BMBannerAdImpl
 import org.bidon.bidmachine.impl.BMInterstitialAdImpl
 import org.bidon.bidmachine.impl.BMRewardedAdImpl
-import org.bidon.sdk.BidOnSdk
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.logs.logging.Logger
 import org.json.JSONObject
@@ -39,7 +39,7 @@ class BidMachineAdapter :
         suspendCancellableCoroutine { continuation ->
             this.context = activity.applicationContext
             val sourceId = configParams.sellerId
-            BidMachine.setLoggingEnabled(BidOnSdk.loggerLevel != Logger.Level.Off)
+            BidMachine.setLoggingEnabled(BidonSdk.loggerLevel != Logger.Level.Off)
             BidMachine.initialize(context, sourceId) {
                 continuation.resume(Unit)
             }

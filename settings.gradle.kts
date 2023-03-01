@@ -32,7 +32,7 @@ dependencyResolutionManagement {
         }
     }
 }
-rootProject.name = "BidOn SDK"
+rootProject.name = "Bidon SDK"
 
 include(
     ":app",

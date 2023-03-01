@@ -68,7 +68,7 @@ class FairBidAdapter :
             currencyCode = this?.currency,
             auctionId = "",
             adUnitId = null,
-            eCPM = this?.netPayout ?: 0.0,
+            ecpm = this?.netPayout ?: 0.0,
         )
     }
 

@@ -224,7 +224,7 @@ class IronSourceAdapter :
         val adInfo = this
         return Ad(
             demandAd = demandAd,
-            eCPM = adInfo?.revenue ?: 0.0,
+            ecpm = adInfo?.revenue ?: 0.0,
             sourceAd = adInfo ?: demandAd,
             currencyCode = null,
             roundId = "Ad.AuctionRound.Mediation",

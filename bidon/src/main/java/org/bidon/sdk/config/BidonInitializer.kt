@@ -7,7 +7,7 @@ import org.bidon.sdk.utils.networking.NetworkSettings
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-internal interface BidOnInitializer {
+internal interface BidonInitializer {
 
     val isInitialized: Boolean
 
@@ -27,13 +27,13 @@ internal interface BidOnInitializer {
     fun registerAdapter(adaptersClassName: String)
 
     /**
-     * BidOn SDK always invokes [InitializationCallback.onFinished] callback.
+     * Bidon SDK always invokes [InitializationCallback.onFinished] callback.
      * If error occurs, it will be logged.
      */
     fun setInitializationCallback(initializationCallback: InitializationCallback)
 
     /**
-     * Redefine BaseUrl for /action-requests. Default base url [NetworkSettings.BidOnBaseUrl]
+     * Redefine BaseUrl for /action-requests. Default base url [NetworkSettings.BidonBaseUrl]
      */
     fun setBaseUrl(host: String)
 

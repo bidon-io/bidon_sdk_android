@@ -30,7 +30,7 @@ internal fun ServerSettingsScreen(
     val host = remember {
         mutableStateOf(
             when (sharedPreferences.getString("host", "")) {
-                NetworkSettings.BidOnBaseUrl -> Host.Production
+                NetworkSettings.BidonBaseUrl -> Host.Production
                 MockUrl -> Host.MockServer
                 else -> Host.Production
             }
@@ -69,7 +69,7 @@ internal fun ServerSettingsScreen(
                 .align(Alignment.CenterHorizontally),
             onClick = {
                 val hostValue = when (host.value) {
-                    Host.Production -> NetworkSettings.BidOnBaseUrl
+                    Host.Production -> NetworkSettings.BidonBaseUrl
                     Host.MockServer -> MockUrl
                 }
                 sharedPreferences.edit().putString("host", hostValue).apply()
@@ -116,7 +116,7 @@ private fun RenderHosts(hosts: List<Host>, selectedHost: Host, onClick: (Host) -
                     )
                     CaptionText(
                         text = when (host) {
-                            Host.Production -> NetworkSettings.BidOnBaseUrl
+                            Host.Production -> NetworkSettings.BidonBaseUrl
                             Host.MockServer -> MockUrl
                         },
                         maxLines = 1

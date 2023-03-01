@@ -27,10 +27,10 @@ internal class AppDataSourceImpl(
     override fun getBundleId(): String = context.packageName
     override fun getVersionName(): String? = getPackageInfo(context)?.versionName
     override fun getAppKey(): String? = keyValueStorage.appKey
-    override fun getFramework(): String = BidOnVersion.frameworkName
-    override fun getFrameworkVersion(): String? = BidOnVersion.frameworkVersion
-    override fun getPluginVersion(): String? = BidOnVersion.engineVersion
-    override fun getVersion(): String = BidOnVersion.version
+    override fun getFramework(): String = BidonVersion.frameworkName
+    override fun getFrameworkVersion(): String? = BidonVersion.frameworkVersion
+    override fun getPluginVersion(): String? = BidonVersion.engineVersion
+    override fun getVersion(): String = BidonVersion.version
 
     private fun getPackageInfo(context: Context): PackageInfo? {
         var packageInfo: PackageInfo? = null

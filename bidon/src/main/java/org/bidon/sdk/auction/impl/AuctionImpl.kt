@@ -238,7 +238,7 @@ internal class AuctionImpl(
             logError(Tag, "Round '${round.id}' failed", BidonError.NoRoundResults)
             roundsListener.onRoundFailed(
                 roundId = round.id,
-                error = BidonError.NoRoundResults
+                cause = BidonError.NoRoundResults
             )
         }
     }

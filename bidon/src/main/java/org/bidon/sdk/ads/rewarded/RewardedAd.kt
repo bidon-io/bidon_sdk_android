@@ -1,8 +1,8 @@
 package org.bidon.sdk.ads.rewarded
 
 import android.app.Activity
-import org.bidon.sdk.BidOnSdk.DefaultPlacement
-import org.bidon.sdk.BidOnSdk.DefaultPricefloor
+import org.bidon.sdk.BidonSdk.DefaultPlacement
+import org.bidon.sdk.BidonSdk.DefaultPricefloor
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.

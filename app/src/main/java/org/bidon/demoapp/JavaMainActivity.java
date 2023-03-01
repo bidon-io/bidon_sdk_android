@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.bidon.sdk.BidOnSdk;
+import org.bidon.sdk.BidonSdk;
 import org.bidon.sdk.ads.Ad;
 import org.bidon.sdk.ads.interstitial.InterstitialListener;
 import org.bidon.sdk.auction.AuctionResult;
@@ -73,7 +73,7 @@ public class JavaMainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onAuctionFailed(@NonNull Throwable throwable) {
+            public void onAuctionFailed(@NonNull BidonError cause) {
 
             }
 
@@ -84,11 +84,11 @@ public class JavaMainActivity extends AppCompatActivity {
 
             @Override
             public void onRoundSucceed(@NonNull String s, @NonNull List<AuctionResult> list) {
-                list.get(0).getAdSource().getDemandId();
+                list.get(0).getAdSource().getDemandId().getDemandId();
             }
 
             @Override
-            public void onRoundFailed(@NonNull String s, @NonNull Throwable throwable) {
+            public void onRoundFailed(@NonNull String s, @NonNull BidonError cause) {
 
             }
 
@@ -100,7 +100,7 @@ public class JavaMainActivity extends AppCompatActivity {
                 adValue.getPrecision();
             }
         };
-        BidOnSdk.setLoggerLevel(Logger.Level.Verbose)
+        BidonSdk.setLoggerLevel(Logger.Level.Verbose)
                 .registerDefaultAdapters()
                 .setInitializationCallback(new InitializationCallback() {
                     @Override

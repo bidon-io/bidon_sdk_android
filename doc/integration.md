@@ -1,6 +1,6 @@
 # Integration
 
-This page is describes how to import and configure the BidOn SDK. 
+This page is describes how to import and configure the Bidon SDK. 
 
 - [Getting Started](#getting-started) 
 - [Initialize the SDK](#initialize-the-sdk)
@@ -8,7 +8,7 @@ This page is describes how to import and configure the BidOn SDK.
   
 ## Getting Started 
 
-To integrate BidOn SDK through Dependencies, firstly add repository fo BidOn SDK dependencies
+To integrate Bidon SDK through Dependencies, firstly add repository fo Bidon SDK dependencies
 ```ruby
 repositories {
     maven {
@@ -25,7 +25,7 @@ secondly add the following lines to your `build.gradle` (:app):
 
 ``` ruby
 dependencies {
-    # BidOn SDK Library
+    # Bidon SDK Library
     implementation 'org.bidon:bidon-sdk:0.1.0-Beta'
 
     # Demand Sources (AdNetworks)
@@ -45,12 +45,12 @@ Then sync project.
 Receive your `APP_KEY` in the dashboard app settings. Init Bidon SDK in your MainActivity class.
 
 ```kotlin
-BidOn
+Bidon
     .registerDefaultAdapters()
     // .registerAdapters("com.example.YourOwnAdapterClass") // for registering your custom Adapter (AdNetwork) by class name
     // .registerAdapters(YourOwnAdapter()) // for registering your custom Adapter (AdNetwork) by instance. Instance should be initialized and ready to work
     .setInitializationCallback {
-        //  BidOn is initialized and ready to work
+        //  Bidon is initialized and ready to work
     }
     .initialize(
         activity = this@MainActivity,
@@ -60,7 +60,7 @@ BidOn
 
 Set logging.
 ```kotlin
-BidOn.setLogLevel(Logger.Level.Verbose)
+Bidon.setLogLevel(Logger.Level.Verbose)
 ```
 
 ## Configure Ad Types

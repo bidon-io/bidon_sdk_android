@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.bidon.sdk.adapter.Adapter
-import org.bidon.sdk.config.BidOnInitializer
+import org.bidon.sdk.config.BidonInitializer
 import org.bidon.sdk.config.SdkState
 import org.bidon.sdk.config.models.ConfigRequestBody
 import org.bidon.sdk.config.usecases.GetConfigRequestUseCase
@@ -18,12 +18,12 @@ import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.DI
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
-import org.bidon.sdk.utils.networking.BidOnEndpoints
+import org.bidon.sdk.utils.networking.BidonEndpoints
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-internal class BidOnInitializerImpl : BidOnInitializer {
+internal class BidonInitializerImpl : BidonInitializer {
     private val dispatcher by lazy { SdkDispatchers.Single }
     private val scope get() = CoroutineScope(dispatcher)
 
@@ -37,7 +37,7 @@ internal class BidOnInitializerImpl : BidOnInitializer {
     private val getConfigRequest: GetConfigRequestUseCase get() = get()
     private val adapterInstanceCreator: org.bidon.sdk.config.AdapterInstanceCreator get() = get()
     private val keyValueStorage: KeyValueStorage get() = get()
-    private val bidOnEndpoints: BidOnEndpoints get() = get()
+    private val bidOnEndpoints: BidonEndpoints get() = get()
 
     init {
         DI.setFactories()
@@ -141,4 +141,4 @@ internal class BidOnInitializerImpl : BidOnInitializer {
     }
 }
 
-private const val Tag = "BidOnInitializer"
+private const val Tag = "BidonInitializer"

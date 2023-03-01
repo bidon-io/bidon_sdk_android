@@ -1,15 +1,15 @@
 package org.bidon.sdk.utils.networking.impl
 
-import org.bidon.sdk.utils.networking.BidOnEndpoints
+import org.bidon.sdk.utils.networking.BidonEndpoints
 import org.bidon.sdk.utils.networking.NetworkSettings
 import java.util.*
 
 /**
  * Created by Aleksei Cherniaev on 07/02/2023.
  */
-internal class BidOnEndpointsImpl : BidOnEndpoints {
+internal class BidonEndpointsImpl : BidonEndpoints {
     private val hosts: Queue<String> = LinkedList()
-    private var defaultEndpoint: String = NetworkSettings.BidOnBaseUrl
+    private var defaultEndpoint: String = NetworkSettings.BidonBaseUrl
 
     override val activeEndpoint: String get() = hosts.peek() ?: defaultEndpoint
 

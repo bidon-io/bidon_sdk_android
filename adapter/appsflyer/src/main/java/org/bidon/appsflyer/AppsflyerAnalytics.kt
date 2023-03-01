@@ -63,7 +63,7 @@ class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenu
             this["auction_round"] = ad.roundId
         }
         val monetizationNetwork = ad.networkName ?: "unknown"
-        val eventRevenue = ad.eCPM
+        val eventRevenue = ad.ecpm
         val eventRevenueCurrency = ad.currency ?: Currency.getInstance("USD")
 
         AppsFlyerAdRevenue.logAdRevenue(

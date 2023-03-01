@@ -55,10 +55,10 @@ import org.bidon.sdk.stats.usecases.SendImpressionRequestUseCase
 import org.bidon.sdk.stats.usecases.StatsRequestUseCase
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorageImpl
-import org.bidon.sdk.utils.networking.BidOnEndpoints
+import org.bidon.sdk.utils.networking.BidonEndpoints
 import org.bidon.sdk.utils.networking.JsonHttpRequest
 import org.bidon.sdk.utils.networking.NetworkStateObserver
-import org.bidon.sdk.utils.networking.impl.BidOnEndpointsImpl
+import org.bidon.sdk.utils.networking.impl.BidonEndpointsImpl
 import org.bidon.sdk.utils.networking.impl.NetworkStateObserverImpl
 import org.bidon.sdk.utils.networking.requests.*
 
@@ -83,7 +83,7 @@ internal object DI {
              * Singletons
              */
             singleton<AdaptersSource> { AdaptersSourceImpl() }
-            singleton<BidOnEndpoints> { BidOnEndpointsImpl() }
+            singleton<BidonEndpoints> { BidonEndpointsImpl() }
             singleton<KeyValueStorage> {
                 KeyValueStorageImpl(
                     context = get()

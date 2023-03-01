@@ -11,9 +11,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import org.bidon.sdk.BidOnSdk
-import org.bidon.sdk.BidOnSdk.DefaultPlacement
-import org.bidon.sdk.BidOnSdk.DefaultPricefloor
+import org.bidon.sdk.BidonSdk
+import org.bidon.sdk.BidonSdk.DefaultPlacement
+import org.bidon.sdk.BidonSdk.DefaultPricefloor
 import org.bidon.sdk.R
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
@@ -189,7 +189,7 @@ class BannerView(
      */
 
     private fun sendAction(action: ShowAction) {
-        if (!BidOnSdk.isInitialized()) {
+        if (!BidonSdk.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
             return
         }
@@ -197,7 +197,7 @@ class BannerView(
     }
 
     private fun sendAction(action: LoadAction) {
-        if (!BidOnSdk.isInitialized()) {
+        if (!BidonSdk.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
             return
         }
@@ -251,7 +251,7 @@ class BannerView(
                         /**
                          * Auction failed
                          */
-                        listener.onAuctionFailed(error = action.cause)
+                        listener.onAuctionFailed(cause = action.cause)
                         listener.onAdLoadFailed(cause = action.cause)
                         launchLoadingRefreshIfNeeded()
                         LoadState.Idle

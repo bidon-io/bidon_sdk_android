@@ -16,12 +16,12 @@
 
 ### Dependencies (Recommended)
 
-Add BidOn-repository to `settings.gradle.kts`:
+Add Bidon-repository to `settings.gradle.kts`:
 ```ruby
 dependencyResolutionManagement {
     repositories {
         maven {
-            url = uri("https://maven.pkg.github.com/appodeal/BidOn-SDK-Android")
+            url = uri("https://maven.pkg.github.com/io-bidon/bidon-sdk-Android")
         }
         ...
     }
