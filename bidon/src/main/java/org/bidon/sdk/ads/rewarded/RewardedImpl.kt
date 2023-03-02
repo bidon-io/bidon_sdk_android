@@ -47,6 +47,7 @@ internal class RewardedImpl(
     override fun loadAd(activity: Activity, pricefloor: Double) {
         if (!BidonSdk.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
+            listener.onAdLoadFailed(BidonError.SdkNotInitialized)
             return
         }
         logInfo(Tag, "Load with placement: $placementId")
@@ -89,6 +90,11 @@ internal class RewardedImpl(
     }
 
     override fun showAd(activity: Activity) {
+        if (!BidonSdk.isInitialized()) {
+            logInfo(Tag, "Sdk is not initialized")
+            listener.onAdShowFailed(BidonError.SdkNotInitialized)
+            return
+        }
         logInfo(Tag, "Show with placement: $placementId")
         if (auctionHolder.isActive) {
             logInfo(Tag, "Show failed. Auction in progress.")
@@ -101,9 +107,6 @@ internal class RewardedImpl(
                 listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
             }
             else -> {
-                require(adSource is AdSource.Rewarded<*>) {
-                    "Unexpected AdSource type. Expected: AdSource.Rewarded. Actual: ${adSource::class.java}."
-                }
                 scope.launch(Dispatchers.Main.immediate) {
                     adSource.show(activity)
                 }

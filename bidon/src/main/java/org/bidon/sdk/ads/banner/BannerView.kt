@@ -29,6 +29,7 @@ import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.models.BannerRequestBody.Format
+import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
@@ -144,6 +145,11 @@ class BannerView(
     }
 
     override fun loadAd(pricefloor: Double) {
+        if (!BidonSdk.isInitialized()) {
+            logInfo(Tag, "Sdk is not initialized")
+            listener.onAdLoadFailed(BidonError.SdkNotInitialized)
+            return
+        }
         this.pricefloor = pricefloor
         logInfo(Tag, "Load with placement invoked: $placementId")
         sendAction(LoadAction.OnLoadInvoked)

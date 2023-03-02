@@ -8,6 +8,7 @@ import org.bidon.sdk.ads.banner.BannerFormat
  */
 sealed class BidonError : Throwable() {
 
+    object SdkNotInitialized : BidonError()
     object AppKeyIsInvalid : BidonError() {
         override val message: String = "App key is invalid"
     }

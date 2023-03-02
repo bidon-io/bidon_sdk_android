@@ -45,6 +45,7 @@ internal class InterstitialImpl(
     override fun loadAd(activity: Activity, pricefloor: Double) {
         if (!BidonSdk.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
+            listener.onAdLoadFailed(BidonError.SdkNotInitialized)
             return
         }
         logInfo(Tag, "Load with placement=$placementId, pricefloor=$pricefloor")
@@ -66,7 +67,7 @@ internal class InterstitialImpl(
                             listener.onAuctionSuccess(auctionResults)
                             listener.onAdLoaded(
                                 requireNotNull(winner.adSource.ad) {
-                                    "[Ad] should exist when the Action succeeds"
+                                    "[Ad] should exist when action succeeds"
                                 }
                             )
                         }.onFailure {
@@ -84,10 +85,15 @@ internal class InterstitialImpl(
     }
 
     override fun showAd(activity: Activity) {
+        if (!BidonSdk.isInitialized()) {
+            logInfo(Tag, "Sdk is not initialized")
+            listener.onAdShowFailed(BidonError.SdkNotInitialized)
+            return
+        }
         logInfo(Tag, "Show with placement: $placementId")
         if (auctionHolder.isActive) {
             logInfo(Tag, "Show failed. Auction in progress.")
-            listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
+            listener.onAdShowFailed(BidonError.AuctionInProgress)
             return
         }
         when (val adSource = auctionHolder.popWinner()) {
@@ -96,9 +102,6 @@ internal class InterstitialImpl(
                 listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
             }
             else -> {
-                require(adSource is AdSource.Interstitial<*>) {
-                    "Unexpected AdSource type. Expected: AdSource.Interstitial. Actual: ${adSource::class.java}."
-                }
                 scope.launch(Dispatchers.Main.immediate) {
                     adSource.show(activity)
                 }
