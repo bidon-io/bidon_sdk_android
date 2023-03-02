@@ -32,6 +32,8 @@ dependencies {
     implementation 'org.bidon:bidmachine-adapter:0.1.0.1-Beta'
     implementation 'org.bidon:admob-adapter:0.1.0.1-Beta'
     implementation 'org.bidon:applovin-adapter:0.1.0.1-Beta'
+    implementation 'org.bidon:dtexchange-adapter:0.1.0.1-Beta'
+    implementation 'org.bidon:unityads-adapter:0.1.0.1-Beta'
     
     ... 
 }

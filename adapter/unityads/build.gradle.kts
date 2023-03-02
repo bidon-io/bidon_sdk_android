@@ -6,7 +6,7 @@ plugins {
 }
 
 project.extra.apply {
-    this.set("AdapterArtifactId", "dtexchange-adapter")
+    this.set("AdapterArtifactId", "unityads-adapter")
     this.set("AdapterVersionName", Versions.Adapters.UnityAds)
 }
 
