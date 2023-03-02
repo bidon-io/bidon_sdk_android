@@ -195,7 +195,7 @@ internal class AdmobBannerImpl(
             when (state) {
                 is AdEvent.LoadFailed -> {
                     AuctionResult(
-                        ecpm = 0.0,
+                        ecpm = adParams.lineItem.pricefloor,
                         adSource = this@AdmobBannerImpl
                     )
                 }

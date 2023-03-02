@@ -154,9 +154,9 @@ internal class AdmobInterstitialImpl(
     ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
             .minByPricefloorOrNull(demandId, pricefloor)
-            ?.also(onLineItemConsumed)
+            ?.also(onLineItemConsumed) ?: error(BidonError.NoAppropriateAdUnitId)
         AdmobFullscreenAdAuctionParams(
-            lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
+            lineItem = lineItem,
             pricefloor = pricefloor,
             context = activity.applicationContext
         )
@@ -187,7 +187,7 @@ internal class AdmobInterstitialImpl(
             when (state) {
                 is AdEvent.LoadFailed -> {
                     AuctionResult(
-                        ecpm = 0.0,
+                        ecpm = adParams.lineItem.pricefloor,
                         adSource = this@AdmobInterstitialImpl
                     )
                 }
@@ -203,12 +203,10 @@ internal class AdmobInterstitialImpl(
         /**
          * Admob fills the bid automatically. It's not needed to fill it manually.
          */
-        AdEvent.Fill(
-            requireNotNull(interstitialAd?.asAd())
-        ).also {
-            markFillFinished(RoundStatus.Successful)
-            adEvent.tryEmit(it)
-        }.ad
+        val event = AdEvent.Fill(requireNotNull(interstitialAd?.asAd()))
+        markFillFinished(RoundStatus.Successful)
+        adEvent.tryEmit(event)
+        event.ad
     }
 
     override fun show(activity: Activity) {

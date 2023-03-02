@@ -9,6 +9,7 @@ object Versions {
         const val IronSource = "0.1.0.1-Beta"
         const val Fyber = "0.1.0.1-Beta"
         const val DTExchange = "0.1.0.1-Beta"
+        const val UnityAds = "0.1.0.1-Beta"
     }
 }
 

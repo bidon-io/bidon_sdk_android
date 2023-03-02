@@ -43,6 +43,7 @@ include(
     ":adapter:admob",
     ":adapter:applovin",
     ":adapter:dtexchange",
+    ":adapter:unityads",
 //    ":adapter:fyber",
 //    ":adapter:ironsource",
 //    ":adapter:appsflyer"

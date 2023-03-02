@@ -5,7 +5,6 @@ import org.bidon.sdk.adapter.AdapterParameters
 /**
  * Created by Aleksei Cherniaev on 28/02/2023.
  */
-data class DataExchangeParameters(
+data class DTExchangeParameters(
     val appId: String,
-    val coppa: Boolean,
 ) : AdapterParameters

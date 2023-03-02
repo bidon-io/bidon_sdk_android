@@ -11,6 +11,7 @@ internal enum class DefaultAdapters(val classPath: String) {
     BidmachineAdapter(classPath = "org.bidon.bidmachine.BidMachineAdapter"),
     ApplovinAdapter(classPath = "org.bidon.applovin.ApplovinAdapter"),
     DataExchangeAdapter(classPath = "org.bidon.dtexchange.DTExchangeAdapter"),
+    UnityAdsAdapter(classPath = "org.bidon.unityads.UnityAdsAdapter"),
 
 //    AppsflyerAdapter(classPath = "org.bidon.appsflyer.AppsflyerAnalytics"),
 //    FyberFairBidAdapter(classPath = "org.bidon.fyber.FairBidAdapter"),

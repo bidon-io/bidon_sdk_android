@@ -25,7 +25,7 @@ val DTExchangeDemandId = DemandId("dtexchange")
  */
 class DTExchangeAdapter :
     Adapter,
-    Initializable<DataExchangeParameters>,
+    Initializable<DTExchangeParameters>,
     AdProvider.Rewarded<DTExchangeAdAuctionParams>,
     AdProvider.Interstitial<DTExchangeAdAuctionParams> {
     override val demandId: DemandId = DTExchangeDemandId
@@ -34,10 +34,14 @@ class DTExchangeAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun init(activity: Activity, configParams: DataExchangeParameters) =
+    override suspend fun init(activity: Activity, configParams: DTExchangeParameters) =
         suspendCancellableCoroutine { continuation ->
-            if (configParams.coppa) {
-                InneractiveAdManager.currentAudienceIsAChild()
+            when (BidonSdk.loggerLevel) {
+                Logger.Level.Verbose -> InneractiveAdManager.setLogLevel(Log.VERBOSE)
+                Logger.Level.Error -> InneractiveAdManager.setLogLevel(Log.ERROR)
+                Logger.Level.Off -> {
+                    // do nothing
+                }
             }
             InneractiveAdManager.initialize(activity.applicationContext, configParams.appId) { initStatus ->
                 when (initStatus) {
@@ -53,20 +57,12 @@ class DTExchangeAdapter :
                     }
                 }
             }
-            when (BidonSdk.loggerLevel) {
-                Logger.Level.Verbose -> InneractiveAdManager.setLogLevel(Log.VERBOSE)
-                Logger.Level.Error -> InneractiveAdManager.setLogLevel(Log.ERROR)
-                Logger.Level.Off -> {
-                    // do nothing
-                }
-            }
         }
 
-    override fun parseConfigParam(json: String): DataExchangeParameters {
+    override fun parseConfigParam(json: String): DTExchangeParameters {
         return JSONObject(json).let {
-            DataExchangeParameters(
+            DTExchangeParameters(
                 appId = requireNotNull(it.optString("app_id")),
-                coppa = it.optBoolean("coppa", false)
             )
         }
     }

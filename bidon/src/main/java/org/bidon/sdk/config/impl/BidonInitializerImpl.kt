@@ -71,6 +71,7 @@ internal class BidonInitializerImpl : BidonInitializer {
     }
 
     override fun initialize(activity: Activity, appKey: String) {
+        val timeStart = System.currentTimeMillis()
         if (initializationState.value == SdkState.Initialized) {
             notifyInitialized()
             return
@@ -87,11 +88,12 @@ internal class BidonInitializerImpl : BidonInitializer {
             DI.init(context = activity.applicationContext)
             scope.launch {
                 runCatching {
-                    init(activity, appKey)
+                    init(activity, appKey, timeStart)
                 }.onFailure {
                     logError(Tag, "Error while initialization", it)
                     initializationState.value = SdkState.InitializationFailed
                 }.onSuccess {
+                    logInfo(Tag, "Initialized in ${System.currentTimeMillis() - timeStart} ms.")
                     initializationState.value = SdkState.Initialized
                 }
                 notifyInitialized()
@@ -99,7 +101,7 @@ internal class BidonInitializerImpl : BidonInitializer {
         }
     }
 
-    private suspend fun init(activity: Activity, appKey: String): Result<Unit> {
+    private suspend fun init(activity: Activity, appKey: String, timeStart: Long): Result<Unit> {
         startSession()
         withContext(SdkDispatchers.IO) {
             keyValueStorage.appKey = appKey
@@ -117,7 +119,8 @@ internal class BidonInitializerImpl : BidonInitializer {
         )
         return getConfigRequest.request(body)
             .map { configResponse ->
-                logInfo(Tag, "Config data: $configResponse")
+                logInfo(Tag, "Config data received in ${System.currentTimeMillis() - timeStart} ms.: $configResponse")
+                logInfo(Tag, "Starting adapters initialization")
                 initAndRegisterAdapters(
                     activity = activity,
                     adapters = (defaultAdapters + publisherAdapters.values).distinctBy { it::class },
