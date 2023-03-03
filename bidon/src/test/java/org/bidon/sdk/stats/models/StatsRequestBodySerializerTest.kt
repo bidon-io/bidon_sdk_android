@@ -52,6 +52,12 @@ class StatsRequestBodySerializerTest {
                     winnerDemandId = null,
                     winnerEcpm = null
                 ),
+            ),
+            result = ResultBody(
+                status = "SUCCESS",
+                demandId = "admob",
+                ecpm = 0.123,
+                adUnitId = "id123"
             )
         ).serialize()
         json.assertEquals(
@@ -94,6 +100,12 @@ class StatsRequestBodySerializerTest {
                         }
                     )
                     putValues(list)
+                }
+                "result" hasJson expectedJsonStructure {
+                    "status" hasValue "SUCCESS"
+                    "winner_id" hasValue "admob"
+                    "ecpm" hasValue 0.123
+                    "ad_unit_id" hasValue "id123"
                 }
             }
         )

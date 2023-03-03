@@ -1,14 +1,16 @@
-package org.bidon.sdk.adapters
+package org.bidon.sdk.config.models.adapters
 
 import android.app.Activity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.sdk.adapter.*
-import org.bidon.sdk.ads.*
+import org.bidon.sdk.ads.Ad
+import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.config.models.auctions.impl.PlacementId
+import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.ext.asFailure
 import org.bidon.sdk.utils.ext.asSuccess
 
@@ -16,7 +18,10 @@ internal data class TestAdapterInterstitialParameters(
     val bid: Process = Process.Succeed,
     val fill: Process = Process.Succeed,
     val auctionParam: Process = Process.Succeed,
-) : AdAuctionParams
+) : AdAuctionParams {
+    override val adUnitId: String?
+        get() = "123"
+}
 
 internal enum class Process {
     Succeed,
@@ -57,13 +62,15 @@ internal class TestAdapterInterstitialImpl(
             Process.Succeed -> {
                 AuctionResult(
                     ecpm = 1.3,
-                    adSource = this
+                    adSource = this,
+                    roundStatus = RoundStatus.Successful
                 )
             }
             Process.Failed -> {
                 AuctionResult(
                     ecpm = 0.0,
-                    adSource = this
+                    adSource = this,
+                    roundStatus = RoundStatus.NoFill
                 )
             }
             Process.Timeout -> {

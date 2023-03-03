@@ -13,4 +13,6 @@ internal data class StatsRequestBody(
     val auctionConfigurationId: Int,
     @field:JsonName("rounds")
     val rounds: List<Round>,
+    @field:JsonName("result")
+    val result: ResultBody,
 ) : Serializable

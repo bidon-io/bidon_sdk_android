@@ -44,7 +44,7 @@ fun RewardedScreen(
         mutableStateOf(listOf("Log"))
     }
     val pricefloor = remember {
-        mutableStateOf("0.0001")
+        mutableStateOf("0.001")
     }
 
     val rewardedAd by lazy {

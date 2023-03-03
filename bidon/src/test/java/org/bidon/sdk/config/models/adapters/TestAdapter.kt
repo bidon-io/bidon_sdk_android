@@ -5,6 +5,8 @@ import org.bidon.sdk.adapter.*
 import org.bidon.sdk.adapter.AdapterInfo
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.config.models.adapters.TestAdapterInterstitialImpl
+import org.bidon.sdk.config.models.adapters.TestAdapterInterstitialParameters
 
 internal object TestAdapterParameters : AdapterParameters
 

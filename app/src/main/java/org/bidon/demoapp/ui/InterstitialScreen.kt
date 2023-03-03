@@ -43,7 +43,7 @@ fun InterstitialScreen(
         mutableStateOf(listOf("Log"))
     }
     val pricefloorState = remember {
-        mutableStateOf("0.0001")
+        mutableStateOf("0.001")
     }
 
     val interstitial by lazy {

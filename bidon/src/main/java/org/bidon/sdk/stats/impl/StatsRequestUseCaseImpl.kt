@@ -6,6 +6,7 @@ import org.bidon.sdk.databinders.DataBinderType
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.RoundStat
+import org.bidon.sdk.stats.models.*
 import org.bidon.sdk.stats.models.Demand
 import org.bidon.sdk.stats.models.Round
 import org.bidon.sdk.stats.models.StatsRequestBody
@@ -87,7 +88,11 @@ internal class StatsRequestUseCaseImpl(
                         )
                     }
                 )
-            }
+            },
+            result = this
+                .flatMap { it.demands }
+                .firstOrNull { it.roundStatus == RoundStatus.Win }
+                .asSuccessResultOrFail()
         )
     }
 }

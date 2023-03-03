@@ -11,9 +11,7 @@ import kotlinx.coroutines.test.runTest
 import org.bidon.sdk.adapter.AdapterInfo
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapters.Process
 import org.bidon.sdk.adapters.TestAdapter
-import org.bidon.sdk.adapters.TestAdapterInterstitialParameters
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
@@ -27,6 +25,8 @@ import org.bidon.sdk.auction.models.Round
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
 import org.bidon.sdk.base.ConcurrentTest
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.config.models.adapters.Process
+import org.bidon.sdk.config.models.adapters.TestAdapterInterstitialParameters
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.ext.asSuccess
