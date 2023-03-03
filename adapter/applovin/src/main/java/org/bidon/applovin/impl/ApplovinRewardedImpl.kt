@@ -18,6 +18,7 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
+import org.bidon.sdk.stats.models.asRoundStatus
 
 /**
  * I have no idea how it works. There is no documentation.
@@ -46,15 +47,12 @@ internal class ApplovinRewardedImpl(
             override fun adReceived(ad: AppLovinAd) {
                 logInfo(Tag, "adReceived: $this")
                 applovinAd = ad
-                markBidFinished(
-                    ecpm = requireNotNull(lineItem?.pricefloor),
-                    roundStatus = RoundStatus.Successful,
-                )
                 adEvent.tryEmit(
                     AdEvent.Bid(
                         AuctionResult(
                             ecpm = lineItem?.pricefloor ?: 0.0,
                             adSource = this@ApplovinRewardedImpl,
+                            roundStatus = RoundStatus.Successful
                         )
                     )
                 )
@@ -62,10 +60,6 @@ internal class ApplovinRewardedImpl(
 
             override fun failedToReceiveAd(errorCode: Int) {
                 logInfo(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
-                markBidFinished(
-                    ecpm = null,
-                    roundStatus = RoundStatus.NoBid,
-                )
                 adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
@@ -89,6 +83,7 @@ internal class ApplovinRewardedImpl(
                         adValue = lineItem?.pricefloor.asBidonAdValue()
                     )
                 )
+                sendShowImpression(StatisticsCollector.AdType.Rewarded)
             }
 
             override fun adHidden(ad: AppLovinAd) {
@@ -99,11 +94,13 @@ internal class ApplovinRewardedImpl(
             override fun adClicked(ad: AppLovinAd) {
                 logInfo(Tag, "adClicked: $this")
                 adEvent.tryEmit(AdEvent.Clicked(ad.asAd()))
+                sendClickImpression(StatisticsCollector.AdType.Rewarded)
             }
 
             override fun userRewardVerified(ad: AppLovinAd, response: MutableMap<String, String>?) {
                 logInfo(Tag, "userRewardVerified: $this")
                 adEvent.tryEmit(AdEvent.OnReward(ad.asAd(), reward = null))
+                sendRewardImpression()
             }
 
             override fun userOverQuota(ad: AppLovinAd?, response: MutableMap<String, String>?) {}
@@ -144,7 +141,6 @@ internal class ApplovinRewardedImpl(
 
     override suspend fun bid(adParams: ApplovinFullscreenAdAuctionParams): AuctionResult {
         logInfo(Tag, "Starting with $adParams: $this")
-        markBidStarted(adParams.lineItem.adUnitId)
         lineItem = adParams.lineItem
         val incentivizedInterstitial = AppLovinIncentivizedInterstitial.create(adParams.lineItem.adUnitId, applovinSdk).also {
             rewardedAd = it
@@ -157,7 +153,8 @@ internal class ApplovinRewardedImpl(
             is AdEvent.LoadFailed -> {
                 AuctionResult(
                     ecpm = 0.0,
-                    adSource = this
+                    adSource = this,
+                    roundStatus = state.cause.asRoundStatus()
                 )
             }
             is AdEvent.Bid -> state.result
@@ -167,9 +164,7 @@ internal class ApplovinRewardedImpl(
 
     override suspend fun fill(): Result<Ad> = runCatching {
         logInfo(Tag, "Starting fill: $this")
-        markFillStarted()
         requireNotNull(applovinAd?.asAd()).also {
-            markFillFinished(RoundStatus.Successful)
             adEvent.tryEmit(AdEvent.Fill(it))
         }
     }

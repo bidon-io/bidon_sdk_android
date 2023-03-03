@@ -16,10 +16,16 @@ data class ApplovinBannerAuctionParams(
     val bannerFormat: BannerFormat,
     val lineItem: LineItem,
     val adaptiveBannerHeight: Int?
-) : AdAuctionParams
+) : AdAuctionParams {
+    override val adUnitId: String?
+        get() = lineItem.adUnitId
+}
 
 data class ApplovinFullscreenAdAuctionParams(
     val activity: Activity,
     val lineItem: LineItem,
     val timeoutMs: Long
-) : AdAuctionParams
+) : AdAuctionParams {
+    override val adUnitId: String?
+        get() = lineItem.adUnitId
+}

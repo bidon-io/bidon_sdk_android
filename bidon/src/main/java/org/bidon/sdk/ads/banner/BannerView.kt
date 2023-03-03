@@ -8,7 +8,6 @@ import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.bidon.sdk.BidonSdk
@@ -28,12 +27,9 @@ import org.bidon.sdk.ads.banner.helper.wrapUserBannerListener
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
-import org.bidon.sdk.auction.models.BannerRequestBody.Format
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
-import org.bidon.sdk.stats.StatisticsCollector
-import org.bidon.sdk.stats.StatisticsCollector.AdType.Banner
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 
@@ -49,18 +45,13 @@ interface BannerAd {
     /**
      * Shows if banner is ready to show
      */
-    fun isReady()
+    fun isReady(): Boolean
     fun showAd()
     fun destroyAd()
     fun setBannerListener(listener: BannerListener)
-
-    /**
-     * By default AutoRefresh is on with [DefaultAutoRefreshTimeoutMs]
-     */
-    fun startAutoRefresh(timeoutMs: Long = DefaultAutoRefreshTimeoutMs)
-    fun stopAutoRefresh()
 }
 
+@Deprecated("Use Banner")
 class BannerView(
     context: Context,
     attrs: AttributeSet? = null,
@@ -140,7 +131,7 @@ class BannerView(
         this.userListener = listener
     }
 
-    override fun isReady() {
+    override fun isReady(): Boolean {
         TODO("Not yet implemented")
     }
 
@@ -160,25 +151,25 @@ class BannerView(
         sendAction(ShowAction.OnShowInvoked)
     }
 
-    override fun startAutoRefresh(timeoutMs: Long) {
-        if (activityLifecycleObserver == null) {
-            logInfo(
-                Tag,
-                "Auto-refresh is disabled, because BannerView created not with Activity context."
-            )
-            refresh = AutoRefresh.Off
-            return
-        }
-        logInfo(Tag, "Auto-refresh initialized with timeout $timeoutMs ms")
-        refresh = AutoRefresh.On(timeoutMs)
-        sendAction(ShowAction.OnStartAutoRefreshInvoked(timeoutMs))
-    }
-
-    override fun stopAutoRefresh() {
-        logInfo(Tag, "Auto-refresh stopped")
-        refresh = AutoRefresh.Off
-        sendAction(ShowAction.OnStopAutoRefreshInvoked)
-    }
+//    override fun startAutoRefresh(timeoutMs: Long) {
+//        if (activityLifecycleObserver == null) {
+//            logInfo(
+//                Tag,
+//                "Auto-refresh is disabled, because BannerView created not with Activity context."
+//            )
+//            refresh = AutoRefresh.Off
+//            return
+//        }
+//        logInfo(Tag, "Auto-refresh initialized with timeout $timeoutMs ms")
+//        refresh = AutoRefresh.On(timeoutMs)
+//        sendAction(ShowAction.OnStartAutoRefreshInvoked(timeoutMs))
+//    }
+//
+//    override fun stopAutoRefresh() {
+//        logInfo(Tag, "Auto-refresh stopped")
+//        refresh = AutoRefresh.Off
+//        sendAction(ShowAction.OnStopAutoRefreshInvoked)
+//    }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
@@ -300,7 +291,6 @@ class BannerView(
                     }
                     is ShowAction.OnAdShown -> {
                         listener.onAdShown(action.ad)
-                        sendStatsShownAsync(action.winner.adSource)
                         (state as? ShowState.Displaying)?.auctionResult?.adSource?.destroy()
                         launchDisplayingRefreshIfNeeded()
                         ShowState.Displaying(action.winner)
@@ -378,10 +368,7 @@ class BannerView(
                 activityLifecycleObserver?.lifecycleFlow?.first {
                     val isResumed = it == ActivityLifecycleState.Resumed
                     if (!isResumed) {
-                        logInfo(
-                            Tag,
-                            "Showing is waiting for Activity Resumed state. Current: $it"
-                        )
+                        logInfo(Tag, "Showing is waiting for Activity Resumed state. Current: $it")
                     }
                     isResumed
                 }
@@ -436,7 +423,6 @@ class BannerView(
                     // do nothing
                 }
                 is AdEvent.Clicked -> {
-                    sendStatsClickedAsync(adSource)
                     listener.onAdClicked(adEvent.ad)
                 }
                 is AdEvent.Shown -> listener.onAdShown(adEvent.ad)
@@ -445,33 +431,6 @@ class BannerView(
                 is AdEvent.Expired -> listener.onAdExpired(adEvent.ad)
             }
         }.launchIn(scope)
-    }
-
-    private suspend fun sendStatsClickedAsync(adSource: AdSource<*>) {
-        coroutineScope {
-            launch {
-                (adSource as? StatisticsCollector)?.sendClickImpression(
-                    Banner(format = bannerFormat.asBannerFormat())
-                )
-            }
-        }
-    }
-
-    private suspend fun sendStatsShownAsync(adSource: AdSource<*>) {
-        coroutineScope {
-            launch {
-                (adSource as? StatisticsCollector)?.sendShowImpression(
-                    Banner(format = bannerFormat.asBannerFormat())
-                )
-            }
-        }
-    }
-
-    private fun BannerFormat.asBannerFormat() = when (this) {
-        BannerFormat.Banner -> Format.Banner320x50
-        BannerFormat.LeaderBoard -> Format.LeaderBoard728x90
-        BannerFormat.MRec -> Format.MRec300x250
-        BannerFormat.Adaptive -> Format.AdaptiveBanner320x50
     }
 }
 

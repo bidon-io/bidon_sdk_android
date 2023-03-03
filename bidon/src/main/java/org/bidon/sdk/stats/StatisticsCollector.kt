@@ -8,9 +8,9 @@ import org.bidon.sdk.stats.models.RoundStatus
  */
 interface StatisticsCollector {
 
-    suspend fun sendShowImpression(adType: AdType)
-    suspend fun sendClickImpression(adType: AdType)
-    suspend fun sendRewardImpression()
+    fun sendShowImpression(adType: AdType)
+    fun sendClickImpression(adType: AdType)
+    fun sendRewardImpression()
 
     fun markBidStarted(adUnitId: String? = null)
     fun markBidFinished(roundStatus: RoundStatus, ecpm: Double?)
@@ -26,6 +26,6 @@ interface StatisticsCollector {
     sealed interface AdType {
         object Rewarded : AdType
         object Interstitial : AdType
-        data class Banner(val format: BannerRequestBody.Format) : AdType
+        data class Banner(val format: BannerRequestBody.StatFormat) : AdType
     }
 }

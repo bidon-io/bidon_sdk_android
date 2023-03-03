@@ -98,9 +98,9 @@ internal fun MainScreen(
                 AppButton(text = "Rewarded") {
                     navController.navigate(Screen.Rewarded.route)
                 }
-//                AppButton(text = "Banner") {
-//                    navController.navigate(Screen.Banners.route)
-//                }
+                AppButton(text = "Banner") {
+                    navController.navigate(Screen.Banners.route)
+                }
 //                AppButton(text = "Banner in XML-Layout") {
 //                    (context as Activity).startActivity(
 //                        Intent(context, BannerViewActivity::class.java)

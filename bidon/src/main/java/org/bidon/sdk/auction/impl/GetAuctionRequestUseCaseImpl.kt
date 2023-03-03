@@ -76,10 +76,10 @@ internal class GetAuctionRequestUseCaseImpl(
             is AdTypeParam.Banner -> {
                 val banner = BannerRequestBody(
                     formatCode = when (data.bannerFormat) {
-                        BannerFormat.Banner -> BannerRequestBody.Format.Banner320x50
-                        BannerFormat.LeaderBoard -> BannerRequestBody.Format.LeaderBoard728x90
-                        BannerFormat.MRec -> BannerRequestBody.Format.MRec300x250
-                        BannerFormat.Adaptive -> BannerRequestBody.Format.AdaptiveBanner320x50
+                        BannerFormat.Banner -> BannerRequestBody.StatFormat.Banner320x50
+                        BannerFormat.LeaderBoard -> BannerRequestBody.StatFormat.LeaderBoard728x90
+                        BannerFormat.MRec -> BannerRequestBody.StatFormat.MRec300x250
+                        BannerFormat.Adaptive -> BannerRequestBody.StatFormat.AdaptiveBanner320x50
                     }.code,
                 )
                 Triple(first = banner, second = null, third = null)

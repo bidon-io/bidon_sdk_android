@@ -11,11 +11,7 @@ import kotlinx.coroutines.withContext
 import org.bidon.admob.AdmobFullscreenAdAuctionParams
 import org.bidon.admob.asBidonError
 import org.bidon.admob.ext.asBidonAdValue
-import org.bidon.sdk.adapter.AdAuctionParams
-import org.bidon.sdk.adapter.AdEvent
-import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.rewarded.Reward
 import org.bidon.sdk.auction.AuctionResult
@@ -50,7 +46,7 @@ internal class AdmobRewardedImpl(
 
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
 
-    private var lineItem: LineItem? = null
+    private var param: AdmobFullscreenAdAuctionParams? = null
     private var rewardedAd: RewardedAd? = null
     private val requiredRewardedAd: RewardedAd get() = requireNotNull(rewardedAd)
 
@@ -58,10 +54,6 @@ internal class AdmobRewardedImpl(
         object : RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(Tag, "Error while loading ad. LoadAdError=$loadAdError.\n$this", loadAdError.asBidonError())
-                markBidFinished(
-                    ecpm = null,
-                    roundStatus = loadAdError.asBidonError().asRoundStatus(),
-                )
                 adEvent.tryEmit(AdEvent.LoadFailed(loadAdError.asBidonError()))
             }
 
@@ -70,15 +62,12 @@ internal class AdmobRewardedImpl(
                 this@AdmobRewardedImpl.rewardedAd = rewardedAd
                 requiredRewardedAd.onPaidEventListener = paidListener
                 requiredRewardedAd.fullScreenContentCallback = rewardedListener
-                markBidFinished(
-                    ecpm = requireNotNull(lineItem?.pricefloor),
-                    roundStatus = RoundStatus.Successful,
-                )
                 adEvent.tryEmit(
                     AdEvent.Bid(
                         AuctionResult(
-                            ecpm = requireNotNull(lineItem?.pricefloor),
+                            ecpm = requireNotNull(param?.lineItem?.pricefloor),
                             adSource = this@AdmobRewardedImpl,
+                            roundStatus = RoundStatus.Successful
                         )
                     )
                 )
@@ -94,6 +83,7 @@ internal class AdmobRewardedImpl(
                     reward = Reward(rewardItem.type, rewardItem.amount)
                 )
             )
+            sendRewardImpression()
         }
     }
 
@@ -106,14 +96,14 @@ internal class AdmobRewardedImpl(
                 AdEvent.PaidRevenue(
                     ad = Ad(
                         demandAd = demandAd,
-                        ecpm = lineItem?.pricefloor ?: 0.0,
+                        ecpm = param?.lineItem?.pricefloor ?: 0.0,
                         demandAdObject = requiredRewardedAd,
                         networkName = demandId.demandId,
                         dsp = null,
                         roundId = roundId,
                         currencyCode = "USD",
                         auctionId = auctionId,
-                        adUnitId = lineItem?.adUnitId
+                        adUnitId = param?.lineItem?.adUnitId
                     ),
                     adValue = adValue.asBidonAdValue()
                 )
@@ -126,6 +116,7 @@ internal class AdmobRewardedImpl(
             override fun onAdClicked() {
                 logInfo(Tag, "onAdClicked: $this")
                 adEvent.tryEmit(AdEvent.Clicked(requiredRewardedAd.asAd()))
+                sendClickImpression(StatisticsCollector.AdType.Rewarded)
             }
 
             override fun onAdDismissedFullScreenContent() {
@@ -141,6 +132,7 @@ internal class AdmobRewardedImpl(
             override fun onAdImpression() {
                 logInfo(Tag, "onAdShown: $this")
                 adEvent.tryEmit(AdEvent.Shown(requiredRewardedAd.asAd()))
+                sendShowImpression(StatisticsCollector.AdType.Rewarded)
             }
 
             override fun onAdShowedFullScreenContent() {}
@@ -159,7 +151,7 @@ internal class AdmobRewardedImpl(
         rewardedAd?.onPaidEventListener = null
         rewardedAd?.fullScreenContentCallback = null
         rewardedAd = null
-        lineItem = null
+        param = null
     }
 
     override fun getAuctionParams(
@@ -181,11 +173,10 @@ internal class AdmobRewardedImpl(
 
     override suspend fun bid(adParams: AdmobFullscreenAdAuctionParams): AuctionResult {
         logInfo(Tag, "Starting with $adParams: $this")
-        markBidStarted(adParams.lineItem.adUnitId)
         return withContext(dispatcher) {
-            lineItem = adParams.lineItem
+            param = adParams
             val adRequest = AdRequest.Builder().build()
-            val adUnitId = lineItem?.adUnitId
+            val adUnitId = param?.lineItem?.adUnitId
             if (!adUnitId.isNullOrBlank()) {
                 RewardedAd.load(adParams.context, adUnitId, adRequest, requestListener)
             } else {
@@ -193,7 +184,7 @@ internal class AdmobRewardedImpl(
                 logError(
                     tag = Tag,
                     message = "No appropriate AdUnitId found. PriceFloor=${adParams.pricefloor}, " +
-                        "but LineItem with max pricefloor=${lineItem?.pricefloor}",
+                        "but LineItem with max pricefloor=${param?.lineItem?.pricefloor}",
                     error = error
                 )
                 adEvent.tryEmit(AdEvent.LoadFailed(error))
@@ -205,7 +196,8 @@ internal class AdmobRewardedImpl(
                 is AdEvent.LoadFailed -> {
                     AuctionResult(
                         ecpm = adParams.lineItem.pricefloor,
-                        adSource = this@AdmobRewardedImpl
+                        adSource = this@AdmobRewardedImpl,
+                        roundStatus = state.cause.asRoundStatus()
                     )
                 }
                 is AdEvent.Bid -> state.result
@@ -216,14 +208,12 @@ internal class AdmobRewardedImpl(
 
     override suspend fun fill(): Result<Ad> = runCatching {
         logInfo(Tag, "Starting fill: $this")
-        markFillStarted()
         /**
          * Admob fills the bid automatically. It's not needed to fill it manually.
          */
         AdEvent.Fill(
             requiredRewardedAd.asAd()
         ).also {
-            markFillFinished(RoundStatus.Successful)
             adEvent.tryEmit(it)
         }.ad
     }
@@ -240,14 +230,14 @@ internal class AdmobRewardedImpl(
     private fun RewardedAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            ecpm = lineItem?.pricefloor ?: 0.0,
+            ecpm = param?.lineItem?.pricefloor ?: 0.0,
             demandAdObject = this,
             networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = "USD",
             auctionId = auctionId,
-            adUnitId = lineItem?.adUnitId
+            adUnitId = param?.lineItem?.adUnitId
         )
     }
 }

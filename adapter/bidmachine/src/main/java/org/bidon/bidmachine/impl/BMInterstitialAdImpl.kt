@@ -64,15 +64,12 @@ internal class BMInterstitialAdImpl(
             ) {
                 logInfo(Tag, "onRequestSuccess $result: $this")
                 adRequest = request
-                markBidFinished(
-                    ecpm = result.price,
-                    roundStatus = RoundStatus.Successful,
-                )
                 adEvent.tryEmit(
                     AdEvent.Bid(
                         AuctionResult(
                             ecpm = result.price,
                             adSource = this@BMInterstitialAdImpl,
+                            roundStatus = RoundStatus.Successful
                         )
                     )
                 )
@@ -81,20 +78,12 @@ internal class BMInterstitialAdImpl(
             override fun onRequestFailed(request: InterstitialRequest, bmError: BMError) {
                 logError(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
                 adRequest = request
-                markBidFinished(
-                    ecpm = null,
-                    roundStatus = bmError.asBidonError(demandId).asRoundStatus(),
-                )
                 adEvent.tryEmit(AdEvent.LoadFailed(bmError.asBidonError(demandId)))
             }
 
             override fun onRequestExpired(request: InterstitialRequest) {
                 logInfo(Tag, "onRequestExpired: $this")
                 adRequest = request
-                markBidFinished(
-                    ecpm = null,
-                    roundStatus = RoundStatus.NoBid,
-                )
                 adEvent.tryEmit(AdEvent.LoadFailed(BidonError.Expired(demandId)))
             }
         }
@@ -130,12 +119,14 @@ internal class BMInterstitialAdImpl(
                         adValue = interstitialAd.auctionResult.asBidonAdValue()
                     )
                 )
+                sendShowImpression(StatisticsCollector.AdType.Interstitial)
             }
 
             override fun onAdClicked(interstitialAd: InterstitialAd) {
                 logInfo(Tag, "onAdClicked: $this")
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
                 adEvent.tryEmit(AdEvent.Clicked(interstitialAd.asAd()))
+                sendClickImpression(StatisticsCollector.AdType.Interstitial)
             }
 
             override fun onAdExpired(interstitialAd: InterstitialAd) {
@@ -154,7 +145,6 @@ internal class BMInterstitialAdImpl(
 
     override suspend fun bid(adParams: BMFullscreenAuctionParams): AuctionResult {
         logInfo(Tag, "Starting with $adParams: $this")
-        markBidStarted()
         context = adParams.context
         InterstitialRequest.Builder()
             .setAdContentType(AdContentType.All)
@@ -174,7 +164,8 @@ internal class BMInterstitialAdImpl(
             is AdEvent.LoadFailed -> {
                 AuctionResult(
                     ecpm = 0.0,
-                    adSource = this
+                    adSource = this,
+                    roundStatus = state.cause.asRoundStatus()
                 )
             }
             is AdEvent.Bid -> state.result
@@ -184,7 +175,6 @@ internal class BMInterstitialAdImpl(
 
     override suspend fun fill(): Result<Ad> {
         logInfo(Tag, "Starting fill: $this")
-        markFillStarted()
         val context = context
         if (context == null) {
             adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoContextFound))
@@ -200,15 +190,12 @@ internal class BMInterstitialAdImpl(
         }
         return when (state) {
             is AdEvent.Fill -> {
-                markFillFinished(RoundStatus.Successful)
                 state.ad.asSuccess()
             }
             is AdEvent.LoadFailed -> {
-                markFillFinished(RoundStatus.NoFill)
                 state.cause.asFailure()
             }
             is AdEvent.Expired -> {
-                markFillFinished(RoundStatus.NoFill)
                 BidonError.FillTimedOut(demandId).asFailure()
             }
             else -> error("unexpected: $state")

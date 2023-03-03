@@ -17,7 +17,7 @@ internal class AdObjectRequestBodySerializerTest {
             pricefloor = 1.23,
             auctionId = "aId",
             orientationCode = AdObjectRequestBody.Orientation.Portrait.code,
-            banner = BannerRequestBody(BannerRequestBody.Format.LeaderBoard728x90.code),
+            banner = BannerRequestBody(BannerRequestBody.StatFormat.LeaderBoard728x90.code),
             interstitial = InterstitialRequestBody(),
             rewarded = RewardedRequestBody(),
         )
@@ -45,7 +45,7 @@ internal class AdObjectRequestBodySerializerTest {
             pricefloor = 1.23,
             auctionId = "aId",
             orientationCode = AdObjectRequestBody.Orientation.Portrait.code,
-            banner = BannerRequestBody(BannerRequestBody.Format.LeaderBoard728x90.code),
+            banner = BannerRequestBody(BannerRequestBody.StatFormat.LeaderBoard728x90.code),
             interstitial = null,
             rewarded = null,
         )

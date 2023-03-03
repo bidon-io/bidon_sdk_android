@@ -16,10 +16,14 @@ data class BMBannerAuctionParams(
     val bannerFormat: BannerFormat,
     val pricefloor: Double,
     val timeout: Long,
-) : AdAuctionParams
+) : AdAuctionParams {
+    override val adUnitId: String? = null
+}
 
 data class BMFullscreenAuctionParams(
     val context: Context,
     val pricefloor: Double,
     val timeout: Long,
-) : AdAuctionParams
+) : AdAuctionParams {
+    override val adUnitId: String? = null
+}

@@ -44,15 +44,12 @@ internal class DTExchangeRewarded(
                 logInfo(Tag, "SuccessfulAdRequest: $inneractiveAdSpot")
                 this@DTExchangeRewarded.inneractiveAdSpot = inneractiveAdSpot
                 val ecpm = auctionParams?.lineItem?.pricefloor ?: 0.0
-                markBidFinished(
-                    ecpm = ecpm,
-                    roundStatus = RoundStatus.Successful,
-                )
                 adEvent.tryEmit(
                     AdEvent.Bid(
                         AuctionResult(
                             ecpm = ecpm,
                             adSource = this@DTExchangeRewarded,
+                            roundStatus = RoundStatus.Successful
                         )
                     )
                 )
@@ -63,11 +60,6 @@ internal class DTExchangeRewarded(
                 inneractiveErrorCode: InneractiveErrorCode?
             ) {
                 logError(Tag, "Error while bidding: $inneractiveErrorCode", inneractiveErrorCode.asBidonError())
-                val ecpm = auctionParams?.lineItem?.pricefloor ?: 0.0
-                markBidFinished(
-                    ecpm = ecpm,
-                    roundStatus = inneractiveErrorCode.asBidonError().asRoundStatus(),
-                )
                 adEvent.tryEmit(AdEvent.LoadFailed(inneractiveErrorCode.asBidonError()))
             }
         }
@@ -81,6 +73,7 @@ internal class DTExchangeRewarded(
                     reward = null
                 )
             )
+            sendRewardImpression()
         }
     }
 
@@ -96,18 +89,18 @@ internal class DTExchangeRewarded(
                 val adValue = impressionData?.asAdValue() ?: return
                 val ad = adSpot?.asAd() ?: return
                 adEvent.tryEmit(AdEvent.PaidRevenue(ad, adValue))
+                adEvent.tryEmit(AdEvent.Shown(ad))
+                sendShowImpression(StatisticsCollector.AdType.Rewarded)
             }
 
             override fun onAdImpression(adSpot: InneractiveAdSpot?) {
-                adSpot?.asAd()?.let {
-                    adEvent.tryEmit(AdEvent.Shown(ad = it))
-                }
             }
 
             override fun onAdClicked(adSpot: InneractiveAdSpot?) {
                 adSpot?.asAd()?.let {
                     adEvent.tryEmit(AdEvent.Clicked(ad = it))
                 }
+                sendClickImpression(StatisticsCollector.AdType.Rewarded)
             }
 
             override fun onAdWillCloseInternalBrowser(adSpot: InneractiveAdSpot?) {
@@ -153,7 +146,6 @@ internal class DTExchangeRewarded(
 
     override suspend fun bid(adParams: DTExchangeAdAuctionParams): AuctionResult {
         logInfo(Tag, "Starting with $adParams: $this")
-        markBidStarted(adParams.lineItem.adUnitId)
         auctionParams = adParams
         val spot = InneractiveAdSpotManager.get().createSpot()
         val controller = InneractiveFullscreenUnitController()
@@ -174,7 +166,8 @@ internal class DTExchangeRewarded(
             is AdEvent.LoadFailed -> {
                 AuctionResult(
                     ecpm = adParams.lineItem.pricefloor,
-                    adSource = this
+                    adSource = this,
+                    roundStatus = state.cause.asRoundStatus()
                 )
             }
             is AdEvent.Bid -> state.result
@@ -184,12 +177,10 @@ internal class DTExchangeRewarded(
 
     override suspend fun fill(): Result<Ad> = runCatching {
         logInfo(Tag, "Starting fill: $this")
-        markFillStarted()
         /**
          * DataExchange fills the bid automatically. It's not needed to fill it manually.
          */
         val event = AdEvent.Fill(requireNotNull(inneractiveAdSpot?.asAd()))
-        markFillFinished(RoundStatus.Successful)
         adEvent.tryEmit(event)
         event.ad
     }

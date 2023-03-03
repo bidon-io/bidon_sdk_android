@@ -9,4 +9,6 @@ import org.bidon.sdk.auction.models.LineItem
 data class UnityAdsAuctionParams(
     val lineItem: LineItem,
     val pricefloor: Double
-) : AdAuctionParams
+) : AdAuctionParams {
+    override val adUnitId: String? get() = lineItem.adUnitId
+}

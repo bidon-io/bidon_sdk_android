@@ -77,7 +77,6 @@ internal class UnityAdsInterstitial(
 
     override suspend fun bid(adParams: UnityAdsAuctionParams): AuctionResult {
         logInfo(Tag, "Starting with $adParams: $this")
-        markBidStarted(adParams.lineItem.adUnitId)
         return withContext(dispatcher) {
             lineItem = adParams.lineItem
 
@@ -86,15 +85,12 @@ internal class UnityAdsInterstitial(
                     logInfo(Tag, "onUnityAdsAdLoaded: $this")
                     this@UnityAdsInterstitial.placementId = placementId
                     isAdReadyToShow = true
-                    markBidFinished(
-                        ecpm = requireNotNull(lineItem?.pricefloor),
-                        roundStatus = RoundStatus.Successful,
-                    )
                     adEvent.tryEmit(
                         AdEvent.Bid(
                             AuctionResult(
                                 ecpm = requireNotNull(lineItem?.pricefloor),
                                 adSource = this@UnityAdsInterstitial,
+                                roundStatus = RoundStatus.Successful
                             )
                         )
                     )
@@ -105,10 +101,6 @@ internal class UnityAdsInterstitial(
                         tag = Tag,
                         message = "onUnityAdsFailedToLoad: placementId=$placementId, error=$error, message=$message",
                         error = error?.asBidonError()
-                    )
-                    markBidFinished(
-                        ecpm = null,
-                        roundStatus = error.asBidonError().asRoundStatus(),
                     )
                     adEvent.tryEmit(AdEvent.LoadFailed(error.asBidonError()))
                 }
@@ -121,7 +113,8 @@ internal class UnityAdsInterstitial(
                 is AdEvent.LoadFailed -> {
                     AuctionResult(
                         ecpm = 0.0,
-                        adSource = this@UnityAdsInterstitial
+                        adSource = this@UnityAdsInterstitial,
+                        roundStatus = state.cause.asRoundStatus()
                     )
                 }
                 is AdEvent.Bid -> state.result
@@ -132,12 +125,10 @@ internal class UnityAdsInterstitial(
 
     override suspend fun fill(): Result<Ad> = runCatching {
         logInfo(Tag, "Starting fill: $this")
-        markFillStarted()
         /**
          * UnityAds fills the bid automatically. It's not needed to fill it manually.
          */
         val event = AdEvent.Fill(requireNotNull(ad))
-        markFillFinished(RoundStatus.Successful)
         adEvent.tryEmit(event)
         event.ad
     }
@@ -167,12 +158,14 @@ internal class UnityAdsInterstitial(
                             )
                         )
                     )
+                    sendShowImpression(StatisticsCollector.AdType.Interstitial)
                 }
             }
 
             override fun onUnityAdsShowClick(placementId: String?) {
                 logInfo(Tag, "onUnityAdsShowClick. placementId: $placementId")
                 ad?.let { adEvent.tryEmit(AdEvent.Clicked(it)) }
+                sendClickImpression(StatisticsCollector.AdType.Interstitial)
             }
 
             override fun onUnityAdsShowComplete(placementId: String?, state: UnityAds.UnityAdsShowCompletionState?) {

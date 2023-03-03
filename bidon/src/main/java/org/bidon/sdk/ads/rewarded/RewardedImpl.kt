@@ -17,7 +17,6 @@ import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
-import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.utils.SdkDispatchers
 
 internal class RewardedImpl(
@@ -139,19 +138,10 @@ internal class RewardedImpl(
                 is AdEvent.Fill -> {
                     // do nothing
                 }
-                is AdEvent.OnReward -> {
-                    sendStatsRewardAsync(adSource)
-                    listener.onUserRewarded(adEvent.ad, adEvent.reward)
-                }
-                is AdEvent.Clicked -> {
-                    sendStatsClickedAsync(adSource)
-                    listener.onAdClicked(adEvent.ad)
-                }
+                is AdEvent.OnReward -> listener.onUserRewarded(adEvent.ad, adEvent.reward)
+                is AdEvent.Clicked -> listener.onAdClicked(adEvent.ad)
                 is AdEvent.Closed -> listener.onAdClosed(adEvent.ad)
-                is AdEvent.Shown -> {
-                    sendStatsShownAsync(adSource)
-                    listener.onAdShown(adEvent.ad)
-                }
+                is AdEvent.Shown -> listener.onAdShown(adEvent.ad)
                 is AdEvent.PaidRevenue -> listener.onRevenuePaid(adEvent.ad, adEvent.adValue)
                 is AdEvent.ShowFailed -> listener.onAdShowFailed(adEvent.cause)
                 is AdEvent.LoadFailed -> listener.onAdLoadFailed(adEvent.cause)
@@ -219,34 +209,6 @@ internal class RewardedImpl(
 
         override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
             userListener?.onRevenuePaid(ad, adValue)
-        }
-    }
-
-    private suspend fun sendStatsClickedAsync(adSource: AdSource<*>) {
-        coroutineScope {
-            launch {
-                (adSource as? StatisticsCollector)?.sendClickImpression(
-                    StatisticsCollector.AdType.Rewarded
-                )
-            }
-        }
-    }
-
-    private suspend fun sendStatsShownAsync(adSource: AdSource<*>) {
-        coroutineScope {
-            launch {
-                (adSource as? StatisticsCollector)?.sendShowImpression(
-                    StatisticsCollector.AdType.Rewarded
-                )
-            }
-        }
-    }
-
-    private suspend fun sendStatsRewardAsync(adSource: AdSource.Rewarded<*>) {
-        coroutineScope {
-            launch {
-                (adSource as? StatisticsCollector)?.sendRewardImpression()
-            }
         }
     }
 }

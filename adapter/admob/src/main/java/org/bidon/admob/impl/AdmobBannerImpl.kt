@@ -19,6 +19,7 @@ import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.AuctionResult
+import org.bidon.sdk.auction.models.BannerRequestBody.Companion.asStatBannerFormat
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
@@ -40,7 +41,7 @@ internal class AdmobBannerImpl(
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
-        demandId = demandId
+        demandId = demandId,
     ) {
 
     override val ad: Ad?
@@ -53,7 +54,7 @@ internal class AdmobBannerImpl(
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
 
     private var adSize: AdSize? = null
-    private var lineItem: LineItem? = null
+    private var param: AdmobBannerAuctionParams? = null
     private var adView: AdView? = null
     private val requiredAdView: AdView get() = requireNotNull(adView)
 
@@ -61,10 +62,6 @@ internal class AdmobBannerImpl(
         object : AdListener() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(Tag, "Error while loading ad: $loadAdError. $this", loadAdError.asBidonError())
-                markBidFinished(
-                    ecpm = null,
-                    roundStatus = loadAdError.asBidonError().asRoundStatus(),
-                )
                 adEvent.tryEmit(
                     AdEvent.LoadFailed(loadAdError.asBidonError())
                 )
@@ -72,17 +69,14 @@ internal class AdmobBannerImpl(
 
             override fun onAdLoaded() {
                 logInfo(Tag, "onAdLoaded: $this")
-                markBidFinished(
-                    ecpm = requireNotNull(lineItem?.pricefloor),
-                    roundStatus = RoundStatus.Successful,
-                )
                 adView?.run {
                     isAdReadyToShow = true
                     adEvent.tryEmit(
                         AdEvent.Bid(
                             AuctionResult(
-                                ecpm = requireNotNull(lineItem?.pricefloor),
+                                ecpm = requireNotNull(param?.lineItem?.pricefloor),
                                 adSource = this@AdmobBannerImpl,
+                                roundStatus = RoundStatus.Successful
                             )
                         )
                     )
@@ -92,6 +86,9 @@ internal class AdmobBannerImpl(
             override fun onAdClicked() {
                 logInfo(Tag, "onAdClicked: $this")
                 adEvent.tryEmit(AdEvent.Clicked(requiredAdView.asAd()))
+                param?.bannerFormat?.asStatBannerFormat()?.let {
+                    sendClickImpression(StatisticsCollector.AdType.Banner(format = it))
+                }
             }
 
             override fun onAdClosed() {
@@ -102,6 +99,9 @@ internal class AdmobBannerImpl(
             override fun onAdImpression() {
                 logInfo(Tag, "onAdShown: $this")
                 adEvent.tryEmit(AdEvent.Shown(requiredAdView.asAd()))
+                param?.bannerFormat?.asStatBannerFormat()?.let {
+                    sendShowImpression(StatisticsCollector.AdType.Banner(format = it))
+                }
             }
 
             override fun onAdOpened() {}
@@ -117,14 +117,14 @@ internal class AdmobBannerImpl(
                 AdEvent.PaidRevenue(
                     ad = Ad(
                         demandAd = demandAd,
-                        ecpm = lineItem?.pricefloor ?: 0.0,
+                        ecpm = param?.lineItem?.pricefloor ?: 0.0,
                         demandAdObject = requiredAdView,
                         networkName = demandId.demandId,
                         dsp = null,
                         roundId = roundId,
                         currencyCode = AdValue.USD,
                         auctionId = auctionId,
-                        adUnitId = lineItem?.adUnitId
+                        adUnitId = param?.lineItem?.adUnitId
                     ),
                     adValue = adValue.asBidonAdValue()
                 )
@@ -136,7 +136,7 @@ internal class AdmobBannerImpl(
         logInfo(Tag, "destroy $this")
         adView?.onPaidEventListener = null
         adView = null
-        lineItem = null
+        param = null
     }
 
     override fun getAuctionParams(
@@ -161,10 +161,9 @@ internal class AdmobBannerImpl(
     @SuppressLint("MissingPermission")
     override suspend fun bid(adParams: AdmobBannerAuctionParams): AuctionResult {
         logInfo(Tag, "Starting with $adParams")
-        markBidStarted(adParams.lineItem.adUnitId)
         return withContext(dispatcher) {
-            lineItem = adParams.lineItem
-            val adUnitId = lineItem?.adUnitId
+            param = adParams
+            val adUnitId = param?.lineItem?.adUnitId
             if (!adUnitId.isNullOrBlank()) {
                 val adView = AdView(adParams.adContainer.context)
                     .apply {
@@ -196,7 +195,8 @@ internal class AdmobBannerImpl(
                 is AdEvent.LoadFailed -> {
                     AuctionResult(
                         ecpm = adParams.lineItem.pricefloor,
-                        adSource = this@AdmobBannerImpl
+                        adSource = this@AdmobBannerImpl,
+                        roundStatus = state.cause.asRoundStatus()
                     )
                 }
                 is AdEvent.Bid -> state.result
@@ -207,14 +207,12 @@ internal class AdmobBannerImpl(
 
     override suspend fun fill(): Result<Ad> = runCatching {
         logInfo(Tag, "Starting fill: $this")
-        markFillStarted()
         /**
          * Admob fills the bid automatically. It's not needed to fill it manually.
          */
         AdEvent.Fill(
             requireNotNull(adView?.asAd())
         ).also {
-            markFillFinished(RoundStatus.Successful)
             adEvent.tryEmit(it)
         }.ad
     }
@@ -230,7 +228,7 @@ internal class AdmobBannerImpl(
     private fun AdView.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            ecpm = lineItem?.pricefloor ?: 0.0,
+            ecpm = param?.lineItem?.pricefloor ?: 0.0,
             demandAdObject = this,
             networkName = demandId.demandId,
             dsp = null,

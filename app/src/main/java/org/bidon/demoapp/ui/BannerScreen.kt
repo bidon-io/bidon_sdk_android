@@ -25,15 +25,13 @@ import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import org.bidon.demoapp.component.*
 import org.bidon.sdk.ads.Ad
+import org.bidon.sdk.ads.banner.Banner
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.BannerListener
-import org.bidon.sdk.ads.banner.BannerView
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
-import kotlin.math.max
-import kotlin.math.min
 
 @Composable
 fun BannerScreen(navController: NavHostController) {
@@ -49,11 +47,8 @@ fun BannerScreen(navController: NavHostController) {
     val showOnLoad = remember {
         mutableStateOf(false)
     }
-    val autoRefreshTtl = remember {
-        mutableStateOf(10_000L)
-    }
-    val bannerView = remember {
-        mutableStateOf<BannerView?>(null)
+    val banner = remember {
+        mutableStateOf<Banner?>(null)
     }
 
     Column(
@@ -78,7 +73,7 @@ fun BannerScreen(navController: NavHostController) {
                 .padding(0.dp),
             contentAlignment = Alignment.Center
         ) {
-            val view = bannerView.value
+            val view = banner.value
             if (view != null) {
                 AndroidView(
                     modifier = Modifier
@@ -114,73 +109,18 @@ fun BannerScreen(navController: NavHostController) {
                 },
                 onItemClicked = {
                     bannerFormat.value = it
-                    bannerView.value?.setBannerFormat(it)
+                    banner.value?.setBannerFormat(it)
                 }
             )
             Spacer(modifier = Modifier.padding(top = 2.dp))
 
-            val autoRefreshText = "AutoRefresh " + if (autoRefreshTtl.value / 1000 == 0L) {
-                "Off"
-            } else {
-                "each ${autoRefreshTtl.value / 1000} sec."
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                NumberScroller(
-                    modifier = Modifier.weight(1f),
-                    initialValue = DefaultAutoRefreshTimeoutMs / 1000f,
-                    value = (autoRefreshTtl.value.toInt() / 1000).toString(),
-                    onValueChanges = {
-                        val newTimeout = min(
-                            a = max(
-                                a = (it * 1000L).toLong(),
-                                b = 0L
-                            ),
-                            b = 30000L
-                        )
-                        if (newTimeout == 0L) {
-                            bannerView.value?.stopAutoRefresh()
-                        } else {
-                            bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
-                        }
-                        autoRefreshTtl.value = newTimeout
-                    },
-                    onPlusClicked = {
-                        val newTimeout = min(autoRefreshTtl.value + 5000, 30_000L)
-                        bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
-                        autoRefreshTtl.value = newTimeout
-                    },
-                    onMinusClicked = {
-                        val newTimeout = max(autoRefreshTtl.value - 5000, 0L)
-                        if (newTimeout == 0L) {
-                            bannerView.value?.stopAutoRefresh()
-                        } else {
-                            bannerView.value?.startAutoRefresh(timeoutMs = newTimeout)
-                        }
-                        autoRefreshTtl.value = newTimeout
-                    }
-                )
-                Body2Text(
-                    modifier = Modifier.weight(2f),
-                    text = autoRefreshText
-                )
-            }
-
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 AppButton(text = "Create") {
-                    bannerView.value = BannerView(
+                    banner.value = Banner(
                         context = context,
                         placementId = "some_placement_id"
                     ).apply {
                         setBannerFormat(bannerFormat.value)
-                        if (autoRefreshTtl.value == 0L) {
-                            stopAutoRefresh()
-                        } else {
-                            startAutoRefresh(timeoutMs = autoRefreshTtl.value)
-                        }
                         setBannerListener(
                             object : BannerListener {
                                 override fun onAdLoaded(ad: Ad) {
@@ -251,9 +191,9 @@ fun BannerScreen(navController: NavHostController) {
                 AppButton(
                     text = "Load",
                 ) {
-                    bannerView.value?.loadAd()
+                    banner.value?.loadAd()
                     if (showOnLoad.value) {
-                        bannerView.value?.showAd()
+                        banner.value?.showAd()
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
@@ -267,12 +207,12 @@ fun BannerScreen(navController: NavHostController) {
             }
             Row {
                 AppButton(text = "Show") {
-                    bannerView.value?.showAd()
+                    banner.value?.showAd()
                 }
                 Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                 AppButton(text = "Destroy") {
-                    bannerView.value?.destroyAd()
-                    bannerView.value = null
+                    banner.value?.destroyAd()
+                    banner.value = null
                 }
             }
         }

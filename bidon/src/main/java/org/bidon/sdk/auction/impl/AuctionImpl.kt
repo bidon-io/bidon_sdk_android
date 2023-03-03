@@ -7,14 +7,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.bidon.sdk.adapter.*
-import org.bidon.sdk.adapter.AdaptersSource
-import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.auction.*
-import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.Auction
-import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.Round
@@ -98,10 +92,19 @@ internal class AuctionImpl(
             }.getOrThrow()
         }
         state.first { it == AuctionState.Finished }
-
-        auctionResults.value.ifEmpty {
+        val results = auctionResults.value.toList()
+        clearData()
+        results.ifEmpty {
             throw BidonError.NoAuctionResults
         }
+    }
+
+    private fun clearData() {
+        auctionResults.value = emptyList()
+        statsRound.clear()
+        statsAuctionResults.clear()
+        mutableLineItems.clear()
+        _auctionDataResponse = null
     }
 
     private fun notifyLosers(finalResults: List<AuctionResult>) {
@@ -121,6 +124,7 @@ internal class AuctionImpl(
     private suspend fun fillWinner(auctionResults: List<AuctionResult>, timeout: Long): List<AuctionResult> {
         val index = auctionResults.indexOfFirst { auctionResult ->
             val fillResult = withTimeoutOrNull(timeout) {
+                (auctionResult.adSource as? StatisticsCollector)?.markFillStarted()
                 logInfo(Tag, "Filling winner started for auction result: $auctionResult")
                 auctionResult.adSource.fill()
             } ?: BidonError.FillTimedOut(auctionResult.adSource.demandId).asFailure()
@@ -128,6 +132,7 @@ internal class AuctionImpl(
             fillResult
                 .onFailure { cause ->
                     logError(Tag, "Failed to fill: ${auctionResult.adSource.demandId}", cause)
+                    (auctionResult.adSource as? StatisticsCollector)?.markFillFinished(RoundStatus.NoFill)
                     (auctionResult.adSource as? WinLossNotifiable)?.let {
                         logInfo(Tag, "Notified loss: ${auctionResult.adSource.demandId}")
                         it.notifyLoss()
@@ -136,6 +141,7 @@ internal class AuctionImpl(
                 }
                 .onSuccess {
                     logInfo(Tag, "Winner filled: ${auctionResult.adSource.demandId}")
+                    (auctionResult.adSource as? StatisticsCollector)?.markFillFinished(RoundStatus.Successful)
                     (auctionResult.adSource as? WinLossNotifiable)?.let {
                         logInfo(Tag, "Notified win: ${auctionResult.adSource.demandId}")
                         it.notifyWin()
@@ -375,21 +381,40 @@ internal class AuctionImpl(
                             "PriceFloor=$pricefloor. LineItems: $availableLineItemsForDemand."
                     )
                     async {
-                        withTimeoutOrNull(round.timeoutMs) {
+                        val result = withTimeoutOrNull(round.timeoutMs) {
                             val adParam = obtainAdParamByType(
                                 adSource = adSource,
                                 adTypeParamData = adTypeParamData,
                                 pricefloor = pricefloor,
                                 timeout = timeout,
                                 availableLineItemsForDemand = availableLineItemsForDemand,
+                            ).onSuccess {
+                                (adSource as? StatisticsCollector)?.markBidStarted(adUnitId = it.adUnitId)
+                            }.onFailure {
+                                (adSource as? StatisticsCollector)?.markBidStarted(adUnitId = null)
+                            }
+                            adParam.getOrNull()?.let { adAuctionParams ->
+                                adSource.bid(adParams = adAuctionParams)
+                            } ?: run {
+                                AuctionResult(
+                                    ecpm = 0.0,
+                                    adSource = adSource,
+                                    roundStatus = RoundStatus.NoAppropriateAdUnitId
+                                )
+                            }
+                        } ?: run {
+                            AuctionResult(
+                                ecpm = 0.0,
+                                adSource = adSource,
+                                roundStatus = RoundStatus.BidTimeoutReached
                             )
-                            adParam.getOrNull()?.let {
-                                adSource.bid(adParams = it)
-                            } ?: RoundStatus.NoAppropriateAdUnitId.asAuctionResult(adSource)
-                        } ?: RoundStatus.BidTimeoutReached.asAuctionResult(adSource)
+                        }
+                        (adSource as? StatisticsCollector)?.markBidFinished(result.roundStatus, result.ecpm)
+                        result
                     } to adSource
                 }.mapIndexed { index, (deferred, adSource) ->
                     val logRoundTitle = "Round '${round.id}' result #$index(${adSource.demandId.demandId})"
+
                     deferred.await().also {
                         logInfo(Tag, "$logRoundTitle: $it. Statistics: ${(adSource as StatisticsCollector).buildBidStatistic()}")
                     }
@@ -399,24 +424,13 @@ internal class AuctionImpl(
         }
     }
 
-    private fun RoundStatus.asAuctionResult(adSource: AdSource<AdAuctionParams>): AuctionResult {
-        (adSource as StatisticsCollector).markBidFinished(
-            roundStatus = this,
-            ecpm = null
-        )
-        return AuctionResult(
-            ecpm = 0.0,
-            adSource = adSource
-        )
-    }
-
     private fun obtainAdParamByType(
         adSource: AdSource<AdAuctionParams>,
         adTypeParamData: AdTypeParam,
         pricefloor: Double,
         timeout: Long,
         availableLineItemsForDemand: List<LineItem>,
-    ) = when (adSource) {
+    ): Result<AdAuctionParams> = when (adSource) {
         is AdSource.Banner -> {
             check(adTypeParamData is AdTypeParam.Banner)
             adSource.getAuctionParams(

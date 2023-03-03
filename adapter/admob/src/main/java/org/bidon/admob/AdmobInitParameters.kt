@@ -14,10 +14,16 @@ data class AdmobBannerAuctionParams(
     val bannerFormat: BannerFormat,
     val lineItem: LineItem,
     val pricefloor: Double
-) : AdAuctionParams
+) : AdAuctionParams {
+    override val adUnitId: String?
+        get() = lineItem.adUnitId
+}
 
 data class AdmobFullscreenAdAuctionParams(
     val context: Context,
     val lineItem: LineItem,
     val pricefloor: Double
-) : AdAuctionParams
+) : AdAuctionParams {
+    override val adUnitId: String?
+        get() = lineItem.adUnitId
+}

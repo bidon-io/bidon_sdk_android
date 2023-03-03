@@ -44,7 +44,7 @@ internal class AdmobInterstitialImpl(
 
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
 
-    private var lineItem: LineItem? = null
+    private var param: AdmobFullscreenAdAuctionParams? = null
     private var interstitialAd: InterstitialAd? = null
     private val requiredInterstitialAd: InterstitialAd get() = requireNotNull(interstitialAd)
 
@@ -52,10 +52,6 @@ internal class AdmobInterstitialImpl(
         object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(Tag, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
-                markBidFinished(
-                    ecpm = null,
-                    roundStatus = loadAdError.asBidonError().asRoundStatus(),
-                )
                 adEvent.tryEmit(AdEvent.LoadFailed(loadAdError.asBidonError()))
             }
 
@@ -64,15 +60,12 @@ internal class AdmobInterstitialImpl(
                 this@AdmobInterstitialImpl.interstitialAd = interstitialAd
                 interstitialAd.onPaidEventListener = paidListener
                 interstitialAd.fullScreenContentCallback = interstitialListener
-                markBidFinished(
-                    ecpm = requireNotNull(lineItem?.pricefloor),
-                    roundStatus = RoundStatus.Successful,
-                )
                 adEvent.tryEmit(
                     AdEvent.Bid(
                         AuctionResult(
-                            ecpm = requireNotNull(lineItem?.pricefloor),
+                            ecpm = requireNotNull(param?.lineItem?.pricefloor),
                             adSource = this@AdmobInterstitialImpl,
+                            roundStatus = RoundStatus.Successful
                         )
                     )
                 )
@@ -89,14 +82,14 @@ internal class AdmobInterstitialImpl(
                 AdEvent.PaidRevenue(
                     ad = Ad(
                         demandAd = demandAd,
-                        ecpm = lineItem?.pricefloor ?: 0.0,
+                        ecpm = param?.lineItem?.pricefloor ?: 0.0,
                         demandAdObject = requiredInterstitialAd,
                         networkName = demandId.demandId,
                         dsp = null,
                         roundId = roundId,
                         currencyCode = "USD",
                         auctionId = auctionId,
-                        adUnitId = lineItem?.adUnitId
+                        adUnitId = param?.lineItem?.adUnitId
                     ),
                     adValue = adValue.asBidonAdValue()
                 )
@@ -109,6 +102,7 @@ internal class AdmobInterstitialImpl(
             override fun onAdClicked() {
                 logInfo(Tag, "onAdClicked: $this")
                 adEvent.tryEmit(AdEvent.Clicked(requiredInterstitialAd.asAd()))
+                sendClickImpression(StatisticsCollector.AdType.Interstitial)
             }
 
             override fun onAdDismissedFullScreenContent() {
@@ -124,6 +118,7 @@ internal class AdmobInterstitialImpl(
             override fun onAdImpression() {
                 logInfo(Tag, "onAdShown: $this")
                 adEvent.tryEmit(AdEvent.Shown(requiredInterstitialAd.asAd()))
+                sendShowImpression(StatisticsCollector.AdType.Interstitial)
             }
 
             override fun onAdShowedFullScreenContent() {}
@@ -142,7 +137,7 @@ internal class AdmobInterstitialImpl(
         interstitialAd?.onPaidEventListener = null
         interstitialAd?.fullScreenContentCallback = null
         interstitialAd = null
-        lineItem = null
+        param = null
     }
 
     override fun getAuctionParams(
@@ -164,11 +159,10 @@ internal class AdmobInterstitialImpl(
 
     override suspend fun bid(adParams: AdmobFullscreenAdAuctionParams): AuctionResult {
         logInfo(Tag, "Starting with $adParams: $this")
-        markBidStarted(adParams.lineItem.adUnitId)
         return withContext(dispatcher) {
-            lineItem = adParams.lineItem
+            param = adParams
             val adRequest = AdRequest.Builder().build()
-            val adUnitId = lineItem?.adUnitId
+            val adUnitId = param?.lineItem?.adUnitId
             if (!adUnitId.isNullOrBlank()) {
                 InterstitialAd.load(adParams.context, adUnitId, adRequest, requestListener)
             } else {
@@ -176,7 +170,7 @@ internal class AdmobInterstitialImpl(
                 logError(
                     tag = Tag,
                     message = "No appropriate AdUnitId found. PriceFloor=${adParams.pricefloor}, " +
-                        "but LineItem with max pricefloor=${lineItem?.pricefloor}",
+                        "but LineItem with max pricefloor=${param?.lineItem?.pricefloor}",
                     error = error
                 )
                 adEvent.tryEmit(AdEvent.LoadFailed(error))
@@ -188,7 +182,8 @@ internal class AdmobInterstitialImpl(
                 is AdEvent.LoadFailed -> {
                     AuctionResult(
                         ecpm = adParams.lineItem.pricefloor,
-                        adSource = this@AdmobInterstitialImpl
+                        adSource = this@AdmobInterstitialImpl,
+                        roundStatus = state.cause.asRoundStatus()
                     )
                 }
                 is AdEvent.Bid -> state.result
@@ -199,12 +194,10 @@ internal class AdmobInterstitialImpl(
 
     override suspend fun fill(): Result<Ad> = runCatching {
         logInfo(Tag, "Starting fill: $this")
-        markFillStarted()
         /**
          * Admob fills the bid automatically. It's not needed to fill it manually.
          */
         val event = AdEvent.Fill(requireNotNull(interstitialAd?.asAd()))
-        markFillFinished(RoundStatus.Successful)
         adEvent.tryEmit(event)
         event.ad
     }
@@ -221,14 +214,14 @@ internal class AdmobInterstitialImpl(
     private fun InterstitialAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            ecpm = lineItem?.pricefloor ?: 0.0,
+            ecpm = param?.lineItem?.pricefloor ?: 0.0,
             demandAdObject = this,
             networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = "USD",
             auctionId = auctionId,
-            adUnitId = lineItem?.adUnitId
+            adUnitId = param?.lineItem?.adUnitId
         )
     }
 }

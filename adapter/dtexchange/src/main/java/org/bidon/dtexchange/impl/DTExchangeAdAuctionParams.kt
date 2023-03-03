@@ -10,4 +10,5 @@ data class DTExchangeAdAuctionParams(
     val lineItem: LineItem
 ) : AdAuctionParams {
     val spotId: String get() = requireNotNull(lineItem.adUnitId)
+    override val adUnitId: String? get() = lineItem.adUnitId
 }

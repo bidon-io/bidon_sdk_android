@@ -19,6 +19,7 @@ import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.impl.dpToPx
 import org.bidon.sdk.auction.AuctionResult
+import org.bidon.sdk.auction.models.BannerRequestBody.Companion.asStatBannerFormat
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
@@ -50,15 +51,12 @@ internal class MaxBannerImpl(
         object : MaxAdViewAdListener {
             override fun onAdLoaded(ad: MaxAd) {
                 maxAd = ad
-                markBidFinished(
-                    ecpm = requireNotNull(ad.revenue),
-                    roundStatus = RoundStatus.Successful,
-                )
                 adEvent.tryEmit(
                     AdEvent.Bid(
                         AuctionResult(
                             ecpm = ad.revenue,
                             adSource = this@MaxBannerImpl,
+                            roundStatus = RoundStatus.Successful
                         )
                     )
                 )
@@ -69,10 +67,6 @@ internal class MaxBannerImpl(
 
             override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
                 logError(Tag, "(code=${error.code}) ${error.message}", error.asBidonError())
-                markBidFinished(
-                    ecpm = null,
-                    roundStatus = error.asBidonError().asRoundStatus(),
-                )
                 adEvent.tryEmit(AdEvent.LoadFailed(error.asBidonError()))
             }
 
@@ -85,6 +79,9 @@ internal class MaxBannerImpl(
                         adValue = ad.asBidonAdValue()
                     )
                 )
+                bannerFormat?.let {
+                    sendShowImpression(StatisticsCollector.AdType.Banner(format = it.asStatBannerFormat()))
+                }
             }
 
             override fun onAdHidden(ad: MaxAd) {
@@ -95,6 +92,9 @@ internal class MaxBannerImpl(
             override fun onAdClicked(ad: MaxAd) {
                 maxAd = ad
                 adEvent.tryEmit(AdEvent.Clicked(ad.asAd()))
+                bannerFormat?.let {
+                    sendClickImpression(StatisticsCollector.AdType.Banner(format = it.asStatBannerFormat()))
+                }
             }
 
             override fun onAdDisplayFailed(ad: MaxAd, error: MaxError) {
@@ -155,7 +155,6 @@ internal class MaxBannerImpl(
 
     override suspend fun bid(adParams: MaxBannerAuctionParams): AuctionResult {
         logInfo(Tag, "Starting with $adParams")
-        markBidStarted(adParams.lineItem.adUnitId)
         bannerFormat = adParams.bannerFormat
         val maxAdView = if (adParams.bannerFormat == BannerFormat.Adaptive) {
             MaxAdView(
@@ -194,7 +193,8 @@ internal class MaxBannerImpl(
             is AdEvent.LoadFailed -> {
                 AuctionResult(
                     ecpm = 0.0,
-                    adSource = this
+                    adSource = this,
+                    roundStatus = state.cause.asRoundStatus()
                 )
             }
             is AdEvent.Bid -> state.result

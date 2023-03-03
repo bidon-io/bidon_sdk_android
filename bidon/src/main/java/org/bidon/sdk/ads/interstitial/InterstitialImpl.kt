@@ -17,7 +17,6 @@ import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
-import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 
@@ -140,12 +139,10 @@ internal class InterstitialImpl(
                     // do nothing
                 }
                 is AdEvent.Clicked -> {
-                    sendStatsClickedAsync(adSource)
                     listener.onAdClicked(adEvent.ad)
                 }
                 is AdEvent.Closed -> listener.onAdClosed(adEvent.ad)
                 is AdEvent.Shown -> {
-                    sendStatsShownAsync(adSource)
                     listener.onAdShown(adEvent.ad)
                 }
                 is AdEvent.PaidRevenue -> listener.onRevenuePaid(adEvent.ad, adEvent.adValue)
@@ -211,26 +208,6 @@ internal class InterstitialImpl(
 
         override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
             userListener?.onRevenuePaid(ad, adValue)
-        }
-    }
-
-    private suspend fun sendStatsClickedAsync(adSource: AdSource<*>) {
-        coroutineScope {
-            launch {
-                (adSource as? StatisticsCollector)?.sendClickImpression(
-                    StatisticsCollector.AdType.Interstitial
-                )
-            }
-        }
-    }
-
-    private suspend fun sendStatsShownAsync(adSource: AdSource<*>) {
-        coroutineScope {
-            launch {
-                (adSource as? StatisticsCollector)?.sendShowImpression(
-                    StatisticsCollector.AdType.Interstitial
-                )
-            }
         }
     }
 }
