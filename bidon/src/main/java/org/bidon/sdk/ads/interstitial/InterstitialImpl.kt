@@ -47,6 +47,10 @@ internal class InterstitialImpl(
             listener.onAdLoadFailed(BidonError.SdkNotInitialized)
             return
         }
+        if (auctionHolder.isAdReady()) {
+            logInfo(Tag, "Ad is loaded and available to show.")
+            return
+        }
         logInfo(Tag, "Load with placement=$placementId, pricefloor=$pricefloor")
         if (!auctionHolder.isActive) {
             listener.onAuctionStarted()

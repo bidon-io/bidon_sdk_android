@@ -59,9 +59,10 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
         adapter: Initializable<AdapterParameters>
     ): Result<AdapterParameters> = runCatching {
         val json = configResponse.adapters[(adapter as Adapter).demandId.demandId]
-        adapter.parseConfigParam(json?.toString() ?: "")
-    }.onFailure { parsingError ->
-        logError(Tag, "Config parameters is null. Adapter not initialized: $adapter", parsingError)
+        requireNotNull(json) {
+            "No config found for Adapter($adapter). Adapter not initialized."
+        }
+        adapter.parseConfigParam(json.toString())
     }
 }
 

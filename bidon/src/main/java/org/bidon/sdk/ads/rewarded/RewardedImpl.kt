@@ -49,6 +49,10 @@ internal class RewardedImpl(
             listener.onAdLoadFailed(BidonError.SdkNotInitialized)
             return
         }
+        if (auctionHolder.isAdReady()) {
+            logInfo(Tag, "Ad is loaded and available to show.")
+            return
+        }
         logInfo(Tag, "Load with placement: $placementId")
         observeCallbacksJob?.cancel()
         observeCallbacksJob = null
