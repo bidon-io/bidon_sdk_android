@@ -12,14 +12,9 @@ import io.bidmachine.banner.BannerView
 import io.bidmachine.utils.BMError
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
-import org.bidon.bidmachine.BMAuctionResult
-import org.bidon.bidmachine.BMBannerAuctionParams
-import org.bidon.bidmachine.BidMachineBannerSize
-import org.bidon.bidmachine.asBidonError
+import org.bidon.bidmachine.*
 import org.bidon.bidmachine.ext.asBidonAdValue
 import org.bidon.sdk.adapter.*
-import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.impl.dpToPx
@@ -76,9 +71,10 @@ internal class BMBannerAdImpl(
             }
 
             override fun onRequestFailed(request: BannerRequest, bmError: BMError) {
-                logError(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
+                val error = bmError.asBidonErrorOnBid(demandId)
+                logError(Tag, "onRequestFailed $bmError. $this", error)
                 adRequest = request
-                adEvent.tryEmit(AdEvent.LoadFailed(bmError.asBidonError(demandId)))
+                adEvent.tryEmit(AdEvent.LoadFailed(error))
             }
 
             override fun onRequestExpired(request: BannerRequest) {
@@ -98,9 +94,10 @@ internal class BMBannerAdImpl(
             }
 
             override fun onAdLoadFailed(bannerView: BannerView, bmError: BMError) {
-                logError(Tag, "onAdLoadFailed: $this", bmError.asBidonError(demandId))
+                val error = bmError.asBidonErrorOnFill(demandId)
+                logError(Tag, "onAdLoadFailed: $this", error)
                 this@BMBannerAdImpl.bannerView = bannerView
-                adEvent.tryEmit(AdEvent.LoadFailed(bmError.asBidonError(demandId)))
+                adEvent.tryEmit(AdEvent.LoadFailed(error))
             }
 
             override fun onAdImpression(bannerView: BannerView) {

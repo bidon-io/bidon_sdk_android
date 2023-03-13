@@ -24,7 +24,7 @@ enum class RoundStatus(val code: String) {
     UnspecifiedException("UNSPECIFIED_EXCEPTION"),
     BelowPricefloor("BELOW_PRICEFLOOR"),
 
-    Successful("INTERNAL_STATUS"), // Internal status
+    Successful("INTERNAL_STATUS"), // Internal status, its code should not be used
 }
 
 fun Throwable.asRoundStatus() = when (this as? BidonError) {

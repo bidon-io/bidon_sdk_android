@@ -109,13 +109,15 @@ internal class AuctionImpl(
 
     private fun notifyLosers(finalResults: List<AuctionResult>) {
         finalResults.drop(1)
-            .map { it.adSource }
-            .forEach { adSource ->
+            .forEach { auctionResult ->
+                val adSource = auctionResult.adSource
                 if (adSource is WinLossNotifiable) {
                     logInfo(Tag, "Notified loss: ${adSource.demandId}")
                     adSource.notifyLoss()
                 }
-                (adSource as StatisticsCollector).markLoss()
+                if (auctionResult.roundStatus == RoundStatus.Successful) {
+                    (adSource as StatisticsCollector).markLoss()
+                }
                 logInfo(Tag, "Destroying loser: ${adSource.demandId}")
                 adSource.destroy()
             }
@@ -137,7 +139,6 @@ internal class AuctionImpl(
                         logInfo(Tag, "Notified loss: ${auctionResult.adSource.demandId}")
                         it.notifyLoss()
                     }
-                    (auctionResult.adSource as StatisticsCollector).markLoss()
                 }
                 .onSuccess {
                     logInfo(Tag, "Winner filled: ${auctionResult.adSource.demandId}")

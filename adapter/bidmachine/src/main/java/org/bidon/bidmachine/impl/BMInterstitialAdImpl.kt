@@ -13,14 +13,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import org.bidon.bidmachine.BMAuctionResult
 import org.bidon.bidmachine.BMFullscreenAuctionParams
-import org.bidon.bidmachine.asBidonError
+import org.bidon.bidmachine.asBidonErrorOnBid
+import org.bidon.bidmachine.asBidonErrorOnFill
 import org.bidon.bidmachine.ext.asBidonAdValue
-import org.bidon.sdk.adapter.AdAuctionParams
-import org.bidon.sdk.adapter.AdEvent
-import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
-import org.bidon.sdk.adapter.WinLossNotifiable
+import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
@@ -76,9 +72,10 @@ internal class BMInterstitialAdImpl(
             }
 
             override fun onRequestFailed(request: InterstitialRequest, bmError: BMError) {
-                logError(Tag, "onRequestFailed $bmError. $this", bmError.asBidonError(demandId))
+                val error = bmError.asBidonErrorOnBid(demandId)
+                logError(Tag, "onRequestFailed $bmError. $this", error)
                 adRequest = request
-                adEvent.tryEmit(AdEvent.LoadFailed(bmError.asBidonError(demandId)))
+                adEvent.tryEmit(AdEvent.LoadFailed(error))
             }
 
             override fun onRequestExpired(request: InterstitialRequest) {
@@ -98,15 +95,17 @@ internal class BMInterstitialAdImpl(
             }
 
             override fun onAdLoadFailed(interstitialAd: InterstitialAd, bmError: BMError) {
-                logError(Tag, "onAdLoadFailed: $this", bmError.asBidonError(demandId))
+                val error = bmError.asBidonErrorOnFill(demandId)
+                logError(Tag, "onAdLoadFailed: $this", error)
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                adEvent.tryEmit(AdEvent.LoadFailed(bmError.asBidonError(demandId)))
+                adEvent.tryEmit(AdEvent.LoadFailed(error))
             }
 
             override fun onAdShowFailed(interstitialAd: InterstitialAd, bmError: BMError) {
-                logError(Tag, "onAdShowFailed: $this", bmError.asBidonError(demandId))
+                val error = bmError.asBidonErrorOnFill(demandId)
+                logError(Tag, "onAdShowFailed: $this", error)
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                adEvent.tryEmit(AdEvent.ShowFailed(bmError.asBidonError(demandId)))
+                adEvent.tryEmit(AdEvent.ShowFailed(error))
             }
 
             override fun onAdImpression(interstitialAd: InterstitialAd) {
