@@ -175,6 +175,7 @@ internal class UnityAdsRewarded(
                     when (state) {
                         UnityAds.UnityAdsShowCompletionState.COMPLETED -> {
                             adEvent.tryEmit(AdEvent.OnReward(ad = it, reward = null))
+                            sendRewardImpression()
                         }
                         UnityAds.UnityAdsShowCompletionState.SKIPPED,
                         null -> {

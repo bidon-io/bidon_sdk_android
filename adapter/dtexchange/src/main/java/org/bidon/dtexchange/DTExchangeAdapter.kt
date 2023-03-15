@@ -36,11 +36,13 @@ class DTExchangeAdapter :
 
     override suspend fun init(activity: Activity, configParams: DTExchangeParameters) =
         suspendCancellableCoroutine { continuation ->
-            when (BidonSdk.loggerLevel) {
-                Logger.Level.Verbose -> InneractiveAdManager.setLogLevel(Log.VERBOSE)
-                Logger.Level.Error -> InneractiveAdManager.setLogLevel(Log.ERROR)
-                Logger.Level.Off -> {
-                    // do nothing
+            if (BuildConfig.DEBUG) {
+                when (BidonSdk.loggerLevel) {
+                    Logger.Level.Verbose -> InneractiveAdManager.setLogLevel(Log.VERBOSE)
+                    Logger.Level.Error -> InneractiveAdManager.setLogLevel(Log.ERROR)
+                    Logger.Level.Off -> {
+                        // do nothing
+                    }
                 }
             }
             InneractiveAdManager.initialize(activity.applicationContext, configParams.appId) { initStatus ->

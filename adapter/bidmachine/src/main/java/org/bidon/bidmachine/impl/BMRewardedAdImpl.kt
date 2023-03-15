@@ -101,6 +101,7 @@ internal class BMRewardedAdImpl(
                         reward = null
                     )
                 )
+                sendRewardImpression()
             }
 
             override fun onAdLoaded(rewardedAd: RewardedAd) {
