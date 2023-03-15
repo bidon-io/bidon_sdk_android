@@ -1,34 +1,33 @@
-package org.bidon.sdk.adapters
+package org.bidon.sdk.config.models.adapters
 
 import android.app.Activity
 import org.bidon.sdk.adapter.*
-import org.bidon.sdk.adapter.AdapterInfo
-import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
-import org.bidon.sdk.config.models.adapters.TestAdapterInterstitialImpl
-import org.bidon.sdk.config.models.adapters.TestAdapterInterstitialParameters
-
-internal object TestAdapterParameters : AdapterParameters
 
 internal class TestAdapter(
-    demandName: String,
-    private val interstitialData: TestAdapterInterstitialParameters,
+    override val demandId: DemandId,
+    private val testAdapterParameters: TestAdapterParameters,
 ) : Adapter,
     Initializable<TestAdapterParameters>,
-    AdProvider.Interstitial<TestAdapterInterstitialParameters> {
-    override val demandId = DemandId(demandName)
+    AdProvider.Interstitial<TestInterstitialParameters> {
+
     override val adapterInfo = AdapterInfo(adapterVersion = "adapterVersion1", sdkVersion = "sdkVersion1")
+
     override suspend fun init(activity: Activity, configParams: TestAdapterParameters) {
         // do nothing, init emulation
     }
 
-    override fun parseConfigParam(json: String) = TestAdapterParameters
+    override fun parseConfigParam(json: String) = testAdapterParameters
 
     override fun interstitial(
         demandAd: DemandAd,
         roundId: String,
         auctionId: String
-    ): AdSource.Interstitial<TestAdapterInterstitialParameters> {
-        return TestAdapterInterstitialImpl(demandId, roundId, interstitialData)
+    ): AdSource.Interstitial<TestInterstitialParameters> {
+        return TestInterstitialImpl(
+            demandId = demandId,
+            auctionId = auctionId,
+            roundId = roundId,
+            testParameters = testAdapterParameters
+        )
     }
 }

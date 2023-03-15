@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +38,6 @@ fun InterstitialScreen(
     val activity = LocalContext.current as Activity
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-
     val logFlow = remember {
         mutableStateOf(listOf("Log"))
     }
@@ -126,7 +125,7 @@ fun InterstitialScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         AppToolbar(
             title = "Interstitial Ad",
@@ -156,14 +155,14 @@ fun InterstitialScreen(
                     onValueChange = { newValue ->
                         pricefloorState.value = newValue
                     },
-                    textStyle = MaterialTheme.typography.body1.copy(
-                        color = MaterialTheme.colors.onPrimary,
-                        background = MaterialTheme.colors.surface
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        background = MaterialTheme.colorScheme.surface
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 4.dp),
-                    cursorBrush = SolidColor(MaterialTheme.colors.onBackground),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     maxLines = 1
                 )
@@ -184,7 +183,7 @@ fun InterstitialScreen(
                     Column(
                         modifier = Modifier
                             .padding(bottom = 2.dp)
-                            .background(MaterialTheme.colors.secondary, MaterialTheme.shapes.medium)
+                            .background(MaterialTheme.colorScheme.secondary, MaterialTheme.shapes.medium)
                             .padding(4.dp)
                     ) {
                         Body2Text(text = logLine)

@@ -23,6 +23,17 @@ android {
             )
         }
     }
+    flavorDimensions += "server"
+    productFlavors {
+        create("production") {
+            description = "Production backend x.appbaqend.com"
+            dimension = "server"
+        }
+        create("serverless") {
+            description = "No /config and /auction/* requests. Set it manually for tests"
+            dimension = "server"
+        }
+    }
     kotlinOptions {
         jvmTarget = "11"
     }
@@ -43,7 +54,9 @@ dependencies {
      * Testing
      */
     testImplementation(kotlin("test"))
-    testImplementation("io.mockk:mockk:1.13.4")
+    testImplementation("io.mockk:mockk:1.13.4") {
+        exclude(group = "org.slf4j", module = "slf4j-api")
+    }
     testImplementation("com.google.truth:truth:1.1.3")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")

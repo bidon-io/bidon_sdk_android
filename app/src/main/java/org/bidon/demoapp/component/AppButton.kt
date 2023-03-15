@@ -1,10 +1,13 @@
 package org.bidon.demoapp.component
 
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.sp
+import java.util.*
 
 @Composable
 fun AppButton(
@@ -18,7 +21,11 @@ fun AppButton(
             onClick.invoke()
         }
     ) {
-        Text(text = text)
+        Text(
+            text = text.uppercase(Locale.getDefault()),
+            style = MaterialTheme.typography.titleMedium,
+            fontSize = 14.sp
+        )
     }
 }
 
@@ -34,6 +41,10 @@ fun AppTextButton(
             onClick.invoke()
         }
     ) {
-        Text(text = text)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium,
+            fontSize = 14.sp
+        )
     }
 }

@@ -1,18 +1,18 @@
 package org.bidon.demoapp.theme
 
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-internal val DarkColors = darkColors(
+internal val DarkColors = darkColorScheme(
     // Buttons
     primary = AppColors.Orange,
-    primaryVariant = AppColors.Dark,
     onPrimary = Color.White,
+    primaryContainer = AppColors.Orange,
 
     secondary = AppColors.GreyD,
-    secondaryVariant = AppColors.GreyD,
     onSecondary = Color.White,
+    secondaryContainer = AppColors.Orange,
 
     background = AppColors.Dark,
     onBackground = Color.White,
@@ -21,15 +21,21 @@ internal val DarkColors = darkColors(
     onSurface = Color.White,
 
     error = AppColors.Orange,
-    onError = Color.White
+    onError = Color.White,
+
+    tertiaryContainer = AppColors.Orange,
+    tertiary = AppColors.Orange,
+    onTertiary = AppColors.Orange,
+    onTertiaryContainer = AppColors.Orange,
+    surfaceVariant = AppColors.Orange,
+    outline = AppColors.Orange,
+    outlineVariant = AppColors.Orange,
 )
-internal val LightColors = lightColors(
+internal val LightColors = lightColorScheme(
     primary = Color.Black,
-    primaryVariant = AppColors.Dark,
     onPrimary = Color.White,
 
     secondary = AppColors.Grey,
-    secondaryVariant = AppColors.Grey,
     onSecondary = Color.White,
 
     background = AppColors.GreyL,

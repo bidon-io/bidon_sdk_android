@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,7 +54,7 @@ fun BannerScreen(navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         AppToolbar(
             title = "Banners",
@@ -68,7 +68,7 @@ fun BannerScreen(navController: NavHostController) {
                 .dashedBorder(
                     width = 1.dp,
                     radius = 0.dp,
-                    color = MaterialTheme.colors.error
+                    color = MaterialTheme.colorScheme.error
                 )
                 .padding(0.dp),
             contentAlignment = Alignment.Center
@@ -199,7 +199,7 @@ fun BannerScreen(navController: NavHostController) {
                 Spacer(modifier = Modifier.weight(1f))
                 Body2Text(text = "Show onLoad")
                 Checkbox(
-                    colors = CheckboxDefaults.colors(MaterialTheme.colors.onBackground),
+                    colors = CheckboxDefaults.colors(MaterialTheme.colorScheme.onBackground),
                     checked = showOnLoad.value, onCheckedChange = {
                         showOnLoad.value = it
                     }
@@ -227,7 +227,7 @@ fun BannerScreen(navController: NavHostController) {
                 Column(
                     modifier = Modifier
                         .padding(bottom = 2.dp)
-                        .background(MaterialTheme.colors.secondary, MaterialTheme.shapes.medium)
+                        .background(MaterialTheme.colorScheme.secondary, MaterialTheme.shapes.medium)
                         .padding(4.dp)
                 ) {
                     Body2Text(text = logLine)

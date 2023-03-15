@@ -1,6 +1,5 @@
 package org.bidon.demoapp
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -23,7 +22,6 @@ class MainActivity : FragmentActivity() {
                 Column {
                     NavigationGraph(
                         navController = navController,
-                        shared = this@MainActivity.getSharedPreferences("app_test", Context.MODE_PRIVATE)
                     )
                 }
             }

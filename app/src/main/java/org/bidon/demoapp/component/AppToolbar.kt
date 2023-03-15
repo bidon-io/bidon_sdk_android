@@ -1,15 +1,12 @@
 package org.bidon.demoapp.component
 
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AppToolbar(
     title: String = "",
@@ -18,9 +15,9 @@ internal fun AppToolbar(
 ) {
     TopAppBar(
         title = {
-            H5Text(text = title)
+            Subtitle1Text(text = title)
         },
-        backgroundColor = MaterialTheme.colors.background,
+        colors = TopAppBarDefaults.smallTopAppBarColors(MaterialTheme.colorScheme.background),
         navigationIcon = {
             IconButton(
                 onClick = {
@@ -33,6 +30,5 @@ internal fun AppToolbar(
                 )
             }
         },
-        elevation = 0.dp
     )
 }

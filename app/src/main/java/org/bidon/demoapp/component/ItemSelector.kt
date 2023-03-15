@@ -5,9 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -33,15 +33,15 @@ fun <T> ItemSelector(
         title?.let {
             Text(
                 text = title,
-                color = MaterialTheme.colors.onPrimary,
-                style = MaterialTheme.typography.body2
+                color = MaterialTheme.colorScheme.onPrimary,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
         description?.let {
             Text(
                 text = description,
-                color = MaterialTheme.colors.onPrimary,
-                style = MaterialTheme.typography.caption
+                color = MaterialTheme.colorScheme.onPrimary,
+                style = MaterialTheme.typography.displayLarge
             )
         }
         if (items.isNotEmpty()) {
@@ -56,25 +56,25 @@ fun <T> ItemSelector(
             ) {
                 items.forEach { item ->
                     val isSelected = item == selectedItem
-                    val color = if (isSelected) MaterialTheme.colors.primary else MaterialTheme.colors.surface
+                    val color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
                     Surface(
                         shape = MaterialTheme.shapes.small,
-                        color = MaterialTheme.colors.background,
+                        color = MaterialTheme.colorScheme.background,
                         modifier = Modifier
                             .clickable {
                                 if (!isSelected) {
-                                    onItemClicked.invoke(item)
+                                    onItemClicked.invoke(item as T)
                                 }
                             },
                         border = BorderStroke(
                             width = 1.dp,
                             color = color
                         ),
-                        elevation = if (isSelected) 16.dp else 0.dp
+                        shadowElevation = if (isSelected) 16.dp else 0.dp
                     ) {
                         Text(
                             text = getItemTitle(item),
-                            style = MaterialTheme.typography.button,
+                            style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(8.dp),
                             fontSize = 9.sp,
                             color = color

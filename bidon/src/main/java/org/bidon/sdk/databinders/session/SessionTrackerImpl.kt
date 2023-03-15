@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.onEach
 import org.bidon.sdk.ads.banner.helper.ActivityLifecycleState
 import org.bidon.sdk.ads.banner.helper.PauseResumeObserver
 import org.bidon.sdk.logs.logging.impl.logInfo
-import org.bidon.sdk.utils.time.ElapsedMonotonicTimeNow
-import org.bidon.sdk.utils.time.SystemTimeNow
+import org.bidon.sdk.utils.ext.ElapsedMonotonicTimeNow
+import org.bidon.sdk.utils.ext.SystemTimeNow
 import java.util.*
 
 internal class SessionTrackerImpl(

@@ -26,7 +26,7 @@ afterEvaluate {
         publications {
             register<MavenPublication>("gpr") {
                 afterEvaluate {
-                    from(components["release"])
+                    from(components["productionRelease"])
                 }
                 groupId = "org.bidon" // Replace with group ID
                 artifactId = getArtifactId

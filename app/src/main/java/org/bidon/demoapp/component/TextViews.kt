@@ -1,6 +1,6 @@
 package org.bidon.demoapp.component
 
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,7 +15,7 @@ fun H5Text(
     Text(
         modifier = modifier,
         text = text,
-        style = AppTypography.h5,
+        style = AppTypography.headlineLarge,
         color = Color.White
     )
 }
@@ -28,7 +28,7 @@ fun H4Text(
     Text(
         modifier = modifier,
         text = text,
-        style = AppTypography.h4,
+        style = AppTypography.headlineMedium,
         color = Color.White
     )
 }
@@ -41,7 +41,7 @@ fun Subtitle1Text(
     Text(
         modifier = modifier,
         text = text,
-        style = AppTypography.subtitle1,
+        style = AppTypography.titleLarge,
         color = Color.White
     )
 }
@@ -54,7 +54,7 @@ fun Subtitle2Text(
     Text(
         modifier = modifier,
         text = text,
-        style = AppTypography.subtitle2,
+        style = AppTypography.titleSmall,
         color = Color.White
     )
 }
@@ -67,7 +67,7 @@ fun Body1Text(
     Text(
         modifier = modifier,
         text = text,
-        style = AppTypography.body1,
+        style = AppTypography.bodyLarge,
         color = Color.White
     )
 }
@@ -81,7 +81,7 @@ fun Body2Text(
     Text(
         modifier = modifier,
         text = text,
-        style = AppTypography.body2,
+        style = AppTypography.bodySmall,
         color = Color.White,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis
@@ -98,7 +98,7 @@ fun CaptionText(
     Text(
         modifier = modifier,
         text = text,
-        style = AppTypography.caption,
+        style = AppTypography.labelLarge,
         color = color,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis

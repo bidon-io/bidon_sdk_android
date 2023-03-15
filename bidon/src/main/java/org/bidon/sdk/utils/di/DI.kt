@@ -16,11 +16,9 @@ import org.bidon.sdk.auction.AuctionHolder
 import org.bidon.sdk.auction.RoundsListener
 import org.bidon.sdk.auction.impl.AuctionHolderImpl
 import org.bidon.sdk.auction.impl.AuctionImpl
-import org.bidon.sdk.auction.impl.GetAuctionRequestUseCaseImpl
-import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
-import org.bidon.sdk.config.impl.GetConfigRequestUseCaseImpl
+import org.bidon.sdk.config.AdapterInstanceCreator
+import org.bidon.sdk.config.impl.AdapterInstanceCreatorImpl
 import org.bidon.sdk.config.impl.InitAndRegisterAdaptersUseCaseImpl
-import org.bidon.sdk.config.usecases.GetConfigRequestUseCase
 import org.bidon.sdk.config.usecases.InitAndRegisterAdaptersUseCase
 import org.bidon.sdk.databinders.DataProvider
 import org.bidon.sdk.databinders.DataProviderImpl
@@ -60,7 +58,8 @@ import org.bidon.sdk.utils.networking.JsonHttpRequest
 import org.bidon.sdk.utils.networking.NetworkStateObserver
 import org.bidon.sdk.utils.networking.impl.BidonEndpointsImpl
 import org.bidon.sdk.utils.networking.impl.NetworkStateObserverImpl
-import org.bidon.sdk.utils.networking.requests.*
+import org.bidon.sdk.utils.networking.requests.CreateRequestBodyUseCase
+import org.bidon.sdk.utils.networking.requests.CreateRequestBodyUseCaseImpl
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -72,6 +71,7 @@ internal object DI {
         module {
             singleton<Context> { context.applicationContext }
         }
+        FlavoredDI.init()
     }
 
     /**
@@ -126,7 +126,7 @@ internal object DI {
                     adaptersSource = get()
                 )
             }
-            factory<org.bidon.sdk.config.AdapterInstanceCreator> { org.bidon.sdk.config.impl.AdapterInstanceCreatorImpl() }
+            factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
             factory<Auction> {
                 AuctionImpl(
                     adaptersSource = get(),
@@ -152,18 +152,6 @@ internal object DI {
             /**
              * Requests
              */
-            factory<GetConfigRequestUseCase> {
-                GetConfigRequestUseCaseImpl(
-                    createRequestBody = get(),
-                    segmentDataSource = get()
-                )
-            }
-            factory<GetAuctionRequestUseCase> {
-                GetAuctionRequestUseCaseImpl(
-                    createRequestBody = get(),
-                    getOrientation = get()
-                )
-            }
             factory<StatsRequestUseCase> {
                 StatsRequestUseCaseImpl(
                     createRequestBody = get(),
@@ -193,7 +181,6 @@ internal object DI {
                     dataProvider = get()
                 )
             }
-
             factory<DataProvider> {
                 DataProviderImpl(
                     deviceBinder = DeviceBinder(dataSource = get()),

@@ -1,4 +1,4 @@
-package org.bidon.sdk.utils.time
+package org.bidon.sdk.utils.ext
 
 import android.os.SystemClock
 

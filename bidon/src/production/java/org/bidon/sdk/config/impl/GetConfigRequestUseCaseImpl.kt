@@ -52,6 +52,9 @@ internal class GetConfigRequestUseCaseImpl(
                 /**
                  * Save "segment_id"
                  */
+                /**
+                 * Save "segment_id"
+                 */
                 val jsonResponse = JSONObject(jsonString)
                 segmentDataSource.saveSegmentId(
                     segmentId = jsonResponse.optString("segment_id", "").takeIf { !it.isNullOrBlank() }

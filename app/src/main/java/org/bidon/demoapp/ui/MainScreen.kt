@@ -12,26 +12,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import org.bidon.bidmachine.BidMachineAdapter
 import org.bidon.demoapp.BuildConfig
-import org.bidon.demoapp.component.AppButton
-import org.bidon.demoapp.component.AppTextButton
-import org.bidon.demoapp.component.CaptionText
-import org.bidon.demoapp.component.H5Text
+import org.bidon.demoapp.component.*
 import org.bidon.demoapp.navigation.Screen
 import org.bidon.sdk.BidonSdk
+import org.bidon.sdk.config.DefaultAdapters
 import org.bidon.sdk.logs.logging.Logger
 import org.bidon.sdk.utils.networking.NetworkSettings
 
@@ -41,10 +40,13 @@ internal fun MainScreen(
     initState: MutableState<MainScreenState>,
     sharedPreferences: SharedPreferences
 ) {
+    val adapters = remember {
+        mutableStateOf(DefaultAdapters.values().toList())
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -60,15 +62,41 @@ internal fun MainScreen(
                     color = Color.White.copy(alpha = 0.4f)
                 )
                 if (state == MainScreenState.NotInitialized) {
+                    MultiSelector(
+                        modifier = Modifier.padding(horizontal = 60.dp, vertical = 16.dp),
+                        items = DefaultAdapters.values().toList(),
+                        selectedItems = adapters.value,
+                        getItemTitle = {
+                            when (it) {
+                                DefaultAdapters.AdmobAdapter -> "Admob"
+                                DefaultAdapters.BidmachineAdapter -> "BidMachine"
+                                DefaultAdapters.ApplovinAdapter -> "Applovin"
+                                DefaultAdapters.DataExchangeAdapter -> "DT Exchange"
+                                DefaultAdapters.UnityAdsAdapter -> "Unity Ads"
+                            }
+                        },
+                        onItemClicked = {
+                            adapters.value = if (it in adapters.value) {
+                                adapters.value - it
+                            } else {
+                                adapters.value + it
+                            }
+                        }
+                    )
                     AppButton(text = "Init") {
                         val baseUrl =
                             sharedPreferences.getString("host", NetworkSettings.BidonBaseUrl) ?: NetworkSettings.BidonBaseUrl
                         initState.value = MainScreenState.Initializing
                         BidonSdk
                             .setLoggerLevel(Logger.Level.Verbose)
-                            .registerDefaultAdapters()
-                            .registerAdapters(BidMachineAdapter())
-                            .registerAdapter("org.bidon.admob.AdmobAdapter")
+                            .apply {
+                                adapters.value.forEach {
+                                    registerAdapter(it.classPath)
+                                }
+                            }
+//                            .registerDefaultAdapters()
+//                            .registerAdapters(ApplovinAdapter())
+//                            .registerAdapter("org.bidon.admob.AdmobAdapter")
                             .setBaseUrl(baseUrl)
                             .setInitializationCallback {
                                 initState.value = MainScreenState.Initialized

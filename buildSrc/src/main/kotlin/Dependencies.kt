@@ -32,10 +32,6 @@ object Dependencies {
         const val Services = "com.google.gms:google-services:4.3.15"
         const val PlayServicesAds = "com.google.android.gms:play-services-ads:21.5.0"
         const val PlayServicesAdsIdentifier = "com.google.android.gms:play-services-ads-identifier:18.0.1"
-
-        object Secrets {
-            const val gradlePlugin = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1"
-        }
     }
 
     object Accompanist {

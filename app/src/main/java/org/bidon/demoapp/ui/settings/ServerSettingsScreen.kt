@@ -3,9 +3,9 @@ package org.bidon.demoapp.ui.settings
 import android.content.SharedPreferences
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +39,7 @@ internal fun ServerSettingsScreen(
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
     ) {
         AppToolbar(
@@ -100,7 +100,7 @@ private fun RenderHosts(hosts: List<Host>, selectedHost: Host, onClick: (Host) -
                     .fillMaxWidth()
                     .height(48.dp)
                     .background(
-                        color = MaterialTheme.colors.surface,
+                        color = MaterialTheme.colorScheme.surface,
                         shape = hosts.getShapeByPositionFor(host)
                     )
                     .padding(
@@ -125,7 +125,7 @@ private fun RenderHosts(hosts: List<Host>, selectedHost: Host, onClick: (Host) -
                 if (host == selectedHost) {
                     Image(
                         painter = rememberVectorPainter(Icons.Outlined.Check),
-                        colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                         contentDescription = "",
                         modifier = Modifier.align(Alignment.CenterEnd)
                     )

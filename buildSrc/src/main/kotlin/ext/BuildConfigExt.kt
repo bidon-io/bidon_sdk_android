@@ -70,40 +70,14 @@ var LibraryDefaultConfig.ADAPTER_SDK_VERSION: String
     }
 
 /**
- * Build date version property only Appodeal SDK Core
+ * Bidon API Key property only Test Application module
  */
-var LibraryDefaultConfig.BUILD_DATE: Long
-    get() = error("Property BUILD_DATE couldn't be get")
-    set(value) {
-        addBuildConfigField(
-            type = BuildConfigFieldType.Date,
-            name = "BUILD_DATE",
-            value = value
-        )
-    }
-
-/**
- * Sdk version property only Appodeal SDK Core
- */
-var LibraryDefaultConfig.SDK_VERSION: String
-    get() = error("Property SDK_VERSION couldn't be get")
-    set(value) {
-        addBuildConfigField(
-            type = BuildConfigFieldType.String,
-            name = "SDK_VERSION",
-            value = value
-        )
-    }
-
-/**
- * Application key property only Test Application module
- */
-var ApplicationDefaultConfig.APP_KEY: String
+var ApplicationDefaultConfig.BIDON_API_KEY: String
     get() = error("Property APP_KEY couldn't be get")
     set(value) {
         addBuildConfigField(
             type = BuildConfigFieldType.String,
-            name = "APP_KEY",
+            name = "BIDON_API_KEY",
             value = value
         )
     }

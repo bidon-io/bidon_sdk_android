@@ -126,7 +126,7 @@ internal class AuctionImpl(
     private suspend fun fillWinner(auctionResults: List<AuctionResult>, timeout: Long): List<AuctionResult> {
         val index = auctionResults.indexOfFirst { auctionResult ->
             val fillResult = withTimeoutOrNull(timeout) {
-                (auctionResult.adSource as? StatisticsCollector)?.markFillStarted()
+                (auctionResult.adSource as StatisticsCollector).markFillStarted()
                 logInfo(Tag, "Filling winner started for auction result: $auctionResult")
                 auctionResult.adSource.fill()
             } ?: BidonError.FillTimedOut(auctionResult.adSource.demandId).asFailure()
@@ -134,7 +134,7 @@ internal class AuctionImpl(
             fillResult
                 .onFailure { cause ->
                     logError(Tag, "Failed to fill: ${auctionResult.adSource.demandId}", cause)
-                    (auctionResult.adSource as? StatisticsCollector)?.markFillFinished(RoundStatus.NoFill)
+                    (auctionResult.adSource as StatisticsCollector).markFillFinished(RoundStatus.NoFill)
                     (auctionResult.adSource as? WinLossNotifiable)?.let {
                         logInfo(Tag, "Notified loss: ${auctionResult.adSource.demandId}")
                         it.notifyLoss()
@@ -142,7 +142,7 @@ internal class AuctionImpl(
                 }
                 .onSuccess {
                     logInfo(Tag, "Winner filled: ${auctionResult.adSource.demandId}")
-                    (auctionResult.adSource as? StatisticsCollector)?.markFillFinished(RoundStatus.Successful)
+                    (auctionResult.adSource as StatisticsCollector).markFillFinished(RoundStatus.Successful)
                     (auctionResult.adSource as? WinLossNotifiable)?.let {
                         logInfo(Tag, "Notified win: ${auctionResult.adSource.demandId}")
                         it.notifyWin()
@@ -390,9 +390,9 @@ internal class AuctionImpl(
                                 timeout = timeout,
                                 availableLineItemsForDemand = availableLineItemsForDemand,
                             ).onSuccess {
-                                (adSource as? StatisticsCollector)?.markBidStarted(adUnitId = it.adUnitId)
+                                (adSource as StatisticsCollector).markBidStarted(adUnitId = it.adUnitId)
                             }.onFailure {
-                                (adSource as? StatisticsCollector)?.markBidStarted(adUnitId = null)
+                                (adSource as StatisticsCollector).markBidStarted(adUnitId = null)
                             }
                             adParam.getOrNull()?.let { adAuctionParams ->
                                 adSource.bid(adParams = adAuctionParams)
@@ -410,7 +410,7 @@ internal class AuctionImpl(
                                 roundStatus = RoundStatus.BidTimeoutReached
                             )
                         }
-                        (adSource as? StatisticsCollector)?.markBidFinished(result.roundStatus, result.ecpm)
+                        (adSource as StatisticsCollector).markBidFinished(result.roundStatus, result.ecpm)
                         result
                     } to adSource
                 }.mapIndexed { index, (deferred, adSource) ->

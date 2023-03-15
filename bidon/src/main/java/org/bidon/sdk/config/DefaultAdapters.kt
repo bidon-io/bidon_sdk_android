@@ -6,7 +6,7 @@ package org.bidon.sdk.config
  * Define adapters classes. Don't forget to add rules to proguard-files.
  */
 @Suppress("unused")
-internal enum class DefaultAdapters(val classPath: String) {
+enum class DefaultAdapters(val classPath: String) {
     AdmobAdapter(classPath = "org.bidon.admob.AdmobAdapter"),
     BidmachineAdapter(classPath = "org.bidon.bidmachine.BidMachineAdapter"),
     ApplovinAdapter(classPath = "org.bidon.applovin.ApplovinAdapter"),

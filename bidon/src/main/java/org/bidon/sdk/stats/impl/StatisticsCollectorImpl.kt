@@ -14,7 +14,7 @@ import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.usecases.SendImpressionRequestUseCase
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
-import org.bidon.sdk.utils.time.SystemTimeNow
+import org.bidon.sdk.utils.ext.SystemTimeNow
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
