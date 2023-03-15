@@ -1,5 +1,4 @@
 import ext.BIDON_API_KEY
-import org.jetbrains.kotlin.konan.properties.hasProperty
 import java.io.FileInputStream
 import java.util.*
 
