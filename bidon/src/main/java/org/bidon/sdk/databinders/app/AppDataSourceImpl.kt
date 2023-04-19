@@ -3,6 +3,7 @@ package org.bidon.sdk.databinders.app
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.os.Build
+import org.bidon.sdk.BuildConfig
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
 
@@ -14,7 +15,7 @@ internal class AppDataSourceImpl(
     private val keyValueStorage: KeyValueStorage,
 ) : AppDataSource {
 
-    override fun getVersionCode(): Number? {
+    override fun getAppVersionCode(): Number? {
         val packageInfo = getPackageInfo(context)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             packageInfo?.longVersionCode
@@ -25,12 +26,12 @@ internal class AppDataSourceImpl(
     }
 
     override fun getBundleId(): String = context.packageName
-    override fun getVersionName(): String? = getPackageInfo(context)?.versionName
+    override fun getAppVersionName(): String? = getPackageInfo(context)?.versionName
     override fun getAppKey(): String? = keyValueStorage.appKey
-    override fun getFramework(): String = BidonVersion.frameworkName
-    override fun getFrameworkVersion(): String? = BidonVersion.frameworkVersion
-    override fun getPluginVersion(): String? = BidonVersion.engineVersion
-    override fun getVersion(): String = BidonVersion.version
+    override fun getBidonVersion(): String = BuildConfig.ADAPTER_VERSION
+    override fun getFramework(): String = UnitySpecificInfo.frameworkName
+    override fun getFrameworkVersion(): String? = UnitySpecificInfo.frameworkVersion
+    override fun getPluginVersion(): String? = UnitySpecificInfo.pluginVersion
 
     private fun getPackageInfo(context: Context): PackageInfo? {
         var packageInfo: PackageInfo? = null

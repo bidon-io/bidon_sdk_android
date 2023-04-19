@@ -31,7 +31,8 @@ internal class DTExchangeInterstitial(
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
-        demandId = demandId
+        demandId = demandId,
+        demandAd = demandAd,
     ) {
 
     private var auctionParams: DTExchangeAdAuctionParams? = null
@@ -75,7 +76,6 @@ internal class DTExchangeInterstitial(
                 val ad = adSpot?.asAd() ?: return
                 adEvent.tryEmit(AdEvent.PaidRevenue(ad, adValue))
                 adEvent.tryEmit(AdEvent.Shown(ad))
-                sendShowImpression(StatisticsCollector.AdType.Interstitial)
             }
 
             override fun onAdImpression(adSpot: InneractiveAdSpot?) {}
@@ -84,7 +84,6 @@ internal class DTExchangeInterstitial(
                 adSpot?.asAd()?.let {
                     adEvent.tryEmit(AdEvent.Clicked(ad = it))
                 }
-                sendClickImpression(StatisticsCollector.AdType.Interstitial)
             }
 
             override fun onAdWillCloseInternalBrowser(adSpot: InneractiveAdSpot?) {}

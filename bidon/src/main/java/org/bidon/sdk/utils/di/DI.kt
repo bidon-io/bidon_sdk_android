@@ -13,7 +13,6 @@ import org.bidon.sdk.ads.banner.helper.impl.GetOrientationUseCaseImpl
 import org.bidon.sdk.ads.banner.helper.impl.PauseResumeObserverImpl
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionHolder
-import org.bidon.sdk.auction.RoundsListener
 import org.bidon.sdk.auction.impl.AuctionHolderImpl
 import org.bidon.sdk.auction.impl.AuctionImpl
 import org.bidon.sdk.config.AdapterInstanceCreator
@@ -29,6 +28,8 @@ import org.bidon.sdk.databinders.app.AppDataSourceImpl
 import org.bidon.sdk.databinders.device.DeviceBinder
 import org.bidon.sdk.databinders.device.DeviceDataSource
 import org.bidon.sdk.databinders.device.DeviceDataSourceImpl
+import org.bidon.sdk.databinders.extras.Extras
+import org.bidon.sdk.databinders.extras.ExtrasImpl
 import org.bidon.sdk.databinders.geo.GeoBinder
 import org.bidon.sdk.databinders.location.LocationDataSource
 import org.bidon.sdk.databinders.location.LocationDataSourceImpl
@@ -48,8 +49,10 @@ import org.bidon.sdk.databinders.user.UserDataSource
 import org.bidon.sdk.databinders.user.impl.AdvertisingDataImpl
 import org.bidon.sdk.databinders.user.impl.UserDataSourceImpl
 import org.bidon.sdk.stats.impl.SendImpressionRequestUseCaseImpl
+import org.bidon.sdk.stats.impl.SendLossRequestUseCaseImpl
 import org.bidon.sdk.stats.impl.StatsRequestUseCaseImpl
 import org.bidon.sdk.stats.usecases.SendImpressionRequestUseCase
+import org.bidon.sdk.stats.usecases.SendLossRequestUseCase
 import org.bidon.sdk.stats.usecases.StatsRequestUseCase
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorageImpl
@@ -140,10 +143,9 @@ internal object DI {
                 )
             }
 
-            factoryWithParams<AuctionHolder> { (demandAd, listener) ->
+            factoryWithParams<AuctionHolder> { (demandAd) ->
                 AuctionHolderImpl(
                     demandAd = demandAd as DemandAd,
-                    roundsListener = listener as RoundsListener
                 )
             }
             factory<GetOrientationUseCase> { GetOrientationUseCaseImpl(context = get()) }
@@ -192,6 +194,13 @@ internal object DI {
                     placementBinder = PlacementBinder(dataSource = get()),
                     adaptersBinder = AdaptersBinder(adaptersSource = get()),
                     segmentBinder = SegmentBinder(dataSource = get()),
+                )
+            }
+            factory<Extras> { ExtrasImpl() }
+
+            factory<SendLossRequestUseCase> {
+                SendLossRequestUseCaseImpl(
+                    createRequestBody = get()
                 )
             }
         }

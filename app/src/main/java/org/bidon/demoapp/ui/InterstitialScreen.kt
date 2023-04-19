@@ -2,10 +2,15 @@ package org.bidon.demoapp.ui
 
 import android.app.Activity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
@@ -18,15 +23,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
-import org.bidon.demoapp.component.AppButton
-import org.bidon.demoapp.component.AppToolbar
-import org.bidon.demoapp.component.Body1Text
-import org.bidon.demoapp.component.Body2Text
+import org.bidon.demoapp.component.*
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.interstitial.InterstitialAd
 import org.bidon.sdk.ads.interstitial.InterstitialListener
-import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -46,7 +47,7 @@ fun InterstitialScreen(
     }
 
     val interstitial by lazy {
-        InterstitialAd("some_placement_id").apply {
+        InterstitialAd().apply {
             setInterstitialListener(
                 object : InterstitialListener {
                     override fun onAdLoaded(ad: Ad) {
@@ -77,43 +78,6 @@ fun InterstitialScreen(
                         logFlow.log("onAdExpired: $ad")
                     }
 
-                    override fun onAuctionStarted() {
-                        logFlow.log("auctionStarted")
-                    }
-
-                    override fun onAuctionSuccess(auctionResults: List<AuctionResult>) {
-                        val log = buildString {
-                            appendLine("AuctionSucceed (${auctionResults.size} items)")
-                            auctionResults.forEachIndexed { index, auctionResult ->
-                                appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.ecpm}")
-                            }
-                        }
-                        logFlow.log(log)
-                    }
-
-                    override fun onAuctionFailed(cause: BidonError) {
-                        logFlow.log("auctionFailed: $cause")
-                    }
-
-                    override fun onRoundStarted(roundId: String, pricefloor: Double) {
-                        logFlow.log("RoundStarted(roundId=$roundId, pricefloor=$pricefloor)")
-                    }
-
-                    override fun onRoundSucceed(roundId: String, roundResults: List<AuctionResult>) {
-                        logFlow.log(
-                            buildString {
-                                appendLine("roundSucceed($roundId)")
-                                roundResults.forEachIndexed { index, auctionResult ->
-                                    appendLine("#$index ${auctionResult.adSource.demandId.demandId} ${auctionResult.ecpm}")
-                                }
-                            }
-                        )
-                    }
-
-                    override fun onRoundFailed(roundId: String, cause: BidonError) {
-                        logFlow.log("roundFailed: roundId=$roundId, $cause")
-                    }
-
                     override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
                         logFlow.log("onRevenuePaid: ad=$ad, adValue=$adValue")
                     }
@@ -134,22 +98,12 @@ fun InterstitialScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 24.dp, end = 24.dp, top = 24.dp)
+                .padding(start = 24.dp, end = 24.dp, top = 0.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
             ) {
-                AppButton(text = "Load") {
-                    val pricefloor = pricefloorState.value.toDoubleOrNull()
-                    if (pricefloor == null) {
-                        pricefloorState.value = BidonSdk.DefaultPricefloor.toString()
-                    }
-                    interstitial.loadAd(activity, pricefloor = pricefloor ?: BidonSdk.DefaultPricefloor)
-                }
-                Body1Text(
-                    text = "Pricefloor $", modifier = Modifier.padding(start = 16.dp)
-                )
+                Body1Text(text = "Pricefloor $")
                 BasicTextField(
                     value = pricefloorState.value,
                     onValueChange = { newValue ->
@@ -160,18 +114,51 @@ fun InterstitialScreen(
                         background = MaterialTheme.colorScheme.surface
                     ),
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .weight(1f)
                         .padding(horizontal = 4.dp),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     maxLines = 1
                 )
+                AppTextButton(
+                    text = "Add extras"
+                ) {
+                    interstitial.addExtra("some_extra_obj", interstitial)
+                    interstitial.addExtra("some_extra_int", 123)
+                    interstitial.addExtra("some_extra_data", "some_value")
+                }
             }
-            AppButton(text = "Show") {
-                interstitial.showAd(activity)
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                AppButton(text = "Load") {
+                    val pricefloor = pricefloorState.value.toDoubleOrNull()
+                    if (pricefloor == null) {
+                        pricefloorState.value = BidonSdk.DefaultPricefloor.toString()
+                    }
+                    interstitial.loadAd(activity, pricefloor = pricefloor ?: BidonSdk.DefaultPricefloor)
+                }
+                AppButton(
+                    modifier = Modifier.padding(start = 8.dp),
+                    text = "Show"
+                ) {
+                    interstitial.showAd(activity)
+                }
+                AppButton(
+                    modifier = Modifier.padding(start = 8.dp),
+                    text = "Destroy"
+                ) {
+                    interstitial.destroyAd()
+                }
             }
-            AppButton(text = "Destroy") {
-                interstitial.destroyAd()
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                AppOutlinedButton(
+                    modifier = Modifier.padding(start = 0.dp),
+                    text = "Notify Loss"
+                ) {
+                    interstitial.notifyLoss(
+                        winnerDemandId = "appodeal",
+                        winnerEcpm = 234.567
+                    )
+                }
             }
             LazyColumn(
                 modifier = Modifier

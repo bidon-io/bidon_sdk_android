@@ -11,7 +11,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.bidon.sdk.BidonSdk
-import org.bidon.sdk.BidonSdk.DefaultPlacement
 import org.bidon.sdk.BidonSdk.DefaultPricefloor
 import org.bidon.sdk.R
 import org.bidon.sdk.adapter.AdEvent
@@ -36,21 +35,6 @@ import org.bidon.sdk.utils.di.get
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-interface BannerAd {
-    val placementId: String
-
-    fun setBannerFormat(bannerFormat: BannerFormat)
-    fun loadAd(pricefloor: Double = DefaultPricefloor)
-
-    /**
-     * Shows if banner is ready to show
-     */
-    fun isReady(): Boolean
-    fun showAd()
-    fun destroyAd()
-    fun setBannerListener(listener: BannerListener)
-}
-
 @Deprecated("Use Banner")
 class BannerView(
     context: Context,
@@ -58,7 +42,6 @@ class BannerView(
     @AttrRes defStyleAtt: Int = 0
 ) : FrameLayout(context, attrs, defStyleAtt), BannerAd {
 
-    override var placementId: String = DefaultPlacement
     private var bannerFormat: BannerFormat = BannerFormat.Banner
     private var userListener: BannerListener? = null
     private val activityLifecycleObserver by lazy { (context as? Activity)?.let { ActivityLifecycleObserver(it) } }
@@ -68,17 +51,12 @@ class BannerView(
         AutoRefresh.On(DefaultAutoRefreshTimeoutMs)
     }
 
-    @JvmOverloads
-    constructor(context: Context, placementId: String = DefaultPlacement) : this(context, null, 0) {
-        this.placementId = placementId
-    }
-
     private val showState = MutableStateFlow<ShowState>(ShowState.Idle)
     private val showActionFlow = MutableSharedFlow<ShowAction>(extraBufferCapacity = Int.MAX_VALUE)
     private val loadState = MutableStateFlow<LoadState>(LoadState.Idle)
     private val loadActionFlow = MutableSharedFlow<LoadAction>(extraBufferCapacity = Int.MAX_VALUE)
 
-    private val demandAd by lazy { DemandAd(AdType.Banner, placementId) }
+    private val demandAd by lazy { DemandAd(AdType.Banner) }
     private val listener by lazy { wrapUserBannerListener(userListener = { userListener }) }
     private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
     private val displayingRefreshTimer by lazy {
@@ -102,9 +80,6 @@ class BannerView(
     init {
         context.theme.obtainStyledAttributes(attrs, R.styleable.BannerView, 0, 0).apply {
             try {
-                getString(R.styleable.BannerView_placementId)?.let {
-                    this@BannerView.placementId = it
-                }
                 getInteger(R.styleable.BannerView_bannerSize, 0).let {
                     when (it) {
                         1 -> setBannerFormat(BannerFormat.Banner)
@@ -142,12 +117,12 @@ class BannerView(
             return
         }
         this.pricefloor = pricefloor
-        logInfo(Tag, "Load with placement invoked: $placementId")
+        logInfo(Tag, "Load")
         sendAction(LoadAction.OnLoadInvoked)
     }
 
     override fun showAd() {
-        logInfo(Tag, "Show with placement invoked: $placementId")
+        logInfo(Tag, "Show")
         sendAction(ShowAction.OnShowInvoked)
     }
 
@@ -219,14 +194,14 @@ class BannerView(
                             LoadState.Loading -> {
                                 logInfo(
                                     Tag,
-                                    "Auction already in progress. Placement($placementId)."
+                                    "Auction already in progress"
                                 )
                                 state
                             }
                             is LoadState.Loaded -> {
                                 logInfo(
                                     Tag,
-                                    "Auction is completed and winner exists. Placement($placementId)."
+                                    "Auction is completed and winner exists"
                                 )
                                 state
                             }
@@ -240,7 +215,6 @@ class BannerView(
                         val ad = requireNotNull(winner.adSource.ad) {
                             "[Ad] should exist when an Action succeeds"
                         }
-                        listener.onAuctionSuccess(action.auctionResults)
                         listener.onAdLoaded(ad)
                         LoadState.Loaded(winner)
                     }
@@ -248,7 +222,6 @@ class BannerView(
                         /**
                          * Auction failed
                          */
-                        listener.onAuctionFailed(cause = action.cause)
                         listener.onAdLoadFailed(cause = action.cause)
                         launchLoadingRefreshIfNeeded()
                         LoadState.Idle
@@ -391,7 +364,6 @@ class BannerView(
     private fun startAuction(
         pricefloor: Double
     ) {
-        listener.onAuctionStarted()
         scope.launch {
             get<Auction>().start(
                 demandAd = demandAd,
@@ -399,9 +371,8 @@ class BannerView(
                 adTypeParamData = AdTypeParam.Banner(
                     bannerFormat = bannerFormat,
                     adContainer = this@BannerView,
-                    pricefloor = pricefloor
+                    pricefloor = pricefloor,
                 ),
-                roundsListener = listener
             ).onSuccess { auctionResults ->
                 sendAction(LoadAction.OnAuctionSucceed(auctionResults))
             }.onFailure {

@@ -12,7 +12,6 @@ import org.bidon.sdk.utils.ext.asSuccess
  */
 internal class GetAuctionRequestUseCaseImpl : GetAuctionRequestUseCase {
     override suspend fun request(
-        placement: String,
         additionalData: AdTypeParam,
         auctionId: String,
         adapters: Map<String, AdapterInfo>

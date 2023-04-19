@@ -12,7 +12,6 @@
         app:bannerSize="mrec"
         app:layout_constraintBottom_toTopOf="@id/linearLayout"
         app:layout_constraintTop_toTopOf="parent"
-        app:placementId="123456"
         tools:background="#628991"
         tools:minHeight="50dp" />
 

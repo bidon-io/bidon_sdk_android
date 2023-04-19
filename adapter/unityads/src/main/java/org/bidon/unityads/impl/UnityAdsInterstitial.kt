@@ -34,11 +34,15 @@ internal class UnityAdsInterstitial(
     private val roundId: String,
     private val auctionId: String,
 ) : AdSource.Interstitial<UnityAdsAuctionParams>,
-    StatisticsCollector by StatisticsCollectorImpl(auctionId, roundId, demandId) {
+    StatisticsCollector by StatisticsCollectorImpl(
+        auctionId = auctionId,
+        roundId = roundId,
+        demandId = demandId,
+        demandAd = demandAd
+    ) {
 
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
     private var lineItem: LineItem? = null
-    private var placementId: String? = null
 
     override val ad: Ad?
         get() = lineItem?.let {
@@ -83,7 +87,6 @@ internal class UnityAdsInterstitial(
             val loadListener = object : IUnityAdsLoadListener {
                 override fun onUnityAdsAdLoaded(placementId: String?) {
                     logInfo(Tag, "onUnityAdsAdLoaded: $this")
-                    this@UnityAdsInterstitial.placementId = placementId
                     isAdReadyToShow = true
                     adEvent.tryEmit(
                         AdEvent.Bid(
@@ -158,14 +161,12 @@ internal class UnityAdsInterstitial(
                             )
                         )
                     )
-                    sendShowImpression(StatisticsCollector.AdType.Interstitial)
                 }
             }
 
             override fun onUnityAdsShowClick(placementId: String?) {
                 logInfo(Tag, "onUnityAdsShowClick. placementId: $placementId")
                 ad?.let { adEvent.tryEmit(AdEvent.Clicked(it)) }
-                sendClickImpression(StatisticsCollector.AdType.Interstitial)
             }
 
             override fun onUnityAdsShowComplete(placementId: String?, state: UnityAds.UnityAdsShowCompletionState?) {

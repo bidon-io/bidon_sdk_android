@@ -11,6 +11,7 @@ interface StatisticsCollector {
     fun sendShowImpression(adType: AdType)
     fun sendClickImpression(adType: AdType)
     fun sendRewardImpression()
+    fun sendLoss(winnerDemandId: String, winnerEcpm: Double, adType: AdType)
 
     fun markBidStarted(adUnitId: String? = null)
     fun markBidFinished(roundStatus: RoundStatus, ecpm: Double?)

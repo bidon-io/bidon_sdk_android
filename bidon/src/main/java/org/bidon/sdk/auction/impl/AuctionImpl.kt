@@ -45,16 +45,15 @@ internal class AuctionImpl(
     override suspend fun start(
         demandAd: DemandAd,
         resolver: AuctionResolver,
-        roundsListener: RoundsListener,
         adTypeParamData: AdTypeParam
     ): Result<List<AuctionResult>> = runCatching {
         if (state.compareAndSet(expect = AuctionState.Initialized, update = AuctionState.InProgress)) {
             logInfo(Tag, "Action started $this")
             // Request for Auction-data at /auction
             getAuctionRequest.request(
-                placement = demandAd.placement,
                 additionalData = adTypeParamData,
                 auctionId = UUID.randomUUID().toString(),
+                demandAd = demandAd,
                 adapters = adaptersSource.adapters.associate {
                     it.demandId.demandId to it.adapterInfo
                 }
@@ -66,7 +65,6 @@ internal class AuctionImpl(
                     rounds = auctionData.rounds ?: listOf(),
                     sourcePriceFloor = auctionData.pricefloor ?: 0.0,
                     pricefloor = auctionData.pricefloor ?: 0.0,
-                    roundsListener = roundsListener,
                     resolver = resolver,
                     demandAd = demandAd,
                     adTypeParamData = adTypeParamData
@@ -88,7 +86,7 @@ internal class AuctionImpl(
 
                 // Finish auction
                 state.value = AuctionState.Finished
-                sendStatsAsync(demandAd.adType)
+                sendStatsAsync(demandAd)
             }.getOrThrow()
         }
         state.first { it == AuctionState.Finished }
@@ -159,13 +157,11 @@ internal class AuctionImpl(
         rounds: List<Round>,
         sourcePriceFloor: Double,
         pricefloor: Double,
-        roundsListener: RoundsListener,
         resolver: AuctionResolver,
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
     ) {
         val round = rounds.firstOrNull() ?: return
-        roundsListener.onRoundStarted(round.id, sourcePriceFloor)
 
         val allRoundResults = executeRound(
             round = round,
@@ -181,7 +177,6 @@ internal class AuctionImpl(
             sourcePriceFloor = sourcePriceFloor,
             round = round,
             pricefloor = pricefloor,
-            roundsListener = roundsListener
         )
 
         val nextPriceFloor = auctionResults.value.firstOrNull()?.ecpm ?: pricefloor
@@ -189,7 +184,6 @@ internal class AuctionImpl(
             rounds = rounds.drop(1),
             sourcePriceFloor = sourcePriceFloor,
             pricefloor = nextPriceFloor,
-            roundsListener = roundsListener,
             resolver = resolver,
             demandAd = demandAd,
             adTypeParamData = adTypeParamData,
@@ -202,7 +196,6 @@ internal class AuctionImpl(
         sourcePriceFloor: Double,
         round: Round,
         pricefloor: Double,
-        roundsListener: RoundsListener
     ) {
         val sortedResult = resolver.sortWinners(allResults)
         val successfulResults = sortedResult
@@ -237,16 +230,8 @@ internal class AuctionImpl(
                 resolver = resolver,
                 roundResults = successfulResults
             )
-            roundsListener.onRoundSucceed(
-                roundId = round.id,
-                roundResults = successfulResults
-            )
         } else {
             logError(Tag, "Round '${round.id}' failed", BidonError.NoRoundResults)
-            roundsListener.onRoundFailed(
-                roundId = round.id,
-                cause = BidonError.NoRoundResults
-            )
         }
     }
 
@@ -291,7 +276,7 @@ internal class AuctionImpl(
         statsRound.add(roundStat)
     }
 
-    private suspend fun sendStatsAsync(adType: AdType) {
+    private suspend fun sendStatsAsync(demandAd: DemandAd) {
         coroutineScope {
             launch(SdkDispatchers.Default) {
                 val bidStats = statsAuctionResults.map {
@@ -327,7 +312,7 @@ internal class AuctionImpl(
                             }
                         )
                     },
-                    adType = adType
+                    demandAd = demandAd
                 )
                 statsRound.clear()
             }

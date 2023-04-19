@@ -44,7 +44,8 @@ internal class BMRewardedAdImpl(
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
-        demandId = demandId
+        demandId = demandId,
+        demandAd = demandAd,
     ) {
 
     override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
@@ -134,14 +135,12 @@ internal class BMRewardedAdImpl(
                         adValue = rewardedAd.auctionResult.asBidonAdValue()
                     )
                 )
-                sendShowImpression(StatisticsCollector.AdType.Rewarded)
             }
 
             override fun onAdClicked(rewardedAd: RewardedAd) {
                 logInfo(Tag, "onAdClicked: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 adEvent.tryEmit(AdEvent.Clicked(rewardedAd.asAd()))
-                sendClickImpression(StatisticsCollector.AdType.Rewarded)
             }
 
             override fun onAdExpired(rewardedAd: RewardedAd) {
@@ -165,7 +164,6 @@ internal class BMRewardedAdImpl(
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
             .setLoadingTimeOut(adParams.timeout.toInt())
             .setListener(requestListener)
-            .setPlacementId(demandAd.placement)
             .build()
             .also {
                 adRequest = it

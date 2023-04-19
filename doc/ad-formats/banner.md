@@ -2,11 +2,11 @@
 
 ## Loading an Banners
 
-To load a banner, create a `BannerView` instance. Add (optional) placement if needed, otherwise placement = "default" will be used. 
+To load a banner, create a `BannerView` instance. 
 Important: for a single instance of a banner, load() and show() can only be called once. Create new instance for every new banner (in case refreshing banner by timeout as well).
 
 ```kotlin
-val banner = BannerView(context, placement = "your_placement")
+val banner = BannerView(context)
 ```
 
 Set `BannerListener` for receiving all-related events, including loading/displaying and revenue callbacks.

@@ -13,7 +13,6 @@ internal class AdObjectRequestBodySerializerTest {
     @Test
     fun `AdObjectRequestBody Serializer full`() {
         val data = AdObjectRequestBody(
-            placementId = "place",
             pricefloor = 1.23,
             auctionId = "aId",
             orientationCode = AdObjectRequestBody.Orientation.Portrait.code,
@@ -25,7 +24,6 @@ internal class AdObjectRequestBodySerializerTest {
 
         actual.assertEquals(
             expectedJsonStructure {
-                "placement_id" hasValue "place"
                 "pricefloor" hasValue 1.23
                 "auction_id" hasValue "aId"
                 "orientation" hasValue "PORTRAIT"
@@ -41,7 +39,6 @@ internal class AdObjectRequestBodySerializerTest {
     @Test
     fun `AdObjectRequestBody Serializer only banner`() {
         val data = AdObjectRequestBody(
-            placementId = "place",
             pricefloor = 1.23,
             auctionId = "aId",
             orientationCode = AdObjectRequestBody.Orientation.Portrait.code,
@@ -53,7 +50,6 @@ internal class AdObjectRequestBodySerializerTest {
 
         actual.assertEquals(
             expectedJsonStructure {
-                "placement_id" hasValue "place"
                 "pricefloor" hasValue 1.23
                 "auction_id" hasValue "aId"
                 "orientation" hasValue "PORTRAIT"
@@ -67,7 +63,6 @@ internal class AdObjectRequestBodySerializerTest {
     @Test
     fun `AdObjectRequestBody Serializer only INTERSTITIAL`() {
         val data = AdObjectRequestBody(
-            placementId = "place",
             pricefloor = 1.23,
             auctionId = "aId",
             orientationCode = AdObjectRequestBody.Orientation.Portrait.code,
@@ -79,7 +74,6 @@ internal class AdObjectRequestBodySerializerTest {
 
         actual.assertEquals(
             expectedJsonStructure {
-                "placement_id" hasValue "place"
                 "pricefloor" hasValue 1.23
                 "auction_id" hasValue "aId"
                 "orientation" hasValue "PORTRAIT"
@@ -91,7 +85,6 @@ internal class AdObjectRequestBodySerializerTest {
     @Test
     fun `AdObjectRequestBody Serializer only REWARDED`() {
         val data = AdObjectRequestBody(
-            placementId = "place",
             pricefloor = 1.23,
             auctionId = "aId",
             orientationCode = AdObjectRequestBody.Orientation.Portrait.code,
@@ -103,7 +96,6 @@ internal class AdObjectRequestBodySerializerTest {
 
         actual.assertEquals(
             expectedJsonStructure {
-                "placement_id" hasValue "place"
                 "pricefloor" hasValue 1.23
                 "auction_id" hasValue "aId"
                 "orientation" hasValue "PORTRAIT"

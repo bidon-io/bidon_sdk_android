@@ -40,7 +40,8 @@ internal class BMInterstitialAdImpl(
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
-        demandId = demandId
+        demandId = demandId,
+        demandAd = demandAd,
     ) {
 
     override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
@@ -118,14 +119,12 @@ internal class BMInterstitialAdImpl(
                         adValue = interstitialAd.auctionResult.asBidonAdValue()
                     )
                 )
-                sendShowImpression(StatisticsCollector.AdType.Interstitial)
             }
 
             override fun onAdClicked(interstitialAd: InterstitialAd) {
                 logInfo(Tag, "onAdClicked: $this")
                 this@BMInterstitialAdImpl.interstitialAd = interstitialAd
                 adEvent.tryEmit(AdEvent.Clicked(interstitialAd.asAd()))
-                sendClickImpression(StatisticsCollector.AdType.Interstitial)
             }
 
             override fun onAdExpired(interstitialAd: InterstitialAd) {
@@ -150,7 +149,6 @@ internal class BMInterstitialAdImpl(
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
             .setLoadingTimeOut(adParams.timeout.toInt())
             .setListener(requestListener)
-            .setPlacementId(demandAd.placement)
             .build()
             .also {
                 adRequest = it

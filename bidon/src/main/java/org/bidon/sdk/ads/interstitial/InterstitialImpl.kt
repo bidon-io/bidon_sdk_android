@@ -13,25 +13,23 @@ import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.asUnspecified
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.AuctionHolder
-import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 
 internal class InterstitialImpl(
-    override val placementId: String,
     dispatcher: CoroutineDispatcher = SdkDispatchers.Main,
-) : Interstitial {
-    private val demandAd by lazy {
-        DemandAd(AdType.Interstitial, placementId)
-    }
+    private val demandAd: DemandAd = DemandAd(AdType.Interstitial)
+) : Interstitial, Extras by demandAd {
     private var userListener: InterstitialListener? = null
     private var observeCallbacksJob: Job? = null
     private val auctionHolder: AuctionHolder by lazy {
         get {
-            params(demandAd, listener)
+            params(demandAd)
         }
     }
     private val listener by lazy {
@@ -51,13 +49,12 @@ internal class InterstitialImpl(
             logInfo(Tag, "Ad is loaded and available to show.")
             return
         }
-        logInfo(Tag, "Load with placement=$placementId, pricefloor=$pricefloor")
+        logInfo(Tag, "Load (pricefloor=$pricefloor)")
         if (!auctionHolder.isActive) {
-            listener.onAuctionStarted()
             auctionHolder.startAuction(
                 adTypeParam = AdTypeParam.Interstitial(
                     activity = activity,
-                    pricefloor = pricefloor
+                    pricefloor = pricefloor,
                 ),
                 onResult = { result ->
                     result
@@ -67,7 +64,6 @@ internal class InterstitialImpl(
                              */
                             val winner = auctionResults.first()
                             subscribeToWinner(winner.adSource)
-                            listener.onAuctionSuccess(auctionResults)
                             listener.onAdLoaded(
                                 requireNotNull(winner.adSource.ad) {
                                     "[Ad] should exist when action succeeds"
@@ -77,13 +73,12 @@ internal class InterstitialImpl(
                             /**
                              * Auction failed
                              */
-                            listener.onAuctionFailed(cause = it.asUnspecified())
                             listener.onAdLoadFailed(cause = it.asUnspecified())
                         }
                 }
             )
         } else {
-            logInfo(Tag, "Auction already in progress. Placement: $placementId.")
+            logInfo(Tag, "Auction already in progress")
         }
     }
 
@@ -93,7 +88,7 @@ internal class InterstitialImpl(
             listener.onAdShowFailed(BidonError.SdkNotInitialized)
             return
         }
-        logInfo(Tag, "Show with placement: $placementId")
+        logInfo(Tag, "Show")
         if (auctionHolder.isActive) {
             logInfo(Tag, "Show failed. Auction in progress.")
             listener.onAdShowFailed(BidonError.AuctionInProgress)
@@ -115,6 +110,12 @@ internal class InterstitialImpl(
     override fun setInterstitialListener(listener: InterstitialListener) {
         logInfo(Tag, "Set interstitial listener")
         this.userListener = listener
+    }
+
+    override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {
+        logInfo(Tag, "Notify Loss invoked with Winner($winnerDemandId, $winnerEcpm)")
+        auctionHolder.popWinner()?.sendLoss(winnerDemandId, winnerEcpm, StatisticsCollector.AdType.Interstitial)
+        destroyAd()
     }
 
     override fun destroyAd() {
@@ -144,10 +145,12 @@ internal class InterstitialImpl(
                 }
                 is AdEvent.Clicked -> {
                     listener.onAdClicked(adEvent.ad)
+                    adSource.sendClickImpression(adType = StatisticsCollector.AdType.Interstitial)
                 }
                 is AdEvent.Closed -> listener.onAdClosed(adEvent.ad)
                 is AdEvent.Shown -> {
                     listener.onAdShown(adEvent.ad)
+                    adSource.sendShowImpression(adType = StatisticsCollector.AdType.Interstitial)
                 }
                 is AdEvent.PaidRevenue -> listener.onRevenuePaid(adEvent.ad, adEvent.adValue)
                 is AdEvent.ShowFailed -> listener.onAdShowFailed(adEvent.cause)
@@ -184,30 +187,6 @@ internal class InterstitialImpl(
 
         override fun onAdExpired(ad: Ad) {
             userListener?.onAdExpired(ad)
-        }
-
-        override fun onAuctionStarted() {
-            userListener?.onAuctionStarted()
-        }
-
-        override fun onAuctionSuccess(auctionResults: List<AuctionResult>) {
-            userListener?.onAuctionSuccess(auctionResults)
-        }
-
-        override fun onAuctionFailed(cause: BidonError) {
-            userListener?.onAuctionFailed(cause)
-        }
-
-        override fun onRoundStarted(roundId: String, pricefloor: Double) {
-            userListener?.onRoundStarted(roundId, pricefloor)
-        }
-
-        override fun onRoundSucceed(roundId: String, roundResults: List<AuctionResult>) {
-            userListener?.onRoundSucceed(roundId, roundResults)
-        }
-
-        override fun onRoundFailed(roundId: String, cause: BidonError) {
-            userListener?.onRoundFailed(roundId, cause)
         }
 
         override fun onRevenuePaid(ad: Ad, adValue: AdValue) {

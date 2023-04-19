@@ -9,7 +9,6 @@ internal interface Auction {
     suspend fun start(
         demandAd: DemandAd,
         resolver: AuctionResolver,
-        roundsListener: RoundsListener,
         adTypeParamData: AdTypeParam,
     ): Result<List<AuctionResult>>
 }

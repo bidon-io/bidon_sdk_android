@@ -2,7 +2,6 @@ package org.bidon.sdk.ads.banner.helper
 
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerListener
-import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 
@@ -28,30 +27,6 @@ internal fun wrapUserBannerListener(userListener: () -> BannerListener?) = objec
 
     override fun onAdExpired(ad: Ad) {
         userListener()?.onAdExpired(ad)
-    }
-
-    override fun onAuctionStarted() {
-        userListener()?.onAuctionStarted()
-    }
-
-    override fun onAuctionSuccess(auctionResults: List<AuctionResult>) {
-        userListener()?.onAuctionSuccess(auctionResults)
-    }
-
-    override fun onAuctionFailed(cause: BidonError) {
-        userListener()?.onAuctionFailed(cause)
-    }
-
-    override fun onRoundStarted(roundId: String, pricefloor: Double) {
-        userListener()?.onRoundStarted(roundId, pricefloor)
-    }
-
-    override fun onRoundSucceed(roundId: String, roundResults: List<AuctionResult>) {
-        userListener()?.onRoundSucceed(roundId, roundResults)
-    }
-
-    override fun onRoundFailed(roundId: String, cause: BidonError) {
-        userListener()?.onRoundFailed(roundId, cause)
     }
 
     override fun onRevenuePaid(ad: Ad, adValue: AdValue) {

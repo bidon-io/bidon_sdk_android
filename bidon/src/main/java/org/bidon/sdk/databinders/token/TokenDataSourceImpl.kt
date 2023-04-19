@@ -16,13 +16,11 @@ internal class TokenDataSourceImpl(
      */
     override var token: Token? = null
         get() {
-            println("TOKEN GET $field")
             return field ?: keyValueStorage.token?.let { Token(it) }?.also {
                 field = it
             }
         }
         set(value) {
-            println("TOKEN SET $field -> $value")
             keyValueStorage.token = value?.token
             field = value
         }

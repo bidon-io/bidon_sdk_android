@@ -3,8 +3,6 @@ package org.bidon.sdk.ads.rewarded
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdListener
 import org.bidon.sdk.ads.FullscreenAdListener
-import org.bidon.sdk.auction.AuctionListener
-import org.bidon.sdk.auction.RoundsListener
 import org.bidon.sdk.logs.analytic.AdRevenueListener
 
 /**
@@ -13,8 +11,6 @@ import org.bidon.sdk.logs.analytic.AdRevenueListener
 interface RewardedListener :
     AdListener,
     AdRevenueListener,
-    AuctionListener,
-    RoundsListener,
     FullscreenAdListener,
     RewardedAdListener
 

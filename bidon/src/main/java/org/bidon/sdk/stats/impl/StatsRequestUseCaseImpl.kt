@@ -1,14 +1,15 @@
 package org.bidon.sdk.stats.impl
 
 import kotlinx.coroutines.withContext
-import org.bidon.sdk.ads.AdType
+import org.bidon.sdk.BidonSdk
+import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.databinders.DataBinderType
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.RoundStat
-import org.bidon.sdk.stats.models.*
 import org.bidon.sdk.stats.models.Demand
 import org.bidon.sdk.stats.models.Round
+import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.StatsRequestBody
 import org.bidon.sdk.stats.usecases.StatsRequestUseCase
 import org.bidon.sdk.utils.SdkDispatchers
@@ -38,7 +39,7 @@ internal class StatsRequestUseCaseImpl(
         auctionId: String,
         auctionConfigurationId: Int,
         results: List<RoundStat>,
-        adType: AdType,
+        demandAd: DemandAd
     ): Result<BaseResponse> = runCatching {
         return withContext(SdkDispatchers.IO) {
             val body = results.asStatsRequestBody(auctionId, auctionConfigurationId)
@@ -46,10 +47,11 @@ internal class StatsRequestUseCaseImpl(
                 binders = binders,
                 dataKeyName = "stats",
                 data = body,
+                extras = BidonSdk.getExtras() + demandAd.getExtras()
             )
             logInfo(Tag, "$requestBody")
             get<JsonHttpRequest>().invoke(
-                path = "$StatsRequestPath/${adType.code}",
+                path = "$StatsRequestPath/${demandAd.adType.code}",
                 body = requestBody,
             ).mapCatching { jsonResponse ->
                 val baseResponse = JsonParsers.parseOrNull<BaseResponse>(jsonResponse)

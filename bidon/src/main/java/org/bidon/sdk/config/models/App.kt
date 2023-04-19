@@ -18,5 +18,7 @@ internal data class App(
     @field:JsonName("framework_version")
     var frameworkVersion: String?,
     @field:JsonName("plugin_version")
-    var pluginVersion: String?
+    var pluginVersion: String?,
+    @field:JsonName("bidon_version")
+    var bidonVersion: String
 ) : Serializable

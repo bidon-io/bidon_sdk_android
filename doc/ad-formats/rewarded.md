@@ -2,11 +2,11 @@
 
 ## Loading an Rewarded Ad
 
-To load an rewarded ad, create a `RewardedAd` instance. Add (optional) placement if needed, otherwise placement = "default" will be used.
+To load an rewarded ad, create a `RewardedAd` instance.
 Important: for a single instance of an RewardedAd, load() and show() can only be called once. Create new instance for every new interstitial ad.
 
 ```kotlin
-val rewarded = RewardedAd(placement = "your_placement")
+val rewarded = RewardedAd()
 ```
 
 Set `RewardedListener` for receiving all-related events, including loading/displaying and revenue callbacks.

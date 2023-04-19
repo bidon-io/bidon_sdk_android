@@ -1,7 +1,9 @@
 package org.bidon.sdk.auction.impl
 
 import kotlinx.coroutines.withContext
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.AdapterInfo
+import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.GetOrientationUseCase
@@ -36,15 +38,14 @@ internal class GetAuctionRequestUseCaseImpl(
     )
 
     override suspend fun request(
-        placement: String,
         additionalData: AdTypeParam,
         auctionId: String,
+        demandAd: DemandAd,
         adapters: Map<String, AdapterInfo>,
     ): Result<AuctionResponse> {
         return withContext(SdkDispatchers.IO) {
             val (banner, interstitial, rewarded) = getData(additionalData)
             val adObject = AdObjectRequestBody(
-                placementId = placement,
                 auctionId = auctionId,
                 banner = banner,
                 interstitial = interstitial,
@@ -56,6 +57,7 @@ internal class GetAuctionRequestUseCaseImpl(
                 binders = binders,
                 dataKeyName = "ad_object",
                 data = adObject,
+                extras = BidonSdk.getExtras() + demandAd.getExtras()
             )
             logInfo(Tag, "Request body: $requestBody")
             get<JsonHttpRequest>().invoke(

@@ -4,7 +4,10 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.auction.*
+import org.bidon.sdk.auction.AdTypeParam
+import org.bidon.sdk.auction.Auction
+import org.bidon.sdk.auction.AuctionHolder
+import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -19,7 +22,6 @@ import org.bidon.sdk.utils.ext.onAny
  */
 internal class AuctionHolderImpl(
     private val demandAd: DemandAd,
-    private val roundsListener: RoundsListener,
 ) : AuctionHolder {
     private val auctionState = MutableStateFlow<AuctionHolderState>(AuctionHolderState.Idle)
 
@@ -49,7 +51,6 @@ internal class AuctionHolderImpl(
                     demandAd = demandAd,
                     resolver = MaxEcpmAuctionResolver,
                     adTypeParamData = adTypeParam,
-                    roundsListener = roundsListener
                 ).onSuccess { results ->
                     check(results.isNotEmpty()) {
                         "Auction succeed if results is not empty"

@@ -10,6 +10,7 @@ internal interface SendImpressionRequestUseCase {
         urlPath: String,
         bodyKey: String,
         body: ImpressionRequestBody,
+        extras: Map<String, Any>
     ): Result<BaseResponse>
 
     enum class Type(val key: String) {

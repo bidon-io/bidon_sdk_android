@@ -23,6 +23,7 @@ import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
@@ -33,15 +34,13 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class Banner @JvmOverloads constructor(
     context: Context,
-    placementId: String = BidonSdk.DefaultPlacement,
     attrs: AttributeSet? = null,
     @AttrRes defStyleAtt: Int = 0,
-) : FrameLayout(context, attrs, defStyleAtt), BannerAd {
+    private val demandAd: DemandAd = DemandAd(AdType.Banner),
+) : FrameLayout(context, attrs, defStyleAtt),
+    BannerAd,
+    Extras by demandAd {
 
-    override var placementId: String = placementId
-        private set
-
-    private val demandAd by lazy { DemandAd(AdType.Banner, placementId) }
     private var bannerFormat: BannerFormat = BannerFormat.Banner
     private var pricefloor: Double = BidonSdk.DefaultPricefloor
 
@@ -59,9 +58,6 @@ class Banner @JvmOverloads constructor(
     init {
         context.theme.obtainStyledAttributes(attrs, R.styleable.BannerView, 0, 0).apply {
             try {
-                getString(R.styleable.BannerView_placementId)?.let {
-                    this@Banner.placementId = it
-                }
                 getInteger(R.styleable.BannerView_bannerSize, 0).let {
                     when (it) {
                         1 -> setBannerFormat(BannerFormat.Banner)
@@ -88,18 +84,16 @@ class Banner @JvmOverloads constructor(
         }
         if (!isAuctionStarted.getAndSet(true)) {
             this.pricefloor = pricefloor
-            logInfo(Tag, "Load with placement($placementId) and pricefloor($pricefloor)")
+            logInfo(Tag, "Load (pricefloor=$pricefloor)")
             scope.launch {
-                listener.onAuctionStarted()
                 auction.start(
                     demandAd = demandAd,
                     resolver = MaxEcpmAuctionResolver,
                     adTypeParamData = AdTypeParam.Banner(
                         pricefloor = pricefloor,
                         bannerFormat = bannerFormat,
-                        adContainer = this@Banner
+                        adContainer = this@Banner,
                     ),
-                    roundsListener = listener
                 ).onSuccess { auctionResults ->
                     /**
                      * Winner found
@@ -108,7 +102,6 @@ class Banner @JvmOverloads constructor(
                         winner = it
                     }
                     subscribeToWinner(winner.adSource)
-                    listener.onAuctionSuccess(auctionResults)
                     listener.onAdLoaded(
                         requireNotNull(winner.adSource.ad) {
                             "[Ad] should exist when action succeeds"
@@ -118,12 +111,11 @@ class Banner @JvmOverloads constructor(
                     /**
                      * Auction failed
                      */
-                    listener.onAuctionFailed(cause = it.asUnspecified())
                     listener.onAdLoadFailed(cause = it.asUnspecified())
                 }
             }
         } else {
-            logInfo(Tag, "Auction already in progress. Placement: $placementId.")
+            logInfo(Tag, "Auction already in progress")
         }
     }
 
@@ -135,7 +127,7 @@ class Banner @JvmOverloads constructor(
         val adViewHolder = (winner?.adSource as? AdSource.Banner)?.getAdView()
         when {
             adViewHolder != null && !shown.getAndSet(true) -> {
-                logInfo(Tag, "Show with placement($placementId)")
+                logInfo(Tag, "Show")
                 // add AdView to Screen
                 removeAllViews()
                 val layoutParams = LayoutParams(adViewHolder.widthPx, adViewHolder.heightPx).apply {

@@ -9,7 +9,6 @@ import org.bidon.admob.impl.AdmobBannerImpl
 import org.bidon.admob.impl.AdmobInterstitialImpl
 import org.bidon.admob.impl.AdmobRewardedImpl
 import org.bidon.sdk.adapter.*
-import org.bidon.sdk.ads.banner.BannerView
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 

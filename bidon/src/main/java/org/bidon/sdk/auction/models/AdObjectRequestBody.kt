@@ -7,12 +7,9 @@ import org.bidon.sdk.utils.serializer.Serializable
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  *
- * [orientationCode] is a [Orientation.code]
- * [BannerRequestBody.formatCode] is a [BannerRequestBody.StatFormat.code]
+ * @param [orientationCode] is a [Orientation.code]*
  */
 internal data class AdObjectRequestBody(
-    @field:JsonName("placement_id")
-    val placementId: String,
     @field:JsonName("orientation")
     val orientationCode: String,
     @field:JsonName("auction_id")

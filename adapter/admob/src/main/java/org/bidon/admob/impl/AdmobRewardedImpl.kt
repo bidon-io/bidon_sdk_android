@@ -41,7 +41,8 @@ internal class AdmobRewardedImpl(
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
-        demandId = demandId
+        demandId = demandId,
+        demandAd = demandAd,
     ) {
 
     private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
@@ -116,7 +117,6 @@ internal class AdmobRewardedImpl(
             override fun onAdClicked() {
                 logInfo(Tag, "onAdClicked: $this")
                 adEvent.tryEmit(AdEvent.Clicked(requiredRewardedAd.asAd()))
-                sendClickImpression(StatisticsCollector.AdType.Rewarded)
             }
 
             override fun onAdDismissedFullScreenContent() {
@@ -132,7 +132,6 @@ internal class AdmobRewardedImpl(
             override fun onAdImpression() {
                 logInfo(Tag, "onAdShown: $this")
                 adEvent.tryEmit(AdEvent.Shown(requiredRewardedAd.asAd()))
-                sendShowImpression(StatisticsCollector.AdType.Rewarded)
             }
 
             override fun onAdShowedFullScreenContent() {}

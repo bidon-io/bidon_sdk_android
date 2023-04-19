@@ -1,9 +1,6 @@
 package org.bidon.demoapp.component
 
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
@@ -16,6 +13,26 @@ fun AppButton(
     onClick: () -> Unit,
 ) {
     Button(
+        modifier = modifier,
+        onClick = {
+            onClick.invoke()
+        }
+    ) {
+        Text(
+            text = text.uppercase(Locale.getDefault()),
+            style = MaterialTheme.typography.titleMedium,
+            fontSize = 14.sp
+        )
+    }
+}
+
+@Composable
+fun AppOutlinedButton(
+    modifier: Modifier = Modifier,
+    text: String,
+    onClick: () -> Unit,
+) {
+    OutlinedButton(
         modifier = modifier,
         onClick = {
             onClick.invoke()

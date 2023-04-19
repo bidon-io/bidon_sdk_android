@@ -1,8 +1,6 @@
 package org.bidon.sdk.ads.banner
 
 import org.bidon.sdk.ads.AdListener
-import org.bidon.sdk.auction.AuctionListener
-import org.bidon.sdk.auction.RoundsListener
 import org.bidon.sdk.logs.analytic.AdRevenueListener
 
 /**
@@ -10,6 +8,4 @@ import org.bidon.sdk.logs.analytic.AdRevenueListener
  */
 interface BannerListener :
     AdListener,
-    AdRevenueListener,
-    AuctionListener,
-    RoundsListener
+    AdRevenueListener

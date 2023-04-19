@@ -8,11 +8,12 @@ import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.stats.StatisticsCollector
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-sealed interface AdSource<T : AdAuctionParams> {
+sealed interface AdSource<T : AdAuctionParams> : StatisticsCollector {
     val demandId: DemandId
     val ad: Ad?
     val adEvent: Flow<AdEvent>

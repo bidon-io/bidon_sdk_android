@@ -1,6 +1,5 @@
 package org.bidon.sdk.ads
 
-import org.bidon.sdk.auction.AuctionListener
 import org.bidon.sdk.config.BidonError
 
 /**
@@ -10,7 +9,6 @@ interface AdListener {
 
     /**
      * Callback invokes after auction completed and winner is selected.
-     * Calls immediately after [AuctionListener.onAuctionSuccess]
      */
     fun onAdLoaded(ad: Ad)
 

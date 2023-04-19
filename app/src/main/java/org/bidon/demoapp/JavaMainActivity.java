@@ -9,13 +9,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.bidon.sdk.BidonSdk;
 import org.bidon.sdk.ads.Ad;
 import org.bidon.sdk.ads.interstitial.InterstitialListener;
-import org.bidon.sdk.auction.AuctionResult;
 import org.bidon.sdk.config.BidonError;
 import org.bidon.sdk.config.InitializationCallback;
 import org.bidon.sdk.logs.analytic.AdValue;
 import org.bidon.sdk.logs.logging.Logger;
-
-import java.util.List;
 
 /**
  * Created by Aleksei Cherniaev on 28/02/2023.
@@ -60,35 +57,6 @@ public class JavaMainActivity extends AppCompatActivity {
 
             @Override
             public void onAdClosed(@NonNull Ad ad) {
-
-            }
-
-            @Override
-            public void onAuctionStarted() {
-
-            }
-
-            @Override
-            public void onAuctionSuccess(@NonNull List<AuctionResult> list) {
-            }
-
-            @Override
-            public void onAuctionFailed(@NonNull BidonError cause) {
-
-            }
-
-            @Override
-            public void onRoundStarted(@NonNull String s, double v) {
-
-            }
-
-            @Override
-            public void onRoundSucceed(@NonNull String s, @NonNull List<AuctionResult> list) {
-                list.get(0).getAdSource().getDemandId().getDemandId();
-            }
-
-            @Override
-            public void onRoundFailed(@NonNull String s, @NonNull BidonError cause) {
 
             }
 

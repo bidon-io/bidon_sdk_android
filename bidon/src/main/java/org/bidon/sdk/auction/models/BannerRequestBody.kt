@@ -6,6 +6,8 @@ import org.bidon.sdk.utils.serializer.Serializable
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
+ *
+ * @param [formatCode] is a [BannerRequestBody.StatFormat.code]
  */
 data class BannerRequestBody(
     @field:JsonName("format")

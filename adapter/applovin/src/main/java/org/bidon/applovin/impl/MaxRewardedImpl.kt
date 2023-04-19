@@ -34,7 +34,8 @@ internal class MaxRewardedImpl(
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
-        demandId = demandId
+        demandId = demandId,
+        demandAd = demandAd,
     ) {
 
     private var rewardedAd: MaxRewardedAd? = null
@@ -69,7 +70,6 @@ internal class MaxRewardedImpl(
                         adValue = ad.asBidonAdValue()
                     )
                 )
-                sendClickImpression(StatisticsCollector.AdType.Rewarded)
             }
 
             override fun onAdHidden(ad: MaxAd) {
@@ -85,7 +85,6 @@ internal class MaxRewardedImpl(
             override fun onAdDisplayFailed(ad: MaxAd, error: MaxError) {
                 maxAd = ad
                 adEvent.tryEmit(AdEvent.ShowFailed(error.asBidonError()))
-                sendShowImpression(StatisticsCollector.AdType.Rewarded)
             }
 
             @Deprecated("Deprecated in Java")

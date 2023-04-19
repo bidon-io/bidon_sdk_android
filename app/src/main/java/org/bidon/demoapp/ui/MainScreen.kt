@@ -33,6 +33,8 @@ import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.config.DefaultAdapters
 import org.bidon.sdk.logs.logging.Logger
 import org.bidon.sdk.utils.networking.NetworkSettings
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 @Composable
 internal fun MainScreen(
@@ -83,6 +85,13 @@ internal fun MainScreen(
                             }
                         }
                     )
+                    AppOutlinedButton(
+                        modifier = Modifier.padding(top = 16.dp),
+                        text = "Add SDK-level Extras"
+                    ) {
+                        BidonSdk.addExtra("sdk_level_string_before_init", "string0")
+                        BidonSdk.addExtra("sdk_level_int_before_init", 555)
+                    }
                     AppButton(text = "Init") {
                         val baseUrl =
                             sharedPreferences.getString("host", NetworkSettings.BidonBaseUrl) ?: NetworkSettings.BidonBaseUrl
@@ -128,6 +137,12 @@ internal fun MainScreen(
                 }
                 AppButton(text = "Banner") {
                     navController.navigate(Screen.Banners.route)
+                }
+                AppOutlinedButton(
+                    modifier = Modifier.padding(top = 16.dp),
+                    text = "Add SDK-level Extras"
+                ) {
+                    BidonSdk.addExtra("sdk_level_long_after_init", LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
                 }
 //                AppButton(text = "Banner in XML-Layout") {
 //                    (context as Activity).startActivity(

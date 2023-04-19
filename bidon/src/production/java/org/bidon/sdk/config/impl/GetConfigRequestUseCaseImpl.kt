@@ -1,6 +1,7 @@
 package org.bidon.sdk.config.impl
 
 import kotlinx.coroutines.withContext
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.config.models.ConfigRequestBody
 import org.bidon.sdk.config.models.ConfigResponse
 import org.bidon.sdk.config.usecases.GetConfigRequestUseCase
@@ -37,6 +38,7 @@ internal class GetConfigRequestUseCaseImpl(
                 binders = binders,
                 dataKeyName = null,
                 data = null,
+                extras = BidonSdk.getExtras()
             )
             val requestBody = jsonObject(putTo = bindersData) {
                 "adapters" hasValue jsonObject {
@@ -49,9 +51,6 @@ internal class GetConfigRequestUseCaseImpl(
                 path = ConfigRequestPath,
                 body = requestBody,
             ).mapCatching { jsonString ->
-                /**
-                 * Save "segment_id"
-                 */
                 /**
                  * Save "segment_id"
                  */

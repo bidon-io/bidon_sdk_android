@@ -12,5 +12,6 @@ internal interface CreateRequestBodyUseCase {
         binders: List<DataBinderType>,
         dataKeyName: String?,
         data: T?,
+        extras: Map<String, Any>,
     ): JSONObject
 }

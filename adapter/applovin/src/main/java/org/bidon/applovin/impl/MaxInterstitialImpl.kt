@@ -33,7 +33,8 @@ internal class MaxInterstitialImpl(
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
-        demandId = demandId
+        demandId = demandId,
+        demandAd = demandAd,
     ) {
 
     private var interstitialAd: MaxInterstitialAd? = null
@@ -68,7 +69,6 @@ internal class MaxInterstitialImpl(
                         adValue = ad.asBidonAdValue()
                     )
                 )
-                sendShowImpression(StatisticsCollector.AdType.Interstitial)
             }
 
             override fun onAdHidden(ad: MaxAd) {
@@ -79,7 +79,6 @@ internal class MaxInterstitialImpl(
             override fun onAdClicked(ad: MaxAd) {
                 maxAd = ad
                 adEvent.tryEmit(AdEvent.Clicked(ad.asAd()))
-                sendClickImpression(StatisticsCollector.AdType.Interstitial)
             }
 
             override fun onAdDisplayFailed(ad: MaxAd, error: MaxError) {

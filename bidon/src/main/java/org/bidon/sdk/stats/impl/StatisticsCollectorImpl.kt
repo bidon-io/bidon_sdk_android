@@ -2,6 +2,7 @@ package org.bidon.sdk.stats.impl
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.auction.models.BannerRequestBody
@@ -12,6 +13,7 @@ import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.models.ImpressionRequestBody
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.usecases.SendImpressionRequestUseCase
+import org.bidon.sdk.stats.usecases.SendLossRequestUseCase
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.ext.SystemTimeNow
@@ -25,6 +27,7 @@ class StatisticsCollectorImpl(
     auctionId: String,
     roundId: String,
     demandId: DemandId,
+    private val demandAd: DemandAd
 ) : StatisticsCollector {
 
     private var auctionConfigurationId: Int = 0
@@ -35,6 +38,9 @@ class StatisticsCollectorImpl(
 
     private val sendImpression by lazy {
         get<SendImpressionRequestUseCase>()
+    }
+    private val sendLossRequest by lazy {
+        get<SendLossRequestUseCase>()
     }
 
     private val isShowSent = AtomicBoolean(false)
@@ -64,8 +70,9 @@ class StatisticsCollectorImpl(
                 val lastSegment = adType.asAdType().code
                 sendImpression(
                     urlPath = "$key/$lastSegment",
-                    bodyKey = "show",
-                    body = createImpressionRequestBody(adType)
+                    bodyKey = "bid",
+                    body = createImpressionRequestBody(adType),
+                    extras = demandAd.getExtras()
                 )
             }
         }
@@ -78,8 +85,9 @@ class StatisticsCollectorImpl(
                 val lastSegment = adType.asAdType().code
                 sendImpression(
                     urlPath = "$key/$lastSegment",
-                    bodyKey = "show",
-                    body = createImpressionRequestBody(adType)
+                    bodyKey = "bid",
+                    body = createImpressionRequestBody(adType),
+                    extras = demandAd.getExtras()
                 )
             }
         }
@@ -92,10 +100,23 @@ class StatisticsCollectorImpl(
                 val lastSegment = StatisticsCollector.AdType.Rewarded.asAdType().code
                 sendImpression(
                     urlPath = "$key/$lastSegment",
-                    bodyKey = "show",
-                    body = createImpressionRequestBody(StatisticsCollector.AdType.Rewarded)
+                    bodyKey = "bid",
+                    body = createImpressionRequestBody(StatisticsCollector.AdType.Rewarded),
+                    extras = demandAd.getExtras()
                 )
             }
+        }
+    }
+
+    override fun sendLoss(winnerDemandId: String, winnerEcpm: Double, adType: StatisticsCollector.AdType) {
+        scope.launch {
+            sendLossRequest.invoke(
+                winnerDemandId = winnerDemandId,
+                winnerEcpm = winnerEcpm,
+                demandAd = demandAd,
+                bodyKey = "bid",
+                body = createImpressionRequestBody(adType)
+            )
         }
     }
 
