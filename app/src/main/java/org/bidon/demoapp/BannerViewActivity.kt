@@ -4,12 +4,12 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import org.bidon.sdk.ads.banner.BannerView
+import org.bidon.sdk.ads.banner.Banner
 
 class BannerViewActivity : AppCompatActivity(R.layout.banner_view_layout) {
 
     private val bannerView by lazy {
-        findViewById<BannerView>(R.id.bannerView)
+        findViewById<Banner>(R.id.bannerView)
     }
 
     private val loadButton by lazy {
@@ -31,7 +31,7 @@ class BannerViewActivity : AppCompatActivity(R.layout.banner_view_layout) {
 
     private fun initViews() {
         loadButton.setOnClickListener {
-            bannerView.loadAd()
+            bannerView.loadAd(activity = this)
             bannerView.showAd()
         }
         destroyButton.setOnClickListener {

@@ -18,7 +18,7 @@
 
 -keep public interface org.bidon.sdk.ads.banner.BannerAd { *; }
 -keep public enum org.bidon.sdk.ads.banner.BannerFormat { *; }
--keep public class org.bidon.sdk.ads.banner.BannerView { *; }
+-keep public class org.bidon.sdk.ads.banner.Banner { *; }
 -keep public interface org.bidon.sdk.ads.banner.BannerListener { *; }
 
 -keep public interface org.bidon.sdk.ads.interstitial.Interstitial { *; }

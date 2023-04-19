@@ -1,6 +1,5 @@
 package org.bidon.applovin
 
-import android.app.Activity
 import android.content.Context
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdapterParameters
@@ -22,7 +21,6 @@ data class ApplovinBannerAuctionParams(
 }
 
 data class ApplovinFullscreenAdAuctionParams(
-    val activity: Activity,
     val lineItem: LineItem,
     val timeoutMs: Long
 ) : AdAuctionParams {

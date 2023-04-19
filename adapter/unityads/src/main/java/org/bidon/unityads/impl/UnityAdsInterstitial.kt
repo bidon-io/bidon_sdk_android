@@ -33,7 +33,7 @@ internal class UnityAdsInterstitial(
     private val demandAd: DemandAd,
     private val roundId: String,
     private val auctionId: String,
-) : AdSource.Interstitial<UnityAdsAuctionParams>,
+) : AdSource.Interstitial<UnityAdsFullscreenAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
@@ -73,13 +73,13 @@ internal class UnityAdsInterstitial(
         val lineItem = lineItems
             .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed) ?: error(org.bidon.sdk.config.BidonError.NoAppropriateAdUnitId)
-        UnityAdsAuctionParams(
+        UnityAdsFullscreenAuctionParams(
             lineItem = lineItem,
             pricefloor = pricefloor
         )
     }
 
-    override suspend fun bid(adParams: UnityAdsAuctionParams): AuctionResult {
+    override suspend fun bid(adParams: UnityAdsFullscreenAuctionParams): AuctionResult {
         logInfo(Tag, "Starting with $adParams: $this")
         return withContext(dispatcher) {
             lineItem = adParams.lineItem

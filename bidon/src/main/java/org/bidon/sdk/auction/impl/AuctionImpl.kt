@@ -106,12 +106,13 @@ internal class AuctionImpl(
     }
 
     private fun notifyLosers(finalResults: List<AuctionResult>) {
+        val winner = finalResults.getOrNull(0) ?: return
         finalResults.drop(1)
             .forEach { auctionResult ->
                 val adSource = auctionResult.adSource
                 if (adSource is WinLossNotifiable) {
                     logInfo(Tag, "Notified loss: ${adSource.demandId}")
-                    adSource.notifyLoss()
+                    adSource.notifyLoss(winner.adSource.demandId.demandId, winner.ecpm)
                 }
                 if (auctionResult.roundStatus == RoundStatus.Successful) {
                     (adSource as StatisticsCollector).markLoss()
@@ -133,10 +134,10 @@ internal class AuctionImpl(
                 .onFailure { cause ->
                     logError(Tag, "Failed to fill: ${auctionResult.adSource.demandId}", cause)
                     (auctionResult.adSource as StatisticsCollector).markFillFinished(RoundStatus.NoFill)
-                    (auctionResult.adSource as? WinLossNotifiable)?.let {
-                        logInfo(Tag, "Notified loss: ${auctionResult.adSource.demandId}")
-                        it.notifyLoss()
-                    }
+//                    (auctionResult.adSource as? WinLossNotifiable)?.let {
+//                        logInfo(Tag, "Notified loss: ${auctionResult.adSource.demandId}")
+//                        it.notifyLoss()
+//                    }
                 }
                 .onSuccess {
                     logInfo(Tag, "Winner filled: ${auctionResult.adSource.demandId}")
@@ -420,14 +421,15 @@ internal class AuctionImpl(
         is AdSource.Banner -> {
             check(adTypeParamData is AdTypeParam.Banner)
             adSource.getAuctionParams(
+                activity = adTypeParamData.activity,
                 pricefloor = pricefloor,
                 timeout = timeout,
                 lineItems = availableLineItemsForDemand,
-                adContainer = adTypeParamData.adContainer,
                 bannerFormat = adTypeParamData.bannerFormat,
                 onLineItemConsumed = { lineItem ->
                     mutableLineItems.remove(lineItem)
                 },
+                containerWidth = adTypeParamData.containerWidth
             )
         }
         is AdSource.Interstitial -> {

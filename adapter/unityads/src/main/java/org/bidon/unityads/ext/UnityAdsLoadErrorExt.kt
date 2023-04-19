@@ -1,6 +1,8 @@
 package org.bidon.unityads.ext
 
 import com.unity3d.ads.UnityAds
+import com.unity3d.services.banners.BannerErrorCode
+import com.unity3d.services.banners.BannerErrorInfo
 import org.bidon.sdk.config.BidonError
 import org.bidon.unityads.UnityAdsDemandId
 
@@ -32,4 +34,12 @@ internal fun UnityAds.UnityAdsShowError?.asBidonError() = when (this) {
     null -> {
         BidonError.Unspecified(UnityAdsDemandId, Throwable("$this"))
     }
+}
+
+internal fun BannerErrorInfo?.asBidonError() = when (this?.errorCode) {
+    null -> BidonError.Unspecified(UnityAdsDemandId, Throwable("null"))
+    BannerErrorCode.NATIVE_ERROR,
+    BannerErrorCode.WEBVIEW_ERROR,
+    BannerErrorCode.UNKNOWN -> BidonError.Unspecified(UnityAdsDemandId, Throwable(errorMessage))
+    BannerErrorCode.NO_FILL -> BidonError.NoFill(UnityAdsDemandId)
 }

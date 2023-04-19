@@ -132,7 +132,6 @@ internal class ApplovinRewardedImpl(
             .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed)
         ApplovinFullscreenAdAuctionParams(
-            activity = activity,
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
             timeoutMs = timeout,
         )

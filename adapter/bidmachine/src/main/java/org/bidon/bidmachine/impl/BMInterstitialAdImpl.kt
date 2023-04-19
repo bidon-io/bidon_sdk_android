@@ -208,8 +208,8 @@ internal class BMInterstitialAdImpl(
         }
     }
 
-    override fun notifyLoss() {
-        adRequest?.notifyMediationLoss()
+    override fun notifyLoss(winnerNetworkName: String, winnerNetworkPrice: Double) {
+        adRequest?.notifyMediationLoss(winnerNetworkName, winnerNetworkPrice)
     }
 
     override fun notifyWin() {

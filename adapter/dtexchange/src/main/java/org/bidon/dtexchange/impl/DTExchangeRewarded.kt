@@ -88,7 +88,7 @@ internal class DTExchangeRewarded(
         object : InneractiveFullscreenAdEventsListenerWithImpressionData {
             override fun onAdImpression(adSpot: InneractiveAdSpot?, impressionData: ImpressionData?) {
                 val adValue = impressionData?.asAdValue() ?: return
-                val ad = adSpot?.asAd() ?: return
+                val ad = adSpot?.asAd(impressionData.demandSource) ?: return
                 adEvent.tryEmit(AdEvent.PaidRevenue(ad, adValue))
                 adEvent.tryEmit(AdEvent.Shown(ad))
             }
@@ -198,14 +198,14 @@ internal class DTExchangeRewarded(
         inneractiveAdSpot = null
     }
 
-    private fun InneractiveAdSpot.asAd() = Ad(
+    private fun InneractiveAdSpot.asAd(demandSource: String? = null) = Ad(
         ecpm = auctionParams?.lineItem?.pricefloor ?: 0.0,
         auctionId = auctionId,
         adUnitId = auctionParams?.lineItem?.adUnitId,
         networkName = demandId.demandId,
         currencyCode = AdValue.USD,
         demandAd = demandAd,
-        dsp = this.mediationNameString,
+        dsp = demandSource ?: this.mediationNameString,
         roundId = roundId,
         demandAdObject = this
     )

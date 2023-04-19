@@ -1,5 +1,6 @@
 package org.bidon.demoapp.ui
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,6 +35,23 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 
 @Composable
 fun BannerScreen(navController: NavHostController) {
+//    ServerlessAuctionConfig.setLocalAuctionResponse(
+//        rounds = listOf(
+//            Round(
+//                id = "ROUND_1",
+//                demandIds = listOf("admob"),
+//                timeoutMs = 10000
+//            )
+//        ),
+//        lineItems = listOf(
+//            LineItem(
+//                demandId = "admob",
+//                pricefloor = 0.01,
+//                adUnitId = "ca-app-pub-3940256099942544/6300978111"
+//            )
+//        ),
+//        pricefloor = 0.0
+//    )
     val context = LocalContext.current
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -76,7 +94,8 @@ fun BannerScreen(navController: NavHostController) {
             if (view != null) {
                 AndroidView(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .defaultMinSize(minHeight = 50.dp),
 //                    .height(
 //                        when (bannerSize.value) {
 //                            BannerSize.Banner -> 50.dp
@@ -152,7 +171,7 @@ fun BannerScreen(navController: NavHostController) {
                 AppButton(
                     text = "Load",
                 ) {
-                    banner.value?.loadAd()
+                    banner.value?.loadAd(activity = context as Activity)
                     if (showOnLoad.value) {
                         banner.value?.showAd()
                     }

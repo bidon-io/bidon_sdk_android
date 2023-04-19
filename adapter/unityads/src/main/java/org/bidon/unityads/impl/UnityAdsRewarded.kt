@@ -34,7 +34,7 @@ internal class UnityAdsRewarded(
     private val demandAd: DemandAd,
     private val roundId: String,
     private val auctionId: String,
-) : AdSource.Rewarded<UnityAdsAuctionParams>,
+) : AdSource.Rewarded<UnityAdsFullscreenAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
@@ -74,13 +74,13 @@ internal class UnityAdsRewarded(
         val lineItem = lineItems
             .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed) ?: error(BidonError.NoAppropriateAdUnitId)
-        UnityAdsAuctionParams(
+        UnityAdsFullscreenAuctionParams(
             lineItem = lineItem,
             pricefloor = pricefloor
         )
     }
 
-    override suspend fun bid(adParams: UnityAdsAuctionParams): AuctionResult {
+    override suspend fun bid(adParams: UnityAdsFullscreenAuctionParams): AuctionResult {
         logInfo(Tag, "Starting with $adParams: $this")
         return withContext(dispatcher) {
             lineItem = adParams.lineItem

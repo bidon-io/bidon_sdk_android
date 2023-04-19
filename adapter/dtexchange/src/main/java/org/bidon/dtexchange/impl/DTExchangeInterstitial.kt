@@ -41,6 +41,7 @@ internal class DTExchangeInterstitial(
     private val adRequestListener by lazy {
         object : InneractiveAdSpot.RequestListener {
             override fun onInneractiveSuccessfulAdRequest(inneractiveAdSpot: InneractiveAdSpot?) {
+                logInfo(Tag, "onInneractiveSuccessfulAdRequest: $inneractiveAdSpot")
                 this@DTExchangeInterstitial.inneractiveAdSpot = inneractiveAdSpot
                 val ecpm = auctionParams?.lineItem?.pricefloor ?: 0.0
                 adEvent.tryEmit(
@@ -58,6 +59,7 @@ internal class DTExchangeInterstitial(
                 inneractiveAdSpot: InneractiveAdSpot?,
                 inneractiveErrorCode: InneractiveErrorCode?
             ) {
+                logInfo(Tag, "onInneractiveFailedAdRequest: $inneractiveErrorCode")
                 adEvent.tryEmit(AdEvent.LoadFailed(inneractiveErrorCode.asBidonError()))
             }
         }
@@ -72,8 +74,9 @@ internal class DTExchangeInterstitial(
     private val impressionListener by lazy {
         object : InneractiveFullscreenAdEventsListenerWithImpressionData {
             override fun onAdImpression(adSpot: InneractiveAdSpot?, impressionData: ImpressionData?) {
+                logInfo(Tag, "onAdImpression: $adSpot")
                 val adValue = impressionData?.asAdValue() ?: return
-                val ad = adSpot?.asAd() ?: return
+                val ad = adSpot?.asAd(impressionData?.demandSource) ?: return
                 adEvent.tryEmit(AdEvent.PaidRevenue(ad, adValue))
                 adEvent.tryEmit(AdEvent.Shown(ad))
             }
@@ -81,6 +84,7 @@ internal class DTExchangeInterstitial(
             override fun onAdImpression(adSpot: InneractiveAdSpot?) {}
 
             override fun onAdClicked(adSpot: InneractiveAdSpot?) {
+                logInfo(Tag, "onAdClicked: $adSpot")
                 adSpot?.asAd()?.let {
                     adEvent.tryEmit(AdEvent.Clicked(ad = it))
                 }
@@ -93,10 +97,12 @@ internal class DTExchangeInterstitial(
                 adSpot: InneractiveAdSpot?,
                 adDisplayError: InneractiveUnitController.AdDisplayError?
             ) {
+                logInfo(Tag, "onAdEnteredErrorState: $adSpot, $adDisplayError")
                 adEvent.tryEmit(AdEvent.ShowFailed(adDisplayError.asBidonError()))
             }
 
             override fun onAdDismissed(adSpot: InneractiveAdSpot?) {
+                logInfo(Tag, "onAdDismissed: $adSpot")
                 adSpot?.asAd()?.let {
                     adEvent.tryEmit(AdEvent.Closed(ad = it))
                 }
@@ -178,14 +184,14 @@ internal class DTExchangeInterstitial(
         inneractiveAdSpot = null
     }
 
-    private fun InneractiveAdSpot.asAd() = Ad(
+    private fun InneractiveAdSpot.asAd(demandSource: String? = null) = Ad(
         ecpm = auctionParams?.lineItem?.pricefloor ?: 0.0,
         auctionId = auctionId,
         adUnitId = auctionParams?.lineItem?.adUnitId,
         networkName = demandId.demandId,
         currencyCode = AdValue.USD,
         demandAd = demandAd,
-        dsp = this.mediationNameString,
+        dsp = demandSource ?: this.mediationNameString,
         roundId = roundId,
         demandAdObject = this
     )

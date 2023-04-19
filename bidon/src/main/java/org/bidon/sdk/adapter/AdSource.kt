@@ -2,7 +2,6 @@ package org.bidon.sdk.adapter
 
 import android.app.Activity
 import android.view.View
-import android.view.ViewGroup
 import kotlinx.coroutines.flow.Flow
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
@@ -49,12 +48,13 @@ sealed interface AdSource<T : AdAuctionParams> : StatisticsCollector {
 
     interface Banner<T : AdAuctionParams> : AdSource<T> {
         fun getAuctionParams(
-            adContainer: ViewGroup,
+            activity: Activity,
             pricefloor: Double,
             timeout: Long,
             lineItems: List<LineItem>,
             bannerFormat: BannerFormat,
-            onLineItemConsumed: (LineItem) -> Unit
+            onLineItemConsumed: (LineItem) -> Unit,
+            containerWidth: Float,
         ): Result<AdAuctionParams>
 
         fun getAdView(): AdViewHolder

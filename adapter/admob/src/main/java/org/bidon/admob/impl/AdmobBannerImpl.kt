@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.util.DisplayMetrics
-import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
 import com.google.android.gms.ads.*
@@ -134,12 +133,13 @@ internal class AdmobBannerImpl(
     }
 
     override fun getAuctionParams(
-        adContainer: ViewGroup,
+        activity: Activity,
         pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         bannerFormat: BannerFormat,
         onLineItemConsumed: (LineItem) -> Unit,
+        containerWidth: Float,
     ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
             .minByPricefloorOrNull(demandId, pricefloor)
@@ -147,8 +147,9 @@ internal class AdmobBannerImpl(
         AdmobBannerAuctionParams(
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
             bannerFormat = bannerFormat,
-            adContainer = adContainer,
-            pricefloor = pricefloor
+            pricefloor = pricefloor,
+            context = activity.applicationContext,
+            containerWidth = containerWidth
         )
     }
 
@@ -159,9 +160,12 @@ internal class AdmobBannerImpl(
             param = adParams
             val adUnitId = param?.lineItem?.adUnitId
             if (!adUnitId.isNullOrBlank()) {
-                val adView = AdView(adParams.adContainer.context)
+                val adView = AdView(adParams.context)
                     .apply {
-                        val admobBannerSize = adParams.bannerFormat.asAdmobAdSize(adParams.adContainer)
+                        val admobBannerSize = adParams.bannerFormat.asAdmobAdSize(
+                            context = adParams.context,
+                            containerWidth = adParams.containerWidth
+                        )
                         this@AdmobBannerImpl.adSize = admobBannerSize
                         this.setAdSize(admobBannerSize)
                         this.adUnitId = adUnitId
@@ -233,26 +237,26 @@ internal class AdmobBannerImpl(
         )
     }
 
-    private fun BannerFormat.asAdmobAdSize(adContainer: ViewGroup) = when (this) {
+    private fun BannerFormat.asAdmobAdSize(context: Context, containerWidth: Float) = when (this) {
         BannerFormat.Banner -> AdSize.BANNER
         BannerFormat.LeaderBoard -> AdSize.LEADERBOARD
         BannerFormat.MRec -> AdSize.MEDIUM_RECTANGLE
-        BannerFormat.Adaptive -> adContainer.adaptiveAdSize()
+        BannerFormat.Adaptive -> context.adaptiveAdSize(containerWidth)
     }
 
     @Suppress("DEPRECATION")
-    private fun ViewGroup.adaptiveAdSize(): AdSize {
-        val windowManager = this.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private fun Context.adaptiveAdSize(width: Float): AdSize {
+        val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val display = windowManager.defaultDisplay
         val outMetrics = DisplayMetrics()
         display.getMetrics(outMetrics)
         val density = outMetrics.density
-        var adWidthPixels = this.width.toFloat()
+        var adWidthPixels = width
         if (adWidthPixels == 0f) {
             adWidthPixels = outMetrics.widthPixels.toFloat()
         }
         val adWidth = (adWidthPixels / density).toInt()
-        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this.context, adWidth)
+        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth)
     }
 }
 

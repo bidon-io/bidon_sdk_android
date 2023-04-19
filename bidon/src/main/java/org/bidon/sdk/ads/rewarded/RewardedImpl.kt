@@ -120,7 +120,11 @@ internal class RewardedImpl(
 
     override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {
         logInfo(Tag, "Notify Loss invoked with Winner($winnerDemandId, $winnerEcpm)")
-        auctionHolder.popWinner()?.sendLoss(winnerDemandId, winnerEcpm, StatisticsCollector.AdType.Rewarded)
+        auctionHolder.popWinner()?.sendLoss(
+            winnerDemandId = winnerDemandId,
+            winnerEcpm = winnerEcpm,
+            adType = StatisticsCollector.AdType.Rewarded
+        )
         destroyAd()
     }
 

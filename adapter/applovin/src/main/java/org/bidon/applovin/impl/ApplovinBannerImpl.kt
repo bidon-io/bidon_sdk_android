@@ -1,7 +1,6 @@
 package org.bidon.applovin.impl
 
 import android.app.Activity
-import android.view.ViewGroup
 import com.applovin.adview.AppLovinAdView
 import com.applovin.sdk.*
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -107,18 +106,19 @@ internal class ApplovinBannerImpl(
     }
 
     override fun getAuctionParams(
-        adContainer: ViewGroup,
+        activity: Activity,
         pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         bannerFormat: BannerFormat,
-        onLineItemConsumed: (LineItem) -> Unit
+        onLineItemConsumed: (LineItem) -> Unit,
+        containerWidth: Float
     ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
             .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed)
         ApplovinBannerAuctionParams(
-            context = adContainer.context,
+            context = activity.applicationContext,
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
             adaptiveBannerHeight = null,
             bannerFormat = bannerFormat
