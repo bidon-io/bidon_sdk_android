@@ -7,10 +7,7 @@ import android.util.DisplayMetrics
 import android.view.WindowManager
 import android.widget.FrameLayout
 import com.google.android.gms.ads.*
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 import org.bidon.admob.AdmobBannerAuctionParams
 import org.bidon.admob.asBidonError
 import org.bidon.admob.ext.asBidonAdValue
@@ -27,8 +24,6 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.stats.models.asRoundStatus
-import org.bidon.sdk.utils.SdkDispatchers
 
 internal class AdmobBannerImpl(
     override val demandId: DemandId,
@@ -46,11 +41,9 @@ internal class AdmobBannerImpl(
     override val ad: Ad?
         get() = adView?.asAd()
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
 
     override var isAdReadyToShow: Boolean = false
-
-    private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
 
     private var adSize: AdSize? = null
     private var param: AdmobBannerAuctionParams? = null
@@ -154,65 +147,47 @@ internal class AdmobBannerImpl(
     }
 
     @SuppressLint("MissingPermission")
-    override suspend fun bid(adParams: AdmobBannerAuctionParams): AuctionResult {
+    override fun bid(adParams: AdmobBannerAuctionParams) {
         logInfo(Tag, "Starting with $adParams")
-        return withContext(dispatcher) {
-            param = adParams
-            val adUnitId = param?.lineItem?.adUnitId
-            if (!adUnitId.isNullOrBlank()) {
-                val adView = AdView(adParams.context)
-                    .apply {
-                        val admobBannerSize = adParams.bannerFormat.asAdmobAdSize(
-                            context = adParams.context,
-                            containerWidth = adParams.containerWidth
-                        )
-                        this@AdmobBannerImpl.adSize = admobBannerSize
-                        this.setAdSize(admobBannerSize)
-                        this.adUnitId = adUnitId
-                        this.adListener = requestListener
-                        this.onPaidEventListener = paidListener
-                    }
-                    .also {
-                        adView = it
-                    }
-                val adRequest = AdRequest.Builder().build()
-                adView.loadAd(adRequest)
-            } else {
-                val error = BidonError.NoAppropriateAdUnitId
-                logError(
-                    tag = Tag,
-                    message = "No appropriate AdUnitId found for price_floor=${adParams.lineItem.pricefloor}",
-                    error = error
-                )
-                adEvent.tryEmit(AdEvent.LoadFailed(error))
-            }
-            val state = adEvent.first {
-                it is AdEvent.Bid || it is AdEvent.LoadFailed
-            }
-            when (state) {
-                is AdEvent.LoadFailed -> {
-                    AuctionResult(
-                        ecpm = adParams.lineItem.pricefloor,
-                        adSource = this@AdmobBannerImpl,
-                        roundStatus = state.cause.asRoundStatus()
+        param = adParams
+        val adUnitId = param?.lineItem?.adUnitId
+        if (!adUnitId.isNullOrBlank()) {
+            val adView = AdView(adParams.context)
+                .apply {
+                    val admobBannerSize = adParams.bannerFormat.asAdmobAdSize(
+                        context = adParams.context,
+                        containerWidth = adParams.containerWidth
                     )
+                    this@AdmobBannerImpl.adSize = admobBannerSize
+                    this.setAdSize(admobBannerSize)
+                    this.adUnitId = adUnitId
+                    this.adListener = requestListener
+                    this.onPaidEventListener = paidListener
                 }
-                is AdEvent.Bid -> state.result
-                else -> error("unexpected: $state")
-            }
+                .also {
+                    adView = it
+                }
+            val adRequest = AdRequest.Builder().build()
+            adView.loadAd(adRequest)
+        } else {
+            val error = BidonError.NoAppropriateAdUnitId
+            logError(
+                tag = Tag,
+                message = "No appropriate AdUnitId found for price_floor=${adParams.lineItem.pricefloor}",
+                error = error
+            )
+            adEvent.tryEmit(AdEvent.LoadFailed(error))
         }
     }
 
-    override suspend fun fill(): Result<Ad> = runCatching {
-        logInfo(Tag, "Starting fill: $this")
-        /**
-         * Admob fills the bid automatically. It's not needed to fill it manually.
-         */
-        AdEvent.Fill(
-            requireNotNull(adView?.asAd())
-        ).also {
-            adEvent.tryEmit(it)
-        }.ad
+    override fun fill() {
+        runCatching {
+            logInfo(Tag, "Starting fill: $this")
+            /**
+             * Admob fills the bid automatically. It's not needed to fill it manually.
+             */
+            adEvent.tryEmit(AdEvent.Fill(ad = requireNotNull(adView?.asAd())))
+        }
     }
 
     override fun show(activity: Activity) {}

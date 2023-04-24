@@ -1,8 +1,11 @@
 package org.bidon.sdk.config.models.adapters
 
 import android.app.Activity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
@@ -13,8 +16,6 @@ import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.utils.ext.asFailure
-import org.bidon.sdk.utils.ext.asSuccess
 
 internal class TestInterstitialImpl(
     override val demandId: DemandId,
@@ -40,42 +41,46 @@ internal class TestInterstitialImpl(
             adUnitId = adParams.adUnitId
         )
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
 
     override val isAdReadyToShow: Boolean
         get() = testParameters.fill == Process.Succeed
 
-    override suspend fun bid(adParams: TestInterstitialParameters): AuctionResult {
+    override fun bid(adParams: TestInterstitialParameters) {
         this.adParams = adParams
-        return when (testParameters.bid) {
+        when (testParameters.bid) {
             Process.Succeed -> {
-                AuctionResult(
-                    ecpm = adParams.lineItem.pricefloor,
-                    adSource = this,
-                    roundStatus = RoundStatus.Successful
+                adEvent.tryEmit(
+                    AdEvent.Bid(
+                        AuctionResult(
+                            ecpm = adParams.lineItem.pricefloor,
+                            adSource = this,
+                            roundStatus = RoundStatus.Successful
+                        )
+                    )
                 )
             }
             Process.Failed -> {
-                AuctionResult(
-                    ecpm = adParams.lineItem.pricefloor,
-                    adSource = this,
-                    roundStatus = RoundStatus.NoFill
-                )
+                adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
             Process.Timeout -> {
-                delay(60_000L)
-                error("should not be here")
+                CoroutineScope(Dispatchers.Main).launch {
+                    delay(60_000L)
+                    error("should not be here")
+                }
             }
         }
     }
 
-    override suspend fun fill(): Result<Ad> {
-        return when (testParameters.fill) {
-            Process.Succeed -> ad.asSuccess()
-            Process.Failed -> BidonError.NoFill(demandId).asFailure()
+    override fun fill() {
+        when (testParameters.fill) {
+            Process.Succeed -> adEvent.tryEmit(AdEvent.Fill(ad))
+            Process.Failed -> adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             Process.Timeout -> {
-                delay(60_000L)
-                error("should not be here")
+                CoroutineScope(Dispatchers.Main).launch {
+                    delay(60_000L)
+                    error("should not be here")
+                }
             }
         }
     }

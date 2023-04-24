@@ -5,7 +5,6 @@ import android.view.View
 import kotlinx.coroutines.flow.Flow
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.stats.StatisticsCollector
 
@@ -18,11 +17,11 @@ sealed interface AdSource<T : AdAuctionParams> : StatisticsCollector {
     val adEvent: Flow<AdEvent>
     val isAdReadyToShow: Boolean
 
+    fun bid(adParams: T)
+    fun fill()
     /**
      * Applovin needs Activity instance for interstitial 🤦‍️
      */
-    suspend fun bid(adParams: T): AuctionResult
-    suspend fun fill(): Result<Ad>
     fun show(activity: Activity)
     fun destroy()
 

@@ -8,7 +8,7 @@ import org.bidon.sdk.auction.models.LineItem
 
 object AdmobInitParameters : AdapterParameters
 
-data class AdmobBannerAuctionParams(
+class AdmobBannerAuctionParams(
     val context: Context,
     val bannerFormat: BannerFormat,
     val lineItem: LineItem,
@@ -17,13 +17,21 @@ data class AdmobBannerAuctionParams(
 ) : AdAuctionParams {
     override val adUnitId: String?
         get() = lineItem.adUnitId
+
+    override fun toString(): String {
+        return "AdmobBannerAuctionParams(pricefloor=$pricefloor, lineItem=$lineItem)"
+    }
 }
 
-data class AdmobFullscreenAdAuctionParams(
+class AdmobFullscreenAdAuctionParams(
     val context: Context,
     val lineItem: LineItem,
     val pricefloor: Double
 ) : AdAuctionParams {
     override val adUnitId: String?
         get() = lineItem.adUnitId
+
+    override fun toString(): String {
+        return "AdmobFullscreenAdAuctionParams(pricefloor=$pricefloor, lineItem=$lineItem)"
+    }
 }

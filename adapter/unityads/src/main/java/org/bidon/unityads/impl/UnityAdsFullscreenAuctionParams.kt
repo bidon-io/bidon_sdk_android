@@ -15,12 +15,15 @@ data class UnityAdsFullscreenAuctionParams(
     override val adUnitId: String get() = requireNotNull(lineItem.adUnitId)
 }
 
-data class UnityAdsBannerAuctionParams(
+class UnityAdsBannerAuctionParams(
     val bannerFormat: BannerFormat,
     val lineItem: LineItem,
     val pricefloor: Double,
     val activity: Activity,
-    val containerWidth: Float,
 ) : AdAuctionParams {
     override val adUnitId: String get() = requireNotNull(lineItem.adUnitId)
+
+    override fun toString(): String {
+        return "UnityAdsBannerAuctionParams(bannerFormat=$bannerFormat, lineItem=$lineItem)"
+    }
 }

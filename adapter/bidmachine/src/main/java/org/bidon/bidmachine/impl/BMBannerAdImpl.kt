@@ -10,7 +10,6 @@ import io.bidmachine.banner.BannerRequest
 import io.bidmachine.banner.BannerView
 import io.bidmachine.utils.BMError
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 import org.bidon.bidmachine.*
 import org.bidon.bidmachine.ext.asBidonAdValue
 import org.bidon.sdk.adapter.*
@@ -25,9 +24,6 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.stats.models.asRoundStatus
-import org.bidon.sdk.utils.ext.asFailure
-import org.bidon.sdk.utils.ext.asSuccess
 
 internal class BMBannerAdImpl(
     override val demandId: DemandId,
@@ -43,7 +39,7 @@ internal class BMBannerAdImpl(
         demandAd = demandAd,
     ) {
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val ad: Ad? get() = bannerView?.asAd()
 
     private var context: Context? = null
@@ -125,7 +121,7 @@ internal class BMBannerAdImpl(
         }
     }
 
-    override suspend fun bid(adParams: BMBannerAuctionParams): AuctionResult {
+    override fun bid(adParams: BMBannerAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")
         context = adParams.context
         bannerFormat = adParams.bannerFormat
@@ -139,23 +135,9 @@ internal class BMBannerAdImpl(
                 adRequest = it
             }
             .request(adParams.context)
-        val state = adEvent.first {
-            it is AdEvent.Bid || it is AdEvent.LoadFailed
-        }
-        return when (state) {
-            is AdEvent.LoadFailed -> {
-                AuctionResult(
-                    ecpm = 0.0,
-                    adSource = this,
-                    roundStatus = state.cause.asRoundStatus()
-                )
-            }
-            is AdEvent.Bid -> state.result
-            else -> error("unexpected: $state")
-        }
     }
 
-    override suspend fun fill(): Result<Ad> {
+    override fun fill() {
         logInfo(Tag, "Starting fill: $this")
         val context = context
         if (context == null) {
@@ -166,21 +148,6 @@ internal class BMBannerAdImpl(
             }
             bannerView.setListener(bannerListener)
             bannerView.load(adRequest)
-        }
-        val state = adEvent.first {
-            it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
-        }
-        return when (state) {
-            is AdEvent.Fill -> {
-                state.ad.asSuccess()
-            }
-            is AdEvent.LoadFailed -> {
-                state.cause.asFailure()
-            }
-            is AdEvent.Expired -> {
-                BidonError.FillTimedOut(demandId).asFailure()
-            }
-            else -> error("unexpected: $state")
         }
     }
 

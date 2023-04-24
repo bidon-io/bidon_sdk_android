@@ -6,7 +6,6 @@ import com.applovin.mediation.MaxAdListener
 import com.applovin.mediation.MaxError
 import com.applovin.mediation.ads.MaxInterstitialAd
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 import org.bidon.applovin.ApplovinDemandId
 import org.bidon.applovin.MaxFullscreenAdAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
@@ -22,7 +21,6 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.stats.models.asRoundStatus
 
 internal class MaxInterstitialImpl(
     override val demandId: DemandId,
@@ -88,7 +86,7 @@ internal class MaxInterstitialImpl(
         }
     }
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
 
     override val isAdReadyToShow: Boolean
         get() = interstitialAd?.isReady == true
@@ -121,36 +119,20 @@ internal class MaxInterstitialImpl(
         )
     }
 
-    override suspend fun bid(adParams: MaxFullscreenAdAuctionParams): AuctionResult {
+    override fun bid(adParams: MaxFullscreenAdAuctionParams) {
         logInfo(Tag, "Starting with $adParams")
         val maxInterstitialAd = MaxInterstitialAd(adParams.lineItem.adUnitId, adParams.activity).also {
             it.setListener(maxAdListener)
             interstitialAd = it
         }
         maxInterstitialAd.loadAd()
-        val state = adEvent.first {
-            it is AdEvent.Bid || it is AdEvent.LoadFailed
-        }
-        return when (state) {
-            is AdEvent.LoadFailed -> {
-                AuctionResult(
-                    ecpm = 0.0,
-                    adSource = this,
-                    roundStatus = state.cause.asRoundStatus()
-                )
-            }
-            is AdEvent.Bid -> state.result
-            else -> error("unexpected: $state")
-        }
     }
 
-    override suspend fun fill(): Result<Ad> = runCatching {
+    override fun fill() {
         /**
          * Applovin fills the bid automatically. It's not needed to fill it manually.
          */
-        AdEvent.Fill(
-            requireNotNull(interstitialAd?.asAd())
-        ).also { adEvent.tryEmit(it) }.ad
+        adEvent.tryEmit(AdEvent.Fill(requireNotNull(interstitialAd?.asAd())))
     }
 
     override fun show(activity: Activity) {

@@ -4,7 +4,6 @@ import android.app.Activity
 import com.applovin.adview.AppLovinAdView
 import com.applovin.sdk.*
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 import org.bidon.applovin.ApplovinBannerAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
 import org.bidon.sdk.adapter.*
@@ -19,7 +18,6 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.stats.models.asRoundStatus
 
 /**
  * I have no idea how it works. There is no documentation.
@@ -92,7 +90,7 @@ internal class ApplovinBannerImpl(
         }
     }
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val isAdReadyToShow: Boolean
         get() = applovinAd != null
 
@@ -120,14 +118,11 @@ internal class ApplovinBannerImpl(
         ApplovinBannerAuctionParams(
             context = activity.applicationContext,
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
-            adaptiveBannerHeight = null,
             bannerFormat = bannerFormat
         )
     }
 
-    override suspend fun bid(
-        adParams: ApplovinBannerAuctionParams
-    ): AuctionResult {
+    override fun bid(adParams: ApplovinBannerAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")
         param = adParams
         val adSize = adParams.bannerFormat.asApplovinAdSize() ?: error(
@@ -141,30 +136,14 @@ internal class ApplovinBannerImpl(
             it.setAdDisplayListener(listener)
             adView = it
         }
-
         bannerView.setAdLoadListener(requestListener)
         bannerView.loadNextAd()
-
-        val state = adEvent.first {
-            it is AdEvent.Bid || it is AdEvent.LoadFailed
-        }
-        return when (state) {
-            is AdEvent.LoadFailed -> {
-                AuctionResult(
-                    ecpm = 0.0,
-                    adSource = this,
-                    roundStatus = state.cause.asRoundStatus()
-                )
-            }
-            is AdEvent.Bid -> state.result
-            else -> error("unexpected: $state")
-        }
     }
 
-    override suspend fun fill(): Result<Ad> = runCatching {
-        logInfo(Tag, "Starting fill: $this")
-        requireNotNull(applovinAd?.asAd()).also {
-            adEvent.tryEmit(AdEvent.Fill(it))
+    override fun fill() {
+        runCatching {
+            logInfo(Tag, "Starting fill: $this")
+            adEvent.tryEmit(AdEvent.Fill(requireNotNull(applovinAd?.asAd())))
         }
     }
 
