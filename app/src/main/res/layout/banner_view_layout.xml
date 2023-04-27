@@ -5,15 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <org.bidon.sdk.ads.banner.BannerView
-        android:id="@+id/bannerView"
+    <FrameLayout
+        android:id="@+id/bannerContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:bannerSize="mrec"
+        tools:minHeight="50dp"
         app:layout_constraintBottom_toTopOf="@id/linearLayout"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:background="#628991"
-        tools:minHeight="50dp" />
+        app:layout_constraintTop_toTopOf="parent" />
+    <!--    <org.bidon.sdk.ads.banner.BannerView-->
+    <!--        android:id="@+id/bannerView"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        app:bannerSize="mrec"-->
+    <!--        app:layout_constraintBottom_toTopOf="@id/linearLayout"-->
+    <!--        app:layout_constraintTop_toTopOf="parent"-->
+    <!--        tools:background="#628991"-->
+    <!--        tools:minHeight="50dp" />-->
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -22,7 +29,14 @@
         android:gravity="center"
         android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@id/closeButton"
-        app:layout_constraintTop_toBottomOf="@id/bannerView">
+        app:layout_constraintTop_toBottomOf="@id/bannerContainer">
+
+        <Button
+            android:id="@+id/createButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="Create" />
 
         <Button
             android:id="@+id/loadButton"
@@ -30,6 +44,13 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:text="Load" />
+
+        <Button
+            android:id="@+id/showButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="Show" />
 
         <Button
             android:id="@+id/destroyButton"

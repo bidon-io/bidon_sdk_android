@@ -103,7 +103,7 @@ class BannerView @JvmOverloads constructor(
                 }
 
                 else -> {
-                    logInfo(Tag, "Ad State=${adLifecycleFlow.value})")
+                    logInfo(Tag, "Ad State=${adLifecycleFlow.value}")
                 }
             }
         }

@@ -90,28 +90,22 @@ fun BannerScreen(navController: NavHostController) {
                 .padding(0.dp),
             contentAlignment = Alignment.Center
         ) {
-            val view = bannerView.value
-            if (view != null) {
+            bannerView.value?.let { view ->
+                logInfo(Tag, "Recompose: $view")
                 AndroidView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 50.dp),
-//                    .height(
-//                        when (bannerSize.value) {
-//                            BannerSize.Banner -> 50.dp
-//                            BannerSize.LeaderBoard -> 90.dp
-//                            BannerSize.MRec -> 250.dp
-//                            BannerSize.Large -> 100.dp
-//                            BannerSize.Adaptive -> 100.dp
-//                        }
-//                    ), // TODO Admob.OnPaidListener isn't invoked using ComposeView, but always in XML-Layout. Check it.
                     factory = {
-                        view
+                        view.also {
+                            logInfo(Tag, "AndroidView factory: $it")
+                        }
+                    },
+                    update = {
+                        logInfo(Tag, "AndroidView update: $it")
                     }
                 )
-            } else {
-                Subtitle1Text(text = "Place for Banner", modifier = Modifier.padding(8.dp))
-            }
+            } ?: Subtitle1Text(text = "Place for Banner", modifier = Modifier.padding(8.dp))
         }
         Column(modifier = Modifier.padding(8.dp)) {
             ItemSelector(
@@ -173,7 +167,7 @@ fun BannerScreen(navController: NavHostController) {
                             }
                         )
                     }
-                    logFlow.log("New BannerView created")
+                    logFlow.log("New BannerView created: ${bannerView.value}")
                 }
                 Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                 AppButton(
@@ -192,6 +186,7 @@ fun BannerScreen(navController: NavHostController) {
             }
             Row {
                 AppButton(text = "Show") {
+                    logInfo(Tag, "Recompose. ShowClicked: ${bannerView.value}")
                     bannerView.value?.showAd()
                 }
                 Spacer(modifier = Modifier.padding(horizontal = 4.dp))
