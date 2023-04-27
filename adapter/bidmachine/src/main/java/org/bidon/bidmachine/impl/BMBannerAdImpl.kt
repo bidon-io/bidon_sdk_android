@@ -2,7 +2,6 @@ package org.bidon.bidmachine.impl
 
 import android.app.Activity
 import android.content.Context
-import android.widget.FrameLayout
 import io.bidmachine.AdRequest
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.banner.BannerListener
@@ -15,7 +14,8 @@ import org.bidon.bidmachine.ext.asBidonAdValue
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.impl.dpToPx
+import org.bidon.sdk.ads.banner.helper.getHeightDp
+import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.config.BidonError
@@ -98,7 +98,7 @@ internal class BMBannerAdImpl(
             override fun onAdImpression(bannerView: BannerView) {
                 logInfo(Tag, "onAdShown: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
-                adEvent.tryEmit(AdEvent.Shown(bannerView.asAd()))
+                // tracked impression/shown by [BannerView]
                 adEvent.tryEmit(
                     AdEvent.PaidRevenue(
                         ad = bannerView.asAd(),
@@ -190,14 +190,8 @@ internal class BMBannerAdImpl(
         val adView = requireNotNull(bannerView)
         return AdViewHolder(
             networkAdview = adView,
-            widthPx = FrameLayout.LayoutParams.MATCH_PARENT,
-            heightPx = when (bannerFormat) {
-                BannerFormat.Adaptive,
-                BannerFormat.Banner -> 50.dpToPx
-                BannerFormat.LeaderBoard -> 90.dpToPx
-                BannerFormat.MRec -> 250.dpToPx
-                null -> FrameLayout.LayoutParams.WRAP_CONTENT
-            }
+            widthDp = bannerFormat.getWidthDp(),
+            heightDp = bannerFormat.getHeightDp()
         )
     }
 

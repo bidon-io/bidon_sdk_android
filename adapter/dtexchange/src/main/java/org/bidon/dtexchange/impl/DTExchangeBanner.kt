@@ -8,7 +8,6 @@ import org.bidon.dtexchange.ext.asBidonError
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.impl.dpToPx
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
@@ -122,7 +121,7 @@ internal class DTExchangeBanner(
                 )
                 val ad = adSpot?.asAd() ?: return
                 adEvent.tryEmit(AdEvent.PaidRevenue(ad, adValue))
-                adEvent.tryEmit(AdEvent.Shown(ad))
+                // tracked impression/shown by [BannerView]
             }
 
             override fun onAdClicked(adSpot: InneractiveAdSpot?) {
@@ -149,13 +148,19 @@ internal class DTExchangeBanner(
         controller.bindView(container)
         return AdViewHolder(
             networkAdview = container,
-            widthPx = FrameLayout.LayoutParams.MATCH_PARENT,
-            heightPx = when (param?.bannerFormat) {
+            widthDp = when (param?.bannerFormat) {
+                BannerFormat.Banner -> 320
+                BannerFormat.LeaderBoard -> 728
+                BannerFormat.MRec -> 300
                 BannerFormat.Adaptive,
-                BannerFormat.Banner -> 50.dpToPx
-                BannerFormat.LeaderBoard -> 90.dpToPx
-                BannerFormat.MRec -> 250.dpToPx
-                null -> FrameLayout.LayoutParams.WRAP_CONTENT
+                null -> FrameLayout.LayoutParams.MATCH_PARENT
+            },
+            heightDp = when (param?.bannerFormat) {
+                BannerFormat.Banner -> 50
+                BannerFormat.LeaderBoard -> 90
+                BannerFormat.MRec -> 250
+                BannerFormat.Adaptive,
+                null -> FrameLayout.LayoutParams.MATCH_PARENT
             }
         )
     }

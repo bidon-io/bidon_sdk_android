@@ -32,4 +32,8 @@ internal fun wrapUserBannerListener(userListener: () -> BannerListener?) = objec
     override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
         userListener()?.onRevenuePaid(ad, adValue)
     }
+
+    override fun onAdShowFailed(cause: BidonError) {
+        userListener()?.onAdShowFailed(cause)
+    }
 }

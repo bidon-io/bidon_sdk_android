@@ -60,4 +60,4 @@ sealed interface AdSource<T : AdAuctionParams> : StatisticsCollector {
     }
 }
 
-class AdViewHolder(val networkAdview: View, val widthPx: Int, val heightPx: Int)
+class AdViewHolder(val networkAdview: View, val widthDp: Int, val heightDp: Int)
