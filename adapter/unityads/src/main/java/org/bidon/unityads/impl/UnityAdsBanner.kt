@@ -1,7 +1,6 @@
 package org.bidon.unityads.impl
 
 import android.app.Activity
-import android.widget.FrameLayout
 import com.unity3d.services.banners.BannerErrorInfo
 import com.unity3d.services.banners.BannerView
 import com.unity3d.services.banners.UnityBannerSize
@@ -9,7 +8,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.impl.dpToPx
+import org.bidon.sdk.ads.banner.helper.getHeightDp
+import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
@@ -102,17 +102,14 @@ internal class UnityAdsBanner(
         )
     }
 
-    override fun getAdView(): AdViewHolder = AdViewHolder(
-        networkAdview = requireNotNull(bannerAdView),
-        widthPx = FrameLayout.LayoutParams.MATCH_PARENT,
-        heightPx = when (param?.bannerFormat) {
-            BannerFormat.Adaptive,
-            BannerFormat.Banner -> 50.dpToPx
-            BannerFormat.LeaderBoard -> 90.dpToPx
-            BannerFormat.MRec -> 250.dpToPx
-            null -> FrameLayout.LayoutParams.WRAP_CONTENT
-        }
-    )
+    override fun getAdView(): AdViewHolder {
+        val bannerAdView = requireNotNull(bannerAdView)
+        return AdViewHolder(
+            networkAdview = bannerAdView,
+            widthDp = bannerAdView.width.takeIf { it != 0 } ?: param?.bannerFormat.getWidthDp(),
+            heightDp = bannerAdView.height.takeIf { it != 0 } ?: param?.bannerFormat.getHeightDp()
+        )
+    }
 
     override fun bid(adParams: UnityAdsBannerAuctionParams) {
         logInfo(Tag, "Starting with $adParams")
@@ -120,9 +117,10 @@ internal class UnityAdsBanner(
         val adUnitId = adParams.adUnitId
         if (adUnitId.isNotBlank()) {
             val unityBannerSize = when (adParams.bannerFormat) {
+                BannerFormat.LeaderBoard -> UnityBannerSize(728, 90)
                 BannerFormat.Banner,
-                BannerFormat.LeaderBoard,
                 BannerFormat.Adaptive -> UnityBannerSize(320, 50)
+
                 BannerFormat.MRec -> UnityBannerSize(300, 250)
             }
             val adView = BannerView(adParams.activity, adParams.adUnitId, unityBannerSize)

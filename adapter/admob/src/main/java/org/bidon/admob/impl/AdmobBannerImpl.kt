@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.util.DisplayMetrics
 import android.view.WindowManager
-import android.widget.FrameLayout
 import com.google.android.gms.ads.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.admob.AdmobBannerAuctionParams
@@ -14,6 +13,8 @@ import org.bidon.admob.ext.asBidonAdValue
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.ads.banner.helper.getHeightDp
+import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
@@ -86,8 +87,8 @@ internal class AdmobBannerImpl(
             }
 
             override fun onAdImpression() {
-                logInfo(Tag, "onAdShown: $this")
-                adEvent.tryEmit(AdEvent.Shown(requiredAdView.asAd()))
+                logInfo(Tag, "onAdImpression: $this")
+                // tracked impression/shown by [BannerView]
             }
 
             override fun onAdOpened() {}
@@ -194,8 +195,8 @@ internal class AdmobBannerImpl(
 
     override fun getAdView(): AdViewHolder = AdViewHolder(
         networkAdview = requiredAdView,
-        widthPx = FrameLayout.LayoutParams.MATCH_PARENT,
-        heightPx = adSize?.getHeightInPixels(requiredAdView.context) ?: FrameLayout.LayoutParams.WRAP_CONTENT
+        widthDp = adSize?.width ?: param?.bannerFormat.getWidthDp(),
+        heightDp = adSize?.height ?: param?.bannerFormat.getHeightDp()
     )
 
     private fun AdView.asAd(): Ad {

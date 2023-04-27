@@ -18,6 +18,8 @@ interface AdListener {
     fun onAdLoadFailed(cause: BidonError)
 
     fun onAdShown(ad: Ad) // equals onAdImpression()
+    fun onAdShowFailed(cause: BidonError) {}
+
     fun onAdClicked(ad: Ad) {}
     fun onAdExpired(ad: Ad) {}
 }

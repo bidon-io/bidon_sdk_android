@@ -16,7 +16,6 @@ import org.bidon.applovin.ext.asBidonAdValue
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.impl.dpToPx
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
@@ -70,13 +69,13 @@ internal class MaxBannerImpl(
 
             override fun onAdDisplayed(ad: MaxAd) {
                 maxAd = ad
-                adEvent.tryEmit(AdEvent.Shown(ad.asAd()))
                 adEvent.tryEmit(
                     AdEvent.PaidRevenue(
                         ad = ad.asAd(),
                         adValue = ad.asBidonAdValue()
                     )
                 )
+                // tracked impression/shown by [BannerView]
             }
 
             override fun onAdHidden(ad: MaxAd) {
@@ -135,14 +134,8 @@ internal class MaxBannerImpl(
         val adView = requireNotNull(maxAdView)
         return AdViewHolder(
             networkAdview = adView,
-            widthPx = FrameLayout.LayoutParams.MATCH_PARENT,
-            heightPx = when (bannerFormat) {
-                BannerFormat.Banner -> 50.dpToPx
-                BannerFormat.LeaderBoard -> 90.dpToPx
-                BannerFormat.MRec -> 250.dpToPx
-                BannerFormat.Adaptive,
-                null -> FrameLayout.LayoutParams.WRAP_CONTENT
-            }
+            widthDp = adView.width,
+            heightDp = adView.height
         )
     }
 

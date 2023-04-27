@@ -69,13 +69,13 @@ internal class ApplovinBannerImpl(
         object : AppLovinAdDisplayListener, AppLovinAdClickListener {
             override fun adDisplayed(ad: AppLovinAd) {
                 logInfo(Tag, "adDisplayed: $ad")
-                adEvent.tryEmit(AdEvent.Shown(ad.asAd()))
                 adEvent.tryEmit(
                     AdEvent.PaidRevenue(
                         ad = ad.asAd(),
                         adValue = param?.lineItem?.pricefloor.asBidonAdValue()
                     )
                 )
+                // tracked impression/shown by [BannerView]
             }
 
             override fun adHidden(ad: AppLovinAd) {
@@ -154,8 +154,8 @@ internal class ApplovinBannerImpl(
         val adView = requireNotNull(adView)
         return AdViewHolder(
             networkAdview = adView,
-            widthPx = adView.size.width,
-            heightPx = adView.size.height
+            widthDp = adView.size.width,
+            heightDp = adView.size.height
         )
     }
 
