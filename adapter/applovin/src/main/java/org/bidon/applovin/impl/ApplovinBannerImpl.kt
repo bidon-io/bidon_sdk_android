@@ -2,13 +2,24 @@ package org.bidon.applovin.impl
 
 import android.app.Activity
 import com.applovin.adview.AppLovinAdView
-import com.applovin.sdk.*
+import com.applovin.sdk.AppLovinAd
+import com.applovin.sdk.AppLovinAdClickListener
+import com.applovin.sdk.AppLovinAdDisplayListener
+import com.applovin.sdk.AppLovinAdLoadListener
+import com.applovin.sdk.AppLovinAdSize
+import com.applovin.sdk.AppLovinSdk
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.applovin.ApplovinBannerAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.AdViewHolder
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.ads.banner.helper.DeviceType.isTablet
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
@@ -154,7 +165,13 @@ internal class ApplovinBannerImpl(
         val adView = requireNotNull(adView)
         return AdViewHolder(
             networkAdview = adView,
-            widthDp = adView.size.width,
+            widthDp = adView.size.width.takeIf { it > 0 } ?: when (param?.bannerFormat) {
+                BannerFormat.Banner -> 320
+                BannerFormat.LeaderBoard -> 728
+                BannerFormat.MRec -> 300
+                BannerFormat.Adaptive -> if (isTablet) 728 else 320
+                null -> error("unexpected")
+            },
             heightDp = adView.size.height
         )
     }
@@ -189,8 +206,13 @@ internal class ApplovinBannerImpl(
 
     private fun BannerFormat.asApplovinAdSize() = when (this) {
         BannerFormat.Banner -> AppLovinAdSize.BANNER
-        BannerFormat.Adaptive -> AppLovinAdSize.BANNER
         BannerFormat.LeaderBoard -> AppLovinAdSize.LEADER
+        BannerFormat.Adaptive -> if (isTablet) {
+            AppLovinAdSize.LEADER
+        } else {
+            AppLovinAdSize.BANNER
+        }
+
         BannerFormat.MRec -> AppLovinAdSize.MREC
     }
 }

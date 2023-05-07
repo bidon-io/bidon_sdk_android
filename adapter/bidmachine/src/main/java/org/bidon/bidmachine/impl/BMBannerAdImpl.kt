@@ -9,11 +9,22 @@ import io.bidmachine.banner.BannerRequest
 import io.bidmachine.banner.BannerView
 import io.bidmachine.utils.BMError
 import kotlinx.coroutines.flow.MutableSharedFlow
-import org.bidon.bidmachine.*
+import org.bidon.bidmachine.BMAuctionResult
+import org.bidon.bidmachine.BMBannerAuctionParams
+import org.bidon.bidmachine.BidMachineBannerSize
+import org.bidon.bidmachine.asBidonErrorOnBid
+import org.bidon.bidmachine.asBidonErrorOnFill
 import org.bidon.bidmachine.ext.asBidonAdValue
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.AdViewHolder
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.ads.banner.helper.DeviceType.isTablet
 import org.bidon.sdk.ads.banner.helper.getHeightDp
 import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.auction.AuctionResult
@@ -213,7 +224,11 @@ internal class BMBannerAdImpl(
         BannerFormat.Banner -> BidMachineBannerSize.Size_320x50
         BannerFormat.LeaderBoard -> BidMachineBannerSize.Size_728x90
         BannerFormat.MRec -> BidMachineBannerSize.Size_300x250
-        BannerFormat.Adaptive -> BidMachineBannerSize.Size_320x50
+        BannerFormat.Adaptive -> if (isTablet) {
+            BidMachineBannerSize.Size_728x90
+        } else {
+            BidMachineBannerSize.Size_320x50
+        }
     }
 }
 

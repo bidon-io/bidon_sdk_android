@@ -26,6 +26,9 @@ import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
 
+/**
+ * [Test ad units](https://developers.google.com/admob/android/test-ads)
+ */
 internal class AdmobBannerImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
