@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.bidon.sdk.adapter.Adapter
+import org.bidon.sdk.ads.banner.helper.DeviceType
 import org.bidon.sdk.config.AdapterInstanceCreator
 import org.bidon.sdk.config.BidonInitializer
 import org.bidon.sdk.config.InitializationCallback
@@ -86,6 +87,7 @@ internal class BidonInitializerImpl : BidonInitializer {
              * Check if SDK is initialized with [isInitialized].
              */
             DI.init(context = activity.applicationContext)
+            DeviceType.init(activity)
             scope.launch {
                 runCatching {
                     init(activity, appKey, timeStart)

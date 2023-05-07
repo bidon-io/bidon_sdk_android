@@ -18,5 +18,5 @@ interface BannerAd : LossNotifier, Extras {
     fun isReady(): Boolean
     fun showAd()
     fun destroyAd()
-    fun setBannerListener(listener: BannerListener)
+    fun setBannerListener(listener: BannerListener?)
 }

@@ -8,6 +8,7 @@ import org.bidon.dtexchange.ext.asBidonError
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.ads.banner.helper.impl.pxToDp
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
@@ -153,14 +154,14 @@ internal class DTExchangeBanner(
                 BannerFormat.LeaderBoard -> 728
                 BannerFormat.MRec -> 300
                 BannerFormat.Adaptive,
-                null -> FrameLayout.LayoutParams.MATCH_PARENT
+                null -> controller.adContentWidth.pxToDp
             },
             heightDp = when (param?.bannerFormat) {
                 BannerFormat.Banner -> 50
                 BannerFormat.LeaderBoard -> 90
                 BannerFormat.MRec -> 250
                 BannerFormat.Adaptive,
-                null -> FrameLayout.LayoutParams.MATCH_PARENT
+                null -> controller.adContentHeight.pxToDp
             }
         )
     }

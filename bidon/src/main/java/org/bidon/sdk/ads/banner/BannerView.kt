@@ -60,6 +60,7 @@ class BannerView @JvmOverloads constructor(
     private val visibilityTracker: VisibilityTracker get() = get()
     private var winner: AuctionResult? = null
     private var winnerSubscriberJob: Job? = null
+    private var auctionJob: Job? = null
 
     init {
         context.theme.obtainStyledAttributes(attrs, R.styleable.BannerView, 0, 0).apply {
@@ -135,7 +136,7 @@ class BannerView @JvmOverloads constructor(
         addViewOnScreen(bannerSource)
     }
 
-    override fun setBannerListener(listener: BannerListener) {
+    override fun setBannerListener(listener: BannerListener?) {
         userListener = listener
     }
 
@@ -154,6 +155,8 @@ class BannerView @JvmOverloads constructor(
     override fun destroyAd() {
         adLifecycleFlow.value = AdLifecycle.Destroyed
         visibilityTracker.stopTracking(this)
+        auctionJob?.cancel()
+        auctionJob = null
         winner?.adSource?.destroy()
         winner = null
         winnerSubscriberJob?.cancel()
@@ -167,7 +170,7 @@ class BannerView @JvmOverloads constructor(
         val adViewHolder: AdViewHolder = adSource.getAdView()
         val layoutParams = LayoutParams(adViewHolder.widthDp.dpToPx, adViewHolder.heightDp.dpToPx, Gravity.CENTER)
         addView(adViewHolder.networkAdview, layoutParams)
-        logInfo(Tag, "View added: ${adViewHolder.networkAdview}. Size(${adViewHolder.widthDp}, ${adViewHolder.heightDp})")
+        logInfo(Tag, "View added(${adSource.demandId.demandId}): ${adViewHolder.networkAdview}. Size(${adViewHolder.widthDp}, ${adViewHolder.heightDp})")
         checkBannerShown(onBannerShown = {
             adLifecycleFlow.value = AdLifecycle.Displayed
             adSource.ad?.let { listener.onAdShown(ad = it) }
@@ -182,7 +185,8 @@ class BannerView @JvmOverloads constructor(
     private fun conductAuction(activity: Activity, pricefloor: Double) {
         this.pricefloor = pricefloor
         logInfo(Tag, "Load (pricefloor=$pricefloor)")
-        scope.launch {
+        auctionJob?.cancel()
+        auctionJob = scope.launch {
             auction.start(
                 demandAd = demandAd,
                 resolver = MaxEcpmAuctionResolver,
