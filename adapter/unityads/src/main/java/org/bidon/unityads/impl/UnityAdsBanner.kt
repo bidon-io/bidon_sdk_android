@@ -152,6 +152,7 @@ internal class UnityAdsBanner(
     override fun show(activity: Activity) {}
 
     override fun destroy() {
+        bannerAdView?.listener = null
         bannerAdView?.destroy()
         bannerAdView = null
     }

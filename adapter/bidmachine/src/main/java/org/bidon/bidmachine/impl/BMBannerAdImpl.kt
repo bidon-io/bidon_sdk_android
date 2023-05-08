@@ -193,6 +193,7 @@ internal class BMBannerAdImpl(
         logInfo(Tag, "destroy $this")
         adRequest?.destroy()
         adRequest = null
+        bannerView?.setListener(null)
         bannerView?.destroy()
         bannerView = null
     }

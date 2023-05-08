@@ -110,6 +110,7 @@ internal class ApplovinBannerImpl(
 
     override fun destroy() {
         logInfo(Tag, "destroy $this")
+        adView?.setAdLoadListener(null)
         adView = null
         applovinAd = null
     }

@@ -169,6 +169,7 @@ internal class DTExchangeBanner(
     override fun show(activity: Activity) {}
 
     override fun destroy() {
+        adSpot?.setRequestListener(null)
         adSpot?.destroy()
         adSpot = null
     }
