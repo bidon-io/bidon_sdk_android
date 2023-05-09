@@ -2,10 +2,23 @@ package org.bidon.dtexchange.impl
 
 import android.app.Activity
 import android.widget.FrameLayout
-import com.fyber.inneractive.sdk.external.*
+import com.fyber.inneractive.sdk.external.ImpressionData
+import com.fyber.inneractive.sdk.external.InneractiveAdRequest
+import com.fyber.inneractive.sdk.external.InneractiveAdSpot
+import com.fyber.inneractive.sdk.external.InneractiveAdSpotManager
+import com.fyber.inneractive.sdk.external.InneractiveAdViewEventsListenerWithImpressionData
+import com.fyber.inneractive.sdk.external.InneractiveAdViewUnitController
+import com.fyber.inneractive.sdk.external.InneractiveErrorCode
+import com.fyber.inneractive.sdk.external.InneractiveUnitController
 import kotlinx.coroutines.flow.MutableSharedFlow
+import org.bidon.dtexchange.ext.asAdValue
 import org.bidon.dtexchange.ext.asBidonError
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.AdViewHolder
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.impl.pxToDp
@@ -14,7 +27,6 @@ import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
-import org.bidon.sdk.logs.analytic.Precision
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
@@ -112,17 +124,16 @@ internal class DTExchangeBanner(
         val controller = adSpot?.selectedUnitController as InneractiveAdViewUnitController
         // set to new container, because DTExchange does not expose its bannerView
         val container = FrameLayout(requireNotNull(param?.context))
-        controller.eventsListener = object : InneractiveAdViewEventsListener {
-            override fun onAdImpression(adSpot: InneractiveAdSpot?) {
-                logInfo(Tag, "onAdImpression: $adSpot")
-                val adValue = AdValue(
-                    adRevenue = param?.pricefloor ?: 0.0,
-                    precision = Precision.Estimated,
-                    currency = AdValue.USD
-                )
+        controller.eventsListener = object : InneractiveAdViewEventsListenerWithImpressionData {
+            override fun onAdImpression(adSpot: InneractiveAdSpot?, impressionData: ImpressionData?) {
+                logInfo(Tag, "onAdImpression: $adSpot, $impressionData")
+                val adValue = impressionData?.asAdValue() ?: return
                 val ad = adSpot?.asAd() ?: return
                 adEvent.tryEmit(AdEvent.PaidRevenue(ad, adValue))
                 // tracked impression/shown by [BannerView]
+            }
+
+            override fun onAdImpression(adSpot: InneractiveAdSpot?) {
             }
 
             override fun onAdClicked(adSpot: InneractiveAdSpot?) {

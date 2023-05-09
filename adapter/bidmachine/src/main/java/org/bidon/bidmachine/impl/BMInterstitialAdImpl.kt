@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import io.bidmachine.AdContentType
 import io.bidmachine.AdRequest
+import io.bidmachine.CustomParams
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.interstitial.InterstitialAd
 import io.bidmachine.interstitial.InterstitialListener
@@ -144,6 +145,7 @@ internal class BMInterstitialAdImpl(
         InterstitialRequest.Builder()
             .setAdContentType(AdContentType.All)
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
+            .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
             .setLoadingTimeOut(adParams.timeout.toInt())
             .setListener(requestListener)
             .build()
