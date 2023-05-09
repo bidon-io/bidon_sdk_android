@@ -31,7 +31,17 @@ internal class DeviceBinder(
             language = dataSource.getLanguage(),
             carrier = dataSource.getCarrier(),
             mccmnc = dataSource.getPhoneMCCMNC(),
-            connectionType = dataSource.getConnectionTypeCode()
+            connectionType = dataSource.getConnectionTypeCode(),
+            type = DeviceType.getType(dataSource.isTablet()).code
         )
+    }
+
+    enum class DeviceType(val code: String) {
+        Phone("PHONE"),
+        Tablet("TABLET");
+
+        companion object {
+            fun getType(isTablet: Boolean) = if (isTablet) Tablet else Phone
+        }
     }
 }

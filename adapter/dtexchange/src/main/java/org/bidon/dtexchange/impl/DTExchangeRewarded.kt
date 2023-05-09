@@ -3,6 +3,7 @@ package org.bidon.dtexchange.impl
 import android.app.Activity
 import com.fyber.inneractive.sdk.external.*
 import kotlinx.coroutines.flow.MutableSharedFlow
+import org.bidon.dtexchange.ext.asAdValue
 import org.bidon.dtexchange.ext.asBidonError
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
@@ -11,7 +12,6 @@ import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
-import org.bidon.sdk.logs.analytic.Precision
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
@@ -75,12 +75,6 @@ internal class DTExchangeRewarded(
             sendRewardImpression()
         }
     }
-
-    private fun ImpressionData.asAdValue() = AdValue(
-        adRevenue = this.pricing?.value ?: 0.0,
-        precision = Precision.Precise,
-        currency = this.pricing?.currency ?: AdValue.USD
-    )
 
     private val impressionListener by lazy {
         object : InneractiveFullscreenAdEventsListenerWithImpressionData {

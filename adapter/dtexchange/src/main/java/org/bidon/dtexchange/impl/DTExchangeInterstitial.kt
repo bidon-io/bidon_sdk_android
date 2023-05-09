@@ -1,17 +1,29 @@
 package org.bidon.dtexchange.impl
 
 import android.app.Activity
-import com.fyber.inneractive.sdk.external.*
+import com.fyber.inneractive.sdk.external.ImpressionData
+import com.fyber.inneractive.sdk.external.InneractiveAdRequest
+import com.fyber.inneractive.sdk.external.InneractiveAdSpot
+import com.fyber.inneractive.sdk.external.InneractiveAdSpotManager
+import com.fyber.inneractive.sdk.external.InneractiveErrorCode
+import com.fyber.inneractive.sdk.external.InneractiveFullscreenAdEventsListenerWithImpressionData
+import com.fyber.inneractive.sdk.external.InneractiveFullscreenUnitController
+import com.fyber.inneractive.sdk.external.InneractiveFullscreenVideoContentController
+import com.fyber.inneractive.sdk.external.InneractiveUnitController
 import kotlinx.coroutines.flow.MutableSharedFlow
+import org.bidon.dtexchange.ext.asAdValue
 import org.bidon.dtexchange.ext.asBidonError
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
-import org.bidon.sdk.logs.analytic.Precision
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
@@ -62,12 +74,6 @@ internal class DTExchangeInterstitial(
             }
         }
     }
-
-    private fun ImpressionData.asAdValue() = AdValue(
-        adRevenue = this.pricing?.value ?: 0.0,
-        precision = Precision.Precise,
-        currency = this.pricing?.currency ?: AdValue.USD
-    )
 
     private val impressionListener by lazy {
         object : InneractiveFullscreenAdEventsListenerWithImpressionData {

@@ -19,7 +19,6 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.ads.AdType
-import org.bidon.sdk.ads.asUnspecified
 import org.bidon.sdk.ads.banner.helper.AdLifecycle
 import org.bidon.sdk.ads.banner.helper.LogLifecycleAdStateUseCase
 import org.bidon.sdk.ads.banner.helper.impl.dpToPx
@@ -30,12 +29,12 @@ import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.models.BannerRequestBody.Companion.asStatBannerFormat
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.config.impl.asBidonErrorOrUnspecified
 import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
-import org.bidon.sdk.utils.visibilitytracker.VisibilityParams
 import org.bidon.sdk.utils.visibilitytracker.VisibilityTracker
 
 /**
@@ -57,10 +56,11 @@ class BannerView @JvmOverloads constructor(
     private val listener by lazy { wrapUserBannerListener(userListener = { userListener }) }
     private val adLifecycleFlow = MutableStateFlow(AdLifecycle.Created)
     private val auction: Auction get() = get()
-    private val visibilityTracker: VisibilityTracker get() = get()
+    private val visibilityTracker: VisibilityTracker by lazy { get() }
     private var winner: AuctionResult? = null
     private var winnerSubscriberJob: Job? = null
     private var auctionJob: Job? = null
+    private var loadingError: BidonError? = null
 
     init {
         context.theme.obtainStyledAttributes(attrs, R.styleable.BannerView, 0, 0).apply {
@@ -119,21 +119,47 @@ class BannerView @JvmOverloads constructor(
 
     override fun showAd() {
         logInfo(Tag, "ShowAd invoked")
-        val bannerSource = (winner?.adSource as? AdSource.Banner) ?: run {
-            logInfo(Tag, "AdSource(${winner?.adSource}: no ad view.")
-            LogLifecycleAdStateUseCase.invoke(adLifecycle = adLifecycleFlow.value)
-            userListener?.onAdShowFailed(BidonError.BannerAdNotReady)
+        if (!BidonSdk.isInitialized()) {
+            logInfo(Tag, "Sdk is not initialized")
+            listener.onAdShowFailed(BidonError.SdkNotInitialized)
             return
         }
-        val isLoaded = isReady() && adLifecycleFlow.compareAndSet(expect = AdLifecycle.Loaded, update = AdLifecycle.Displaying)
-        if (!isLoaded) {
-            logInfo(Tag, "Not loaded. Current state: ${adLifecycleFlow.value}")
-            LogLifecycleAdStateUseCase.invoke(adLifecycle = adLifecycleFlow.value)
-            userListener?.onAdShowFailed(BidonError.BannerAdNotReady)
-            return
+        when (adLifecycleFlow.value) {
+            AdLifecycle.Displaying,
+            AdLifecycle.Created,
+            AdLifecycle.Loading -> {
+                // do nothing
+            }
+
+            AdLifecycle.Loaded -> {
+                val isLoaded =
+                    isReady() && adLifecycleFlow.compareAndSet(expect = AdLifecycle.Loaded, update = AdLifecycle.Displaying)
+                if (!isLoaded) {
+                    logInfo(Tag, "Not loaded. Current state: ${adLifecycleFlow.value}")
+                    LogLifecycleAdStateUseCase.invoke(adLifecycle = adLifecycleFlow.value)
+                    userListener?.onAdShowFailed(loadingError ?: BidonError.BannerAdNotReady)
+                    return
+                }
+                val bannerSource = (winner?.adSource as? AdSource.Banner) ?: run {
+                    logInfo(Tag, "AdSource(${winner?.adSource}: no ad view.")
+                    LogLifecycleAdStateUseCase.invoke(adLifecycle = adLifecycleFlow.value)
+                    userListener?.onAdShowFailed(loadingError ?: BidonError.BannerAdNotReady)
+                    return
+                }
+                // Success
+                addViewOnScreen(bannerSource)
+            }
+
+            AdLifecycle.Displayed -> {
+                winner?.adSource?.ad?.let { userListener?.onAdShown(ad = it) }
+            }
+
+            AdLifecycle.LoadingFailed,
+            AdLifecycle.DisplayingFailed,
+            AdLifecycle.Destroyed -> {
+                userListener?.onAdShowFailed(loadingError ?: BidonError.BannerAdNotReady)
+            }
         }
-        // Success
-        addViewOnScreen(bannerSource)
     }
 
     override fun setBannerListener(listener: BannerListener?) {
@@ -154,7 +180,7 @@ class BannerView @JvmOverloads constructor(
 
     override fun destroyAd() {
         adLifecycleFlow.value = AdLifecycle.Destroyed
-        visibilityTracker.stopTracking(this)
+        visibilityTracker.stop()
         auctionJob?.cancel()
         auctionJob = null
         winner?.adSource?.destroy()
@@ -170,7 +196,10 @@ class BannerView @JvmOverloads constructor(
         val adViewHolder: AdViewHolder = adSource.getAdView()
         val layoutParams = LayoutParams(adViewHolder.widthDp.dpToPx, adViewHolder.heightDp.dpToPx, Gravity.CENTER)
         addView(adViewHolder.networkAdview, layoutParams)
-        logInfo(Tag, "View added(${adSource.demandId.demandId}): ${adViewHolder.networkAdview}. Size(${adViewHolder.widthDp}, ${adViewHolder.heightDp})")
+        logInfo(
+            Tag,
+            "View added(${adSource.demandId.demandId}): ${adViewHolder.networkAdview}. Size(${adViewHolder.widthDp}, ${adViewHolder.heightDp})"
+        )
         checkBannerShown(onBannerShown = {
             adLifecycleFlow.value = AdLifecycle.Displayed
             adSource.ad?.let { listener.onAdShown(ad = it) }
@@ -215,7 +244,8 @@ class BannerView @JvmOverloads constructor(
                  * Auction failed
                  */
                 adLifecycleFlow.value = AdLifecycle.LoadingFailed
-                listener.onAdLoadFailed(cause = it.asUnspecified())
+                loadingError = it.asBidonErrorOrUnspecified()
+                listener.onAdLoadFailed(cause = it.asBidonErrorOrUnspecified())
             }
         }
     }
@@ -257,11 +287,11 @@ class BannerView @JvmOverloads constructor(
     }
 
     private fun checkBannerShown(onBannerShown: () -> Unit) {
-        visibilityTracker.startTracking(view = this, visibilityParams = VisibilityParams()) {
+        visibilityTracker.start(view = this) {
             onBannerShown.invoke()
         }
     }
 }
 
-private const val Tag = "Banner"
+private const val Tag = "BannerView"
 const val DefaultAutoRefreshTimeoutMs = 10_000L
