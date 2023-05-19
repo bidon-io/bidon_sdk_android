@@ -10,11 +10,13 @@ internal class ExtrasImpl : Extras {
 
     override fun addExtra(key: String, value: Any?) {
         if (value != null && value.isTypeSupported()) {
-            extras[key] = value
+            if (extras[key] != value) {
+                logInfo(Tag, "Extras updated: $extras")
+                extras[key] = value
+            }
         } else {
             extras.remove(key)
         }
-        logInfo(Tag, "Extras updated: $extras")
     }
 
     override fun getExtras(): Map<String, Any> = extras.toMap()
