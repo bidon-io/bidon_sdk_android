@@ -19,6 +19,8 @@ import org.bidon.sdk.config.AdapterInstanceCreator
 import org.bidon.sdk.config.impl.AdapterInstanceCreatorImpl
 import org.bidon.sdk.config.impl.InitAndRegisterAdaptersUseCaseImpl
 import org.bidon.sdk.config.usecases.InitAndRegisterAdaptersUseCase
+import org.bidon.sdk.config.usecases.SendTokenUseCase
+import org.bidon.sdk.config.usecases.SendTokenUseCaseImpl
 import org.bidon.sdk.databinders.DataProvider
 import org.bidon.sdk.databinders.DataProviderImpl
 import org.bidon.sdk.databinders.adapters.AdaptersBinder
@@ -39,7 +41,11 @@ import org.bidon.sdk.databinders.placement.PlacementDataSourceImpl
 import org.bidon.sdk.databinders.segment.SegmentBinder
 import org.bidon.sdk.databinders.segment.SegmentDataSource
 import org.bidon.sdk.databinders.segment.SegmentDataSourceImpl
-import org.bidon.sdk.databinders.session.*
+import org.bidon.sdk.databinders.session.SessionBinder
+import org.bidon.sdk.databinders.session.SessionDataSource
+import org.bidon.sdk.databinders.session.SessionDataSourceImpl
+import org.bidon.sdk.databinders.session.SessionTracker
+import org.bidon.sdk.databinders.session.SessionTrackerImpl
 import org.bidon.sdk.databinders.token.TokenBinder
 import org.bidon.sdk.databinders.token.TokenDataSource
 import org.bidon.sdk.databinders.token.TokenDataSourceImpl
@@ -127,6 +133,7 @@ internal object DI {
              */
             factory<InitAndRegisterAdaptersUseCase> {
                 InitAndRegisterAdaptersUseCaseImpl(
+                    sendTokenUseCase = get(),
                     adaptersSource = get()
                 )
             }
@@ -202,6 +209,11 @@ internal object DI {
 
             factory<SendLossRequestUseCase> {
                 SendLossRequestUseCaseImpl(
+                    createRequestBody = get()
+                )
+            }
+            factory<SendTokenUseCase> {
+                SendTokenUseCaseImpl(
                     createRequestBody = get()
                 )
             }

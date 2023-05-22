@@ -9,6 +9,7 @@ import org.bidon.bidmachine.ext.sdkVersion
 import org.bidon.bidmachine.impl.BMBannerAdImpl
 import org.bidon.bidmachine.impl.BMInterstitialAdImpl
 import org.bidon.bidmachine.impl.BMRewardedAdImpl
+import org.bidon.bidmachine.impl.BMTokenGetter
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.logs.logging.Logger
@@ -24,6 +25,7 @@ internal typealias BMAuctionResult = io.bidmachine.models.AuctionResult
 class BidMachineAdapter :
     Adapter,
     Initializable<BidMachineParameters>,
+    BiddingProvider by BMTokenGetter(),
     AdProvider.Banner<BMBannerAuctionParams>,
     AdProvider.Rewarded<BMFullscreenAuctionParams>,
     AdProvider.Interstitial<BMFullscreenAuctionParams> {
