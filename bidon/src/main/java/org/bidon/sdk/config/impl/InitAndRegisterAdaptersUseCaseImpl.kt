@@ -5,9 +5,13 @@ import kotlinx.coroutines.*
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.adapter.AdapterParameters
 import org.bidon.sdk.adapter.AdaptersSource
+import org.bidon.sdk.adapter.BiddingProvider
+import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.Initializable
+import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.config.models.ConfigResponse
 import org.bidon.sdk.config.usecases.InitAndRegisterAdaptersUseCase
+import org.bidon.sdk.config.usecases.SendTokenUseCase
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import kotlin.system.measureTimeMillis
@@ -17,7 +21,8 @@ import kotlin.system.measureTimeMillis
  */
 @Suppress("UNCHECKED_CAST")
 internal class InitAndRegisterAdaptersUseCaseImpl(
-    private val adaptersSource: AdaptersSource
+    private val adaptersSource: AdaptersSource,
+    private val sendTokenUseCase: SendTokenUseCase,
 ) : InitAndRegisterAdaptersUseCase {
 
     override suspend operator fun invoke(
@@ -35,10 +40,14 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                             adapter
                         } else {
                             val timeStart = measureTimeMillis {
-                                val adapterParameters = parseAdapterParameters(configResponse, adapter).getOrThrow()
+                                val adapterParameters =
+                                    parseAdapterParameters(configResponse, adapter).getOrThrow()
                                 adapter.init(activity, adapterParameters)
                             }
-                            logInfo(Tag, "Adapter ${demandId.demandId} initialized in $timeStart ms.")
+                            logInfo(
+                                Tag,
+                                "Adapter ${demandId.demandId} initialized in $timeStart ms."
+                            )
                             adapter
                         }
                     }
@@ -50,7 +59,22 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                 logError(Tag, "Adapter not initialized: ${demandId.demandId}", cause)
             }.getOrNull()
         }
-        logInfo(Tag, "Registered adapters: ${readyAdapters.joinToString { it::class.java.simpleName }}")
+        readyAdapters.filterIsInstance<BiddingProvider>().forEach {
+            logInfo(Tag, "BiddingProvider: $it")
+            val token = it.getToken(activity)
+            logInfo(Tag, "BiddingProvider token: $token")
+            if (!token.isNullOrEmpty()) {
+                sendTokenUseCase.invoke(
+                    demandAd = DemandAd(AdType.Banner),
+                    demandId = (it as Adapter).demandId.demandId,
+                    token = token
+                )
+            }
+        }
+        logInfo(
+            Tag,
+            "Registered adapters: ${readyAdapters.joinToString { it::class.java.simpleName }}"
+        )
         adaptersSource.add(readyAdapters)
     }
 
