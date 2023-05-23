@@ -1,6 +1,5 @@
 package org.bidon.applovin
 
-import android.app.Activity
 import android.content.Context
 import com.applovin.sdk.AppLovinSdk
 import com.applovin.sdk.AppLovinSdkSettings
@@ -26,7 +25,6 @@ class ApplovinAdapter :
     AdProvider.Interstitial<ApplovinFullscreenAdAuctionParams>,
     AdProvider.Rewarded<ApplovinFullscreenAdAuctionParams> {
 
-    private lateinit var context: Context
     private var applovinSdk: AppLovinSdk? = null
 
     override val demandId: DemandId = ApplovinDemandId
@@ -35,14 +33,13 @@ class ApplovinAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun init(activity: Activity, configParams: ApplovinParameters): Unit =
+    override suspend fun init(context: Context, configParams: ApplovinParameters): Unit =
         suspendCancellableCoroutine { continuation ->
-            val context = activity.applicationContext.also {
-                context = it
-            }
-            val instance = AppLovinSdk.getInstance(configParams.key, AppLovinSdkSettings(context), context).also {
-                applovinSdk = it
-            }
+            val instance =
+                AppLovinSdk.getInstance(configParams.key, AppLovinSdkSettings(context), context)
+                    .also {
+                        applovinSdk = it
+                    }
             instance.settings.setVerboseLogging(BidonSdk.loggerLevel != Logger.Level.Off)
             if (!instance.isInitialized) {
                 instance.initializeSdk {
@@ -88,7 +85,11 @@ class ApplovinAdapter :
         )
     }
 
-    override fun banner(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Banner<ApplovinBannerAuctionParams> {
+    override fun banner(
+        demandAd: DemandAd,
+        roundId: String,
+        auctionId: String
+    ): AdSource.Banner<ApplovinBannerAuctionParams> {
         return ApplovinBannerImpl(
             demandId = demandId,
             demandAd = demandAd,

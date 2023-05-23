@@ -114,7 +114,7 @@ internal fun MainScreen(
                                 initState.value = MainScreenState.Initialized
                             }
                             .initialize(
-                                activity = context as Activity,
+                                context = context,
                                 appKey = BuildConfig.BIDON_API_KEY,
                             )
                     }

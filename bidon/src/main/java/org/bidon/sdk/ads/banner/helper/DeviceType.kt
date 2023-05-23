@@ -1,9 +1,7 @@
 package org.bidon.sdk.ads.banner.helper
 
-import android.app.Activity
 import android.content.Context
 import android.graphics.Point
-import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Display
 import android.view.WindowManager
@@ -21,8 +19,8 @@ object DeviceType {
      * Only visual Contexts (such as Activity or one created with Context#createWindowContext)
      * or ones created with Context#createDisplayContext are associated with displays.
      */
-    fun init(activity: Activity) {
-        val display: Display = getDisplay(activity) ?: return
+    fun init(context: Context) {
+        val display: Display = getDisplay(context) ?: return
         val metrics = DisplayMetrics()
         val realSize = Point()
         display.getRealSize(realSize)
@@ -34,11 +32,7 @@ object DeviceType {
     }
 
     private fun getDisplay(context: Context): Display? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            context.display
-        } else {
-            val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            windowManager.defaultDisplay
-        }
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        return windowManager.defaultDisplay
     }
 }

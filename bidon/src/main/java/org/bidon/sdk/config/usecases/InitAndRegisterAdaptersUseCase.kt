@@ -1,6 +1,6 @@
 package org.bidon.sdk.config.usecases
 
-import android.app.Activity
+import android.content.Context
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.config.models.ConfigResponse
 
@@ -9,7 +9,7 @@ import org.bidon.sdk.config.models.ConfigResponse
  */
 internal interface InitAndRegisterAdaptersUseCase {
     suspend operator fun invoke(
-        activity: Activity,
+        context: Context,
         adapters: List<Adapter>,
         configResponse: ConfigResponse
     )
