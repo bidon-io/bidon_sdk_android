@@ -1,6 +1,5 @@
 package org.bidon.applovin
 
-import android.app.Activity
 import android.content.Context
 import com.applovin.sdk.AppLovinSdk
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -23,19 +22,14 @@ class MaxAdapter :
     AdProvider.Interstitial<MaxFullscreenAdAuctionParams>,
     AdProvider.Rewarded<MaxFullscreenAdAuctionParams> {
 
-    private lateinit var context: Context
-
     override val demandId: DemandId = MaxDemandId
     override val adapterInfo = AdapterInfo(
         adapterVersion = adapterVersion,
         sdkVersion = sdkVersion
     )
 
-    override suspend fun init(activity: Activity, configParams: MaxParameters): Unit =
+    override suspend fun init(context: Context, configParams: MaxParameters): Unit =
         suspendCancellableCoroutine { continuation ->
-            val context = activity.applicationContext.also {
-                context = it
-            }
 //            Does not work properly with [configParams.key] research?
 //            val instance = AppLovinSdk.getInstance(configParams.key, AppLovinSdkSettings(context), context)
             val instance = AppLovinSdk.getInstance(context)

@@ -1,6 +1,5 @@
 package org.bidon.bidmachine
 
-import android.app.Activity
 import android.content.Context
 import io.bidmachine.BidMachine
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -27,7 +26,6 @@ class BidMachineAdapter :
     AdProvider.Banner<BMBannerAuctionParams>,
     AdProvider.Rewarded<BMFullscreenAuctionParams>,
     AdProvider.Interstitial<BMFullscreenAuctionParams> {
-    private lateinit var context: Context
 
     override val demandId = BidMachineDemandId
     override val adapterInfo = AdapterInfo(
@@ -35,9 +33,8 @@ class BidMachineAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun init(activity: Activity, configParams: BidMachineParameters): Unit =
+    override suspend fun init(context: Context, configParams: BidMachineParameters): Unit =
         suspendCancellableCoroutine { continuation ->
-            this.context = activity.applicationContext
             val sourceId = configParams.sellerId
             BidMachine.setLoggingEnabled(BidonSdk.loggerLevel != Logger.Level.Off)
             BidMachine.initialize(context, sourceId) {
@@ -65,14 +62,37 @@ class BidMachineAdapter :
         roundId: String,
         auctionId: String
     ): AdSource.Interstitial<BMFullscreenAuctionParams> {
-        return BMInterstitialAdImpl(demandId = demandId, demandAd = demandAd, roundId = roundId, auctionId = auctionId)
+        return BMInterstitialAdImpl(
+            demandId = demandId,
+            demandAd = demandAd,
+            roundId = roundId,
+            auctionId = auctionId
+        )
     }
 
-    override fun rewarded(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Rewarded<BMFullscreenAuctionParams> {
-        return BMRewardedAdImpl(demandId = demandId, demandAd = demandAd, roundId = roundId, auctionId = auctionId)
+    override fun rewarded(
+        demandAd: DemandAd,
+        roundId: String,
+        auctionId: String
+    ): AdSource.Rewarded<BMFullscreenAuctionParams> {
+        return BMRewardedAdImpl(
+            demandId = demandId,
+            demandAd = demandAd,
+            roundId = roundId,
+            auctionId = auctionId
+        )
     }
 
-    override fun banner(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Banner<BMBannerAuctionParams> {
-        return BMBannerAdImpl(demandId = demandId, demandAd = demandAd, roundId = roundId, auctionId = auctionId)
+    override fun banner(
+        demandAd: DemandAd,
+        roundId: String,
+        auctionId: String
+    ): AdSource.Banner<BMBannerAuctionParams> {
+        return BMBannerAdImpl(
+            demandId = demandId,
+            demandAd = demandAd,
+            roundId = roundId,
+            auctionId = auctionId
+        )
     }
 }

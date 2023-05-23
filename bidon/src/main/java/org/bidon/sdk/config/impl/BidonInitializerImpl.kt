@@ -1,12 +1,11 @@
 package org.bidon.sdk.config.impl
 
-import android.app.Activity
+import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.bidon.sdk.adapter.Adapter
-import org.bidon.sdk.ads.banner.helper.DeviceType
 import org.bidon.sdk.config.AdapterInstanceCreator
 import org.bidon.sdk.config.BidonInitializer
 import org.bidon.sdk.config.InitializationCallback
@@ -71,7 +70,7 @@ internal class BidonInitializerImpl : BidonInitializer {
         bidOnEndpoints.init(host, setOf())
     }
 
-    override fun initialize(activity: Activity, appKey: String) {
+    override fun initialize(context: Context, appKey: String) {
         val timeStart = System.currentTimeMillis()
         if (initializationState.value == SdkState.Initialized) {
             notifyInitialized()
@@ -86,11 +85,10 @@ internal class BidonInitializerImpl : BidonInitializer {
              * [DI.init] must be invoked before using all.
              * Check if SDK is initialized with [isInitialized].
              */
-            DI.init(context = activity.applicationContext)
-            DeviceType.init(activity)
+            DI.init(context)
             scope.launch {
                 runCatching {
-                    init(activity, appKey, timeStart)
+                    init(context, appKey, timeStart)
                 }.onFailure {
                     logError(Tag, "Error while initialization", it)
                     initializationState.value = SdkState.InitializationFailed
@@ -103,7 +101,7 @@ internal class BidonInitializerImpl : BidonInitializer {
         }
     }
 
-    private suspend fun init(activity: Activity, appKey: String, timeStart: Long): Result<Unit> {
+    private suspend fun init(context: Context, appKey: String, timeStart: Long): Result<Unit> {
         startSession()
         withContext(SdkDispatchers.IO) {
             keyValueStorage.appKey = appKey
@@ -121,10 +119,13 @@ internal class BidonInitializerImpl : BidonInitializer {
         )
         return getConfigRequest.request(body)
             .map { configResponse ->
-                logInfo(Tag, "Config data received in ${System.currentTimeMillis() - timeStart} ms.: $configResponse")
+                logInfo(
+                    Tag,
+                    "Config data received in ${System.currentTimeMillis() - timeStart} ms.: $configResponse"
+                )
                 logInfo(Tag, "Starting adapters initialization")
                 initAndRegisterAdapters(
-                    activity = activity,
+                    context = context,
                     adapters = (defaultAdapters + publisherAdapters.values).distinctBy { it::class },
                     configResponse = configResponse,
                 )

@@ -1,6 +1,6 @@
 package org.bidon.sdk
 
-import android.app.Activity
+import android.content.Context
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.config.DefaultAdapters
 import org.bidon.sdk.config.InitializationCallback
@@ -76,7 +76,8 @@ object BidonSdk {
     }
 
     @JvmStatic
-    fun initialize(activity: Activity, appKey: String) = bidon.initialize(activity, appKey)
+    fun initialize(context: Context, appKey: String) =
+        bidon.initialize(context.applicationContext, appKey)
 
     /**
      * Adding SDK-level extra data.

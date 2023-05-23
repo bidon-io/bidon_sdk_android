@@ -1,6 +1,6 @@
 package org.bidon.sdk.config
 
-import android.app.Activity
+import android.content.Context
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.utils.networking.NetworkSettings
 
@@ -37,5 +37,5 @@ internal interface BidonInitializer {
      */
     fun setBaseUrl(host: String)
 
-    fun initialize(activity: Activity, appKey: String)
+    fun initialize(context: Context, appKey: String)
 }

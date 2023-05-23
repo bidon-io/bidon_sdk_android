@@ -1,6 +1,6 @@
 package org.bidon.sdk.config.impl
 
-import android.app.Activity
+import android.content.Context
 import kotlinx.coroutines.*
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.adapter.AdapterParameters
@@ -21,7 +21,7 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
 ) : InitAndRegisterAdaptersUseCase {
 
     override suspend operator fun invoke(
-        activity: Activity,
+        context: Context,
         adapters: List<Adapter>,
         configResponse: ConfigResponse
     ) = coroutineScope {
@@ -35,10 +35,14 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                             adapter
                         } else {
                             val timeStart = measureTimeMillis {
-                                val adapterParameters = parseAdapterParameters(configResponse, adapter).getOrThrow()
-                                adapter.init(activity, adapterParameters)
+                                val adapterParameters =
+                                    parseAdapterParameters(configResponse, adapter).getOrThrow()
+                                adapter.init(context, adapterParameters)
                             }
-                            logInfo(Tag, "Adapter ${demandId.demandId} initialized in $timeStart ms.")
+                            logInfo(
+                                Tag,
+                                "Adapter ${demandId.demandId} initialized in $timeStart ms."
+                            )
                             adapter
                         }
                     }
@@ -50,7 +54,10 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                 logError(Tag, "Adapter not initialized: ${demandId.demandId}", cause)
             }.getOrNull()
         }
-        logInfo(Tag, "Registered adapters: ${readyAdapters.joinToString { it::class.java.simpleName }}")
+        logInfo(
+            Tag,
+            "Registered adapters: ${readyAdapters.joinToString { it::class.java.simpleName }}"
+        )
         adaptersSource.add(readyAdapters)
     }
 
