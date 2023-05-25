@@ -51,7 +51,8 @@ internal class BMBannerAdImpl(
         demandAd = demandAd,
     ) {
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
+    override val adEvent =
+        MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val ad: Ad? get() = bannerView?.asAd()
 
     private var context: Context? = null
@@ -204,8 +205,8 @@ internal class BMBannerAdImpl(
         val adView = requireNotNull(bannerView)
         return AdViewHolder(
             networkAdview = adView,
-            widthDp = bannerFormat.getWidthDp(),
-            heightDp = bannerFormat.getHeightDp()
+            widthDp = bannerFormat?.asBidMachineBannerSize()?.width ?: bannerFormat.getWidthDp(),
+            heightDp = bannerFormat?.asBidMachineBannerSize()?.height ?: bannerFormat.getHeightDp()
         )
     }
 
