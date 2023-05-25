@@ -9,6 +9,11 @@ import org.bidon.sdk.stats.LossNotifier
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 interface BannerAd : LossNotifier, Extras {
+    /**
+     * Loaded Ad's size
+     */
+    val adSize: AdSize?
+
     fun setBannerFormat(bannerFormat: BannerFormat)
     fun loadAd(activity: Activity, pricefloor: Double = BidonSdk.DefaultPricefloor)
 

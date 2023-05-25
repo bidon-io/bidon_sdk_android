@@ -80,6 +80,11 @@ class BannerView @JvmOverloads constructor(
         }
     }
 
+    override val adSize: AdSize?
+        get() = (winner?.adSource as? AdSource.Banner)?.getAdView()?.let {
+            AdSize(widthDp = it.widthDp, heightDp = it.heightDp)
+        }
+
     override fun setBannerFormat(bannerFormat: BannerFormat) {
         this.bannerFormat = bannerFormat
     }
@@ -91,7 +96,11 @@ class BannerView @JvmOverloads constructor(
             listener.onAdLoadFailed(BidonError.SdkNotInitialized)
             return
         }
-        if (adLifecycleFlow.compareAndSet(expect = AdLifecycle.Created, update = AdLifecycle.Loading)) {
+        if (adLifecycleFlow.compareAndSet(
+                expect = AdLifecycle.Created,
+                update = AdLifecycle.Loading
+            )
+        ) {
             conductAuction(activity, pricefloor)
         } else {
             when (adLifecycleFlow.value) {
@@ -134,7 +143,10 @@ class BannerView @JvmOverloads constructor(
 
             AdLifecycle.Loaded -> {
                 val isLoaded =
-                    isReady() && adLifecycleFlow.compareAndSet(expect = AdLifecycle.Loaded, update = AdLifecycle.Displaying)
+                    isReady() && adLifecycleFlow.compareAndSet(
+                        expect = AdLifecycle.Loaded,
+                        update = AdLifecycle.Displaying
+                    )
                 if (!isLoaded) {
                     logInfo(Tag, "Not loaded. Current state: ${adLifecycleFlow.value}")
                     LogLifecycleAdStateUseCase.invoke(adLifecycle = adLifecycleFlow.value)
@@ -195,7 +207,8 @@ class BannerView @JvmOverloads constructor(
         // add AdView to Screen
         removeAllViews()
         val adViewHolder: AdViewHolder = adSource.getAdView()
-        val layoutParams = LayoutParams(adViewHolder.widthDp.dpToPx, adViewHolder.heightDp.dpToPx, Gravity.CENTER)
+        val layoutParams =
+            LayoutParams(adViewHolder.widthDp.dpToPx, adViewHolder.heightDp.dpToPx, Gravity.CENTER)
         addView(adViewHolder.networkAdview, layoutParams)
         this.visibility = VISIBLE
         adViewHolder.networkAdview.visibility = VISIBLE
