@@ -10,6 +10,9 @@ import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.logging.Logger
 import org.bidon.sdk.utils.networking.NetworkSettings
 
+/**
+ * Created by Aleksei Cherniaev on 07/02/2023.
+ */
 object BidonSdk {
     const val DefaultPricefloor = 0.0
     const val SdkVersion = BuildConfig.ADAPTER_VERSION
