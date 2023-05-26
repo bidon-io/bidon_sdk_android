@@ -32,7 +32,8 @@ internal class DeviceBinder(
             carrier = dataSource.getCarrier(),
             mccmnc = dataSource.getPhoneMCCMNC(),
             connectionType = dataSource.getConnectionTypeCode(),
-            type = DeviceType.getType(dataSource.isTablet()).code
+            type = DeviceType.getType(dataSource.isTablet()).code,
+            osApiLevel = dataSource.getApiLevel()
         )
     }
 

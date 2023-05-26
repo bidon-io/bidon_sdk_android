@@ -57,6 +57,7 @@ internal class DeviceDataSourceImpl(
     override fun getDeviceModel(): String = "${getManufacturer()} ${Build.MODEL}"
     override fun getOs(): String = AndroidPlatform
     override fun getOsVersion(): String = Build.VERSION.RELEASE
+    override fun getApiLevel(): String = Build.VERSION.SDK_INT.toString()
     override fun getHardwareVersion(): String = Build.HARDWARE
     override fun getScreenWidth(): Int = screenSize.x
     override fun getScreenHeight(): Int = screenSize.y
