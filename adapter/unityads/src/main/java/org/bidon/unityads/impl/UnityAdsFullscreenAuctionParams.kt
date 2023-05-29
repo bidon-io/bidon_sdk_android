@@ -10,18 +10,18 @@ import org.bidon.sdk.auction.models.LineItem
  */
 data class UnityAdsFullscreenAuctionParams(
     val lineItem: LineItem,
-    val pricefloor: Double
 ) : AdAuctionParams {
     override val adUnitId: String get() = requireNotNull(lineItem.adUnitId)
+    override val pricefloor: Double get() = lineItem.pricefloor
 }
 
 class UnityAdsBannerAuctionParams(
     val bannerFormat: BannerFormat,
     val lineItem: LineItem,
-    val pricefloor: Double,
     val activity: Activity,
 ) : AdAuctionParams {
     override val adUnitId: String get() = requireNotNull(lineItem.adUnitId)
+    override val pricefloor: Double get() = lineItem.pricefloor
 
     override fun toString(): String {
         return "UnityAdsBannerAuctionParams(bannerFormat=$bannerFormat, lineItem=$lineItem)"

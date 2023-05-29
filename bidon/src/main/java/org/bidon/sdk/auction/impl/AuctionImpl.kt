@@ -50,7 +50,11 @@ internal class AuctionImpl(
         resolver: AuctionResolver,
         adTypeParamData: AdTypeParam
     ): Result<List<AuctionResult>> = runCatching {
-        if (state.compareAndSet(expect = AuctionState.Initialized, update = AuctionState.InProgress)) {
+        if (state.compareAndSet(
+                expect = AuctionState.Initialized,
+                update = AuctionState.InProgress
+            )
+        ) {
             logInfo(Tag, "Action started $this")
             // Request for Auction-data at /auction
             getAuctionRequest.request(
@@ -123,7 +127,10 @@ internal class AuctionImpl(
     }
 
     @Deprecated("")
-    private suspend fun fillWinner(auctionResults: List<AuctionResult>, timeout: Long): List<AuctionResult> {
+    private suspend fun fillWinner(
+        auctionResults: List<AuctionResult>,
+        timeout: Long
+    ): List<AuctionResult> {
         val index = auctionResults.indexOfFirst { auctionResult ->
             val fillResult: Result<Ad> = withTimeoutOrNull(timeout) {
                 (auctionResult.adSource as StatisticsCollector).markFillStarted()
@@ -136,7 +143,9 @@ internal class AuctionImpl(
                 when (state) {
                     is AdEvent.LoadFailed -> state.cause.asFailure()
                     is AdEvent.Fill -> state.ad.asSuccess()
-                    is AdEvent.Expired -> BidonError.FillTimedOut(auctionResult.adSource.demandId).asFailure()
+                    is AdEvent.Expired -> BidonError.FillTimedOut(auctionResult.adSource.demandId)
+                        .asFailure()
+
                     else -> error("unexpected: $state")
                 }
             } ?: BidonError.FillTimedOut(auctionResult.adSource.demandId).asFailure()
@@ -144,11 +153,17 @@ internal class AuctionImpl(
             fillResult
                 .onFailure { cause ->
                     logError(Tag, "Failed to fill: ${auctionResult.adSource.demandId}", cause)
-                    (auctionResult.adSource as StatisticsCollector).markFillFinished(RoundStatus.NoFill)
+                    (auctionResult.adSource as StatisticsCollector).markFillFinished(
+                        roundStatus = RoundStatus.NoFill,
+                        ecpm = auctionResult.ecpm
+                    )
                 }
-                .onSuccess {
+                .onSuccess { ad ->
                     logInfo(Tag, "Winner filled: ${auctionResult.adSource.demandId}")
-                    (auctionResult.adSource as StatisticsCollector).markFillFinished(RoundStatus.Successful)
+                    (auctionResult.adSource as StatisticsCollector).markFillFinished(
+                        roundStatus = RoundStatus.Successful,
+                        ecpm = ad.ecpm
+                    )
                     (auctionResult.adSource as? WinLossNotifiable)?.let {
                         logInfo(Tag, "Notified win: ${auctionResult.adSource.demandId}")
                         it.notifyWin()
@@ -247,20 +262,24 @@ internal class AuctionImpl(
         successfulRoundResults: List<AuctionResult>,
     ) {
         val winner = successfulRoundResults.firstOrNull()
-        val unknownDemandId = (round.demandIds - allRoundResults.map { it.adSource.demandId.demandId }.toSet()).takeIf {
-            it.isNotEmpty()
-        }?.map { demandId ->
-            DemandStat(
-                roundStatus = RoundStatus.UnknownAdapter,
-                demandId = DemandId(demandId),
-                bidStartTs = null,
-                bidFinishTs = null,
-                fillStartTs = null,
-                fillFinishTs = null,
-                ecpm = null,
-                adUnitId = null
-            )
-        } ?: emptyList()
+        val unknownDemandId =
+            (
+                round.demandIds - allRoundResults.map { it.adSource.demandId.demandId }
+                    .toSet()
+                )
+                .takeIf { it.isNotEmpty() }
+                ?.map { demandId ->
+                    DemandStat(
+                        roundStatus = RoundStatus.UnknownAdapter,
+                        demandId = DemandId(demandId),
+                        bidStartTs = null,
+                        bidFinishTs = null,
+                        fillStartTs = null,
+                        fillFinishTs = null,
+                        ecpm = null,
+                        adUnitId = null
+                    )
+                } ?: emptyList()
 
         allRoundResults.forEach {
             (it.adSource as StatisticsCollector).addAuctionConfigurationId(
@@ -292,16 +311,21 @@ internal class AuctionImpl(
                     results = statsRound.map { roundStat ->
                         val errorDemandStat = roundStat.demands
                         val succeedDemandStat = bidStats.filter { it.roundId == roundStat.roundId }
-                            .map {
+                            .map { bidStat ->
                                 DemandStat(
-                                    roundStatus = requireNotNull(it.roundStatus),
-                                    demandId = it.demandId,
-                                    bidStartTs = it.bidStartTs,
-                                    bidFinishTs = it.bidFinishTs,
-                                    fillStartTs = it.fillStartTs,
-                                    fillFinishTs = it.fillFinishTs,
-                                    ecpm = it.ecpm,
-                                    adUnitId = it.adUnitId
+                                    roundStatus = requireNotNull(bidStat.roundStatus),
+                                    demandId = bidStat.demandId,
+                                    bidStartTs = bidStat.bidStartTs,
+                                    bidFinishTs = bidStat.bidFinishTs,
+                                    fillStartTs = bidStat.fillStartTs,
+                                    fillFinishTs = bidStat.fillFinishTs,
+                                    ecpm = bidStat.ecpm.takeIf {
+                                        bidStat.roundStatus !in arrayOf(
+                                            RoundStatus.NoBid,
+                                            RoundStatus.NoAppropriateAdUnitId
+                                        )
+                                    },
+                                    adUnitId = bidStat.adUnitId
                                 )
                             }
                         roundStat.copy(
@@ -342,22 +366,40 @@ internal class AuctionImpl(
                         error = NoSuchElementException(unknownDemandIds.joinToString())
                     )
                 }
-            logInfo(Tag, "Round '${round.id}' started with adapters [${filteredAdapters.joinToString { it.demandId.demandId }}]")
+            logInfo(
+                Tag,
+                "Round '${round.id}' started with adapters [${filteredAdapters.joinToString { it.demandId.demandId }}]"
+            )
             logInfo(Tag, "Round '${round.id}' started with line items: $mutableLineItems")
             val adSources = when (demandAd.adType) {
                 AdType.Interstitial -> {
-                    filteredAdapters.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>().map {
-                        it.interstitial(demandAd = demandAd, roundId = round.id, auctionId = auctionDataResponse.auctionId ?: "")
-                    }
+                    filteredAdapters.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>()
+                        .map {
+                            it.interstitial(
+                                demandAd = demandAd,
+                                roundId = round.id,
+                                auctionId = auctionDataResponse.auctionId ?: ""
+                            )
+                        }
                 }
+
                 AdType.Rewarded -> {
                     filteredAdapters.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().map {
-                        it.rewarded(demandAd = demandAd, roundId = round.id, auctionId = auctionDataResponse.auctionId ?: "")
+                        it.rewarded(
+                            demandAd = demandAd,
+                            roundId = round.id,
+                            auctionId = auctionDataResponse.auctionId ?: ""
+                        )
                     }
                 }
+
                 AdType.Banner -> {
                     filteredAdapters.filterIsInstance<AdProvider.Banner<AdAuctionParams>>().map {
-                        it.banner(demandAd = demandAd, roundId = round.id, auctionId = auctionDataResponse.auctionId ?: "")
+                        it.banner(
+                            demandAd = demandAd,
+                            roundId = round.id,
+                            auctionId = auctionDataResponse.auctionId ?: ""
+                        )
                     }
                 }
             }
@@ -389,11 +431,18 @@ internal class AuctionImpl(
                         } ?: AdEvent.LoadFailed(BidonError.NoAppropriateAdUnitId)
                         when (bidAdEvent) {
                             is AdEvent.LoadFailed -> {
-                                adSource.markBidFinished(bidAdEvent.cause.asRoundStatus(), ecpm = 0.0)
+                                adSource.markBidFinished(
+                                    roundStatus = bidAdEvent.cause.asRoundStatus(),
+                                    ecpm = adParam?.pricefloor
+                                )
                                 bidAdEvent
                             }
+
                             is AdEvent.Bid -> {
-                                adSource.markBidFinished(bidAdEvent.result.roundStatus, bidAdEvent.result.ecpm)
+                                adSource.markBidFinished(
+                                    roundStatus = bidAdEvent.result.roundStatus,
+                                    ecpm = bidAdEvent.result.ecpm
+                                )
                                 // FILL
                                 adSource.markFillStarted()
                                 adSource.fill()
@@ -403,38 +452,59 @@ internal class AuctionImpl(
                                 }
                                 when (fillAdEvent) {
                                     is AdEvent.Fill -> {
-                                        adSource.markFillFinished(RoundStatus.Successful)
+                                        adSource.markFillFinished(
+                                            roundStatus = RoundStatus.Successful,
+                                            ecpm = fillAdEvent.ad.ecpm
+                                        )
                                     }
+
                                     is AdEvent.LoadFailed -> {
-                                        logError(Tag, "Failed to fill: ${adSource.demandId}", fillAdEvent.cause)
-                                        adSource.markFillFinished(fillAdEvent.cause.asRoundStatus())
+                                        logError(
+                                            Tag,
+                                            "Failed to fill: ${adSource.demandId}",
+                                            fillAdEvent.cause
+                                        )
+                                        adSource.markFillFinished(
+                                            roundStatus = fillAdEvent.cause.asRoundStatus(),
+                                            ecpm = bidAdEvent.result.ecpm
+                                        )
                                     }
+
                                     is AdEvent.Expired -> {
                                         logError(
                                             Tag,
                                             "Failed to fill: ${adSource.demandId}",
                                             BidonError.Expired(adSource.demandId)
                                         )
-                                        adSource.markFillFinished(RoundStatus.NoFill)
+                                        adSource.markFillFinished(
+                                            roundStatus = RoundStatus.NoFill,
+                                            ecpm = fillAdEvent.ad.ecpm
+                                        )
                                     }
+
                                     else -> error("unexpected: $state")
                                 }
                                 fillAdEvent
                             }
+
                             else -> error("unexpected: $state")
                         }
                     } ?: AdEvent.LoadFailed(
-                        when (adSource.buildBidStatistic().roundStatus) {
+                        cause = when (adSource.buildBidStatistic().roundStatus) {
                             RoundStatus.NoBid -> BidonError.FillTimedOut(adSource.demandId)
                             else -> BidonError.BidTimedOut(adSource.demandId)
                         }
                     )
                 } to adSource
             }.mapIndexed { index, (deferred, adSource) ->
-                val logRoundTitle = "Round '${round.id}' result #$index(${adSource.demandId.demandId})"
+                val logRoundTitle =
+                    "Round '${round.id}' result #$index(${adSource.demandId.demandId})"
 
                 deferred.await().let { adEvent ->
-                    logInfo(Tag, "$logRoundTitle: $adEvent. Statistics: ${adSource.buildBidStatistic()}")
+                    logInfo(
+                        Tag,
+                        "$logRoundTitle: $adEvent. Statistics: ${adSource.buildBidStatistic()}"
+                    )
                     AuctionResult(
                         roundStatus = when (adEvent) {
                             is AdEvent.Fill -> RoundStatus.Successful
@@ -473,6 +543,7 @@ internal class AuctionImpl(
                 containerWidth = adTypeParamData.containerWidth
             )
         }
+
         is AdSource.Interstitial -> {
             check(adTypeParamData is AdTypeParam.Interstitial)
             adSource.getAuctionParams(
@@ -485,6 +556,7 @@ internal class AuctionImpl(
                 },
             )
         }
+
         is AdSource.Rewarded -> {
             check(adTypeParamData is AdTypeParam.Rewarded)
             adSource.getAuctionParams(
@@ -499,7 +571,10 @@ internal class AuctionImpl(
         }
     }
 
-    private suspend fun saveAuctionResults(resolver: AuctionResolver, roundResults: List<AuctionResult>) {
+    private suspend fun saveAuctionResults(
+        resolver: AuctionResolver,
+        roundResults: List<AuctionResult>
+    ) {
         auctionResults.value = resolver.sortWinners(auctionResults.value + roundResults)
     }
 
@@ -508,5 +583,4 @@ internal class AuctionImpl(
 }
 
 private const val Tag = "Auction"
-private const val DefaultFillTimeoutMs = 10_000L
 private const val NoWinnerFilled = -1

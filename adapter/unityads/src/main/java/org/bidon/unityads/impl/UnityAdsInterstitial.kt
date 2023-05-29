@@ -67,10 +67,7 @@ internal class UnityAdsInterstitial(
         val lineItem = lineItems
             .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed) ?: error(org.bidon.sdk.config.BidonError.NoAppropriateAdUnitId)
-        UnityAdsFullscreenAuctionParams(
-            lineItem = lineItem,
-            pricefloor = pricefloor
-        )
+        UnityAdsFullscreenAuctionParams(lineItem)
     }
 
     override fun bid(adParams: UnityAdsFullscreenAuctionParams) {

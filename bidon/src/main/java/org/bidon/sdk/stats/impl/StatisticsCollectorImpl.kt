@@ -145,10 +145,11 @@ class StatisticsCollectorImpl(
         )
     }
 
-    override fun markFillFinished(roundStatus: RoundStatus) {
+    override fun markFillFinished(roundStatus: RoundStatus, ecpm: Double?) {
         stat = stat.copy(
             fillFinishTs = SystemTimeNow,
             roundStatus = roundStatus,
+            ecpm = ecpm
         )
     }
 

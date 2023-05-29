@@ -95,7 +95,6 @@ internal class UnityAdsBanner(
             ?.also(onLineItemConsumed) ?: error(BidonError.NoAppropriateAdUnitId)
         UnityAdsBannerAuctionParams(
             lineItem = lineItem,
-            pricefloor = pricefloor,
             bannerFormat = bannerFormat,
             activity = activity,
         )

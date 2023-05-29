@@ -68,10 +68,7 @@ internal class UnityAdsRewarded(
         val lineItem = lineItems
             .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed) ?: error(BidonError.NoAppropriateAdUnitId)
-        UnityAdsFullscreenAuctionParams(
-            lineItem = lineItem,
-            pricefloor = pricefloor
-        )
+        UnityAdsFullscreenAuctionParams(lineItem)
     }
 
     override fun bid(adParams: UnityAdsFullscreenAuctionParams) {
