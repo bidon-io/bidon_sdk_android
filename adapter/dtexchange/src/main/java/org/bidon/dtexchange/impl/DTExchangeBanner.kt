@@ -53,7 +53,8 @@ internal class DTExchangeBanner(
 
     override val ad: Ad?
         get() = adSpot?.asAd()
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
+    override val adEvent =
+        MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val isAdReadyToShow: Boolean get() = adSpot?.isReady == true
 
     override fun getAuctionParams(
@@ -70,7 +71,6 @@ internal class DTExchangeBanner(
             ?.also(onLineItemConsumed) ?: error(BidonError.NoAppropriateAdUnitId)
         DTExchangeBannerAuctionParams(
             lineItem = lineItem,
-            pricefloor = pricefloor,
             bannerFormat = bannerFormat,
             context = activity.applicationContext,
         )
@@ -105,7 +105,9 @@ internal class DTExchangeBanner(
                 inneractiveErrorCode: InneractiveErrorCode?
             ) {
                 logInfo(Tag, "onInneractiveFailedAdRequest: $inneractiveErrorCode")
-                adEvent.tryEmit(AdEvent.LoadFailed(inneractiveErrorCode.asBidonError()))
+                adEvent.tryEmit(
+                    AdEvent.LoadFailed(inneractiveErrorCode.asBidonError())
+                )
             }
         })
         adSpot.requestAd(adRequest)
@@ -125,7 +127,10 @@ internal class DTExchangeBanner(
         // set to new container, because DTExchange does not expose its bannerView
         val container = FrameLayout(requireNotNull(param?.context))
         controller.eventsListener = object : InneractiveAdViewEventsListenerWithImpressionData {
-            override fun onAdImpression(adSpot: InneractiveAdSpot?, impressionData: ImpressionData?) {
+            override fun onAdImpression(
+                adSpot: InneractiveAdSpot?,
+                impressionData: ImpressionData?
+            ) {
                 logInfo(Tag, "onAdImpression: $adSpot, $impressionData")
                 val adValue = impressionData?.asAdValue() ?: return
                 val ad = adSpot?.asAd() ?: return

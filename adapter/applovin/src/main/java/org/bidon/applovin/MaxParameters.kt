@@ -17,6 +17,9 @@ data class MaxBannerAuctionParams(
     val lineItem: LineItem,
     val adaptiveBannerHeight: Int?
 ) : AdAuctionParams {
+    override val pricefloor: Double
+        get() = lineItem.pricefloor
+
     override val adUnitId: String?
         get() = lineItem.adUnitId
 }
@@ -26,6 +29,9 @@ data class MaxFullscreenAdAuctionParams(
     val lineItem: LineItem,
     val timeoutMs: Long
 ) : AdAuctionParams {
+    override val pricefloor: Double
+        get() = lineItem.pricefloor
+
     override val adUnitId: String?
         get() = lineItem.adUnitId
 }
