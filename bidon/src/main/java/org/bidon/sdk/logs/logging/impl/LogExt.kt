@@ -6,7 +6,7 @@ import org.bidon.sdk.logs.logging.Logger
 import org.bidon.sdk.logs.logging.Logger.Level
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  *
  * Set log level with [Logger]
  */

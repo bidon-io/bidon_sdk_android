@@ -4,7 +4,7 @@ import org.bidon.sdk.utils.json.JsonParser
 import org.json.JSONObject
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 internal data class ConfigResponse(
     val initializationTimeout: Long,

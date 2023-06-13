@@ -9,7 +9,7 @@ import org.bidon.sdk.databinders.user.AdvertisingData
 import org.bidon.sdk.databinders.user.AdvertisingProfile
 import java.util.*
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 internal class AdvertisingDataImpl(
     private val context: Context

@@ -3,9 +3,7 @@ package org.bidon.sdk.databinders.app
 import org.bidon.sdk.databinders.DataSource
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
- *
- * [Scheme](https://appodeal.atlassian.net/wiki/spaces/SX/pages/4490264831/SDK+Server+Schema#SDK%3C%3EServerSchema-App)
+ * Created by Bidon Team on 06/02/2023.
  */
 internal interface AppDataSource : DataSource {
     /**

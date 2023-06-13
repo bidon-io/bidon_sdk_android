@@ -5,7 +5,7 @@ import org.bidon.sdk.utils.networking.NetworkSettings
 import java.util.*
 
 /**
- * Created by Aleksei Cherniaev on 07/02/2023.
+ * Created by Bidon Team on 07/02/2023.
  */
 internal class BidonEndpointsImpl : BidonEndpoints {
     private val hosts: Queue<String> = LinkedList()

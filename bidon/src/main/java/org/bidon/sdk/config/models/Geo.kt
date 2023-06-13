@@ -4,7 +4,7 @@ import org.bidon.sdk.utils.serializer.JsonName
 import org.bidon.sdk.utils.serializer.Serializable
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 data class Geo(
     @field:JsonName("lat")

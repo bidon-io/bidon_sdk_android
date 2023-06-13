@@ -7,7 +7,7 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.SdkDispatchers
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  *
  * Timer stops if Application is in the background, and continues on the foregrounded.
  */

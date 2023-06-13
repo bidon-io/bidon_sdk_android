@@ -6,7 +6,7 @@ import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import org.bidon.sdk.ads.banner.helper.GetOrientationUseCase
 import org.bidon.sdk.auction.models.AdObjectRequestBody.Orientation
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 internal class GetOrientationUseCaseImpl(
     private val context: Context

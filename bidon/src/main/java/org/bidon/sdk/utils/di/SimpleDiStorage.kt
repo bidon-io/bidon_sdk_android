@@ -3,7 +3,7 @@ package org.bidon.sdk.utils.di
 import org.bidon.sdk.utils.di.InstanceType.ParamFactory.Params
 import kotlin.reflect.KClass
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  *
  *
  * val instanceSomeClass = get<SomeClass> {

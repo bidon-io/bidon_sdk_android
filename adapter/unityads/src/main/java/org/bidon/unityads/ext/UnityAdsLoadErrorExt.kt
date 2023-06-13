@@ -5,7 +5,7 @@ import org.bidon.sdk.config.BidonError
 import org.bidon.unityads.UnityAdsDemandId
 
 /**
- * Created by Aleksei Cherniaev on 02/03/2023.
+ * Created by Bidon Team on 02/03/2023.
  */
 internal fun UnityAds.UnityAdsLoadError?.asBidonError() = when (this) {
     UnityAds.UnityAdsLoadError.INTERNAL_ERROR -> BidonError.InternalServerSdkError("UnityAdsLoadError.INTERNAL_ERROR")

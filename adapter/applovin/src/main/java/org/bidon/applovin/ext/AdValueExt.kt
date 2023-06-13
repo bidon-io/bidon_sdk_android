@@ -5,7 +5,7 @@ import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
 
 /**
- * Created by Aleksei Cherniaev on 21/02/2023.
+ * Created by Bidon Team on 21/02/2023.
  */
 internal fun Double?.asBidonAdValue(): AdValue {
     return AdValue(

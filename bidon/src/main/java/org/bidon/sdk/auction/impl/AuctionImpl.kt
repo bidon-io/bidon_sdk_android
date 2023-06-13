@@ -26,7 +26,7 @@ import org.bidon.sdk.utils.ext.asFailure
 import java.util.*
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 internal class AuctionImpl(
     private val adaptersSource: AdaptersSource,

@@ -9,7 +9,7 @@ import org.bidon.sdk.ads.banner.helper.PauseResumeObserver
 import org.bidon.sdk.logs.logging.impl.logInfo
 import java.lang.ref.WeakReference
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 internal class ActivityLifecycleObserver(activity: Activity) : PauseResumeObserver {
 

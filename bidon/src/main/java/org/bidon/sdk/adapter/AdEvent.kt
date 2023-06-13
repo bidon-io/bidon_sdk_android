@@ -7,7 +7,7 @@ import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 sealed interface AdEvent {
     class Expired(val ad: Ad) : AdEvent

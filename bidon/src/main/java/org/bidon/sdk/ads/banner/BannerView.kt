@@ -33,7 +33,7 @@ import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 @Deprecated("Use Banner")
 class BannerView(

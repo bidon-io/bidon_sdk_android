@@ -3,12 +3,23 @@ package org.bidon.applovin.impl
 import android.app.Activity
 import com.applovin.adview.AppLovinIncentivizedInterstitial
 import com.applovin.adview.AppLovinInterstitialAd
-import com.applovin.sdk.*
+import com.applovin.sdk.AppLovinAd
+import com.applovin.sdk.AppLovinAdClickListener
+import com.applovin.sdk.AppLovinAdDisplayListener
+import com.applovin.sdk.AppLovinAdLoadListener
+import com.applovin.sdk.AppLovinAdService
+import com.applovin.sdk.AppLovinAdSize
+import com.applovin.sdk.AppLovinAdVideoPlaybackListener
+import com.applovin.sdk.AppLovinSdk
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import org.bidon.applovin.ApplovinFullscreenAdAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
@@ -21,11 +32,6 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.asRoundStatus
 
-/**
- * I have no idea how it works. There is no documentation.
- *
- * https://appodeal.slack.com/archives/C02PE4GAFU0/p1661421318406689
- */
 internal class ApplovinInterstitialImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
@@ -149,6 +155,7 @@ internal class ApplovinInterstitialImpl(
                     roundStatus = state.cause.asRoundStatus()
                 )
             }
+
             is AdEvent.Bid -> state.result
             else -> error("unexpected: $state")
         }

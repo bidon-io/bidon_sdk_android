@@ -4,7 +4,7 @@ import org.bidon.sdk.adapter.DemandAd
 import java.util.*
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 class Ad(
     val demandAd: DemandAd,

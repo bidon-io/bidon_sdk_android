@@ -4,7 +4,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Created by Aleksei Cherniaev on 08/02/2023.
+ * Created by Bidon Team on 08/02/2023.
  */
 
 internal fun jsonObject(method: JsonObjectBuilder.() -> Unit): JSONObject {

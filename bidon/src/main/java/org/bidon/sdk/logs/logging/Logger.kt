@@ -1,7 +1,7 @@
 package org.bidon.sdk.logs.logging
 
 /**
- * Created by Aleksei Cherniaev on 10/02/2023.
+ * Created by Bidon Team on 10/02/2023.
  */
 interface Logger {
     val loggerLevel: Level

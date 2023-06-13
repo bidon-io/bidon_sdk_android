@@ -3,7 +3,7 @@ package org.bidon.sdk.stats
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.stats.models.RoundStatus
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 data class BidStat(
     val roundStatus: RoundStatus?,

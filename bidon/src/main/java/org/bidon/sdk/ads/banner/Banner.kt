@@ -30,7 +30,7 @@ import org.bidon.sdk.utils.di.get
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Created by Aleksei Cherniaev on 02/03/2023.
+ * Created by Bidon Team on 02/03/2023.
  */
 class Banner @JvmOverloads constructor(
     context: Context,

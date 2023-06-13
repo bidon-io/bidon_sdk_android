@@ -26,7 +26,7 @@ android {
     flavorDimensions += "server"
     productFlavors {
         create("production") {
-            description = "Production backend x.appbaqend.com"
+            description = "Production backend"
             dimension = "server"
         }
         create("serverless") {

@@ -5,7 +5,7 @@ import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.logs.logging.Logger
 
 /**
- * Created by Aleksei Cherniaev on 07/03/2023.
+ * Created by Bidon Team on 07/03/2023.
  */
 internal object StepSdkInitialization {
     fun perform(activity: ComponentActivity) {

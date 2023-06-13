@@ -21,7 +21,7 @@ import kotlin.coroutines.resumeWithException
 val DTExchangeDemandId = DemandId("dtexchange")
 
 /**
- * Created by Aleksei Cherniaev on 28/02/2023.
+ * Created by Bidon Team on 28/02/2023.
  */
 class DTExchangeAdapter :
     Adapter,

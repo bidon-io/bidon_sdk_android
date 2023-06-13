@@ -4,7 +4,7 @@ import org.bidon.sdk.ads.AdListener
 import org.bidon.sdk.logs.analytic.AdRevenueListener
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 interface BannerListener :
     AdListener,

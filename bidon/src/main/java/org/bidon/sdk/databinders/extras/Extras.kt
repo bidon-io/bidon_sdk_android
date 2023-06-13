@@ -1,7 +1,7 @@
 package org.bidon.sdk.databinders.extras
 
 /**
- * Created by Aleksei Cherniaev on 24/03/2023.
+ * Created by Bidon Team on 24/03/2023.
  *
  * Allows to collect extra data.
  */

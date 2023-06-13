@@ -6,7 +6,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 
 /**
- * Created by Aleksei Cherniaev on 10/08/2022.
+ * Created by Bidon Team on 10/08/2022.
  */
 internal class AdapterInstanceCreatorImpl : org.bidon.sdk.config.AdapterInstanceCreator {
     override fun createAvailableAdapters(useDefaultAdapters: Boolean, adapterClasses: MutableSet<String>): List<Adapter> {

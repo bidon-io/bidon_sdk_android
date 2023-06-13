@@ -13,7 +13,7 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * Created by Aleksei Cherniaev on 03/03/2023.
+ * Created by Bidon Team on 03/03/2023.
  */
 class InterstitialTest {
 

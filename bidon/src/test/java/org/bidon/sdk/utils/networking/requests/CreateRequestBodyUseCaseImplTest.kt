@@ -15,7 +15,7 @@ import org.bidon.sdk.databinders.extras.ExtrasImpl
 import org.junit.Test
 
 /**
- * Created by Aleksei Cherniaev on 04/04/2023.
+ * Created by Bidon Team on 04/04/2023.
  */
 @ExperimentalCoroutinesApi
 internal class CreateRequestBodyUseCaseImplTest : ConcurrentTest() {
