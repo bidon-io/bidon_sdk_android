@@ -36,7 +36,6 @@ internal class CreateRequestBodyUseCaseImplTest : ConcurrentTest() {
                 trackingAuthorizationStatus = "asd",
                 applicationId = "a.a.a",
                 consent = null,
-                coppa = false
             ),
             dataKeyName = "user_key"
         )
@@ -51,7 +50,6 @@ internal class CreateRequestBodyUseCaseImplTest : ConcurrentTest() {
                 "idfa" hasValue "123"
                 "tracking_authorization_status" hasValue "asd"
                 "idg" hasValue "a.a.a"
-                "coppa" hasValue false
             }
         )
     }
@@ -72,7 +70,6 @@ internal class CreateRequestBodyUseCaseImplTest : ConcurrentTest() {
                 trackingAuthorizationStatus = "asd",
                 applicationId = null,
                 consent = null,
-                coppa = false
             ),
             dataKeyName = "user_key"
         )

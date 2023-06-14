@@ -13,15 +13,12 @@ import org.bidon.applovin.ext.asBidonAdValue
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.rewarded.Reward
-import org.bidon.sdk.auction.AuctionResult
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.RoundStatus
 
 internal class MaxRewardedImpl(
     override val demandId: DemandId,
@@ -29,6 +26,7 @@ internal class MaxRewardedImpl(
     private val roundId: String,
     private val auctionId: String
 ) : AdSource.Rewarded<MaxFullscreenAdAuctionParams>,
+    AdLoadingType.Network<MaxFullscreenAdAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
@@ -43,15 +41,7 @@ internal class MaxRewardedImpl(
         object : MaxRewardedAdListener {
             override fun onAdLoaded(ad: MaxAd) {
                 maxAd = ad
-                adEvent.tryEmit(
-                    AdEvent.Bid(
-                        AuctionResult(
-                            ecpm = ad.revenue,
-                            adSource = this@MaxRewardedImpl,
-                            roundStatus = RoundStatus.Successful
-                        )
-                    )
-                )
+                adEvent.tryEmit(AdEvent.Fill(requireNotNull(rewardedAd?.asAd())))
             }
 
             override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
@@ -122,36 +112,25 @@ internal class MaxRewardedImpl(
         maxAd = null
     }
 
-    override fun getAuctionParams(
-        activity: Activity,
-        pricefloor: Double,
-        timeout: Long,
-        lineItems: List<LineItem>,
-        onLineItemConsumed: (LineItem) -> Unit,
-    ): Result<AdAuctionParams> = runCatching {
-        val lineItem = lineItems.minByOrNull { it.pricefloor }
-            ?.also(onLineItemConsumed)
-        MaxFullscreenAdAuctionParams(
-            lineItem = requireNotNull(lineItem),
-            timeoutMs = timeout,
-            activity = activity
-        )
+    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+        return auctionParamsScope {
+            val lineItem = lineItems.minByOrNull { it.pricefloor }
+                ?.also(onLineItemConsumed)
+            MaxFullscreenAdAuctionParams(
+                lineItem = requireNotNull(lineItem),
+                timeoutMs = timeout,
+                activity = activity
+            )
+        }
     }
 
-    override fun bid(adParams: MaxFullscreenAdAuctionParams) {
+    override fun fill(adParams: MaxFullscreenAdAuctionParams) {
         logInfo(Tag, "Starting with $adParams")
         val maxInterstitialAd = MaxRewardedAd.getInstance(adParams.lineItem.adUnitId, adParams.activity).also {
             it.setListener(maxAdListener)
             rewardedAd = it
         }
         maxInterstitialAd.loadAd()
-    }
-
-    override fun fill() {
-        /**
-         * Applovin fills the bid automatically. It's not needed to fill it manually.
-         */
-        adEvent.tryEmit(AdEvent.Fill(requireNotNull(rewardedAd?.asAd())))
     }
 
     override fun show(activity: Activity) {

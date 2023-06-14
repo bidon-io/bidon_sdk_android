@@ -1,6 +1,7 @@
 package org.bidon.sdk.stats
 
 import org.bidon.sdk.auction.models.BannerRequestBody
+import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.stats.models.RoundStatus
 
 /**

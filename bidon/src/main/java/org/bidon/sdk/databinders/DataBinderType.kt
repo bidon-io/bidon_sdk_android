@@ -6,11 +6,13 @@ package org.bidon.sdk.databinders
 internal enum class DataBinderType {
     Device,
     App,
-    Geo,
+    // Geo, -> moved to Device
     Session,
     User,
     Token,
     Placement, // - not ready to use
     AvailableAdapters,
-    Segment
+    Segment,
+    Reg,
+    Test
 }

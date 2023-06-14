@@ -13,11 +13,16 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.applovin.ApplovinDemandId
 import org.bidon.applovin.MaxBannerAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParamSource
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdLoadingType
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.AdViewHolder
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.auction.AuctionResult
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
@@ -25,7 +30,6 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.RoundStatus
 
 internal class MaxBannerImpl(
     override val demandId: DemandId,
@@ -33,6 +37,7 @@ internal class MaxBannerImpl(
     private val roundId: String,
     private val auctionId: String
 ) : AdSource.Banner<MaxBannerAuctionParams>,
+    AdLoadingType.Network<MaxBannerAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
@@ -48,15 +53,7 @@ internal class MaxBannerImpl(
         object : MaxAdViewAdListener {
             override fun onAdLoaded(ad: MaxAd) {
                 maxAd = ad
-                adEvent.tryEmit(
-                    AdEvent.Bid(
-                        AuctionResult(
-                            ecpm = ad.revenue,
-                            adSource = this@MaxBannerImpl,
-                            roundStatus = RoundStatus.Successful
-                        )
-                    )
-                )
+                adEvent.tryEmit(AdEvent.Fill(requireNotNull(maxAdView?.asAd())))
             }
 
             override fun onAdExpanded(ad: MaxAd?) {}
@@ -110,24 +107,18 @@ internal class MaxBannerImpl(
         maxAd = null
     }
 
-    override fun getAuctionParams(
-        activity: Activity,
-        pricefloor: Double,
-        timeout: Long,
-        lineItems: List<LineItem>,
-        bannerFormat: BannerFormat,
-        onLineItemConsumed: (LineItem) -> Unit,
-        containerWidth: Float
-    ): Result<AdAuctionParams> = runCatching {
-        val lineItem = lineItems
-            .minByPricefloorOrNull(demandId, pricefloor)
-            ?.also(onLineItemConsumed)
-        MaxBannerAuctionParams(
-            context = activity.applicationContext,
-            lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
-            bannerFormat = bannerFormat,
-            adaptiveBannerHeight = null
-        )
+    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+        return auctionParamsScope {
+            val lineItem = lineItems
+                .minByPricefloorOrNull(demandId, pricefloor)
+                ?.also(onLineItemConsumed)
+            MaxBannerAuctionParams(
+                context = activity.applicationContext,
+                lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
+                bannerFormat = bannerFormat,
+                adaptiveBannerHeight = null
+            )
+        }
     }
 
     override fun getAdView(): AdViewHolder {
@@ -139,7 +130,7 @@ internal class MaxBannerImpl(
         )
     }
 
-    override fun bid(adParams: MaxBannerAuctionParams) {
+    override fun fill(adParams: MaxBannerAuctionParams) {
         logInfo(Tag, "Starting with $adParams")
         bannerFormat = adParams.bannerFormat
         val maxAdView = if (adParams.bannerFormat == BannerFormat.Adaptive) {
@@ -172,15 +163,6 @@ internal class MaxBannerImpl(
         }
         maxAdView.loadAd()
     }
-
-    override fun fill() {
-        /**
-         * Applovin fills the bid automatically. It's not needed to fill it manually.
-         */
-        adEvent.tryEmit(AdEvent.Fill(requireNotNull(maxAdView?.asAd())))
-    }
-
-    override fun show(activity: Activity) {}
 
     /**
      * Use it after loaded ECPM is known

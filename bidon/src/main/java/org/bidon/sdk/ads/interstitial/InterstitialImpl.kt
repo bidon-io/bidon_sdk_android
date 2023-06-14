@@ -101,7 +101,7 @@ internal class InterstitialImpl(
             }
             else -> {
                 scope.launch(Dispatchers.Main.immediate) {
-                    adSource.show(activity)
+                    (adSource as AdSource.Interstitial).show(activity)
                 }
             }
         }

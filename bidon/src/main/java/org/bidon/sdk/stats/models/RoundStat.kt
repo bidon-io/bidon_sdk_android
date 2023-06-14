@@ -1,4 +1,4 @@
-package org.bidon.sdk.stats
+package org.bidon.sdk.stats.models
 
 import org.bidon.sdk.adapter.DemandId
 /**
@@ -9,7 +9,9 @@ internal data class RoundStat(
     val roundId: String,
     val pricefloor: Double,
 
-    val demands: List<DemandStat>,
+    val demands: List<DemandStat.Network>,
+    val bidding: DemandStat.Bidding?,
+
     val winnerDemandId: DemandId?,
     val winnerEcpm: Double?,
 )

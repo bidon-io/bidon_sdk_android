@@ -140,12 +140,6 @@ Add listener to be notified when your ad is ready and of other ad-related events
 `setListener(bnInterstitialListener: BNInterstitialListener)`
 
 ```kotlin
-import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
-import org.bidon.applovin.interstitial.BNInterstitialListener
-import org.bidon.applovin.interstitial.BNMaxInterstitialAd
-import com.appodealstack.mads.demands.Ad
-
 class MainActivity : FragmentActivity() {
     private val interstitialAd by lazy {
         BNMaxInterstitialAd("applovin ad unit id", this)
@@ -193,13 +187,6 @@ class MainActivity : FragmentActivity() {
 To load a rewarded ad, get an instance of a `BNMaxRewardedAd` object that corresponds to your rewarded ad unit and then call its `loadAd` method. Implement `BNRewardedListener` so that you are notified when your ad is ready and of other ad-related events.
 
 ```kotlin
-import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
-import org.bidon.applovin.rewarded.BNMaxRewardedAd
-import org.bidon.applovin.rewarded.BNRewardedListener
-import com.appodealstack.mads.demands.Ad
-import com.appodealstack.mads.demands.RewardedAdListener
-
 class MainActivity : FragmentActivity() {
     private val rewardedAd by lazy {
         BNMaxRewardedAd("applovin ad unit id", this)
@@ -277,12 +264,6 @@ val maxAdView = ad.sourceAd as? com.applovin.mediation.ads.MaxAdView // for bann
 To load a banner AdView, get an instance of a `BNMaxAdView` class that corresponds to your rewarded ad unit and then call its `loadAd` method. Implement `BNMaxAdViewAdListener` to be notified about banner-related events.
 
 ```kotlin
-import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
-import org.bidon.applovin.banner.BNMaxAdView
-import org.bidon.applovin.impl.BNMaxAdViewAdListener
-import com.appodealstack.mads.demands.Ad
-
 class MainActivity : FragmentActivity() {
     private val bannerListener = object : BNMaxAdViewAdListener {
         override fun onAdExpanded(ad: Ad) {}

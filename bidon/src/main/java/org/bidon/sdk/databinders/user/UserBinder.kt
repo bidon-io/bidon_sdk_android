@@ -21,7 +21,6 @@ internal class UserBinder(
             trackingAuthorizationStatus = dataSource.getTrackingAuthorizationStatus(),
             applicationId = dataSource.getApplicationId(),
             consent = null,
-            coppa = false,
         )
     }
 }

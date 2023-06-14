@@ -1,8 +1,8 @@
 package org.bidon.bidmachine.impl
 
-import android.app.Activity
 import android.content.Context
 import io.bidmachine.AdRequest
+import io.bidmachine.BidMachine
 import io.bidmachine.CustomParams
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.banner.BannerListener
@@ -16,20 +16,20 @@ import org.bidon.bidmachine.BidMachineBannerSize
 import org.bidon.bidmachine.asBidonErrorOnBid
 import org.bidon.bidmachine.asBidonErrorOnFill
 import org.bidon.bidmachine.ext.asBidonAdValue
+import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
-import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceType.isTablet
 import org.bidon.sdk.ads.banner.helper.getHeightDp
 import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.auction.AuctionResult
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -43,7 +43,7 @@ internal class BMBannerAdImpl(
     private val roundId: String,
     private val auctionId: String
 ) : AdSource.Banner<BMBannerAuctionParams>,
-    WinLossNotifiable,
+    AdLoadingType.Bidding<BMBannerAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
@@ -69,8 +69,7 @@ internal class BMBannerAdImpl(
                 adRequest = request
                 adEvent.tryEmit(
                     AdEvent.Bid(
-                        AuctionResult(
-                            ecpm = result.price,
+                        AuctionResult.Bidding.Success(
                             adSource = this@BMBannerAdImpl,
                             roundStatus = RoundStatus.Successful
                         )
@@ -134,7 +133,9 @@ internal class BMBannerAdImpl(
         }
     }
 
-    override fun bid(adParams: BMBannerAuctionParams) {
+    override fun getToken(context: Context): String = BidMachine.getBidToken(context)
+
+    override fun adRequest(adParams: BMBannerAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")
         context = adParams.context
         bannerFormat = adParams.bannerFormat
@@ -142,6 +143,7 @@ internal class BMBannerAdImpl(
             .setSize(adParams.bannerFormat.asBidMachineBannerSize())
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
             .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
+            .setBidPayload(adParams.payload)
             .setLoadingTimeOut(adParams.timeout.toInt())
             .setListener(requestListener)
             .build()
@@ -165,31 +167,16 @@ internal class BMBannerAdImpl(
         }
     }
 
-    override fun show(activity: Activity) {}
-
-    override fun notifyLoss(winnerNetworkName: String, winnerNetworkPrice: Double) {
-        adRequest?.notifyMediationLoss(winnerNetworkName, winnerNetworkPrice)
-    }
-
-    override fun notifyWin() {
-        adRequest?.notifyMediationWin()
-    }
-
-    override fun getAuctionParams(
-        activity: Activity,
-        pricefloor: Double,
-        timeout: Long,
-        lineItems: List<LineItem>,
-        bannerFormat: BannerFormat,
-        onLineItemConsumed: (LineItem) -> Unit,
-        containerWidth: Float
-    ): Result<AdAuctionParams> = runCatching {
-        BMBannerAuctionParams(
-            pricefloor = pricefloor,
-            timeout = timeout,
-            context = activity.applicationContext,
-            bannerFormat = bannerFormat
-        )
+    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+        return auctionParamsScope {
+            BMBannerAuctionParams(
+                pricefloor = pricefloor,
+                timeout = timeout,
+                context = activity.applicationContext,
+                bannerFormat = bannerFormat,
+                payload = payload
+            )
+        }
     }
 
     override fun destroy() {
@@ -236,4 +223,4 @@ internal class BMBannerAdImpl(
     }
 }
 
-private const val Tag = "BidMachine Banner"
+private const val Tag = "BidMachineBanner"

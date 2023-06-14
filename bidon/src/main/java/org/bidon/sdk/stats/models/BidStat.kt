@@ -1,17 +1,18 @@
-package org.bidon.sdk.stats
+package org.bidon.sdk.stats.models
 
 import org.bidon.sdk.adapter.DemandId
-import org.bidon.sdk.stats.models.RoundStatus
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-internal data class DemandStat(
-    val roundStatus: RoundStatus,
+data class BidStat(
+    val roundStatus: RoundStatus?,
     val demandId: DemandId,
+    val ecpm: Double?,
+    val roundId: String,
     val bidStartTs: Long?,
     val bidFinishTs: Long?,
     val fillStartTs: Long?,
     val fillFinishTs: Long?,
-    val ecpm: Double?,
     val adUnitId: String?,
+    val auctionId: String,
 )
