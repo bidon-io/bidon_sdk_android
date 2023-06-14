@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,7 +29,8 @@ fun <T> ItemSelector(
 ) {
     Column(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         title?.let {
             Text(
@@ -49,7 +51,7 @@ fun <T> ItemSelector(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp),
-                mainAxisAlignment = MainAxisAlignment.Start,
+                mainAxisAlignment = MainAxisAlignment.Center,
                 mainAxisSize = SizeMode.Expand,
                 crossAxisSpacing = 6.dp,
                 mainAxisSpacing = 6.dp,
@@ -63,7 +65,7 @@ fun <T> ItemSelector(
                         modifier = Modifier
                             .clickable {
                                 if (!isSelected) {
-                                    onItemClicked.invoke(item as T)
+                                    onItemClicked.invoke(item)
                                 }
                             },
                         border = BorderStroke(

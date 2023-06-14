@@ -107,7 +107,7 @@ internal class RewardedImpl(
             }
             else -> {
                 scope.launch(Dispatchers.Main.immediate) {
-                    adSource.show(activity)
+                    (adSource as AdSource.Rewarded).show(activity)
                 }
             }
         }

@@ -11,6 +11,8 @@ import org.bidon.sdk.adapter.AdapterInfo
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Initializable
+import org.bidon.sdk.adapter.SupportsTestMode
+import org.bidon.sdk.adapter.SupportsTestModeImpl
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.unityads.ext.adapterVersion
 import org.bidon.unityads.ext.asBidonError
@@ -35,6 +37,7 @@ internal val UnityAdsDemandId = DemandId("unityads")
  */
 class UnityAdsAdapter :
     Adapter,
+    SupportsTestMode by SupportsTestModeImpl(),
     Initializable<UnityAdsParameters>,
     AdProvider.Banner<UnityAdsBannerAuctionParams>,
     AdProvider.Interstitial<UnityAdsFullscreenAuctionParams>,
@@ -48,7 +51,6 @@ class UnityAdsAdapter :
 
     override suspend fun init(context: Context, configParams: UnityAdsParameters) =
         suspendCancellableCoroutine { continuation ->
-            val isTestMode = BuildConfig.DEBUG
             UnityAds.initialize(
                 context,
                 configParams.unityGameId,

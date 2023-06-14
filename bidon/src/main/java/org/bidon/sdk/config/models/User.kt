@@ -15,8 +15,6 @@ internal data class User(
     var applicationId: String?, // ID that app generates on the very first launch and send across session.
     @field:JsonName("consent")
     var consent: Consent? = null, // TODO do not use it until ConsentManager is integrated
-    @field:JsonName("coppa")
-    var coppa: Boolean
 ) : Serializable
 
 internal data class Consent(

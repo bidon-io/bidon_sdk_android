@@ -158,12 +158,6 @@ or
 `IronSourceDecorator.setInterstitialListener(listener: IronSourceInterstitialListener)`.
 
 ```kotlin
-import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
-import org.bidon.ironsource.IronSourceDecorator
-import org.bidon.ironsource.interstitial.IronSourceLevelPlayInterstitialListener
-import com.appodealstack.mads.demands.Ad
-
 class MainActivity : FragmentActivity() {
     private val interstitialListener = object : IronSourceLevelPlayInterstitialListener {
         override fun onAdReady(ad: Ad) {
@@ -207,13 +201,6 @@ or
 
 
 ```kotlin
-import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
-import org.bidon.ironsource.IronSourceDecorator
-import org.bidon.ironsource.rewarded.IronSourceLevelPlayRewardedListener
-import com.appodealstack.mads.demands.Ad
-import com.appodealstack.mads.demands.RewardedAdListener.Reward
-
 class MainActivity : FragmentActivity() {
     private val rewardedListener = object : IronSourceLevelPlayRewardedListener {
         override fun onAdReady(ad: Ad) {
@@ -359,13 +346,6 @@ IronSourceDecorator.loadBanner(banner, placement)
 You are now all set up to serve Banners in your application.
 
 ```kotlin
-import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
-import org.bidon.ironsource.IronSourceDecorator
-import org.bidon.ironsource.banner.IronSourceLevelPlayBannerListener
-import com.appodealstack.mads.demands.Ad
-import com.appodealstack.mads.demands.banners.BannerSize
-
 class MainActivity : FragmentActivity() {
     private val bannerListener = object : IronSourceLevelPlayBannerListener {
         override fun onAdLoaded(ad: Ad) {

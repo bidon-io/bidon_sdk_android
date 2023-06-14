@@ -22,10 +22,13 @@ internal typealias BMAuctionResult = io.bidmachine.models.AuctionResult
 @Suppress("unused")
 class BidMachineAdapter :
     Adapter,
+    SupportsTestMode by SupportsTestModeImpl(),
     Initializable<BidMachineParameters>,
     AdProvider.Banner<BMBannerAuctionParams>,
     AdProvider.Rewarded<BMFullscreenAuctionParams>,
     AdProvider.Interstitial<BMFullscreenAuctionParams> {
+
+    private var context: Context? = null
 
     override val demandId = BidMachineDemandId
     override val adapterInfo = AdapterInfo(
@@ -35,7 +38,9 @@ class BidMachineAdapter :
 
     override suspend fun init(context: Context, configParams: BidMachineParameters): Unit =
         suspendCancellableCoroutine { continuation ->
+            this.context = context
             val sourceId = configParams.sellerId
+            BidMachine.setTestMode(isTestMode)
             BidMachine.setLoggingEnabled(BidonSdk.loggerLevel != Logger.Level.Off)
             BidMachine.initialize(context, sourceId) {
                 continuation.resume(Unit)

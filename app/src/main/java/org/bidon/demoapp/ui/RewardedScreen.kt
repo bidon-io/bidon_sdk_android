@@ -159,7 +159,7 @@ fun RewardedScreen(
                     text = "Notify Loss"
                 ) {
                     rewardedAd.notifyLoss(
-                        winnerDemandId = "appodeal",
+                        winnerDemandId = "some_winner_demand",
                         winnerEcpm = 123.456
                     )
                 }

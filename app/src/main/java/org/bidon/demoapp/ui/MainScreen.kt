@@ -47,6 +47,9 @@ internal fun MainScreen(
     val adapters = remember {
         mutableStateOf(DefaultAdapters.values().toList())
     }
+    val testModeState = remember {
+        mutableStateOf(false)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -87,6 +90,19 @@ internal fun MainScreen(
                             }
                         }
                     )
+                    ItemSelector(
+                        modifier = Modifier.padding(top = 16.dp),
+                        title = "Test mode",
+                        items = listOf(true, false),
+                        selectedItem = testModeState.value,
+                        getItemTitle = { testMode ->
+                            "True".takeIf { testMode } ?: "False"
+                        },
+                        onItemClicked = { testMode ->
+                            testModeState.value = testMode
+                            BidonSdk.setTestMode(testMode)
+                        }
+                    )
                     AppOutlinedButton(
                         modifier = Modifier.padding(top = 16.dp),
                         text = "Add SDK-level Extras"
@@ -125,6 +141,7 @@ internal fun MainScreen(
                     navController.navigate(Screen.ServerSettings.route)
                 }
             }
+
             MainScreenState.Initialized -> {
                 H5Text(text = "Ad types")
                 CaptionText(

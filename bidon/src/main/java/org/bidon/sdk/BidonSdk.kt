@@ -17,7 +17,7 @@ object BidonSdk {
     const val DefaultPricefloor = 0.0
     const val SdkVersion = BuildConfig.ADAPTER_VERSION
 
-    private val bidon by lazy { Bidon() }
+    internal val bidon by lazy { Bidon() }
 
     @JvmStatic
     val loggerLevel: Logger.Level
@@ -99,6 +99,18 @@ object BidonSdk {
      */
     @JvmStatic
     fun getExtras(): Map<String, Any> = bidon.getExtras()
+
+    /**
+     * Enabling test mode.
+     * In test mode test ads will be shown and debug data will be written to logcat.
+     *
+     * @param isTestMode true to enable test mode. False by default.
+     */
+    @JvmStatic
+    fun setTestMode(isTestMode: Boolean): BidonSdk {
+        bidon.isTestMode = isTestMode
+        return this
+    }
 
     /**
      * Unity uses only

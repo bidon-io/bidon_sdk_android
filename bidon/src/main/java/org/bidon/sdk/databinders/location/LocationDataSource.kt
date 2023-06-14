@@ -17,7 +17,7 @@ internal interface LocationDataSource : DataSource {
      */
     fun getLongitude(): Double?
 
-    fun getAccuracy(): Float?
+    fun getAccuracy(): Int?
     fun getLastFix(): Long?
 
     /**

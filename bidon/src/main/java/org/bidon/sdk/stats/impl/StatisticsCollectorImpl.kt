@@ -8,8 +8,8 @@ import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.auction.models.BannerRequestBody
 import org.bidon.sdk.auction.models.InterstitialRequestBody
 import org.bidon.sdk.auction.models.RewardedRequestBody
-import org.bidon.sdk.stats.BidStat
 import org.bidon.sdk.stats.StatisticsCollector
+import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.stats.models.ImpressionRequestBody
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.usecases.SendImpressionRequestUseCase
@@ -17,7 +17,7 @@ import org.bidon.sdk.stats.usecases.SendLossRequestUseCase
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.ext.SystemTimeNow
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -109,14 +109,16 @@ class StatisticsCollectorImpl(
     }
 
     override fun sendLoss(winnerDemandId: String, winnerEcpm: Double, adType: StatisticsCollector.AdType) {
-        scope.launch {
-            sendLossRequest.invoke(
-                winnerDemandId = winnerDemandId,
-                winnerEcpm = winnerEcpm,
-                demandAd = demandAd,
-                bodyKey = "bid",
-                body = createImpressionRequestBody(adType)
-            )
+        if (!isShowSent.getAndSet(true)) {
+            scope.launch {
+                sendLossRequest.invoke(
+                    winnerDemandId = winnerDemandId,
+                    winnerEcpm = winnerEcpm,
+                    demandAd = demandAd,
+                    bodyKey = "bid",
+                    body = createImpressionRequestBody(adType)
+                )
+            }
         }
     }
 
@@ -177,6 +179,7 @@ class StatisticsCollectorImpl(
         val (banner, interstitial, rewarded) = getData(adType)
         return ImpressionRequestBody(
             auctionId = stat.auctionId,
+            roundId = stat.roundId,
             auctionConfigurationId = auctionConfigurationId,
             impressionId = impressionId,
             demandId = stat.demandId.demandId,
@@ -193,9 +196,11 @@ class StatisticsCollectorImpl(
             is StatisticsCollector.AdType.Banner -> {
                 Triple(BannerRequestBody(formatCode = adType.format.code), null, null)
             }
+
             StatisticsCollector.AdType.Interstitial -> {
                 Triple(null, InterstitialRequestBody(), null)
             }
+
             StatisticsCollector.AdType.Rewarded -> {
                 Triple(null, null, RewardedRequestBody())
             }

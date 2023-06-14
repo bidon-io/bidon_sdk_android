@@ -12,6 +12,8 @@ import org.bidon.sdk.utils.serializer.Serializable
 internal data class ImpressionRequestBody(
     @field:JsonName("auction_id")
     val auctionId: String,
+    @field:JsonName("round_id")
+    val roundId: String,
     @field:JsonName("auction_configuration_id")
     val auctionConfigurationId: Int,
     @field:JsonName("imp_id")
