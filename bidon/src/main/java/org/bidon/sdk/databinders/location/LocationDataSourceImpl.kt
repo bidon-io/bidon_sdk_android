@@ -11,6 +11,7 @@ import android.location.LocationManager
 import android.os.Process
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.utils.ext.SystemTimeNow
 import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.math.roundToInt
@@ -41,7 +42,7 @@ internal class LocationDataSourceImpl(
     override fun getLatitude(): Double? = deviceLocation?.latitude
     override fun getLongitude(): Double? = deviceLocation?.longitude
     override fun getAccuracy(): Int? = deviceLocation?.accuracy?.roundToInt()
-    override fun getLastFix(): Long? = deviceLocation?.time?.let { it / 1000 }
+    override fun getLastFix(): Long? = deviceLocation?.time?.let { (SystemTimeNow - it) / 1000 }
     override fun getCountry(): String? = address?.countryCode
     override fun getRegion(): String? = address?.adminArea
     override fun getCity(): String? = address?.locality
