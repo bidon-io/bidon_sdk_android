@@ -213,8 +213,8 @@ internal class AuctionStatImpl(
                     roundStatus = this.roundStatus,
                     ecpm = this.ecpm.takeEcpmIfPossible(this.roundStatus),
                     demandId = this.adSource.demandId,
-                    bidStartTs = stat.bidStartTs,
-                    bidFinishTs = stat.bidFinishTs,
+                    bidStartTs = null,
+                    bidFinishTs = null,
                     fillStartTs = stat.fillStartTs,
                     fillFinishTs = stat.fillFinishTs,
                     adUnitId = stat.adUnitId
