@@ -58,11 +58,12 @@ internal class ExecuteRoundUseCaseImpl(
             val roundDeferred = mutableListOf<Deferred<AuctionResult>>()
 
             // Start Bidding demands auction
-            val biddingResultDeferred = if (round.biddingIds.isNotEmpty()) {
+            val biddingDemands = adSources.filterIsInstance<AdLoadingType.Bidding<AdAuctionParams>>()
+            val biddingResultDeferred = if (biddingDemands.intersect(round.biddingIds.toSet()).isNotEmpty()) {
                 async {
                     conductBiddingAuction.invoke(
                         context = adTypeParam.activity.applicationContext,
-                        biddingSources = adSources.filterIsInstance<AdLoadingType.Bidding<AdAuctionParams>>(),
+                        biddingSources = biddingDemands,
                         participantIds = round.biddingIds,
                         adTypeParam = adTypeParam,
                         demandAd = demandAd,
