@@ -35,10 +35,10 @@ internal class DeviceDataSourceImpl(
         Ethernet("ETHERNET"),
         WiFI("WIFI"),
         CellularUnknown("CELLULAR"),
-        Cellular2G("CELLULAR_2G"),
-        Cellular3G("CELLULAR_3G"),
-        Cellular4G("CELLULAR_4G"),
-        Cellular5G("CELLULAR_5G"),
+        Cellular2G("CELLULAR_2_G"),
+        Cellular3G("CELLULAR_3_G"),
+        Cellular4G("CELLULAR_4_G"),
+        Cellular5G("CELLULAR_5_G"),
     }
 
     override fun getUserAgent(): String {
