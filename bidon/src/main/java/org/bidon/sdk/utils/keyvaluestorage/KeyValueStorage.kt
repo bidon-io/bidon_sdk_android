@@ -12,6 +12,7 @@ internal interface KeyValueStorage {
     var appKey: String?
     var token: String?
     var host: String?
+    var segmentId: String?
 
     fun clear()
 }
@@ -21,4 +22,5 @@ internal enum class Key {
     BidonAppKey,
     ClientApplicationId,
     Host,
+    SegmentId,
 }

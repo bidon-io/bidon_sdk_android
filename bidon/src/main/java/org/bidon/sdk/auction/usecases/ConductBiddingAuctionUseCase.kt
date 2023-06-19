@@ -40,10 +40,12 @@ internal interface ConductBiddingAuctionUseCase {
     ): AuctionResult.Bidding
 }
 
+@Suppress("UNCHECKED_CAST")
 internal class ConductBiddingAuctionUseCaseImpl(
     private val bidRequestUseCase: BidRequestUseCase
 ) : ConductBiddingAuctionUseCase {
 
+    @Suppress("UNCHECKED_CAST")
     override suspend fun invoke(
         context: Context,
         biddingSources: List<AdLoadingType.Bidding<AdAuctionParams>>,

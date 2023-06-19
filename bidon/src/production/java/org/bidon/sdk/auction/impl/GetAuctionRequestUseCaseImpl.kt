@@ -14,6 +14,7 @@ import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
 import org.bidon.sdk.databinders.DataBinderType
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.segment.SegmentSynchronizer
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.json.JsonParsers
@@ -26,6 +27,7 @@ import org.bidon.sdk.utils.networking.requests.CreateRequestBodyUseCase
 internal class GetAuctionRequestUseCaseImpl(
     private val createRequestBody: CreateRequestBodyUseCase,
     private val getOrientation: GetOrientationUseCase,
+    private val segmentSynchronizer: SegmentSynchronizer,
 ) : GetAuctionRequestUseCase {
     private val binders: List<DataBinderType> = listOf(
         DataBinderType.AvailableAdapters,
@@ -66,6 +68,7 @@ internal class GetAuctionRequestUseCaseImpl(
                 path = "$AuctionRequestPath/${additionalData.asAdType().code}",
                 body = requestBody,
             ).mapCatching { jsonResponse ->
+                segmentSynchronizer.parseSegmentId(jsonResponse)
                 requireNotNull(JsonParsers.parseOrNull<AuctionResponse>(jsonResponse))
             }.onFailure {
                 logError(Tag, "Error while loading auction data", it)

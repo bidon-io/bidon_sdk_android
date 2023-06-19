@@ -5,6 +5,8 @@ import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.databinders.extras.ExtrasImpl
 import org.bidon.sdk.logs.logging.Logger
 import org.bidon.sdk.logs.logging.impl.LoggerImpl
+import org.bidon.sdk.segment.Segmentation
+import org.bidon.sdk.segment.impl.SegmentationImpl
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -12,4 +14,5 @@ import org.bidon.sdk.logs.logging.impl.LoggerImpl
 internal class Bidon :
     BidonInitializer by BidonInitializerImpl(),
     Logger by LoggerImpl(),
-    Extras by ExtrasImpl()
+    Extras by ExtrasImpl(),
+    Segmentation by SegmentationImpl()

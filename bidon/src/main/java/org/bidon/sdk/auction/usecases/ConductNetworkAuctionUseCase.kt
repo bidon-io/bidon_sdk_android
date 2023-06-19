@@ -36,10 +36,11 @@ internal interface ConductNetworkAuctionUseCase {
         lineItems: List<LineItem>,
         round: Round,
         pricefloor: Double,
-        coroutineScope: CoroutineScope
+        scope: CoroutineScope
     ): DeferredRoundResult
 }
 
+@Suppress("UNCHECKED_CAST")
 internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
     override fun invoke(
         context: Context,

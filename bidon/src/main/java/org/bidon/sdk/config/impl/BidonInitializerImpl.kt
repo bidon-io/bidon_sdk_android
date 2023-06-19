@@ -16,6 +16,7 @@ import org.bidon.sdk.config.usecases.InitAndRegisterAdaptersUseCase
 import org.bidon.sdk.databinders.session.SessionTracker
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.segment.SegmentSynchronizer
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.DI
 import org.bidon.sdk.utils.di.get
@@ -40,6 +41,7 @@ internal class BidonInitializerImpl : BidonInitializer {
     private val adapterInstanceCreator: AdapterInstanceCreator get() = get()
     private val keyValueStorage: KeyValueStorage get() = get()
     private val bidOnEndpoints: BidonEndpoints get() = get()
+    private val segmentSynchronizer: SegmentSynchronizer get() = get()
 
     init {
         DI.setFactories()
@@ -88,6 +90,7 @@ internal class BidonInitializerImpl : BidonInitializer {
              */
             DI.init(context)
             scope.launch {
+                obtainSegmentId()
                 runCatching {
                     init(context, appKey, timeStart)
                 }.onFailure {
@@ -98,6 +101,14 @@ internal class BidonInitializerImpl : BidonInitializer {
                     initializationState.value = SdkState.Initialized
                 }
                 notifyInitialized()
+            }
+        }
+    }
+
+    private suspend fun obtainSegmentId() {
+        withContext(SdkDispatchers.IO) {
+            keyValueStorage.segmentId?.let {
+                segmentSynchronizer.setSegmentId(segmentId = it)
             }
         }
     }

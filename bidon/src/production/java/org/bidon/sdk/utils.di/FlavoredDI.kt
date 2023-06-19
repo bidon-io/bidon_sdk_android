@@ -14,13 +14,14 @@ object FlavoredDI {
             factory<GetAuctionRequestUseCase> {
                 GetAuctionRequestUseCaseImpl(
                     createRequestBody = get(),
-                    getOrientation = get()
+                    getOrientation = get(),
+                    segmentSynchronizer = get()
                 )
             }
             factory<GetConfigRequestUseCase> {
                 GetConfigRequestUseCaseImpl(
                     createRequestBody = get(),
-                    segmentDataSource = get()
+                    segmentSynchronizer = get()
                 )
             }
         }
