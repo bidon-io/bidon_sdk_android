@@ -134,7 +134,7 @@ internal class AuctionStatImpl(
             is Bidding.Failure.NoBid -> {
                 DemandStat.Bidding(
                     roundStatus = RoundStatus.NoBid,
-                    ecpm = pricefloor,
+                    ecpm = null,
                     demandId = null,
                     bidStartTs = biddingResult.biddingStartTimeTs,
                     bidFinishTs = biddingResult.biddingFinishTimeTs,
@@ -145,8 +145,8 @@ internal class AuctionStatImpl(
 
             Bidding.Failure.TimeoutReached -> {
                 DemandStat.Bidding(
-                    roundStatus = RoundStatus.NoBid,
-                    ecpm = pricefloor,
+                    roundStatus = RoundStatus.BidTimeoutReached,
+                    ecpm = null,
                     demandId = null,
                     bidStartTs = null,
                     bidFinishTs = null,
