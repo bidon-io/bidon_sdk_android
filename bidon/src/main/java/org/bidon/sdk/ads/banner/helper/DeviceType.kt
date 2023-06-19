@@ -19,6 +19,7 @@ object DeviceType {
      * Only visual Contexts (such as Activity or one created with Context#createWindowContext)
      * or ones created with Context#createDisplayContext are associated with displays.
      */
+    @Suppress("DEPRECATION")
     fun init(context: Context) {
         val display: Display = getDisplay(context) ?: return
         val metrics = DisplayMetrics()
@@ -31,6 +32,7 @@ object DeviceType {
         isTablet = (screenInches > 7.0)
     }
 
+    @Suppress("DEPRECATION")
     private fun getDisplay(context: Context): Display? {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         return windowManager.defaultDisplay

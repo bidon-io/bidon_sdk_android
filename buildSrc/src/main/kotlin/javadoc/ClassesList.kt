@@ -30,5 +30,6 @@ object ClassesList {
         "org/bidon/sdk/logs/analytic/AdRevenueListener.kt",
         "org/bidon/sdk/logs/analytic/AdValue.kt",
         "org/bidon/sdk/logs/analytic/Precision.kt",
+        "org/bidon/sdk/segment/Segment.kt",
     )
 }

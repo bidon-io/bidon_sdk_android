@@ -12,7 +12,6 @@ import org.bidon.sdk.auction.models.Round
 import org.bidon.sdk.stats.models.DemandStat
 import org.bidon.sdk.stats.models.RoundStat
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.stats.usecases.SendStatisticsAsyncUseCase.Companion.takeEcpmIfPossible
 import org.bidon.sdk.stats.usecases.StatsRequestUseCase
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.ext.SystemTimeNow
@@ -228,6 +227,15 @@ internal class AuctionStatImpl(
             isWinner -> RoundStatus.Win
             this == RoundStatus.Successful -> RoundStatus.Loss
             else -> this
+        }
+    }
+
+    private fun Double?.takeEcpmIfPossible(status: RoundStatus): Double? {
+        return this?.takeIf {
+            status !in arrayOf(
+                RoundStatus.NoBid,
+                RoundStatus.NoAppropriateAdUnitId
+            )
         }
     }
 }

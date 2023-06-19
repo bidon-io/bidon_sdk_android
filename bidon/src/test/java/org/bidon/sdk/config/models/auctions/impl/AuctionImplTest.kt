@@ -4,7 +4,6 @@ import android.app.Activity
 import android.util.Log
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -34,7 +33,6 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.models.RoundStat
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.stats.usecases.SendStatisticsAsyncUseCase
 import org.bidon.sdk.utils.di.DI
 import org.bidon.sdk.utils.di.SimpleDiStorage
 import org.bidon.sdk.utils.ext.asSuccess
@@ -51,7 +49,6 @@ internal class AuctionImplTest : ConcurrentTest() {
 
     private val activity: Activity by lazy { mockk() }
     private val getAuctionRequestUseCase: GetAuctionRequestUseCase = mockk()
-    private val sendStatisticsAsyncUseCase: SendStatisticsAsyncUseCase = mockk(relaxed = true)
 
     private val adaptersSource: AdaptersSource by lazy { mockk(relaxed = true) }
 
@@ -167,16 +164,6 @@ internal class AuctionImplTest : ConcurrentTest() {
             val roundStat = slot<List<RoundStat>>()
             val demandAd = slot<DemandAd>()
             // AND CHECK STAT REQUEST
-            coVerify(exactly = 1) {
-                sendStatisticsAsyncUseCase.invoke(
-                    demandAd = capture(demandAd),
-                    auctionResponse = any(),
-                    auctionFinishTs = 1000,
-                    auctionStartTs = 1300,
-                    statsRound = capture(roundStat),
-                    statsAuctionResults = any()
-                )
-            }
             assertThat(demandAd.captured.adType).isEqualTo(AdType.Interstitial)
             val actualRoundStat = roundStat.captured
             // LOSERS
