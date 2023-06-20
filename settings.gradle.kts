@@ -13,16 +13,11 @@ dependencyResolutionManagement {
         google()
         // mavenLocal()
         mavenCentral()
-        maven {
-            url = uri("https://artifacts.applovin.com/android")
-        }
-        maven {
-            name = "BidMachine Ads maven repository"
-            url = uri("https://artifactory.bidmachine.io/bidmachine")
-        }
-        maven {
-            url = uri("https://android-sdk.is.com/")
-        }
+        maven("https://dl-maven-android.mintegral.com/repository/mbridge_android_sdk_oversea")
+        maven("https://artifacts.applovin.com/android")
+        maven("https://artifactory.bidmachine.io/bidmachine")
+        maven("https://android-sdk.is.com/")
+
         maven {
             url = uri("https://maven.pkg.github.com/bidon-io/bidon-sdk-android")
             credentials {
@@ -44,6 +39,7 @@ include(
     ":adapter:applovin",
     ":adapter:dtexchange",
     ":adapter:unityads",
+    ":adapter:mintegral",
 //    ":adapter:fyber",
 //    ":adapter:ironsource",
 //    ":adapter:appsflyer"
