@@ -79,12 +79,13 @@ android {
 }
 
 dependencies {
-//    implementation("io.bidon:bidon-sdk:0.1.0-Beta")
-//    implementation("io.bidon:admob-adapter:0.1.0.1-Beta")
-//    implementation("io.bidon:bidmachine-adapter:0.1.0.1-Beta")
-//    implementation("io.bidon:applovin-adapter:0.1.0.1-Beta")
-//    implementation("io.bidon:dtexchange-adapter:0.1.0.1-Beta")
-//    implementation("io.bidon:unityads-adapter:0.1.0.1-Beta")
+//    implementation("io.bidon:bidon-sdk:0.3.0")
+//    implementation("io.bidon:admob-adapter:0.3.0.0")
+//    implementation("io.bidon:bidmachine-adapter:0.3.0.0")
+//    implementation("io.bidon:applovin-adapter:0.3.0.0")
+//    implementation("io.bidon:dtexchange-adapter:0.3.0.0")
+//    implementation("io.bidon:unityads-adapter:0.3.0.0")
+//    implementation("io.bidon:mintegral-adapter:0.3.0.0")
 
     implementation(project(":bidon"))
     implementation(project(":adapter:bidmachine"))
@@ -92,9 +93,7 @@ dependencies {
     implementation(project(":adapter:applovin"))
     implementation(project(":adapter:dtexchange"))
     implementation(project(":adapter:unityads"))
-//    implementation(project(":adapter:appsflyer"))
-//    implementation(project(":adapter:fyber"))
-//    implementation(project(":adapter:ironsource"))
+    implementation(project(":adapter:mintegral"))
 
     implementation(Dependencies.Google.PlayServicesAdsIdentifier)
 
