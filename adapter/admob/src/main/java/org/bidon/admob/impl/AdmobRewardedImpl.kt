@@ -1,6 +1,7 @@
 package org.bidon.admob.impl
 
 import android.app.Activity
+import com.google.ads.mediation.admob.AdMobAdapter
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
@@ -8,6 +9,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.admob.AdmobFullscreenAdAuctionParams
 import org.bidon.admob.asBidonError
 import org.bidon.admob.ext.asBidonAdValue
+import org.bidon.admob.ext.asBundle
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.rewarded.Reward
@@ -137,7 +140,9 @@ internal class AdmobRewardedImpl(
     override fun fill(adParams: AdmobFullscreenAdAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")
         param = adParams
-        val adRequest = AdRequest.Builder().build()
+        val adRequest = AdRequest.Builder()
+            .addNetworkExtrasBundle(AdMobAdapter::class.java, BidonSdk.regulation.asBundle())
+            .build()
         val adUnitId = param?.lineItem?.adUnitId
         if (!adUnitId.isNullOrBlank()) {
             val requestListener = object : RewardedAdLoadCallback() {

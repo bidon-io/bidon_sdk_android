@@ -14,6 +14,6 @@ internal class RegulationsBinder(
         get() = "regs"
 
     override suspend fun getJsonObject(): JSONObject {
-        return dataSource.regulations.serialize()
+        return dataSource.regulationsRequestBody.serialize()
     }
 }

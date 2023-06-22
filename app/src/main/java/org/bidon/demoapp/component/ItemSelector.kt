@@ -23,6 +23,7 @@ fun <T> ItemSelector(
     title: String? = null,
     description: String? = null,
     items: List<T>,
+    horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     selectedItem: T? = null,
     getItemTitle: (T) -> String,
     onItemClicked: (T) -> Unit,
@@ -30,7 +31,7 @@ fun <T> ItemSelector(
     Column(
         modifier = modifier
             .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = horizontalAlignment
     ) {
         title?.let {
             Text(
@@ -51,7 +52,14 @@ fun <T> ItemSelector(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp),
-                mainAxisAlignment = MainAxisAlignment.Center,
+                mainAxisAlignment = when (horizontalAlignment) {
+                    Alignment.Start -> {
+                        MainAxisAlignment.Start
+                    }
+                    else -> {
+                        MainAxisAlignment.Center
+                    }
+                },
                 mainAxisSize = SizeMode.Expand,
                 crossAxisSpacing = 6.dp,
                 mainAxisSpacing = 6.dp,

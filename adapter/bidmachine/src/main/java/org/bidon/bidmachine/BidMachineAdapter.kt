@@ -10,7 +10,9 @@ import org.bidon.bidmachine.impl.BMInterstitialAdImpl
 import org.bidon.bidmachine.impl.BMRewardedAdImpl
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
 import org.bidon.sdk.logs.logging.Logger
+import org.bidon.sdk.regulation.Regulation
 import org.json.JSONObject
 import kotlin.coroutines.resume
 
@@ -22,6 +24,7 @@ internal typealias BMAuctionResult = io.bidmachine.models.AuctionResult
 @Suppress("unused")
 class BidMachineAdapter :
     Adapter,
+    SupportsRegulation,
     SupportsTestMode by SupportsTestModeImpl(),
     Initializable<BidMachineParameters>,
     AdProvider.Banner<BMBannerAuctionParams>,
@@ -59,6 +62,16 @@ class BidMachineAdapter :
                     }
                 }
             },
+        )
+    }
+
+    override fun updateRegulation(regulation: Regulation) {
+        BidMachine.setUSPrivacyString(regulation.usPrivacyString)
+        BidMachine.setCoppa(regulation.coppaApplies)
+        BidMachine.setSubjectToGDPR(regulation.gdprConsent)
+        BidMachine.setConsentConfig(
+            /* hasConsent = */ !regulation.gdprConsentString.isNullOrBlank(),
+            /* consentString = */ regulation.gdprConsentString
         )
     }
 

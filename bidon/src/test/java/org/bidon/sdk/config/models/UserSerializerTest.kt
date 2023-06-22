@@ -16,7 +16,6 @@ internal class UserSerializerTest {
             platformAdvertisingId = "123",
             trackingAuthorizationStatus = "asd",
             applicationId = "a.a.a",
-            consent = null,
         ).serialize()
 
         actual.assertEquals(

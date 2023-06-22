@@ -1,6 +1,7 @@
 package org.bidon.admob.impl
 
 import android.app.Activity
+import com.google.ads.mediation.admob.AdMobAdapter
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -12,6 +13,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.admob.AdmobFullscreenAdAuctionParams
 import org.bidon.admob.asBidonError
 import org.bidon.admob.ext.asBidonAdValue
+import org.bidon.admob.ext.asBundle
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
@@ -132,7 +135,9 @@ internal class AdmobInterstitialImpl(
     override fun fill(adParams: AdmobFullscreenAdAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")
         param = adParams
-        val adRequest = AdRequest.Builder().build()
+        val adRequest = AdRequest.Builder()
+            .addNetworkExtrasBundle(AdMobAdapter::class.java, BidonSdk.regulation.asBundle())
+            .build()
         val adUnitId = param?.lineItem?.adUnitId
         if (!adUnitId.isNullOrBlank()) {
             val requestListener = object : InterstitialAdLoadCallback() {

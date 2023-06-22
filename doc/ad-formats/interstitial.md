@@ -3,10 +3,10 @@
 ## Loading an Interstitial Ad
 
 To load an interstitial ad, create a `Interstitial` instance.
-Important: for a single instance of an Interstitial, load() and show() can only be called once. Create new instance for every new interstitial ad.
+Important: for a single instance of an InterstitialAd, load() and show() can only be called once. Create new instance for every new interstitial ad.
 
 ```kotlin
-val interstitial = Interstitial()
+val interstitial = InterstitialAd()
 ```
 
 Set `InterstitialListener` for receiving all-related events, including loading/displaying and revenue callbacks.

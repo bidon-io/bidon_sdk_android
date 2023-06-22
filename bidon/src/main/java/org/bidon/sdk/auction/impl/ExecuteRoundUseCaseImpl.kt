@@ -10,6 +10,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.SupportsRegulation
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.AuctionResult
@@ -21,11 +22,13 @@ import org.bidon.sdk.auction.usecases.ConductNetworkAuctionUseCase
 import org.bidon.sdk.auction.usecases.models.ExecuteRoundUseCase
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.regulation.Regulation
 
 internal class ExecuteRoundUseCaseImpl(
     private val adaptersSource: AdaptersSource,
     private val conductBiddingAuction: ConductBiddingAuctionUseCase,
     private val conductNetworkAuction: ConductNetworkAuctionUseCase,
+    private val regulation: Regulation,
 ) : ExecuteRoundUseCase {
     override suspend fun invoke(
         demandAd: DemandAd,
@@ -40,6 +43,12 @@ internal class ExecuteRoundUseCaseImpl(
         runCatching {
             val filteredAdapters = adaptersSource.adapters.filter {
                 it.demandId.demandId in (round.demandIds + round.biddingIds)
+            }
+            filteredAdapters.forEach {
+                (it as? SupportsRegulation)?.let { supportsRegulation ->
+                    logInfo(Tag, "Applying regulation to ${it.demandId.demandId}")
+                    supportsRegulation.updateRegulation(regulation)
+                }
             }
             (round.demandIds - filteredAdapters.map { it.demandId.demandId }.toSet())
                 .takeIf { it.isNotEmpty() }
