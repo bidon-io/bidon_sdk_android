@@ -8,7 +8,3 @@ package org.bidon.sdk.adapter
 interface SupportsTestMode {
     var isTestMode: Boolean
 }
-
-class SupportsTestModeImpl : SupportsTestMode {
-    override var isTestMode: Boolean = false
-}

@@ -64,6 +64,10 @@ import org.bidon.sdk.databinders.user.UserBinder
 import org.bidon.sdk.databinders.user.UserDataSource
 import org.bidon.sdk.databinders.user.impl.AdvertisingDataImpl
 import org.bidon.sdk.databinders.user.impl.UserDataSourceImpl
+import org.bidon.sdk.regulation.IabConsent
+import org.bidon.sdk.regulation.Regulation
+import org.bidon.sdk.regulation.impl.IabConsentImpl
+import org.bidon.sdk.regulation.impl.RegulationImpl
 import org.bidon.sdk.segment.Segment
 import org.bidon.sdk.segment.SegmentSynchronizer
 import org.bidon.sdk.segment.impl.SegmentImpl
@@ -140,6 +144,7 @@ internal object DI {
 
             // [SegmentDataSource] should be singleton per session
             singleton<TokenDataSource> { TokenDataSourceImpl(keyValueStorage = get()) }
+            singleton<Regulation> { RegulationImpl() }
             /**
              * [SegmentSynchronizer] depends on it
              */
@@ -198,7 +203,8 @@ internal object DI {
                 ExecuteRoundUseCaseImpl(
                     conductNetworkAuction = get(),
                     conductBiddingAuction = get(),
-                    adaptersSource = get()
+                    adaptersSource = get(),
+                    regulation = get()
                 )
             }
 
@@ -249,8 +255,14 @@ internal object DI {
                 )
             }
             factory<Extras> { ExtrasImpl() }
+            factory<IabConsent> { IabConsentImpl(context = get()) }
             factory { VisibilityTracker() }
-            factory<RegulationDataSource> { RegulationDataSourceImpl() }
+            factory<RegulationDataSource> {
+                RegulationDataSourceImpl(
+                    publisherRegulations = get(),
+                    iabConsent = get()
+                )
+            }
 
             factory<SendLossRequestUseCase> {
                 SendLossRequestUseCaseImpl(

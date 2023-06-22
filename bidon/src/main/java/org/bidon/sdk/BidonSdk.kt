@@ -8,6 +8,7 @@ import org.bidon.sdk.config.impl.Bidon
 import org.bidon.sdk.databinders.app.UnitySpecificInfo
 import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.logging.Logger
+import org.bidon.sdk.regulation.Regulation
 import org.bidon.sdk.segment.Segment
 import org.bidon.sdk.utils.networking.NetworkSettings
 
@@ -31,6 +32,10 @@ object BidonSdk {
     @JvmStatic
     val loggerLevel: Logger.Level
         get() = bidon.loggerLevel
+
+    @JvmStatic
+    val regulation: Regulation
+        get() = bidon.regulation
 
     @JvmStatic
     fun isInitialized(): Boolean = bidon.isInitialized

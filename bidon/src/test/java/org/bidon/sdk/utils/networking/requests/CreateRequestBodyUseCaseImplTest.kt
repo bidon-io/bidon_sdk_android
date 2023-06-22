@@ -35,7 +35,6 @@ internal class CreateRequestBodyUseCaseImplTest : ConcurrentTest() {
                 platformAdvertisingId = "123",
                 trackingAuthorizationStatus = "asd",
                 applicationId = "a.a.a",
-                consent = null,
             ),
             dataKeyName = "user_key"
         )
@@ -69,7 +68,6 @@ internal class CreateRequestBodyUseCaseImplTest : ConcurrentTest() {
                 platformAdvertisingId = "123",
                 trackingAuthorizationStatus = "asd",
                 applicationId = null,
-                consent = null,
             ),
             dataKeyName = "user_key"
         )

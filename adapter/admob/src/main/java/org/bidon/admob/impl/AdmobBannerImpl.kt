@@ -4,11 +4,14 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.DisplayMetrics
 import android.view.WindowManager
+import com.google.ads.mediation.admob.AdMobAdapter
 import com.google.android.gms.ads.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.admob.AdmobBannerAuctionParams
 import org.bidon.admob.asBidonError
 import org.bidon.admob.ext.asBidonAdValue
+import org.bidon.admob.ext.asBundle
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
@@ -156,7 +159,9 @@ internal class AdmobBannerImpl(
                 .also {
                     adView = it
                 }
-            val adRequest = AdRequest.Builder().build()
+            val adRequest = AdRequest.Builder()
+                .addNetworkExtrasBundle(AdMobAdapter::class.java, BidonSdk.regulation.asBundle())
+                .build()
             adView.loadAd(adRequest)
         } else {
             val error = BidonError.NoAppropriateAdUnitId
