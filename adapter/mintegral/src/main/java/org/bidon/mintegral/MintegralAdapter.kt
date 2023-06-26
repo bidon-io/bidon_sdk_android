@@ -67,8 +67,8 @@ class MintegralAdapter :
     override fun parseConfigParam(json: String): MintegralInitParam {
         val jsonObject = JSONObject(json)
         return MintegralInitParam(
-            appId = jsonObject.optString("app_id") ?: "144002",
-            appKey = jsonObject.optString("app_key") ?: "7c22942b749fe6a6e361b675e96b3ee9"
+            appId = jsonObject.optString("app_id") ,
+            appKey = jsonObject.optString("app_key")
         )
     }
 
