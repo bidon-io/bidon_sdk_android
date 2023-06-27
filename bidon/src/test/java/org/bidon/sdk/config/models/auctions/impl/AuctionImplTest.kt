@@ -1,13 +1,11 @@
 package org.bidon.sdk.config.models.auctions.impl
 
 import android.app.Activity
-import android.util.Log
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -23,16 +21,20 @@ import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.Round
+import org.bidon.sdk.auction.usecases.AuctionStat
+import org.bidon.sdk.auction.usecases.AuctionStatImpl
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
-import org.bidon.sdk.base.ConcurrentTest
+import org.bidon.sdk.auction.usecases.models.ExecuteRoundUseCase
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.config.models.adapters.Process
 import org.bidon.sdk.config.models.adapters.TestAdapter
 import org.bidon.sdk.config.models.adapters.TestAdapterParameters
-import org.bidon.sdk.logs.logging.impl.logError
-import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.config.models.adapters.TestBiddingAdapter
+import org.bidon.sdk.config.models.base.ConcurrentTest
+import org.bidon.sdk.mockkLog
 import org.bidon.sdk.stats.models.RoundStat
 import org.bidon.sdk.stats.models.RoundStatus
+import org.bidon.sdk.stats.usecases.StatsRequestUseCase
 import org.bidon.sdk.utils.di.DI
 import org.bidon.sdk.utils.di.SimpleDiStorage
 import org.bidon.sdk.utils.ext.asSuccess
@@ -41,8 +43,9 @@ import org.junit.Before
 import org.junit.Test
 import kotlin.test.Ignore
 
-private const val Applovin = "applovin"
-private const val Admob = "admob"
+internal const val BidMachine = "bidmachine"
+internal const val Applovin = "applovin"
+internal const val Admob = "admob"
 
 @ExperimentalCoroutinesApi
 internal class AuctionImplTest : ConcurrentTest() {
@@ -51,13 +54,19 @@ internal class AuctionImplTest : ConcurrentTest() {
     private val getAuctionRequestUseCase: GetAuctionRequestUseCase = mockk()
 
     private val adaptersSource: AdaptersSource by lazy { mockk(relaxed = true) }
+    private val executeRoundUseCase: ExecuteRoundUseCase by lazy { mockk(relaxed = true) }
+    private val statRequestUseCase: StatsRequestUseCase by lazy { mockk(relaxed = true) }
+
+    private val auctionStat: AuctionStat by lazy {
+        AuctionStatImpl(statRequestUseCase)
+    }
 
     private val testee: Auction by lazy {
         AuctionImpl(
             adaptersSource = adaptersSource,
             getAuctionRequest = getAuctionRequestUseCase,
-            auctionStat = mockk(),
-            executeRound = mockk()
+            auctionStat = auctionStat,
+            executeRound = executeRoundUseCase
         )
     }
 
@@ -66,12 +75,7 @@ internal class AuctionImplTest : ConcurrentTest() {
         mockkObject(DeviceType)
         every { DeviceType.init(any()) } returns Unit
         DI.init(activity)
-        DI.setFactories()
-        mockkStatic(Log::class)
-        mockkStatic(::logInfo)
-        every { logInfo(any(), any()) } returns Unit
-        every { logInfo(any(), any()) } returns Unit
-        every { logError(any(), any(), any()) } returns Unit
+        mockkLog()
     }
 
     @After
@@ -93,6 +97,13 @@ internal class AuctionImplTest : ConcurrentTest() {
             ),
             TestAdapter(
                 demandId = DemandId(Admob),
+                testAdapterParameters = TestAdapterParameters(
+                    bid = Process.Succeed,
+                    fill = Process.Succeed,
+                )
+            ),
+            TestBiddingAdapter(
+                demandId = DemandId(BidMachine),
                 testAdapterParameters = TestAdapterParameters(
                     bid = Process.Succeed,
                     fill = Process.Succeed,

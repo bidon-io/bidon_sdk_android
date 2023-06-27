@@ -11,7 +11,7 @@ import org.bidon.sdk.adapter.Initializable
 import org.bidon.sdk.adapter.SupportsRegulation
 import org.bidon.sdk.regulation.Regulation
 
-internal class TestAdapter(
+internal class TestBiddingAdapter(
     override val demandId: DemandId,
     private val testAdapterParameters: TestAdapterParameters,
 ) : Adapter,
@@ -32,7 +32,7 @@ internal class TestAdapter(
         roundId: String,
         auctionId: String
     ): AdSource.Interstitial<TestInterstitialParameters> {
-        return TestInterstitialImpl(
+        return TestBiddingInterstitialImpl(
             demandId = demandId,
             auctionId = auctionId,
             roundId = roundId,

@@ -54,7 +54,6 @@ internal class AuctionStatImpl(
         val roundWinner = roundResults.firstOrNull { it.roundStatus == RoundStatus.Successful }
         val networkResults = roundResults.filterIsInstance<AuctionResult.Network>()
         val biddingResult = roundResults.filterIsInstance<Bidding>().firstOrNull()
-        val unknownNetworkDemands = networkResults.findUnknownNetworkDemands(round)
         val roundStat = RoundStat(
             auctionId = auctionId,
             roundId = round.id,
@@ -63,7 +62,7 @@ internal class AuctionStatImpl(
             winnerEcpm = roundWinner?.ecpm,
             demands = networkResults.map {
                 it.asDemandStat(pricefloor) as DemandStat.Network
-            } + unknownNetworkDemands,
+            },
             bidding = biddingResult?.asDemandStatBidding(pricefloor)
         )
         statsRound.add(roundStat)
@@ -96,23 +95,6 @@ internal class AuctionStatImpl(
                 auctionFinishTs = SystemTimeNow
             )
         }
-    }
-
-    private fun List<AuctionResult.Network>.findUnknownNetworkDemands(round: Round): List<DemandStat.Network> {
-        return (round.demandIds - this.map { it.adSource.demandId.demandId }.toSet())
-            .takeIf { it.isNotEmpty() }
-            ?.map { demandId ->
-                DemandStat.Network(
-                    roundStatus = RoundStatus.UnknownAdapter,
-                    demandId = DemandId(demandId),
-                    bidStartTs = null,
-                    bidFinishTs = null,
-                    fillStartTs = null,
-                    fillFinishTs = null,
-                    ecpm = null,
-                    adUnitId = null
-                )
-            } ?: emptyList()
     }
 
     private fun Bidding.asDemandStatBidding(pricefloor: Double): DemandStat.Bidding {
@@ -206,7 +188,7 @@ internal class AuctionStatImpl(
                 )
             }
 
-            is AuctionResult.Network -> {
+            is AuctionResult.Network.Success -> {
                 val stat = this.adSource.buildBidStatistic()
                 DemandStat.Network(
                     roundStatus = this.roundStatus,
@@ -217,6 +199,19 @@ internal class AuctionStatImpl(
                     fillStartTs = stat.fillStartTs,
                     fillFinishTs = stat.fillFinishTs,
                     adUnitId = stat.adUnitId
+                )
+            }
+
+            is AuctionResult.Network.UnknownAdapter -> {
+                DemandStat.Network(
+                    roundStatus = RoundStatus.UnknownAdapter,
+                    demandId = DemandId(this.adapterName),
+                    bidStartTs = null,
+                    bidFinishTs = null,
+                    fillStartTs = null,
+                    fillFinishTs = null,
+                    ecpm = null,
+                    adUnitId = null
                 )
             }
         }

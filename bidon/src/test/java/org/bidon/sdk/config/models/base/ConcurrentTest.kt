@@ -1,4 +1,4 @@
-package org.bidon.sdk.base
+package org.bidon.sdk.config.models.base
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext

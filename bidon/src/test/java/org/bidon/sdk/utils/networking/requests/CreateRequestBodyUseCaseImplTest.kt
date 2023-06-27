@@ -5,8 +5,8 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.bidon.sdk.base.ConcurrentTest
 import org.bidon.sdk.config.models.User
+import org.bidon.sdk.config.models.base.ConcurrentTest
 import org.bidon.sdk.config.models.json_scheme_utils.assertEquals
 import org.bidon.sdk.config.models.json_scheme_utils.expectedJsonStructure
 import org.bidon.sdk.databinders.DataProvider

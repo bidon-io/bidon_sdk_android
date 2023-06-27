@@ -78,7 +78,7 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
                             mutableLineItems.remove(lineItem)
                         }
                     )
-                    AuctionResult.Network(
+                    AuctionResult.Network.Success(
                         adSource = adSource,
                         roundStatus = when (adEvent) {
                             is AdEvent.Fill -> RoundStatus.Successful
