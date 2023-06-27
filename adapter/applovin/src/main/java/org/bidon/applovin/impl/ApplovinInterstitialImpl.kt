@@ -48,7 +48,7 @@ internal class ApplovinInterstitialImpl(
                 applovinAd = ad
                 adEvent.tryEmit(
                     AdEvent.Bid(
-                        AuctionResult.Network(
+                        AuctionResult.Network.Success(
                             adSource = this@ApplovinInterstitialImpl,
                             roundStatus = RoundStatus.Successful
                         )

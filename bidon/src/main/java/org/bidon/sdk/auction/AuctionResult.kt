@@ -11,13 +11,23 @@ sealed interface AuctionResult {
     val ecpm: Double
     val roundStatus: RoundStatus
 
-    class Network(
-        override val adSource: AdSource<*>,
-        override val roundStatus: RoundStatus,
-    ) : AuctionResult {
-        override val ecpm: Double get() = adSource.ad?.ecpm ?: 0.0
-        override fun toString(): String {
-            return "AuctionResult.Network(ecpm=$ecpm, roundStatus=$roundStatus, ${adSource.demandId})"
+    sealed interface Network : AuctionResult {
+        class Success(
+            override val adSource: AdSource<*>,
+            override val roundStatus: RoundStatus,
+        ) : Network {
+            override val ecpm: Double get() = adSource.ad?.ecpm ?: 0.0
+            override fun toString(): String {
+                return "AuctionResult.Network(ecpm=$ecpm, roundStatus=$roundStatus, ${adSource.demandId})"
+            }
+        }
+
+        data class UnknownAdapter(
+            val adapterName: String
+        ) : Network {
+            override val roundStatus = RoundStatus.UnknownAdapter
+            override val ecpm: Double get() = error("unexpected")
+            override val adSource: AdSource<*> get() = error("unexpected")
         }
     }
 
@@ -51,7 +61,7 @@ sealed interface AuctionResult {
 
             object TimeoutReached : Failure {
                 override val adSource: AdSource<*> get() = error("unexpected")
-                override val ecpm: Double = error("unexpected")
+                override val ecpm: Double get() = error("unexpected")
                 override val roundStatus: RoundStatus = RoundStatus.BidTimeoutReached
             }
         }

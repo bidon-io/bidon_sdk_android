@@ -6,8 +6,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import kotlinx.coroutines.test.runTest
-import org.bidon.sdk.base.ConcurrentTest
 import org.bidon.sdk.config.models.Token
+import org.bidon.sdk.config.models.base.ConcurrentTest
 import org.bidon.sdk.databinders.token.TokenBinder
 import org.bidon.sdk.databinders.token.TokenDataSource
 import org.bidon.sdk.logs.logging.impl.logError

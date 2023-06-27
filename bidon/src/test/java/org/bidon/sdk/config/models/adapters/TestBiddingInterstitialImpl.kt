@@ -1,6 +1,7 @@
 package org.bidon.sdk.config.models.adapters
 
 import android.app.Activity
+import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -22,14 +23,14 @@ import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
 
-internal class TestInterstitialImpl(
+internal class TestBiddingInterstitialImpl(
     override val demandId: DemandId,
     private val auctionId: String,
     private val roundId: String,
     private val testParameters: TestAdapterParameters,
     private val demandAd: DemandAd = DemandAd(AdType.Interstitial),
 ) : AdSource.Interstitial<TestInterstitialParameters>,
-    AdLoadingType.Network<TestInterstitialParameters>,
+    AdLoadingType.Bidding<TestInterstitialParameters>,
     StatisticsCollector by StatisticsCollectorImpl(auctionId, roundId, demandId, demandAd) {
 
     private lateinit var adParams: TestInterstitialParameters
@@ -52,22 +53,28 @@ internal class TestInterstitialImpl(
     override val isAdReadyToShow: Boolean
         get() = testParameters.fill == Process.Succeed
 
-    override fun fill(adParams: TestInterstitialParameters) {
+    override fun getToken(context: Context): String {
+        return "token123"
+    }
+
+    override fun adRequest(adParams: TestInterstitialParameters) {
         this.adParams = adParams
         when (testParameters.bid) {
             Process.Succeed -> {
                 adEvent.tryEmit(
                     AdEvent.Bid(
-                        AuctionResult.Network.Success(
+                        AuctionResult.Bidding.Success(
                             adSource = this,
                             roundStatus = RoundStatus.Successful,
                         )
                     )
                 )
             }
+
             Process.Failed -> {
                 adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
+
             Process.Timeout -> {
                 CoroutineScope(Dispatchers.Main).launch {
                     delay(60_000L)
@@ -75,6 +82,9 @@ internal class TestInterstitialImpl(
                 }
             }
         }
+    }
+
+    override fun fill() {
         when (testParameters.fill) {
             Process.Succeed -> adEvent.tryEmit(AdEvent.Fill(ad))
             Process.Failed -> adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
