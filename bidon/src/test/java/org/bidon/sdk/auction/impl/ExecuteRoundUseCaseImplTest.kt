@@ -85,6 +85,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
         ),
         pricefloor = 0.01,
         token = null,
+        externalWinNotificationsEnabled = true
     )
 
     private val activity: Activity by lazy { mockk(relaxed = true) }

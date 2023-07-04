@@ -10,7 +10,7 @@ internal data class Round(
     @field:JsonName("id")
     val id: String,
     @field:JsonName("pricefloor")
-    val pricefloor: Double,
+    val pricefloor: Double?,
     @field:JsonName("winner_id")
     val winnerDemandId: String?,
     @field:JsonName("winner_ecpm")

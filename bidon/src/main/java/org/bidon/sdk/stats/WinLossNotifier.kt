@@ -1,5 +1,6 @@
 package org.bidon.sdk.stats
 
-interface LossNotifier {
+interface WinLossNotifier {
     fun notifyLoss(winnerDemandId: String, winnerEcpm: Double)
+    fun notifyWin()
 }

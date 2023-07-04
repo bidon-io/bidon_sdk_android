@@ -198,11 +198,19 @@ fun BannerScreen(navController: NavHostController) {
                     bannerExists.value = false
                     logFlow.log("BannerView destroyed")
                 }
-                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+            }
+            Row {
                 AppTextButton(text = "Notify Loss") {
                     bannerView?.also {
                         it.notifyLoss(winnerDemandId = "Unity", winnerEcpm = 4.0)
                         logFlow.log("NotifyLoss")
+                    }
+                }
+                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                AppTextButton(text = "Notify Win") {
+                    bannerView?.also {
+                        it.notifyWin()
+                        logFlow.log("NotifyWin")
                     }
                 }
             }

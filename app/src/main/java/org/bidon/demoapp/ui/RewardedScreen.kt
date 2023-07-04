@@ -154,7 +154,7 @@ fun RewardedScreen(
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.horizontalScroll(rememberScrollState())) {
-                AppOutlinedButton(
+                AppTextButton(
                     modifier = Modifier.padding(start = 0.dp),
                     text = "Notify Loss"
                 ) {
@@ -162,6 +162,12 @@ fun RewardedScreen(
                         winnerDemandId = "some_winner_demand",
                         winnerEcpm = 123.456
                     )
+                    logFlow.log("NotifyLoss")
+                }
+                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                AppTextButton(text = "Notify Win") {
+                    rewardedAd.notifyWin()
+                    logFlow.log("NotifyWin")
                 }
             }
             LazyColumn(
