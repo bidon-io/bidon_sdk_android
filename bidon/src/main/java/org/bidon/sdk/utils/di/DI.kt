@@ -72,10 +72,10 @@ import org.bidon.sdk.segment.Segment
 import org.bidon.sdk.segment.SegmentSynchronizer
 import org.bidon.sdk.segment.impl.SegmentImpl
 import org.bidon.sdk.stats.impl.SendImpressionRequestUseCaseImpl
-import org.bidon.sdk.stats.impl.SendLossRequestUseCaseImpl
+import org.bidon.sdk.stats.impl.SendWinLossRequestUseCaseImpl
 import org.bidon.sdk.stats.impl.StatsRequestUseCaseImpl
 import org.bidon.sdk.stats.usecases.SendImpressionRequestUseCase
-import org.bidon.sdk.stats.usecases.SendLossRequestUseCase
+import org.bidon.sdk.stats.usecases.SendWinLossRequestUseCase
 import org.bidon.sdk.stats.usecases.StatsRequestUseCase
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorageImpl
@@ -264,8 +264,8 @@ internal object DI {
                 )
             }
 
-            factory<SendLossRequestUseCase> {
-                SendLossRequestUseCaseImpl(
+            factory<SendWinLossRequestUseCase> {
+                SendWinLossRequestUseCaseImpl(
                     createRequestBody = get()
                 )
             }

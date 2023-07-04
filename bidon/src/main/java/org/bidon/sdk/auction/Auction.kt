@@ -6,11 +6,18 @@ import org.bidon.sdk.adapter.DemandAd
  * Created by Aleksei Cherniaev on 07/09/2022.
  */
 internal interface Auction {
-    suspend fun start(
+    fun start(
         demandAd: DemandAd,
         resolver: AuctionResolver,
         adTypeParamData: AdTypeParam,
-    ): Result<List<AuctionResult>>
+        onSuccess: (results: List<AuctionResult>) -> Unit,
+        onFailure: (Throwable) -> Unit
+    )
+
+    /**
+     * Cancel auction in progress and sent /stats
+     */
+    fun cancel()
 }
 
 enum class AuctionState {

@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -150,7 +151,7 @@ fun InterstitialScreen(
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.horizontalScroll(rememberScrollState())) {
-                AppOutlinedButton(
+                AppTextButton(
                     modifier = Modifier.padding(start = 0.dp),
                     text = "Notify Loss"
                 ) {
@@ -158,6 +159,12 @@ fun InterstitialScreen(
                         winnerDemandId = "som_winner_demand",
                         winnerEcpm = 234.567
                     )
+                    logFlow.log("NotifyLoss")
+                }
+                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                AppTextButton(text = "Notify Win") {
+                    interstitial.notifyWin()
+                    logFlow.log("NotifyWin")
                 }
             }
             LazyColumn(

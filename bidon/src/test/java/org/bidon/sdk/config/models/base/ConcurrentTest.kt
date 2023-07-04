@@ -21,7 +21,8 @@ abstract class ConcurrentTest {
     private val mainThreadSurrogate = newSingleThreadContext("UI thread")
 
     @Before
-    fun setUp() {
+    open fun setUp() {
+
         defaultDispatcherOverridden = mainThreadSurrogate
         ioDispatcherOverridden = mainThreadSurrogate
         singleDispatcherOverridden = mainThreadSurrogate

@@ -86,6 +86,7 @@ internal class AuctionImplTest : ConcurrentTest() {
     @Ignore
     @Test
     fun `it should detect winner in #round_2 when 2 rounds are completed`() = runTest {
+
         // PREPARE
         every { adaptersSource.adapters } returns setOf(
             TestAdapter(
@@ -146,6 +147,7 @@ internal class AuctionImplTest : ConcurrentTest() {
             ),
             pricefloor = 0.01,
             token = null,
+            externalWinNotificationsEnabled = true
         )
         coEvery {
             getAuctionRequestUseCase.request(
@@ -160,45 +162,47 @@ internal class AuctionImplTest : ConcurrentTest() {
         testee.start(
             demandAd = DemandAd(AdType.Interstitial),
             adTypeParamData = AdTypeParam.Interstitial(activity, 1.0),
-            resolver = MaxEcpmAuctionResolver
-        ).onSuccess { auctionResults ->
+            resolver = MaxEcpmAuctionResolver,
+            onSuccess = { auctionResults ->
 
-            // THEN it should detect winner in round_2
-            assertThat(auctionResults).hasSize(3)
-            val winner = auctionResults.first()
-            val winnerAd = winner.adSource.ad
-            requireNotNull(winnerAd)
-            assertThat(winnerAd.adUnitId).isEqualTo("admob2")
-            assertThat(winnerAd.ecpm).isEqualTo(2.2235)
-            assertThat(winnerAd.roundId).isEqualTo("round_2")
-            assertThat(winner.ecpm).isEqualTo(2.2235)
-            val roundStat = slot<List<RoundStat>>()
-            val demandAd = slot<DemandAd>()
-            // AND CHECK STAT REQUEST
-            assertThat(demandAd.captured.adType).isEqualTo(AdType.Interstitial)
-            val actualRoundStat = roundStat.captured
-            // LOSERS
-            assertThat(actualRoundStat[0].auctionId).isEqualTo("auctionId_123")
-            assertThat(actualRoundStat[0].roundId).isEqualTo("round_1")
-            assertThat(actualRoundStat[0].demands).hasSize(2)
-            assertThat(actualRoundStat[0].demands[0].roundStatus).isEqualTo(RoundStatus.Loss)
-            assertThat(actualRoundStat[0].demands[0].ecpm).isEqualTo(1.2235)
-            assertThat(actualRoundStat[0].demands[0].fillStartTs).isNull()
-            assertThat(actualRoundStat[0].demands[1].roundStatus).isEqualTo(RoundStatus.Loss)
-            assertThat(actualRoundStat[0].demands[1].ecpm).isEqualTo(0.25)
-            assertThat(actualRoundStat[0].demands[1].fillStartTs).isNull()
-            // WINNER
-            assertThat(actualRoundStat[1].auctionId).isEqualTo("auctionId_123")
-            assertThat(actualRoundStat[1].roundId).isEqualTo("round_2")
-            assertThat(actualRoundStat[1].demands).hasSize(1)
-            assertThat(actualRoundStat[1].demands[0].roundStatus).isEqualTo(RoundStatus.Win)
-            assertThat(actualRoundStat[1].demands[0].ecpm).isEqualTo(2.2235)
-            assertThat(actualRoundStat[1].demands[0].adUnitId).isEqualTo("admob2")
-            assertThat(actualRoundStat[1].demands[0].fillStartTs).isNotNull()
-            assertThat(actualRoundStat[1].demands[0].fillFinishTs).isNotNull()
-        }.onFailure {
-            error("unexpected: $it")
-        }
+                // THEN it should detect winner in round_2
+                assertThat(auctionResults).hasSize(3)
+                val winner = auctionResults.first()
+                val winnerAd = winner.adSource.ad
+                requireNotNull(winnerAd)
+                assertThat(winnerAd.adUnitId).isEqualTo("admob2")
+                assertThat(winnerAd.ecpm).isEqualTo(2.2235)
+                assertThat(winnerAd.roundId).isEqualTo("round_2")
+                assertThat(winner.ecpm).isEqualTo(2.2235)
+                val roundStat = slot<List<RoundStat>>()
+                val demandAd = slot<DemandAd>()
+                // AND CHECK STAT REQUEST
+                assertThat(demandAd.captured.adType).isEqualTo(AdType.Interstitial)
+                val actualRoundStat = roundStat.captured
+                // LOSERS
+                assertThat(actualRoundStat[0].auctionId).isEqualTo("auctionId_123")
+                assertThat(actualRoundStat[0].roundId).isEqualTo("round_1")
+                assertThat(actualRoundStat[0].demands).hasSize(2)
+                assertThat(actualRoundStat[0].demands[0].roundStatus).isEqualTo(RoundStatus.Loss)
+                assertThat(actualRoundStat[0].demands[0].ecpm).isEqualTo(1.2235)
+                assertThat(actualRoundStat[0].demands[0].fillStartTs).isNull()
+                assertThat(actualRoundStat[0].demands[1].roundStatus).isEqualTo(RoundStatus.Loss)
+                assertThat(actualRoundStat[0].demands[1].ecpm).isEqualTo(0.25)
+                assertThat(actualRoundStat[0].demands[1].fillStartTs).isNull()
+                // WINNER
+                assertThat(actualRoundStat[1].auctionId).isEqualTo("auctionId_123")
+                assertThat(actualRoundStat[1].roundId).isEqualTo("round_2")
+                assertThat(actualRoundStat[1].demands).hasSize(1)
+                assertThat(actualRoundStat[1].demands[0].roundStatus).isEqualTo(RoundStatus.Win)
+                assertThat(actualRoundStat[1].demands[0].ecpm).isEqualTo(2.2235)
+                assertThat(actualRoundStat[1].demands[0].adUnitId).isEqualTo("admob2")
+                assertThat(actualRoundStat[1].demands[0].fillStartTs).isNotNull()
+                assertThat(actualRoundStat[1].demands[0].fillFinishTs).isNotNull()
+            },
+            onFailure = {
+                error("unexpected: $it")
+            }
+        )
     }
 
     @Ignore
@@ -235,26 +239,28 @@ internal class AuctionImplTest : ConcurrentTest() {
         testee.start(
             demandAd = DemandAd(AdType.Interstitial),
             adTypeParamData = AdTypeParam.Interstitial(activity, 1.0),
-            resolver = MaxEcpmAuctionResolver
-        ).onSuccess { auctionResults ->
+            resolver = MaxEcpmAuctionResolver,
+            onSuccess = { auctionResults ->
 
-            // THEN it should detect winner in round_1. "admob2" can not fill.
-            /**
-             * success bid results: 1-"admob2". 2-"AAAA2". 3-"admob1"
-             * success fill results: 2-"AAAA2". WINNER
-             */
+                // THEN it should detect winner in round_1. "admob2" can not fill.
+                /**
+                 * success bid results: 1-"admob2". 2-"AAAA2". 3-"admob1"
+                 * success fill results: 2-"AAAA2". WINNER
+                 */
 
-            assertThat(auctionResults).hasSize(2)
-            val winner = auctionResults.first()
-            val winnerAd = winner.adSource.ad
-            requireNotNull(winnerAd)
-            assertThat(winnerAd.adUnitId).isEqualTo("AAAA2")
-            assertThat(winnerAd.ecpm).isEqualTo(2.25)
-            assertThat(winnerAd.roundId).isEqualTo("round_1")
-            assertThat(winner.ecpm).isEqualTo(2.25)
-        }.onFailure {
-            error("unexpected: $it")
-        }
+                assertThat(auctionResults).hasSize(2)
+                val winner = auctionResults.first()
+                val winnerAd = winner.adSource.ad
+                requireNotNull(winnerAd)
+                assertThat(winnerAd.adUnitId).isEqualTo("AAAA2")
+                assertThat(winnerAd.ecpm).isEqualTo(2.25)
+                assertThat(winnerAd.roundId).isEqualTo("round_1")
+                assertThat(winner.ecpm).isEqualTo(2.25)
+            },
+            onFailure = {
+                error("unexpected: $it")
+            }
+        )
     }
 
     @Ignore
@@ -291,13 +297,15 @@ internal class AuctionImplTest : ConcurrentTest() {
         testee.start(
             demandAd = DemandAd(AdType.Interstitial),
             adTypeParamData = AdTypeParam.Interstitial(activity, 1.0),
-            resolver = MaxEcpmAuctionResolver
-        ).onSuccess {
-            error("unexpected")
-        }.onFailure {
-            // THEN it should expose NoAuctionResults
-            assertThat(it).isEqualTo(BidonError.NoAuctionResults)
-        }
+            resolver = MaxEcpmAuctionResolver,
+            onSuccess = {
+                error("unexpected")
+            },
+            onFailure = {
+                // THEN it should expose NoAuctionResults
+                assertThat(it).isEqualTo(BidonError.NoAuctionResults)
+            }
+        )
     }
 
     @Ignore
@@ -334,13 +342,15 @@ internal class AuctionImplTest : ConcurrentTest() {
         testee.start(
             demandAd = DemandAd(AdType.Interstitial),
             adTypeParamData = AdTypeParam.Interstitial(activity, 1.0),
-            resolver = MaxEcpmAuctionResolver
-        ).onSuccess {
-            error("unexpected")
-        }.onFailure {
-            // THEN it should expose NoAuctionResults
-            assertThat(it).isEqualTo(BidonError.NoAuctionResults)
-        }
+            resolver = MaxEcpmAuctionResolver,
+            onSuccess = {
+                error("unexpected")
+            },
+            onFailure = {
+                // THEN it should expose NoAuctionResults
+                assertThat(it).isEqualTo(BidonError.NoAuctionResults)
+            }
+        )
     }
 
     private fun getAuctionResponse() = AuctionResponse(
@@ -379,5 +389,6 @@ internal class AuctionImplTest : ConcurrentTest() {
         ),
         pricefloor = 0.01,
         token = null,
+        externalWinNotificationsEnabled = true
     )
 }

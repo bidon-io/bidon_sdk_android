@@ -3,6 +3,13 @@ package org.bidon.sdk
 import io.mockk.every
 import io.mockk.mockkStatic
 import org.bidon.sdk.logs.logging.Logger
+import org.bidon.sdk.utils.ext.SystemTimeNow
+
+internal fun freezeTime(time: Long = 1000L): Long {
+    mockkStatic("org.bidon.sdk.utils.ext.LocalDateTimeExtKt")
+    every { SystemTimeNow } returns time
+    return time
+}
 
 internal fun mockkLog() {
 //    mockkStatic(Log::class)

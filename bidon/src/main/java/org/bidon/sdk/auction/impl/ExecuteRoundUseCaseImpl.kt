@@ -12,9 +12,11 @@ import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.SupportsRegulation
 import org.bidon.sdk.ads.AdType
+import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.AuctionResponse
+import org.bidon.sdk.auction.models.BannerRequestBody
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.Round
 import org.bidon.sdk.auction.usecases.ConductBiddingAuctionUseCase
@@ -23,6 +25,7 @@ import org.bidon.sdk.auction.usecases.models.ExecuteRoundUseCase
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.regulation.Regulation
+import org.bidon.sdk.stats.StatisticsCollector
 
 internal class ExecuteRoundUseCaseImpl(
     private val adaptersSource: AdaptersSource,
@@ -56,7 +59,9 @@ internal class ExecuteRoundUseCaseImpl(
             logInfo(Tag, "$logText adapters [${filteredAdapters.joinToString { it.demandId.demandId }}]")
             logInfo(Tag, "$logText line items: $mutableLineItems")
             val adSources = filteredAdapters.getAdSources(demandAd, round, auctionResponse).onEach { adSource ->
+                adSource.setStatisticAdType(adTypeParam.asStatisticAdType())
                 adSource.addAuctionConfigurationId(auctionResponse.auctionConfigurationId ?: 0)
+                adSource.addExternalWinNotificationsEnabled(auctionResponse.externalWinNotificationsEnabled)
             }
             val roundDeferred = mutableListOf<Deferred<AuctionResult>>()
 
@@ -199,6 +204,24 @@ internal class ExecuteRoundUseCaseImpl(
                     auctionId = auctionResponse.auctionId ?: ""
                 )
             }
+        }
+    }
+
+    private fun AdTypeParam.asStatisticAdType(): StatisticsCollector.AdType {
+        return when (this) {
+            is AdTypeParam.Banner -> {
+                StatisticsCollector.AdType.Banner(
+                    format = when (bannerFormat) {
+                        BannerFormat.Banner -> BannerRequestBody.StatFormat.Banner320x50
+                        BannerFormat.LeaderBoard -> BannerRequestBody.StatFormat.LeaderBoard728x90
+                        BannerFormat.MRec -> BannerRequestBody.StatFormat.MRec300x250
+                        BannerFormat.Adaptive -> BannerRequestBody.StatFormat.AdaptiveBanner320x50
+                    }
+                )
+            }
+
+            is AdTypeParam.Interstitial -> StatisticsCollector.AdType.Interstitial
+            is AdTypeParam.Rewarded -> StatisticsCollector.AdType.Rewarded
         }
     }
 }

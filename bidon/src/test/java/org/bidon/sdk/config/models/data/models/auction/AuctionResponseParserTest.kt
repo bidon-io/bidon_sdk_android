@@ -52,7 +52,8 @@ internal class AuctionResponseParserTest {
                 adUnitId = "AAAA1"
             ),
         ),
-        pricefloor = 0.01
+        pricefloor = 0.01,
+        externalWinNotificationsEnabled = false
     )
 
     private val responseJsonStr = """
@@ -93,7 +94,8 @@ internal class AuctionResponseParserTest {
           "fill_timeout": 10000,
           "pricefloor": 0.01,
           "auction_id":"49975154-b82a-444b-a7f0-30bd749e7fce",
-          "auction_configuration_id":10
+          "auction_configuration_id":10,
+          "external_win_notifications":false
         }
     """.trimIndent()
 }
