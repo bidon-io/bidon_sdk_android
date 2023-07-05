@@ -26,7 +26,6 @@ import org.bidon.sdk.ads.banner.helper.wrapUserBannerListener
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionResult
-import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.config.impl.asBidonErrorOrUnspecified
 import org.bidon.sdk.databinders.extras.Extras
@@ -249,7 +248,6 @@ class BannerView @JvmOverloads constructor(
         logInfo(Tag, "Load (pricefloor=$pricefloor)")
         auction.start(
             demandAd = demandAd,
-            resolver = MaxEcpmAuctionResolver,
             adTypeParamData = AdTypeParam.Banner(
                 activity = activity,
                 pricefloor = pricefloor,

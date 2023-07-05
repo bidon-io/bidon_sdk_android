@@ -15,6 +15,7 @@ import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.AuctionResult
+import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.BannerRequestBody
 import org.bidon.sdk.auction.models.LineItem
@@ -40,6 +41,7 @@ internal class ExecuteRoundUseCaseImpl(
         round: Round,
         pricefloor: Double,
         lineItems: List<LineItem>,
+        resultsCollector: ResultsCollector,
         onFinish: (remainingLineItems: List<LineItem>) -> Unit,
     ): Result<List<AuctionResult>> = coroutineScope {
         val mutableLineItems = lineItems.toMutableList()
@@ -53,8 +55,6 @@ internal class ExecuteRoundUseCaseImpl(
                     supportsRegulation.updateRegulation(regulation)
                 }
             }
-            val unknownNetworkDemands = findUnknownNetworkAdapters(round, filteredAdapters)
-
             val logText = "Round '${round.id}' started with"
             logInfo(Tag, "$logText adapters [${filteredAdapters.joinToString { it.demandId.demandId }}]")
             logInfo(Tag, "$logText line items: $mutableLineItems")
@@ -80,13 +80,18 @@ internal class ExecuteRoundUseCaseImpl(
                         bidfloor = pricefloor,
                         auctionId = auctionResponse.auctionId ?: "",
                         round = round,
-                        auctionConfigurationId = auctionResponse.auctionConfigurationId
+                        auctionConfigurationId = auctionResponse.auctionConfigurationId,
+                        resultsCollector = resultsCollector
                     )
                 }
             } else {
                 null
             }
             logUnknownBiddingAdapters(round, biddingDemands)
+
+            val unknownNetworkDemands = findUnknownNetworkAdapters(round, adSources).onEach {
+                resultsCollector.addAuctionResult(it)
+            }
 
             // Start Regular AdNetwork demands auction
             if (round.demandIds.isNotEmpty()) {
@@ -99,7 +104,8 @@ internal class ExecuteRoundUseCaseImpl(
                     lineItems = mutableLineItems,
                     round = round,
                     pricefloor = pricefloor,
-                    scope = this@coroutineScope
+                    scope = this@coroutineScope,
+                    resultsCollector = resultsCollector
                 )
                 mutableLineItems.clear()
                 mutableLineItems.addAll(networkResults.remainingLineItems)
@@ -154,21 +160,26 @@ internal class ExecuteRoundUseCaseImpl(
 
     private fun findUnknownNetworkAdapters(
         round: Round,
-        filteredAdapters: List<Adapter>
-    ) = (round.demandIds - filteredAdapters.map { it.demandId.demandId }.toSet())
-        .takeIf { it.isNotEmpty() }
-        ?.let { unknownDemandIds ->
-            logError(
-                tag = Tag,
-                message = "Adapters not found: $unknownDemandIds",
-                error = NoSuchElementException(unknownDemandIds.joinToString())
+        adSources: List<AdSource<*>>
+    ): List<AuctionResult.Network.UnknownAdapter> {
+        return (
+            round.demandIds - adSources.filterIsInstance<AdLoadingType.Network<*>>()
+                .map { (it as AdSource<*>).demandId.demandId }.toSet()
             )
-            unknownDemandIds
-        }?.map {
-            AuctionResult.Network.UnknownAdapter(
-                adapterName = it
-            )
-        }.orEmpty()
+            .takeIf { it.isNotEmpty() }
+            ?.let { unknownDemandIds ->
+                logError(
+                    tag = Tag,
+                    message = "Adapters not found: $unknownDemandIds",
+                    error = NoSuchElementException(unknownDemandIds.joinToString())
+                )
+                unknownDemandIds
+            }?.map {
+                AuctionResult.Network.UnknownAdapter(
+                    adapterName = it
+                )
+            }.orEmpty()
+    }
 
     private fun List<Adapter>.getAdSources(
         demandAd: DemandAd,

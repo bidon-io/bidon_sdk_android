@@ -138,7 +138,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
     fun `it should conduct round`() = runTest {
         // mockk results
         coEvery {
-            conductNetworkAuction.invoke(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            conductNetworkAuction.invoke(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         } returns DeferredRoundResult(
             results = listOf(
                 CoroutineScope(mainDispatcherOverridden!!).async {
@@ -164,7 +164,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
             remainingLineItems = emptyList()
         )
         coEvery {
-            conductBiddingAuction.invoke(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            conductBiddingAuction.invoke(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         } returns AuctionResult.Bidding.Success(
             adSource = mockk<AdSource<*>>(relaxed = true).also {
                 every { it.demandId } returns DemandId(BidMachine)
@@ -196,6 +196,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
             ),
             pricefloor = 0.4,
             lineItems = emptyList(),
+            resultsCollector = mockk(relaxed = true),
             onFinish = { remainingLineItems ->
             }
         )

@@ -13,6 +13,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.AuctionResult
+import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.Round
 import org.bidon.sdk.config.BidonError
@@ -36,7 +37,8 @@ internal interface ConductNetworkAuctionUseCase {
         lineItems: List<LineItem>,
         round: Round,
         pricefloor: Double,
-        scope: CoroutineScope
+        scope: CoroutineScope,
+        resultsCollector: ResultsCollector,
     ): DeferredRoundResult
 }
 
@@ -51,9 +53,13 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
         lineItems: List<LineItem>,
         round: Round,
         pricefloor: Double,
-        scope: CoroutineScope
+        scope: CoroutineScope,
+        resultsCollector: ResultsCollector,
     ): DeferredRoundResult {
         val mutableLineItems = lineItems.toMutableList()
+        val onEach: (AuctionResult) -> Unit = {
+            resultsCollector.addAuctionResult(it)
+        }
         runCatching {
             val participants = networkSources.filter {
                 (it as AdSource<*>).demandId.demandId in participantIds
@@ -86,7 +92,7 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
                             is AdEvent.LoadFailed -> adEvent.cause.asRoundStatus()
                             else -> error("unexpected: $adEvent")
                         }
-                    )
+                    ).also(onEach)
                 }
             }
             return DeferredRoundResult(
@@ -125,12 +131,6 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
                 return@withTimeoutOrNull AdEvent.LoadFailed(BidonError.NoAppropriateAdUnitId)
             }
 
-            // BID todo Should we remove it?
-//            adSource.markBidStarted(adUnitId = adParam.adUnitId)
-//            adSource.markBidFinished(
-//                roundStatus = RoundStatus.Successful,
-//                ecpm = adParam.pricefloor
-//            )
             // FILL
             adSource.markFillStarted()
             adSource.fill(adParam)

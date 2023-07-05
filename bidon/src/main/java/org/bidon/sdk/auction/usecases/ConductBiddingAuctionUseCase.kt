@@ -11,6 +11,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.AuctionResult
+import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.models.Bid
 import org.bidon.sdk.auction.models.BidResponse.BidStatus
 import org.bidon.sdk.auction.models.Round
@@ -37,6 +38,7 @@ internal interface ConductBiddingAuctionUseCase {
         auctionId: String,
         round: Round,
         auctionConfigurationId: Int?,
+        resultsCollector: ResultsCollector,
     ): AuctionResult.Bidding
 }
 
@@ -56,9 +58,13 @@ internal class ConductBiddingAuctionUseCaseImpl(
         auctionId: String,
         round: Round,
         auctionConfigurationId: Int?,
+        resultsCollector: ResultsCollector,
     ): AuctionResult.Bidding {
         var biddingStartTime: Long? = null
         var biddingFinishTime: Long? = null
+        val onEach: (AuctionResult) -> Unit = {
+            resultsCollector.addAuctionResult(it)
+        }
         return runCatching {
             withTimeoutOrNull(round.timeoutMs) {
                 val participants = biddingSources.filter {
@@ -115,11 +121,11 @@ internal class ConductBiddingAuctionUseCaseImpl(
                 biddingStartTimeTs = biddingStartTime,
                 biddingFinishTimeTs = biddingFinishTime
             )
-        }.getOrNull() ?: AuctionResult.Bidding.Failure.NoBid(
+        }.getOrNull()?.also(onEach) ?: AuctionResult.Bidding.Failure.NoBid(
             roundStatus = RoundStatus.UnspecifiedException,
             biddingStartTimeTs = biddingStartTime,
             biddingFinishTimeTs = biddingFinishTime
-        )
+        ).also(onEach)
     }
 
     private suspend fun loadWinner(

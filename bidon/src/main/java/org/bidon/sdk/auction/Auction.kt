@@ -8,7 +8,6 @@ import org.bidon.sdk.adapter.DemandAd
 internal interface Auction {
     fun start(
         demandAd: DemandAd,
-        resolver: AuctionResolver,
         adTypeParamData: AdTypeParam,
         onSuccess: (results: List<AuctionResult>) -> Unit,
         onFailure: (Throwable) -> Unit
