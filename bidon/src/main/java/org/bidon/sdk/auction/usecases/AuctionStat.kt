@@ -6,7 +6,6 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.AuctionResult.Bidding
-import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.Round
 import org.bidon.sdk.stats.impl.asSuccessResultOrFail
@@ -52,7 +51,7 @@ internal class AuctionStatImpl(
             else field
         }
 
-    private val statsRound = mutableListOf<RoundStat>()
+    private val statsRounds = mutableListOf<RoundStat>()
     private var isAuctionCanceled = false
 
     override fun markAuctionStarted(auctionId: String) {
@@ -69,9 +68,14 @@ internal class AuctionStatImpl(
         pricefloor: Double,
         roundResults: List<AuctionResult>,
     ) {
-        val roundWinner = roundResults.firstOrNull { it.roundStatus == RoundStatus.Successful }
+        val roundWinner = roundResults.firstOrNull { it.roundStatus == RoundStatus.Successful }.takeIf { !isAuctionCanceled }
         val biddingResult = roundResults.filterIsInstance<Bidding>().firstOrNull()
         val networkResults = roundResults.filterIsInstance<AuctionResult.Network>()
+        val cancelledAdUnits = getCancelledNetworkAd(
+            round = round,
+            networkResults = networkResults
+        )
+        val cancelledBidding = getCancelledBidding(round.biddingIds, isAuctionCanceled)
         val roundStat = RoundStat(
             auctionId = auctionId,
             roundId = round.id,
@@ -79,12 +83,27 @@ internal class AuctionStatImpl(
             winnerDemandId = roundWinner?.adSource?.demandId,
             winnerEcpm = roundWinner?.ecpm,
             demands = networkResults.map {
-                it.asDemandStat(pricefloor) as DemandStat.Network
-            },
-            bidding = biddingResult?.asDemandStatBidding()
+                it.asDemandStat() as DemandStat.Network
+            } + cancelledAdUnits,
+            bidding = biddingResult?.asDemandStatBidding() ?: cancelledBidding
         )
-        statsRound.add(roundStat)
-        updateWinnerIfNeed(roundWinner, pricefloor)
+        statsRounds.add(roundStat)
+        updateWinnerIfNeed(roundWinner)
+    }
+
+    private fun getCancelledBidding(biddingIds: List<String>, auctionCanceled: Boolean): DemandStat.Bidding? {
+        if (biddingIds.isNotEmpty() && auctionCanceled) {
+            return DemandStat.Bidding(
+                demandId = null,
+                bidFinishTs = null,
+                fillFinishTs = null,
+                bidStartTs = null,
+                ecpm = null,
+                fillStartTs = null,
+                roundStatus = RoundStatus.AuctionCancelled
+            )
+        }
+        return null
     }
 
     override fun sendAuctionStats(auctionData: AuctionResponse, demandAd: DemandAd) {
@@ -92,18 +111,18 @@ internal class AuctionStatImpl(
             // prepare data
             val canceledRounds = getCanceledRoundStats(
                 rounds = auctionData.rounds.orEmpty(),
-                completedRoundIds = statsRound.map { it.roundId },
+                completedRoundIds = statsRounds.map { it.roundId },
                 isCanceled = isAuctionCanceled
             )
-            val roundResults = statsRound.map { roundStat ->
+            val roundResults = statsRounds.map { roundStat ->
                 roundStat.copy(
                     demands = roundStat.demands.map { demandStat ->
                         demandStat.copy(
-                            roundStatus = demandStat.roundStatus.getFinalStatus(demandStat == winner, isAuctionCanceled)
+                            roundStatus = demandStat.roundStatus.getFinalStatus(demandStat == winner)
                         )
                     },
                     bidding = roundStat.bidding?.copy(
-                        roundStatus = roundStat.bidding.roundStatus.getFinalStatus(roundStat.bidding == winner, isAuctionCanceled)
+                        roundStatus = roundStat.bidding.roundStatus.getFinalStatus(roundStat.bidding == winner)
                     )
                 )
             } + canceledRounds
@@ -117,6 +136,32 @@ internal class AuctionStatImpl(
                     auctionFinishTs = SystemTimeNow
                 ),
                 demandAd = demandAd,
+            )
+        }
+    }
+
+    private fun getCancelledNetworkAd(
+        round: Round,
+        networkResults: List<AuctionResult.Network>
+    ): List<DemandStat.Network> {
+        val cancelledDemandIds = if (isAuctionCanceled) {
+            round.demandIds - networkResults.map {
+                when (it) {
+                    is AuctionResult.Network.Success -> it.adSource.demandId.demandId
+                    is AuctionResult.Network.UnknownAdapter -> it.adapterName
+                }
+            }.toSet()
+        } else emptyList()
+        return cancelledDemandIds.map {
+            DemandStat.Network(
+                roundStatus = RoundStatus.AuctionCancelled,
+                demandId = DemandId(it),
+                ecpm = null,
+                adUnitId = null,
+                fillStartTs = null,
+                bidStartTs = null,
+                fillFinishTs = null,
+                bidFinishTs = null
             )
         }
     }
@@ -209,16 +254,15 @@ internal class AuctionStatImpl(
         }
     }
 
-    private fun updateWinnerIfNeed(roundWinner: AuctionResult?, pricefloor: Double) {
-        MaxEcpmAuctionResolver
+    private fun updateWinnerIfNeed(roundWinner: AuctionResult?) {
         if (roundWinner?.roundStatus == RoundStatus.Successful) {
             if ((winner?.ecpm ?: 0.0) < roundWinner.ecpm) {
-                winner = roundWinner.asDemandStat(pricefloor)
+                winner = roundWinner.asDemandStat()
             }
         }
     }
 
-    private fun AuctionResult.asDemandStat(pricefloor: Double): DemandStat {
+    private fun AuctionResult.asDemandStat(): DemandStat {
         return when (this) {
             is Bidding.Success,
             is Bidding.Failure.NoFill -> {
@@ -237,7 +281,7 @@ internal class AuctionStatImpl(
             is Bidding.Failure.NoBid -> {
                 DemandStat.Bidding(
                     roundStatus = RoundStatus.NoBid,
-                    ecpm = pricefloor,
+                    ecpm = null,
                     demandId = null,
                     bidStartTs = this.biddingStartTimeTs,
                     bidFinishTs = this.biddingFinishTimeTs,
@@ -249,7 +293,7 @@ internal class AuctionStatImpl(
             is Bidding.Failure.TimeoutReached -> {
                 DemandStat.Bidding(
                     roundStatus = RoundStatus.BidTimeoutReached,
-                    ecpm = pricefloor,
+                    ecpm = null,
                     demandId = null,
                     bidStartTs = null,
                     bidFinishTs = null,
@@ -287,7 +331,7 @@ internal class AuctionStatImpl(
         }
     }
 
-    private fun RoundStatus.getFinalStatus(isWinner: Boolean, isAuctionCanceled: Boolean): RoundStatus {
+    private fun RoundStatus.getFinalStatus(isWinner: Boolean): RoundStatus {
         return when {
             isWinner -> RoundStatus.Win
             this == RoundStatus.Successful -> RoundStatus.Loss

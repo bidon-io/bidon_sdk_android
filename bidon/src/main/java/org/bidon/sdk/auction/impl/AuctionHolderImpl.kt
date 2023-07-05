@@ -43,7 +43,6 @@ internal class AuctionHolderImpl(
         if (auctionState.compareAndSet(expect = AuctionHolderState.Idle, update = progressState)) {
             progressState.auction.start(
                 demandAd = demandAd,
-                resolver = MaxEcpmAuctionResolver,
                 adTypeParamData = adTypeParam,
                 onSuccess = { results ->
                     check(results.isNotEmpty()) {

@@ -3,6 +3,7 @@ package org.bidon.sdk.auction.usecases.models
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.AuctionResult
+import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.Round
@@ -18,6 +19,7 @@ internal interface ExecuteRoundUseCase {
         round: Round,
         pricefloor: Double,
         lineItems: List<LineItem>,
+        resultsCollector: ResultsCollector,
         onFinish: (remainingLineItems: List<LineItem>) -> Unit,
     ): Result<List<AuctionResult>>
 }

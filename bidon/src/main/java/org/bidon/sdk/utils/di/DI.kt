@@ -14,9 +14,12 @@ import org.bidon.sdk.ads.banner.helper.impl.GetOrientationUseCaseImpl
 import org.bidon.sdk.ads.banner.helper.impl.PauseResumeObserverImpl
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionHolder
+import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.ResultsCollectorImpl
 import org.bidon.sdk.auction.impl.AuctionHolderImpl
 import org.bidon.sdk.auction.impl.AuctionImpl
 import org.bidon.sdk.auction.impl.ExecuteRoundUseCaseImpl
+import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.usecases.AuctionStat
 import org.bidon.sdk.auction.usecases.AuctionStatImpl
 import org.bidon.sdk.auction.usecases.BidRequestUseCase
@@ -268,6 +271,9 @@ internal object DI {
                 SendWinLossRequestUseCaseImpl(
                     createRequestBody = get()
                 )
+            }
+            factory<ResultsCollector> {
+                ResultsCollectorImpl(resolver = MaxEcpmAuctionResolver)
             }
         }
     }

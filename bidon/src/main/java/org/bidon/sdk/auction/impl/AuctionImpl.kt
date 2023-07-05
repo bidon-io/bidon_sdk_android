@@ -10,9 +10,9 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
-import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.AuctionState
+import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.Round
@@ -22,9 +22,9 @@ import org.bidon.sdk.auction.usecases.models.ExecuteRoundUseCase
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
-import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.SdkDispatchers
+import org.bidon.sdk.utils.di.get
 import java.util.UUID
 
 /**
@@ -38,7 +38,6 @@ internal class AuctionImpl(
 ) : Auction {
     private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
     private val state = MutableStateFlow(AuctionState.Initialized)
-    private val auctionResults = MutableStateFlow(listOf<AuctionResult>())
     private val mutableLineItems = mutableListOf<LineItem>()
     private var _auctionDataResponse: AuctionResponse? = null
     private var _demandAd: DemandAd? = null
@@ -46,10 +45,10 @@ internal class AuctionImpl(
     private val auctionDataResponse: AuctionResponse
         get() = requireNotNull(_auctionDataResponse)
     private var adTypeParam: AdTypeParam? = null
+    private val resultsCollector: ResultsCollector by lazy { get() }
 
     override fun start(
         demandAd: DemandAd,
-        resolver: AuctionResolver,
         adTypeParamData: AdTypeParam,
         onSuccess: (results: List<AuctionResult>) -> Unit,
         onFailure: (Throwable) -> Unit
@@ -89,14 +88,13 @@ internal class AuctionImpl(
                             rounds = auctionData.rounds ?: listOf(),
                             sourcePriceFloor = auctionData.pricefloor ?: 0.0,
                             pricefloor = auctionData.pricefloor ?: 0.0,
-                            resolver = resolver,
                             demandAd = demandAd,
                             adTypeParamData = adTypeParamData,
                         )
                         logInfo(Tag, "Rounds completed")
 
                         // Finding winner / notifying losers
-                        val finalResults = auctionResults.value
+                        val finalResults = resultsCollector.getAll()
                         logInfo(Tag, "Action finished with ${finalResults.size} results")
                         finalResults.forEachIndexed { index, auctionResult ->
                             logInfo(Tag, "Action result #$index: $auctionResult")
@@ -114,7 +112,7 @@ internal class AuctionImpl(
                     }.getOrThrow()
                     // Wait for auction is completed
                     state.first { it == AuctionState.Finished }
-                    val results = auctionResults.value.toList()
+                    val results = resultsCollector.getAll()
                     clearData()
                     if (results.isNotEmpty()) {
                         onSuccess.invoke(results)
@@ -130,6 +128,7 @@ internal class AuctionImpl(
         if (job?.isActive == true) {
             job?.cancel()
             auctionStat.markAuctionCanceled()
+            proceedRoundResults()
             val auctionData = _auctionDataResponse
             if (auctionData == null) {
                 logInfo(Tag, "No AuctionResponse info. There is nothing to send.")
@@ -146,7 +145,7 @@ internal class AuctionImpl(
     }
 
     private fun clearData() {
-        auctionResults.value = emptyList()
+        resultsCollector.clear()
         mutableLineItems.clear()
         _auctionDataResponse = null
     }
@@ -162,7 +161,6 @@ internal class AuctionImpl(
                  */
                 if (auctionResult !is AuctionResult.Bidding && adSource is WinLossNotifiable) {
                     logInfo(Tag, "Notified loss: ${adSource.demandId}")
-                    adSource.notifyWin()
                     adSource.notifyLoss(winner.adSource.demandId.demandId, winner.ecpm)
                 }
                 if (auctionResult.roundStatus == RoundStatus.Successful) {
@@ -177,95 +175,51 @@ internal class AuctionImpl(
         rounds: List<Round>,
         sourcePriceFloor: Double,
         pricefloor: Double,
-        resolver: AuctionResolver,
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
     ) {
         val round = rounds.firstOrNull() ?: return
-
+        resultsCollector.startRound(round, pricefloor)
         // Execute round
-        val allRoundResults = executeRound(
+        executeRound(
             round = round,
             pricefloor = pricefloor,
             demandAd = demandAd,
             adTypeParam = adTypeParamData,
             auctionResponse = auctionDataResponse,
             lineItems = mutableLineItems,
+            resultsCollector = resultsCollector,
             onFinish = { remainingLineItems ->
                 mutableLineItems.clear()
                 mutableLineItems.addAll(remainingLineItems)
             }
-        ).getOrNull() ?: emptyList()
-
-        // Save round results
-        proceedRoundResults(
-            resolver = resolver,
-            allResults = allRoundResults,
-            sourcePriceFloor = sourcePriceFloor,
-            round = round,
-            pricefloor = pricefloor,
         )
 
+        // Save round results
+        resultsCollector.saveWinners(sourcePriceFloor)
+        proceedRoundResults()
+
         // Start next round
-        val nextPriceFloor = auctionResults.value.firstOrNull()?.ecpm ?: pricefloor
+        val nextPriceFloor = resultsCollector.getAll().firstOrNull()?.ecpm ?: pricefloor
         conductRounds(
             rounds = rounds.drop(1),
             sourcePriceFloor = sourcePriceFloor,
             pricefloor = nextPriceFloor,
-            resolver = resolver,
             demandAd = demandAd,
             adTypeParamData = adTypeParamData,
         )
     }
 
-    private suspend fun proceedRoundResults(
-        resolver: AuctionResolver,
-        allResults: List<AuctionResult>,
-        sourcePriceFloor: Double,
-        round: Round,
-        pricefloor: Double,
-    ) {
-        val sortedResult = resolver.sortWinners(allResults)
-        val successfulResults = sortedResult
-            .filter { it.roundStatus == RoundStatus.Successful }
-            .filter {
-                /**
-                 * Received ecpm should not be less then initial one [sourcePriceFloor].
-                 */
-                val isAbovePricefloor = it.ecpm >= sourcePriceFloor
-                if (!isAbovePricefloor) {
-                    (it.adSource as StatisticsCollector).markBelowPricefloor()
-                }
-                isAbovePricefloor
-            }
-
-        /**
-         * Save statistic data for /stats
-         */
+    private fun proceedRoundResults() {
+        val (round, pricefloor, roundResults) = resultsCollector.popRoundResults() ?: return
         auctionStat.addRoundResults(
             round = round,
             pricefloor = pricefloor,
-            roundResults = sortedResult,
+            roundResults = roundResults,
         )
-
-        /**
-         * Save auction results data
-         */
-        if (successfulResults.isNotEmpty()) {
-            saveAuctionResults(
-                resolver = resolver,
-                roundResults = successfulResults
-            )
-        } else {
+        if (roundResults.isEmpty()) {
             logError(Tag, "Round '${round.id}' failed", BidonError.NoRoundResults)
         }
-    }
-
-    private suspend fun saveAuctionResults(
-        resolver: AuctionResolver,
-        roundResults: List<AuctionResult>
-    ) {
-        auctionResults.value = resolver.sortWinners(auctionResults.value + roundResults).take(2)
     }
 }
 

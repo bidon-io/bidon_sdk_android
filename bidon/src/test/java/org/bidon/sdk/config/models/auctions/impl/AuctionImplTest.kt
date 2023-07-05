@@ -17,7 +17,6 @@ import org.bidon.sdk.ads.banner.helper.DeviceType
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.impl.AuctionImpl
-import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.Round
@@ -162,7 +161,6 @@ internal class AuctionImplTest : ConcurrentTest() {
         testee.start(
             demandAd = DemandAd(AdType.Interstitial),
             adTypeParamData = AdTypeParam.Interstitial(activity, 1.0),
-            resolver = MaxEcpmAuctionResolver,
             onSuccess = { auctionResults ->
 
                 // THEN it should detect winner in round_2
@@ -239,7 +237,6 @@ internal class AuctionImplTest : ConcurrentTest() {
         testee.start(
             demandAd = DemandAd(AdType.Interstitial),
             adTypeParamData = AdTypeParam.Interstitial(activity, 1.0),
-            resolver = MaxEcpmAuctionResolver,
             onSuccess = { auctionResults ->
 
                 // THEN it should detect winner in round_1. "admob2" can not fill.
@@ -297,7 +294,6 @@ internal class AuctionImplTest : ConcurrentTest() {
         testee.start(
             demandAd = DemandAd(AdType.Interstitial),
             adTypeParamData = AdTypeParam.Interstitial(activity, 1.0),
-            resolver = MaxEcpmAuctionResolver,
             onSuccess = {
                 error("unexpected")
             },
@@ -342,7 +338,6 @@ internal class AuctionImplTest : ConcurrentTest() {
         testee.start(
             demandAd = DemandAd(AdType.Interstitial),
             adTypeParamData = AdTypeParam.Interstitial(activity, 1.0),
-            resolver = MaxEcpmAuctionResolver,
             onSuccess = {
                 error("unexpected")
             },
