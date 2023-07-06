@@ -89,6 +89,7 @@ internal fun MainScreen(
                                 DefaultAdapters.ApplovinAdapter -> "Applovin"
                                 DefaultAdapters.DataExchangeAdapter -> "DT Exchange"
                                 DefaultAdapters.UnityAdsAdapter -> "Unity Ads"
+                                DefaultAdapters.MobileFuseAdapter -> "MobileFuse"
                             }
                         },
                         onItemClicked = {

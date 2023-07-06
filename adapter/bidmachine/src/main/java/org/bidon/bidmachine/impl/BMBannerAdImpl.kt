@@ -133,7 +133,7 @@ internal class BMBannerAdImpl(
         }
     }
 
-    override fun getToken(context: Context): String = BidMachine.getBidToken(context)
+    override suspend fun getToken(context: Context): String = BidMachine.getBidToken(context)
 
     override fun adRequest(adParams: BMBannerAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")

@@ -53,7 +53,7 @@ internal class TestBiddingInterstitialImpl(
     override val isAdReadyToShow: Boolean
         get() = testParameters.fill == Process.Succeed
 
-    override fun getToken(context: Context): String {
+    override suspend fun getToken(context: Context): String {
         return "token123"
     }
 
