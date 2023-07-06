@@ -138,7 +138,7 @@ internal class BMInterstitialAdImpl(
         }
     }
 
-    override fun getToken(context: Context): String = BidMachine.getBidToken(context)
+    override suspend fun getToken(context: Context): String = BidMachine.getBidToken(context)
 
     override fun adRequest(adParams: BMFullscreenAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")

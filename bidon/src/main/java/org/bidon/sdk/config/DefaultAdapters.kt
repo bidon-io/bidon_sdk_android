@@ -12,6 +12,7 @@ enum class DefaultAdapters(val classPath: String) {
     ApplovinAdapter(classPath = "org.bidon.applovin.ApplovinAdapter"),
     DataExchangeAdapter(classPath = "org.bidon.dtexchange.DTExchangeAdapter"),
     UnityAdsAdapter(classPath = "org.bidon.unityads.UnityAdsAdapter"),
+    MobileFuseAdapter(classPath = "org.bidon.mobilefuse.MobileFuseAdapter"),
 
 //    AppsflyerAdapter(classPath = "org.bidon.appsflyer.AppsflyerAnalytics"),
 //    FyberFairBidAdapter(classPath = "org.bidon.fyber.FairBidAdapter"),

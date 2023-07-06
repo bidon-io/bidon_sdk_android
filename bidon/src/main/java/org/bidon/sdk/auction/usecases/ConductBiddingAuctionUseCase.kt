@@ -223,7 +223,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
         }
     }
 
-    private fun List<AdLoadingType.Bidding<AdAuctionParams>>.getTokens(
+    private suspend fun List<AdLoadingType.Bidding<AdAuctionParams>>.getTokens(
         context: Context
     ) = this.mapNotNull { adSource ->
         adSource.getToken(context)?.let { token ->

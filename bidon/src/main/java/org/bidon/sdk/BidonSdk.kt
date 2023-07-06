@@ -8,6 +8,7 @@ import org.bidon.sdk.config.impl.Bidon
 import org.bidon.sdk.databinders.app.UnitySpecificInfo
 import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.logging.Logger
+import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.regulation.Regulation
 import org.bidon.sdk.segment.Segment
 import org.bidon.sdk.utils.networking.NetworkSettings
@@ -123,6 +124,13 @@ object BidonSdk {
     @JvmStatic
     fun setTestMode(isTestMode: Boolean): BidonSdk {
         bidon.isTestMode = isTestMode
+        if (bidon.isInitialized) {
+            logInfo(
+                tag = Tag,
+                message = "The adapters have been initialized. " +
+                    "It's important to note that the test mode for an adapter can only be applied before initialization."
+            )
+        }
         return this
     }
 
@@ -153,3 +161,5 @@ object BidonSdk {
         return this
     }
 }
+
+private const val Tag = "BidonSdk"
