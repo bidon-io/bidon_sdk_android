@@ -26,7 +26,7 @@ sealed interface AuctionResult {
             val adapterName: String
         ) : Network {
             override val roundStatus = RoundStatus.UnknownAdapter
-            override val ecpm: Double get() = error("unexpected")
+            override val ecpm: Double get() = 0.0
             override val adSource: AdSource<*> get() = error("unexpected")
         }
     }
@@ -61,7 +61,7 @@ sealed interface AuctionResult {
 
             object TimeoutReached : Failure {
                 override val adSource: AdSource<*> get() = error("unexpected")
-                override val ecpm: Double get() = error("unexpected")
+                override val ecpm: Double get() = 0.0
                 override val roundStatus: RoundStatus = RoundStatus.BidTimeoutReached
             }
         }
