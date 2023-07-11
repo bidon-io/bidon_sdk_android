@@ -4,10 +4,7 @@ import android.app.Activity
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 import org.bidon.admob.AdmobFullscreenAdAuctionParams
 import org.bidon.admob.asBidonError
 import org.bidon.admob.ext.asBidonAdValue
@@ -22,8 +19,6 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.stats.models.asRoundStatus
-import org.bidon.sdk.utils.SdkDispatchers
 
 // $0.1 ca-app-pub-9630071911882835/9299488830
 // $0.5 ca-app-pub-9630071911882835/4234864416
@@ -42,8 +37,6 @@ internal class AdmobInterstitialImpl(
         demandId = demandId,
         demandAd = demandAd
     ) {
-
-    private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
 
     private var param: AdmobFullscreenAdAuctionParams? = null
     private var interstitialAd: InterstitialAd? = null
@@ -127,7 +120,7 @@ internal class AdmobInterstitialImpl(
     override val ad: Ad?
         get() = interstitialAd?.asAd()
 
-    override val adEvent = MutableSharedFlow<AdEvent>(Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val isAdReadyToShow: Boolean
         get() = interstitialAd != null
 
@@ -156,49 +149,31 @@ internal class AdmobInterstitialImpl(
         )
     }
 
-    override suspend fun bid(adParams: AdmobFullscreenAdAuctionParams): AuctionResult {
+    override fun bid(adParams: AdmobFullscreenAdAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")
-        return withContext(dispatcher) {
-            param = adParams
-            val adRequest = AdRequest.Builder().build()
-            val adUnitId = param?.lineItem?.adUnitId
-            if (!adUnitId.isNullOrBlank()) {
-                InterstitialAd.load(adParams.context, adUnitId, adRequest, requestListener)
-            } else {
-                val error = BidonError.NoAppropriateAdUnitId
-                logError(
-                    tag = Tag,
-                    message = "No appropriate AdUnitId found. PriceFloor=${adParams.pricefloor}, " +
-                        "but LineItem with max pricefloor=${param?.lineItem?.pricefloor}",
-                    error = error
-                )
-                adEvent.tryEmit(AdEvent.LoadFailed(error))
-            }
-            val state = adEvent.first {
-                it is AdEvent.Bid || it is AdEvent.LoadFailed
-            }
-            when (state) {
-                is AdEvent.LoadFailed -> {
-                    AuctionResult(
-                        ecpm = adParams.lineItem.pricefloor,
-                        adSource = this@AdmobInterstitialImpl,
-                        roundStatus = state.cause.asRoundStatus()
-                    )
-                }
-                is AdEvent.Bid -> state.result
-                else -> error("unexpected: $state")
-            }
+        param = adParams
+        val adRequest = AdRequest.Builder().build()
+        val adUnitId = param?.lineItem?.adUnitId
+        if (!adUnitId.isNullOrBlank()) {
+            InterstitialAd.load(adParams.context, adUnitId, adRequest, requestListener)
+        } else {
+            val error = BidonError.NoAppropriateAdUnitId
+            logError(
+                tag = Tag,
+                message = "No appropriate AdUnitId found. PriceFloor=${adParams.pricefloor}, " +
+                    "but LineItem with max pricefloor=${param?.lineItem?.pricefloor}",
+                error = error
+            )
+            adEvent.tryEmit(AdEvent.LoadFailed(error))
         }
     }
 
-    override suspend fun fill(): Result<Ad> = runCatching {
+    override fun fill() {
         logInfo(Tag, "Starting fill: $this")
         /**
          * Admob fills the bid automatically. It's not needed to fill it manually.
          */
-        val event = AdEvent.Fill(requireNotNull(interstitialAd?.asAd()))
-        adEvent.tryEmit(event)
-        event.ad
+        adEvent.tryEmit(AdEvent.Fill(requireNotNull(interstitialAd?.asAd())))
     }
 
     override fun show(activity: Activity) {

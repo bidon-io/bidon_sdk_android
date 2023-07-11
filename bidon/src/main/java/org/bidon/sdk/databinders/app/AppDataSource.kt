@@ -40,9 +40,4 @@ internal interface AppDataSource : DataSource {
      * Unity Bidon plugin version
      */
     fun getPluginVersion(): String?
-
-    /**
-     * Bidon SDK version
-     */
-    fun getBidonVersion(): String
 }

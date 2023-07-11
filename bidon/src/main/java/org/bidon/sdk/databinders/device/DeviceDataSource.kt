@@ -20,4 +20,6 @@ internal interface DeviceDataSource : DataSource {
     fun getCarrier(): String?
     fun getPhoneMCCMNC(): String?
     fun getConnectionTypeCode(): String
+    fun isTablet(): Boolean
+    fun getApiLevel(): String
 }

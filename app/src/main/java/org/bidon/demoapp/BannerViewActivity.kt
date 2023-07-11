@@ -2,18 +2,33 @@ package org.bidon.demoapp
 
 import android.os.Bundle
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.children
 import org.bidon.sdk.ads.banner.BannerView
 
 class BannerViewActivity : AppCompatActivity(R.layout.banner_view_layout) {
 
-    private val bannerView by lazy {
-        findViewById<BannerView>(R.id.bannerView)
+    private var bannerView: BannerView? = null
+
+    //    private val bannerView by lazy {
+//        findViewById<BannerView>(R.id.bannerView)
+//    }
+    private val bannerContainer by lazy {
+        findViewById<FrameLayout>(R.id.bannerContainer)
+    }
+
+    private val createButton by lazy {
+        findViewById<Button>(R.id.createButton)
     }
 
     private val loadButton by lazy {
         findViewById<Button>(R.id.loadButton)
+    }
+
+    private val showButton by lazy {
+        findViewById<Button>(R.id.showButton)
     }
 
     private val destroyButton by lazy {
@@ -30,12 +45,25 @@ class BannerViewActivity : AppCompatActivity(R.layout.banner_view_layout) {
     }
 
     private fun initViews() {
+        createButton.setOnClickListener {
+            bannerView = BannerView(this)
+        }
         loadButton.setOnClickListener {
-            bannerView.loadAd()
-            bannerView.showAd()
+            bannerView?.loadAd(activity = this)
+        }
+        showButton.setOnClickListener {
+            bannerView?.let {
+                if (it !in bannerContainer.children) {
+                    bannerContainer.removeAllViews()
+                    bannerContainer.addView(it)
+                    it.showAd()
+                }
+            }
         }
         destroyButton.setOnClickListener {
-            bannerView.destroyAd()
+            bannerContainer.removeAllViews()
+            bannerView?.destroyAd()
+            bannerView = null
         }
         closeButton.setOnClickListener {
             onBackPressed()

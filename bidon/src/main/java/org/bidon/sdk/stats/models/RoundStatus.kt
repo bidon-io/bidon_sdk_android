@@ -37,6 +37,7 @@ fun Throwable.asRoundStatus() = when (this as? BidonError) {
 
     is BidonError.AppKeyIsInvalid,
     BidonError.FullscreenAdNotReady,
+    BidonError.BannerAdNotReady,
     BidonError.NoAuctionResults,
     BidonError.NoContextFound,
     BidonError.NoRoundResults,

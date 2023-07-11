@@ -17,6 +17,8 @@ internal data class Device(
     val os: String?,
     @field:JsonName("osv")
     val osVersion: String?,
+    @field:JsonName("os_api_level")
+    val osApiLevel: String?,
     @field:JsonName("hwv")
     val hardwareVersion: String?,
     @field:JsonName("h")
@@ -37,4 +39,6 @@ internal data class Device(
     val mccmnc: String?,
     @field:JsonName("connection_type")
     val connectionType: String?,
+    @field:JsonName("type")
+    val type: String,
 ) : Serializable

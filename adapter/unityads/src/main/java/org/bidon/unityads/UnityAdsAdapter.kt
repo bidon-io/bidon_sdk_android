@@ -1,15 +1,23 @@
 package org.bidon.unityads
 
-import android.app.Activity
+import android.content.Context
 import com.unity3d.ads.IUnityAdsInitializationListener
 import com.unity3d.ads.UnityAds
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdProvider
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.Adapter
+import org.bidon.sdk.adapter.AdapterInfo
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.adapter.Initializable
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.unityads.ext.adapterVersion
 import org.bidon.unityads.ext.asBidonError
 import org.bidon.unityads.ext.sdkVersion
-import org.bidon.unityads.impl.UnityAdsAuctionParams
+import org.bidon.unityads.impl.UnityAdsBanner
+import org.bidon.unityads.impl.UnityAdsBannerAuctionParams
+import org.bidon.unityads.impl.UnityAdsFullscreenAuctionParams
 import org.bidon.unityads.impl.UnityAdsInterstitial
 import org.bidon.unityads.impl.UnityAdsRewarded
 import org.json.JSONObject
@@ -22,11 +30,15 @@ import kotlin.coroutines.resumeWithException
 
 internal val UnityAdsDemandId = DemandId("unityads")
 
+/**
+ * [Documentation](https://docs.unity.com/ads/en/manual/InitializingTheAndroidSDK)
+ */
 class UnityAdsAdapter :
     Adapter,
     Initializable<UnityAdsParameters>,
-    AdProvider.Interstitial<UnityAdsAuctionParams>,
-    AdProvider.Rewarded<UnityAdsAuctionParams> {
+    AdProvider.Banner<UnityAdsBannerAuctionParams>,
+    AdProvider.Interstitial<UnityAdsFullscreenAuctionParams>,
+    AdProvider.Rewarded<UnityAdsFullscreenAuctionParams> {
 
     override val demandId: DemandId = UnityAdsDemandId
     override val adapterInfo = AdapterInfo(
@@ -34,11 +46,11 @@ class UnityAdsAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun init(activity: Activity, configParams: UnityAdsParameters) =
+    override suspend fun init(context: Context, configParams: UnityAdsParameters) =
         suspendCancellableCoroutine { continuation ->
             val isTestMode = BuildConfig.DEBUG
             UnityAds.initialize(
-                activity.applicationContext,
+                context,
                 configParams.unityGameId,
                 isTestMode,
                 object : IUnityAdsInitializationListener {
@@ -64,7 +76,7 @@ class UnityAdsAdapter :
         demandAd: DemandAd,
         roundId: String,
         auctionId: String
-    ): AdSource.Interstitial<UnityAdsAuctionParams> {
+    ): AdSource.Interstitial<UnityAdsFullscreenAuctionParams> {
         return UnityAdsInterstitial(
             demandId = demandId,
             demandAd = demandAd,
@@ -77,8 +89,21 @@ class UnityAdsAdapter :
         demandAd: DemandAd,
         roundId: String,
         auctionId: String
-    ): AdSource.Rewarded<UnityAdsAuctionParams> {
+    ): AdSource.Rewarded<UnityAdsFullscreenAuctionParams> {
         return UnityAdsRewarded(
+            demandId = demandId,
+            demandAd = demandAd,
+            roundId = roundId,
+            auctionId = auctionId
+        )
+    }
+
+    override fun banner(
+        demandAd: DemandAd,
+        roundId: String,
+        auctionId: String
+    ): AdSource.Banner<UnityAdsBannerAuctionParams> {
+        return UnityAdsBanner(
             demandId = demandId,
             demandAd = demandAd,
             roundId = roundId,

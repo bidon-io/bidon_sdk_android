@@ -5,4 +5,5 @@ package org.bidon.sdk.adapter
  */
 interface AdAuctionParams {
     val adUnitId: String?
+    val pricefloor: Double?
 }

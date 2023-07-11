@@ -1,6 +1,7 @@
 package org.bidon.sdk.auction.impl
 
 import org.bidon.sdk.adapter.AdapterInfo
+import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
@@ -14,6 +15,7 @@ internal class GetAuctionRequestUseCaseImpl : GetAuctionRequestUseCase {
     override suspend fun request(
         additionalData: AdTypeParam,
         auctionId: String,
+        demandAd: DemandAd,
         adapters: Map<String, AdapterInfo>
     ): Result<AuctionResponse> {
         logInfo(Tag, "----------------------------- SERVERLESS DATA / USE ONLY FOR TEST ----------------------------- ")

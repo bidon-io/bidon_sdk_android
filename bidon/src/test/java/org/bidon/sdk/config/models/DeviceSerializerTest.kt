@@ -28,7 +28,9 @@ internal class DeviceSerializerTest {
             osVersion = "djshkf",
             ppi = 123,
             pxRatio = 23.3f,
-            javaScriptSupport = 1
+            javaScriptSupport = 1,
+            type = "TABLET",
+            osApiLevel = "33"
         )
         val actual = device.serialize()
 
@@ -49,6 +51,8 @@ internal class DeviceSerializerTest {
                 "w" hasValue 321
                 "model" hasValue "model123"
                 "make" hasValue "sony"
+                "type" hasValue "TABLET"
+                "os_api_level" hasValue "33"
             }
         )
     }
@@ -70,7 +74,9 @@ internal class DeviceSerializerTest {
             osVersion = null,
             ppi = null,
             pxRatio = 23.3f,
-            javaScriptSupport = null
+            javaScriptSupport = null,
+            type = "PHONE",
+            osApiLevel = "33"
         )
         val actual = device.serialize()
 
@@ -83,6 +89,8 @@ internal class DeviceSerializerTest {
                 "pxratio" has Whatever.Double
                 "model" hasValue "model123"
                 "make" hasValue "sony"
+                "type" hasValue "PHONE"
+                "os_api_level" hasValue "33"
             }
         )
     }
