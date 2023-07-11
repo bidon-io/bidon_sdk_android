@@ -5,7 +5,7 @@ import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.utils.di.get
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 class DemandAd(val adType: AdType) : Extras by get() {
     override fun toString(): String {

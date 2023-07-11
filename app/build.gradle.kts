@@ -55,7 +55,7 @@ android {
     flavorDimensions += "server"
     productFlavors {
         create("production") {
-            description = "Production backend x.appbaqend.com"
+            description = "Production backend"
             dimension = "server"
         }
         create("serverless") {
@@ -92,9 +92,6 @@ dependencies {
     implementation(project(":adapter:applovin"))
     implementation(project(":adapter:dtexchange"))
     implementation(project(":adapter:unityads"))
-//    implementation(project(":adapter:appsflyer"))
-//    implementation(project(":adapter:fyber"))
-//    implementation(project(":adapter:ironsource"))
 
     implementation(Dependencies.Google.PlayServicesAdsIdentifier)
 

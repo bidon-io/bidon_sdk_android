@@ -3,7 +3,7 @@ package org.bidon.sdk.ads.banner
 import org.bidon.sdk.BidonSdk
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 interface BannerAd {
     fun setBannerFormat(bannerFormat: BannerFormat)

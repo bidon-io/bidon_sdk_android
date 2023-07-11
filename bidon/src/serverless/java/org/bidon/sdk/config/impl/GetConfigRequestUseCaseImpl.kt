@@ -7,7 +7,7 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.ext.asSuccess
 
 /**
- * Created by Aleksei Cherniaev on 06/03/2023.
+ * Created by Bidon Team on 06/03/2023.
  */
 internal class GetConfigRequestUseCaseImpl : GetConfigRequestUseCase {
     override suspend fun request(body: ConfigRequestBody): Result<ConfigResponse> {

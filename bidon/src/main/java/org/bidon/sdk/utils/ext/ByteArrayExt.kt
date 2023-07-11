@@ -1,6 +1,6 @@
 package org.bidon.sdk.utils.ext
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 fun ByteArray.toHexString(): String {
     val hexArray = "0123456789abcdef".toCharArray()

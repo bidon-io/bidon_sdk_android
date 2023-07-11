@@ -4,7 +4,7 @@ import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.auction.models.LineItem
 
 /**
- * Created by Aleksei Cherniaev on 21/02/2023.
+ * Created by Bidon Team on 21/02/2023.
  */
 
 /**

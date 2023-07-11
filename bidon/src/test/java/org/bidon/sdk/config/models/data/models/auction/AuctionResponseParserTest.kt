@@ -8,7 +8,7 @@ import org.bidon.sdk.utils.json.JsonParsers
 import org.junit.Test
 
 /**
- * Created by Aleksei Cherniaev on 08/02/2023.
+ * Created by Bidon Team on 08/02/2023.
  */
 internal class AuctionResponseParserTest {
 

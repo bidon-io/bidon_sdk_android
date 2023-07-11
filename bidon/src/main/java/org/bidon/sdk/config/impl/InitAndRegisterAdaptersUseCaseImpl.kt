@@ -13,7 +13,7 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import kotlin.system.measureTimeMillis
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 @Suppress("UNCHECKED_CAST")
 internal class InitAndRegisterAdaptersUseCaseImpl(

@@ -3,7 +3,7 @@ package org.bidon.sdk.utils.serializer
 import kotlin.reflect.full.*
 
 /**
- * Created by Aleksei Cherniaev on 14/02/2023.
+ * Created by Bidon Team on 14/02/2023.
  */
 
 internal interface Serializable {

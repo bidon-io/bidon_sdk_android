@@ -14,7 +14,7 @@ import androidx.test.espresso.matcher.ViewMatchers
 import org.hamcrest.Matcher
 
 /**
- * Created by Aleksei Cherniaev on 08/03/2023.
+ * Created by Bidon Team on 08/03/2023.
  */
 
 fun ComposeContentTestRule.checkTextOnScreen(

@@ -13,7 +13,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 internal class NetworkStateObserverImpl : NetworkStateObserver {
     private var connectivityManager: ConnectivityManager? = null

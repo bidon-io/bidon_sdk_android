@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
 /**
- * Created by Aleksei Cherniaev on 04/04/2023.
+ * Created by Bidon Team on 04/04/2023.
  */
 internal class ExtrasImplTest {
 

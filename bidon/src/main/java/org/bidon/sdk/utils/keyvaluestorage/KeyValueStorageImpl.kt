@@ -3,7 +3,7 @@ package org.bidon.sdk.utils.keyvaluestorage
 import android.content.Context
 import java.util.*
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 internal class KeyValueStorageImpl(private val context: Context) : KeyValueStorage {
     private val sharedPreferences by lazy {

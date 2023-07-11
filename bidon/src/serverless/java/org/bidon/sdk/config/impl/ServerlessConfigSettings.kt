@@ -6,7 +6,7 @@ import org.bidon.sdk.utils.json.jsonObject
 import org.json.JSONObject
 
 /**
- * Created by Aleksei Cherniaev on 06/03/2023.
+ * Created by Bidon Team on 06/03/2023.
  */
 object ServerlessConfigSettings {
 
@@ -39,7 +39,7 @@ object ServerlessConfigSettings {
                     when (defaultAdapter) {
                         DefaultAdapters.AdmobAdapter -> "admob" to admobOptions
                         DefaultAdapters.BidmachineAdapter -> "bidmachine" to bidmachineOptions
-                        DefaultAdapters.ApplovinAdapter -> "applovin" to applovinOptions
+                        DefaultAdapters.ApplovinAdapter -> "applovin" to """{}"""
                         DefaultAdapters.DataExchangeAdapter -> "dtexchange" to dtexchangeOptions
                         DefaultAdapters.UnityAdsAdapter -> "unityads" to unityadsOptions
                     }
@@ -51,28 +51,8 @@ object ServerlessConfigSettings {
     }
 
     private val admobOptions = jsonObject {}
-    private val bidmachineOptions = JSONObject(
-        """
-           {
-             "seller_id": "1",
-             "endpoint": "x.appbaqend.com",
-             "mediation_config": [
-               "meta_audience",
-               "criteo",
-               "pangle",
-               "amazon",
-               "adcolony",
-               "my_target",
-               "vungle",
-               "tapjoy",
-               "notsy"
-             ]
-           }
-        """.trimIndent()
-    )
+    private val bidmachineOptions = jsonObject {}
 
-    private val applovinOptions =
-        JSONObject("""{"app_key": "8M_ro4EHQZexs13KI8fEI0cw7s57D11LN1AA5PRW-4Sq6W9OepdypFtx5z2J-4fM5rWBEziD2918fBXJ-AFoP7"}""")
     private val dtexchangeOptions = JSONObject("""{"app_id": "102960"}""")
     private val unityadsOptions = JSONObject("""{"game_id": "5186538"}""")
 }

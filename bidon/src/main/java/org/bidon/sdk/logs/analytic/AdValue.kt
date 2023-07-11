@@ -1,7 +1,7 @@
 package org.bidon.sdk.logs.analytic
 
 /**
- * Created by Aleksei Cherniaev on 21/02/2023.
+ * Created by Bidon Team on 21/02/2023.
  */
 
 /**

@@ -3,7 +3,7 @@ package org.bidon.sdk.logs.logging.impl
 import org.bidon.sdk.logs.logging.Logger
 
 /**
- * Created by Aleksei Cherniaev on 10/02/2023.
+ * Created by Bidon Team on 10/02/2023.
  */
 internal class LoggerImpl : Logger {
 

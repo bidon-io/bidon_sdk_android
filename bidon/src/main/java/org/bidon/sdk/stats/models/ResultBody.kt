@@ -4,7 +4,7 @@ import org.bidon.sdk.utils.serializer.JsonName
 import org.bidon.sdk.utils.serializer.Serializable
 
 /**
- * Created by Aleksei Cherniaev on 03/03/2023.
+ * Created by Bidon Team on 03/03/2023.
  */
 internal data class ResultBody(
     @field:JsonName("status")

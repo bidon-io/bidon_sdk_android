@@ -8,7 +8,7 @@ import org.json.JSONArray
 import org.junit.Test
 
 /**
- * Created by Aleksei Cherniaev on 23/02/2023.
+ * Created by Bidon Team on 23/02/2023.
  */
 internal class SessionSerializerTest {
 

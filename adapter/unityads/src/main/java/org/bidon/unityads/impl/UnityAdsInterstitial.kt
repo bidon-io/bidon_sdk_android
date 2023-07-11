@@ -26,7 +26,7 @@ import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.unityads.ext.asBidonError
 
 /**
- * Created by Aleksei Cherniaev on 02/03/2023.
+ * Created by Bidon Team on 02/03/2023.
  */
 internal class UnityAdsInterstitial(
     override val demandId: DemandId,

@@ -23,7 +23,7 @@ import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
 import org.bidon.sdk.utils.networking.BidonEndpoints
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  */
 internal class BidonInitializerImpl : BidonInitializer {
     private val dispatcher by lazy { SdkDispatchers.Single }

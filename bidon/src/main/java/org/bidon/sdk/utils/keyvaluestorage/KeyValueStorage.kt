@@ -1,7 +1,7 @@
 package org.bidon.sdk.utils.keyvaluestorage
 
 /**
- * Created by Aleksei Cherniaev on 06/02/2023.
+ * Created by Bidon Team on 06/02/2023.
  *
  * Add unique [Key] for each variable.
  *

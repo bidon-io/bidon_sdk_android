@@ -5,7 +5,7 @@ import org.bidon.sdk.stats.models.ResultBody
 import org.bidon.sdk.stats.models.RoundStatus
 
 /**
- * Created by Aleksei Cherniaev on 03/03/2023.
+ * Created by Bidon Team on 03/03/2023.
  */
 
 internal fun DemandStat?.asSuccessResultOrFail(): ResultBody {
