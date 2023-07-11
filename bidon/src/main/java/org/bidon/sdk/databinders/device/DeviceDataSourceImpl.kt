@@ -11,6 +11,7 @@ import android.telephony.TelephonyManager
 import android.view.Display
 import android.view.WindowManager
 import android.webkit.WebSettings
+import org.bidon.sdk.ads.banner.helper.DeviceType
 import org.bidon.sdk.logs.logging.impl.logError
 import java.util.*
 
@@ -56,6 +57,7 @@ internal class DeviceDataSourceImpl(
     override fun getDeviceModel(): String = "${getManufacturer()} ${Build.MODEL}"
     override fun getOs(): String = AndroidPlatform
     override fun getOsVersion(): String = Build.VERSION.RELEASE
+    override fun getApiLevel(): String = Build.VERSION.SDK_INT.toString()
     override fun getHardwareVersion(): String = Build.HARDWARE
     override fun getScreenWidth(): Int = screenSize.x
     override fun getScreenHeight(): Int = screenSize.y
@@ -98,9 +100,8 @@ internal class DeviceDataSourceImpl(
         return null
     }
 
-    override fun getConnectionTypeCode(): String {
-        return getConnectionType(context).code
-    }
+    override fun getConnectionTypeCode(): String = getConnectionType(context).code
+    override fun isTablet(): Boolean = DeviceType.isTablet
 
     private fun getConnectionType(context: Context): ConnectionType {
         val connectivityManager =

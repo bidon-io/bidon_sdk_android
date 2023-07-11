@@ -4,13 +4,13 @@ import android.app.Activity
 import android.content.Context
 import io.bidmachine.AdContentType
 import io.bidmachine.AdRequest
+import io.bidmachine.CustomParams
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.interstitial.InterstitialAd
 import io.bidmachine.interstitial.InterstitialListener
 import io.bidmachine.interstitial.InterstitialRequest
 import io.bidmachine.utils.BMError
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 import org.bidon.bidmachine.BMAuctionResult
 import org.bidon.bidmachine.BMFullscreenAuctionParams
 import org.bidon.bidmachine.asBidonErrorOnBid
@@ -26,8 +26,6 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.stats.models.asRoundStatus
-import org.bidon.sdk.utils.ext.asFailure
 import org.bidon.sdk.utils.ext.asSuccess
 
 internal class BMInterstitialAdImpl(
@@ -44,7 +42,7 @@ internal class BMInterstitialAdImpl(
         demandAd = demandAd,
     ) {
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val ad: Ad? get() = interstitialAd?.asAd()
 
     private var context: Context? = null
@@ -141,12 +139,13 @@ internal class BMInterstitialAdImpl(
         }
     }
 
-    override suspend fun bid(adParams: BMFullscreenAuctionParams): AuctionResult {
+    override fun bid(adParams: BMFullscreenAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")
         context = adParams.context
         InterstitialRequest.Builder()
             .setAdContentType(AdContentType.All)
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
+            .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
             .setLoadingTimeOut(adParams.timeout.toInt())
             .setListener(requestListener)
             .build()
@@ -154,23 +153,9 @@ internal class BMInterstitialAdImpl(
                 adRequest = it
             }
             .request(adParams.context)
-        val state = adEvent.first {
-            it is AdEvent.Bid || it is AdEvent.LoadFailed
-        }
-        return when (state) {
-            is AdEvent.LoadFailed -> {
-                AuctionResult(
-                    ecpm = 0.0,
-                    adSource = this,
-                    roundStatus = state.cause.asRoundStatus()
-                )
-            }
-            is AdEvent.Bid -> state.result
-            else -> error("unexpected: $state")
-        }
     }
 
-    override suspend fun fill(): Result<Ad> {
+    override fun fill() {
         logInfo(Tag, "Starting fill: $this")
         val context = context
         if (context == null) {
@@ -181,21 +166,6 @@ internal class BMInterstitialAdImpl(
             }
             bmInterstitialAd.setListener(interstitialListener)
             bmInterstitialAd.load(adRequest)
-        }
-        val state = adEvent.first {
-            it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
-        }
-        return when (state) {
-            is AdEvent.Fill -> {
-                state.ad.asSuccess()
-            }
-            is AdEvent.LoadFailed -> {
-                state.cause.asFailure()
-            }
-            is AdEvent.Expired -> {
-                BidonError.FillTimedOut(demandId).asFailure()
-            }
-            else -> error("unexpected: $state")
         }
     }
 
@@ -208,8 +178,8 @@ internal class BMInterstitialAdImpl(
         }
     }
 
-    override fun notifyLoss() {
-        adRequest?.notifyMediationLoss()
+    override fun notifyLoss(winnerNetworkName: String, winnerNetworkPrice: Double) {
+        adRequest?.notifyMediationLoss(winnerNetworkName, winnerNetworkPrice)
     }
 
     override fun notifyWin() {

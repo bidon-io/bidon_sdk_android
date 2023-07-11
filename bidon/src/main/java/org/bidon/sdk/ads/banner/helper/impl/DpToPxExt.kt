@@ -10,3 +10,5 @@ val Number.dpToPx get() = TypedValue.applyDimension(
     this.toFloat(),
     Resources.getSystem().displayMetrics
 ).toInt()
+
+val Number.pxToDp get() = (this.toInt() / Resources.getSystem().displayMetrics.density).toInt()

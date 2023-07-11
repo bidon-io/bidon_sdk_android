@@ -6,6 +6,7 @@ import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.impl.AdaptersSourceImpl
 import org.bidon.sdk.ads.banner.helper.CountDownTimer
+import org.bidon.sdk.ads.banner.helper.DeviceType
 import org.bidon.sdk.ads.banner.helper.GetOrientationUseCase
 import org.bidon.sdk.ads.banner.helper.PauseResumeObserver
 import org.bidon.sdk.ads.banner.helper.impl.ActivityLifecycleObserver
@@ -63,6 +64,7 @@ import org.bidon.sdk.utils.networking.impl.BidonEndpointsImpl
 import org.bidon.sdk.utils.networking.impl.NetworkStateObserverImpl
 import org.bidon.sdk.utils.networking.requests.CreateRequestBodyUseCase
 import org.bidon.sdk.utils.networking.requests.CreateRequestBodyUseCaseImpl
+import org.bidon.sdk.utils.visibilitytracker.VisibilityTracker
 
 /**
  * Created by Bidon Team on 06/02/2023.
@@ -74,6 +76,7 @@ internal object DI {
         module {
             singleton<Context> { context.applicationContext }
         }
+        DeviceType.init(context)
         FlavoredDI.init()
     }
 
@@ -197,6 +200,7 @@ internal object DI {
                 )
             }
             factory<Extras> { ExtrasImpl() }
+            factory { VisibilityTracker() }
 
             factory<SendLossRequestUseCase> {
                 SendLossRequestUseCaseImpl(

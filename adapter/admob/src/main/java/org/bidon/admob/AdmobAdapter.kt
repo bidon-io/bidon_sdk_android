@@ -1,6 +1,5 @@
 package org.bidon.admob
 
-import android.app.Activity
 import android.content.Context
 import com.google.android.gms.ads.MobileAds
 import org.bidon.admob.ext.adapterVersion
@@ -21,7 +20,6 @@ class AdmobAdapter :
     AdProvider.Banner<AdmobBannerAuctionParams>,
     AdProvider.Rewarded<AdmobFullscreenAdAuctionParams>,
     AdProvider.Interstitial<AdmobFullscreenAdAuctionParams> {
-    private lateinit var context: Context
 
     override val demandId = AdmobDemandId
     override val adapterInfo = AdapterInfo(
@@ -29,8 +27,7 @@ class AdmobAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun init(activity: Activity, configParams: AdmobInitParameters): Unit = suspendCoroutine { continuation ->
-        this.context = activity.applicationContext
+    override suspend fun init(context: Context, configParams: AdmobInitParameters): Unit = suspendCoroutine { continuation ->
         /**
          * Don't forget set Automatic refresh is Disabled for each AdUnit.
          * Manage refresh rate with [BannerView.startAutoRefresh].

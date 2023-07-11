@@ -4,78 +4,64 @@ import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.bidon.sdk.BidonSdk
-import org.bidon.sdk.BidonSdk.DefaultPricefloor
 import org.bidon.sdk.R
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.ads.AdType
-import org.bidon.sdk.ads.asUnspecified
-import org.bidon.sdk.ads.banner.helper.ActivityLifecycleState
-import org.bidon.sdk.ads.banner.helper.BannerState.*
-import org.bidon.sdk.ads.banner.helper.CountDownTimer
-import org.bidon.sdk.ads.banner.helper.impl.ActivityLifecycleObserver
+import org.bidon.sdk.ads.banner.helper.AdLifecycle
+import org.bidon.sdk.ads.banner.helper.LogLifecycleAdStateUseCase
+import org.bidon.sdk.ads.banner.helper.impl.dpToPx
 import org.bidon.sdk.ads.banner.helper.wrapUserBannerListener
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
+import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
+import org.bidon.sdk.auction.models.BannerRequestBody.Companion.asStatBannerFormat
 import org.bidon.sdk.config.BidonError
-import org.bidon.sdk.logs.logging.impl.logError
+import org.bidon.sdk.config.impl.asBidonErrorOrUnspecified
+import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
+import org.bidon.sdk.utils.visibilitytracker.VisibilityTracker
 
 /**
- * Created by Bidon Team on 06/02/2023.
+ * Created by Aleksei Cherniaev on 02/03/2023.
  */
-@Deprecated("Use Banner")
-class BannerView(
+class BannerView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    @AttrRes defStyleAtt: Int = 0
-) : FrameLayout(context, attrs, defStyleAtt), BannerAd {
+    @AttrRes defStyleAtt: Int = 0,
+    private val demandAd: DemandAd = DemandAd(AdType.Banner),
+) : FrameLayout(context, attrs, defStyleAtt),
+    BannerAd,
+    Extras by demandAd {
 
     private var bannerFormat: BannerFormat = BannerFormat.Banner
+    private var pricefloor: Double = BidonSdk.DefaultPricefloor
     private var userListener: BannerListener? = null
-    private val activityLifecycleObserver by lazy { (context as? Activity)?.let { ActivityLifecycleObserver(it) } }
-    private var refresh: AutoRefresh = if (activityLifecycleObserver == null) {
-        AutoRefresh.Off
-    } else {
-        AutoRefresh.On(DefaultAutoRefreshTimeoutMs)
-    }
-
-    private val showState = MutableStateFlow<ShowState>(ShowState.Idle)
-    private val showActionFlow = MutableSharedFlow<ShowAction>(extraBufferCapacity = Int.MAX_VALUE)
-    private val loadState = MutableStateFlow<LoadState>(LoadState.Idle)
-    private val loadActionFlow = MutableSharedFlow<LoadAction>(extraBufferCapacity = Int.MAX_VALUE)
-
-    private val demandAd by lazy { DemandAd(AdType.Banner) }
-    private val listener by lazy { wrapUserBannerListener(userListener = { userListener }) }
     private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
-    private val displayingRefreshTimer by lazy {
-        activityLifecycleObserver?.let { observer ->
-            get<CountDownTimer> {
-                params(observer)
-            }
-        }
-    }
-    private val loadingRefreshTimer by lazy {
-        activityLifecycleObserver?.let { observer ->
-            get<CountDownTimer> {
-                params(observer)
-            }
-        }
-    }
-    private var showJob: Job? = null
-    private var observeCallbacksJob: Job? = null
-    private var pricefloor: Double = DefaultPricefloor
+    private val listener by lazy { wrapUserBannerListener(userListener = { userListener }) }
+    private val adLifecycleFlow = MutableStateFlow(AdLifecycle.Created)
+    private val auction: Auction get() = get()
+    private val visibilityTracker: VisibilityTracker by lazy { get() }
+    private var winner: AuctionResult? = null
+    private var winnerSubscriberJob: Job? = null
+    private var auctionJob: Job? = null
+    private var loadingError: BidonError? = null
 
     init {
         context.theme.obtainStyledAttributes(attrs, R.styleable.BannerView, 0, 0).apply {
@@ -92,298 +78,196 @@ class BannerView(
                 recycle()
             }
         }
-        launchLoadReducer(pricefloor)
-        launchShowReducer()
     }
 
+    override val adSize: AdSize?
+        get() = (winner?.adSource as? AdSource.Banner)?.getAdView()?.let {
+            AdSize(widthDp = it.widthDp, heightDp = it.heightDp)
+        }
+
     override fun setBannerFormat(bannerFormat: BannerFormat) {
-        logInfo(Tag, "BannerSize set: $bannerFormat")
         this.bannerFormat = bannerFormat
     }
 
-    override fun setBannerListener(listener: BannerListener) {
-        logInfo(Tag, "Set banner listener")
-        this.userListener = listener
-    }
-
-    override fun isReady(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun loadAd(pricefloor: Double) {
+    override fun loadAd(activity: Activity, pricefloor: Double) {
+        logInfo(Tag, "LoadAd. $this")
         if (!BidonSdk.isInitialized()) {
             logInfo(Tag, "Sdk is not initialized")
             listener.onAdLoadFailed(BidonError.SdkNotInitialized)
             return
         }
-        this.pricefloor = pricefloor
-        logInfo(Tag, "Load")
-        sendAction(LoadAction.OnLoadInvoked)
+        if (adLifecycleFlow.compareAndSet(
+                expect = AdLifecycle.Created,
+                update = AdLifecycle.Loading
+            )
+        ) {
+            conductAuction(activity, pricefloor)
+        } else {
+            when (adLifecycleFlow.value) {
+                AdLifecycle.Loading -> {
+                    logInfo(Tag, "Auction already in progress")
+                    userListener?.onAdLoadFailed(BidonError.AuctionInProgress)
+                }
+
+                AdLifecycle.Loaded -> {
+                    winner?.adSource?.ad?.let {
+                        logInfo(Tag, "Banner loaded")
+                        userListener?.onAdLoaded(it)
+                    }
+                }
+
+                else -> {
+                    logInfo(Tag, "Ad State=${adLifecycleFlow.value}")
+                }
+            }
+        }
+    }
+
+    override fun isReady(): Boolean {
+        return winner?.adSource?.isAdReadyToShow == true
     }
 
     override fun showAd() {
-        logInfo(Tag, "Show")
-        sendAction(ShowAction.OnShowInvoked)
+        logInfo(Tag, "ShowAd invoked")
+        if (!BidonSdk.isInitialized()) {
+            logInfo(Tag, "Sdk is not initialized")
+            listener.onAdShowFailed(BidonError.SdkNotInitialized)
+            return
+        }
+        when (adLifecycleFlow.value) {
+            AdLifecycle.Displaying,
+            AdLifecycle.Created,
+            AdLifecycle.Loading -> {
+                // do nothing
+            }
+
+            AdLifecycle.Loaded -> {
+                val isLoaded =
+                    isReady() && adLifecycleFlow.compareAndSet(
+                        expect = AdLifecycle.Loaded,
+                        update = AdLifecycle.Displaying
+                    )
+                if (!isLoaded) {
+                    logInfo(Tag, "Not loaded. Current state: ${adLifecycleFlow.value}")
+                    LogLifecycleAdStateUseCase.invoke(adLifecycle = adLifecycleFlow.value)
+                    userListener?.onAdShowFailed(loadingError ?: BidonError.BannerAdNotReady)
+                    return
+                }
+                val bannerSource = (winner?.adSource as? AdSource.Banner) ?: run {
+                    logInfo(Tag, "AdSource(${winner?.adSource}: no ad view.")
+                    LogLifecycleAdStateUseCase.invoke(adLifecycle = adLifecycleFlow.value)
+                    userListener?.onAdShowFailed(loadingError ?: BidonError.BannerAdNotReady)
+                    return
+                }
+                // Success
+                addViewOnScreen(bannerSource)
+            }
+
+            AdLifecycle.Displayed -> {
+                winner?.adSource?.ad?.let { userListener?.onAdShown(ad = it) }
+            }
+
+            AdLifecycle.LoadingFailed,
+            AdLifecycle.DisplayingFailed,
+            AdLifecycle.Destroyed -> {
+                userListener?.onAdShowFailed(loadingError ?: BidonError.BannerAdNotReady)
+            }
+        }
     }
 
-//    override fun startAutoRefresh(timeoutMs: Long) {
-//        if (activityLifecycleObserver == null) {
-//            logInfo(
-//                Tag,
-//                "Auto-refresh is disabled, because BannerView created not with Activity context."
-//            )
-//            refresh = AutoRefresh.Off
-//            return
-//        }
-//        logInfo(Tag, "Auto-refresh initialized with timeout $timeoutMs ms")
-//        refresh = AutoRefresh.On(timeoutMs)
-//        sendAction(ShowAction.OnStartAutoRefreshInvoked(timeoutMs))
-//    }
-//
-//    override fun stopAutoRefresh() {
-//        logInfo(Tag, "Auto-refresh stopped")
-//        refresh = AutoRefresh.Off
-//        sendAction(ShowAction.OnStopAutoRefreshInvoked)
-//    }
+    override fun setBannerListener(listener: BannerListener?) {
+        userListener = listener
+    }
 
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
+    override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {
+        logInfo(Tag, "Notify Loss invoked with Winner($winnerDemandId, $winnerEcpm)")
+        winner?.adSource?.sendLoss(
+            winnerDemandId = winnerDemandId,
+            winnerEcpm = winnerEcpm,
+            adType = StatisticsCollector.AdType.Banner(
+                format = bannerFormat.asStatBannerFormat()
+            )
+        )
         destroyAd()
     }
 
     override fun destroyAd() {
-        sendAction(LoadAction.OnDestroyInvoked)
-        sendAction(ShowAction.OnDestroyInvoked)
+        adLifecycleFlow.value = AdLifecycle.Destroyed
+        visibilityTracker.stop()
+        auctionJob?.cancel()
+        auctionJob = null
+        winner?.adSource?.destroy()
+        winner = null
+        winnerSubscriberJob?.cancel()
+        winnerSubscriberJob = null
+        removeAllViews()
     }
 
-    /**
-     * Private
-     */
-
-    private fun sendAction(action: ShowAction) {
-        if (!BidonSdk.isInitialized()) {
-            logInfo(Tag, "Sdk is not initialized")
-            return
-        }
-        showActionFlow.tryEmit(action)
-    }
-
-    private fun sendAction(action: LoadAction) {
-        if (!BidonSdk.isInitialized()) {
-            logInfo(Tag, "Sdk is not initialized")
-            return
-        }
-        loadActionFlow.tryEmit(action)
-    }
-
-    private fun launchLoadReducer(pricefloor: Double) {
-        loadActionFlow.scan(
-            initial = loadState.value,
-            operation = { state, action ->
-                logInfo(
-                    Tag,
-                    "Load Action: ${action.javaClass.simpleName}. Current State: ${state.javaClass.simpleName}."
+    private fun FrameLayout.addViewOnScreen(adSource: AdSource.Banner<*>) {
+        // add AdView to Screen
+        removeAllViews()
+        val adViewHolder: AdViewHolder = adSource.getAdView()
+        val layoutParams =
+            LayoutParams(adViewHolder.widthDp.dpToPx, adViewHolder.heightDp.dpToPx, Gravity.CENTER)
+        addView(adViewHolder.networkAdview, layoutParams)
+        this.visibility = VISIBLE
+        adViewHolder.networkAdview.visibility = VISIBLE
+        logInfo(
+            Tag,
+            "View added(${adSource.demandId.demandId}): ${adViewHolder.networkAdview}. Size(${adViewHolder.widthDp}, ${adViewHolder.heightDp})"
+        )
+        checkBannerShown(adViewHolder.networkAdview, onBannerShown = {
+            adLifecycleFlow.value = AdLifecycle.Displayed
+            adSource.ad?.let { listener.onAdShown(ad = it) }
+            adSource.sendShowImpression(
+                StatisticsCollector.AdType.Banner(
+                    format = bannerFormat.asStatBannerFormat()
                 )
-                when (action) {
-                    LoadAction.OnLoadInvoked -> {
-                        when (state) {
-                            LoadState.Idle -> {
-                                startAuction(pricefloor)
-                                LoadState.Loading
-                            }
-                            LoadState.Loading -> {
-                                logInfo(
-                                    Tag,
-                                    "Auction already in progress"
-                                )
-                                state
-                            }
-                            is LoadState.Loaded -> {
-                                logInfo(
-                                    Tag,
-                                    "Auction is completed and winner exists"
-                                )
-                                state
-                            }
-                        }
-                    }
-                    is LoadAction.OnAuctionSucceed -> {
-                        /**
-                         * Winner found
-                         */
-                        val winner = action.auctionResults.first()
-                        val ad = requireNotNull(winner.adSource.ad) {
-                            "[Ad] should exist when an Action succeeds"
-                        }
-                        listener.onAdLoaded(ad)
-                        LoadState.Loaded(winner)
-                    }
-                    is LoadAction.OnAuctionFailed -> {
-                        /**
-                         * Auction failed
-                         */
-                        listener.onAdLoadFailed(cause = action.cause)
-                        launchLoadingRefreshIfNeeded()
-                        LoadState.Idle
-                    }
-                    LoadAction.OnRefreshTimeoutFinished -> {
-                        sendAction(LoadAction.OnLoadInvoked)
-                        LoadState.Idle
-                    }
-                    LoadAction.OnWinnerTaken -> {
-                        if (refresh is AutoRefresh.On) {
-                            loadingRefreshTimer?.stop()
-                            sendAction(LoadAction.OnRefreshTimeoutFinished)
-                        }
-                        LoadState.Idle
-                    }
-                    LoadAction.OnDestroyInvoked -> {
-                        loadingRefreshTimer?.stop()
-                        LoadState.Idle
-                    }
-                }
-            }
-        ).onEach {
-            logInfo(Tag, "New Load state: ${it.javaClass.simpleName}")
-            loadState.value = it
-        }.launchIn(scope = scope)
-    }
-
-    private fun launchShowReducer() {
-        showActionFlow.scan(
-            initial = showState.value,
-            operation = { state, action ->
-                logInfo(
-                    Tag,
-                    "Show Action: ${action.javaClass.simpleName}. Current State: ${state.javaClass.simpleName}."
-                )
-                when (action) {
-                    ShowAction.OnShowInvoked -> {
-                        proceedShow()
-                        state
-                    }
-                    is ShowAction.OnAdShown -> {
-                        listener.onAdShown(action.ad)
-                        (state as? ShowState.Displaying)?.auctionResult?.adSource?.destroy()
-                        launchDisplayingRefreshIfNeeded()
-                        ShowState.Displaying(action.winner)
-                    }
-                    ShowAction.OnRefreshTimeoutFinished -> {
-                        sendAction(ShowAction.OnShowInvoked)
-                        state
-                    }
-                    is ShowAction.OnStartAutoRefreshInvoked -> {
-                        if (showState.value is ShowState.Displaying) {
-                            launchLoadingRefreshIfNeeded()
-                            launchDisplayingRefreshIfNeeded()
-                        }
-                        state
-                    }
-                    ShowAction.OnStopAutoRefreshInvoked -> {
-                        displayingRefreshTimer?.stop()
-                        loadingRefreshTimer?.stop()
-                        state
-                    }
-                    ShowAction.OnDestroyInvoked -> {
-                        observeCallbacksJob?.cancel()
-                        observeCallbacksJob = null
-                        displayingRefreshTimer?.stop()
-                        this.removeAllViews()
-                        ShowState.Idle
-                    }
-                }
-            }
-        ).onEach {
-            logInfo(Tag, "New Show state: ${it.javaClass.simpleName}")
-            showState.value = it
-        }.launchIn(scope = scope)
-    }
-
-    private fun launchLoadingRefreshIfNeeded() {
-        (refresh as? AutoRefresh.On)?.timeoutMs?.let { timeoutMs ->
-            logInfo(Tag, "Launching Loading CountDownTimer: $timeoutMs ms")
-            loadingRefreshTimer?.startTimer(timeoutMs) {
-                sendAction(LoadAction.OnRefreshTimeoutFinished)
-            }
-        }
-    }
-
-    private fun launchDisplayingRefreshIfNeeded() {
-        (refresh as? AutoRefresh.On)?.timeoutMs?.let { timeoutMs ->
-            logInfo(Tag, "Launching Display CountDownTimer: $timeoutMs ms")
-            displayingRefreshTimer?.startTimer(timeoutMs) {
-                sendAction(ShowAction.OnRefreshTimeoutFinished)
-            }
-        }
-    }
-
-    private fun proceedShow() {
-        showJob?.cancel()
-        if (refresh is AutoRefresh.Off && loadState.value !is LoadState.Loaded) {
-            logInfo(
-                Tag,
-                "AutoRefresh is OFF and no banner loaded. Unable to show banner."
             )
-            return
-        }
-        showJob = scope.launch {
-            try {
-                val winner = (loadState.first { it is LoadState.Loaded } as? LoadState.Loaded)?.auctionResult ?: return@launch
-                sendAction(LoadAction.OnWinnerTaken)
-                subscribeToWinner(winner.adSource)
-                val adSource = requireNotNull(winner.adSource as? AdSource.Banner) {
-                    "Unexpected AdSource type. Expected: AdSource.Banner. Actual: ${winner.adSource::class.java}."
-                }
-                val ad = requireNotNull(adSource.ad) {
-                    "Ad should exist on start of displaying [${adSource.demandId}]"
-                }
-                // wait if app in background
-                activityLifecycleObserver?.lifecycleFlow?.first {
-                    val isResumed = it == ActivityLifecycleState.Resumed
-                    if (!isResumed) {
-                        logInfo(Tag, "Showing is waiting for Activity Resumed state. Current: $it")
-                    }
-                    isResumed
-                }
-                // add AdView to Screen
-                removeAllViews()
-
-                val adViewHolder = adSource.getAdView()
-                val layoutParams = LayoutParams(adViewHolder.widthPx, adViewHolder.heightPx).apply {
-                    gravity = Gravity.CENTER
-                }
-                addView(adViewHolder.networkAdview, layoutParams)
-
-                sendAction(ShowAction.OnAdShown(winner, ad))
-            } catch (e: Exception) {
-                logError(Tag, "Error while displaying BannerView", e)
-            }
-        }
+        })
     }
 
-    private fun startAuction(
-        pricefloor: Double
-    ) {
-        scope.launch {
-            get<Auction>().start(
+    private fun conductAuction(activity: Activity, pricefloor: Double) {
+        this.pricefloor = pricefloor
+        logInfo(Tag, "Load (pricefloor=$pricefloor)")
+        auctionJob?.cancel()
+        auctionJob = scope.launch {
+            auction.start(
                 demandAd = demandAd,
                 resolver = MaxEcpmAuctionResolver,
                 adTypeParamData = AdTypeParam.Banner(
-                    bannerFormat = bannerFormat,
-                    adContainer = this@BannerView,
+                    activity = activity,
                     pricefloor = pricefloor,
+                    bannerFormat = bannerFormat,
+                    containerWidth = width.toFloat()
                 ),
             ).onSuccess { auctionResults ->
-                sendAction(LoadAction.OnAuctionSucceed(auctionResults))
+                /**
+                 * Winner found
+                 */
+                val winner = auctionResults.first().also {
+                    winner = it
+                }
+                subscribeToWinner(winner.adSource)
+                adLifecycleFlow.value = AdLifecycle.Loaded
+                listener.onAdLoaded(
+                    requireNotNull(winner.adSource.ad) {
+                        "[Ad] should exist when action succeeds"
+                    }
+                )
             }.onFailure {
-                sendAction(LoadAction.OnAuctionFailed(it.asUnspecified()))
+                /**
+                 * Auction failed
+                 */
+                adLifecycleFlow.value = AdLifecycle.LoadingFailed
+                loadingError = it.asBidonErrorOrUnspecified()
+                listener.onAdLoadFailed(cause = it.asBidonErrorOrUnspecified())
             }
         }
     }
 
     private fun subscribeToWinner(adSource: AdSource<*>) {
-        observeCallbacksJob?.cancel()
-        observeCallbacksJob = adSource.adEvent.onEach { adEvent ->
+        winnerSubscriberJob = adSource.adEvent.onEach { adEvent ->
             logInfo(Tag, "$adEvent")
             when (adEvent) {
                 is AdEvent.Bid,
@@ -393,15 +277,35 @@ class BannerView(
                 is AdEvent.Fill -> {
                     // do nothing
                 }
+
                 is AdEvent.Clicked -> {
                     listener.onAdClicked(adEvent.ad)
+                    adSource.sendClickImpression(
+                        StatisticsCollector.AdType.Banner(
+                            format = bannerFormat.asStatBannerFormat()
+                        )
+                    )
                 }
-                is AdEvent.Shown -> listener.onAdShown(adEvent.ad)
+
+                is AdEvent.Shown -> {
+                    // banners do not invoke onShown callback
+                }
+
                 is AdEvent.PaidRevenue -> listener.onRevenuePaid(adEvent.ad, adEvent.adValue)
-                is AdEvent.ShowFailed -> listener.onAdLoadFailed(adEvent.cause)
+                is AdEvent.ShowFailed -> {
+                    adLifecycleFlow.value = AdLifecycle.DisplayingFailed
+                    listener.onAdLoadFailed(adEvent.cause)
+                }
+
                 is AdEvent.Expired -> listener.onAdExpired(adEvent.ad)
             }
         }.launchIn(scope)
+    }
+
+    private fun checkBannerShown(networkAdview: View, onBannerShown: () -> Unit) {
+        visibilityTracker.start(view = networkAdview) {
+            onBannerShown.invoke()
+        }
     }
 }
 

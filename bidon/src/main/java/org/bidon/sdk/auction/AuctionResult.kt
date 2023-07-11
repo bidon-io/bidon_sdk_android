@@ -10,4 +10,8 @@ class AuctionResult(
     val ecpm: Double,
     val adSource: AdSource<*>,
     val roundStatus: RoundStatus
-)
+) {
+    override fun toString(): String {
+        return "AuctionResult(ecpm=$ecpm, roundStatus=$roundStatus, adSource=${adSource.demandId.demandId})"
+    }
+}

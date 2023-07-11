@@ -2,11 +2,9 @@ package org.bidon.sdk.adapter
 
 import android.app.Activity
 import android.view.View
-import android.view.ViewGroup
 import kotlinx.coroutines.flow.Flow
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.stats.StatisticsCollector
 
@@ -19,11 +17,11 @@ sealed interface AdSource<T : AdAuctionParams> : StatisticsCollector {
     val adEvent: Flow<AdEvent>
     val isAdReadyToShow: Boolean
 
+    fun bid(adParams: T)
+    fun fill()
     /**
      * Applovin needs Activity instance for interstitial 🤦‍️
      */
-    suspend fun bid(adParams: T): AuctionResult
-    suspend fun fill(): Result<Ad>
     fun show(activity: Activity)
     fun destroy()
 
@@ -49,16 +47,17 @@ sealed interface AdSource<T : AdAuctionParams> : StatisticsCollector {
 
     interface Banner<T : AdAuctionParams> : AdSource<T> {
         fun getAuctionParams(
-            adContainer: ViewGroup,
+            activity: Activity,
             pricefloor: Double,
             timeout: Long,
             lineItems: List<LineItem>,
             bannerFormat: BannerFormat,
-            onLineItemConsumed: (LineItem) -> Unit
+            onLineItemConsumed: (LineItem) -> Unit,
+            containerWidth: Float,
         ): Result<AdAuctionParams>
 
         fun getAdView(): AdViewHolder
     }
 }
 
-class AdViewHolder(val networkAdview: View, val widthPx: Int, val heightPx: Int)
+class AdViewHolder(val networkAdview: View, val widthDp: Int, val heightDp: Int)

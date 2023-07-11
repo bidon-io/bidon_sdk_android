@@ -7,4 +7,6 @@ internal data class TestInterstitialParameters(
     val lineItem: LineItem
 ) : AdAuctionParams {
     override val adUnitId: String? get() = lineItem.adUnitId
+    override val pricefloor: Double
+        get() = lineItem.pricefloor
 }

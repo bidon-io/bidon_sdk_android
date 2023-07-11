@@ -4,20 +4,17 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.util.DisplayMetrics
-import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.FrameLayout
 import com.google.android.gms.ads.*
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 import org.bidon.admob.AdmobBannerAuctionParams
 import org.bidon.admob.asBidonError
 import org.bidon.admob.ext.asBidonAdValue
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.ads.banner.helper.getHeightDp
+import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
@@ -28,9 +25,10 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.stats.models.asRoundStatus
-import org.bidon.sdk.utils.SdkDispatchers
 
+/**
+ * [Test ad units](https://developers.google.com/admob/android/test-ads)
+ */
 internal class AdmobBannerImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
@@ -47,11 +45,9 @@ internal class AdmobBannerImpl(
     override val ad: Ad?
         get() = adView?.asAd()
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
 
     override var isAdReadyToShow: Boolean = false
-
-    private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
 
     private var adSize: AdSize? = null
     private var param: AdmobBannerAuctionParams? = null
@@ -94,8 +90,8 @@ internal class AdmobBannerImpl(
             }
 
             override fun onAdImpression() {
-                logInfo(Tag, "onAdShown: $this")
-                adEvent.tryEmit(AdEvent.Shown(requiredAdView.asAd()))
+                logInfo(Tag, "onAdImpression: $this")
+                // tracked impression/shown by [BannerView]
             }
 
             override fun onAdOpened() {}
@@ -134,12 +130,13 @@ internal class AdmobBannerImpl(
     }
 
     override fun getAuctionParams(
-        adContainer: ViewGroup,
+        activity: Activity,
         pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         bannerFormat: BannerFormat,
         onLineItemConsumed: (LineItem) -> Unit,
+        containerWidth: Float,
     ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
             .minByPricefloorOrNull(demandId, pricefloor)
@@ -147,76 +144,62 @@ internal class AdmobBannerImpl(
         AdmobBannerAuctionParams(
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
             bannerFormat = bannerFormat,
-            adContainer = adContainer,
-            pricefloor = pricefloor
+            pricefloor = pricefloor,
+            context = activity.applicationContext,
+            containerWidth = containerWidth
         )
     }
 
     @SuppressLint("MissingPermission")
-    override suspend fun bid(adParams: AdmobBannerAuctionParams): AuctionResult {
+    override fun bid(adParams: AdmobBannerAuctionParams) {
         logInfo(Tag, "Starting with $adParams")
-        return withContext(dispatcher) {
-            param = adParams
-            val adUnitId = param?.lineItem?.adUnitId
-            if (!adUnitId.isNullOrBlank()) {
-                val adView = AdView(adParams.adContainer.context)
-                    .apply {
-                        val admobBannerSize = adParams.bannerFormat.asAdmobAdSize(adParams.adContainer)
-                        this@AdmobBannerImpl.adSize = admobBannerSize
-                        this.setAdSize(admobBannerSize)
-                        this.adUnitId = adUnitId
-                        this.adListener = requestListener
-                        this.onPaidEventListener = paidListener
-                    }
-                    .also {
-                        adView = it
-                    }
-                val adRequest = AdRequest.Builder().build()
-                adView.loadAd(adRequest)
-            } else {
-                val error = BidonError.NoAppropriateAdUnitId
-                logError(
-                    tag = Tag,
-                    message = "No appropriate AdUnitId found for price_floor=${adParams.lineItem.pricefloor}",
-                    error = error
-                )
-                adEvent.tryEmit(AdEvent.LoadFailed(error))
-            }
-            val state = adEvent.first {
-                it is AdEvent.Bid || it is AdEvent.LoadFailed
-            }
-            when (state) {
-                is AdEvent.LoadFailed -> {
-                    AuctionResult(
-                        ecpm = adParams.lineItem.pricefloor,
-                        adSource = this@AdmobBannerImpl,
-                        roundStatus = state.cause.asRoundStatus()
+        param = adParams
+        val adUnitId = param?.lineItem?.adUnitId
+        if (!adUnitId.isNullOrBlank()) {
+            val adView = AdView(adParams.context)
+                .apply {
+                    val admobBannerSize = adParams.bannerFormat.asAdmobAdSize(
+                        context = adParams.context,
+                        containerWidth = adParams.containerWidth
                     )
+                    this@AdmobBannerImpl.adSize = admobBannerSize
+                    this.setAdSize(admobBannerSize)
+                    this.adUnitId = adUnitId
+                    this.adListener = requestListener
+                    this.onPaidEventListener = paidListener
                 }
-                is AdEvent.Bid -> state.result
-                else -> error("unexpected: $state")
-            }
+                .also {
+                    adView = it
+                }
+            val adRequest = AdRequest.Builder().build()
+            adView.loadAd(adRequest)
+        } else {
+            val error = BidonError.NoAppropriateAdUnitId
+            logError(
+                tag = Tag,
+                message = "No appropriate AdUnitId found for price_floor=${adParams.lineItem.pricefloor}",
+                error = error
+            )
+            adEvent.tryEmit(AdEvent.LoadFailed(error))
         }
     }
 
-    override suspend fun fill(): Result<Ad> = runCatching {
-        logInfo(Tag, "Starting fill: $this")
-        /**
-         * Admob fills the bid automatically. It's not needed to fill it manually.
-         */
-        AdEvent.Fill(
-            requireNotNull(adView?.asAd())
-        ).also {
-            adEvent.tryEmit(it)
-        }.ad
+    override fun fill() {
+        runCatching {
+            logInfo(Tag, "Starting fill: $this")
+            /**
+             * Admob fills the bid automatically. It's not needed to fill it manually.
+             */
+            adEvent.tryEmit(AdEvent.Fill(ad = requireNotNull(adView?.asAd())))
+        }
     }
 
     override fun show(activity: Activity) {}
 
     override fun getAdView(): AdViewHolder = AdViewHolder(
         networkAdview = requiredAdView,
-        widthPx = FrameLayout.LayoutParams.MATCH_PARENT,
-        heightPx = adSize?.getHeightInPixels(requiredAdView.context) ?: FrameLayout.LayoutParams.WRAP_CONTENT
+        widthDp = adSize?.width ?: param?.bannerFormat.getWidthDp(),
+        heightDp = adSize?.height ?: param?.bannerFormat.getHeightDp()
     )
 
     private fun AdView.asAd(): Ad {
@@ -233,26 +216,26 @@ internal class AdmobBannerImpl(
         )
     }
 
-    private fun BannerFormat.asAdmobAdSize(adContainer: ViewGroup) = when (this) {
+    private fun BannerFormat.asAdmobAdSize(context: Context, containerWidth: Float) = when (this) {
         BannerFormat.Banner -> AdSize.BANNER
         BannerFormat.LeaderBoard -> AdSize.LEADERBOARD
         BannerFormat.MRec -> AdSize.MEDIUM_RECTANGLE
-        BannerFormat.Adaptive -> adContainer.adaptiveAdSize()
+        BannerFormat.Adaptive -> context.adaptiveAdSize(containerWidth)
     }
 
     @Suppress("DEPRECATION")
-    private fun ViewGroup.adaptiveAdSize(): AdSize {
-        val windowManager = this.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private fun Context.adaptiveAdSize(width: Float): AdSize {
+        val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val display = windowManager.defaultDisplay
         val outMetrics = DisplayMetrics()
         display.getMetrics(outMetrics)
         val density = outMetrics.density
-        var adWidthPixels = this.width.toFloat()
+        var adWidthPixels = width
         if (adWidthPixels == 0f) {
             adWidthPixels = outMetrics.widthPixels.toFloat()
         }
         val adWidth = (adWidthPixels / density).toInt()
-        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this.context, adWidth)
+        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth)
     }
 }
 
