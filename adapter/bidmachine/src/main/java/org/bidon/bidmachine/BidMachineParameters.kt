@@ -11,19 +11,27 @@ data class BidMachineParameters(
     val mediationConfig: List<String>?,
 ) : AdapterParameters
 
-data class BMBannerAuctionParams(
+class BMBannerAuctionParams(
     val context: Context,
     val bannerFormat: BannerFormat,
-    val pricefloor: Double,
+    override val pricefloor: Double,
     val timeout: Long,
 ) : AdAuctionParams {
     override val adUnitId: String? = null
+
+    override fun toString(): String {
+        return "BMBannerAuctionParams(bannerFormat=$bannerFormat, pricefloor=$pricefloor, timeout=$timeout)"
+    }
 }
 
-data class BMFullscreenAuctionParams(
+class BMFullscreenAuctionParams(
     val context: Context,
-    val pricefloor: Double,
+    override val pricefloor: Double,
     val timeout: Long,
 ) : AdAuctionParams {
     override val adUnitId: String? = null
+
+    override fun toString(): String {
+        return "BMFullscreenAuctionParams(pricefloor=$pricefloor, timeout=$timeout)"
+    }
 }

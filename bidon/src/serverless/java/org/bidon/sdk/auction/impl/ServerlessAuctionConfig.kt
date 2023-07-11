@@ -19,7 +19,6 @@ object ServerlessAuctionConfig {
         lineItems: List<LineItem>,
         pricefloor: Double,
 
-        fillTimeout: Long = 5000L,
         token: String? = null,
         auctionId: String = UUID.randomUUID().toString(),
         auctionConfigurationId: Int = 10,
@@ -27,7 +26,6 @@ object ServerlessAuctionConfig {
         auctionResponse = AuctionResponse(
             auctionId = auctionId,
             pricefloor = pricefloor,
-            fillTimeout = fillTimeout,
             auctionConfigurationId = auctionConfigurationId,
             lineItems = lineItems,
             token = token,

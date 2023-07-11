@@ -1,7 +1,13 @@
 package org.bidon.sdk.config.models.adapters
 
-import android.app.Activity
-import org.bidon.sdk.adapter.*
+import android.content.Context
+import org.bidon.sdk.adapter.AdProvider
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.Adapter
+import org.bidon.sdk.adapter.AdapterInfo
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.adapter.Initializable
 
 internal class TestAdapter(
     override val demandId: DemandId,
@@ -12,7 +18,7 @@ internal class TestAdapter(
 
     override val adapterInfo = AdapterInfo(adapterVersion = "adapterVersion1", sdkVersion = "sdkVersion1")
 
-    override suspend fun init(activity: Activity, configParams: TestAdapterParameters) {
+    override suspend fun init(context: Context, configParams: TestAdapterParameters) {
         // do nothing, init emulation
     }
 

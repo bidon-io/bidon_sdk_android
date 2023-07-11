@@ -1,25 +1,12 @@
 package org.bidon.applovin.impl
 
 import android.app.Activity
-import com.applovin.adview.AppLovinIncentivizedInterstitial
 import com.applovin.adview.AppLovinInterstitialAd
-import com.applovin.sdk.AppLovinAd
-import com.applovin.sdk.AppLovinAdClickListener
-import com.applovin.sdk.AppLovinAdDisplayListener
-import com.applovin.sdk.AppLovinAdLoadListener
-import com.applovin.sdk.AppLovinAdService
-import com.applovin.sdk.AppLovinAdSize
-import com.applovin.sdk.AppLovinAdVideoPlaybackListener
-import com.applovin.sdk.AppLovinSdk
+import com.applovin.sdk.*
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 import org.bidon.applovin.ApplovinFullscreenAdAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
-import org.bidon.sdk.adapter.AdAuctionParams
-import org.bidon.sdk.adapter.AdEvent
-import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
@@ -30,8 +17,12 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.stats.models.asRoundStatus
 
+/**
+ * I have no idea how it works. There is no documentation.
+ *
+ * https://appodeal.slack.com/archives/C02PE4GAFU0/p1661421318406689
+ */
 internal class ApplovinInterstitialImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
@@ -103,7 +94,7 @@ internal class ApplovinInterstitialImpl(
         }
     }
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val isAdReadyToShow: Boolean
         get() = applovinAd != null
 
@@ -126,15 +117,12 @@ internal class ApplovinInterstitialImpl(
             .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed)
         ApplovinFullscreenAdAuctionParams(
-            activity = activity,
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
             timeoutMs = timeout,
         )
     }
 
-    override suspend fun bid(
-        adParams: ApplovinFullscreenAdAuctionParams
-    ): AuctionResult {
+    override fun bid(adParams: ApplovinFullscreenAdAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")
         lineItem = adParams.lineItem
         val adService: AppLovinAdService = applovinSdk.adService
@@ -144,27 +132,12 @@ internal class ApplovinInterstitialImpl(
         } else {
             adService.loadNextAdForZoneId(zoneId, requestListener)
         }
-        val state = adEvent.first {
-            it is AdEvent.Bid || it is AdEvent.LoadFailed
-        }
-        return when (state) {
-            is AdEvent.LoadFailed -> {
-                AuctionResult(
-                    ecpm = 0.0,
-                    adSource = this,
-                    roundStatus = state.cause.asRoundStatus()
-                )
-            }
-
-            is AdEvent.Bid -> state.result
-            else -> error("unexpected: $state")
-        }
     }
 
-    override suspend fun fill(): Result<Ad> = runCatching {
-        logInfo(Tag, "Starting fill: $this")
-        requireNotNull(applovinAd?.asAd()).also {
-            adEvent.tryEmit(AdEvent.Fill(it))
+    override fun fill() {
+        runCatching {
+            logInfo(Tag, "Starting fill: $this")
+            adEvent.tryEmit(AdEvent.Fill(requireNotNull(applovinAd?.asAd())))
         }
     }
 
@@ -180,20 +153,6 @@ internal class ApplovinInterstitialImpl(
         } else {
             adEvent.tryEmit(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
         }
-    }
-
-    private fun AppLovinIncentivizedInterstitial?.asAd(): Ad {
-        return Ad(
-            demandAd = demandAd,
-            ecpm = lineItem?.pricefloor ?: 0.0,
-            demandAdObject = this ?: demandAd,
-            networkName = demandId.demandId,
-            dsp = null,
-            roundId = roundId,
-            currencyCode = AdValue.USD,
-            auctionId = auctionId,
-            adUnitId = lineItem?.adUnitId
-        )
     }
 
     private fun AppLovinAd?.asAd(): Ad {

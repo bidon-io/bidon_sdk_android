@@ -1,16 +1,25 @@
 package org.bidon.applovin.impl
 
 import android.app.Activity
-import android.view.ViewGroup
 import com.applovin.adview.AppLovinAdView
-import com.applovin.sdk.*
+import com.applovin.sdk.AppLovinAd
+import com.applovin.sdk.AppLovinAdClickListener
+import com.applovin.sdk.AppLovinAdDisplayListener
+import com.applovin.sdk.AppLovinAdLoadListener
+import com.applovin.sdk.AppLovinAdSize
+import com.applovin.sdk.AppLovinSdk
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 import org.bidon.applovin.ApplovinBannerAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.AdViewHolder
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.ads.banner.helper.DeviceType.isTablet
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
@@ -20,7 +29,6 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.stats.models.asRoundStatus
 
 internal class ApplovinBannerImpl(
     override val demandId: DemandId,
@@ -67,18 +75,18 @@ internal class ApplovinBannerImpl(
         object : AppLovinAdDisplayListener, AppLovinAdClickListener {
             override fun adDisplayed(ad: AppLovinAd) {
                 logInfo(Tag, "adDisplayed: $ad")
-                adEvent.tryEmit(AdEvent.Shown(ad.asAd()))
                 adEvent.tryEmit(
                     AdEvent.PaidRevenue(
                         ad = ad.asAd(),
                         adValue = param?.lineItem?.pricefloor.asBidonAdValue()
                     )
                 )
+                // tracked impression/shown by [BannerView]
             }
 
             override fun adHidden(ad: AppLovinAd) {
                 logInfo(Tag, "adHidden: $ad")
-                adEvent.tryEmit(AdEvent.Closed(ad.asAd()))
+                adEvent.tryEmit(AdEvent.ShowFailed(BidonError.NoFill(demandId)))
             }
 
             override fun adClicked(ad: AppLovinAd) {
@@ -88,7 +96,7 @@ internal class ApplovinBannerImpl(
         }
     }
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val isAdReadyToShow: Boolean
         get() = applovinAd != null
 
@@ -97,32 +105,31 @@ internal class ApplovinBannerImpl(
 
     override fun destroy() {
         logInfo(Tag, "destroy $this")
+        adView?.setAdLoadListener(null)
         adView = null
         applovinAd = null
     }
 
     override fun getAuctionParams(
-        adContainer: ViewGroup,
+        activity: Activity,
         pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         bannerFormat: BannerFormat,
-        onLineItemConsumed: (LineItem) -> Unit
+        onLineItemConsumed: (LineItem) -> Unit,
+        containerWidth: Float
     ): Result<AdAuctionParams> = runCatching {
         val lineItem = lineItems
             .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed)
         ApplovinBannerAuctionParams(
-            context = adContainer.context,
+            context = activity.applicationContext,
             lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
-            adaptiveBannerHeight = null,
             bannerFormat = bannerFormat
         )
     }
 
-    override suspend fun bid(
-        adParams: ApplovinBannerAuctionParams
-    ): AuctionResult {
+    override fun bid(adParams: ApplovinBannerAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")
         param = adParams
         val adSize = adParams.bannerFormat.asApplovinAdSize() ?: error(
@@ -136,30 +143,14 @@ internal class ApplovinBannerImpl(
             it.setAdDisplayListener(listener)
             adView = it
         }
-
         bannerView.setAdLoadListener(requestListener)
         bannerView.loadNextAd()
-
-        val state = adEvent.first {
-            it is AdEvent.Bid || it is AdEvent.LoadFailed
-        }
-        return when (state) {
-            is AdEvent.LoadFailed -> {
-                AuctionResult(
-                    ecpm = 0.0,
-                    adSource = this,
-                    roundStatus = state.cause.asRoundStatus()
-                )
-            }
-            is AdEvent.Bid -> state.result
-            else -> error("unexpected: $state")
-        }
     }
 
-    override suspend fun fill(): Result<Ad> = runCatching {
-        logInfo(Tag, "Starting fill: $this")
-        requireNotNull(applovinAd?.asAd()).also {
-            adEvent.tryEmit(AdEvent.Fill(it))
+    override fun fill() {
+        runCatching {
+            logInfo(Tag, "Starting fill: $this")
+            adEvent.tryEmit(AdEvent.Fill(requireNotNull(applovinAd?.asAd())))
         }
     }
 
@@ -170,8 +161,14 @@ internal class ApplovinBannerImpl(
         val adView = requireNotNull(adView)
         return AdViewHolder(
             networkAdview = adView,
-            widthPx = adView.size.width,
-            heightPx = adView.size.height
+            widthDp = adView.size.width.takeIf { it > 0 } ?: when (param?.bannerFormat) {
+                BannerFormat.Banner -> 320
+                BannerFormat.LeaderBoard -> 728
+                BannerFormat.MRec -> 300
+                BannerFormat.Adaptive -> if (isTablet) 728 else 320
+                null -> error("unexpected")
+            },
+            heightDp = adView.size.height
         )
     }
 
@@ -205,8 +202,13 @@ internal class ApplovinBannerImpl(
 
     private fun BannerFormat.asApplovinAdSize() = when (this) {
         BannerFormat.Banner -> AppLovinAdSize.BANNER
-        BannerFormat.Adaptive -> AppLovinAdSize.BANNER
         BannerFormat.LeaderBoard -> AppLovinAdSize.LEADER
+        BannerFormat.Adaptive -> if (isTablet) {
+            AppLovinAdSize.LEADER
+        } else {
+            AppLovinAdSize.BANNER
+        }
+
         BannerFormat.MRec -> AppLovinAdSize.MREC
     }
 }
