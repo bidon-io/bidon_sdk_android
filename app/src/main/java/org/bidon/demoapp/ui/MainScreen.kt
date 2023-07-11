@@ -26,12 +26,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import org.bidon.demoapp.BannerViewActivity
 import org.bidon.demoapp.BuildConfig
 import org.bidon.demoapp.component.*
 import org.bidon.demoapp.navigation.Screen
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.config.DefaultAdapters
 import org.bidon.sdk.logs.logging.Logger
+import org.json.JSONObject
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -88,6 +90,7 @@ internal fun MainScreen(
                         modifier = Modifier.padding(top = 16.dp),
                         text = "Add SDK-level Extras"
                     ) {
+                        BidonSdk.addExtra("token_json", JSONObject("""{"a":"before_init"}"""))
                         BidonSdk.addExtra("sdk_level_string_before_init", "string0")
                         BidonSdk.addExtra("sdk_level_int_before_init", 555)
                     }
@@ -107,7 +110,7 @@ internal fun MainScreen(
                                 initState.value = MainScreenState.Initialized
                             }
                             .initialize(
-                                activity = context as Activity,
+                                context = context,
                                 appKey = BuildConfig.BIDON_API_KEY,
                             )
                     }
@@ -134,17 +137,18 @@ internal fun MainScreen(
                 AppButton(text = "Banner") {
                     navController.navigate(Screen.Banners.route)
                 }
+                AppButton(text = "Banner in XML-Layout") {
+                    (context as Activity).startActivity(
+                        Intent(context, BannerViewActivity::class.java)
+                    )
+                }
                 AppOutlinedButton(
                     modifier = Modifier.padding(top = 16.dp),
                     text = "Add SDK-level Extras"
                 ) {
+                    BidonSdk.addExtra("token_json", JSONObject("""{"a":"after_init"}"""))
                     BidonSdk.addExtra("sdk_level_long_after_init", LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
                 }
-//                AppButton(text = "Banner in XML-Layout") {
-//                    (context as Activity).startActivity(
-//                        Intent(context, BannerViewActivity::class.java)
-//                    )
-//                }
                 TextButton(modifier = Modifier.padding(top = 100.dp), onClick = {
                     val packageManager: PackageManager = context.packageManager
                     val intent: Intent = packageManager.getLaunchIntentForPackage(context.packageName)!!

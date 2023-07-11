@@ -2,22 +2,32 @@ package org.bidon.bidmachine.impl
 
 import android.app.Activity
 import android.content.Context
-import android.view.ViewGroup
-import android.widget.FrameLayout
 import io.bidmachine.AdRequest
+import io.bidmachine.CustomParams
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.banner.BannerListener
 import io.bidmachine.banner.BannerRequest
 import io.bidmachine.banner.BannerView
 import io.bidmachine.utils.BMError
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
-import org.bidon.bidmachine.*
+import org.bidon.bidmachine.BMAuctionResult
+import org.bidon.bidmachine.BMBannerAuctionParams
+import org.bidon.bidmachine.BidMachineBannerSize
+import org.bidon.bidmachine.asBidonErrorOnBid
+import org.bidon.bidmachine.asBidonErrorOnFill
 import org.bidon.bidmachine.ext.asBidonAdValue
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.AdViewHolder
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.impl.dpToPx
+import org.bidon.sdk.ads.banner.helper.DeviceType.isTablet
+import org.bidon.sdk.ads.banner.helper.getHeightDp
+import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.config.BidonError
@@ -26,9 +36,6 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.stats.models.asRoundStatus
-import org.bidon.sdk.utils.ext.asFailure
-import org.bidon.sdk.utils.ext.asSuccess
 
 internal class BMBannerAdImpl(
     override val demandId: DemandId,
@@ -44,7 +51,8 @@ internal class BMBannerAdImpl(
         demandAd = demandAd,
     ) {
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent =
+        MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val ad: Ad? get() = bannerView?.asAd()
 
     private var context: Context? = null
@@ -103,7 +111,7 @@ internal class BMBannerAdImpl(
             override fun onAdImpression(bannerView: BannerView) {
                 logInfo(Tag, "onAdShown: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
-                adEvent.tryEmit(AdEvent.Shown(bannerView.asAd()))
+                // tracked impression/shown by [BannerView]
                 adEvent.tryEmit(
                     AdEvent.PaidRevenue(
                         ad = bannerView.asAd(),
@@ -126,13 +134,14 @@ internal class BMBannerAdImpl(
         }
     }
 
-    override suspend fun bid(adParams: BMBannerAuctionParams): AuctionResult {
+    override fun bid(adParams: BMBannerAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")
         context = adParams.context
         bannerFormat = adParams.bannerFormat
         BannerRequest.Builder()
             .setSize(adParams.bannerFormat.asBidMachineBannerSize())
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
+            .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
             .setLoadingTimeOut(adParams.timeout.toInt())
             .setListener(requestListener)
             .build()
@@ -140,23 +149,9 @@ internal class BMBannerAdImpl(
                 adRequest = it
             }
             .request(adParams.context)
-        val state = adEvent.first {
-            it is AdEvent.Bid || it is AdEvent.LoadFailed
-        }
-        return when (state) {
-            is AdEvent.LoadFailed -> {
-                AuctionResult(
-                    ecpm = 0.0,
-                    adSource = this,
-                    roundStatus = state.cause.asRoundStatus()
-                )
-            }
-            is AdEvent.Bid -> state.result
-            else -> error("unexpected: $state")
-        }
     }
 
-    override suspend fun fill(): Result<Ad> {
+    override fun fill() {
         logInfo(Tag, "Starting fill: $this")
         val context = context
         if (context == null) {
@@ -168,27 +163,12 @@ internal class BMBannerAdImpl(
             bannerView.setListener(bannerListener)
             bannerView.load(adRequest)
         }
-        val state = adEvent.first {
-            it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
-        }
-        return when (state) {
-            is AdEvent.Fill -> {
-                state.ad.asSuccess()
-            }
-            is AdEvent.LoadFailed -> {
-                state.cause.asFailure()
-            }
-            is AdEvent.Expired -> {
-                BidonError.FillTimedOut(demandId).asFailure()
-            }
-            else -> error("unexpected: $state")
-        }
     }
 
     override fun show(activity: Activity) {}
 
-    override fun notifyLoss() {
-        adRequest?.notifyMediationLoss()
+    override fun notifyLoss(winnerNetworkName: String, winnerNetworkPrice: Double) {
+        adRequest?.notifyMediationLoss(winnerNetworkName, winnerNetworkPrice)
     }
 
     override fun notifyWin() {
@@ -196,17 +176,18 @@ internal class BMBannerAdImpl(
     }
 
     override fun getAuctionParams(
-        adContainer: ViewGroup,
+        activity: Activity,
         pricefloor: Double,
         timeout: Long,
         lineItems: List<LineItem>,
         bannerFormat: BannerFormat,
         onLineItemConsumed: (LineItem) -> Unit,
+        containerWidth: Float
     ): Result<AdAuctionParams> = runCatching {
         BMBannerAuctionParams(
             pricefloor = pricefloor,
             timeout = timeout,
-            context = adContainer.context,
+            context = activity.applicationContext,
             bannerFormat = bannerFormat
         )
     }
@@ -215,6 +196,7 @@ internal class BMBannerAdImpl(
         logInfo(Tag, "destroy $this")
         adRequest?.destroy()
         adRequest = null
+        bannerView?.setListener(null)
         bannerView?.destroy()
         bannerView = null
     }
@@ -223,14 +205,8 @@ internal class BMBannerAdImpl(
         val adView = requireNotNull(bannerView)
         return AdViewHolder(
             networkAdview = adView,
-            widthPx = FrameLayout.LayoutParams.MATCH_PARENT,
-            heightPx = when (bannerFormat) {
-                BannerFormat.Adaptive,
-                BannerFormat.Banner -> 50.dpToPx
-                BannerFormat.LeaderBoard -> 90.dpToPx
-                BannerFormat.MRec -> 250.dpToPx
-                null -> FrameLayout.LayoutParams.WRAP_CONTENT
-            }
+            widthDp = bannerFormat?.asBidMachineBannerSize()?.width ?: bannerFormat.getWidthDp(),
+            heightDp = bannerFormat?.asBidMachineBannerSize()?.height ?: bannerFormat.getHeightDp()
         )
     }
 
@@ -252,7 +228,11 @@ internal class BMBannerAdImpl(
         BannerFormat.Banner -> BidMachineBannerSize.Size_320x50
         BannerFormat.LeaderBoard -> BidMachineBannerSize.Size_728x90
         BannerFormat.MRec -> BidMachineBannerSize.Size_300x250
-        BannerFormat.Adaptive -> BidMachineBannerSize.Size_320x50
+        BannerFormat.Adaptive -> if (isTablet) {
+            BidMachineBannerSize.Size_728x90
+        } else {
+            BidMachineBannerSize.Size_320x50
+        }
     }
 }
 

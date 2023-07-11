@@ -13,8 +13,6 @@
 # Ad types
 -keep public interface org.bidon.sdk.ads.AdListener { *; }
 -keep public interface org.bidon.sdk.ads.FullscreenAdListener { *; }
--keep public interface org.bidon.sdk.auction.AuctionListener { *; }
--keep public interface org.bidon.sdk.auction.RoundsListener { *; }
 
 -keep public interface org.bidon.sdk.ads.banner.BannerAd { *; }
 -keep public enum org.bidon.sdk.ads.banner.BannerFormat { *; }

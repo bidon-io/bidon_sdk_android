@@ -19,10 +19,12 @@ buildscript {
 
 plugins {
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
+    id("org.jetbrains.dokka") version "1.8.10"
 }
 
 subprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint") // Version should be inherited from parent
+    apply(plugin = "org.jetbrains.dokka")
 
     repositories {
         // Required to download KtLint

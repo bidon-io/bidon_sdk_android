@@ -10,10 +10,10 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
-import org.bidon.sdk.ads.asUnspecified
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.AuctionHolder
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.config.impl.asBidonErrorOrUnspecified
 import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -73,7 +73,7 @@ internal class InterstitialImpl(
                             /**
                              * Auction failed
                              */
-                            listener.onAdLoadFailed(cause = it.asUnspecified())
+                            listener.onAdLoadFailed(cause = it.asBidonErrorOrUnspecified())
                         }
                 }
             )
@@ -114,7 +114,11 @@ internal class InterstitialImpl(
 
     override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {
         logInfo(Tag, "Notify Loss invoked with Winner($winnerDemandId, $winnerEcpm)")
-        auctionHolder.popWinner()?.sendLoss(winnerDemandId, winnerEcpm, StatisticsCollector.AdType.Interstitial)
+        auctionHolder.popWinner()?.sendLoss(
+            winnerDemandId = winnerDemandId,
+            winnerEcpm = winnerEcpm,
+            adType = StatisticsCollector.AdType.Interstitial
+        )
         destroyAd()
     }
 

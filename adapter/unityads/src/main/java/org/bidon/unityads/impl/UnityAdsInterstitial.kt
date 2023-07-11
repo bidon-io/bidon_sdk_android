@@ -5,10 +5,7 @@ import com.unity3d.ads.IUnityAdsLoadListener
 import com.unity3d.ads.IUnityAdsShowListener
 import com.unity3d.ads.UnityAds
 import com.unity3d.ads.UnityAdsShowOptions
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.AuctionResult
@@ -21,8 +18,6 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.stats.models.asRoundStatus
-import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.unityads.ext.asBidonError
 
 /**
@@ -33,7 +28,7 @@ internal class UnityAdsInterstitial(
     private val demandAd: DemandAd,
     private val roundId: String,
     private val auctionId: String,
-) : AdSource.Interstitial<UnityAdsAuctionParams>,
+) : AdSource.Interstitial<UnityAdsFullscreenAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
@@ -41,7 +36,6 @@ internal class UnityAdsInterstitial(
         demandAd = demandAd
     ) {
 
-    private val dispatcher: CoroutineDispatcher = SdkDispatchers.Main
     private var lineItem: LineItem? = null
 
     override val ad: Ad?
@@ -59,7 +53,7 @@ internal class UnityAdsInterstitial(
             )
         }
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE)
+    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
 
     override var isAdReadyToShow: Boolean = false
 
@@ -73,67 +67,46 @@ internal class UnityAdsInterstitial(
         val lineItem = lineItems
             .minByPricefloorOrNull(demandId, pricefloor)
             ?.also(onLineItemConsumed) ?: error(org.bidon.sdk.config.BidonError.NoAppropriateAdUnitId)
-        UnityAdsAuctionParams(
-            lineItem = lineItem,
-            pricefloor = pricefloor
-        )
+        UnityAdsFullscreenAuctionParams(lineItem)
     }
 
-    override suspend fun bid(adParams: UnityAdsAuctionParams): AuctionResult {
+    override fun bid(adParams: UnityAdsFullscreenAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")
-        return withContext(dispatcher) {
-            lineItem = adParams.lineItem
+        lineItem = adParams.lineItem
 
-            val loadListener = object : IUnityAdsLoadListener {
-                override fun onUnityAdsAdLoaded(placementId: String?) {
-                    logInfo(Tag, "onUnityAdsAdLoaded: $this")
-                    isAdReadyToShow = true
-                    adEvent.tryEmit(
-                        AdEvent.Bid(
-                            AuctionResult(
-                                ecpm = requireNotNull(lineItem?.pricefloor),
-                                adSource = this@UnityAdsInterstitial,
-                                roundStatus = RoundStatus.Successful
-                            )
+        val loadListener = object : IUnityAdsLoadListener {
+            override fun onUnityAdsAdLoaded(placementId: String?) {
+                logInfo(Tag, "onUnityAdsAdLoaded: $this")
+                isAdReadyToShow = true
+                adEvent.tryEmit(
+                    AdEvent.Bid(
+                        AuctionResult(
+                            ecpm = requireNotNull(lineItem?.pricefloor),
+                            adSource = this@UnityAdsInterstitial,
+                            roundStatus = RoundStatus.Successful
                         )
                     )
-                }
+                )
+            }
 
-                override fun onUnityAdsFailedToLoad(placementId: String?, error: UnityAds.UnityAdsLoadError?, message: String?) {
-                    logError(
-                        tag = Tag,
-                        message = "onUnityAdsFailedToLoad: placementId=$placementId, error=$error, message=$message",
-                        error = error?.asBidonError()
-                    )
-                    adEvent.tryEmit(AdEvent.LoadFailed(error.asBidonError()))
-                }
-            }
-            UnityAds.load(adParams.lineItem.adUnitId, loadListener)
-            val state = adEvent.first {
-                it is AdEvent.Bid || it is AdEvent.LoadFailed
-            }
-            when (state) {
-                is AdEvent.LoadFailed -> {
-                    AuctionResult(
-                        ecpm = 0.0,
-                        adSource = this@UnityAdsInterstitial,
-                        roundStatus = state.cause.asRoundStatus()
-                    )
-                }
-                is AdEvent.Bid -> state.result
-                else -> error("unexpected: $state")
+            override fun onUnityAdsFailedToLoad(placementId: String?, error: UnityAds.UnityAdsLoadError?, message: String?) {
+                logError(
+                    tag = Tag,
+                    message = "onUnityAdsFailedToLoad: placementId=$placementId, error=$error, message=$message",
+                    error = error?.asBidonError()
+                )
+                adEvent.tryEmit(AdEvent.LoadFailed(error.asBidonError()))
             }
         }
+        UnityAds.load(adParams.lineItem.adUnitId, loadListener)
     }
 
-    override suspend fun fill(): Result<Ad> = runCatching {
+    override fun fill() {
         logInfo(Tag, "Starting fill: $this")
         /**
          * UnityAds fills the bid automatically. It's not needed to fill it manually.
          */
-        val event = AdEvent.Fill(requireNotNull(ad))
-        adEvent.tryEmit(event)
-        event.ad
+        adEvent.tryEmit(AdEvent.Fill(requireNotNull(ad)))
     }
 
     override fun show(activity: Activity) {

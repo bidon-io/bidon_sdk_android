@@ -1,28 +1,29 @@
 package org.bidon.sdk.auction
 
 import android.app.Activity
-import android.view.ViewGroup
 import org.bidon.sdk.ads.banner.BannerFormat
 
 /**
  * Created by Bidon Team on 06/02/2023.
  */
 internal sealed interface AdTypeParam {
+    val activity: Activity
     val pricefloor: Double
 
     class Banner(
-        val adContainer: ViewGroup,
+        override val activity: Activity,
         val bannerFormat: BannerFormat,
         override val pricefloor: Double,
+        val containerWidth: Float,
     ) : AdTypeParam
 
     class Interstitial(
-        val activity: Activity,
+        override val activity: Activity,
         override val pricefloor: Double,
     ) : AdTypeParam
 
     class Rewarded(
-        val activity: Activity,
+        override val activity: Activity,
         override val pricefloor: Double,
     ) : AdTypeParam
 }

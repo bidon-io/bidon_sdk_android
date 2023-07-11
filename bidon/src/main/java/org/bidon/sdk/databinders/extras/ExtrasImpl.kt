@@ -2,6 +2,7 @@ package org.bidon.sdk.databinders.extras
 
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.json.JSONObject
 
 internal class ExtrasImpl : Extras {
 
@@ -9,11 +10,13 @@ internal class ExtrasImpl : Extras {
 
     override fun addExtra(key: String, value: Any?) {
         if (value != null && value.isTypeSupported()) {
-            extras[key] = value
+            if (extras[key] != value) {
+                logInfo(Tag, "Extras updated: $extras")
+                extras[key] = value
+            }
         } else {
             extras.remove(key)
         }
-        logInfo(Tag, "Extras updated: $extras")
     }
 
     override fun getExtras(): Map<String, Any> = extras.toMap()
@@ -26,7 +29,8 @@ internal class ExtrasImpl : Extras {
                 this is Double ||
                 this is Float ||
                 this is Boolean ||
-                this is Char
+                this is Char ||
+                this is JSONObject
             ).also {
             if (!it) {
                 logError(Tag, "Type of $this is not supported", UnsupportedOperationException())

@@ -8,6 +8,6 @@ import org.bidon.sdk.stats.models.RoundStatus
  * Use to notify Demands for loss/win. It isn't related to stats [RoundStatus].
  */
 interface WinLossNotifiable {
-    fun notifyLoss()
+    fun notifyLoss(winnerNetworkName: String, winnerNetworkPrice: Double)
     fun notifyWin()
 }

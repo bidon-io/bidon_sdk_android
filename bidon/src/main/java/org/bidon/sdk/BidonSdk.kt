@@ -1,6 +1,6 @@
 package org.bidon.sdk
 
-import android.app.Activity
+import android.content.Context
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.config.DefaultAdapters
 import org.bidon.sdk.config.InitializationCallback
@@ -10,6 +10,9 @@ import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.logging.Logger
 import org.bidon.sdk.utils.networking.NetworkSettings
 
+/**
+ * Created by Aleksei Cherniaev on 07/02/2023.
+ */
 object BidonSdk {
     const val DefaultPricefloor = 0.0
     const val SdkVersion = BuildConfig.ADAPTER_VERSION
@@ -76,7 +79,8 @@ object BidonSdk {
     }
 
     @JvmStatic
-    fun initialize(activity: Activity, appKey: String) = bidon.initialize(activity, appKey)
+    fun initialize(context: Context, appKey: String) =
+        bidon.initialize(context.applicationContext, appKey)
 
     /**
      * Adding SDK-level extra data.

@@ -8,6 +8,11 @@ object Dependencies {
 
     object Kotlin {
         const val kotlinVersion = "1.8.0"
+
+        /**
+         * [Compatibility](https://developer.android.com/jetpack/androidx/releases/compose-kotlin)
+         */
+        const val kotlinCompilerExtensionVersion = "1.4.1"
         const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         const val reflect = "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 

@@ -50,7 +50,6 @@ internal class AuctionResponseParserTest {
                 adUnitId = "AAAA1"
             ),
         ),
-        fillTimeout = 10000,
         pricefloor = 0.01
     )
 

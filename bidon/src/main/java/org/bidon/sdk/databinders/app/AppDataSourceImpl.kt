@@ -3,7 +3,6 @@ package org.bidon.sdk.databinders.app
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.os.Build
-import org.bidon.sdk.BuildConfig
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
 
@@ -28,7 +27,6 @@ internal class AppDataSourceImpl(
     override fun getBundleId(): String = context.packageName
     override fun getAppVersionName(): String? = getPackageInfo(context)?.versionName
     override fun getAppKey(): String? = keyValueStorage.appKey
-    override fun getBidonVersion(): String = BuildConfig.ADAPTER_VERSION
     override fun getFramework(): String = UnitySpecificInfo.frameworkName
     override fun getFrameworkVersion(): String? = UnitySpecificInfo.frameworkVersion
     override fun getPluginVersion(): String? = UnitySpecificInfo.pluginVersion

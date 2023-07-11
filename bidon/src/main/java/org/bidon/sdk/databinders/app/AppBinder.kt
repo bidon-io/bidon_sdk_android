@@ -23,7 +23,6 @@ internal class AppBinder(
             version = dataSource.getAppVersionName(),
             frameworkVersion = dataSource.getFrameworkVersion(),
             pluginVersion = dataSource.getPluginVersion(),
-            bidonVersion = dataSource.getBidonVersion()
         )
     }
 }
