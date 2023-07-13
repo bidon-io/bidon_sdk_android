@@ -6,11 +6,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParamSource
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdLoadingType
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.auction.AuctionResult
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.stats.StatisticsCollector
@@ -24,6 +29,7 @@ internal class TestInterstitialImpl(
     private val testParameters: TestAdapterParameters,
     private val demandAd: DemandAd = DemandAd(AdType.Interstitial),
 ) : AdSource.Interstitial<TestInterstitialParameters>,
+    AdLoadingType.Network<TestInterstitialParameters>,
     StatisticsCollector by StatisticsCollectorImpl(auctionId, roundId, demandId, demandAd) {
 
     private lateinit var adParams: TestInterstitialParameters
@@ -33,7 +39,7 @@ internal class TestInterstitialImpl(
             demandAd = demandAd,
             ecpm = adParams.lineItem.pricefloor,
             roundId = roundId,
-            networkName = "monetizationNetwork-Other",
+            networkName = "monetizationNetwork-asd",
             dsp = "DSP-bidmachine",
             demandAdObject = this,
             currencyCode = "USD",
@@ -46,16 +52,15 @@ internal class TestInterstitialImpl(
     override val isAdReadyToShow: Boolean
         get() = testParameters.fill == Process.Succeed
 
-    override fun bid(adParams: TestInterstitialParameters) {
+    override fun fill(adParams: TestInterstitialParameters) {
         this.adParams = adParams
         when (testParameters.bid) {
             Process.Succeed -> {
                 adEvent.tryEmit(
                     AdEvent.Bid(
-                        AuctionResult(
-                            ecpm = adParams.lineItem.pricefloor,
+                        AuctionResult.Network.Success(
                             adSource = this,
-                            roundStatus = RoundStatus.Successful
+                            roundStatus = RoundStatus.Successful,
                         )
                     )
                 )
@@ -70,9 +75,6 @@ internal class TestInterstitialImpl(
                 }
             }
         }
-    }
-
-    override fun fill() {
         when (testParameters.fill) {
             Process.Succeed -> adEvent.tryEmit(AdEvent.Fill(ad))
             Process.Failed -> adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
@@ -89,16 +91,12 @@ internal class TestInterstitialImpl(
 
     override fun destroy() {}
 
-    override fun getAuctionParams(
-        activity: Activity,
-        pricefloor: Double,
-        timeout: Long,
-        lineItems: List<LineItem>,
-        onLineItemConsumed: (LineItem) -> Unit
-    ): Result<AdAuctionParams> = runCatching {
-        val lineItem = lineItems
-            .minByPricefloorOrNull(demandId, pricefloor)
-            ?.also(onLineItemConsumed) ?: error(BidonError.NoAppropriateAdUnitId)
-        TestInterstitialParameters(lineItem)
+    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+        return auctionParamsScope {
+            val lineItem = lineItems
+                .minByPricefloorOrNull(demandId, pricefloor)
+                ?.also(onLineItemConsumed) ?: error(BidonError.NoAppropriateAdUnitId)
+            TestInterstitialParameters(lineItem)
+        }
     }
 }

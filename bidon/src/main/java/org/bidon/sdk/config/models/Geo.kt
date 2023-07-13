@@ -8,19 +8,19 @@ import org.bidon.sdk.utils.serializer.Serializable
  */
 data class Geo(
     @field:JsonName("lat")
-    var lat: Double?,
+    val lat: Double?,
     @field:JsonName("lon")
-    var lon: Double?,
+    val lon: Double?,
     @field:JsonName("accuracy")
-    var accuracy: Float?,
+    val accuracy: Int?,
     @field:JsonName("lastfix")
-    var lastfix: Long?,
+    val lastFix: Long?,
     @field:JsonName("country")
-    var country: String?,
+    val country: String?,
     @field:JsonName("city")
-    var city: String?,
+    val city: String?,
     @field:JsonName("zip")
-    var zip: String?,
+    val zip: String?,
     @field:JsonName("utcoffset")
-    var utcOffset: Int
+    val utcOffset: Int
 ) : Serializable

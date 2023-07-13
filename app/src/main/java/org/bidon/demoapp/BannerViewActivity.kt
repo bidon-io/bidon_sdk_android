@@ -71,6 +71,7 @@ class BannerViewActivity : AppCompatActivity(R.layout.banner_view_layout) {
         }
         closeButton.setOnClickListener {
             StaticBanner.bannerView = null
+            @Suppress("DEPRECATION")
             onBackPressed()
         }
     }

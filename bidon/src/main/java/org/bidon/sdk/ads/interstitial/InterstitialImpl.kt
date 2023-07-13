@@ -1,9 +1,13 @@
 package org.bidon.sdk.ads.interstitial
 
 import android.app.Activity
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
@@ -17,7 +21,6 @@ import org.bidon.sdk.config.impl.asBidonErrorOrUnspecified
 import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
-import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 
@@ -27,6 +30,7 @@ internal class InterstitialImpl(
 ) : Interstitial, Extras by demandAd {
     private var userListener: InterstitialListener? = null
     private var observeCallbacksJob: Job? = null
+
     private val auctionHolder: AuctionHolder by lazy {
         get {
             params(demandAd)
@@ -50,7 +54,7 @@ internal class InterstitialImpl(
             return
         }
         logInfo(Tag, "Load (pricefloor=$pricefloor)")
-        if (!auctionHolder.isActive) {
+        if (!auctionHolder.isAuctionActive) {
             auctionHolder.startAuction(
                 adTypeParam = AdTypeParam.Interstitial(
                     activity = activity,
@@ -89,19 +93,20 @@ internal class InterstitialImpl(
             return
         }
         logInfo(Tag, "Show")
-        if (auctionHolder.isActive) {
+        if (auctionHolder.isAuctionActive) {
             logInfo(Tag, "Show failed. Auction in progress.")
             listener.onAdShowFailed(BidonError.AuctionInProgress)
             return
         }
-        when (val adSource = auctionHolder.popWinner()) {
+        when (val adSource = auctionHolder.popWinnerForShow()) {
             null -> {
                 logInfo(Tag, "Show failed. No Auction results.")
                 listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
             }
+
             else -> {
                 scope.launch(Dispatchers.Main.immediate) {
-                    adSource.show(activity)
+                    (adSource as AdSource.Interstitial).show(activity)
                 }
             }
         }
@@ -113,13 +118,20 @@ internal class InterstitialImpl(
     }
 
     override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {
-        logInfo(Tag, "Notify Loss invoked with Winner($winnerDemandId, $winnerEcpm)")
-        auctionHolder.popWinner()?.sendLoss(
+        auctionHolder.notifyLoss(
             winnerDemandId = winnerDemandId,
             winnerEcpm = winnerEcpm,
-            adType = StatisticsCollector.AdType.Interstitial
+            onAuctionCancelled = {
+                userListener?.onAdLoadFailed(BidonError.AuctionCancelled)
+            },
+            onNotified = {
+                destroyAd()
+            }
         )
-        destroyAd()
+    }
+
+    override fun notifyWin() {
+        auctionHolder.notifyWin()
     }
 
     override fun destroyAd() {
@@ -147,15 +159,18 @@ internal class InterstitialImpl(
                 is AdEvent.Fill -> {
                     // do nothing
                 }
+
                 is AdEvent.Clicked -> {
                     listener.onAdClicked(adEvent.ad)
-                    adSource.sendClickImpression(adType = StatisticsCollector.AdType.Interstitial)
+                    adSource.sendClickImpression()
                 }
+
                 is AdEvent.Closed -> listener.onAdClosed(adEvent.ad)
                 is AdEvent.Shown -> {
                     listener.onAdShown(adEvent.ad)
-                    adSource.sendShowImpression(adType = StatisticsCollector.AdType.Interstitial)
+                    adSource.sendShowImpression()
                 }
+
                 is AdEvent.PaidRevenue -> listener.onRevenuePaid(adEvent.ad, adEvent.adValue)
                 is AdEvent.ShowFailed -> listener.onAdShowFailed(adEvent.cause)
                 is AdEvent.LoadFailed -> listener.onAdLoadFailed(adEvent.cause)

@@ -34,6 +34,7 @@ fun Throwable.asRoundStatus() = when (this as? BidonError) {
     BidonError.NoAppropriateAdUnitId -> RoundStatus.NoAppropriateAdUnitId
     is BidonError.NoFill -> RoundStatus.NoFill
     is BidonError.NoBid -> RoundStatus.NoBid
+    BidonError.AuctionCancelled -> RoundStatus.AuctionCancelled
 
     is BidonError.AppKeyIsInvalid,
     BidonError.FullscreenAdNotReady,

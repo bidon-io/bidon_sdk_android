@@ -8,20 +8,34 @@ import org.bidon.sdk.config.impl.Bidon
 import org.bidon.sdk.databinders.app.UnitySpecificInfo
 import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.logging.Logger
+import org.bidon.sdk.regulation.Regulation
+import org.bidon.sdk.segment.Segment
 import org.bidon.sdk.utils.networking.NetworkSettings
 
 /**
  * Created by Aleksei Cherniaev on 07/02/2023.
  */
 object BidonSdk {
+
     const val DefaultPricefloor = 0.0
     const val SdkVersion = BuildConfig.ADAPTER_VERSION
 
-    private val bidon by lazy { Bidon() }
+    internal val bidon by lazy { Bidon() }
+
+    /**
+     * Represents User's [Segment]
+     */
+    @JvmStatic
+    val segment: Segment
+        get() = bidon.segment
 
     @JvmStatic
     val loggerLevel: Logger.Level
         get() = bidon.loggerLevel
+
+    @JvmStatic
+    val regulation: Regulation
+        get() = bidon.regulation
 
     @JvmStatic
     fun isInitialized(): Boolean = bidon.isInitialized
@@ -99,6 +113,18 @@ object BidonSdk {
      */
     @JvmStatic
     fun getExtras(): Map<String, Any> = bidon.getExtras()
+
+    /**
+     * Enabling test mode.
+     * In test mode test ads will be shown and debug data will be written to logcat.
+     *
+     * @param isTestMode true to enable test mode. False by default.
+     */
+    @JvmStatic
+    fun setTestMode(isTestMode: Boolean): BidonSdk {
+        bidon.isTestMode = isTestMode
+        return this
+    }
 
     /**
      * Unity uses only

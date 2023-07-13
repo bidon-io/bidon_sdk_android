@@ -1,6 +1,5 @@
 package org.bidon.dtexchange.impl
 
-import android.app.Activity
 import android.widget.FrameLayout
 import com.fyber.inneractive.sdk.external.ImpressionData
 import com.fyber.inneractive.sdk.external.InneractiveAdRequest
@@ -13,8 +12,10 @@ import com.fyber.inneractive.sdk.external.InneractiveUnitController
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.dtexchange.ext.asAdValue
 import org.bidon.dtexchange.ext.asBidonError
+import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.DemandAd
@@ -22,16 +23,12 @@ import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.impl.pxToDp
-import org.bidon.sdk.auction.AuctionResult
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
-import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.RoundStatus
 
 /**
  * Created by Aleksei Cherniaev on 17/04/2023.
@@ -42,6 +39,7 @@ internal class DTExchangeBanner(
     private val roundId: String,
     private val auctionId: String,
 ) : AdSource.Banner<DTExchangeBannerAuctionParams>,
+    AdLoadingType.Network<DTExchangeBannerAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
@@ -59,26 +57,20 @@ internal class DTExchangeBanner(
         MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val isAdReadyToShow: Boolean get() = adSpot?.isReady == true
 
-    override fun getAuctionParams(
-        activity: Activity,
-        pricefloor: Double,
-        timeout: Long,
-        lineItems: List<LineItem>,
-        bannerFormat: BannerFormat,
-        onLineItemConsumed: (LineItem) -> Unit,
-        containerWidth: Float,
-    ): Result<AdAuctionParams> = runCatching {
-        val lineItem = lineItems
-            .minByPricefloorOrNull(demandId, pricefloor)
-            ?.also(onLineItemConsumed) ?: error(BidonError.NoAppropriateAdUnitId)
-        DTExchangeBannerAuctionParams(
-            lineItem = lineItem,
-            bannerFormat = bannerFormat,
-            context = activity.applicationContext,
-        )
+    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+        return auctionParamsScope {
+            val lineItem = lineItems
+                .minByPricefloorOrNull(demandId, pricefloor)
+                ?.also(onLineItemConsumed) ?: error("BidonError.NoAppropriateAdUnitId")
+            DTExchangeBannerAuctionParams(
+                lineItem = lineItem,
+                bannerFormat = bannerFormat,
+                context = activity.applicationContext,
+            )
+        }
     }
 
-    override fun bid(adParams: DTExchangeBannerAuctionParams) {
+    override fun fill(adParams: DTExchangeBannerAuctionParams) {
         logInfo(Tag, "Starting with $adParams")
         param = adParams
         // Spot integration for display square
@@ -91,15 +83,7 @@ internal class DTExchangeBanner(
             override fun onInneractiveSuccessfulAdRequest(inneractiveAdSpot: InneractiveAdSpot?) {
                 logInfo(Tag, "onInneractiveSuccessfulAdRequest: $inneractiveAdSpot")
                 this@DTExchangeBanner.adSpot = inneractiveAdSpot
-                adEvent.tryEmit(
-                    AdEvent.Bid(
-                        AuctionResult(
-                            ecpm = adParams.lineItem.pricefloor,
-                            adSource = this@DTExchangeBanner,
-                            roundStatus = RoundStatus.Successful
-                        )
-                    )
-                )
+                adEvent.tryEmit(AdEvent.Fill(requireNotNull(inneractiveAdSpot?.asAd())))
             }
 
             override fun onInneractiveFailedAdRequest(
@@ -115,21 +99,11 @@ internal class DTExchangeBanner(
         adSpot.requestAd(adRequest)
     }
 
-    override fun fill() {
-        logInfo(Tag, "Starting fill: $this")
-        /**
-         * DataExchange fills the bid automatically. It's not needed to fill it manually.
-         */
-        adEvent.tryEmit(AdEvent.Fill(requireNotNull(adSpot?.asAd())))
-    }
-
     override fun getAdView(): AdViewHolder? {
         return adViewHolder ?: synchronized(this) {
             adViewHolder ?: createViewHolder(adSpot)
         }
     }
-
-    override fun show(activity: Activity) {}
 
     override fun destroy() {
         adSpot?.setRequestListener(null)

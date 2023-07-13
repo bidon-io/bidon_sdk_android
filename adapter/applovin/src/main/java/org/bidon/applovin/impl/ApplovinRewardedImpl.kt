@@ -2,13 +2,24 @@ package org.bidon.applovin.impl
 
 import android.app.Activity
 import com.applovin.adview.AppLovinIncentivizedInterstitial
-import com.applovin.sdk.*
+import com.applovin.sdk.AppLovinAd
+import com.applovin.sdk.AppLovinAdClickListener
+import com.applovin.sdk.AppLovinAdDisplayListener
+import com.applovin.sdk.AppLovinAdLoadListener
+import com.applovin.sdk.AppLovinAdRewardListener
+import com.applovin.sdk.AppLovinAdVideoPlaybackListener
+import com.applovin.sdk.AppLovinSdk
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.applovin.ApplovinFullscreenAdAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParamSource
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdLoadingType
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
-import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
@@ -16,8 +27,12 @@ import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.RoundStatus
 
+/**
+ * I have no idea how it works. There is no documentation.
+ *
+ * https://appodeal.slack.com/archives/C02PE4GAFU0/p1661421318406689
+ */
 internal class ApplovinRewardedImpl(
     override val demandId: DemandId,
     private val demandAd: DemandAd,
@@ -25,6 +40,7 @@ internal class ApplovinRewardedImpl(
     private val applovinSdk: AppLovinSdk,
     private val auctionId: String
 ) : AdSource.Rewarded<ApplovinFullscreenAdAuctionParams>,
+    AdLoadingType.Network<ApplovinFullscreenAdAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
@@ -36,29 +52,6 @@ internal class ApplovinRewardedImpl(
     private var applovinAd: AppLovinAd? = null
     private var lineItem: LineItem? = null
 
-    private val requestListener by lazy {
-        object : AppLovinAdLoadListener {
-            override fun adReceived(ad: AppLovinAd) {
-                logInfo(Tag, "adReceived: $this")
-                applovinAd = ad
-                adEvent.tryEmit(
-                    AdEvent.Bid(
-                        AuctionResult(
-                            ecpm = lineItem?.pricefloor ?: 0.0,
-                            adSource = this@ApplovinRewardedImpl,
-                            roundStatus = RoundStatus.Successful
-                        )
-                    )
-                )
-            }
-
-            override fun failedToReceiveAd(errorCode: Int) {
-                logInfo(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
-                adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
-            }
-        }
-    }
-
     private val listener by lazy {
         object :
             AppLovinAdRewardListener,
@@ -66,7 +59,12 @@ internal class ApplovinRewardedImpl(
             AppLovinAdDisplayListener,
             AppLovinAdClickListener {
             override fun videoPlaybackBegan(ad: AppLovinAd) {}
-            override fun videoPlaybackEnded(ad: AppLovinAd, percentViewed: Double, fullyWatched: Boolean) {}
+            override fun videoPlaybackEnded(
+                ad: AppLovinAd,
+                percentViewed: Double,
+                fullyWatched: Boolean
+            ) {
+            }
 
             override fun adDisplayed(ad: AppLovinAd) {
                 logInfo(Tag, "adDisplayed: $this")
@@ -96,12 +94,18 @@ internal class ApplovinRewardedImpl(
             }
 
             override fun userOverQuota(ad: AppLovinAd?, response: MutableMap<String, String>?) {}
-            override fun userRewardRejected(ad: AppLovinAd?, response: MutableMap<String, String>?) {}
+            override fun userRewardRejected(
+                ad: AppLovinAd?,
+                response: MutableMap<String, String>?
+            ) {
+            }
+
             override fun validationRequestFailed(ad: AppLovinAd?, errorCode: Int) {}
         }
     }
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
+    override val adEvent =
+        MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val isAdReadyToShow: Boolean
         get() = applovinAd != null
 
@@ -114,36 +118,38 @@ internal class ApplovinRewardedImpl(
         applovinAd = null
     }
 
-    override fun getAuctionParams(
-        activity: Activity,
-        pricefloor: Double,
-        timeout: Long,
-        lineItems: List<LineItem>,
-        onLineItemConsumed: (LineItem) -> Unit,
-    ): Result<AdAuctionParams> = runCatching {
-        val lineItem = lineItems
-            .minByPricefloorOrNull(demandId, pricefloor)
-            ?.also(onLineItemConsumed)
-        ApplovinFullscreenAdAuctionParams(
-            lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
-            timeoutMs = timeout,
-        )
+    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+        return auctionParamsScope {
+            val lineItem = lineItems
+                .minByPricefloorOrNull(demandId, pricefloor)
+                ?.also(onLineItemConsumed)
+            ApplovinFullscreenAdAuctionParams(
+                lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
+                timeoutMs = timeout,
+            )
+        }
     }
 
-    override fun bid(adParams: ApplovinFullscreenAdAuctionParams) {
+    override fun fill(adParams: ApplovinFullscreenAdAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")
         lineItem = adParams.lineItem
-        val incentivizedInterstitial = AppLovinIncentivizedInterstitial.create(adParams.lineItem.adUnitId, applovinSdk).also {
-            rewardedAd = it
+        val incentivizedInterstitial =
+            AppLovinIncentivizedInterstitial.create(adParams.lineItem.adUnitId, applovinSdk).also {
+                rewardedAd = it
+            }
+        val requestListener = object : AppLovinAdLoadListener {
+            override fun adReceived(ad: AppLovinAd) {
+                logInfo(Tag, "adReceived: $this")
+                applovinAd = ad
+                adEvent.tryEmit(AdEvent.Fill(requireNotNull(applovinAd?.asAd())))
+            }
+
+            override fun failedToReceiveAd(errorCode: Int) {
+                logInfo(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
+                adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+            }
         }
         incentivizedInterstitial.preload(requestListener)
-    }
-
-    override fun fill() {
-        runCatching {
-            logInfo(Tag, "Starting fill: $this")
-            adEvent.tryEmit(AdEvent.Fill(requireNotNull(applovinAd?.asAd())))
-        }
     }
 
     override fun show(activity: Activity) {

@@ -1,4 +1,4 @@
-package org.bidon.sdk.base
+package org.bidon.sdk.config.models.base
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
@@ -21,7 +21,8 @@ abstract class ConcurrentTest {
     private val mainThreadSurrogate = newSingleThreadContext("UI thread")
 
     @Before
-    fun setUp() {
+    open fun setUp() {
+
         defaultDispatcherOverridden = mainThreadSurrogate
         ioDispatcherOverridden = mainThreadSurrogate
         singleDispatcherOverridden = mainThreadSurrogate

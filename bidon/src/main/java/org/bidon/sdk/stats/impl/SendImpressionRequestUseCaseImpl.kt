@@ -26,9 +26,10 @@ internal class SendImpressionRequestUseCaseImpl(
         DataBinderType.Session,
         DataBinderType.App,
         DataBinderType.User,
-        DataBinderType.Geo,
         DataBinderType.Token,
         DataBinderType.Segment,
+        DataBinderType.Reg,
+        DataBinderType.Test,
     )
 
     override suspend fun invoke(

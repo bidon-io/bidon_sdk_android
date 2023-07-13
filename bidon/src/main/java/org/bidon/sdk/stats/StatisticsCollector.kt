@@ -1,6 +1,7 @@
 package org.bidon.sdk.stats
 
 import org.bidon.sdk.auction.models.BannerRequestBody
+import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.stats.models.RoundStatus
 
 /**
@@ -8,19 +9,23 @@ import org.bidon.sdk.stats.models.RoundStatus
  */
 interface StatisticsCollector {
 
-    fun sendShowImpression(adType: AdType)
-    fun sendClickImpression(adType: AdType)
+    fun sendShowImpression()
+    fun sendClickImpression()
     fun sendRewardImpression()
-    fun sendLoss(winnerDemandId: String, winnerEcpm: Double, adType: AdType)
+    fun sendLoss(winnerDemandId: String, winnerEcpm: Double)
+    fun sendWin()
 
     fun markBidStarted(adUnitId: String? = null)
     fun markBidFinished(roundStatus: RoundStatus, ecpm: Double?)
-    fun markFillStarted()
+    fun markFillStarted(adUnitId: String?)
     fun markFillFinished(roundStatus: RoundStatus, ecpm: Double?)
     fun markWin()
     fun markLoss()
     fun markBelowPricefloor()
+
+    fun setStatisticAdType(adType: AdType)
     fun addAuctionConfigurationId(auctionConfigurationId: Int)
+    fun addExternalWinNotificationsEnabled(enabled: Boolean)
 
     fun buildBidStatistic(): BidStat
 

@@ -12,7 +12,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.R
 import org.bidon.sdk.adapter.AdEvent
@@ -27,19 +26,18 @@ import org.bidon.sdk.ads.banner.helper.wrapUserBannerListener
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionResult
-import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
-import org.bidon.sdk.auction.models.BannerRequestBody.Companion.asStatBannerFormat
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.config.impl.asBidonErrorOrUnspecified
 import org.bidon.sdk.databinders.extras.Extras
+import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
-import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.visibilitytracker.VisibilityTracker
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Created by Aleksei Cherniaev on 02/03/2023.
+ * Created by Aleksei Cherniaev on 06/02/2023.
  */
 class BannerView @JvmOverloads constructor(
     context: Context,
@@ -55,13 +53,18 @@ class BannerView @JvmOverloads constructor(
     private var userListener: BannerListener? = null
     private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
     private val listener by lazy { wrapUserBannerListener(userListener = { userListener }) }
+    private var loadingError: BidonError? = null
     private val adLifecycleFlow = MutableStateFlow(AdLifecycle.Created)
-    private val auction: Auction get() = get()
+    private val auction: Auction by lazy { get() }
     private val visibilityTracker: VisibilityTracker by lazy { get() }
     private var winner: AuctionResult? = null
+        set(value) {
+            wasNotified.set(false)
+            field = value
+        }
+    private val wasNotified = AtomicBoolean(false)
+
     private var winnerSubscriberJob: Job? = null
-    private var auctionJob: Job? = null
-    private var loadingError: BidonError? = null
 
     init {
         context.theme.obtainStyledAttributes(attrs, R.styleable.BannerView, 0, 0).apply {
@@ -181,21 +184,39 @@ class BannerView @JvmOverloads constructor(
 
     override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {
         logInfo(Tag, "Notify Loss invoked with Winner($winnerDemandId, $winnerEcpm)")
-        winner?.adSource?.sendLoss(
-            winnerDemandId = winnerDemandId,
-            winnerEcpm = winnerEcpm,
-            adType = StatisticsCollector.AdType.Banner(
-                format = bannerFormat.asStatBannerFormat()
-            )
-        )
-        destroyAd()
+        when (adLifecycleFlow.value) {
+            AdLifecycle.Loading -> {
+                destroyAd()
+                userListener?.onAdLoadFailed(BidonError.AuctionCancelled)
+            }
+
+            AdLifecycle.Loaded -> {
+                if (!wasNotified.getAndSet(true)) {
+                    winner?.adSource?.sendLoss(
+                        winnerDemandId = winnerDemandId,
+                        winnerEcpm = winnerEcpm,
+                    )
+                    destroyAd()
+                }
+            }
+
+            else -> {
+                // do nothing
+            }
+        }
+    }
+
+    override fun notifyWin() {
+        logInfo(Tag, "Notify Win was invoked")
+        if (adLifecycleFlow.value == AdLifecycle.Loaded && !wasNotified.getAndSet(true)) {
+            winner?.adSource?.sendWin()
+        }
     }
 
     override fun destroyAd() {
         adLifecycleFlow.value = AdLifecycle.Destroyed
         visibilityTracker.stop()
-        auctionJob?.cancel()
-        auctionJob = null
+        auction.cancel()
         winner?.adSource?.destroy()
         winner = null
         winnerSubscriberJob?.cancel()
@@ -206,7 +227,10 @@ class BannerView @JvmOverloads constructor(
     private fun FrameLayout.addViewOnScreen(adSource: AdSource.Banner<*>) {
         // add AdView to Screen
         removeAllViews()
-        val adViewHolder: AdViewHolder = adSource.getAdView() ?: return
+        val adViewHolder: AdViewHolder = adSource.getAdView() ?: run {
+            logError(Tag, "No AdView found.", NullPointerException())
+            return
+        }
         val layoutParams = LayoutParams(adViewHolder.widthDp.dpToPx, adViewHolder.heightDp.dpToPx, Gravity.CENTER)
         addView(adViewHolder.networkAdview, layoutParams)
         this.visibility = VISIBLE
@@ -218,29 +242,22 @@ class BannerView @JvmOverloads constructor(
         checkBannerShown(adViewHolder.networkAdview, onBannerShown = {
             adLifecycleFlow.value = AdLifecycle.Displayed
             adSource.ad?.let { listener.onAdShown(ad = it) }
-            adSource.sendShowImpression(
-                StatisticsCollector.AdType.Banner(
-                    format = bannerFormat.asStatBannerFormat()
-                )
-            )
+            adSource.sendShowImpression()
         })
     }
 
     private fun conductAuction(activity: Activity, pricefloor: Double) {
         this.pricefloor = pricefloor
         logInfo(Tag, "Load (pricefloor=$pricefloor)")
-        auctionJob?.cancel()
-        auctionJob = scope.launch {
-            auction.start(
-                demandAd = demandAd,
-                resolver = MaxEcpmAuctionResolver,
-                adTypeParamData = AdTypeParam.Banner(
-                    activity = activity,
-                    pricefloor = pricefloor,
-                    bannerFormat = bannerFormat,
-                    containerWidth = width.toFloat()
-                ),
-            ).onSuccess { auctionResults ->
+        auction.start(
+            demandAd = demandAd,
+            adTypeParamData = AdTypeParam.Banner(
+                activity = activity,
+                pricefloor = pricefloor,
+                bannerFormat = bannerFormat,
+                containerWidth = width.toFloat()
+            ),
+            onSuccess = { auctionResults ->
                 /**
                  * Winner found
                  */
@@ -254,7 +271,8 @@ class BannerView @JvmOverloads constructor(
                         "[Ad] should exist when action succeeds"
                     }
                 )
-            }.onFailure {
+            },
+            onFailure = {
                 /**
                  * Auction failed
                  */
@@ -262,7 +280,7 @@ class BannerView @JvmOverloads constructor(
                 loadingError = it.asBidonErrorOrUnspecified()
                 listener.onAdLoadFailed(cause = it.asBidonErrorOrUnspecified())
             }
-        }
+        )
     }
 
     private fun subscribeToWinner(adSource: AdSource<*>) {
@@ -279,11 +297,7 @@ class BannerView @JvmOverloads constructor(
 
                 is AdEvent.Clicked -> {
                     listener.onAdClicked(adEvent.ad)
-                    adSource.sendClickImpression(
-                        StatisticsCollector.AdType.Banner(
-                            format = bannerFormat.asStatBannerFormat()
-                        )
-                    )
+                    adSource.sendClickImpression()
                 }
 
                 is AdEvent.Shown -> {

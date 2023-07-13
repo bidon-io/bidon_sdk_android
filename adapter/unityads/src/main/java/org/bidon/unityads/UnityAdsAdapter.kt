@@ -3,6 +3,7 @@ package org.bidon.unityads
 import android.content.Context
 import com.unity3d.ads.IUnityAdsInitializationListener
 import com.unity3d.ads.UnityAds
+import com.unity3d.ads.metadata.MetaData
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.sdk.adapter.AdProvider
 import org.bidon.sdk.adapter.AdSource
@@ -11,7 +12,11 @@ import org.bidon.sdk.adapter.AdapterInfo
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Initializable
+import org.bidon.sdk.adapter.SupportsRegulation
+import org.bidon.sdk.adapter.SupportsTestMode
+import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
 import org.bidon.sdk.logs.logging.impl.logError
+import org.bidon.sdk.regulation.Regulation
 import org.bidon.unityads.ext.adapterVersion
 import org.bidon.unityads.ext.asBidonError
 import org.bidon.unityads.ext.sdkVersion
@@ -25,7 +30,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 /**
- * Created by Bidon Team on 01/03/2023.
+ * Created by Aleksei Cherniaev on 01/03/2023.
  */
 
 internal val UnityAdsDemandId = DemandId("unityads")
@@ -35,11 +40,14 @@ internal val UnityAdsDemandId = DemandId("unityads")
  */
 class UnityAdsAdapter :
     Adapter,
+    SupportsRegulation,
+    SupportsTestMode by SupportsTestModeImpl(),
     Initializable<UnityAdsParameters>,
     AdProvider.Banner<UnityAdsBannerAuctionParams>,
     AdProvider.Interstitial<UnityAdsFullscreenAuctionParams>,
     AdProvider.Rewarded<UnityAdsFullscreenAuctionParams> {
 
+    private var context: Context? = null
     override val demandId: DemandId = UnityAdsDemandId
     override val adapterInfo = AdapterInfo(
         adapterVersion = adapterVersion,
@@ -48,7 +56,7 @@ class UnityAdsAdapter :
 
     override suspend fun init(context: Context, configParams: UnityAdsParameters) =
         suspendCancellableCoroutine { continuation ->
-            val isTestMode = BuildConfig.DEBUG
+            this.context = context
             UnityAds.initialize(
                 context,
                 configParams.unityGameId,
@@ -70,6 +78,13 @@ class UnityAdsAdapter :
         return UnityAdsParameters(
             unityGameId = JSONObject(json).optString("game_id")
         )
+    }
+
+    override fun updateRegulation(regulation: Regulation) {
+        MetaData(context).also { data ->
+            data.set("gdpr.consent", regulation.gdprConsent)
+            data.set("user.nonbehavioral", regulation.coppaApplies)
+        }.commit()
     }
 
     override fun interstitial(
