@@ -7,6 +7,8 @@ import org.bidon.sdk.utils.serializer.Serializable
  * Created by Bidon Team on 06/02/2023.
  */
 internal data class Device(
+    @field:JsonName("geo")
+    val geo: Geo?,
     @field:JsonName("ua")
     val userAgent: String?,
     @field:JsonName("make")

@@ -10,6 +10,7 @@ import org.bidon.sdk.utils.networking.NetworkSettings
 internal interface BidonInitializer {
 
     val isInitialized: Boolean
+    var isTestMode: Boolean
 
     /**
      * Default adapters is in [DefaultAdapters]

@@ -1,7 +1,6 @@
-package org.bidon.sdk.stats
+package org.bidon.sdk.stats.models
 
 import org.bidon.sdk.adapter.DemandId
-import org.bidon.sdk.stats.models.RoundStatus
 /**
  * Created by Bidon Team on 06/02/2023.
  */

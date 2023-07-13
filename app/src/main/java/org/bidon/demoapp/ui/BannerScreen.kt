@@ -52,7 +52,7 @@ fun BannerScreen(navController: NavHostController) {
 //        ),
 //        pricefloor = 0.0
 //    )
-    val context = LocalContext.current
+    val activity = LocalContext.current as Activity
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val logFlow = remember {
@@ -64,9 +64,10 @@ fun BannerScreen(navController: NavHostController) {
     val showOnLoad = remember {
         mutableStateOf(false)
     }
-    val bannerView = remember {
-        mutableStateOf<BannerView?>(null)
+    val bannerExists = remember {
+        mutableStateOf(false)
     }
+    var bannerView: BannerView? = null
 
     Column(
         modifier = Modifier
@@ -90,22 +91,62 @@ fun BannerScreen(navController: NavHostController) {
                 .padding(0.dp),
             contentAlignment = Alignment.Center
         ) {
-            bannerView.value?.let { view ->
-                logInfo(Tag, "Recompose: $view")
+            Subtitle1Text(text = "Place for Banner", modifier = Modifier.padding(8.dp))
+            if (bannerExists.value) {
                 AndroidView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 50.dp),
-                    factory = {
-                        view.also {
-                            logInfo(Tag, "AndroidView factory: $it")
+                    factory = { context ->
+                        logInfo(Tag, "AndroidView factory")
+                        BannerView(
+                            context = context,
+                        ).apply {
+                            setBannerFormat(bannerFormat.value)
+                            setBannerListener(
+                                object : BannerListener {
+                                    override fun onAdLoaded(ad: Ad) {
+                                        logFlow.log("onAdLoaded WINNER:\n$ad")
+                                        if (showOnLoad.value) {
+                                            bannerView?.showAd()
+                                        }
+                                    }
+
+                                    override fun onAdLoadFailed(cause: BidonError) {
+                                        logFlow.log("onAdLoadFailed: $cause")
+                                    }
+
+                                    override fun onAdShown(ad: Ad) {
+                                        logFlow.log("onAdShown: $ad")
+                                    }
+
+                                    override fun onAdClicked(ad: Ad) {
+                                        logFlow.log("onAdClicked: $ad")
+                                    }
+
+                                    override fun onAdExpired(ad: Ad) {
+                                        logFlow.log("onAdExpired: $ad")
+                                    }
+
+                                    override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
+                                        logFlow.log("onRevenuePaid: ad=$ad, adValue=$adValue")
+                                    }
+
+                                    override fun onAdShowFailed(cause: BidonError) {
+                                        logFlow.log("onAdShowFailed: $cause")
+                                    }
+                                }
+                            )
+                        }.also {
+                            bannerView = it
+                            logFlow.log("New BannerView created: $it")
                         }
                     },
                     update = {
                         logInfo(Tag, "AndroidView update: $it")
                     }
                 )
-            } ?: Subtitle1Text(text = "Place for Banner", modifier = Modifier.padding(8.dp))
+            }
         }
         Column(modifier = Modifier.padding(8.dp)) {
             ItemSelector(
@@ -121,59 +162,20 @@ fun BannerScreen(navController: NavHostController) {
                 },
                 onItemClicked = {
                     bannerFormat.value = it
-                    bannerView.value?.setBannerFormat(it)
+                    bannerView?.setBannerFormat(it)
                 }
             )
             Spacer(modifier = Modifier.padding(top = 2.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 AppButton(text = "Create") {
-                    bannerView.value = BannerView(
-                        context = context,
-                    ).apply {
-                        setBannerFormat(bannerFormat.value)
-                        setBannerListener(
-                            object : BannerListener {
-                                override fun onAdLoaded(ad: Ad) {
-                                    logFlow.log("onAdLoaded WINNER:\n$ad")
-                                    if (showOnLoad.value) {
-                                        bannerView.value?.showAd()
-                                    }
-                                }
-
-                                override fun onAdLoadFailed(cause: BidonError) {
-                                    logFlow.log("onAdLoadFailed: $cause")
-                                }
-
-                                override fun onAdShown(ad: Ad) {
-                                    logFlow.log("onAdShown: $ad")
-                                }
-
-                                override fun onAdClicked(ad: Ad) {
-                                    logFlow.log("onAdClicked: $ad")
-                                }
-
-                                override fun onAdExpired(ad: Ad) {
-                                    logFlow.log("onAdExpired: $ad")
-                                }
-
-                                override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
-                                    logFlow.log("onRevenuePaid: ad=$ad, adValue=$adValue")
-                                }
-
-                                override fun onAdShowFailed(cause: BidonError) {
-                                    logFlow.log("onAdShowFailed: $cause")
-                                }
-                            }
-                        )
-                    }
-                    logFlow.log("New BannerView created: ${bannerView.value}")
+                    bannerExists.value = true
                 }
                 Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                 AppButton(
                     text = "Load",
                 ) {
-                    bannerView.value?.loadAd(activity = context as Activity)
+                    bannerView?.loadAd(activity = activity)
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Body2Text(text = "Show onLoad")
@@ -186,20 +188,29 @@ fun BannerScreen(navController: NavHostController) {
             }
             Row {
                 AppButton(text = "Show") {
-                    logInfo(Tag, "Recompose. ShowClicked: ${bannerView.value}")
-                    bannerView.value?.showAd()
+                    logInfo(Tag, "Recompose. ShowClicked: $bannerView")
+                    bannerView?.showAd()
                 }
                 Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                 AppButton(text = "Destroy") {
-                    bannerView.value?.destroyAd()
-                    bannerView.value = null
+                    bannerView?.destroyAd()
+                    bannerView = null
+                    bannerExists.value = false
                     logFlow.log("BannerView destroyed")
                 }
-                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+            }
+            Row {
                 AppTextButton(text = "Notify Loss") {
-                    bannerView.value?.also {
+                    bannerView?.also {
                         it.notifyLoss(winnerDemandId = "Unity", winnerEcpm = 4.0)
                         logFlow.log("NotifyLoss")
+                    }
+                }
+                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                AppTextButton(text = "Notify Win") {
+                    bannerView?.also {
+                        it.notifyWin()
+                        logFlow.log("NotifyWin")
                     }
                 }
             }

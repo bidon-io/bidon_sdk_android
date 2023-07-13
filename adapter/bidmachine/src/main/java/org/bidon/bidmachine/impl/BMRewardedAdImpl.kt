@@ -3,6 +3,7 @@ package org.bidon.bidmachine.impl
 import android.app.Activity
 import android.content.Context
 import io.bidmachine.AdRequest
+import io.bidmachine.BidMachine
 import io.bidmachine.CustomParams
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.rewarded.RewardedAd
@@ -18,7 +19,6 @@ import org.bidon.bidmachine.ext.asBidonAdValue
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.AuctionResult
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -32,7 +32,7 @@ internal class BMRewardedAdImpl(
     private val roundId: String,
     private val auctionId: String
 ) : AdSource.Rewarded<BMFullscreenAuctionParams>,
-    WinLossNotifiable,
+    AdLoadingType.Bidding<BMFullscreenAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
@@ -40,7 +40,8 @@ internal class BMRewardedAdImpl(
         demandAd = demandAd,
     ) {
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
+    override val adEvent =
+        MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val ad: Ad? get() = rewardedAd?.asAd()
 
     private var context: Context? = null
@@ -59,8 +60,7 @@ internal class BMRewardedAdImpl(
                 adRequest = request
                 adEvent.tryEmit(
                     AdEvent.Bid(
-                        AuctionResult(
-                            ecpm = result.price,
+                        AuctionResult.Bidding.Success(
                             adSource = this@BMRewardedAdImpl,
                             roundStatus = RoundStatus.Successful
                         )
@@ -149,13 +149,16 @@ internal class BMRewardedAdImpl(
         }
     }
 
-    override fun bid(adParams: BMFullscreenAuctionParams) {
+    override fun getToken(context: Context): String = BidMachine.getBidToken(context)
+
+    override fun adRequest(adParams: BMFullscreenAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")
         this.context = adParams.context
         RewardedRequest.Builder()
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
             .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
             .setLoadingTimeOut(adParams.timeout.toInt())
+            .setBidPayload(adParams.payload)
             .setListener(requestListener)
             .build()
             .also {
@@ -187,22 +190,15 @@ internal class BMRewardedAdImpl(
         }
     }
 
-    override fun notifyLoss(winnerNetworkName: String, winnerNetworkPrice: Double) {
-        adRequest?.notifyMediationLoss(winnerNetworkName, winnerNetworkPrice)
-    }
-
-    override fun notifyWin() {
-        adRequest?.notifyMediationWin()
-    }
-
-    override fun getAuctionParams(
-        activity: Activity,
-        pricefloor: Double,
-        timeout: Long,
-        lineItems: List<LineItem>,
-        onLineItemConsumed: (LineItem) -> Unit,
-    ): Result<AdAuctionParams> = runCatching {
-        BMFullscreenAuctionParams(pricefloor = pricefloor, timeout = timeout, context = activity.applicationContext)
+    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+        return auctionParamsScope {
+            BMFullscreenAuctionParams(
+                pricefloor = pricefloor,
+                timeout = timeout,
+                context = activity.applicationContext,
+                payload = payload
+            )
+        }
     }
 
     override fun destroy() {

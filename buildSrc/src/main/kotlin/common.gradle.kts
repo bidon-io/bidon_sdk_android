@@ -54,10 +54,10 @@ dependencies {
      * Testing
      */
     testImplementation(kotlin("test"))
-    testImplementation("io.mockk:mockk:1.13.4") {
+    testImplementation("io.mockk:mockk:1.13.5") {
         exclude(group = "org.slf4j", module = "slf4j-api")
     }
-    testImplementation("com.google.truth:truth:1.1.3")
+    testImplementation("com.google.truth:truth:1.1.4")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
     testImplementation("org.json:json:20210307")

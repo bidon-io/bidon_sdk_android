@@ -6,6 +6,7 @@ import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.adapter.AdapterParameters
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.Initializable
+import org.bidon.sdk.adapter.SupportsTestMode
 import org.bidon.sdk.config.models.ConfigResponse
 import org.bidon.sdk.config.usecases.InitAndRegisterAdaptersUseCase
 import org.bidon.sdk.logs.logging.impl.logError
@@ -13,7 +14,7 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import kotlin.system.measureTimeMillis
 
 /**
- * Created by Bidon Team on 06/02/2023.
+ * Created by Aleksei Cherniaev on 06/02/2023.
  */
 @Suppress("UNCHECKED_CAST")
 internal class InitAndRegisterAdaptersUseCaseImpl(
@@ -23,13 +24,18 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
     override suspend operator fun invoke(
         context: Context,
         adapters: List<Adapter>,
-        configResponse: ConfigResponse
+        configResponse: ConfigResponse,
+        isTestMode: Boolean
     ) = coroutineScope {
         val deferredList = adapters.associate { adapter ->
             val demandId = adapter.demandId
             demandId to async {
                 runCatching {
                     withTimeout(configResponse.initializationTimeout) {
+                        // set test mode param
+                        (adapter as? SupportsTestMode)?.isTestMode = isTestMode
+
+                        // initialize if needed
                         val initializable = adapter as? Initializable<AdapterParameters>
                         if (initializable == null) {
                             adapter
@@ -43,6 +49,8 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                                 Tag,
                                 "Adapter ${demandId.demandId} initialized in $timeStart ms."
                             )
+
+                            // adapter is ready
                             adapter
                         }
                     }

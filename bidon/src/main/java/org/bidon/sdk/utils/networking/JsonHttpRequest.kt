@@ -39,6 +39,7 @@ internal class JsonHttpRequest(
                         logInfo(Tag, "Response: $it")
                     }
                 }
+
                 is RawResponse.Failure -> {
                     val baseResponse = JsonParsers.parseOrNull<BaseResponse>(String(response.responseBody ?: byteArrayOf()))
                     logInfo(Tag, "Request failed ${String(response.responseBody ?: byteArrayOf())}")
@@ -51,6 +52,7 @@ internal class JsonHttpRequest(
                                 throw BidonError.NetworkError(demandId = null, message = baseResponse?.error?.message)
                             }
                         }
+
                         500 -> throw BidonError.InternalServerSdkError(message = baseResponse?.error?.message)
                         else -> throw BidonError.Unspecified(demandId = null, sourceError = response.httpError)
                     }

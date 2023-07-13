@@ -15,4 +15,8 @@ internal data class ResultBody(
     val ecpm: Double?,
     @field:JsonName("ad_unit_id")
     val adUnitId: String?,
+    @field:JsonName("auction_start_ts")
+    val auctionStartTs: Long,
+    @field:JsonName("auction_finish_ts")
+    val auctionFinishTs: Long,
 ) : Serializable

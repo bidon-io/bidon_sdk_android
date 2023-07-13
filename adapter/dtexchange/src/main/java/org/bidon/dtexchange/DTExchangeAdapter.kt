@@ -20,8 +20,10 @@ import org.bidon.sdk.adapter.AdapterInfo
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Initializable
+import org.bidon.sdk.adapter.SupportsRegulation
 import org.bidon.sdk.logs.logging.Logger
 import org.bidon.sdk.logs.logging.impl.logError
+import org.bidon.sdk.regulation.Regulation
 import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -36,6 +38,7 @@ val DTExchangeDemandId = DemandId("dtexchange")
  */
 class DTExchangeAdapter :
     Adapter,
+    SupportsRegulation,
     Initializable<DTExchangeParameters>,
     AdProvider.Rewarded<DTExchangeAdAuctionParams>,
     AdProvider.Interstitial<DTExchangeAdAuctionParams>,
@@ -57,11 +60,13 @@ class DTExchangeAdapter :
                     }
                 }
             }
+
             InneractiveAdManager.initialize(context, configParams.appId) { initStatus ->
                 when (initStatus) {
                     FyberInitStatus.SUCCESSFULLY -> {
                         continuation.resume(Unit)
                     }
+
                     FyberInitStatus.FAILED_NO_KITS_DETECTED,
                     FyberInitStatus.FAILED,
                     FyberInitStatus.INVALID_APP_ID, null -> {
@@ -78,6 +83,15 @@ class DTExchangeAdapter :
             DTExchangeParameters(
                 appId = requireNotNull(it.optString("app_id")),
             )
+        }
+    }
+
+    override fun updateRegulation(regulation: Regulation) {
+        InneractiveAdManager.setUSPrivacyString(regulation.usPrivacyString)
+        InneractiveAdManager.setGdprConsent(regulation.gdprConsent)
+        InneractiveAdManager.setGdprConsentString(regulation.gdprConsentString)
+        if (regulation.coppaApplies) {
+            InneractiveAdManager.currentAudienceAppliesToCoppa()
         }
     }
 

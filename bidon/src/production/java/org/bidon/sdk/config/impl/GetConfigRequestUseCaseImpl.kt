@@ -6,7 +6,7 @@ import org.bidon.sdk.config.models.ConfigRequestBody
 import org.bidon.sdk.config.models.ConfigResponse
 import org.bidon.sdk.config.usecases.GetConfigRequestUseCase
 import org.bidon.sdk.databinders.DataBinderType
-import org.bidon.sdk.databinders.segment.SegmentDataSource
+import org.bidon.sdk.segment.SegmentSynchronizer
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.json.JsonParsers
@@ -21,15 +21,17 @@ import org.json.JSONObject
  */
 internal class GetConfigRequestUseCaseImpl(
     private val createRequestBody: CreateRequestBodyUseCase,
-    private val segmentDataSource: SegmentDataSource,
+    private val segmentSynchronizer: SegmentSynchronizer,
 ) : GetConfigRequestUseCase {
     private val binders: List<DataBinderType> = listOf(
         DataBinderType.Device,
         DataBinderType.App,
         DataBinderType.Token,
-        DataBinderType.Geo,
         DataBinderType.Session,
         DataBinderType.User,
+        DataBinderType.Reg,
+        DataBinderType.Test,
+        DataBinderType.Segment,
     )
 
     override suspend fun request(body: ConfigRequestBody): Result<ConfigResponse> {
@@ -55,9 +57,7 @@ internal class GetConfigRequestUseCaseImpl(
                  * Save "segment_id"
                  */
                 val jsonResponse = JSONObject(jsonString)
-                segmentDataSource.saveSegmentId(
-                    segmentId = jsonResponse.optString("segment_id", "").takeIf { !it.isNullOrBlank() }
-                )
+                segmentSynchronizer.parseSegmentId(jsonString)
                 val config = jsonResponse.getString("init")
                 requireNotNull(JsonParsers.parseOrNull(config))
             }

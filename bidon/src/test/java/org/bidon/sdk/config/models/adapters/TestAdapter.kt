@@ -8,11 +8,14 @@ import org.bidon.sdk.adapter.AdapterInfo
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Initializable
+import org.bidon.sdk.adapter.SupportsRegulation
+import org.bidon.sdk.regulation.Regulation
 
 internal class TestAdapter(
     override val demandId: DemandId,
     private val testAdapterParameters: TestAdapterParameters,
 ) : Adapter,
+    SupportsRegulation,
     Initializable<TestAdapterParameters>,
     AdProvider.Interstitial<TestInterstitialParameters> {
 
@@ -35,5 +38,8 @@ internal class TestAdapter(
             roundId = roundId,
             testParameters = testAdapterParameters
         )
+    }
+
+    override fun updateRegulation(regulation: Regulation) {
     }
 }

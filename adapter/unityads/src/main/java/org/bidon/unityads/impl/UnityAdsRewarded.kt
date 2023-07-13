@@ -6,9 +6,14 @@ import com.unity3d.ads.IUnityAdsShowListener
 import com.unity3d.ads.UnityAds
 import com.unity3d.ads.UnityAdsShowOptions
 import kotlinx.coroutines.flow.MutableSharedFlow
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParamSource
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdLoadingType
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
-import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
@@ -18,11 +23,10 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.unityads.ext.asBidonError
 
 /**
- * Created by Bidon Team on 02/03/2023.
+ * Created by Aleksei Cherniaev on 02/03/2023.
  */
 internal class UnityAdsRewarded(
     override val demandId: DemandId,
@@ -30,6 +34,7 @@ internal class UnityAdsRewarded(
     private val roundId: String,
     private val auctionId: String,
 ) : AdSource.Rewarded<UnityAdsFullscreenAuctionParams>,
+    AdLoadingType.Network<UnityAdsFullscreenAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
@@ -58,35 +63,23 @@ internal class UnityAdsRewarded(
 
     override var isAdReadyToShow: Boolean = false
 
-    override fun getAuctionParams(
-        activity: Activity,
-        pricefloor: Double,
-        timeout: Long,
-        lineItems: List<LineItem>,
-        onLineItemConsumed: (LineItem) -> Unit
-    ): Result<AdAuctionParams> = runCatching {
-        val lineItem = lineItems
-            .minByPricefloorOrNull(demandId, pricefloor)
-            ?.also(onLineItemConsumed) ?: error(BidonError.NoAppropriateAdUnitId)
-        UnityAdsFullscreenAuctionParams(lineItem)
+    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+        return auctionParamsScope {
+            val lineItem = lineItems
+                .minByPricefloorOrNull(demandId, pricefloor)
+                ?.also(onLineItemConsumed) ?: error(BidonError.NoAppropriateAdUnitId)
+            UnityAdsFullscreenAuctionParams(lineItem)
+        }
     }
 
-    override fun bid(adParams: UnityAdsFullscreenAuctionParams) {
+    override fun fill(adParams: UnityAdsFullscreenAuctionParams) {
         logInfo(Tag, "Starting with $adParams: $this")
         lineItem = adParams.lineItem
         val loadListener = object : IUnityAdsLoadListener {
             override fun onUnityAdsAdLoaded(placementId: String?) {
                 logInfo(Tag, "onUnityAdsAdLoaded: $this")
                 isAdReadyToShow = true
-                adEvent.tryEmit(
-                    AdEvent.Bid(
-                        AuctionResult(
-                            ecpm = requireNotNull(lineItem?.pricefloor),
-                            adSource = this@UnityAdsRewarded,
-                            roundStatus = RoundStatus.Successful
-                        )
-                    )
-                )
+                adEvent.tryEmit(AdEvent.Fill(requireNotNull(ad)))
             }
 
             override fun onUnityAdsFailedToLoad(placementId: String?, error: UnityAds.UnityAdsLoadError?, message: String?) {
@@ -99,14 +92,6 @@ internal class UnityAdsRewarded(
             }
         }
         UnityAds.load(adParams.lineItem.adUnitId, loadListener)
-    }
-
-    override fun fill() {
-        logInfo(Tag, "Starting fill: $this")
-        /**
-         * UnityAds fills the bid automatically. It's not needed to fill it manually.
-         */
-        adEvent.tryEmit(AdEvent.Fill(requireNotNull(ad)))
     }
 
     override fun show(activity: Activity) {

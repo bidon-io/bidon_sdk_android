@@ -14,6 +14,7 @@ internal data class AuctionResponse(
     val token: String?,
     val auctionId: String?,
     val auctionConfigurationId: Int?,
+    val externalWinNotificationsEnabled: Boolean,
 )
 
 internal class AuctionResponseParser : JsonParser<AuctionResponse> {
@@ -25,7 +26,8 @@ internal class AuctionResponseParser : JsonParser<AuctionResponse> {
             pricefloor = json.optDouble("pricefloor"),
             auctionConfigurationId = json.optInt("auction_configuration_id"),
             lineItems = JsonParsers.parseList(json.optJSONArray("line_items")),
-            token = json.optString("token")
+            token = json.optString("token"),
+            externalWinNotificationsEnabled = json.optBoolean("external_win_notifications", false)
         )
     }.getOrNull()
 }

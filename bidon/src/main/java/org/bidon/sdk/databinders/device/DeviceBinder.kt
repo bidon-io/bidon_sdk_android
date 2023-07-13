@@ -1,15 +1,18 @@
 package org.bidon.sdk.databinders.device
 
 import org.bidon.sdk.config.models.Device
+import org.bidon.sdk.config.models.Geo
 import org.bidon.sdk.databinders.DataBinder
+import org.bidon.sdk.databinders.location.LocationDataSource
 import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONObject
 
 /**
- * Created by Bidon Team on 06/02/2023.
+ * Created by Aleksei Cherniaev on 06/02/2023.
  */
 internal class DeviceBinder(
-    private val dataSource: DeviceDataSource,
+    private val deviceDataSource: DeviceDataSource,
+    private val locationDataSource: LocationDataSource
 ) : DataBinder<JSONObject> {
     override val fieldName: String = "device"
 
@@ -17,23 +20,37 @@ internal class DeviceBinder(
 
     private fun createDevice(): Device {
         return Device(
-            userAgent = dataSource.getUserAgent(),
-            manufacturer = dataSource.getManufacturer(),
-            deviceModel = dataSource.getDeviceModel(),
-            os = dataSource.getOs(),
-            osVersion = dataSource.getOsVersion(),
-            hardwareVersion = dataSource.getHardwareVersion(),
-            width = dataSource.getScreenWidth(),
-            height = dataSource.getScreenHeight(),
-            ppi = dataSource.getPpi(),
-            pxRatio = dataSource.getPxRatio(),
-            javaScriptSupport = dataSource.getJavaScriptSupport(),
-            language = dataSource.getLanguage(),
-            carrier = dataSource.getCarrier(),
-            mccmnc = dataSource.getPhoneMCCMNC(),
-            connectionType = dataSource.getConnectionTypeCode(),
-            type = DeviceType.getType(dataSource.isTablet()).code,
-            osApiLevel = dataSource.getApiLevel()
+            geo = if (locationDataSource.isLocationAvailable) {
+                Geo(
+                    lat = locationDataSource.getLatitude(),
+                    lon = locationDataSource.getLongitude(),
+                    accuracy = locationDataSource.getAccuracy(),
+                    lastFix = locationDataSource.getLastFix(),
+                    country = locationDataSource.getCountry(),
+                    city = locationDataSource.getCity(),
+                    zip = locationDataSource.getZip(),
+                    utcOffset = locationDataSource.getUtcOffset()
+                )
+            } else {
+                null
+            },
+            userAgent = deviceDataSource.getUserAgent(),
+            manufacturer = deviceDataSource.getManufacturer(),
+            deviceModel = deviceDataSource.getDeviceModel(),
+            os = deviceDataSource.getOs(),
+            osVersion = deviceDataSource.getOsVersion(),
+            hardwareVersion = deviceDataSource.getHardwareVersion(),
+            width = deviceDataSource.getScreenWidth(),
+            height = deviceDataSource.getScreenHeight(),
+            ppi = deviceDataSource.getPpi(),
+            pxRatio = deviceDataSource.getPxRatio(),
+            javaScriptSupport = deviceDataSource.getJavaScriptSupport(),
+            language = deviceDataSource.getLanguage(),
+            carrier = deviceDataSource.getCarrier(),
+            mccmnc = deviceDataSource.getPhoneMCCMNC(),
+            connectionType = deviceDataSource.getConnectionTypeCode(),
+            type = DeviceType.getType(deviceDataSource.isTablet()).code,
+            osApiLevel = deviceDataSource.getApiLevel()
         )
     }
 

@@ -11,7 +11,8 @@ internal interface CreateRequestBodyUseCase {
     suspend operator fun <T : Serializable> invoke(
         binders: List<DataBinderType>,
         dataKeyName: String?,
-        data: T?,
+        data: T? = null,
+        list: List<T> = emptyList(),
         extras: Map<String, Any>,
     ): JSONObject
 }
