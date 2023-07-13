@@ -56,7 +56,7 @@ sealed interface AdSource<T : AdAuctionParams> : StatisticsCollector {
             containerWidth: Float,
         ): Result<AdAuctionParams>
 
-        fun getAdView(): AdViewHolder
+        fun getAdView(): AdViewHolder?
     }
 }
 
