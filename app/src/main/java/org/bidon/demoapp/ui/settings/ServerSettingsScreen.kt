@@ -69,7 +69,7 @@ internal fun ServerSettingsScreen(
                 .align(Alignment.CenterHorizontally),
             onClick = {
                 val hostValue = when (host.value) {
-                    Host.Production -> NetworkSettings.BidonBaseUrl
+                    Host.Production -> "https://b.appbaqend.com"
                     Host.MockServer -> MockUrl
                 }
                 sharedPreferences.edit().putString("host", hostValue).apply()
@@ -116,7 +116,7 @@ private fun RenderHosts(hosts: List<Host>, selectedHost: Host, onClick: (Host) -
                     )
                     CaptionText(
                         text = when (host) {
-                            Host.Production -> NetworkSettings.BidonBaseUrl
+                            Host.Production -> "https://b.appbaqend.com"
                             Host.MockServer -> MockUrl
                         },
                         maxLines = 1

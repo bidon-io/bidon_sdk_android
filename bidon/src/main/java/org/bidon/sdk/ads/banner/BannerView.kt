@@ -206,9 +206,8 @@ class BannerView @JvmOverloads constructor(
     private fun FrameLayout.addViewOnScreen(adSource: AdSource.Banner<*>) {
         // add AdView to Screen
         removeAllViews()
-        val adViewHolder: AdViewHolder = adSource.getAdView()
-        val layoutParams =
-            LayoutParams(adViewHolder.widthDp.dpToPx, adViewHolder.heightDp.dpToPx, Gravity.CENTER)
+        val adViewHolder: AdViewHolder = adSource.getAdView() ?: return
+        val layoutParams = LayoutParams(adViewHolder.widthDp.dpToPx, adViewHolder.heightDp.dpToPx, Gravity.CENTER)
         addView(adViewHolder.networkAdview, layoutParams)
         this.visibility = VISIBLE
         adViewHolder.networkAdview.visibility = VISIBLE
