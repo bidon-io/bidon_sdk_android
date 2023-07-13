@@ -1,6 +1,7 @@
 package org.bidon.demoapp
 
 import android.os.Bundle
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -10,8 +11,7 @@ import org.bidon.sdk.ads.banner.BannerView
 
 class BannerViewActivity : AppCompatActivity(R.layout.banner_view_layout) {
 
-    private var bannerView: BannerView? = null
-
+    private var bannerView: BannerView? = StaticBanner.bannerView
     //    private val bannerView by lazy {
 //        findViewById<BannerView>(R.id.bannerView)
 //    }
@@ -46,7 +46,9 @@ class BannerViewActivity : AppCompatActivity(R.layout.banner_view_layout) {
 
     private fun initViews() {
         createButton.setOnClickListener {
-            bannerView = BannerView(this)
+            bannerView = BannerView(this).also {
+                StaticBanner.bannerView = it
+            }
         }
         loadButton.setOnClickListener {
             bannerView?.loadAd(activity = this)
@@ -54,6 +56,7 @@ class BannerViewActivity : AppCompatActivity(R.layout.banner_view_layout) {
         showButton.setOnClickListener {
             bannerView?.let {
                 if (it !in bannerContainer.children) {
+                    (bannerView?.parent as? ViewGroup)?.removeView(it)
                     bannerContainer.removeAllViews()
                     bannerContainer.addView(it)
                     it.showAd()
@@ -61,12 +64,18 @@ class BannerViewActivity : AppCompatActivity(R.layout.banner_view_layout) {
             }
         }
         destroyButton.setOnClickListener {
+            StaticBanner.bannerView = null
             bannerContainer.removeAllViews()
             bannerView?.destroyAd()
             bannerView = null
         }
         closeButton.setOnClickListener {
+            StaticBanner.bannerView = null
             onBackPressed()
         }
     }
+}
+
+object StaticBanner {
+    var bannerView: BannerView? = null
 }

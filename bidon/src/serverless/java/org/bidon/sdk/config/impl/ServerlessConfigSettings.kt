@@ -39,7 +39,7 @@ object ServerlessConfigSettings {
                     when (defaultAdapter) {
                         DefaultAdapters.AdmobAdapter -> "admob" to admobOptions
                         DefaultAdapters.BidmachineAdapter -> "bidmachine" to bidmachineOptions
-                        DefaultAdapters.ApplovinAdapter -> "applovin" to """{}"""
+                        DefaultAdapters.ApplovinAdapter -> "applovin" to jsonObject { }
                         DefaultAdapters.DataExchangeAdapter -> "dtexchange" to dtexchangeOptions
                         DefaultAdapters.UnityAdsAdapter -> "unityads" to unityadsOptions
                     }
