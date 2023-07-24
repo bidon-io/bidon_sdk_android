@@ -182,9 +182,9 @@ internal class ExecuteRoundUseCaseImpl(
         adSources: List<AdLoadingType.Network<AdAuctionParams>>
     ): List<AuctionResult.Network.UnknownAdapter> {
         return (
-                round.demandIds - adSources
-                    .map { (it as AdSource<*>).demandId.demandId }.toSet()
-                )
+            round.demandIds - adSources
+                .map { (it as AdSource<*>).demandId.demandId }.toSet()
+            )
             .takeIf { it.isNotEmpty() }
             ?.let { unknownDemandIds ->
                 logError(

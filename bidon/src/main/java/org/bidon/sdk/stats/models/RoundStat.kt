@@ -10,7 +10,7 @@ internal data class RoundStat(
     val pricefloor: Double,
 
     val demands: List<DemandStat.Network>,
-    val bidding: DemandStat.Bidding?,
+    val bidding: List<DemandStat.Bidding>,
 
     val winnerDemandId: DemandId?,
     val winnerEcpm: Double?,
