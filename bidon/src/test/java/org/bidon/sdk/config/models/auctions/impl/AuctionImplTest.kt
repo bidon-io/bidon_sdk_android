@@ -39,13 +39,14 @@ import org.bidon.sdk.utils.di.SimpleDiStorage
 import org.bidon.sdk.utils.ext.asSuccess
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
-import kotlin.test.Ignore
 
 internal const val BidMachine = "bidmachine"
 internal const val Applovin = "applovin"
 internal const val Admob = "admob"
 
+@Ignore
 @ExperimentalCoroutinesApi
 internal class AuctionImplTest : ConcurrentTest() {
 
@@ -82,7 +83,6 @@ internal class AuctionImplTest : ConcurrentTest() {
         SimpleDiStorage.instances.clear()
     }
 
-    @Ignore
     @Test
     fun `it should detect winner in #round_2 when 2 rounds are completed`() = runTest {
 
@@ -203,7 +203,6 @@ internal class AuctionImplTest : ConcurrentTest() {
         )
     }
 
-    @Ignore
     @Test
     fun `it should detect winner in #round_1 when 2 rounds are completed`() = runTest {
         // PREPARE
@@ -260,7 +259,6 @@ internal class AuctionImplTest : ConcurrentTest() {
         )
     }
 
-    @Ignore
     @Test
     fun `it should expose #NoAuctionResults when all bids failed`() = runTest {
         // PREPARE
@@ -304,7 +302,6 @@ internal class AuctionImplTest : ConcurrentTest() {
         )
     }
 
-    @Ignore
     @Test
     fun `it should expose #NoAuctionResults when all fills failed`() = runTest {
         // PREPARE
