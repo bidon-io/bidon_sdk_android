@@ -10,12 +10,10 @@ internal data class Bid(
     val id: String,
     @field:JsonName("impid")
     val impressionId: String,
-    @field:JsonName("demand_id")
-    val demandId: String,
-    @field:JsonName("payload")
-    val payload: String,
     @field:JsonName("price")
     val price: Double,
-    @field:JsonName("ext")
-    val ext: Map<String, Any?>,
-)
+    @field:JsonName("demands")
+    val demands: List<BidDemand>,
+) {
+    val demand get() = demands.first()
+}
