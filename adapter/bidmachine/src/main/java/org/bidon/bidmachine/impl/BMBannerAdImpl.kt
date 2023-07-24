@@ -44,6 +44,7 @@ internal class BMBannerAdImpl(
     private val auctionId: String
 ) : AdSource.Banner<BMBannerAuctionParams>,
     AdLoadingType.Bidding<BMBannerAuctionParams>,
+    AdLoadingType.Network<BMBannerAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
@@ -62,19 +63,28 @@ internal class BMBannerAdImpl(
     override val isAdReadyToShow: Boolean
         get() = bannerView?.canShow() == true
 
+    private var isBiddingRequest = true
     private val requestListener by lazy {
         object : AdRequest.AdRequestListener<BannerRequest> {
             override fun onRequestSuccess(request: BannerRequest, result: BMAuctionResult) {
                 logInfo(Tag, "onRequestSuccess $result: $this")
                 adRequest = request
-                adEvent.tryEmit(
-                    AdEvent.Bid(
-                        AuctionResult.Bidding.Success(
-                            adSource = this@BMBannerAdImpl,
-                            roundStatus = RoundStatus.Successful
+                when (isBiddingRequest) {
+                    false -> {
+                        fillRequest(request)
+                    }
+
+                    true -> {
+                        adEvent.tryEmit(
+                            AdEvent.Bid(
+                                AuctionResult.Bidding.Success(
+                                    adSource = this@BMBannerAdImpl,
+                                    roundStatus = RoundStatus.Successful
+                                )
+                            )
                         )
-                    )
-                )
+                    }
+                }
             }
 
             override fun onRequestFailed(request: BannerRequest, bmError: BMError) {
@@ -136,35 +146,24 @@ internal class BMBannerAdImpl(
     override fun getToken(context: Context): String = BidMachine.getBidToken(context)
 
     override fun adRequest(adParams: BMBannerAuctionParams) {
-        logInfo(Tag, "Starting with $adParams: $this")
-        context = adParams.context
-        bannerFormat = adParams.bannerFormat
-        BannerRequest.Builder()
-            .setSize(adParams.bannerFormat.asBidMachineBannerSize())
-            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
-            .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
-            .setBidPayload(adParams.payload)
-            .setLoadingTimeOut(adParams.timeout.toInt())
-            .setListener(requestListener)
-            .build()
-            .also {
-                adRequest = it
-            }
-            .request(adParams.context)
+        isBiddingRequest = true
+        request(adParams, requestListener)
     }
 
+    /**
+     * As Bidding Network
+     */
     override fun fill() {
-        logInfo(Tag, "Starting fill: $this")
-        val context = context
-        if (context == null) {
-            adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoContextFound))
-        } else {
-            val bannerView = BannerView(context).also {
-                bannerView = it
-            }
-            bannerView.setListener(bannerListener)
-            bannerView.load(adRequest)
-        }
+        isBiddingRequest = true
+        fillRequest(adRequest)
+    }
+
+    /**
+     * As AdNetwork
+     */
+    override fun fill(adParams: BMBannerAuctionParams) {
+        isBiddingRequest = false
+        request(adParams, requestListener)
     }
 
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
@@ -195,6 +194,40 @@ internal class BMBannerAdImpl(
             widthDp = bannerFormat?.asBidMachineBannerSize()?.width ?: bannerFormat.getWidthDp(),
             heightDp = bannerFormat?.asBidMachineBannerSize()?.height ?: bannerFormat.getHeightDp()
         )
+    }
+
+    private fun request(adParams: BMBannerAuctionParams, requestListener: AdRequest.AdRequestListener<BannerRequest>) {
+        logInfo(Tag, "Starting with $adParams: $this")
+        context = adParams.context
+        bannerFormat = adParams.bannerFormat
+        val requestBuilder = BannerRequest.Builder()
+            .setSize(adParams.bannerFormat.asBidMachineBannerSize())
+            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
+            .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
+            .setLoadingTimeOut(adParams.timeout.toInt())
+            .setListener(requestListener)
+        adParams.payload?.let {
+            requestBuilder.setBidPayload(it)
+        }
+        requestBuilder.build()
+            .also {
+                adRequest = it
+            }
+            .request(adParams.context)
+    }
+
+    private fun fillRequest(adRequest: BannerRequest?) {
+        logInfo(Tag, "Starting fill: $this")
+        val context = context
+        if (context == null) {
+            adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoContextFound))
+        } else {
+            val bannerView = BannerView(context).also {
+                bannerView = it
+            }
+            bannerView.setListener(bannerListener)
+            bannerView.load(adRequest)
+        }
     }
 
     private fun BannerView.asAd(): Ad {

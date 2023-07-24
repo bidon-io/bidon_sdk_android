@@ -16,7 +16,13 @@ import org.bidon.bidmachine.BMFullscreenAuctionParams
 import org.bidon.bidmachine.asBidonErrorOnBid
 import org.bidon.bidmachine.asBidonErrorOnFill
 import org.bidon.bidmachine.ext.asBidonAdValue
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParamSource
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdLoadingType
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.config.BidonError
@@ -33,6 +39,7 @@ internal class BMRewardedAdImpl(
     private val auctionId: String
 ) : AdSource.Rewarded<BMFullscreenAuctionParams>,
     AdLoadingType.Bidding<BMFullscreenAuctionParams>,
+    AdLoadingType.Network<BMFullscreenAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
@@ -50,6 +57,7 @@ internal class BMRewardedAdImpl(
     override val isAdReadyToShow: Boolean
         get() = rewardedAd?.canShow() == true
 
+    private var isBiddingRequest = true
     private val requestListener by lazy {
         object : AdRequest.AdRequestListener<RewardedRequest> {
             override fun onRequestSuccess(
@@ -58,14 +66,22 @@ internal class BMRewardedAdImpl(
             ) {
                 logInfo(Tag, "onRequestSuccess $result: $this")
                 adRequest = request
-                adEvent.tryEmit(
-                    AdEvent.Bid(
-                        AuctionResult.Bidding.Success(
-                            adSource = this@BMRewardedAdImpl,
-                            roundStatus = RoundStatus.Successful
+                when (isBiddingRequest) {
+                    false -> {
+                        fillRequest(request, rewardedListener)
+                    }
+
+                    true -> {
+                        adEvent.tryEmit(
+                            AdEvent.Bid(
+                                AuctionResult.Network.Success(
+                                    adSource = this@BMRewardedAdImpl,
+                                    roundStatus = RoundStatus.Successful
+                                )
+                            )
                         )
-                    )
-                )
+                    }
+                }
             }
 
             override fun onRequestFailed(request: RewardedRequest, bmError: BMError) {
@@ -152,33 +168,24 @@ internal class BMRewardedAdImpl(
     override fun getToken(context: Context): String = BidMachine.getBidToken(context)
 
     override fun adRequest(adParams: BMFullscreenAuctionParams) {
-        logInfo(Tag, "Starting with $adParams: $this")
-        this.context = adParams.context
-        RewardedRequest.Builder()
-            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
-            .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
-            .setLoadingTimeOut(adParams.timeout.toInt())
-            .setBidPayload(adParams.payload)
-            .setListener(requestListener)
-            .build()
-            .also {
-                adRequest = it
-            }
-            .request(adParams.context)
+        isBiddingRequest = true
+        request(adParams, requestListener)
     }
 
+    /**
+     * As Bidding Network
+     */
     override fun fill() {
-        logInfo(Tag, "Starting fill: $this")
-        val context = context
-        if (context == null) {
-            adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoContextFound))
-        } else {
-            val bmRewardedAd = RewardedAd(context).also {
-                rewardedAd = it
-            }
-            bmRewardedAd.setListener(rewardedListener)
-            bmRewardedAd.load(adRequest)
-        }
+        isBiddingRequest = true
+        fillRequest(adRequest, rewardedListener)
+    }
+
+    /**
+     * As AdNetwork
+     */
+    override fun fill(adParams: BMFullscreenAuctionParams) {
+        isBiddingRequest = false
+        request(adParams, requestListener)
     }
 
     override fun show(activity: Activity) {
@@ -209,6 +216,39 @@ internal class BMRewardedAdImpl(
         rewardedAd = null
     }
 
+    private fun request(adParams: BMFullscreenAuctionParams, requestListener: AdRequest.AdRequestListener<RewardedRequest>) {
+        logInfo(Tag, "Starting with $adParams: $this")
+        context = adParams.context
+        val requestBuilder = RewardedRequest.Builder()
+            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
+            .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
+            .setLoadingTimeOut(adParams.timeout.toInt())
+            .setListener(requestListener)
+        adParams.payload?.let {
+            requestBuilder.setBidPayload(it)
+        }
+        requestBuilder.build()
+            .also {
+                adRequest = it
+            }
+            .request(adParams.context)
+    }
+
+    private fun fillRequest(adRequest: RewardedRequest?, listener: RewardedListener) {
+        logInfo(Tag, "Starting fill: $this")
+        val context = context
+        if (context == null) {
+            adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoContextFound))
+        } else {
+            RewardedAd(context)
+                .also {
+                    rewardedAd = it
+                }
+                .setListener(listener)
+                .load(adRequest)
+        }
+    }
+
     private fun RewardedAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
@@ -224,4 +264,4 @@ internal class BMRewardedAdImpl(
     }
 }
 
-private const val Tag = "BidMachine Rewarded"
+private const val Tag = "BidMachineRewarded"

@@ -17,7 +17,13 @@ import org.bidon.bidmachine.BMFullscreenAuctionParams
 import org.bidon.bidmachine.asBidonErrorOnBid
 import org.bidon.bidmachine.asBidonErrorOnFill
 import org.bidon.bidmachine.ext.asBidonAdValue
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParamSource
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdLoadingType
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.config.BidonError
@@ -34,6 +40,7 @@ internal class BMInterstitialAdImpl(
     private val auctionId: String
 ) : AdSource.Interstitial<BMFullscreenAuctionParams>,
     AdLoadingType.Bidding<BMFullscreenAuctionParams>,
+    AdLoadingType.Network<BMFullscreenAuctionParams>,
     StatisticsCollector by StatisticsCollectorImpl(
         auctionId = auctionId,
         roundId = roundId,
@@ -51,6 +58,7 @@ internal class BMInterstitialAdImpl(
     override val isAdReadyToShow: Boolean
         get() = interstitialAd?.canShow() == true
 
+    private var isBiddingRequest = true
     private val requestListener by lazy {
         object : AdRequest.AdRequestListener<InterstitialRequest> {
             override fun onRequestSuccess(
@@ -59,14 +67,22 @@ internal class BMInterstitialAdImpl(
             ) {
                 logInfo(Tag, "onRequestSuccess $result: $this")
                 adRequest = request
-                adEvent.tryEmit(
-                    AdEvent.Bid(
-                        AuctionResult.Network.Success(
-                            adSource = this@BMInterstitialAdImpl,
-                            roundStatus = RoundStatus.Successful
+                when (isBiddingRequest) {
+                    false -> {
+                        fillRequest(request, interstitialListener)
+                    }
+
+                    true -> {
+                        adEvent.tryEmit(
+                            AdEvent.Bid(
+                                AuctionResult.Network.Success(
+                                    adSource = this@BMInterstitialAdImpl,
+                                    roundStatus = RoundStatus.Successful
+                                )
+                            )
                         )
-                    )
-                )
+                    }
+                }
             }
 
             override fun onRequestFailed(request: InterstitialRequest, bmError: BMError) {
@@ -141,34 +157,24 @@ internal class BMInterstitialAdImpl(
     override fun getToken(context: Context): String = BidMachine.getBidToken(context)
 
     override fun adRequest(adParams: BMFullscreenAuctionParams) {
-        logInfo(Tag, "Starting with $adParams: $this")
-        context = adParams.context
-        InterstitialRequest.Builder()
-            .setAdContentType(AdContentType.All)
-            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
-            .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
-            .setBidPayload(adParams.payload)
-            .setLoadingTimeOut(adParams.timeout.toInt())
-            .setListener(requestListener)
-            .build()
-            .also {
-                adRequest = it
-            }
-            .request(adParams.context)
+        isBiddingRequest = true
+        request(adParams, requestListener)
     }
 
+    /**
+     * As Bidding Network
+     */
     override fun fill() {
-        logInfo(Tag, "Starting fill: $this")
-        val context = context
-        if (context == null) {
-            adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoContextFound))
-        } else {
-            val bmInterstitialAd = InterstitialAd(context).also {
-                interstitialAd = it
-            }
-            bmInterstitialAd.setListener(interstitialListener)
-            bmInterstitialAd.load(adRequest)
-        }
+        isBiddingRequest = true
+        fillRequest(adRequest, interstitialListener)
+    }
+
+    /**
+     * As AdNetwork
+     */
+    override fun fill(adParams: BMFullscreenAuctionParams) {
+        isBiddingRequest = false
+        request(adParams, requestListener)
     }
 
     override fun show(activity: Activity) {
@@ -199,6 +205,41 @@ internal class BMInterstitialAdImpl(
         interstitialAd = null
     }
 
+    private fun request(adParams: BMFullscreenAuctionParams, requestListener: AdRequest.AdRequestListener<InterstitialRequest>) {
+        logInfo(Tag, "Starting with $adParams: $this")
+        context = adParams.context
+        val requestBuilder = InterstitialRequest.Builder()
+            .setAdContentType(AdContentType.All)
+            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
+            .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
+            .setBidPayload(adParams.payload)
+            .setLoadingTimeOut(adParams.timeout.toInt())
+            .setListener(requestListener)
+        adParams.payload?.let {
+            requestBuilder.setBidPayload(it)
+        }
+        requestBuilder.build()
+            .also {
+                adRequest = it
+            }
+            .request(adParams.context)
+    }
+
+    private fun fillRequest(adRequest: InterstitialRequest?, listener: InterstitialListener) {
+        logInfo(Tag, "Starting fill: $this")
+        val context = context
+        if (context == null) {
+            adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoContextFound))
+        } else {
+            InterstitialAd(context)
+                .also {
+                    interstitialAd = it
+                }
+                .setListener(listener)
+                .load(adRequest)
+        }
+    }
+
     private fun InterstitialAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
@@ -214,4 +255,4 @@ internal class BMInterstitialAdImpl(
     }
 }
 
-private const val Tag = "BidMachine Interstitial"
+private const val Tag = "BidMachineInterstitial"
