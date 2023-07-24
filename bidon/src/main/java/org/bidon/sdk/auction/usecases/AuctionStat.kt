@@ -215,7 +215,7 @@ internal class AuctionStatImpl(
     private fun Bidding.asDemandStatBidding(): DemandStat.Bidding {
         return when (val biddingResult = this) {
             is Bidding.Success,
-            is Bidding.Failure.NoFill -> {
+            is Bidding.Failure.Other -> {
                 val stat = biddingResult.adSource.buildBidStatistic()
                 DemandStat.Bidding(
                     roundStatus = biddingResult.roundStatus,
@@ -239,18 +239,6 @@ internal class AuctionStatImpl(
                     fillFinishTs = null,
                 )
             }
-
-            Bidding.Failure.TimeoutReached -> {
-                DemandStat.Bidding(
-                    roundStatus = RoundStatus.BidTimeoutReached,
-                    ecpm = null,
-                    demandId = null,
-                    bidStartTs = null,
-                    bidFinishTs = null,
-                    fillStartTs = null,
-                    fillFinishTs = null,
-                )
-            }
         }
     }
 
@@ -265,7 +253,7 @@ internal class AuctionStatImpl(
     private fun AuctionResult.asDemandStat(): DemandStat {
         return when (this) {
             is Bidding.Success,
-            is Bidding.Failure.NoFill -> {
+            is Bidding.Failure.Other -> {
                 val stat = this.adSource.buildBidStatistic()
                 DemandStat.Bidding(
                     roundStatus = this.roundStatus,
@@ -285,18 +273,6 @@ internal class AuctionStatImpl(
                     demandId = null,
                     bidStartTs = this.biddingStartTimeTs,
                     bidFinishTs = this.biddingFinishTimeTs,
-                    fillStartTs = null,
-                    fillFinishTs = null,
-                )
-            }
-
-            is Bidding.Failure.TimeoutReached -> {
-                DemandStat.Bidding(
-                    roundStatus = RoundStatus.BidTimeoutReached,
-                    ecpm = null,
-                    demandId = null,
-                    bidStartTs = null,
-                    bidFinishTs = null,
                     fillStartTs = null,
                     fillFinishTs = null,
                 )

@@ -52,17 +52,11 @@ sealed interface AuctionResult {
                 override val adSource: AdSource<*> get() = error("unexpected")
             }
 
-            data class NoFill(
+            data class Other(
                 override val roundStatus: RoundStatus,
                 override val adSource: AdSource<*>,
             ) : Failure {
                 override val ecpm: Double get() = adSource.ad?.ecpm ?: 0.0
-            }
-
-            object TimeoutReached : Failure {
-                override val adSource: AdSource<*> get() = error("unexpected")
-                override val ecpm: Double get() = 0.0
-                override val roundStatus: RoundStatus = RoundStatus.BidTimeoutReached
             }
         }
     }

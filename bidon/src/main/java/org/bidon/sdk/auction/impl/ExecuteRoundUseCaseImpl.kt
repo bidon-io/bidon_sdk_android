@@ -95,7 +95,7 @@ internal class ExecuteRoundUseCaseImpl(
                 .onEach { applyParams(it, adTypeParam, auctionResponse) }
                 .filterIsInstance<AdLoadingType.Network<AdAuctionParams>>()
             val unknownNetworkDemands = findUnknownNetworkAdapters(round, networkAdSources).onEach {
-                resultsCollector.addAuctionResult(it)
+                resultsCollector.addAuctionResult(listOf(it))
             }
             // Start Regular AdNetwork demands auction
             if (round.demandIds.isNotEmpty()) {
@@ -119,7 +119,7 @@ internal class ExecuteRoundUseCaseImpl(
             /**
              * Collecting results
              */
-            val biddingResult = biddingResultDeferred?.await()?.let { listOf(it) }.orEmpty()
+            val biddingResult = biddingResultDeferred?.await().orEmpty()
             roundDeferred
                 .map { deferred -> deferred.await() }
                 .let { dspResults -> dspResults + biddingResult }
@@ -182,9 +182,9 @@ internal class ExecuteRoundUseCaseImpl(
         adSources: List<AdLoadingType.Network<AdAuctionParams>>
     ): List<AuctionResult.Network.UnknownAdapter> {
         return (
-            round.demandIds - adSources
-                .map { (it as AdSource<*>).demandId.demandId }.toSet()
-            )
+                round.demandIds - adSources
+                    .map { (it as AdSource<*>).demandId.demandId }.toSet()
+                )
             .takeIf { it.isNotEmpty() }
             ?.let { unknownDemandIds ->
                 logError(

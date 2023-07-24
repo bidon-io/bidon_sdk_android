@@ -15,7 +15,7 @@ import org.bidon.sdk.stats.models.RoundStatus
  */
 internal interface ResultsCollector {
     fun startRound(round: Round, pricefloor: Double)
-    fun addAuctionResult(auctionResult: AuctionResult)
+    fun addAuctionResult(auctionResult: List<AuctionResult>)
     fun getAll(): List<AuctionResult>
     fun clear()
     suspend fun saveWinners(sourcePriceFloor: Double)
@@ -43,7 +43,7 @@ internal class ResultsCollectorImpl(
         this.roundPricefloor = pricefloor
     }
 
-    override fun addAuctionResult(auctionResult: AuctionResult) {
+    override fun addAuctionResult(auctionResult: List<AuctionResult>) {
         lastRoundResults.update {
             it + auctionResult
         }

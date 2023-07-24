@@ -545,6 +545,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                 )
             )
         )
+        println(expect)
         coVerify(exactly = 1) {
             statRequest.invoke(
                 demandAd = any(),
