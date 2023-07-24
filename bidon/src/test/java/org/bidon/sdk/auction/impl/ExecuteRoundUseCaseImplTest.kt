@@ -181,7 +181,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                 )
             },
             roundStatus = RoundStatus.Successful
-        )
+        ).let(::listOf)
 
         // it should conduct round with 2 results
         val results = testee.invoke(

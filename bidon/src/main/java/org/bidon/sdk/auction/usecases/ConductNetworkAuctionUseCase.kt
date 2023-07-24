@@ -58,7 +58,7 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
     ): DeferredRoundResult {
         val mutableLineItems = lineItems.toMutableList()
         val onEach: (AuctionResult) -> Unit = {
-            resultsCollector.addAuctionResult(it)
+            resultsCollector.addAuctionResult(listOf(it))
         }
         runCatching {
             val participants = networkSources.filter {
