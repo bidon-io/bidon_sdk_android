@@ -69,13 +69,13 @@ internal class AuctionStatImpl(
         roundResults: List<AuctionResult>,
     ) {
         val roundWinner = roundResults.firstOrNull { it.roundStatus == RoundStatus.Successful }.takeIf { !isAuctionCanceled }
-        val biddingResult = roundResults.filterIsInstance<Bidding>().firstOrNull()
+        val biddingResult = roundResults.filterIsInstance<Bidding>()
         val networkResults = roundResults.filterIsInstance<AuctionResult.Network>()
         val cancelledAdUnits = getCancelledNetworkAd(
             round = round,
             networkResults = networkResults
         )
-        val cancelledBidding = getCancelledBidding(round.biddingIds, isAuctionCanceled)
+        val cancelledBidding = getCancelledBidding(round.biddingIds, isAuctionCanceled)?.let(::listOf).orEmpty()
         val roundStat = RoundStat(
             auctionId = auctionId,
             roundId = round.id,
@@ -85,7 +85,9 @@ internal class AuctionStatImpl(
             demands = networkResults.map {
                 it.asDemandStat() as DemandStat.Network
             } + cancelledAdUnits,
-            bidding = biddingResult?.asDemandStatBidding() ?: cancelledBidding
+            bidding = biddingResult.map {
+                it.asDemandStatBidding()
+            } + cancelledBidding,
         )
         statsRounds.add(roundStat)
         updateWinnerIfNeed(roundWinner)
@@ -121,9 +123,11 @@ internal class AuctionStatImpl(
                             roundStatus = demandStat.roundStatus.getFinalStatus(demandStat == winner)
                         )
                     },
-                    bidding = roundStat.bidding?.copy(
-                        roundStatus = roundStat.bidding.roundStatus.getFinalStatus(roundStat.bidding == winner)
-                    )
+                    bidding = roundStat.bidding.map {
+                        it.copy(
+                            roundStatus = it.roundStatus.getFinalStatus(roundStat.bidding == winner)
+                        )
+                    }
                 )
             } + canceledRounds
 
@@ -192,7 +196,7 @@ internal class AuctionStatImpl(
                                     bidFinishTs = null
                                 )
                             },
-                            bidding = if (round.biddingIds.isNotEmpty()) {
+                            bidding = round.biddingIds.map {
                                 DemandStat.Bidding(
                                     roundStatus = RoundStatus.AuctionCancelled,
                                     ecpm = null,
@@ -202,7 +206,7 @@ internal class AuctionStatImpl(
                                     fillStartTs = null,
                                     fillFinishTs = null,
                                 )
-                            } else null,
+                            },
                             winnerEcpm = null,
                             winnerDemandId = null
                         )
@@ -353,7 +357,7 @@ internal class AuctionStatImpl(
                             fillFinishTs = demandStat.fillFinishTs,
                         )
                     },
-                    bidding = stat.bidding?.let {
+                    biddings = stat.bidding.map {
                         StatBidding(
                             demandId = it.demandId?.demandId,
                             bidFinishTs = it.bidFinishTs,
@@ -375,7 +379,6 @@ internal class AuctionStatImpl(
     ): ResultBody {
         val results = this
             .flatMap { it.demands + it.bidding }
-            .filterNotNull()
         val cancelled = results.firstOrNull { it.roundStatus == RoundStatus.AuctionCancelled }
         val winner = results.firstOrNull { it.roundStatus == RoundStatus.Win }
         return (cancelled ?: winner).asSuccessResultOrFail(
