@@ -126,11 +126,11 @@ internal class ExecuteRoundUseCaseImpl(
                     val details = when (result) {
 
                         is AuctionResult.Bidding.Success -> {
-                            "Bidding ${result.adSource.demandId.demandId}, ${result.adSource.buildBidStatistic()}"
+                            "Bidding ${result.adSource.demandId.demandId}, ${result.adSource.getStats()}"
                         }
 
                         is AuctionResult.Network -> {
-                            "DSP ${result.adSource.demandId.demandId}, ${result.adSource.buildBidStatistic()}"
+                            "DSP ${result.adSource.demandId.demandId}, ${result.adSource.getStats()}"
                         }
 
                         is AuctionResult.Bidding.Failure -> {
