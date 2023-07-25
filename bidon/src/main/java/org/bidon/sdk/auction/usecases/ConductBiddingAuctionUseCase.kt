@@ -169,10 +169,10 @@ internal class ConductBiddingAuctionUseCaseImpl(
                 auctionResultBidding
             } else {
                 AuctionResult.Bidding.Failure.Other(
-                    roundStatus = RoundStatus.Loss,
+                    roundStatus = RoundStatus.Lose,
                     adSource = biddingSources.first {
                         (it as AdSource<*>).demandId.demandId == bid.demand.id.code
-                    } as AdSource<*>
+                    } as AdSource<*>,
                 )
             }
         } ?: emptyList()
@@ -199,7 +199,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
         ).onFailure {
             return AuctionResult.Bidding.Failure.Other(
                 roundStatus = RoundStatus.NoAppropriateAdUnitId,
-                adSource = adSource
+                adSource = adSource,
             )
         }.getOrThrow()
         /**
@@ -213,7 +213,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
         }
         return when (bidAdEvent) {
             is AdEvent.Bid -> {
-                adSource.fillWinner(bidfloor = bid.price)
+                adSource.fillWinner(bidPrice = bid.price)
             }
 
             is AdEvent.LoadFailed,
@@ -224,7 +224,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
                 )
                 AuctionResult.Bidding.Failure.Other(
                     roundStatus = RoundStatus.NoFill,
-                    adSource = adSource
+                    adSource = adSource,
                 )
             }
 
@@ -235,7 +235,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
     }
 
     private suspend fun AdLoadingType.Bidding<AdAuctionParams>.fillWinner(
-        bidfloor: Double,
+        bidPrice: Double,
     ): AuctionResult.Bidding {
         val winnerAdSource = this
         winnerAdSource as AdSource<AdAuctionParams>
@@ -250,7 +250,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
         return if (fillAdEvent is AdEvent.Fill) {
             winnerAdSource.markFillFinished(
                 roundStatus = RoundStatus.Successful,
-                ecpm = bidfloor
+                ecpm = bidPrice
             )
             AuctionResult.Bidding.Success(
                 adSource = winnerAdSource,
@@ -264,11 +264,11 @@ internal class ConductBiddingAuctionUseCaseImpl(
             }
             winnerAdSource.markFillFinished(
                 roundStatus = roundStatus,
-                ecpm = bidfloor
+                ecpm = bidPrice
             )
             AuctionResult.Bidding.Failure.Other(
                 roundStatus = roundStatus,
-                adSource = winnerAdSource
+                adSource = winnerAdSource,
             )
         }
     }

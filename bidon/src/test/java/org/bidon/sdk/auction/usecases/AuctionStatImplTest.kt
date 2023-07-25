@@ -302,9 +302,9 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         asDemandStatNetwork("dem1", RoundStatus.UnknownAdapter),
                         Demand(
                             /**
-                             * [RoundStatus.Win] should be mark as [RoundStatus.Loss]
+                             * [RoundStatus.Win] should be mark as [RoundStatus.Lose]
                              */
-                            roundStatusCode = RoundStatus.Loss.code,
+                            roundStatusCode = RoundStatus.Lose.code,
                             demandId = "dem2",
                             bidStartTs = null,
                             bidFinishTs = null,

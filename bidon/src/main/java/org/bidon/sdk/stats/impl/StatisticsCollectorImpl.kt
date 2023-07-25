@@ -65,7 +65,7 @@ class StatisticsCollectorImpl(
         fillStartTs = null,
         fillFinishTs = null,
         roundStatus = null,
-        ecpm = null
+        ecpm = 0.0
     )
 
     override fun sendShowImpression() {
@@ -172,7 +172,7 @@ class StatisticsCollectorImpl(
         stat = stat.copy(
             bidFinishTs = SystemTimeNow,
             roundStatus = roundStatus,
-            ecpm = ecpm,
+            ecpm = ecpm ?: 0.0,
         )
     }
 
@@ -187,7 +187,7 @@ class StatisticsCollectorImpl(
         stat = stat.copy(
             fillFinishTs = SystemTimeNow,
             roundStatus = roundStatus,
-            ecpm = ecpm
+            ecpm = ecpm ?: 0.0
         )
     }
 
@@ -199,7 +199,7 @@ class StatisticsCollectorImpl(
 
     override fun markLoss() {
         stat = stat.copy(
-            roundStatus = RoundStatus.Loss
+            roundStatus = RoundStatus.Lose
         )
     }
 
@@ -220,7 +220,7 @@ class StatisticsCollectorImpl(
             impressionId = impressionId,
             demandId = stat.demandId.demandId,
             adUnitId = stat.adUnitId,
-            ecpm = stat.ecpm ?: 0.0,
+            ecpm = stat.ecpm,
             banner = banner,
             interstitial = interstitial,
             rewarded = rewarded,

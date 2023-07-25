@@ -39,6 +39,9 @@ internal sealed interface BidDemand {
         override val payload: String,
     ) : BidDemand {
         override val id = BidDemandName.BidMachine
+        override fun toString(): String {
+            return "BidMachine(payload=${payload.take(4)}..${payload.takeLast(4)})"
+        }
     }
 
     data class Mobilefuse(

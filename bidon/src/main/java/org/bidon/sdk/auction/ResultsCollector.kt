@@ -68,7 +68,7 @@ internal class ResultsCollectorImpl(
                 /**
                  * Received ecpm should not be less then initial one [sourcePriceFloor].
                  */
-                val isAbovePricefloor = it.ecpm >= sourcePriceFloor
+                val isAbovePricefloor = it.adSource.buildBidStatistic().ecpm >= sourcePriceFloor
                 if (!isAbovePricefloor) {
                     (it.adSource as StatisticsCollector).markBelowPricefloor()
                 }
@@ -86,7 +86,7 @@ internal class ResultsCollectorImpl(
                          */
                         if (auctionResult !is AuctionResult.Bidding && adSource is WinLossNotifiable) {
                             logInfo(Tag, "Notified loss: ${adSource.demandId}")
-                            adSource.notifyLoss(winner.adSource.demandId.demandId, winner.ecpm)
+                            adSource.notifyLoss(winner.adSource.demandId.demandId, winner.adSource.buildBidStatistic().ecpm)
                         }
                         if (auctionResult.roundStatus == RoundStatus.Successful) {
                             adSource.markLoss()

@@ -94,9 +94,8 @@ internal class ExecuteRoundUseCaseImpl(
             val networkAdSources = filteredAdNetworkAdapters.getAdSources(demandAd, round, auctionResponse)
                 .onEach { applyParams(it, adTypeParam, auctionResponse) }
                 .filterIsInstance<AdLoadingType.Network<AdAuctionParams>>()
-            val unknownNetworkDemands = findUnknownNetworkAdapters(round, networkAdSources).onEach {
-                resultsCollector.addAuctionResult(listOf(it))
-            }
+            val unknownNetworkDemands = findUnknownNetworkAdapters(round, networkAdSources)
+                .onEach { resultsCollector.addAuctionResult(listOf(it)) }
             // Start Regular AdNetwork demands auction
             if (round.demandIds.isNotEmpty()) {
                 val networkResults = conductNetworkAuction.invoke(
