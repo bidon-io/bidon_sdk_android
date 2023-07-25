@@ -171,7 +171,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 assertThat(winnerAd.adUnitId).isEqualTo("admob2")
                 assertThat(winnerAd.ecpm).isEqualTo(2.2235)
                 assertThat(winnerAd.roundId).isEqualTo("round_2")
-                assertThat(winner.ecpm).isEqualTo(2.2235)
+                assertThat(winner.adSource.buildBidStatistic().ecpm).isEqualTo(2.2235)
                 val roundStat = slot<List<RoundStat>>()
                 val demandAd = slot<DemandAd>()
                 // AND CHECK STAT REQUEST
@@ -181,10 +181,10 @@ internal class AuctionImplTest : ConcurrentTest() {
                 assertThat(actualRoundStat[0].auctionId).isEqualTo("auctionId_123")
                 assertThat(actualRoundStat[0].roundId).isEqualTo("round_1")
                 assertThat(actualRoundStat[0].demands).hasSize(2)
-                assertThat(actualRoundStat[0].demands[0].roundStatus).isEqualTo(RoundStatus.Loss)
+                assertThat(actualRoundStat[0].demands[0].roundStatus).isEqualTo(RoundStatus.Lose)
                 assertThat(actualRoundStat[0].demands[0].ecpm).isEqualTo(1.2235)
                 assertThat(actualRoundStat[0].demands[0].fillStartTs).isNull()
-                assertThat(actualRoundStat[0].demands[1].roundStatus).isEqualTo(RoundStatus.Loss)
+                assertThat(actualRoundStat[0].demands[1].roundStatus).isEqualTo(RoundStatus.Lose)
                 assertThat(actualRoundStat[0].demands[1].ecpm).isEqualTo(0.25)
                 assertThat(actualRoundStat[0].demands[1].fillStartTs).isNull()
                 // WINNER
@@ -251,7 +251,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 assertThat(winnerAd.adUnitId).isEqualTo("AAAA2")
                 assertThat(winnerAd.ecpm).isEqualTo(2.25)
                 assertThat(winnerAd.roundId).isEqualTo("round_1")
-                assertThat(winner.ecpm).isEqualTo(2.25)
+                assertThat(winner.adSource.buildBidStatistic().ecpm).isEqualTo(2.25)
             },
             onFailure = {
                 error("unexpected: $it")

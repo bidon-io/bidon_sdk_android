@@ -7,7 +7,7 @@ import org.bidon.sdk.adapter.DemandId
 data class BidStat(
     val roundStatus: RoundStatus?,
     val demandId: DemandId,
-    val ecpm: Double?,
+    val ecpm: Double,
     val roundId: String,
     val bidStartTs: Long?,
     val bidFinishTs: Long?,
