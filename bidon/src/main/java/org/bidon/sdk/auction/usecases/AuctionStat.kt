@@ -81,7 +81,7 @@ internal class AuctionStatImpl(
             roundId = round.id,
             pricefloor = pricefloor,
             winnerDemandId = roundWinner?.adSource?.demandId,
-            winnerEcpm = roundWinner?.adSource?.buildBidStatistic()?.ecpm,
+            winnerEcpm = roundWinner?.adSource?.getStats()?.ecpm,
             demands = networkResults.map {
                 it.asDemandStat() as DemandStat.Network
             } + cancelledAdUnits,
@@ -218,7 +218,7 @@ internal class AuctionStatImpl(
 
     private fun updateWinnerIfNeed(roundWinner: AuctionResult?) {
         if (roundWinner?.roundStatus == RoundStatus.Successful) {
-            if ((winner?.ecpm ?: 0.0) < roundWinner.adSource.buildBidStatistic().ecpm) {
+            if ((winner?.ecpm ?: 0.0) < roundWinner.adSource.getStats().ecpm) {
                 winner = roundWinner.asDemandStat()
             }
         }
@@ -229,7 +229,7 @@ internal class AuctionStatImpl(
             is Bidding -> this.asDemandStatBidding()
 
             is AuctionResult.Network.Success -> {
-                val stat = this.adSource.buildBidStatistic()
+                val stat = this.adSource.getStats()
                 DemandStat.Network(
                     roundStatus = this.roundStatus,
                     ecpm = stat.ecpm.takeEcpmIfPossible(this.roundStatus),
@@ -261,7 +261,7 @@ internal class AuctionStatImpl(
         return when (val biddingResult = this) {
             is Bidding.Success,
             is Bidding.Failure.Other -> {
-                val stat = biddingResult.adSource.buildBidStatistic()
+                val stat = biddingResult.adSource.getStats()
                 DemandStat.Bidding(
                     roundStatus = biddingResult.roundStatus,
                     ecpm = stat.ecpm.takeEcpmIfPossible(biddingResult.roundStatus),

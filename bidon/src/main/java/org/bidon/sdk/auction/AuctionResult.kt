@@ -15,9 +15,8 @@ sealed interface AuctionResult {
             override val adSource: AdSource<*>,
             override val roundStatus: RoundStatus,
         ) : Network {
-            val ecpm: Double get() = adSource.buildBidStatistic().ecpm
             override fun toString(): String {
-                return "AuctionResult.Network(ecpm=$ecpm, roundStatus=$roundStatus, ${adSource.demandId})"
+                return "AuctionResult.Network(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
             }
         }
 
@@ -34,10 +33,8 @@ sealed interface AuctionResult {
             override val adSource: AdSource<*>,
             override val roundStatus: RoundStatus,
         ) : Bidding {
-            val ecpm: Double get() = adSource.buildBidStatistic().ecpm
-
             override fun toString(): String {
-                return "AuctionResult.Bidding(ecpm=$ecpm, roundStatus=$roundStatus, ${adSource.demandId})"
+                return "AuctionResult.Bidding(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
             }
         }
 

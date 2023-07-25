@@ -171,7 +171,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 assertThat(winnerAd.adUnitId).isEqualTo("admob2")
                 assertThat(winnerAd.ecpm).isEqualTo(2.2235)
                 assertThat(winnerAd.roundId).isEqualTo("round_2")
-                assertThat(winner.adSource.buildBidStatistic().ecpm).isEqualTo(2.2235)
+                assertThat(winner.adSource.getStats().ecpm).isEqualTo(2.2235)
                 val roundStat = slot<List<RoundStat>>()
                 val demandAd = slot<DemandAd>()
                 // AND CHECK STAT REQUEST
@@ -251,7 +251,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 assertThat(winnerAd.adUnitId).isEqualTo("AAAA2")
                 assertThat(winnerAd.ecpm).isEqualTo(2.25)
                 assertThat(winnerAd.roundId).isEqualTo("round_1")
-                assertThat(winner.adSource.buildBidStatistic().ecpm).isEqualTo(2.25)
+                assertThat(winner.adSource.getStats().ecpm).isEqualTo(2.25)
             },
             onFailure = {
                 error("unexpected: $it")

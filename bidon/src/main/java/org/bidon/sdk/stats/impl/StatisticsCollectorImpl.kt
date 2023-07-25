@@ -176,10 +176,11 @@ class StatisticsCollectorImpl(
         )
     }
 
-    override fun markFillStarted(adUnitId: String?) {
+    override fun markFillStarted(adUnitId: String?, pricefloor: Double?) {
         stat = stat.copy(
             fillStartTs = SystemTimeNow,
-            adUnitId = adUnitId
+            adUnitId = adUnitId,
+            ecpm = pricefloor ?: stat.ecpm
         )
     }
 
@@ -209,7 +210,7 @@ class StatisticsCollectorImpl(
         )
     }
 
-    override fun buildBidStatistic(): BidStat = stat
+    override fun getStats(): BidStat = stat
 
     private fun createImpressionRequestBody(adType: StatisticsCollector.AdType): ImpressionRequestBody {
         val (banner, interstitial, rewarded) = getData(adType)

@@ -152,7 +152,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
                 (it as AdSource<*>).demandId.demandId == bid.demand.id.code
             } as AdSource<*>
             if (!filled) {
-                adSource.markFillStarted(null)
+                adSource.markFillStarted(null, bid.price)
                 val auctionResultBidding = loadAd(
                     biddingSources = biddingSources,
                     bid = bid,
@@ -241,7 +241,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
         winnerAdSource as AdSource<AdAuctionParams>
 
         // Start Fill Ad
-        winnerAdSource.markFillStarted(adUnitId = null)
+        winnerAdSource.markFillStarted(adUnitId = null, pricefloor = bidPrice)
         winnerAdSource.fill()
         // Wait for fill result
         val fillAdEvent = winnerAdSource.adEvent.first {
