@@ -58,7 +58,7 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
     ): DeferredRoundResult {
         val mutableLineItems = lineItems.toMutableList()
         val onEach: (AuctionResult) -> Unit = {
-            resultsCollector.addAuctionResult(listOf(it))
+            resultsCollector.addAuctionResult(it)
         }
         runCatching {
             val participants = networkSources.filter {
@@ -132,7 +132,7 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
             }
 
             // FILL
-            adSource.markFillStarted(adParam.adUnitId, adParam.pricefloor)
+            adSource.markFillStarted(adParam.adUnitId)
             adSource.fill(adParam)
             val fillAdEvent = adSource.adEvent.first {
                 // wait for results
@@ -164,7 +164,7 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
             }
             fillAdEvent
         } ?: AdEvent.LoadFailed(
-            cause = when (adSource.getStats().roundStatus) {
+            cause = when (adSource.buildBidStatistic().roundStatus) {
                 RoundStatus.NoBid -> BidonError.FillTimedOut(adSource.demandId)
                 else -> BidonError.BidTimedOut(adSource.demandId)
             }
