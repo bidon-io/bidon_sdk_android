@@ -1,17 +1,13 @@
 package org.bidon.sdk.adapter
 
 import android.app.Activity
-import kotlinx.coroutines.flow.Flow
-import org.bidon.sdk.ads.Ad
+import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.stats.StatisticsCollector
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-sealed interface AdSource<T : AdAuctionParams> : StatisticsCollector {
-    val demandId: DemandId
-    val ad: Ad?
-    val adEvent: Flow<AdEvent>
+sealed interface AdSource<T : AdAuctionParams> : StatisticsCollector, AdEventFlow {
     val isAdReadyToShow: Boolean
 
     fun destroy()

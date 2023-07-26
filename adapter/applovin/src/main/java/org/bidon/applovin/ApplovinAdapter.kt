@@ -69,45 +69,21 @@ class ApplovinAdapter :
         }
     }
 
-    override fun interstitial(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
+    override fun interstitial(): AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
         return ApplovinInterstitialImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
             applovinSdk = requireNotNull(applovinSdk),
-            auctionId = auctionId
         )
     }
 
-    override fun rewarded(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Rewarded<ApplovinFullscreenAdAuctionParams> {
+    override fun rewarded(): AdSource.Rewarded<ApplovinFullscreenAdAuctionParams> {
         return ApplovinRewardedImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
             applovinSdk = requireNotNull(applovinSdk),
-            auctionId = auctionId
         )
     }
 
-    override fun banner(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Banner<ApplovinBannerAuctionParams> {
+    override fun banner(): AdSource.Banner<ApplovinBannerAuctionParams> {
         return ApplovinBannerImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
             applovinSdk = requireNotNull(applovinSdk),
-            auctionId = auctionId
         )
     }
 }

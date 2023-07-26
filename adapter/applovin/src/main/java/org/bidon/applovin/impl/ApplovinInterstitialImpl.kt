@@ -2,11 +2,23 @@ package org.bidon.applovin.impl
 
 import android.app.Activity
 import com.applovin.adview.AppLovinInterstitialAd
-import com.applovin.sdk.*
-import kotlinx.coroutines.flow.MutableSharedFlow
+import com.applovin.sdk.AppLovinAd
+import com.applovin.sdk.AppLovinAdClickListener
+import com.applovin.sdk.AppLovinAdDisplayListener
+import com.applovin.sdk.AppLovinAdLoadListener
+import com.applovin.sdk.AppLovinAdService
+import com.applovin.sdk.AppLovinAdSize
+import com.applovin.sdk.AppLovinAdVideoPlaybackListener
+import com.applovin.sdk.AppLovinSdk
 import org.bidon.applovin.ApplovinFullscreenAdAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParamSource
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdLoadingType
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.impl.AdEventFlow
+import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
@@ -19,19 +31,11 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
 
 internal class ApplovinInterstitialImpl(
-    override val demandId: DemandId,
-    private val demandAd: DemandAd,
-    private val roundId: String,
     private val applovinSdk: AppLovinSdk,
-    private val auctionId: String
 ) : AdSource.Interstitial<ApplovinFullscreenAdAuctionParams>,
     AdLoadingType.Network<ApplovinFullscreenAdAuctionParams>,
-    StatisticsCollector by StatisticsCollectorImpl(
-        auctionId = auctionId,
-        roundId = roundId,
-        demandId = demandId,
-        demandAd = demandAd,
-    ) {
+    AdEventFlow by AdEventFlowImpl(),
+    StatisticsCollector by StatisticsCollectorImpl() {
 
     private var applovinAd: AppLovinAd? = null
     private var lineItem: LineItem? = null
@@ -41,7 +45,7 @@ internal class ApplovinInterstitialImpl(
             override fun adReceived(ad: AppLovinAd) {
                 logInfo(Tag, "adReceived: $this")
                 applovinAd = ad
-                adEvent.tryEmit(
+                emitEvent(
                     AdEvent.Bid(
                         AuctionResult.Network.Success(
                             adSource = this@ApplovinInterstitialImpl,
@@ -53,7 +57,7 @@ internal class ApplovinInterstitialImpl(
 
             override fun failedToReceiveAd(errorCode: Int) {
                 logInfo(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
-                adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
     }
@@ -68,8 +72,8 @@ internal class ApplovinInterstitialImpl(
 
             override fun adDisplayed(ad: AppLovinAd) {
                 logInfo(Tag, "adDisplayed: $this")
-                adEvent.tryEmit(AdEvent.Shown(ad.asAd()))
-                adEvent.tryEmit(
+                emitEvent(AdEvent.Shown(ad.asAd()))
+                emitEvent(
                     AdEvent.PaidRevenue(
                         ad = ad.asAd(),
                         adValue = lineItem?.pricefloor.asBidonAdValue()
@@ -79,22 +83,18 @@ internal class ApplovinInterstitialImpl(
 
             override fun adHidden(ad: AppLovinAd) {
                 logInfo(Tag, "adHidden: $this")
-                adEvent.tryEmit(AdEvent.Closed(ad.asAd()))
+                emitEvent(AdEvent.Closed(ad.asAd()))
             }
 
             override fun adClicked(ad: AppLovinAd) {
                 logInfo(Tag, "adClicked: $this")
-                adEvent.tryEmit(AdEvent.Clicked(ad.asAd()))
+                emitEvent(AdEvent.Clicked(ad.asAd()))
             }
         }
     }
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val isAdReadyToShow: Boolean
         get() = applovinAd != null
-
-    override val ad: Ad?
-        get() = applovinAd?.asAd()
 
     override fun destroy() {
         logInfo(Tag, "destroy")
@@ -125,7 +125,7 @@ internal class ApplovinInterstitialImpl(
         }
         runCatching {
             logInfo(Tag, "Starting fill: $this")
-            adEvent.tryEmit(AdEvent.Fill(requireNotNull(applovinAd?.asAd())))
+            emitEvent(AdEvent.Fill(requireNotNull(applovinAd?.asAd())))
         }
     }
 
@@ -139,7 +139,7 @@ internal class ApplovinInterstitialImpl(
             }
             adDialog.showAndRender(applovinAd)
         } else {
-            adEvent.tryEmit(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
         }
     }
 

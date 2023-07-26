@@ -12,6 +12,7 @@ object Versions {
         val BidMachine = "$mainVersion.0"
         val DTExchange = "$mainVersion.0"
         val UnityAds = "$mainVersion.0"
+        val BigoAds = "$mainVersion.0"
 
         val IronSource = "$mainVersion.0"
         val Appsflyer = "$mainVersion.0"
