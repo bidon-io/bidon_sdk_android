@@ -40,7 +40,7 @@ import org.junit.Test
 internal typealias SRound = org.bidon.sdk.stats.models.Round
 internal typealias SBidding = org.bidon.sdk.stats.models.Bidding
 
-// @Ignore
+@Ignore
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class AuctionStatImplTest : ConcurrentTest() {
 
@@ -63,7 +63,6 @@ internal class AuctionStatImplTest : ConcurrentTest() {
 //        unmockkAll()
     }
 
-    @Ignore
     @Test
     fun `it should send AUCTION_CANCELLED state`() = runTest {
         coEvery {
@@ -117,24 +116,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
             roundResults = listOf(
                 AuctionResult.Network.UnknownAdapter("dem1"),
                 AuctionResult.Network.UnknownAdapter("dem2"),
-                AuctionResult.Bidding.Failure.Other(
-                    adSource = mockk(relaxed = true) {
-                        val a = this
-                        every { a.demandId } returns DemandId("bi3")
-                        every { a.ad } returns Ad(
-                            demandAd = DemandAd(AdType.Interstitial),
-                            networkName = "admob",
-                            ecpm = 1.5,
-                            adUnitId = null,
-                            roundId = "r123",
-                            currencyCode = AdValue.USD,
-                            demandAdObject = mockk(relaxed = true),
-                            dsp = null,
-                            auctionId = "a123"
-                        )
-                    },
-                    roundStatus = RoundStatus.NoFill
-                ),
+                AuctionResult.Bidding.Failure.TimeoutReached,
             )
         )
         testee.markAuctionCanceled()
@@ -166,7 +148,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 asDemandStatNetwork("dem1", RoundStatus.UnknownAdapter),
                                 asDemandStatNetwork("dem2", RoundStatus.UnknownAdapter),
                             ),
-                            biddings = asDemandStatBidding(RoundStatus.BidTimeoutReached).let(::listOf)
+                            bidding = asDemandStatBidding(RoundStatus.BidTimeoutReached)
                         ),
                         SRound(
                             id = "round2",
@@ -177,7 +159,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 asDemandStatNetwork("dem3", RoundStatus.AuctionCancelled),
                                 asDemandStatNetwork("dem4", RoundStatus.AuctionCancelled)
                             ),
-                            biddings = asDemandStatBidding(RoundStatus.AuctionCancelled).let(::listOf)
+                            bidding = asDemandStatBidding(RoundStatus.AuctionCancelled)
                         )
                     )
                 )
@@ -185,7 +167,6 @@ internal class AuctionStatImplTest : ConcurrentTest() {
         }
     }
 
-    @Ignore
     @Test
     fun `it should send AUCTION_CANCELLED state 2`() = runTest {
         coEvery {
@@ -256,24 +237,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     },
                     roundStatus = RoundStatus.Successful
                 ),
-                AuctionResult.Bidding.Failure.Other(
-                    adSource = mockk(relaxed = true) {
-                        val a = this
-                        every { a.demandId } returns DemandId("bi3")
-                        every { a.ad } returns Ad(
-                            demandAd = DemandAd(AdType.Interstitial),
-                            networkName = "admob",
-                            ecpm = 1.5,
-                            adUnitId = null,
-                            roundId = "r123",
-                            currencyCode = AdValue.USD,
-                            demandAdObject = mockk(relaxed = true),
-                            dsp = null,
-                            auctionId = "a123"
-                        )
-                    },
-                    roundStatus = RoundStatus.BidTimeoutReached
-                ),
+                AuctionResult.Bidding.Failure.TimeoutReached,
             )
         )
         testee.markAuctionCanceled()
@@ -302,9 +266,9 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         asDemandStatNetwork("dem1", RoundStatus.UnknownAdapter),
                         Demand(
                             /**
-                             * [RoundStatus.Win] should be mark as [RoundStatus.Lose]
+                             * [RoundStatus.Win] should be mark as [RoundStatus.Loss]
                              */
-                            roundStatusCode = RoundStatus.Lose.code,
+                            roundStatusCode = RoundStatus.Loss.code,
                             demandId = "dem2",
                             bidStartTs = null,
                             bidFinishTs = null,
@@ -314,7 +278,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                             ecpm = 1.5,
                         )
                     ),
-                    biddings = asDemandStatBidding(RoundStatus.BidTimeoutReached).let(::listOf)
+                    bidding = asDemandStatBidding(RoundStatus.BidTimeoutReached)
                 ),
                 SRound(
                     id = "round2",
@@ -325,7 +289,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         asDemandStatNetwork("dem3", RoundStatus.AuctionCancelled),
                         asDemandStatNetwork("dem4", RoundStatus.AuctionCancelled)
                     ),
-                    biddings = asDemandStatBidding(RoundStatus.AuctionCancelled).let(::listOf)
+                    bidding = asDemandStatBidding(RoundStatus.AuctionCancelled)
                 )
             )
         )
@@ -337,7 +301,6 @@ internal class AuctionStatImplTest : ConcurrentTest() {
         }
     }
 
-    @Ignore
     @Test
     fun `it should send WIN state`() = runTest {
         coEvery {
@@ -391,24 +354,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
             roundResults = listOf(
                 AuctionResult.Network.UnknownAdapter("dem1"),
                 AuctionResult.Network.UnknownAdapter("dem2"),
-                AuctionResult.Bidding.Failure.Other(
-                    adSource = mockk(relaxed = true) {
-                        val a = this
-                        every { a.demandId } returns DemandId("bi3")
-                        every { a.ad } returns Ad(
-                            demandAd = DemandAd(AdType.Interstitial),
-                            networkName = "admob",
-                            ecpm = 1.5,
-                            adUnitId = null,
-                            roundId = "r123",
-                            currencyCode = AdValue.USD,
-                            demandAdObject = mockk(relaxed = true),
-                            dsp = null,
-                            auctionId = "a123"
-                        )
-                    },
-                    roundStatus = RoundStatus.BidTimeoutReached
-                ),
+                AuctionResult.Bidding.Failure.TimeoutReached,
             )
         )
         testee.addRoundResults(
@@ -462,7 +408,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         asDemandStatNetwork("dem1", RoundStatus.UnknownAdapter),
                         asDemandStatNetwork("dem2", RoundStatus.UnknownAdapter)
                     ),
-                    biddings = asDemandStatBidding(RoundStatus.BidTimeoutReached).let(::listOf)
+                    bidding = asDemandStatBidding(RoundStatus.BidTimeoutReached)
                 ),
                 SRound(
                     id = "round2",
@@ -473,7 +419,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         asDemandStatNetwork("dem3", RoundStatus.UnknownAdapter),
                         asDemandStatNetwork("dem4", RoundStatus.UnknownAdapter)
                     ),
-                    biddings = SBidding(
+                    bidding = SBidding(
                         roundStatusCode = RoundStatus.Win.code,
                         demandId = "bi3",
                         bidStartTs = 0,
@@ -481,7 +427,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         fillStartTs = 0,
                         fillFinishTs = 0,
                         ecpm = 1.5,
-                    ).let(::listOf)
+                    )
                 )
             )
         )
@@ -493,7 +439,6 @@ internal class AuctionStatImplTest : ConcurrentTest() {
         }
     }
 
-    @Ignore
     @Test
     fun `it should send FAIL state`() = runTest {
         coEvery {
@@ -548,24 +493,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
             roundResults = listOf(
                 AuctionResult.Network.UnknownAdapter("dem1"),
                 AuctionResult.Network.UnknownAdapter("dem2"),
-                AuctionResult.Bidding.Failure.Other(
-                    adSource = mockk(relaxed = true) {
-                        val a = this
-                        every { a.demandId } returns DemandId("bi3")
-                        every { a.ad } returns Ad(
-                            demandAd = DemandAd(AdType.Interstitial),
-                            networkName = "admob",
-                            ecpm = 1.5,
-                            adUnitId = null,
-                            roundId = "r123",
-                            currencyCode = AdValue.USD,
-                            demandAdObject = mockk(relaxed = true),
-                            dsp = null,
-                            auctionId = "a123"
-                        )
-                    },
-                    roundStatus = RoundStatus.BidTimeoutReached
-                ),
+                AuctionResult.Bidding.Failure.TimeoutReached,
             )
         )
         testee.addRoundResults(
@@ -574,24 +502,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
             roundResults = listOf(
                 AuctionResult.Network.UnknownAdapter("dem3"),
                 AuctionResult.Network.UnknownAdapter("dem4"),
-                AuctionResult.Bidding.Failure.Other(
-                    adSource = mockk(relaxed = true) {
-                        val a = this
-                        every { a.demandId } returns DemandId("bi3")
-                        every { a.ad } returns Ad(
-                            demandAd = DemandAd(AdType.Interstitial),
-                            networkName = "admob",
-                            ecpm = 1.5,
-                            adUnitId = null,
-                            roundId = "r123",
-                            currencyCode = AdValue.USD,
-                            demandAdObject = mockk(relaxed = true),
-                            dsp = null,
-                            auctionId = "a123"
-                        )
-                    },
-                    roundStatus = RoundStatus.BidTimeoutReached
-                ),
+                AuctionResult.Bidding.Failure.TimeoutReached,
             )
         )
         testee.sendAuctionStats(
@@ -619,7 +530,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         asDemandStatNetwork("dem1", RoundStatus.UnknownAdapter),
                         asDemandStatNetwork("dem2", RoundStatus.UnknownAdapter)
                     ),
-                    biddings = asDemandStatBidding(RoundStatus.BidTimeoutReached).let(::listOf)
+                    bidding = asDemandStatBidding(RoundStatus.BidTimeoutReached)
                 ),
                 SRound(
                     id = "round2",
@@ -630,11 +541,10 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         asDemandStatNetwork("dem3", RoundStatus.UnknownAdapter),
                         asDemandStatNetwork("dem4", RoundStatus.UnknownAdapter)
                     ),
-                    biddings = asDemandStatBidding(RoundStatus.BidTimeoutReached).let(::listOf)
+                    bidding = asDemandStatBidding(RoundStatus.BidTimeoutReached)
                 )
             )
         )
-        println(expect)
         coVerify(exactly = 1) {
             statRequest.invoke(
                 demandAd = any(),
