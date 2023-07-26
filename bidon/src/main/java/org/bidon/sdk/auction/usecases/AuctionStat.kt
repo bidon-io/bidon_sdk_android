@@ -123,7 +123,7 @@ internal class AuctionStatImpl(
                             roundStatus = demandStat.roundStatus.getFinalStatus(demandStat == winner)
                         )
                     },
-                    bidding = roundStat.bidding.map {
+                    bidding = roundStat.bidding?.map {
                         it.copy(
                             roundStatus = it.roundStatus.getFinalStatus(roundStat.bidding == winner)
                         )
@@ -333,20 +333,14 @@ internal class AuctionStatImpl(
                             fillFinishTs = demandStat.fillFinishTs,
                         )
                     },
-                    biddings = stat.bidding.map {
-                        StatBidding(
-                            demandId = it.demandId?.demandId,
-                            bidFinishTs = it.bidFinishTs,
-                            fillFinishTs = it.fillFinishTs,
-                            bidStartTs = it.bidStartTs,
-                            ecpm = it.ecpm,
-                            fillStartTs = it.fillStartTs,
-                            roundStatusCode = it.roundStatus.code
-                        )
-                    }
+                    bidding = stat.bidding?.asBiddingRequest()
                 )
             }
         )
+    }
+
+    private fun List<DemandStat.Bidding>.asBiddingRequest() : StatBidding {
+        return TODO()
     }
 
     private fun List<RoundStat>.findCancelledOrWinnerOrNull(
