@@ -7,7 +7,7 @@ import org.bidon.sdk.config.BidonError
  */
 enum class RoundStatus(val code: String) {
     Win("WIN"),
-    Loss("LOSE"),
+    Lose("LOSE"),
     NoBid("NO_BID"),
     NoFill("NO_FILL"), // for Admob only NoBid possible
     UnknownAdapter("UNKNOWN_ADAPTER"),

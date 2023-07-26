@@ -15,7 +15,7 @@ import org.bidon.sdk.stats.models.RoundStatus
  */
 internal interface ResultsCollector {
     fun startRound(round: Round, pricefloor: Double)
-    fun addAuctionResult(auctionResult: AuctionResult)
+    fun addAuctionResult(auctionResult: List<AuctionResult>)
     fun getAll(): List<AuctionResult>
     fun clear()
     suspend fun saveWinners(sourcePriceFloor: Double)
@@ -43,7 +43,7 @@ internal class ResultsCollectorImpl(
         this.roundPricefloor = pricefloor
     }
 
-    override fun addAuctionResult(auctionResult: AuctionResult) {
+    override fun addAuctionResult(auctionResult: List<AuctionResult>) {
         lastRoundResults.update {
             it + auctionResult
         }
@@ -68,7 +68,7 @@ internal class ResultsCollectorImpl(
                 /**
                  * Received ecpm should not be less then initial one [sourcePriceFloor].
                  */
-                val isAbovePricefloor = it.ecpm >= sourcePriceFloor
+                val isAbovePricefloor = it.adSource.getStats().ecpm >= sourcePriceFloor
                 if (!isAbovePricefloor) {
                     (it.adSource as StatisticsCollector).markBelowPricefloor()
                 }
@@ -86,7 +86,7 @@ internal class ResultsCollectorImpl(
                          */
                         if (auctionResult !is AuctionResult.Bidding && adSource is WinLossNotifiable) {
                             logInfo(Tag, "Notified loss: ${adSource.demandId}")
-                            adSource.notifyLoss(winner.adSource.demandId.demandId, winner.ecpm)
+                            adSource.notifyLoss(winner.adSource.demandId.demandId, winner.adSource.getStats().ecpm)
                         }
                         if (auctionResult.roundStatus == RoundStatus.Successful) {
                             adSource.markLoss()

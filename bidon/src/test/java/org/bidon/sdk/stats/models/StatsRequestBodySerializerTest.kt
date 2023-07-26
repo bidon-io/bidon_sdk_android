@@ -44,7 +44,7 @@ class StatsRequestBodySerializerTest {
                     pricefloor = 34.2,
                     winnerDemandId = "asd",
                     winnerEcpm = 234.1,
-                    bidding = null
+                    biddings = emptyList()
                 ),
                 Round(
                     id = "id43",
@@ -52,7 +52,7 @@ class StatsRequestBodySerializerTest {
                     pricefloor = 34.2,
                     winnerDemandId = null,
                     winnerEcpm = null,
-                    bidding = Bidding(
+                    biddings = Bidding(
                         demandId = "d011",
                         roundStatusCode = "code3",
                         ecpm = 1.0,
@@ -60,7 +60,7 @@ class StatsRequestBodySerializerTest {
                         bidStartTs = 2,
                         fillFinishTs = 6,
                         fillStartTs = 5,
-                    )
+                    ).let(::listOf)
                 ),
             ),
             result = ResultBody(
@@ -92,7 +92,7 @@ class StatsRequestBodySerializerTest {
                             "winner_id" hasValue "asd"
                             "id" hasValue "id13"
                             "pricefloor" hasValue 34.2
-
+                            "biddings" hasValue jsonArray {}
                             "demands" hasValue jsonArray {
                                 putValues(
                                     listOf(
@@ -115,15 +115,17 @@ class StatsRequestBodySerializerTest {
                             }
                         },
                         jsonObject {
-                            "bidding" hasValue jsonObject {
-                                // fixme cannot check internal jsonObject
-                                // "bid_start_ts" hasValue 2
-                                // "bid_finish_ts" hasValue 3
-                                // "fill_start_ts" hasValue 5
-                                // "fill_finish_ts" hasValue 6
-                                // "ecpm" hasValue 1.0
-                                // "id" hasValue "d001"
-                                // "status" hasValue "code3"
+                            "biddings" hasValue jsonArray {
+//                                jsonObject {
+//                                    // fixme cannot check internal jsonObject
+//                                    "bid_start_ts" hasValue 2
+//                                    "bid_finish_ts" hasValue 3
+//                                    "fill_start_ts" hasValue 5
+//                                    "fill_finish_ts" hasValue 6
+//                                    "ecpm" hasValue 1.0
+//                                    "id" hasValue "d001"
+//                                    "status" hasValue "code3"
+//                                }
                             }
                             "id" hasValue "id43"
                             "demands" hasValue jsonArray { }
