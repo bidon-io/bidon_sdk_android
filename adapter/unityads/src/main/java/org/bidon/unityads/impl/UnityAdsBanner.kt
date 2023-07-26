@@ -3,15 +3,14 @@ package org.bidon.unityads.impl
 import com.unity3d.services.banners.BannerErrorInfo
 import com.unity3d.services.banners.BannerView
 import com.unity3d.services.banners.UnityBannerSize
-import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
-import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.adapter.impl.AdEventFlow
+import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceType
@@ -27,27 +26,14 @@ import org.bidon.unityads.ext.asBidonError
 /**
  * Created by Aleksei Cherniaev on 12/04/2023.
  */
-internal class UnityAdsBanner(
-    override val demandId: DemandId,
-    private val demandAd: DemandAd,
-    private val roundId: String,
-    private val auctionId: String,
-) : AdSource.Banner<UnityAdsBannerAuctionParams>,
+internal class UnityAdsBanner :
+    AdSource.Banner<UnityAdsBannerAuctionParams>,
     AdLoadingType.Network<UnityAdsBannerAuctionParams>,
-    StatisticsCollector by StatisticsCollectorImpl(
-        auctionId = auctionId,
-        roundId = roundId,
-        demandId = demandId,
-        demandAd = demandAd
-    ) {
+    AdEventFlow by AdEventFlowImpl(),
+    StatisticsCollector by StatisticsCollectorImpl() {
     private var bannerAdView: BannerView? = null
     private var param: UnityAdsBannerAuctionParams? = null
 
-    override val ad: Ad?
-        get() = bannerAdView?.asAd()
-
-    override val adEvent =
-        MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override var isAdReadyToShow: Boolean = false
 
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
@@ -95,13 +81,13 @@ internal class UnityAdsBanner(
                 override fun onBannerLoaded(bannerAdView: BannerView?) {
                     this@UnityAdsBanner.bannerAdView = bannerAdView
                     isAdReadyToShow = true
-                    adEvent.tryEmit(AdEvent.Fill(requireNotNull(bannerAdView?.asAd())))
+                    emitEvent(AdEvent.Fill(requireNotNull(bannerAdView?.asAd())))
                 }
 
                 override fun onBannerClick(bannerAdView: BannerView?) {
                     logInfo(Tag, "onAdClicked: $this")
                     bannerAdView?.let {
-                        adEvent.tryEmit(AdEvent.Clicked(it.asAd()))
+                        emitEvent(AdEvent.Clicked(it.asAd()))
                     }
                 }
 
@@ -112,7 +98,7 @@ internal class UnityAdsBanner(
                     val cause = errorInfo.asBidonError()
                     logError(Tag, "Error while loading ad: $errorInfo. $this", cause)
                     isAdReadyToShow = false
-                    adEvent.tryEmit(AdEvent.LoadFailed(cause))
+                    emitEvent(AdEvent.LoadFailed(cause))
                 }
 
                 override fun onBannerLeftApplication(bannerView: BannerView?) {
@@ -126,7 +112,7 @@ internal class UnityAdsBanner(
                 message = "No appropriate AdUnitId found for price_floor=${adParams.lineItem.pricefloor}",
                 error = error
             )
-            adEvent.tryEmit(AdEvent.LoadFailed(error))
+            emitEvent(AdEvent.LoadFailed(error))
         }
     }
 

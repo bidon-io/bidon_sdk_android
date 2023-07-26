@@ -10,7 +10,6 @@ import com.fyber.inneractive.sdk.external.InneractiveFullscreenAdEventsListenerW
 import com.fyber.inneractive.sdk.external.InneractiveFullscreenUnitController
 import com.fyber.inneractive.sdk.external.InneractiveFullscreenVideoContentController
 import com.fyber.inneractive.sdk.external.InneractiveUnitController
-import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.dtexchange.ext.asAdValue
 import org.bidon.dtexchange.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
@@ -18,8 +17,8 @@ import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.adapter.impl.AdEventFlow
+import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
@@ -31,19 +30,11 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 /**
  * Created by Aleksei Cherniaev on 28/02/2023.
  */
-internal class DTExchangeInterstitial(
-    override val demandId: DemandId,
-    private val demandAd: DemandAd,
-    private val roundId: String,
-    private val auctionId: String
-) : AdSource.Interstitial<DTExchangeAdAuctionParams>,
+internal class DTExchangeInterstitial :
+    AdSource.Interstitial<DTExchangeAdAuctionParams>,
     AdLoadingType.Network<DTExchangeAdAuctionParams>,
-    StatisticsCollector by StatisticsCollectorImpl(
-        auctionId = auctionId,
-        roundId = roundId,
-        demandId = demandId,
-        demandAd = demandAd,
-    ) {
+    AdEventFlow by AdEventFlowImpl(),
+    StatisticsCollector by StatisticsCollectorImpl() {
 
     private var auctionParams: DTExchangeAdAuctionParams? = null
     private var inneractiveAdSpot: InneractiveAdSpot? = null
@@ -57,8 +48,8 @@ internal class DTExchangeInterstitial(
                 logInfo(Tag, "onAdImpression: $adSpot")
                 val adValue = impressionData?.asAdValue() ?: return
                 val ad = adSpot?.asAd(impressionData.demandSource) ?: return
-                adEvent.tryEmit(AdEvent.PaidRevenue(ad, adValue))
-                adEvent.tryEmit(AdEvent.Shown(ad))
+                emitEvent(AdEvent.PaidRevenue(ad, adValue))
+                emitEvent(AdEvent.Shown(ad))
             }
 
             override fun onAdImpression(adSpot: InneractiveAdSpot?) {}
@@ -66,7 +57,7 @@ internal class DTExchangeInterstitial(
             override fun onAdClicked(adSpot: InneractiveAdSpot?) {
                 logInfo(Tag, "onAdClicked: $adSpot")
                 adSpot?.asAd()?.let {
-                    adEvent.tryEmit(AdEvent.Clicked(ad = it))
+                    emitEvent(AdEvent.Clicked(ad = it))
                 }
             }
 
@@ -78,22 +69,18 @@ internal class DTExchangeInterstitial(
                 adDisplayError: InneractiveUnitController.AdDisplayError?
             ) {
                 logInfo(Tag, "onAdEnteredErrorState: $adSpot, $adDisplayError")
-                adEvent.tryEmit(AdEvent.ShowFailed(adDisplayError.asBidonError()))
+                emitEvent(AdEvent.ShowFailed(adDisplayError.asBidonError()))
             }
 
             override fun onAdDismissed(adSpot: InneractiveAdSpot?) {
                 logInfo(Tag, "onAdDismissed: $adSpot")
                 adSpot?.asAd()?.let {
-                    adEvent.tryEmit(AdEvent.Closed(ad = it))
+                    emitEvent(AdEvent.Closed(ad = it))
                 }
             }
         }
     }
 
-    override val ad: Ad?
-        get() = inneractiveAdSpot?.asAd()
-    override val adEvent =
-        MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val isAdReadyToShow: Boolean
         get() = inneractiveAdSpot?.isReady == true
 
@@ -122,7 +109,7 @@ internal class DTExchangeInterstitial(
                 override fun onInneractiveSuccessfulAdRequest(inneractiveAdSpot: InneractiveAdSpot?) {
                     logInfo(Tag, "onInneractiveSuccessfulAdRequest: $inneractiveAdSpot")
                     this@DTExchangeInterstitial.inneractiveAdSpot = inneractiveAdSpot
-                    adEvent.tryEmit(AdEvent.Fill(requireNotNull(inneractiveAdSpot?.asAd())))
+                    emitEvent(AdEvent.Fill(requireNotNull(inneractiveAdSpot?.asAd())))
                 }
 
                 override fun onInneractiveFailedAdRequest(
@@ -130,7 +117,7 @@ internal class DTExchangeInterstitial(
                     inneractiveErrorCode: InneractiveErrorCode?
                 ) {
                     logInfo(Tag, "onInneractiveFailedAdRequest: $inneractiveErrorCode")
-                    adEvent.tryEmit(AdEvent.LoadFailed(inneractiveErrorCode.asBidonError()))
+                    emitEvent(AdEvent.LoadFailed(inneractiveErrorCode.asBidonError()))
                 }
             }
         )
@@ -143,7 +130,7 @@ internal class DTExchangeInterstitial(
         if (inneractiveAdSpot?.isReady == true && controller != null) {
             controller.show(activity)
         } else {
-            adEvent.tryEmit(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
         }
     }
 

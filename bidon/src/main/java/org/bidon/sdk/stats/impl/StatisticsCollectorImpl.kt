@@ -4,10 +4,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.auction.models.BannerRequestBody
 import org.bidon.sdk.auction.models.InterstitialRequestBody
 import org.bidon.sdk.auction.models.RewardedRequestBody
+import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.models.BidStat
@@ -25,12 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-class StatisticsCollectorImpl(
-    auctionId: String,
-    roundId: String,
-    demandId: DemandId,
-    private val demandAd: DemandAd
-) : StatisticsCollector {
+class StatisticsCollectorImpl : StatisticsCollector {
 
     private var auctionConfigurationId: Int = 0
     private var externalWinNotificationsEnabled: Boolean = true
@@ -55,10 +52,11 @@ class StatisticsCollectorImpl(
         CoroutineScope(SdkDispatchers.IO)
     }
 
+    private var _demandAd: DemandAd? = null
     private var stat: BidStat = BidStat(
-        auctionId = auctionId,
-        roundId = roundId,
-        demandId = demandId,
+        auctionId = null,
+        roundId = null,
+        demandId = DemandId(""),
         adUnitId = null,
         bidStartTs = null,
         bidFinishTs = null,
@@ -67,6 +65,46 @@ class StatisticsCollectorImpl(
         roundStatus = null,
         ecpm = 0.0
     )
+
+    override val demandAd: DemandAd
+        get() = requireNotNull(_demandAd) { "DemandAd is not set" }
+    override val demandId: DemandId
+        get() = requireNotNull(stat.demandId) { "DemandId is not set" }
+    override val auctionId: String
+        get() = requireNotNull(stat.auctionId) { "AuctionId is not set" }
+    override val roundId: String
+        get() = requireNotNull(stat.roundId) { "RoundId is not set" }
+
+    override fun getAd(demandAdObject: Any): Ad? {
+        val demandId = stat.demandId
+        val roundId = stat.roundId ?: return null
+        val auctionId = stat.auctionId ?: return null
+        return Ad(
+            demandAd = demandAd,
+            ecpm = stat.ecpm,
+            networkName = demandId.demandId,
+            adUnitId = stat.adUnitId,
+            currencyCode = AdValue.USD,
+            roundId = roundId,
+            auctionId = auctionId,
+            dsp = null,
+            demandAdObject = demandAdObject,
+        )
+    }
+
+    override fun addDemandId(demandId: DemandId) {
+        stat = stat.copy(
+            demandId = demandId
+        )
+    }
+
+    override fun addRoundInfo(auctionId: String, roundId: String, demandAd: DemandAd) {
+        this._demandAd = demandAd
+        stat = stat.copy(
+            auctionId = auctionId,
+            roundId = roundId,
+        )
+    }
 
     override fun sendShowImpression() {
         if (!isShowSent.getAndSet(true)) {
@@ -92,7 +130,7 @@ class StatisticsCollectorImpl(
                     urlPath = "$key/$lastSegment",
                     bodyKey = "bid",
                     body = createImpressionRequestBody(adType),
-                    extras = demandAd.getExtras()
+                    extras = _demandAd?.getExtras().orEmpty()
                 )
             }
         }
@@ -215,11 +253,11 @@ class StatisticsCollectorImpl(
     private fun createImpressionRequestBody(adType: StatisticsCollector.AdType): ImpressionRequestBody {
         val (banner, interstitial, rewarded) = getData(adType)
         return ImpressionRequestBody(
-            auctionId = stat.auctionId,
-            roundId = stat.roundId,
+            auctionId = auctionId,
+            roundId = roundId,
             auctionConfigurationId = auctionConfigurationId,
             impressionId = impressionId,
-            demandId = stat.demandId.demandId,
+            demandId = demandId.demandId,
             adUnitId = stat.adUnitId,
             ecpm = stat.ecpm,
             banner = banner,

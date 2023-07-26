@@ -347,13 +347,14 @@ internal class AuctionStatImpl(
         auctionStartTs: Long,
         auctionFinishTs: Long
     ): ResultBody {
-        val results = this
-            .flatMap { it.demands + it.bidding }
-        val cancelled = results.firstOrNull { it.roundStatus == RoundStatus.AuctionCancelled }
-        val winner = results.firstOrNull { it.roundStatus == RoundStatus.Win }
-        return (cancelled ?: winner).asSuccessResultOrFail(
-            auctionStartTs = auctionStartTs,
-            auctionFinishTs = auctionFinishTs
-        )
+//        val results = this
+//            .flatMap { it.demands + it.bidding }
+//        val cancelled = results.firstOrNull { it.roundStatus == RoundStatus.AuctionCancelled }
+//        val winner = results.firstOrNull { it.roundStatus == RoundStatus.Win }
+//        return (cancelled ?: winner).asSuccessResultOrFail(
+//            auctionStartTs = auctionStartTs,
+//            auctionFinishTs = auctionFinishTs
+//        )
+        TODO()
     }
 }

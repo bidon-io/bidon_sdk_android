@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.helper.DeviceType
 import org.bidon.sdk.auction.AdTypeParam
