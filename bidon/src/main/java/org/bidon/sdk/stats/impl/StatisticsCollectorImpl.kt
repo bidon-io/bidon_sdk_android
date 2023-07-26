@@ -65,7 +65,7 @@ class StatisticsCollectorImpl(
         fillStartTs = null,
         fillFinishTs = null,
         roundStatus = null,
-        ecpm = null
+        ecpm = 0.0
     )
 
     override fun sendShowImpression() {
@@ -172,14 +172,15 @@ class StatisticsCollectorImpl(
         stat = stat.copy(
             bidFinishTs = SystemTimeNow,
             roundStatus = roundStatus,
-            ecpm = ecpm,
+            ecpm = ecpm ?: 0.0,
         )
     }
 
-    override fun markFillStarted(adUnitId: String?) {
+    override fun markFillStarted(adUnitId: String?, pricefloor: Double?) {
         stat = stat.copy(
             fillStartTs = SystemTimeNow,
-            adUnitId = adUnitId
+            adUnitId = adUnitId,
+            ecpm = pricefloor ?: stat.ecpm
         )
     }
 
@@ -187,7 +188,7 @@ class StatisticsCollectorImpl(
         stat = stat.copy(
             fillFinishTs = SystemTimeNow,
             roundStatus = roundStatus,
-            ecpm = ecpm
+            ecpm = ecpm ?: 0.0
         )
     }
 
@@ -199,7 +200,7 @@ class StatisticsCollectorImpl(
 
     override fun markLoss() {
         stat = stat.copy(
-            roundStatus = RoundStatus.Loss
+            roundStatus = RoundStatus.Lose
         )
     }
 
@@ -209,7 +210,7 @@ class StatisticsCollectorImpl(
         )
     }
 
-    override fun buildBidStatistic(): BidStat = stat
+    override fun getStats(): BidStat = stat
 
     private fun createImpressionRequestBody(adType: StatisticsCollector.AdType): ImpressionRequestBody {
         val (banner, interstitial, rewarded) = getData(adType)
@@ -220,7 +221,7 @@ class StatisticsCollectorImpl(
             impressionId = impressionId,
             demandId = stat.demandId.demandId,
             adUnitId = stat.adUnitId,
-            ecpm = stat.ecpm ?: 0.0,
+            ecpm = stat.ecpm,
             banner = banner,
             interstitial = interstitial,
             rewarded = rewarded,

@@ -99,13 +99,14 @@ internal class AuctionImpl(
                         finalResults.forEachIndexed { index, auctionResult ->
                             logInfo(Tag, "Action result #$index: $auctionResult")
                         }
-                        notifyWinLoss(finalResults)
 
                         // Sending auction statistics
                         auctionStat.sendAuctionStats(
                             auctionData = auctionData,
                             demandAd = demandAd,
                         )
+
+                        notifyWinLoss(finalResults)
 
                         // Finish auction
                         state.value = AuctionState.Finished
@@ -161,7 +162,7 @@ internal class AuctionImpl(
                  */
                 if (auctionResult !is AuctionResult.Bidding && adSource is WinLossNotifiable) {
                     logInfo(Tag, "Notified loss: ${adSource.demandId}")
-                    adSource.notifyLoss(winner.adSource.demandId.demandId, winner.ecpm)
+                    adSource.notifyLoss(winner.adSource.demandId.demandId, winner.adSource.getStats().ecpm)
                 }
                 if (auctionResult.roundStatus == RoundStatus.Successful) {
                     adSource.markLoss()
@@ -200,7 +201,7 @@ internal class AuctionImpl(
         proceedRoundResults()
 
         // Start next round
-        val nextPriceFloor = resultsCollector.getAll().firstOrNull()?.ecpm ?: pricefloor
+        val nextPriceFloor = resultsCollector.getAll().firstOrNull()?.adSource?.getStats()?.ecpm ?: pricefloor
         conductRounds(
             rounds = rounds.drop(1),
             sourcePriceFloor = sourcePriceFloor,

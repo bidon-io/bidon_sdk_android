@@ -8,7 +8,6 @@ import org.bidon.sdk.stats.models.RoundStatus
  */
 sealed interface AuctionResult {
     val adSource: AdSource<*>
-    val ecpm: Double
     val roundStatus: RoundStatus
 
     sealed interface Network : AuctionResult {
@@ -16,9 +15,8 @@ sealed interface AuctionResult {
             override val adSource: AdSource<*>,
             override val roundStatus: RoundStatus,
         ) : Network {
-            override val ecpm: Double get() = adSource.ad?.ecpm ?: 0.0
             override fun toString(): String {
-                return "AuctionResult.Network(ecpm=$ecpm, roundStatus=$roundStatus, ${adSource.demandId})"
+                return "AuctionResult.Network(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
             }
         }
 
@@ -26,7 +24,6 @@ sealed interface AuctionResult {
             val adapterName: String
         ) : Network {
             override val roundStatus = RoundStatus.UnknownAdapter
-            override val ecpm: Double get() = 0.0
             override val adSource: AdSource<*> get() = error("unexpected")
         }
     }
@@ -36,9 +33,8 @@ sealed interface AuctionResult {
             override val adSource: AdSource<*>,
             override val roundStatus: RoundStatus,
         ) : Bidding {
-            override val ecpm: Double get() = adSource.ad?.ecpm ?: 0.0
             override fun toString(): String {
-                return "AuctionResult.Bidding(ecpm=$ecpm, roundStatus=$roundStatus, ${adSource.demandId})"
+                return "AuctionResult.Bidding(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
             }
         }
 
@@ -48,22 +44,13 @@ sealed interface AuctionResult {
                 val biddingStartTimeTs: Long?,
                 val biddingFinishTimeTs: Long?,
             ) : Failure {
-                override val ecpm: Double = 0.0
                 override val adSource: AdSource<*> get() = error("unexpected")
             }
 
-            data class NoFill(
+            data class Other(
                 override val roundStatus: RoundStatus,
                 override val adSource: AdSource<*>,
-            ) : Failure {
-                override val ecpm: Double get() = adSource.ad?.ecpm ?: 0.0
-            }
-
-            object TimeoutReached : Failure {
-                override val adSource: AdSource<*> get() = error("unexpected")
-                override val ecpm: Double get() = 0.0
-                override val roundStatus: RoundStatus = RoundStatus.BidTimeoutReached
-            }
+            ) : Failure
         }
     }
 }
