@@ -75,42 +75,15 @@ class BidMachineAdapter :
         )
     }
 
-    override fun interstitial(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Interstitial<BMFullscreenAuctionParams> {
-        return BMInterstitialAdImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
-            auctionId = auctionId
-        )
+    override fun interstitial(): AdSource.Interstitial<BMFullscreenAuctionParams> {
+        return BMInterstitialAdImpl()
     }
 
-    override fun rewarded(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Rewarded<BMFullscreenAuctionParams> {
-        return BMRewardedAdImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
-            auctionId = auctionId
-        )
+    override fun rewarded(): AdSource.Rewarded<BMFullscreenAuctionParams> {
+        return BMRewardedAdImpl()
     }
 
-    override fun banner(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Banner<BMBannerAuctionParams> {
-        return BMBannerAdImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
-            auctionId = auctionId
-        )
+    override fun banner(): AdSource.Banner<BMBannerAuctionParams> {
+        return BMBannerAdImpl()
     }
 }

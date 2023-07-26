@@ -5,15 +5,13 @@ import com.unity3d.ads.IUnityAdsLoadListener
 import com.unity3d.ads.IUnityAdsShowListener
 import com.unity3d.ads.UnityAds
 import com.unity3d.ads.UnityAdsShowOptions
-import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
-import org.bidon.sdk.ads.Ad
+import org.bidon.sdk.adapter.impl.AdEventFlow
+import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
@@ -28,39 +26,13 @@ import org.bidon.unityads.ext.asBidonError
 /**
  * Created by Aleksei Cherniaev on 02/03/2023.
  */
-internal class UnityAdsInterstitial(
-    override val demandId: DemandId,
-    private val demandAd: DemandAd,
-    private val roundId: String,
-    private val auctionId: String,
-) : AdSource.Interstitial<UnityAdsFullscreenAuctionParams>,
+internal class UnityAdsInterstitial :
+    AdSource.Interstitial<UnityAdsFullscreenAuctionParams>,
     AdLoadingType.Network<UnityAdsFullscreenAuctionParams>,
-    StatisticsCollector by StatisticsCollectorImpl(
-        auctionId = auctionId,
-        roundId = roundId,
-        demandId = demandId,
-        demandAd = demandAd
-    ) {
+    AdEventFlow by AdEventFlowImpl(),
+    StatisticsCollector by StatisticsCollectorImpl() {
 
     private var lineItem: LineItem? = null
-
-    override val ad: Ad?
-        get() = lineItem?.let {
-            Ad(
-                demandAd = demandAd,
-                adUnitId = it.adUnitId,
-                dsp = null,
-                currencyCode = AdValue.USD,
-                networkName = demandId.demandId,
-                auctionId = auctionId,
-                ecpm = it.pricefloor,
-                demandAdObject = Unit,
-                roundId = roundId
-            )
-        }
-
-    override val adEvent =
-        MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
 
     override var isAdReadyToShow: Boolean = false
 
@@ -81,7 +53,7 @@ internal class UnityAdsInterstitial(
             override fun onUnityAdsAdLoaded(placementId: String?) {
                 logInfo(Tag, "onUnityAdsAdLoaded: $this")
                 isAdReadyToShow = true
-                adEvent.tryEmit(AdEvent.Fill(requireNotNull(ad)))
+                emitEvent(AdEvent.Fill(requireNotNull(getAd(this@UnityAdsInterstitial))))
             }
 
             override fun onUnityAdsFailedToLoad(
@@ -94,7 +66,7 @@ internal class UnityAdsInterstitial(
                     message = "onUnityAdsFailedToLoad: placementId=$placementId, error=$error, message=$message",
                     error = error?.asBidonError()
                 )
-                adEvent.tryEmit(AdEvent.LoadFailed(error.asBidonError()))
+                emitEvent(AdEvent.LoadFailed(error.asBidonError()))
             }
         }
         UnityAds.load(adParams.lineItem.adUnitId, loadListener)
@@ -112,14 +84,14 @@ internal class UnityAdsInterstitial(
                     message = "onUnityAdsShowFailure: placementId=$placementId, error=$error, message=$message",
                     error = error.asBidonError()
                 )
-                adEvent.tryEmit(AdEvent.ShowFailed(error.asBidonError()))
+                emitEvent(AdEvent.ShowFailed(error.asBidonError()))
             }
 
             override fun onUnityAdsShowStart(placementId: String?) {
                 logInfo(Tag, "onUnityAdsShowStart: placementId=$placementId")
-                ad?.let {
-                    adEvent.tryEmit(AdEvent.Shown(it))
-                    adEvent.tryEmit(
+                getAd(this@UnityAdsInterstitial)?.let {
+                    emitEvent(AdEvent.Shown(it))
+                    emitEvent(
                         AdEvent.PaidRevenue(
                             ad = it,
                             adValue = AdValue(
@@ -134,7 +106,7 @@ internal class UnityAdsInterstitial(
 
             override fun onUnityAdsShowClick(placementId: String?) {
                 logInfo(Tag, "onUnityAdsShowClick. placementId: $placementId")
-                ad?.let { adEvent.tryEmit(AdEvent.Clicked(it)) }
+                getAd(this@UnityAdsInterstitial)?.let { emitEvent(AdEvent.Clicked(it)) }
             }
 
             override fun onUnityAdsShowComplete(
@@ -142,7 +114,7 @@ internal class UnityAdsInterstitial(
                 state: UnityAds.UnityAdsShowCompletionState?
             ) {
                 logInfo(Tag, "onUnityAdsShowComplete: placementId=$placementId, state=$state")
-                ad?.let { adEvent.tryEmit(AdEvent.Closed(it)) }
+                getAd(this@UnityAdsInterstitial)?.let { emitEvent(AdEvent.Closed(it)) }
             }
         }
         UnityAds.show(activity, lineItem?.adUnitId, UnityAdsShowOptions(), showListener)

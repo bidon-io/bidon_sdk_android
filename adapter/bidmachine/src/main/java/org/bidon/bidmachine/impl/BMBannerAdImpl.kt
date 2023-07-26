@@ -9,7 +9,6 @@ import io.bidmachine.banner.BannerListener
 import io.bidmachine.banner.BannerRequest
 import io.bidmachine.banner.BannerView
 import io.bidmachine.utils.BMError
-import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.bidmachine.BMAuctionResult
 import org.bidon.bidmachine.BMBannerAuctionParams
 import org.bidon.bidmachine.BidMachineBannerSize
@@ -22,6 +21,8 @@ import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
+import org.bidon.sdk.adapter.impl.AdEventFlow
+import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.WinLossNotifiable
@@ -38,25 +39,13 @@ import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
 
-internal class BMBannerAdImpl(
-    override val demandId: DemandId,
-    private val demandAd: DemandAd,
-    private val roundId: String,
-    private val auctionId: String
-) : AdSource.Banner<BMBannerAuctionParams>,
+internal class BMBannerAdImpl :
+    AdSource.Banner<BMBannerAuctionParams>,
     AdLoadingType.Bidding<BMBannerAuctionParams>,
     AdLoadingType.Network<BMBannerAuctionParams>,
+    AdEventFlow by AdEventFlowImpl(),
     WinLossNotifiable,
-    StatisticsCollector by StatisticsCollectorImpl(
-        auctionId = auctionId,
-        roundId = roundId,
-        demandId = demandId,
-        demandAd = demandAd,
-    ) {
-
-    override val adEvent =
-        MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
-    override val ad: Ad? get() = bannerView?.asAd()
+    StatisticsCollector by StatisticsCollectorImpl() {
 
     private var context: Context? = null
     private var adRequest: BannerRequest? = null
@@ -77,7 +66,7 @@ internal class BMBannerAdImpl(
                     }
 
                     true -> {
-                        adEvent.tryEmit(
+                        emitEvent(
                             AdEvent.Bid(
                                 AuctionResult.Bidding.Success(
                                     adSource = this@BMBannerAdImpl,
@@ -93,13 +82,13 @@ internal class BMBannerAdImpl(
                 val error = bmError.asBidonErrorOnBid(demandId)
                 logError(Tag, "onRequestFailed $bmError. $this", error)
                 adRequest = request
-                adEvent.tryEmit(AdEvent.LoadFailed(error))
+                emitEvent(AdEvent.LoadFailed(error))
             }
 
             override fun onRequestExpired(request: BannerRequest) {
                 logInfo(Tag, "onRequestExpired: $this")
                 adRequest = request
-                adEvent.tryEmit(AdEvent.LoadFailed(BidonError.Expired(demandId)))
+                emitEvent(AdEvent.LoadFailed(BidonError.Expired(demandId)))
             }
         }
     }
@@ -109,21 +98,21 @@ internal class BMBannerAdImpl(
             override fun onAdLoaded(bannerView: BannerView) {
                 logInfo(Tag, "onAdLoaded: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
-                adEvent.tryEmit(AdEvent.Fill(bannerView.asAd()))
+                emitEvent(AdEvent.Fill(bannerView.asAd()))
             }
 
             override fun onAdLoadFailed(bannerView: BannerView, bmError: BMError) {
                 val error = bmError.asBidonErrorOnFill(demandId)
                 logError(Tag, "onAdLoadFailed: $this", error)
                 this@BMBannerAdImpl.bannerView = bannerView
-                adEvent.tryEmit(AdEvent.LoadFailed(error))
+                emitEvent(AdEvent.LoadFailed(error))
             }
 
             override fun onAdImpression(bannerView: BannerView) {
                 logInfo(Tag, "onAdShown: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 // tracked impression/shown by [BannerView]
-                adEvent.tryEmit(
+                emitEvent(
                     AdEvent.PaidRevenue(
                         ad = bannerView.asAd(),
                         adValue = bannerView.auctionResult.asBidonAdValue()
@@ -134,13 +123,13 @@ internal class BMBannerAdImpl(
             override fun onAdClicked(bannerView: BannerView) {
                 logInfo(Tag, "onAdClicked: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
-                adEvent.tryEmit(AdEvent.Clicked(bannerView.asAd()))
+                emitEvent(AdEvent.Clicked(bannerView.asAd()))
             }
 
             override fun onAdExpired(bannerView: BannerView) {
                 logInfo(Tag, "onAdExpired: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
-                adEvent.tryEmit(AdEvent.Expired(bannerView.asAd()))
+                emitEvent(AdEvent.Expired(bannerView.asAd()))
             }
         }
     }
@@ -230,7 +219,7 @@ internal class BMBannerAdImpl(
         logInfo(Tag, "Starting fill: $this")
         val context = context
         if (context == null) {
-            adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoContextFound))
+            emitEvent(AdEvent.LoadFailed(BidonError.NoContextFound))
         } else {
             val bannerView = BannerView(context).also {
                 bannerView = it

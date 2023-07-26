@@ -4,17 +4,15 @@ import android.app.Activity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
-import org.bidon.sdk.ads.Ad
-import org.bidon.sdk.ads.AdType
+import org.bidon.sdk.adapter.ext.ad
+import org.bidon.sdk.adapter.impl.AdEventFlow
+import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
@@ -23,31 +21,26 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.RoundStatus
 
 internal class TestInterstitialImpl(
-    override val demandId: DemandId,
-    private val auctionId: String,
-    private val roundId: String,
     private val testParameters: TestAdapterParameters,
-    private val demandAd: DemandAd = DemandAd(AdType.Interstitial),
 ) : AdSource.Interstitial<TestInterstitialParameters>,
     AdLoadingType.Network<TestInterstitialParameters>,
-    StatisticsCollector by StatisticsCollectorImpl(auctionId, roundId, demandId, demandAd) {
+    AdEventFlow by AdEventFlowImpl(),
+    StatisticsCollector by StatisticsCollectorImpl() {
 
     private lateinit var adParams: TestInterstitialParameters
-
-    override val ad: Ad
-        get() = Ad(
-            demandAd = demandAd,
-            ecpm = adParams.lineItem.pricefloor,
-            roundId = roundId,
-            networkName = "monetizationNetwork-asd",
-            dsp = "DSP-bidmachine",
-            demandAdObject = this,
-            currencyCode = "USD",
-            auctionId = auctionId,
-            adUnitId = adParams.adUnitId
-        )
-
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
+//
+//    override val ad: Ad
+//        get() = Ad(
+//            demandAd = demandAd,
+//            ecpm = adParams.lineItem.pricefloor,
+//            roundId = roundId,
+//            networkName = "monetizationNetwork-asd",
+//            dsp = "DSP-bidmachine",
+//            demandAdObject = this,
+//            currencyCode = "USD",
+//            auctionId = auctionId,
+//            adUnitId = adParams.adUnitId
+//        )
 
     override val isAdReadyToShow: Boolean
         get() = testParameters.fill == Process.Succeed
@@ -56,7 +49,7 @@ internal class TestInterstitialImpl(
         this.adParams = adParams
         when (testParameters.bid) {
             Process.Succeed -> {
-                adEvent.tryEmit(
+                emitEvent(
                     AdEvent.Bid(
                         AuctionResult.Network.Success(
                             adSource = this,
@@ -66,7 +59,7 @@ internal class TestInterstitialImpl(
                 )
             }
             Process.Failed -> {
-                adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
             Process.Timeout -> {
                 CoroutineScope(Dispatchers.Main).launch {
@@ -76,8 +69,8 @@ internal class TestInterstitialImpl(
             }
         }
         when (testParameters.fill) {
-            Process.Succeed -> adEvent.tryEmit(AdEvent.Fill(ad))
-            Process.Failed -> adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+            Process.Succeed -> emitEvent(AdEvent.Fill(ad!!))
+            Process.Failed -> emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             Process.Timeout -> {
                 CoroutineScope(Dispatchers.Main).launch {
                     delay(60_000L)
