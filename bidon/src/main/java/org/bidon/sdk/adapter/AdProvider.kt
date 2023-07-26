@@ -5,14 +5,14 @@ package org.bidon.sdk.adapter
  */
 sealed interface AdProvider {
     interface Interstitial<T : AdAuctionParams> : AdProvider {
-        fun interstitial(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Interstitial<T>
+        fun interstitial(): AdSource.Interstitial<T>
     }
 
     interface Banner<T : AdAuctionParams> : AdProvider {
-        fun banner(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Banner<T>
+        fun banner(): AdSource.Banner<T>
     }
 
     interface Rewarded<T : AdAuctionParams> : AdProvider {
-        fun rewarded(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Rewarded<T>
+        fun rewarded(): AdSource.Rewarded<T>
     }
 }

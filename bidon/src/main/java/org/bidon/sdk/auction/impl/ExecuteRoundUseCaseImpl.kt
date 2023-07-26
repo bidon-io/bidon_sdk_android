@@ -57,8 +57,9 @@ internal class ExecuteRoundUseCaseImpl(
                 it.demandId.demandId in round.biddingIds
             }.onEach(::applyRegulation)
             logInfo(Tag, "$logText bidding adapters [${filteredBiddingAdapters.joinToString { it.demandId.demandId }}]")
-            val biddingAdSources = filteredBiddingAdapters.getAdSources(demandAd, round, auctionResponse)
-                .onEach { applyParams(it, adTypeParam, auctionResponse) }
+            val biddingAdSources = filteredBiddingAdapters
+                .getAdSources(demandAd.adType)
+                .onEach { applyParams(it, adTypeParam, auctionResponse, demandAd, round) }
                 .filterIsInstance<AdLoadingType.Bidding<AdAuctionParams>>()
             // Start Bidding demands auction
             val biddingDemands = biddingAdSources.map {
@@ -73,7 +74,7 @@ internal class ExecuteRoundUseCaseImpl(
                         adTypeParam = adTypeParam,
                         demandAd = demandAd,
                         bidfloor = pricefloor,
-                        auctionId = auctionResponse.auctionId ?: "",
+                        auctionId = auctionResponse.auctionId,
                         round = round,
                         auctionConfigurationId = auctionResponse.auctionConfigurationId,
                         resultsCollector = resultsCollector
@@ -91,8 +92,8 @@ internal class ExecuteRoundUseCaseImpl(
                 it.demandId.demandId in round.demandIds
             }.onEach(::applyRegulation)
             logInfo(Tag, "$logText network adapters [${filteredAdNetworkAdapters.joinToString { it.demandId.demandId }}]")
-            val networkAdSources = filteredAdNetworkAdapters.getAdSources(demandAd, round, auctionResponse)
-                .onEach { applyParams(it, adTypeParam, auctionResponse) }
+            val networkAdSources = filteredAdNetworkAdapters.getAdSources(demandAd.adType)
+                .onEach { applyParams(it, adTypeParam, auctionResponse, demandAd, round) }
                 .filterIsInstance<AdLoadingType.Network<AdAuctionParams>>()
             val unknownNetworkDemands = findUnknownNetworkAdapters(round, networkAdSources)
                 .onEach { resultsCollector.addAuctionResult(listOf(it)) }
@@ -150,8 +151,15 @@ internal class ExecuteRoundUseCaseImpl(
     private fun applyParams(
         adSource: AdSource<AdAuctionParams>,
         adTypeParam: AdTypeParam,
-        auctionResponse: AuctionResponse
+        auctionResponse: AuctionResponse,
+        demandAd: DemandAd,
+        round: Round
     ) {
+        adSource.addRoundInfo(
+            auctionId = auctionResponse.auctionId,
+            roundId = round.id,
+            demandAd = demandAd,
+        )
         adSource.setStatisticAdType(adTypeParam.asStatisticAdType())
         adSource.addAuctionConfigurationId(auctionResponse.auctionConfigurationId ?: 0)
         adSource.addExternalWinNotificationsEnabled(auctionResponse.externalWinNotificationsEnabled)
@@ -199,39 +207,23 @@ internal class ExecuteRoundUseCaseImpl(
             }.orEmpty()
     }
 
-    private fun List<Adapter>.getAdSources(
-        demandAd: DemandAd,
-        round: Round,
-        auctionResponse: AuctionResponse
-    ) = when (demandAd.adType) {
+    private fun List<Adapter>.getAdSources(adType: AdType) = when (adType) {
         AdType.Interstitial -> {
             this.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>()
-                .map {
-                    it.interstitial(
-                        demandAd = demandAd,
-                        roundId = round.id,
-                        auctionId = auctionResponse.auctionId ?: ""
-                    )
+                .map { adapter ->
+                    adapter.interstitial().apply { addDemandId((adapter as Adapter).demandId) }
                 }
         }
 
         AdType.Rewarded -> {
-            this.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().map {
-                it.rewarded(
-                    demandAd = demandAd,
-                    roundId = round.id,
-                    auctionId = auctionResponse.auctionId ?: ""
-                )
+            this.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().map { adapter ->
+                adapter.rewarded().apply { addDemandId((adapter as Adapter).demandId) }
             }
         }
 
         AdType.Banner -> {
-            this.filterIsInstance<AdProvider.Banner<AdAuctionParams>>().map {
-                it.banner(
-                    demandAd = demandAd,
-                    roundId = round.id,
-                    auctionId = auctionResponse.auctionId ?: ""
-                )
+            this.filterIsInstance<AdProvider.Banner<AdAuctionParams>>().map { adapter ->
+                adapter.banner().apply { addDemandId((adapter as Adapter).demandId) }
             }
         }
     }

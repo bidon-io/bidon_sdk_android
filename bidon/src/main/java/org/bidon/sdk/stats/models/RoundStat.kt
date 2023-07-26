@@ -11,7 +11,6 @@ internal data class RoundStat(
 
     val demands: List<DemandStat.Network>,
     val bidding: List<DemandStat.Bidding>?,
-
     val winnerDemandId: DemandId?,
     val winnerEcpm: Double?,
 )
