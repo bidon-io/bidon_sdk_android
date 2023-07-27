@@ -18,31 +18,31 @@ internal fun View?.isOnTop(visibilityParams: VisibilityParams): Boolean {
     val view = this
     val viewRect = Rect()
     if (!view.getGlobalVisibleRect(viewRect)) {
-        logInfo(Tag, "Show wasn't tracked: global visibility verification failed - $view")
+        logInfo(TAG, "Show wasn't tracked: global visibility verification failed - $view")
         return false
     }
     if (!view.isShown) {
-        logInfo(Tag, "Show wasn't tracked: view visibility verification failed - $view")
+        logInfo(TAG, "Show wasn't tracked: view visibility verification failed - $view")
         return false
     }
     if (view.isTransparent()) {
-        logInfo(Tag, "Show wasn't tracked: view transparent verification failed - $view")
+        logInfo(TAG, "Show wasn't tracked: view transparent verification failed - $view")
         return false
     }
     if (!ignoreWindowFocus && !view.hasWindowFocus()) {
-        logInfo(Tag, "Show wasn't tracked: window focus verification failed - $view")
+        logInfo(TAG, "Show wasn't tracked: window focus verification failed - $view")
         return false
     }
     val totalAdViewArea = (view.width * view.height).toFloat()
     if (totalAdViewArea == 0.0f) {
-        logInfo(Tag, "Show wasn't tracked: view size verification failed - $view")
+        logInfo(TAG, "Show wasn't tracked: view size verification failed - $view")
         return false
     }
     val viewArea = viewRect.width() * viewRect.height()
     val percentOnScreen = viewArea / totalAdViewArea
     if (percentOnScreen < visibilityPercent) {
         logInfo(
-            Tag,
+            TAG,
             "Show wasn't tracked: ad view not completely visible ($percentOnScreen / $visibilityPercent) - $view"
         )
         return false
@@ -52,17 +52,17 @@ internal fun View?.isOnTop(visibilityParams: VisibilityParams): Boolean {
         content = content.parent as View
     }
     if (content == null) {
-        logInfo(Tag, "Show wasn't tracked: activity content layout not found - $view")
+        logInfo(TAG, "Show wasn't tracked: activity content layout not found - $view")
         return false
     }
     val rootViewRect = Rect()
     content.getGlobalVisibleRect(rootViewRect)
     if (!Rect.intersects(viewRect, rootViewRect)) {
-        logInfo(Tag, "Show wasn't tracked: ad view is out of current window - $view")
+        logInfo(TAG, "Show wasn't tracked: ad view is out of current window - $view")
         return false
     }
     if (!ignoreOverlap && view.hasOverlap(viewRect, visibilityPercent, maxCountOverlappedViews)) {
-        logInfo(Tag, "Show wasn't tracked: view overlap verification failed - $view")
+        logInfo(TAG, "Show wasn't tracked: view overlap verification failed - $view")
         return false
     }
     return true
@@ -94,12 +94,12 @@ private fun View.hasOverlap(
                 if (Rect.intersects(viewRect, childRect)) {
                     val visiblePercent = viewNotOverlappedAreaPercent(viewRect, childRect)
                     logInfo(
-                        Tag,
+                        TAG,
                         "Show wasn't tracked: ad view is overlapped by another visible view ($child), visible percent: $visiblePercent / $visibilityPercent"
                     )
                     if (visiblePercent < visibilityPercent) {
                         logInfo(
-                            Tag,
+                            TAG,
                             "Show wasn't tracked: ad view is covered by another view - $view"
                         )
                         return true
@@ -107,7 +107,7 @@ private fun View.hasOverlap(
                         countOverlappedViews++
                         if (countOverlappedViews >= maxCountOverlappedViews) {
                             logInfo(
-                                Tag,
+                                TAG,
                                 "Show wasn't tracked: ad view is covered by too many views - $view"
                             )
                             return true
@@ -139,4 +139,4 @@ private fun viewNotOverlappedAreaPercent(viewRect: Rect, coverRect: Rect): Float
     return (viewArea - overlapArea).toFloat() / viewArea
 }
 
-private const val Tag = "VisibilityTracker"
+private const val TAG = "VisibilityTracker"

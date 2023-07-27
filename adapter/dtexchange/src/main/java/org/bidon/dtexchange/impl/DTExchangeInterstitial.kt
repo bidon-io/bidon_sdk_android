@@ -45,7 +45,7 @@ internal class DTExchangeInterstitial :
                 adSpot: InneractiveAdSpot?,
                 impressionData: ImpressionData?
             ) {
-                logInfo(Tag, "onAdImpression: $adSpot")
+                logInfo(TAG, "onAdImpression: $adSpot")
                 val adValue = impressionData?.asAdValue() ?: return
                 val ad = adSpot?.asAd(impressionData.demandSource) ?: return
                 emitEvent(AdEvent.PaidRevenue(ad, adValue))
@@ -55,7 +55,7 @@ internal class DTExchangeInterstitial :
             override fun onAdImpression(adSpot: InneractiveAdSpot?) {}
 
             override fun onAdClicked(adSpot: InneractiveAdSpot?) {
-                logInfo(Tag, "onAdClicked: $adSpot")
+                logInfo(TAG, "onAdClicked: $adSpot")
                 adSpot?.asAd()?.let {
                     emitEvent(AdEvent.Clicked(ad = it))
                 }
@@ -68,12 +68,12 @@ internal class DTExchangeInterstitial :
                 adSpot: InneractiveAdSpot?,
                 adDisplayError: InneractiveUnitController.AdDisplayError?
             ) {
-                logInfo(Tag, "onAdEnteredErrorState: $adSpot, $adDisplayError")
+                logInfo(TAG, "onAdEnteredErrorState: $adSpot, $adDisplayError")
                 emitEvent(AdEvent.ShowFailed(adDisplayError.asBidonError()))
             }
 
             override fun onAdDismissed(adSpot: InneractiveAdSpot?) {
-                logInfo(Tag, "onAdDismissed: $adSpot")
+                logInfo(TAG, "onAdDismissed: $adSpot")
                 adSpot?.asAd()?.let {
                     emitEvent(AdEvent.Closed(ad = it))
                 }
@@ -95,7 +95,7 @@ internal class DTExchangeInterstitial :
     }
 
     override fun fill(adParams: DTExchangeAdAuctionParams) {
-        logInfo(Tag, "Starting with $adParams: $this")
+        logInfo(TAG, "Starting with $adParams: $this")
         auctionParams = adParams
         val spot = InneractiveAdSpotManager.get().createSpot()
         val controller = InneractiveFullscreenUnitController()
@@ -107,7 +107,7 @@ internal class DTExchangeInterstitial :
         spot.setRequestListener(
             object : InneractiveAdSpot.RequestListener {
                 override fun onInneractiveSuccessfulAdRequest(inneractiveAdSpot: InneractiveAdSpot?) {
-                    logInfo(Tag, "onInneractiveSuccessfulAdRequest: $inneractiveAdSpot")
+                    logInfo(TAG, "onInneractiveSuccessfulAdRequest: $inneractiveAdSpot")
                     this@DTExchangeInterstitial.inneractiveAdSpot = inneractiveAdSpot
                     emitEvent(AdEvent.Fill(requireNotNull(inneractiveAdSpot?.asAd())))
                 }
@@ -116,7 +116,7 @@ internal class DTExchangeInterstitial :
                     inneractiveAdSpot: InneractiveAdSpot?,
                     inneractiveErrorCode: InneractiveErrorCode?
                 ) {
-                    logInfo(Tag, "onInneractiveFailedAdRequest: $inneractiveErrorCode")
+                    logInfo(TAG, "onInneractiveFailedAdRequest: $inneractiveErrorCode")
                     emitEvent(AdEvent.LoadFailed(inneractiveErrorCode.asBidonError()))
                 }
             }
@@ -152,4 +152,4 @@ internal class DTExchangeInterstitial :
     )
 }
 
-private const val Tag = "DataExchangeInterstitial"
+private const val TAG = "DataExchangeInterstitial"

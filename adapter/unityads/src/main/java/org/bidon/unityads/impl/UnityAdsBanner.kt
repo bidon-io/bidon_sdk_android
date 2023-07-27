@@ -59,7 +59,7 @@ internal class UnityAdsBanner :
     }
 
     override fun fill(adParams: UnityAdsBannerAuctionParams) {
-        logInfo(Tag, "Starting with $adParams")
+        logInfo(TAG, "Starting with $adParams")
         param = adParams
         val adUnitId = adParams.adUnitId
         if (adUnitId.isNotBlank()) {
@@ -85,7 +85,7 @@ internal class UnityAdsBanner :
                 }
 
                 override fun onBannerClick(bannerAdView: BannerView?) {
-                    logInfo(Tag, "onAdClicked: $this")
+                    logInfo(TAG, "onAdClicked: $this")
                     bannerAdView?.let {
                         emitEvent(AdEvent.Clicked(it.asAd()))
                     }
@@ -96,7 +96,7 @@ internal class UnityAdsBanner :
                     errorInfo: BannerErrorInfo?
                 ) {
                     val cause = errorInfo.asBidonError()
-                    logError(Tag, "Error while loading ad: $errorInfo. $this", cause)
+                    logError(TAG, "Error while loading ad: $errorInfo. $this", cause)
                     isAdReadyToShow = false
                     emitEvent(AdEvent.LoadFailed(cause))
                 }
@@ -108,7 +108,7 @@ internal class UnityAdsBanner :
         } else {
             val error = BidonError.NoAppropriateAdUnitId
             logError(
-                tag = Tag,
+                tag = TAG,
                 message = "No appropriate AdUnitId found for price_floor=${adParams.lineItem.pricefloor}",
                 error = error
             )
@@ -135,4 +135,4 @@ internal class UnityAdsBanner :
     )
 }
 
-private const val Tag = "UnityAdsBanner"
+private const val TAG = "UnityAdsBanner"

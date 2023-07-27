@@ -35,7 +35,7 @@ internal class HttpClientImpl(
         url: String,
         body: ByteArray?,
     ): Result<RawResponse> {
-        logInfo(Tag, "--> $method $url, request body: ${String(body ?: byteArrayOf())}")
+        logInfo(TAG, "--> $method $url, request body: ${String(body ?: byteArrayOf())}")
         // getting headers from encoders
         val allHeaders = encoders
             .fold(
@@ -64,7 +64,7 @@ internal class HttpClientImpl(
                             val retryDelay = rawResponse.headers[RetryAfter]?.firstOrNull()?.toLongOrNull()
                             val responseBody = rawResponse.responseBody?.let { String(it) }
                             retryDelay?.let {
-                                logError(Tag, "Request failed. Retry after $retryDelay ms. $responseBody", rawResponse.httpError)
+                                logError(TAG, "Request failed. Retry after $retryDelay ms. $responseBody", rawResponse.httpError)
                                 delay(it)
                                 return enqueue(method, url, body)
                             }
@@ -92,4 +92,4 @@ internal class HttpClientImpl(
 
 private val BidonSdkVersion by lazy { BuildConfig.ADAPTER_VERSION }
 private const val RetryAfter = "Retry-After"
-private const val Tag = "HttpClient"
+private const val TAG = "HttpClient"

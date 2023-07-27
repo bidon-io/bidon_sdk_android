@@ -16,7 +16,7 @@ internal data class Round(
     @field:JsonName("winner_ecpm")
     val winnerEcpm: Double?,
     @field:JsonName("demands")
-    val demands: List<Demand>,
+    val demands: List<DemandStat.Network>,
     @field:JsonName("bidding")
-    val bidding: Bidding?,
+    val bidding: DemandStat.Bidding?,
 ) : Serializable

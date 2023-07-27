@@ -11,7 +11,7 @@ internal class ExtrasImpl : Extras {
     override fun addExtra(key: String, value: Any?) {
         if (value != null && value.isTypeSupported()) {
             if (extras[key] != value) {
-                logInfo(Tag, "Extras updated: $extras")
+                logInfo(TAG, "Extras updated: $extras")
                 extras[key] = value
             }
         } else {
@@ -33,10 +33,10 @@ internal class ExtrasImpl : Extras {
                 this is JSONObject
             ).also {
             if (!it) {
-                logError(Tag, "Type of $this is not supported", UnsupportedOperationException())
+                logError(TAG, "Type of $this is not supported", UnsupportedOperationException())
             }
         }
     }
 }
 
-private const val Tag = "Extras"
+private const val TAG = "Extras"

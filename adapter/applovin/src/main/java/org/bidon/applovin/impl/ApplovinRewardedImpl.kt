@@ -58,7 +58,7 @@ internal class ApplovinRewardedImpl(
             }
 
             override fun adDisplayed(ad: AppLovinAd) {
-                logInfo(Tag, "adDisplayed: $this")
+                logInfo(TAG, "adDisplayed: $this")
                 emitEvent(AdEvent.Shown(ad.asAd()))
                 emitEvent(
                     AdEvent.PaidRevenue(
@@ -69,17 +69,17 @@ internal class ApplovinRewardedImpl(
             }
 
             override fun adHidden(ad: AppLovinAd) {
-                logInfo(Tag, "adHidden: $this")
+                logInfo(TAG, "adHidden: $this")
                 emitEvent(AdEvent.Closed(ad.asAd()))
             }
 
             override fun adClicked(ad: AppLovinAd) {
-                logInfo(Tag, "adClicked: $this")
+                logInfo(TAG, "adClicked: $this")
                 emitEvent(AdEvent.Clicked(ad.asAd()))
             }
 
             override fun userRewardVerified(ad: AppLovinAd, response: MutableMap<String, String>?) {
-                logInfo(Tag, "userRewardVerified: $this")
+                logInfo(TAG, "userRewardVerified: $this")
                 emitEvent(AdEvent.OnReward(ad.asAd(), reward = null))
                 sendRewardImpression()
             }
@@ -99,7 +99,7 @@ internal class ApplovinRewardedImpl(
         get() = applovinAd != null
 
     override fun destroy() {
-        logInfo(Tag, "destroy $this")
+        logInfo(TAG, "destroy $this")
         rewardedAd = null
         applovinAd = null
     }
@@ -117,7 +117,7 @@ internal class ApplovinRewardedImpl(
     }
 
     override fun fill(adParams: ApplovinFullscreenAdAuctionParams) {
-        logInfo(Tag, "Starting with $adParams: $this")
+        logInfo(TAG, "Starting with $adParams: $this")
         lineItem = adParams.lineItem
         val incentivizedInterstitial =
             AppLovinIncentivizedInterstitial.create(adParams.lineItem.adUnitId, applovinSdk).also {
@@ -125,13 +125,13 @@ internal class ApplovinRewardedImpl(
             }
         val requestListener = object : AppLovinAdLoadListener {
             override fun adReceived(ad: AppLovinAd) {
-                logInfo(Tag, "adReceived: $this")
+                logInfo(TAG, "adReceived: $this")
                 applovinAd = ad
                 emitEvent(AdEvent.Fill(requireNotNull(applovinAd?.asAd())))
             }
 
             override fun failedToReceiveAd(errorCode: Int) {
-                logInfo(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
+                logInfo(TAG, "failedToReceiveAd: errorCode=$errorCode. $this")
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
@@ -139,7 +139,7 @@ internal class ApplovinRewardedImpl(
     }
 
     override fun show(activity: Activity) {
-        logInfo(Tag, "Starting show: $this")
+        logInfo(TAG, "Starting show: $this")
         val appLovinAd = applovinAd
         if (rewardedAd?.isAdReadyToDisplay == true && appLovinAd != null) {
             rewardedAd?.show(appLovinAd, activity, listener, listener, listener, listener)
@@ -163,4 +163,4 @@ internal class ApplovinRewardedImpl(
     }
 }
 
-private const val Tag = "Applovin Rewarded"
+private const val TAG = "Applovin Rewarded"

@@ -56,7 +56,7 @@ internal class SendWinLossRequestUseCaseImpl(
                 extras = BidonSdk.getExtras() + data.demandAd.getExtras()
             )
             requestBody.put(data.bodyKey, data.body.serialize())
-            logInfo(Tag, "Request body: $requestBody")
+            logInfo(TAG, "Request body: $requestBody")
             get<JsonHttpRequest>().invoke(
                 path = urlPath,
                 body = requestBody,
@@ -64,11 +64,11 @@ internal class SendWinLossRequestUseCaseImpl(
                 val baseResponse = JsonParsers.parseOrNull<BaseResponse>(jsonResponse)
                 requireNotNull(baseResponse)
             }.onFailure {
-                logError(Tag, "Error while sending loss notification $urlPath", it)
+                logError(TAG, "Error while sending loss notification $urlPath", it)
             }.onSuccess {
-                logInfo(Tag, "$path-notification $urlPath was sent successfully")
+                logInfo(TAG, "$path-notification $urlPath was sent successfully")
             }
         }
 }
 
-private const val Tag = "SendWinLossRequest"
+private const val TAG = "SendWinLossRequest"

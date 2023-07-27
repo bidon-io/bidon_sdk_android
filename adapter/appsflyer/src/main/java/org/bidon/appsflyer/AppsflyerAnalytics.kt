@@ -56,7 +56,7 @@ class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenu
     }
 
     override fun logAdRevenue(ad: Ad) {
-        logInfo(Tag, "AdRevenue logged: $ad")
+        logInfo(TAG, "AdRevenue logged: $ad")
         val nonMandatory = mutableMapOf<String, String>().apply {
             ad.dsp?.let { this["demand_source_name"] = it }
             this["ad_type"] = ad.demandAd.adType.code
@@ -84,4 +84,4 @@ class AppsflyerAnalytics : Adapter, Initializable<AppsflyerParameters>, AdRevenu
     }
 }
 
-private const val Tag = "AppsflyerAdapter"
+private const val TAG = "AppsflyerAdapter"

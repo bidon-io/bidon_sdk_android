@@ -18,9 +18,9 @@ internal class GetAuctionRequestUseCaseImpl : GetAuctionRequestUseCase {
         demandAd: DemandAd,
         adapters: Map<String, AdapterInfo>
     ): Result<AuctionResponse> {
-        logInfo(Tag, "----------------------------- SERVERLESS DATA / USE ONLY FOR TEST ----------------------------- ")
+        logInfo(TAG, "----------------------------- SERVERLESS DATA / USE ONLY FOR TEST ----------------------------- ")
         return ServerlessAuctionConfig.getAuctionResponse()!!.asSuccess()
     }
 }
 
-private const val Tag = "GetAuctionRequestUseCase"
+private const val TAG = "GetAuctionRequestUseCase"

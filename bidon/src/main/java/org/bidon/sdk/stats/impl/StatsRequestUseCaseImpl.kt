@@ -43,7 +43,7 @@ internal class StatsRequestUseCaseImpl(
                 data = statsRequestBody,
                 extras = BidonSdk.getExtras() + demandAd.getExtras()
             )
-            logInfo(Tag, "$requestBody")
+            logInfo(TAG, "$requestBody")
             get<JsonHttpRequest>().invoke(
                 path = "$StatsRequestPath/${demandAd.adType.code}",
                 body = requestBody,
@@ -51,13 +51,13 @@ internal class StatsRequestUseCaseImpl(
                 val baseResponse = JsonParsers.parseOrNull<BaseResponse>(jsonResponse)
                 requireNotNull(baseResponse)
             }.onFailure {
-                logError(Tag, "Error while sending stats", it)
+                logError(TAG, "Error while sending stats", it)
             }.onSuccess {
-                logInfo(Tag, "Stats was sent successfully")
+                logInfo(TAG, "Stats was sent successfully")
             }
         }
     }
 }
 
 private const val StatsRequestPath = "stats"
-private const val Tag = "StatsRequestUseCase"
+private const val TAG = "StatsRequestUseCase"

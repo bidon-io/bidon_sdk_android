@@ -98,7 +98,7 @@ internal object BidonSerializer {
                         value = readInstanceProperty(this, field.name)
                     )
                 } else {
-                    logError(Tag, "No annotation @SerialName set to field: ${field.name}", Serializable.Error.NotAnnotatedField)
+                    logError(TAG, "No annotation @SerialName set to field: ${field.name}", Serializable.Error.NotAnnotatedField)
                     null
                 }
             } else {
@@ -108,7 +108,7 @@ internal object BidonSerializer {
     }
 
     private fun logFailure(data: Any, field: SerialParams) {
-        logError(Tag, "Error while serializing: $data. Field: $field", Serializable.Error.UnknownClass)
+        logError(TAG, "Error while serializing: $data. Field: $field", Serializable.Error.UnknownClass)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -126,4 +126,4 @@ internal object BidonSerializer {
     )
 }
 
-private const val Tag = "BidonSerializer"
+private const val TAG = "BidonSerializer"
