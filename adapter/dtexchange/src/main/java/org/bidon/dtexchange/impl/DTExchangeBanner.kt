@@ -58,7 +58,7 @@ internal class DTExchangeBanner :
     }
 
     override fun fill(adParams: DTExchangeBannerAuctionParams) {
-        logInfo(Tag, "Starting with $adParams")
+        logInfo(TAG, "Starting with $adParams")
         param = adParams
         // Spot integration for display square
         val adSpot = InneractiveAdSpotManager.get().createSpot()
@@ -68,7 +68,7 @@ internal class DTExchangeBanner :
         val adRequest = InneractiveAdRequest(adParams.adUnitId)
         adSpot.setRequestListener(object : InneractiveAdSpot.RequestListener {
             override fun onInneractiveSuccessfulAdRequest(inneractiveAdSpot: InneractiveAdSpot?) {
-                logInfo(Tag, "onInneractiveSuccessfulAdRequest: $inneractiveAdSpot")
+                logInfo(TAG, "onInneractiveSuccessfulAdRequest: $inneractiveAdSpot")
                 this@DTExchangeBanner.adSpot = inneractiveAdSpot
                 emitEvent(AdEvent.Fill(requireNotNull(inneractiveAdSpot?.asAd())))
             }
@@ -77,7 +77,7 @@ internal class DTExchangeBanner :
                 inneractiveAdSpot: InneractiveAdSpot?,
                 inneractiveErrorCode: InneractiveErrorCode?
             ) {
-                logInfo(Tag, "onInneractiveFailedAdRequest: $inneractiveErrorCode")
+                logInfo(TAG, "onInneractiveFailedAdRequest: $inneractiveErrorCode")
                 emitEvent(
                     AdEvent.LoadFailed(inneractiveErrorCode.asBidonError())
                 )
@@ -110,7 +110,7 @@ internal class DTExchangeBanner :
                 adSpot: InneractiveAdSpot?,
                 impressionData: ImpressionData?
             ) {
-                logInfo(Tag, "onAdImpression: $adSpot, $impressionData")
+                logInfo(TAG, "onAdImpression: $adSpot, $impressionData")
                 val adValue = impressionData?.asAdValue() ?: return
                 val ad = adSpot?.asAd() ?: return
                 emitEvent(AdEvent.PaidRevenue(ad, adValue))
@@ -121,7 +121,7 @@ internal class DTExchangeBanner :
             }
 
             override fun onAdClicked(adSpot: InneractiveAdSpot?) {
-                logInfo(Tag, "onAdClicked: $adSpot")
+                logInfo(TAG, "onAdClicked: $adSpot")
                 adSpot?.asAd()?.let {
                     emitEvent(AdEvent.Clicked(ad = it))
                 }
@@ -132,7 +132,7 @@ internal class DTExchangeBanner :
                 adDisplayError: InneractiveUnitController.AdDisplayError?
             ) {
                 val cause = adDisplayError.asBidonError()
-                logError(Tag, "onAdEnteredErrorState: $adSpot, $adDisplayError", cause)
+                logError(TAG, "onAdEnteredErrorState: $adSpot, $adDisplayError", cause)
                 emitEvent(AdEvent.ShowFailed(cause))
             }
 
@@ -177,4 +177,4 @@ internal class DTExchangeBanner :
     )
 }
 
-private const val Tag = "DTExchangeBanner"
+private const val TAG = "DTExchangeBanner"

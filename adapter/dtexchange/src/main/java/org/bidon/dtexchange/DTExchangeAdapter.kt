@@ -70,7 +70,7 @@ class DTExchangeAdapter :
                     FyberInitStatus.FAILED,
                     FyberInitStatus.INVALID_APP_ID, null -> {
                         val cause = Throwable("Adapter(${DTExchangeDemandId.demandId}) not initialized ($initStatus)")
-                        logError(Tag, "Error while initialization", cause)
+                        logError(TAG, "Error while initialization", cause)
                         continuation.resumeWithException(cause)
                     }
                 }
@@ -107,4 +107,4 @@ class DTExchangeAdapter :
     }
 }
 
-private const val Tag = "DTExchangeAdapter"
+private const val TAG = "DTExchangeAdapter"

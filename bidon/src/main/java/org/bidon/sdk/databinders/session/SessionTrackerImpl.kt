@@ -72,7 +72,7 @@ internal class SessionTrackerImpl(
                         sessionId = UUID.randomUUID().toString()
                         startTs = systemTime()
                         startMonotonicTs = monotonicTime()
-                        logInfo(Tag, "New session started with sessionId=$sessionId")
+                        logInfo(TAG, "New session started with sessionId=$sessionId")
                     }
                 }
                 ActivityLifecycleState.Paused -> {
@@ -92,4 +92,4 @@ internal class SessionTrackerImpl(
  */
 private const val SessionTtlMs = 30_000L
 
-private const val Tag = "SessionTracker"
+private const val TAG = "SessionTracker"

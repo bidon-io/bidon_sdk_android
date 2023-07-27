@@ -46,7 +46,7 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                                 adapter.init(context, adapterParameters)
                             }
                             logInfo(
-                                Tag,
+                                TAG,
                                 "Adapter ${demandId.demandId} initialized in $timeStart ms."
                             )
 
@@ -59,11 +59,11 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
         }
         val readyAdapters = deferredList.mapNotNull { (demandId, deferred) ->
             deferred.await().onFailure { cause ->
-                logError(Tag, "Adapter not initialized: ${demandId.demandId}", cause)
+                logError(TAG, "Adapter not initialized: ${demandId.demandId}", cause)
             }.getOrNull()
         }
         logInfo(
-            Tag,
+            TAG,
             "Registered adapters: ${readyAdapters.joinToString { it::class.java.simpleName }}"
         )
         adaptersSource.add(readyAdapters)
@@ -81,4 +81,4 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
     }
 }
 
-private const val Tag = "InitAndRegisterUserCase"
+private const val TAG = "InitAndRegisterUserCase"

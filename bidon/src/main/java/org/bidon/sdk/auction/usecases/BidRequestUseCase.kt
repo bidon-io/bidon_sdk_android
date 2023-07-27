@@ -81,20 +81,20 @@ internal class BidRequestUseCaseImpl(
                 data = bidRequestBody,
                 extras = BidonSdk.getExtras() + extras
             )
-            logInfo(Tag, "Request body: $requestBody")
+            logInfo(TAG, "Request body: $requestBody")
             get<JsonHttpRequest>().invoke(
                 path = "$BidRequestPath/${adTypeParam.asAdType().code}",
                 body = requestBody,
             ).mapCatching { jsonResponse ->
                 requireNotNull(JsonParsers.parseOrNull<BidResponse>(jsonResponse))
             }.onFailure {
-                logError(Tag, "Error while loading auction data", it)
+                logError(TAG, "Error while loading auction data", it)
             }.onSuccess {
-                logInfo(Tag, "Loaded auction data: $it")
+                logInfo(TAG, "Loaded auction data: $it")
             }
         }
     }
 }
 
-private const val Tag = "BidRequestUseCase"
+private const val TAG = "BidRequestUseCase"
 private const val BidRequestPath = "bidding"

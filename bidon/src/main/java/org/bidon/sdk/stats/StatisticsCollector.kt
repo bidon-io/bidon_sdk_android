@@ -24,8 +24,6 @@ interface StatisticsCollector {
     fun sendLoss(winnerDemandId: String, winnerEcpm: Double)
     fun sendWin()
 
-    fun markBidStarted(adUnitId: String? = null)
-    fun markBidFinished(roundStatus: RoundStatus, ecpm: Double?)
     fun markFillStarted(adUnitId: String?, pricefloor: Double?)
     fun markFillFinished(roundStatus: RoundStatus, ecpm: Double?)
     fun markWin()

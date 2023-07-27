@@ -67,7 +67,7 @@ internal class AdmobBannerImpl :
     }
 
     override fun destroy() {
-        logInfo(Tag, "destroy $this")
+        logInfo(TAG, "destroy $this")
         adView?.onPaidEventListener = null
         adView = null
         param = null
@@ -90,14 +90,14 @@ internal class AdmobBannerImpl :
 
     @SuppressLint("MissingPermission")
     override fun fill(adParams: AdmobBannerAuctionParams) {
-        logInfo(Tag, "Starting with $adParams")
+        logInfo(TAG, "Starting with $adParams")
         param = adParams
         val adUnitId = param?.lineItem?.adUnitId
         if (!adUnitId.isNullOrBlank()) {
             val requestListener = object : AdListener() {
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     logError(
-                        Tag,
+                        TAG,
                         "Error while loading ad: $loadAdError. $this",
                         loadAdError.asBidonError()
                     )
@@ -107,7 +107,7 @@ internal class AdmobBannerImpl :
                 }
 
                 override fun onAdLoaded() {
-                    logInfo(Tag, "onAdLoaded: $this")
+                    logInfo(TAG, "onAdLoaded: $this")
                     adView?.run {
                         isAdReadyToShow = true
                         emitEvent(AdEvent.Fill(ad = requireNotNull(adView?.asAd())))
@@ -115,17 +115,17 @@ internal class AdmobBannerImpl :
                 }
 
                 override fun onAdClicked() {
-                    logInfo(Tag, "onAdClicked: $this")
+                    logInfo(TAG, "onAdClicked: $this")
                     emitEvent(AdEvent.Clicked(requiredAdView.asAd()))
                 }
 
                 override fun onAdClosed() {
-                    logInfo(Tag, "onAdClosed: $this")
+                    logInfo(TAG, "onAdClosed: $this")
                     emitEvent(AdEvent.Closed(requiredAdView.asAd()))
                 }
 
                 override fun onAdImpression() {
-                    logInfo(Tag, "onAdImpression: $this")
+                    logInfo(TAG, "onAdImpression: $this")
                     // tracked impression/shown by [BannerView]
                 }
 
@@ -153,7 +153,7 @@ internal class AdmobBannerImpl :
         } else {
             val error = BidonError.NoAppropriateAdUnitId
             logError(
-                tag = Tag,
+                tag = TAG,
                 message = "No appropriate AdUnitId found for price_floor=${adParams.lineItem.pricefloor}",
                 error = error
             )
@@ -204,4 +204,4 @@ internal class AdmobBannerImpl :
     }
 }
 
-private const val Tag = "Admob Banner"
+private const val TAG = "Admob Banner"

@@ -34,23 +34,17 @@ sealed interface AuctionResult {
             override val roundStatus: RoundStatus,
         ) : Bidding {
             override fun toString(): String {
-                return "AuctionResult.Bidding(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
+                return "AuctionResult.Bidding.Success(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
             }
         }
 
-        sealed interface Failure : Bidding {
-            data class NoBid(
-                override val roundStatus: RoundStatus,
-                val biddingStartTimeTs: Long?,
-                val biddingFinishTimeTs: Long?,
-            ) : Failure {
-                override val adSource: AdSource<*> get() = error("unexpected")
+        class Failure(
+            override val roundStatus: RoundStatus,
+            override val adSource: AdSource<*>,
+        ) : Bidding {
+            override fun toString(): String {
+                return "AuctionResult.Bidding.Failure(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
             }
-
-            data class Other(
-                override val roundStatus: RoundStatus,
-                override val adSource: AdSource<*>,
-            ) : Failure
         }
     }
 }

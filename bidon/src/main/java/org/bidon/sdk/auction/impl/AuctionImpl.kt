@@ -13,11 +13,13 @@ import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.AuctionState
 import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.RoundResult
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.Round
 import org.bidon.sdk.auction.usecases.AuctionStat
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
+import org.bidon.sdk.auction.usecases.models.BiddingResult
 import org.bidon.sdk.auction.usecases.models.ExecuteRoundUseCase
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
@@ -65,7 +67,7 @@ internal class AuctionImpl(
                 this.adTypeParam = adTypeParamData
                 job = scope.launch {
                     val auctionId = UUID.randomUUID().toString()
-                    logInfo(Tag, "Action started $this")
+                    logInfo(TAG, "Action started $this")
                     // Request for Auction-data at /auction
                     auctionStat.markAuctionStarted(auctionId)
                     getAuctionRequest.request(
@@ -91,13 +93,13 @@ internal class AuctionImpl(
                             demandAd = demandAd,
                             adTypeParamData = adTypeParamData,
                         )
-                        logInfo(Tag, "Rounds completed")
+                        logInfo(TAG, "Rounds completed")
 
                         // Finding winner / notifying losers
                         val finalResults = resultsCollector.getAll()
-                        logInfo(Tag, "Action finished with ${finalResults.size} results")
+                        logInfo(TAG, "Action finished with ${finalResults.size} results")
                         finalResults.forEachIndexed { index, auctionResult ->
-                            logInfo(Tag, "Action result #$index: $auctionResult")
+                            logInfo(TAG, "Action result #$index: $auctionResult")
                         }
 
                         // Sending auction statistics
@@ -132,18 +134,27 @@ internal class AuctionImpl(
             proceedRoundResults()
             val auctionData = _auctionDataResponse
             if (auctionData == null) {
-                logInfo(Tag, "No AuctionResponse info. There is nothing to send.")
+                logInfo(TAG, "No AuctionResponse info. There is nothing to send.")
             } else {
                 auctionStat.sendAuctionStats(
                     auctionData = auctionData,
                     demandAd = requireNotNull(_demandAd),
                 )
             }
-            logInfo(Tag, "Auction canceled")
+            logInfo(TAG, "Auction canceled")
         }
         job = null
         clearData()
     }
+
+
+    private fun proceedRoundResults() {
+        (resultsCollector.getRoundResults() as? RoundResult.Results)?.let {
+            auctionStat.addRoundResults(it)
+        }
+        resultsCollector.clearRoundResults()
+    }
+
 
     private fun clearData() {
         resultsCollector.clear()
@@ -161,13 +172,13 @@ internal class AuctionImpl(
                  *  Bidding demands should not be notified.
                  */
                 if (auctionResult !is AuctionResult.Bidding && adSource is WinLossNotifiable) {
-                    logInfo(Tag, "Notified loss: ${adSource.demandId}")
+                    logInfo(TAG, "Notified loss: ${adSource.demandId}")
                     adSource.notifyLoss(winner.adSource.demandId.demandId, winner.adSource.getStats().ecpm)
                 }
                 if (auctionResult.roundStatus == RoundStatus.Successful) {
                     adSource.markLoss()
                 }
-                logInfo(Tag, "Destroying loser: ${adSource.demandId}")
+                logInfo(TAG, "Destroying loser: ${adSource.demandId}")
                 adSource.destroy()
             }
     }
@@ -211,17 +222,6 @@ internal class AuctionImpl(
         )
     }
 
-    private fun proceedRoundResults() {
-        val (round, pricefloor, roundResults) = resultsCollector.popRoundResults() ?: return
-        auctionStat.addRoundResults(
-            round = round,
-            pricefloor = pricefloor,
-            roundResults = roundResults,
-        )
-        if (roundResults.isEmpty()) {
-            logError(Tag, "Round '${round.id}' failed", BidonError.NoRoundResults)
-        }
-    }
 }
 
-private const val Tag = "Auction"
+private const val TAG = "Auction"

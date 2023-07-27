@@ -18,13 +18,13 @@ internal class CountDownTimer(
     private var timerDeferred: Deferred<Unit>? = null
 
     fun stop() {
-        logInfo(Tag, "Canceled")
+        logInfo(TAG, "Canceled")
         timerDeferred?.cancel()
     }
 
     fun startTimer(timeoutMs: Long, onFinish: () -> Unit) {
         scope.launch {
-            logInfo(Tag, "Started")
+            logInfo(TAG, "Started")
             val deferred = timerDeferred ?: async {
                 val seconds = (timeoutMs / OneSecond).toInt()
                 repeat(seconds) { second ->
@@ -32,13 +32,13 @@ internal class CountDownTimer(
                     activityLifecycleObserver.lifecycleFlow.first { state ->
                         state == ActivityLifecycleState.Resumed
                     }
-                    logInfo(Tag, "Tick ${second + 1}/$seconds")
+                    logInfo(TAG, "Tick ${second + 1}/$seconds")
                 }
             }.also { timerDeferred = it }
             try {
                 deferred.await()
                 onFinish()
-                logInfo(Tag, "Finished")
+                logInfo(TAG, "Finished")
             } finally {
                 timerDeferred = null
             }
@@ -47,4 +47,4 @@ internal class CountDownTimer(
 }
 
 private const val OneSecond = 1000L
-private const val Tag = "CountDownTimer"
+private const val TAG = "CountDownTimer"

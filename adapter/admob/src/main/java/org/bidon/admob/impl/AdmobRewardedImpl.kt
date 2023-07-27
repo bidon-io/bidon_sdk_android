@@ -40,7 +40,7 @@ internal class AdmobRewardedImpl :
 
     private val onUserEarnedRewardListener by lazy {
         OnUserEarnedRewardListener { rewardItem ->
-            logInfo(Tag, "onUserEarnedReward $rewardItem: $this")
+            logInfo(TAG, "onUserEarnedReward $rewardItem: $this")
             emitEvent(
                 AdEvent.OnReward(
                     ad = requiredRewardedAd.asAd(),
@@ -78,22 +78,22 @@ internal class AdmobRewardedImpl :
     private val rewardedListener by lazy {
         object : FullScreenContentCallback() {
             override fun onAdClicked() {
-                logInfo(Tag, "onAdClicked: $this")
+                logInfo(TAG, "onAdClicked: $this")
                 emitEvent(AdEvent.Clicked(requiredRewardedAd.asAd()))
             }
 
             override fun onAdDismissedFullScreenContent() {
-                logInfo(Tag, "onAdDismissedFullScreenContent: $this")
+                logInfo(TAG, "onAdDismissedFullScreenContent: $this")
                 emitEvent(AdEvent.Closed(requiredRewardedAd.asAd()))
             }
 
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
-                logError(Tag, "onAdFailedToShowFullScreenContent: $this", error.asBidonError())
+                logError(TAG, "onAdFailedToShowFullScreenContent: $this", error.asBidonError())
                 emitEvent(AdEvent.ShowFailed(error.asBidonError()))
             }
 
             override fun onAdImpression() {
-                logInfo(Tag, "onAdShown: $this")
+                logInfo(TAG, "onAdShown: $this")
                 emitEvent(AdEvent.Shown(requiredRewardedAd.asAd()))
             }
 
@@ -105,7 +105,7 @@ internal class AdmobRewardedImpl :
         get() = rewardedAd != null
 
     override fun destroy() {
-        logInfo(Tag, "destroy $this")
+        logInfo(TAG, "destroy $this")
         rewardedAd?.onPaidEventListener = null
         rewardedAd?.fullScreenContentCallback = null
         rewardedAd = null
@@ -126,7 +126,7 @@ internal class AdmobRewardedImpl :
     }
 
     override fun fill(adParams: AdmobFullscreenAdAuctionParams) {
-        logInfo(Tag, "Starting with $adParams: $this")
+        logInfo(TAG, "Starting with $adParams: $this")
         param = adParams
         val adRequest = AdRequest.Builder()
             .addNetworkExtrasBundle(AdMobAdapter::class.java, BidonSdk.regulation.asBundle())
@@ -136,7 +136,7 @@ internal class AdmobRewardedImpl :
             val requestListener = object : RewardedAdLoadCallback() {
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     logError(
-                        Tag,
+                        TAG,
                         "Error while loading ad. LoadAdError=$loadAdError.\n$this",
                         loadAdError.asBidonError()
                     )
@@ -144,7 +144,7 @@ internal class AdmobRewardedImpl :
                 }
 
                 override fun onAdLoaded(rewardedAd: RewardedAd) {
-                    logInfo(Tag, "onAdLoaded. RewardedAd=$rewardedAd, $this")
+                    logInfo(TAG, "onAdLoaded. RewardedAd=$rewardedAd, $this")
                     this@AdmobRewardedImpl.rewardedAd = rewardedAd
                     requiredRewardedAd.onPaidEventListener = paidListener
                     requiredRewardedAd.fullScreenContentCallback = rewardedListener
@@ -155,7 +155,7 @@ internal class AdmobRewardedImpl :
         } else {
             val error = BidonError.NoAppropriateAdUnitId
             logError(
-                tag = Tag,
+                tag = TAG,
                 message = "No appropriate AdUnitId found. PriceFloor=${adParams.pricefloor}, " +
                     "but LineItem with max pricefloor=${param?.lineItem?.pricefloor}",
                 error = error
@@ -165,7 +165,7 @@ internal class AdmobRewardedImpl :
     }
 
     override fun show(activity: Activity) {
-        logInfo(Tag, "Starting show: $this")
+        logInfo(TAG, "Starting show: $this")
         if (rewardedAd == null) {
             emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
         } else {
@@ -188,4 +188,4 @@ internal class AdmobRewardedImpl :
     }
 }
 
-private const val Tag = "Admob Rewarded"
+private const val TAG = "Admob Rewarded"

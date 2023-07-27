@@ -198,7 +198,7 @@ private fun MutableState<List<String>>.log(string: String) {
     synchronized(this) {
         this.value = this.value + string
     }
-    logInfo(Tag, string)
+    logInfo(TAG, string)
 }
 
-private const val Tag = "RewardedScreen"
+private const val TAG = "RewardedScreen"
