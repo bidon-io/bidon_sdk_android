@@ -17,7 +17,7 @@ internal sealed interface BiddingResult {
     data class NoBid(
         val serverBiddingStartTs: Long,
         val serverBiddingFinishTs: Long
-    ): BiddingResult
+    ) : BiddingResult
 
     class FilledAd(
         val serverBiddingStartTs: Long,
@@ -28,5 +28,5 @@ internal sealed interface BiddingResult {
 
     data class TimeoutReached(
         val serverBiddingStartTs: Long,
-    ): BiddingResult
+    ) : BiddingResult
 }

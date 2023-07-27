@@ -19,10 +19,8 @@ import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.Round
 import org.bidon.sdk.auction.usecases.AuctionStat
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
-import org.bidon.sdk.auction.usecases.models.BiddingResult
 import org.bidon.sdk.auction.usecases.models.ExecuteRoundUseCase
 import org.bidon.sdk.config.BidonError
-import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.SdkDispatchers
@@ -147,14 +145,12 @@ internal class AuctionImpl(
         clearData()
     }
 
-
     private fun proceedRoundResults() {
         (resultsCollector.getRoundResults() as? RoundResult.Results)?.let {
             auctionStat.addRoundResults(it)
         }
         resultsCollector.clearRoundResults()
     }
-
 
     private fun clearData() {
         resultsCollector.clear()
@@ -221,7 +217,6 @@ internal class AuctionImpl(
             adTypeParamData = adTypeParamData,
         )
     }
-
 }
 
 private const val TAG = "Auction"

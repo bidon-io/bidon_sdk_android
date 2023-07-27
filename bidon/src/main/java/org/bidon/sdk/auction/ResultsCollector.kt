@@ -20,7 +20,6 @@ internal interface ResultsCollector {
     fun clearRoundResults()
     fun biddingTimeoutReached(timeoutMs: Long)
 
-
     companion object {
         /**
          * How many succeeded result to hold
