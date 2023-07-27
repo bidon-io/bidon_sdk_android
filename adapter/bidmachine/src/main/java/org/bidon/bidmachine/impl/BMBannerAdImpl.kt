@@ -21,11 +21,9 @@ import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
+import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
-import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceType.isTablet

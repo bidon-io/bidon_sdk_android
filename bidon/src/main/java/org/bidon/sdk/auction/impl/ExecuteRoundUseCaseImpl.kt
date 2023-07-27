@@ -132,22 +132,9 @@ internal class ExecuteRoundUseCaseImpl(
                     (roundResult as? RoundResult.Results)?.let {
                         it.networkResults + (it.biddingResult as? BiddingResult.FilledAd)?.results.orEmpty()
                     }.orEmpty()
-                }
-                .mapIndexed { index, result ->
-                    val details = when (result) {
-
-                        is AuctionResult.Bidding.Success -> {
-                            "Bidding ${result.adSource.demandId.demandId}, ${result.adSource.getStats()}"
-                        }
-
-                        is AuctionResult.Network -> {
-                            "DSP ${result.adSource.demandId.demandId}, ${result.adSource.getStats()}"
-                        }
-
-                        is AuctionResult.Bidding.Failure -> {
-                            "Bidding ${result.roundStatus}"
-                        }
-                    }
+                }.mapIndexed { index, result ->
+                    val type = "Bidding".takeIf { result is AuctionResult.Bidding } ?: "DSP"
+                    val details = "$type ${result.adSource.demandId.demandId}, ${result.adSource.getStats()}"
                     logInfo(TAG, "Round '${round.id}' result #$index. $details")
                     result
                 }.let {
@@ -199,9 +186,9 @@ internal class ExecuteRoundUseCaseImpl(
         adSources: List<AdLoadingType.Network<AdAuctionParams>>
     ): List<AuctionResult.Network.UnknownAdapter> {
         return (
-                round.demandIds - adSources
-                    .map { (it as AdSource<*>).demandId.demandId }.toSet()
-                )
+            round.demandIds - adSources
+                .map { (it as AdSource<*>).demandId.demandId }.toSet()
+            )
             .takeIf { it.isNotEmpty() }
             ?.let { unknownDemandIds ->
                 logError(

@@ -248,7 +248,6 @@ internal class AuctionStatImpl(
         }
     }
 
-
     private fun BiddingResult.asDemandStat(): DemandStat.Bidding? {
         return when (this) {
             is BiddingResult.NoBid -> {
@@ -361,7 +360,6 @@ internal class AuctionStatImpl(
             }
         )
     }
-
 
     private fun getResultBody(
         auctionStartTs: Long,
