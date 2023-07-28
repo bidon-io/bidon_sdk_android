@@ -34,7 +34,7 @@ internal class AuctionImpl(
     private val adaptersSource: AdaptersSource,
     private val getAuctionRequest: GetAuctionRequestUseCase,
     private val executeRound: ExecuteRoundUseCase,
-    private val auctionStat: AuctionStat
+    private val auctionStat: AuctionStat,
 ) : Auction {
     private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
     private val state = MutableStateFlow(AuctionState.Initialized)
@@ -128,24 +128,26 @@ internal class AuctionImpl(
     override fun cancel() {
         if (job?.isActive == true) {
             job?.cancel()
-            auctionStat.markAuctionCanceled()
-            proceedRoundResults()
-            val auctionData = _auctionDataResponse
-            if (auctionData == null) {
-                logInfo(TAG, "No AuctionResponse info. There is nothing to send.")
-            } else {
-                auctionStat.sendAuctionStats(
-                    auctionData = auctionData,
-                    demandAd = requireNotNull(_demandAd),
-                )
+            scope.launch {
+                auctionStat.markAuctionCanceled()
+                proceedRoundResults()
+                val auctionData = _auctionDataResponse
+                if (auctionData == null) {
+                    logInfo(TAG, "No AuctionResponse info. There is nothing to send.")
+                } else {
+                    auctionStat.sendAuctionStats(
+                        auctionData = auctionData,
+                        demandAd = requireNotNull(_demandAd),
+                    )
+                }
+                logInfo(TAG, "Auction canceled")
+                clearData()
             }
-            logInfo(TAG, "Auction canceled")
         }
         job = null
-        clearData()
     }
 
-    private fun proceedRoundResults() {
+    private suspend fun proceedRoundResults() {
         (resultsCollector.getRoundResults() as? RoundResult.Results)?.let {
             auctionStat.addRoundResults(it)
         }

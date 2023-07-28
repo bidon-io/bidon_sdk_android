@@ -10,15 +10,14 @@ internal interface ResultsCollector {
     fun startRound(round: Round, pricefloor: Double)
     fun serverBiddingStarted()
     fun serverBiddingFinished(bids: List<Bid>?)
-    fun addNetworkResult(networkResult: AuctionResult.Network)
-    fun addBiddingResult(biddingResult: AuctionResult.Bidding)
+    fun add(result: AuctionResult)
     fun getRoundResults(): RoundResult
 
     fun getAll(): List<AuctionResult>
     fun clear()
     suspend fun saveWinners(sourcePriceFloor: Double)
     fun clearRoundResults()
-    fun biddingTimeoutReached(timeoutMs: Long)
+    fun biddingTimeoutReached()
 
     companion object {
         /**

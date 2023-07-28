@@ -13,6 +13,6 @@ internal sealed interface RoundResult {
         val round: Round,
         val pricefloor: Double,
         val biddingResult: BiddingResult,
-        val networkResults: List<AuctionResult.Network>,
+        val networkResults: List<AuctionResult>,
     ) : RoundResult
 }

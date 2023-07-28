@@ -3,6 +3,7 @@ package org.bidon.sdk.auction
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import org.bidon.sdk.adapter.WinLossNotifiable
+import org.bidon.sdk.auction.AuctionResult.UnknownAdapter.Type
 import org.bidon.sdk.auction.models.Bid
 import org.bidon.sdk.auction.models.Round
 import org.bidon.sdk.auction.usecases.models.BiddingResult
@@ -68,43 +69,46 @@ internal class ResultsCollectorImpl(
         )
     }
 
-    override fun addNetworkResult(networkResult: AuctionResult.Network) {
+    override fun add(result: AuctionResult) {
         roundResult.update {
             require(it is RoundResult.Results)
-            RoundResult.Results(
-                biddingResult = it.biddingResult,
-                networkResults = it.networkResults + networkResult,
-                pricefloor = it.pricefloor,
-                round = it.round
-            )
-        }
-    }
+            when {
+                result is AuctionResult.Bidding || (result as? AuctionResult.UnknownAdapter)?.type == Type.Bidding -> {
+                    RoundResult.Results(
+                        biddingResult = when (it.biddingResult) {
+                            is BiddingResult.FilledAd -> {
+                                BiddingResult.FilledAd(
+                                    serverBiddingStartTs = it.biddingResult.serverBiddingStartTs,
+                                    serverBiddingFinishTs = it.biddingResult.serverBiddingFinishTs,
+                                    bids = it.biddingResult.bids,
+                                    results = it.biddingResult.results + result
+                                )
+                            }
 
-    override fun addBiddingResult(biddingResult: AuctionResult.Bidding) {
-        roundResult.update {
-            require(it is RoundResult.Results)
-            RoundResult.Results(
-                biddingResult = when (it.biddingResult) {
-                    is BiddingResult.FilledAd -> {
-                        BiddingResult.FilledAd(
-                            serverBiddingStartTs = it.biddingResult.serverBiddingStartTs,
-                            serverBiddingFinishTs = it.biddingResult.serverBiddingFinishTs,
-                            bids = it.biddingResult.bids,
-                            results = it.biddingResult.results + biddingResult
-                        )
-                    }
+                            BiddingResult.Idle,
+                            is BiddingResult.NoBid,
+                            is BiddingResult.ServerBiddingStarted,
+                            is BiddingResult.TimeoutReached -> {
+                                it.biddingResult
+                            }
+                        },
+                        networkResults = it.networkResults,
+                        pricefloor = it.pricefloor,
+                        round = it.round
+                    )
+                }
 
-                    BiddingResult.Idle,
-                    is BiddingResult.NoBid,
-                    is BiddingResult.ServerBiddingStarted,
-                    is BiddingResult.TimeoutReached -> {
-                        it.biddingResult
-                    }
-                },
-                networkResults = it.networkResults,
-                pricefloor = it.pricefloor,
-                round = it.round
-            )
+                result is AuctionResult.Network || (result as? AuctionResult.UnknownAdapter)?.type == Type.Network -> {
+                    RoundResult.Results(
+                        biddingResult = it.biddingResult,
+                        networkResults = it.networkResults + result,
+                        pricefloor = it.pricefloor,
+                        round = it.round
+                    )
+                }
+
+                else -> it
+            }
         }
     }
 
@@ -160,18 +164,21 @@ internal class ResultsCollectorImpl(
         }
     }
 
-    override fun biddingTimeoutReached(timeoutMs: Long) {
+    override fun biddingTimeoutReached() {
         roundResult.update {
             require(it is RoundResult.Results)
-            val startTs = when (it.biddingResult) {
-                is BiddingResult.ServerBiddingStarted -> it.biddingResult.serverBiddingStartTs
-                is BiddingResult.FilledAd -> it.biddingResult.serverBiddingStartTs
-                BiddingResult.Idle -> null
-                is BiddingResult.NoBid -> it.biddingResult.serverBiddingStartTs
-                is BiddingResult.TimeoutReached -> it.biddingResult.serverBiddingStartTs
+            val (startTs, finishTs) = when (it.biddingResult) {
+                is BiddingResult.ServerBiddingStarted -> it.biddingResult.serverBiddingStartTs to null
+                is BiddingResult.FilledAd -> it.biddingResult.serverBiddingStartTs to it.biddingResult.serverBiddingFinishTs
+                BiddingResult.Idle -> null to null
+                is BiddingResult.NoBid -> it.biddingResult.serverBiddingStartTs to it.biddingResult.serverBiddingFinishTs
+                is BiddingResult.TimeoutReached -> it.biddingResult.serverBiddingStartTs to it.biddingResult.serverBiddingFinishTs
             }
             RoundResult.Results(
-                biddingResult = BiddingResult.TimeoutReached(serverBiddingStartTs = startTs ?: 0),
+                biddingResult = BiddingResult.TimeoutReached(
+                    serverBiddingStartTs = startTs ?: 0,
+                    serverBiddingFinishTs = finishTs
+                ),
                 networkResults = it.networkResults,
                 pricefloor = it.pricefloor,
                 round = it.round

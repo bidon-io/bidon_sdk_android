@@ -10,41 +10,34 @@ sealed interface AuctionResult {
     val adSource: AdSource<*>
     val roundStatus: RoundStatus
 
-    sealed interface Network : AuctionResult {
-        class Success(
-            override val adSource: AdSource<*>,
-            override val roundStatus: RoundStatus,
-        ) : Network {
-            override fun toString(): String {
-                return "AuctionResult.Network(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
-            }
-        }
-
-        data class UnknownAdapter(
-            val adapterName: String
-        ) : Network {
-            override val roundStatus = RoundStatus.UnknownAdapter
-            override val adSource: AdSource<*> get() = error("unexpected")
+    class Network(
+        override val adSource: AdSource<*>,
+        override val roundStatus: RoundStatus,
+    ) : AuctionResult {
+        override fun toString(): String {
+            return "AuctionResult.Network(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
         }
     }
 
-    sealed interface Bidding : AuctionResult {
-        class Success(
-            override val adSource: AdSource<*>,
-            override val roundStatus: RoundStatus,
-        ) : Bidding {
-            override fun toString(): String {
-                return "AuctionResult.Bidding.Success(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
-            }
+    class Bidding(
+        override val adSource: AdSource<*>,
+        override val roundStatus: RoundStatus,
+    ) : AuctionResult {
+        override fun toString(): String {
+            return "AuctionResult.Bidding(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
         }
+    }
 
-        class Failure(
-            override val roundStatus: RoundStatus,
-            override val adSource: AdSource<*>,
-        ) : Bidding {
-            override fun toString(): String {
-                return "AuctionResult.Bidding.Failure(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
-            }
+    data class UnknownAdapter(
+        val adapterName: String,
+        val type: Type,
+    ) : AuctionResult {
+        override val roundStatus = RoundStatus.UnknownAdapter
+        override val adSource: AdSource<*> get() = error("unexpected")
+
+        enum class Type {
+            Network,
+            Bidding,
         }
     }
 }

@@ -13,7 +13,11 @@ internal val MaxEcpmAuctionResolver: AuctionResolver by lazy {
 private class PriceAuctionResolver : AuctionResolver {
     override suspend fun sortWinners(list: List<AuctionResult>): List<AuctionResult> {
         return list.sortedByDescending {
-            it.adSource.getStats().ecpm
+            when (it) {
+                is AuctionResult.Bidding -> it.adSource.getStats().ecpm
+                is AuctionResult.Network -> it.adSource.getStats().ecpm
+                is AuctionResult.UnknownAdapter -> Double.MIN_VALUE
+            }
         }
     }
 }

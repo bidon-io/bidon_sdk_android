@@ -64,7 +64,7 @@ internal class BMInterstitialAdImpl :
                     true -> {
                         emitEvent(
                             AdEvent.Bid(
-                                AuctionResult.Network.Success(
+                                AuctionResult.Network(
                                     adSource = this@BMInterstitialAdImpl,
                                     roundStatus = RoundStatus.Successful
                                 )

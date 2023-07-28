@@ -60,7 +60,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                 biddingIds = listOf(),
             ),
             Round(
-                id = "round_2",
+                id = "ROUND_2",
                 timeoutMs = 25,
                 demandIds = listOf(Admob),
                 biddingIds = listOf(),
@@ -145,7 +145,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
         } returns DeferredRoundResult(
             results = listOf(
                 CoroutineScope(mainDispatcherOverridden!!).async {
-                    AuctionResult.Network.Success(
+                    AuctionResult.Network(
                         adSource = mockk<AdSource<*>>(relaxed = true).also {
                             every { it.demandId } returns DemandId(Admob)
                             every { it.ad } returns Ad(
@@ -166,7 +166,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
             ),
             remainingLineItems = emptyList()
         )
-        val auctionResult = AuctionResult.Bidding.Success(
+        val auctionResult = AuctionResult.Bidding(
             adSource = mockk<AdSource<*>>(relaxed = true).also {
                 every { it.demandId } returns DemandId(BidMachine)
                 every { it.ad } returns Ad(
