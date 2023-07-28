@@ -14,6 +14,7 @@ import org.bidon.sdk.ads.banner.helper.impl.GetOrientationUseCaseImpl
 import org.bidon.sdk.ads.banner.helper.impl.PauseResumeObserverImpl
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionHolder
+import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.ResultsCollectorImpl
 import org.bidon.sdk.auction.impl.AuctionHolderImpl
@@ -163,17 +164,19 @@ internal object DI {
                 )
             }
             factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
+            factory<AuctionResolver> { MaxEcpmAuctionResolver }
             factory<Auction> {
                 AuctionImpl(
                     adaptersSource = get(),
                     getAuctionRequest = get(),
                     executeRound = get(),
-                    auctionStat = get()
+                    auctionStat = get(),
                 )
             }
             factory<AuctionStat> {
                 AuctionStatImpl(
-                    statsRequest = get()
+                    statsRequest = get(),
+                    resolver = get()
                 )
             }
             factoryWithParams { (param) ->
@@ -273,7 +276,7 @@ internal object DI {
                 )
             }
             factory<ResultsCollector> {
-                ResultsCollectorImpl(resolver = MaxEcpmAuctionResolver)
+                ResultsCollectorImpl(resolver = get())
             }
         }
     }

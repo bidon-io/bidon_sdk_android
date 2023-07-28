@@ -94,10 +94,10 @@ internal class BidonInitializerImpl : BidonInitializer {
                 runCatching {
                     init(context, appKey, timeStart)
                 }.onFailure {
-                    logError(Tag, "Error while initialization", it)
+                    logError(TAG, "Error while initialization", it)
                     initializationState.value = SdkState.InitializationFailed
                 }.onSuccess {
-                    logInfo(Tag, "Initialized in ${System.currentTimeMillis() - timeStart} ms.")
+                    logInfo(TAG, "Initialized in ${System.currentTimeMillis() - timeStart} ms.")
                     initializationState.value = SdkState.Initialized
                 }
                 notifyInitialized()
@@ -123,7 +123,7 @@ internal class BidonInitializerImpl : BidonInitializer {
             adapterClasses = publisherAdapterClasses
         )
 
-        logInfo(Tag, "Created adapters instances: $defaultAdapters")
+        logInfo(TAG, "Created adapters instances: $defaultAdapters")
         val body = ConfigRequestBody(
             adapters = (defaultAdapters + publisherAdapters.values).associate {
                 it.demandId.demandId to it.adapterInfo
@@ -132,10 +132,10 @@ internal class BidonInitializerImpl : BidonInitializer {
         return getConfigRequest.request(body)
             .map { configResponse ->
                 logInfo(
-                    Tag,
+                    TAG,
                     "Config data received in ${System.currentTimeMillis() - timeStart} ms.: $configResponse"
                 )
-                logInfo(Tag, "Starting adapters initialization")
+                logInfo(TAG, "Starting adapters initialization")
                 initAndRegisterAdapters(
                     context = context,
                     adapters = (defaultAdapters + publisherAdapters.values).distinctBy { it::class },
@@ -143,7 +143,7 @@ internal class BidonInitializerImpl : BidonInitializer {
                     isTestMode = isTestMode
                 )
             }.onFailure {
-                logError(Tag, "Error while Config-request", it)
+                logError(TAG, "Error while Config-request", it)
             }
     }
 
@@ -152,7 +152,7 @@ internal class BidonInitializerImpl : BidonInitializer {
          * Just retrieve instance to start session time
          */
         val sessionTracker = get<SessionTracker>()
-        logInfo(Tag, "Session started with sessionId=${sessionTracker.sessionId}")
+        logInfo(TAG, "Session started with sessionId=${sessionTracker.sessionId}")
     }
 
     private fun notifyInitialized() {
@@ -162,4 +162,4 @@ internal class BidonInitializerImpl : BidonInitializer {
     }
 }
 
-private const val Tag = "BidonInitializer"
+private const val TAG = "BidonInitializer"

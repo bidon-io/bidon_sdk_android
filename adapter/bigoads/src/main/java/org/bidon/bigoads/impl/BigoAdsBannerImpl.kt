@@ -97,22 +97,22 @@ internal class BigoAdsBannerImpl :
         val loader = BannerAdLoader.Builder().withAdLoadListener(object : AdLoadListener<BannerAd> {
             override fun onError(adError: AdError) {
                 val error = adError.asBidonError()
-                logError(Tag, "Error while loading ad: $adError. $this", error)
+                logError(TAG, "Error while loading ad: $adError. $this", error)
                 emitEvent(AdEvent.LoadFailed(error))
             }
 
             override fun onAdLoaded(bannerAd: BannerAd) {
-                logInfo(Tag, "onAdLoaded: $bannerAd, $this")
+                logInfo(TAG, "onAdLoaded: $bannerAd, $this")
                 this@BigoAdsBannerImpl.bannerAd = bannerAd
                 bannerAd.setAdInteractionListener(object : AdInteractionListener {
                     override fun onAdError(error: AdError) {
                         val cause = error.asBidonError()
-                        logError(Tag, "onAdError: $this", cause)
+                        logError(TAG, "onAdError: $this", cause)
                         emitEvent(AdEvent.ShowFailed(cause))
                     }
 
                     override fun onAdImpression() {
-                        logInfo(Tag, "onAdImpression: $this")
+                        logInfo(TAG, "onAdImpression: $this")
                         val ad = getAd(this@BigoAdsBannerImpl) ?: return
                         // tracked impression/shown by [BannerView]
                         emitEvent(
@@ -128,7 +128,7 @@ internal class BigoAdsBannerImpl :
                     }
 
                     override fun onAdClicked() {
-                        logInfo(Tag, "onAdClicked: $this")
+                        logInfo(TAG, "onAdClicked: $this")
                         val ad = getAd(this@BigoAdsBannerImpl) ?: return
                         emitEvent(AdEvent.Clicked(ad))
                     }
@@ -138,7 +138,7 @@ internal class BigoAdsBannerImpl :
                 })
                 emitEvent(
                     AdEvent.Bid(
-                        AuctionResult.Bidding.Success(
+                        AuctionResult.Bidding(
                             adSource = this@BigoAdsBannerImpl,
                             roundStatus = RoundStatus.Successful
                         )
@@ -160,4 +160,4 @@ internal class BigoAdsBannerImpl :
     }
 }
 
-private const val Tag = "BigoAdsBanner"
+private const val TAG = "BigoAdsBanner"

@@ -48,15 +48,15 @@ internal class RewardedImpl(
 
     override fun loadAd(activity: Activity, pricefloor: Double) {
         if (!BidonSdk.isInitialized()) {
-            logInfo(Tag, "Sdk is not initialized")
+            logInfo(TAG, "Sdk is not initialized")
             listener.onAdLoadFailed(BidonError.SdkNotInitialized)
             return
         }
         if (auctionHolder.isAdReady()) {
-            logInfo(Tag, "Ad is loaded and available to show.")
+            logInfo(TAG, "Ad is loaded and available to show.")
             return
         }
-        logInfo(Tag, "Load (pricefloor=$pricefloor)")
+        logInfo(TAG, "Load (pricefloor=$pricefloor)")
         observeCallbacksJob?.cancel()
         observeCallbacksJob = null
 
@@ -88,25 +88,25 @@ internal class RewardedImpl(
                 }
             )
         } else {
-            logInfo(Tag, "Auction already in progress")
+            logInfo(TAG, "Auction already in progress")
         }
     }
 
     override fun showAd(activity: Activity) {
         if (!BidonSdk.isInitialized()) {
-            logInfo(Tag, "Sdk is not initialized")
+            logInfo(TAG, "Sdk is not initialized")
             listener.onAdShowFailed(BidonError.SdkNotInitialized)
             return
         }
-        logInfo(Tag, "Show")
+        logInfo(TAG, "Show")
         if (auctionHolder.isAuctionActive) {
-            logInfo(Tag, "Show failed. Auction in progress.")
+            logInfo(TAG, "Show failed. Auction in progress.")
             listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
             return
         }
         when (val adSource = auctionHolder.popWinnerForShow()) {
             null -> {
-                logInfo(Tag, "Show failed. No Auction results.")
+                logInfo(TAG, "Show failed. No Auction results.")
                 listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
             }
 
@@ -119,7 +119,7 @@ internal class RewardedImpl(
     }
 
     override fun setRewardedListener(listener: RewardedListener) {
-        logInfo(Tag, "Set rewarded listener")
+        logInfo(TAG, "Set rewarded listener")
         this.userListener = listener
     }
 
@@ -224,4 +224,4 @@ internal class RewardedImpl(
     }
 }
 
-private const val Tag = "Rewarded"
+private const val TAG = "Rewarded"

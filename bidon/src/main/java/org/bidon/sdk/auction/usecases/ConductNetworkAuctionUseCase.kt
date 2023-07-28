@@ -57,20 +57,17 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
         resultsCollector: ResultsCollector,
     ): DeferredRoundResult {
         val mutableLineItems = lineItems.toMutableList()
-        val onEach: (AuctionResult) -> Unit = {
-            resultsCollector.addAuctionResult(listOf(it))
-        }
         runCatching {
             val participants = networkSources.filter {
                 (it as AdSource<*>).demandId.demandId in participantIds
             }
-            logInfo(Tag, "participants: $participants")
+            logInfo(TAG, "participants: $participants")
             val deferredList = participants.map { adSource ->
                 scope.async {
                     adSource as AdSource<AdAuctionParams>
                     val availableLineItemsForDemand = mutableLineItems.filter { it.demandId == adSource.demandId.demandId }
                     logInfo(
-                        tag = Tag,
+                        tag = TAG,
                         message = "Round '${round.id}'. Adapter ${adSource.demandId.demandId} starts fill. " +
                             "PriceFloor=$pricefloor. LineItems: $availableLineItemsForDemand."
                     )
@@ -84,7 +81,7 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
                             mutableLineItems.remove(lineItem)
                         }
                     )
-                    AuctionResult.Network.Success(
+                    AuctionResult.Network(
                         adSource = adSource,
                         roundStatus = when (adEvent) {
                             is AdEvent.Fill -> RoundStatus.Successful
@@ -92,7 +89,9 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
                             is AdEvent.LoadFailed -> adEvent.cause.asRoundStatus()
                             else -> error("unexpected: $adEvent")
                         }
-                    ).also(onEach)
+                    ).also {
+                        resultsCollector.add(it)
+                    }
                 }
             }
             return DeferredRoundResult(
@@ -172,4 +171,4 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
     }
 }
 
-private const val Tag = "ConductNetworkAuctionUseCase"
+private const val TAG = "ConductNetworkAuctionUseCase"

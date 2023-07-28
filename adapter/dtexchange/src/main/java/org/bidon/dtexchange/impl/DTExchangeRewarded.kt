@@ -109,7 +109,7 @@ internal class DTExchangeRewarded :
     }
 
     override fun fill(adParams: DTExchangeAdAuctionParams) {
-        logInfo(Tag, "Starting with $adParams: $this")
+        logInfo(TAG, "Starting with $adParams: $this")
         auctionParams = adParams
         val spot = InneractiveAdSpotManager.get().createSpot()
         val controller = InneractiveFullscreenUnitController()
@@ -123,7 +123,7 @@ internal class DTExchangeRewarded :
         spot.setRequestListener(
             object : InneractiveAdSpot.RequestListener {
                 override fun onInneractiveSuccessfulAdRequest(inneractiveAdSpot: InneractiveAdSpot?) {
-                    logInfo(Tag, "SuccessfulAdRequest: $inneractiveAdSpot")
+                    logInfo(TAG, "SuccessfulAdRequest: $inneractiveAdSpot")
                     this@DTExchangeRewarded.inneractiveAdSpot = inneractiveAdSpot
                     emitEvent(AdEvent.Fill(requireNotNull(inneractiveAdSpot?.asAd())))
                 }
@@ -133,7 +133,7 @@ internal class DTExchangeRewarded :
                     inneractiveErrorCode: InneractiveErrorCode?
                 ) {
                     logError(
-                        Tag,
+                        TAG,
                         "Error while bidding: $inneractiveErrorCode",
                         inneractiveErrorCode.asBidonError()
                     )
@@ -172,4 +172,4 @@ internal class DTExchangeRewarded :
     )
 }
 
-private const val Tag = "DTExchangeRewarded"
+private const val TAG = "DTExchangeRewarded"

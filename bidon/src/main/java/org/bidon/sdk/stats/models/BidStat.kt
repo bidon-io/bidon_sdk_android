@@ -11,8 +11,6 @@ data class BidStat(
     val roundStatus: RoundStatus?,
 
     val ecpm: Double,
-    val bidStartTs: Long?,
-    val bidFinishTs: Long?,
     val fillStartTs: Long?,
     val fillFinishTs: Long?,
     val adUnitId: String?,

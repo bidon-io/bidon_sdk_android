@@ -22,7 +22,7 @@ internal class ActivityLifecycleObserver(activity: Activity) : PauseResumeObserv
         val state = ActivityLifecycleState.Resumed.takeIf {
             activity.window.decorView.rootView.isShown
         } ?: ActivityLifecycleState.Paused
-        logInfo(Tag, "Activity initial state $state: $activity")
+        logInfo(TAG, "Activity initial state $state: $activity")
         return state
     }
 
@@ -36,21 +36,21 @@ internal class ActivityLifecycleObserver(activity: Activity) : PauseResumeObserv
                 override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
                 override fun onActivityDestroyed(activity: Activity) {
                     if (activity == weakActivity?.get()) {
-                        logInfo(Tag, "Activity Destroyed $activity")
+                        logInfo(TAG, "Activity Destroyed $activity")
                         weakActivity = null
                     }
                 }
 
                 override fun onActivityResumed(activity: Activity) {
                     if (activity == weakActivity?.get()) {
-                        logInfo(Tag, "Activity Resumed $activity")
+                        logInfo(TAG, "Activity Resumed $activity")
                         lifecycleFlow.value = ActivityLifecycleState.Resumed
                     }
                 }
 
                 override fun onActivityPaused(activity: Activity) {
                     if (activity == weakActivity?.get()) {
-                        logInfo(Tag, "Activity Paused $activity")
+                        logInfo(TAG, "Activity Paused $activity")
                         lifecycleFlow.value = ActivityLifecycleState.Paused
                     }
                 }
@@ -59,4 +59,4 @@ internal class ActivityLifecycleObserver(activity: Activity) : PauseResumeObserv
     }
 }
 
-private const val Tag = "ActivityLifecycleObserver"
+private const val TAG = "ActivityLifecycleObserver"

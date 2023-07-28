@@ -53,7 +53,7 @@ internal class BMRewardedAdImpl :
                 request: RewardedRequest,
                 result: BMAuctionResult
             ) {
-                logInfo(Tag, "onRequestSuccess $result: $this")
+                logInfo(TAG, "onRequestSuccess $result: $this")
                 adRequest = request
                 when (isBiddingRequest) {
                     false -> {
@@ -63,7 +63,7 @@ internal class BMRewardedAdImpl :
                     true -> {
                         emitEvent(
                             AdEvent.Bid(
-                                AuctionResult.Network.Success(
+                                AuctionResult.Network(
                                     adSource = this@BMRewardedAdImpl,
                                     roundStatus = RoundStatus.Successful
                                 )
@@ -75,13 +75,13 @@ internal class BMRewardedAdImpl :
 
             override fun onRequestFailed(request: RewardedRequest, bmError: BMError) {
                 val error = bmError.asBidonErrorOnBid(demandId)
-                logError(Tag, "onRequestFailed $bmError. $this", error)
+                logError(TAG, "onRequestFailed $bmError. $this", error)
                 adRequest = request
                 emitEvent(AdEvent.LoadFailed(error))
             }
 
             override fun onRequestExpired(request: RewardedRequest) {
-                logInfo(Tag, "onRequestExpired: $this")
+                logInfo(TAG, "onRequestExpired: $this")
                 adRequest = request
                 emitEvent(AdEvent.LoadFailed(BidonError.Expired(demandId)))
             }
@@ -91,7 +91,7 @@ internal class BMRewardedAdImpl :
     private val rewardedListener by lazy {
         object : RewardedListener {
             override fun onAdRewarded(rewardedAd: RewardedAd) {
-                logInfo(Tag, "onAdRewarded $rewardedAd: $this")
+                logInfo(TAG, "onAdRewarded $rewardedAd: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 emitEvent(
                     AdEvent.OnReward(
@@ -103,27 +103,27 @@ internal class BMRewardedAdImpl :
             }
 
             override fun onAdLoaded(rewardedAd: RewardedAd) {
-                logInfo(Tag, "onAdLoaded: $this")
+                logInfo(TAG, "onAdLoaded: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 emitEvent(AdEvent.Fill(rewardedAd.asAd()))
             }
 
             override fun onAdLoadFailed(rewardedAd: RewardedAd, bmError: BMError) {
                 val error = bmError.asBidonErrorOnFill(demandId)
-                logError(Tag, "onAdLoadFailed: $this", error)
+                logError(TAG, "onAdLoadFailed: $this", error)
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 emitEvent(AdEvent.LoadFailed(error))
             }
 
             override fun onAdShowFailed(rewardedAd: RewardedAd, bmError: BMError) {
                 val error = bmError.asBidonErrorOnFill(demandId)
-                logError(Tag, "onAdShowFailed: $this", error)
+                logError(TAG, "onAdShowFailed: $this", error)
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 emitEvent(AdEvent.ShowFailed(error))
             }
 
             override fun onAdImpression(rewardedAd: RewardedAd) {
-                logInfo(Tag, "onAdShown: $this")
+                logInfo(TAG, "onAdShown: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 emitEvent(AdEvent.Shown(rewardedAd.asAd()))
                 emitEvent(
@@ -135,19 +135,19 @@ internal class BMRewardedAdImpl :
             }
 
             override fun onAdClicked(rewardedAd: RewardedAd) {
-                logInfo(Tag, "onAdClicked: $this")
+                logInfo(TAG, "onAdClicked: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 emitEvent(AdEvent.Clicked(rewardedAd.asAd()))
             }
 
             override fun onAdExpired(rewardedAd: RewardedAd) {
-                logInfo(Tag, "onAdExpired: $this")
+                logInfo(TAG, "onAdExpired: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 emitEvent(AdEvent.Expired(rewardedAd.asAd()))
             }
 
             override fun onAdClosed(rewardedAd: RewardedAd, boolean: Boolean) {
-                logInfo(Tag, "onAdClosed: $this")
+                logInfo(TAG, "onAdClosed: $this")
                 this@BMRewardedAdImpl.rewardedAd = rewardedAd
                 emitEvent(AdEvent.Closed(rewardedAd.asAd()))
             }
@@ -178,7 +178,7 @@ internal class BMRewardedAdImpl :
     }
 
     override fun show(activity: Activity) {
-        logInfo(Tag, "Starting show: $this")
+        logInfo(TAG, "Starting show: $this")
         if (rewardedAd?.canShow() == true) {
             rewardedAd?.show()
         } else {
@@ -198,7 +198,7 @@ internal class BMRewardedAdImpl :
     }
 
     override fun destroy() {
-        logInfo(Tag, "destroy $this")
+        logInfo(TAG, "destroy $this")
         adRequest?.destroy()
         adRequest = null
         rewardedAd?.destroy()
@@ -214,7 +214,7 @@ internal class BMRewardedAdImpl :
     }
 
     private fun request(adParams: BMFullscreenAuctionParams, requestListener: AdRequest.AdRequestListener<RewardedRequest>) {
-        logInfo(Tag, "Starting with $adParams: $this")
+        logInfo(TAG, "Starting with $adParams: $this")
         context = adParams.context
         val requestBuilder = RewardedRequest.Builder()
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
@@ -232,7 +232,7 @@ internal class BMRewardedAdImpl :
     }
 
     private fun fillRequest(adRequest: RewardedRequest?, listener: RewardedListener) {
-        logInfo(Tag, "Starting fill: $this")
+        logInfo(TAG, "Starting fill: $this")
         val context = context
         if (context == null) {
             emitEvent(AdEvent.LoadFailed(BidonError.NoContextFound))
@@ -261,4 +261,4 @@ internal class BMRewardedAdImpl :
     }
 }
 
-private const val Tag = "BidMachineRewarded"
+private const val TAG = "BidMachineRewarded"

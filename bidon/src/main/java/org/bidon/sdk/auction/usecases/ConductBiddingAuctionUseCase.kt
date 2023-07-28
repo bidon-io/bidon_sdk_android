@@ -13,14 +13,12 @@ import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.models.Bid
-import org.bidon.sdk.auction.models.BidResponse
 import org.bidon.sdk.auction.models.BidResponse.BidStatus
 import org.bidon.sdk.auction.models.Round
+import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
-import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.asRoundStatus
-import org.bidon.sdk.utils.ext.SystemTimeNow
 
 /**
  * Created by Aleksei Cherniaev on 31/05/2023.
@@ -40,7 +38,7 @@ internal interface ConductBiddingAuctionUseCase {
         round: Round,
         auctionConfigurationId: Int?,
         resultsCollector: ResultsCollector,
-    ): List<AuctionResult.Bidding>
+    )
 }
 
 @Suppress("UNCHECKED_CAST")
@@ -59,26 +57,20 @@ internal class ConductBiddingAuctionUseCaseImpl(
         round: Round,
         auctionConfigurationId: Int?,
         resultsCollector: ResultsCollector,
-    ): List<AuctionResult.Bidding> {
-        var biddingStartTime: Long? = null
-        var biddingFinishTime: Long? = null
-        val onEach: (List<AuctionResult>) -> Unit = {
-            resultsCollector.addAuctionResult(it)
-        }
-        return runCatching {
+    ) {
+        runCatching {
             withTimeoutOrNull(round.timeoutMs) {
                 val participants = biddingSources.filter {
                     (it as AdSource<*>).demandId.demandId in participantIds
                 }
-                logInfo(Tag, "participants: $participants")
+                logInfo(TAG, "participants: $participants")
 
                 /**
                  * Load bids
                  */
                 val tokens = participants.getTokens(context)
-                logInfo(Tag, "tokens: $tokens")
-                biddingStartTime = SystemTimeNow
-                markBidStarted(participants)
+                logInfo(TAG, "tokens: $tokens")
+                resultsCollector.serverBiddingStarted()
                 val bidResponse = bidRequestUseCase.invoke(
                     adTypeParam = adTypeParam,
                     tokens = tokens,
@@ -87,95 +79,65 @@ internal class ConductBiddingAuctionUseCaseImpl(
                     auctionId = auctionId,
                     roundId = round.id,
                     auctionConfigurationId = auctionConfigurationId,
-                ).getOrNull()
-                biddingFinishTime = SystemTimeNow
-                markBidFinished(participants, bidResponse)
+                ).onFailure {
+                    logError(TAG, "Error while server bidding", it)
+                }.getOrNull()
+                val bids = bidResponse?.bids?.takeIf { it.isNotEmpty() && bidResponse.status == BidStatus.Success }
+                resultsCollector.serverBiddingFinished(bids)
 
                 /**
                  * Finish bidding
                  */
-                when (bidResponse?.status) {
-                    BidStatus.Success -> {
-                        fillBids(bidResponse.bids, biddingSources, adTypeParam, round)
-                    }
-
-                    else -> {
-                        listOf(
-                            AuctionResult.Bidding.Failure.NoBid(
-                                roundStatus = RoundStatus.NoBid,
-                                biddingStartTimeTs = biddingStartTime,
-                                biddingFinishTimeTs = biddingFinishTime
-                            )
-                        )
-                    }
+                bids?.let {
+                    fillBids(
+                        resultsCollector = resultsCollector,
+                        bids = it,
+                        biddingSources = biddingSources,
+                        adTypeParam = adTypeParam,
+                        round = round
+                    )
                 }
+            } ?: run {
+                resultsCollector.biddingTimeoutReached()
             }
-        }.getOrNull()?.also(onEach) ?: listOf(
-            AuctionResult.Bidding.Failure.NoBid(
-                roundStatus = RoundStatus.BidTimeoutReached,
-                biddingStartTimeTs = biddingStartTime,
-                biddingFinishTimeTs = biddingFinishTime
-            )
-        ).also(onEach)
-    }
-
-    private fun markBidFinished(
-        participants: List<AdLoadingType.Bidding<AdAuctionParams>>,
-        bidResponse: BidResponse?
-    ) {
-        participants.forEach { adSource ->
-            val bid = bidResponse?.bids?.firstOrNull {
-                (adSource as AdSource<*>).demandId.demandId == it.demand.id.code
-            }
-            (adSource as StatisticsCollector).markBidFinished(
-                roundStatus = RoundStatus.Successful.takeIf { bid != null } ?: RoundStatus.NoBid,
-                ecpm = bid?.price ?: 0.0
-            )
-        }
-    }
-
-    private fun markBidStarted(participants: List<AdLoadingType.Bidding<AdAuctionParams>>) {
-        participants.forEach { adSource ->
-            (adSource as StatisticsCollector).markBidStarted()
+        }.onFailure {
+            logError(TAG, "Error while server bidding", it)
         }
     }
 
     private suspend fun fillBids(
-        bids: List<Bid>?,
+        resultsCollector: ResultsCollector,
+        bids: List<Bid>,
         biddingSources: List<AdLoadingType.Bidding<AdAuctionParams>>,
         adTypeParam: AdTypeParam,
         round: Round
-    ): List<AuctionResult.Bidding> {
+    ) {
         var filled = false
-        return bids?.map { bid ->
+        bids.forEach { bid ->
             val adSource = biddingSources.first {
                 (it as AdSource<*>).demandId.demandId == bid.demand.id.code
             } as AdSource<*>
             if (!filled) {
                 adSource.markFillStarted(null, bid.price)
-                val auctionResultBidding = loadAd(
+                val fillResult = loadAd(
                     biddingSources = biddingSources,
                     bid = bid,
                     adTypeParam = adTypeParam,
                     round = round,
-                )
-                adSource.markBidFinished(
-                    roundStatus = auctionResultBidding.roundStatus,
-                    ecpm = bid.price
-                )
-                if (auctionResultBidding is AuctionResult.Bidding.Success) {
-                    filled = true
+                ).also {
+                    if (it.roundStatus == RoundStatus.Successful) {
+                        filled = true
+                    }
                 }
-                auctionResultBidding
+                resultsCollector.add(fillResult)
             } else {
-                AuctionResult.Bidding.Failure.Other(
+                val lose = AuctionResult.Bidding(
                     roundStatus = RoundStatus.Lose,
-                    adSource = biddingSources.first {
-                        (it as AdSource<*>).demandId.demandId == bid.demand.id.code
-                    } as AdSource<*>,
+                    adSource = adSource,
                 )
+                resultsCollector.add(lose)
             }
-        } ?: emptyList()
+        }
     }
 
     private suspend fun loadAd(
@@ -197,7 +159,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
                 optContainerWidth = (adTypeParam as? AdTypeParam.Banner)?.containerWidth,
             )
         ).onFailure {
-            return AuctionResult.Bidding.Failure.Other(
+            return AuctionResult.Bidding(
                 roundStatus = RoundStatus.NoAppropriateAdUnitId,
                 adSource = adSource,
             )
@@ -218,11 +180,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
 
             is AdEvent.LoadFailed,
             is AdEvent.Expired -> {
-                adSource.markBidFinished(
-                    roundStatus = RoundStatus.NoFill,
-                    ecpm = bid.price
-                )
-                AuctionResult.Bidding.Failure.Other(
+                AuctionResult.Bidding(
                     roundStatus = RoundStatus.NoFill,
                     adSource = adSource,
                 )
@@ -252,7 +210,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
                 roundStatus = RoundStatus.Successful,
                 ecpm = bidPrice
             )
-            AuctionResult.Bidding.Success(
+            AuctionResult.Bidding(
                 adSource = winnerAdSource,
                 roundStatus = RoundStatus.Successful
             )
@@ -266,7 +224,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
                 roundStatus = roundStatus,
                 ecpm = bidPrice
             )
-            AuctionResult.Bidding.Failure.Other(
+            AuctionResult.Bidding(
                 roundStatus = roundStatus,
                 adSource = winnerAdSource,
             )
@@ -282,4 +240,4 @@ internal class ConductBiddingAuctionUseCaseImpl(
     }
 }
 
-private const val Tag = "ConductBiddingAuctionUseCase"
+private const val TAG = "ConductBiddingAuctionUseCase"

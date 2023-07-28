@@ -46,12 +46,12 @@ internal class UnityAdsInterstitial :
     }
 
     override fun fill(adParams: UnityAdsFullscreenAuctionParams) {
-        logInfo(Tag, "Starting with $adParams: $this")
+        logInfo(TAG, "Starting with $adParams: $this")
         lineItem = adParams.lineItem
 
         val loadListener = object : IUnityAdsLoadListener {
             override fun onUnityAdsAdLoaded(placementId: String?) {
-                logInfo(Tag, "onUnityAdsAdLoaded: $this")
+                logInfo(TAG, "onUnityAdsAdLoaded: $this")
                 isAdReadyToShow = true
                 emitEvent(AdEvent.Fill(requireNotNull(getAd(this@UnityAdsInterstitial))))
             }
@@ -62,7 +62,7 @@ internal class UnityAdsInterstitial :
                 message: String?
             ) {
                 logError(
-                    tag = Tag,
+                    tag = TAG,
                     message = "onUnityAdsFailedToLoad: placementId=$placementId, error=$error, message=$message",
                     error = error?.asBidonError()
                 )
@@ -80,7 +80,7 @@ internal class UnityAdsInterstitial :
                 message: String?
             ) {
                 logError(
-                    tag = Tag,
+                    tag = TAG,
                     message = "onUnityAdsShowFailure: placementId=$placementId, error=$error, message=$message",
                     error = error.asBidonError()
                 )
@@ -88,7 +88,7 @@ internal class UnityAdsInterstitial :
             }
 
             override fun onUnityAdsShowStart(placementId: String?) {
-                logInfo(Tag, "onUnityAdsShowStart: placementId=$placementId")
+                logInfo(TAG, "onUnityAdsShowStart: placementId=$placementId")
                 getAd(this@UnityAdsInterstitial)?.let {
                     emitEvent(AdEvent.Shown(it))
                     emitEvent(
@@ -105,7 +105,7 @@ internal class UnityAdsInterstitial :
             }
 
             override fun onUnityAdsShowClick(placementId: String?) {
-                logInfo(Tag, "onUnityAdsShowClick. placementId: $placementId")
+                logInfo(TAG, "onUnityAdsShowClick. placementId: $placementId")
                 getAd(this@UnityAdsInterstitial)?.let { emitEvent(AdEvent.Clicked(it)) }
             }
 
@@ -113,7 +113,7 @@ internal class UnityAdsInterstitial :
                 placementId: String?,
                 state: UnityAds.UnityAdsShowCompletionState?
             ) {
-                logInfo(Tag, "onUnityAdsShowComplete: placementId=$placementId, state=$state")
+                logInfo(TAG, "onUnityAdsShowComplete: placementId=$placementId, state=$state")
                 getAd(this@UnityAdsInterstitial)?.let { emitEvent(AdEvent.Closed(it)) }
             }
         }
@@ -126,4 +126,4 @@ internal class UnityAdsInterstitial :
     }
 }
 
-private const val Tag = "UnityAdsInterstitial"
+private const val TAG = "UnityAdsInterstitial"

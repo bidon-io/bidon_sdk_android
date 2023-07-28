@@ -42,9 +42,9 @@ internal class CreateRequestBodyUseCaseImpl(
                 }
             }
         }.also {
-            logInfo(Tag, "$it")
+            logInfo(TAG, "$it")
         }
     }
 }
 
-private const val Tag = "CreateRequestBodyUseCase"
+private const val TAG = "CreateRequestBodyUseCase"

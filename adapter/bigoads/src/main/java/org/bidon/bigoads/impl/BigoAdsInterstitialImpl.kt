@@ -73,22 +73,22 @@ internal class BigoAdsInterstitialImpl :
         val loader = InterstitialAdLoader.Builder().withAdLoadListener(object : AdLoadListener<InterstitialAd> {
             override fun onError(adError: AdError) {
                 val error = adError.asBidonError()
-                logError(Tag, "Error while loading ad: $adError. $this", error)
+                logError(TAG, "Error while loading ad: $adError. $this", error)
                 emitEvent(AdEvent.LoadFailed(error))
             }
 
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                logInfo(Tag, "onAdLoaded: $interstitialAd, $this")
+                logInfo(TAG, "onAdLoaded: $interstitialAd, $this")
                 this@BigoAdsInterstitialImpl.interstitialAd = interstitialAd
                 interstitialAd.setAdInteractionListener(object : AdInteractionListener {
                     override fun onAdError(error: AdError) {
                         val cause = error.asBidonError()
-                        logError(Tag, "onAdError: $this", cause)
+                        logError(TAG, "onAdError: $this", cause)
                         emitEvent(AdEvent.ShowFailed(cause))
                     }
 
                     override fun onAdImpression() {
-                        logInfo(Tag, "onAdImpression: $this")
+                        logInfo(TAG, "onAdImpression: $this")
                         val ad = getAd(this@BigoAdsInterstitialImpl) ?: return
                         emitEvent(
                             AdEvent.PaidRevenue(
@@ -103,25 +103,25 @@ internal class BigoAdsInterstitialImpl :
                     }
 
                     override fun onAdClicked() {
-                        logInfo(Tag, "onAdClicked: $this")
+                        logInfo(TAG, "onAdClicked: $this")
                         val ad = getAd(this@BigoAdsInterstitialImpl) ?: return
                         emitEvent(AdEvent.Clicked(ad))
                     }
 
                     override fun onAdOpened() {
-                        logInfo(Tag, "onAdOpened: $this")
+                        logInfo(TAG, "onAdOpened: $this")
                         val ad = getAd(this@BigoAdsInterstitialImpl) ?: return
                         emitEvent(AdEvent.Shown(ad))
                     }
                     override fun onAdClosed() {
-                        logInfo(Tag, "onAdClosed: $this")
+                        logInfo(TAG, "onAdClosed: $this")
                         val ad = getAd(this@BigoAdsInterstitialImpl) ?: return
                         emitEvent(AdEvent.Closed(ad))
                     }
                 })
                 emitEvent(
                     AdEvent.Bid(
-                        AuctionResult.Bidding.Success(
+                        AuctionResult.Bidding(
                             adSource = this@BigoAdsInterstitialImpl,
                             roundStatus = RoundStatus.Successful
                         )
@@ -152,4 +152,4 @@ internal class BigoAdsInterstitialImpl :
     }
 }
 
-private const val Tag = "BigoAdsInterstitial"
+private const val TAG = "BigoAdsInterstitial"

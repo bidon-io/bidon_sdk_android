@@ -48,14 +48,14 @@ internal class AuctionHolderImpl(
                     check(results.isNotEmpty()) {
                         "Auction succeed if results is not empty"
                     }
-                    logInfo(Tag, "Auction completed successfully: $results")
+                    logInfo(TAG, "Auction completed successfully: $results")
                     nextWinner = results.first()
                     onResult.invoke(results.asSuccess())
                     auctionState.value = AuctionHolderState.Idle
                 },
                 onFailure = {
                     nextWinner = null
-                    logError(Tag, "Auction failed", it)
+                    logError(TAG, "Auction failed", it)
                     onResult.invoke(it.asFailure())
                     auctionState.value = AuctionHolderState.Idle
                 }
@@ -93,7 +93,7 @@ internal class AuctionHolderImpl(
     }
 
     override fun notifyWin() {
-        logInfo(Tag, "Notify Win was invoked")
+        logInfo(TAG, "Notify Win was invoked")
         if (wasShown.get()) {
             return
         }
@@ -111,7 +111,7 @@ internal class AuctionHolderImpl(
         onAuctionCancelled: () -> Unit,
         onNotified: () -> Unit,
     ) {
-        logInfo(Tag, "Notify Loss invoked with Winner($winnerDemandId, $winnerEcpm)")
+        logInfo(TAG, "Notify Loss invoked with Winner($winnerDemandId, $winnerEcpm)")
         when (val state = auctionState.value) {
             AuctionHolderState.Idle -> {
                 if (!wasShown.get() && !wasNotified.getAndSet(true)) {
@@ -140,4 +140,4 @@ internal sealed interface AuctionHolderState {
     }
 }
 
-private const val Tag = "AuctionHolder"
+private const val TAG = "AuctionHolder"

@@ -58,8 +58,6 @@ class StatisticsCollectorImpl : StatisticsCollector {
         roundId = null,
         demandId = DemandId(""),
         adUnitId = null,
-        bidStartTs = null,
-        bidFinishTs = null,
         fillStartTs = null,
         fillFinishTs = null,
         roundStatus = null,
@@ -153,7 +151,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
 
     override fun sendLoss(winnerDemandId: String, winnerEcpm: Double) {
         if (!externalWinNotificationsEnabled) {
-            logInfo(Tag, "External WinLoss Notifications disabled: external_win_notifications=false")
+            logInfo(TAG, "External WinLoss Notifications disabled: external_win_notifications=false")
             return
         }
         if (!isShowSent.getAndSet(true) && !isWinLossSent.getAndSet(true)) {
@@ -172,7 +170,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
 
     override fun sendWin() {
         if (!externalWinNotificationsEnabled) {
-            logInfo(Tag, "External WinLoss Notifications disabled: external_win_notifications=false")
+            logInfo(TAG, "External WinLoss Notifications disabled: external_win_notifications=false")
             return
         }
         if (!isShowSent.get() && !isWinLossSent.getAndSet(true)) {
@@ -197,21 +195,6 @@ class StatisticsCollectorImpl : StatisticsCollector {
 
     override fun addExternalWinNotificationsEnabled(enabled: Boolean) {
         externalWinNotificationsEnabled = enabled
-    }
-
-    override fun markBidStarted(adUnitId: String?) {
-        stat = stat.copy(
-            bidStartTs = SystemTimeNow,
-            adUnitId = adUnitId
-        )
-    }
-
-    override fun markBidFinished(roundStatus: RoundStatus, ecpm: Double?) {
-        stat = stat.copy(
-            bidFinishTs = SystemTimeNow,
-            roundStatus = roundStatus,
-            ecpm = ecpm ?: 0.0,
-        )
     }
 
     override fun markFillStarted(adUnitId: String?, pricefloor: Double?) {
@@ -289,4 +272,4 @@ class StatisticsCollectorImpl : StatisticsCollector {
     }
 }
 
-private const val Tag = "StatisticsCollector"
+private const val TAG = "StatisticsCollector"

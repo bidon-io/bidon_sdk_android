@@ -32,7 +32,7 @@ internal class LocationDataSourceImpl(
             val addresses = Geocoder(context, Locale.getDefault()).getFromLocation(location.latitude, location.longitude, 1)
             addresses?.first()
         } catch (e: Exception) {
-            logError(Tag, "Error while retrieving location", e)
+            logError(TAG, "Error while retrieving location", e)
             null
         }
     }
@@ -69,13 +69,13 @@ internal class LocationDataSourceImpl(
         return locationManager.getBestProvider(Criteria(), false)?.let {
             try {
                 locationManager.getLastKnownLocation(it).also {
-                    logInfo(Tag, "Location $it")
+                    logInfo(TAG, "Location $it")
                 }
             } catch (e: SecurityException) {
-                logError(Tag, "failed to retrieve GPS location: permission not granted", e)
+                logError(TAG, "failed to retrieve GPS location: permission not granted", e)
                 null
             } catch (e: IllegalArgumentException) {
-                logError(Tag, "failed to retrieve GPS location: device has no GPS provider", e)
+                logError(TAG, "failed to retrieve GPS location: device has no GPS provider", e)
                 null
             }
         }
@@ -103,5 +103,5 @@ internal class LocationDataSourceImpl(
     }
 }
 
-private const val Tag = "Location"
+private const val TAG = "Location"
 private const val HourInMs = 1000 * 60 * 60

@@ -51,7 +51,7 @@ internal class TestInterstitialImpl(
             Process.Succeed -> {
                 emitEvent(
                     AdEvent.Bid(
-                        AuctionResult.Network.Success(
+                        AuctionResult.Network(
                             adSource = this,
                             roundStatus = RoundStatus.Successful,
                         )
