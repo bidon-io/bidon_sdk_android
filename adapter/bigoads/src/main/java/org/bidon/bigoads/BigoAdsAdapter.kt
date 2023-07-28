@@ -53,9 +53,11 @@ class BigoAdsAdapter :
         val config = AdConfig.Builder()
             .setAppId(configParams.appId)
             .setDebug(isTestMode)
-            .setChannel(configParams.channel)
-            .build()
-        BigoAdSdk.initialize(context, config) {
+            .apply {
+                configParams.channel?.let { setChannel(it) }
+            }
+
+        BigoAdSdk.initialize(context, config.build()) {
             continuation.resume(Unit)
         }
     }
@@ -63,7 +65,7 @@ class BigoAdsAdapter :
     override fun parseConfigParam(json: String): BigoParameters {
         return BigoParameters(
             appId = JSONObject(json).getString("app_id"),
-            channel = JSONObject(json).getString("channel"),
+            channel = JSONObject(json).optString("channel"),
         )
     }
 
