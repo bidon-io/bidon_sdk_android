@@ -98,7 +98,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
                     )
                 }
             } ?: run {
-                resultsCollector.biddingTimeoutReached(round.timeoutMs)
+                resultsCollector.biddingTimeoutReached()
             }
         }.onFailure {
             logError(TAG, "Error while server bidding", it)
@@ -125,17 +125,17 @@ internal class ConductBiddingAuctionUseCaseImpl(
                     adTypeParam = adTypeParam,
                     round = round,
                 ).also {
-                    if (it is AuctionResult.Bidding.Success) {
+                    if (it.roundStatus == RoundStatus.Successful) {
                         filled = true
                     }
                 }
-                resultsCollector.addBiddingResult(fillResult)
+                resultsCollector.add(fillResult)
             } else {
-                val lose = AuctionResult.Bidding.Failure(
+                val lose = AuctionResult.Bidding(
                     roundStatus = RoundStatus.Lose,
                     adSource = adSource,
                 )
-                resultsCollector.addBiddingResult(lose)
+                resultsCollector.add(lose)
             }
         }
     }
@@ -159,7 +159,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
                 optContainerWidth = (adTypeParam as? AdTypeParam.Banner)?.containerWidth,
             )
         ).onFailure {
-            return AuctionResult.Bidding.Failure(
+            return AuctionResult.Bidding(
                 roundStatus = RoundStatus.NoAppropriateAdUnitId,
                 adSource = adSource,
             )
@@ -180,7 +180,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
 
             is AdEvent.LoadFailed,
             is AdEvent.Expired -> {
-                AuctionResult.Bidding.Failure(
+                AuctionResult.Bidding(
                     roundStatus = RoundStatus.NoFill,
                     adSource = adSource,
                 )
@@ -210,7 +210,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
                 roundStatus = RoundStatus.Successful,
                 ecpm = bidPrice
             )
-            AuctionResult.Bidding.Success(
+            AuctionResult.Bidding(
                 adSource = winnerAdSource,
                 roundStatus = RoundStatus.Successful
             )
@@ -224,7 +224,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
                 roundStatus = roundStatus,
                 ecpm = bidPrice
             )
-            AuctionResult.Bidding.Failure(
+            AuctionResult.Bidding(
                 roundStatus = roundStatus,
                 adSource = winnerAdSource,
             )

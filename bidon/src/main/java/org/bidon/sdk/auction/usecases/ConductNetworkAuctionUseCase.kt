@@ -81,7 +81,7 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
                             mutableLineItems.remove(lineItem)
                         }
                     )
-                    AuctionResult.Network.Success(
+                    AuctionResult.Network(
                         adSource = adSource,
                         roundStatus = when (adEvent) {
                             is AdEvent.Fill -> RoundStatus.Successful
@@ -90,7 +90,7 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
                             else -> error("unexpected: $adEvent")
                         }
                     ).also {
-                        resultsCollector.addNetworkResult(it)
+                        resultsCollector.add(it)
                     }
                 }
             }

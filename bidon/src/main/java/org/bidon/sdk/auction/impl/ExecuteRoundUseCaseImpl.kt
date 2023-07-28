@@ -85,7 +85,6 @@ internal class ExecuteRoundUseCaseImpl(
             } else {
                 null
             }
-            logUnknownBiddingAdapters(round, biddingDemands)
 
             /**
              * Regular AdNetwork demands auction
@@ -97,8 +96,13 @@ internal class ExecuteRoundUseCaseImpl(
             val networkAdSources = filteredAdNetworkAdapters.getAdSources(demandAd.adType)
                 .onEach { applyParams(it, adTypeParam, auctionResponse, demandAd, round) }
                 .filterIsInstance<AdLoadingType.Network<AdAuctionParams>>()
-            val unknownNetworkDemands = findUnknownNetworkAdapters(round, networkAdSources)
-                .onEach { resultsCollector.addNetworkResult(it) }
+
+            /**
+             * Find unknown adapters
+             */
+            resultsCollector.findUnknownBiddingAdapters(round, biddingAdSources)
+            resultsCollector.findUnknownNetworkAdapters(round, networkAdSources)
+
             // Start Regular AdNetwork demands auction
             if (round.demandIds.isNotEmpty()) {
                 val networkResults = conductNetworkAuction.invoke(
@@ -140,7 +144,7 @@ internal class ExecuteRoundUseCaseImpl(
                 }.let {
                     onFinish.invoke(mutableLineItems)
                     logInfo(TAG, "Round '${round.id}' finished with ${it.size} results: $it")
-                    it + unknownNetworkDemands
+                    it
                 }
         }
     }
@@ -169,39 +173,39 @@ internal class ExecuteRoundUseCaseImpl(
         }
     }
 
-    private fun logUnknownBiddingAdapters(round: Round, biddingDemands: List<String>) {
-        (round.biddingIds - biddingDemands.toSet())
+    private fun ResultsCollector.findUnknownBiddingAdapters(
+        round: Round,
+        adSources: List<AdLoadingType.Bidding<AdAuctionParams>>
+    ) {
+        (round.demandIds - adSources.map { (it as AdSource<*>).demandId.demandId }.toSet())
             .takeIf { it.isNotEmpty() }
-            ?.let {
+            ?.also { unknownDemandIds ->
                 logError(
                     tag = TAG,
-                    message = "Bidding adapters not found: $it",
-                    error = NoSuchElementException(it.joinToString())
+                    message = "Bidding adapters not found: $unknownDemandIds",
+                    error = NoSuchElementException(unknownDemandIds.joinToString())
                 )
+            }?.onEach { adapterName ->
+                this.add(AuctionResult.UnknownAdapter(adapterName, AuctionResult.UnknownAdapter.Type.Bidding))
             }
     }
 
-    private fun findUnknownNetworkAdapters(
+    private fun ResultsCollector.findUnknownNetworkAdapters(
         round: Round,
         adSources: List<AdLoadingType.Network<AdAuctionParams>>
-    ): List<AuctionResult.Network.UnknownAdapter> {
-        return (
-            round.demandIds - adSources
-                .map { (it as AdSource<*>).demandId.demandId }.toSet()
-            )
+    ) {
+        (round.demandIds - adSources.map { (it as AdSource<*>).demandId.demandId }.toSet())
             .takeIf { it.isNotEmpty() }
             ?.let { unknownDemandIds ->
                 logError(
                     tag = TAG,
-                    message = "Adapters not found: $unknownDemandIds",
+                    message = "DSP adapters not found: $unknownDemandIds",
                     error = NoSuchElementException(unknownDemandIds.joinToString())
                 )
                 unknownDemandIds
-            }?.map {
-                AuctionResult.Network.UnknownAdapter(
-                    adapterName = it
-                )
-            }.orEmpty()
+            }?.onEach { adapterName ->
+                this.add(AuctionResult.UnknownAdapter(adapterName, AuctionResult.UnknownAdapter.Type.Network))
+            }
     }
 
     private fun List<Adapter>.getAdSources(adType: AdType) = when (adType) {

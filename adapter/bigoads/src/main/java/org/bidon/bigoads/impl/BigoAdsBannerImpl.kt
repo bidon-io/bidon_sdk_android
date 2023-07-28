@@ -138,7 +138,7 @@ internal class BigoAdsBannerImpl :
                 })
                 emitEvent(
                     AdEvent.Bid(
-                        AuctionResult.Bidding.Success(
+                        AuctionResult.Bidding(
                             adSource = this@BigoAdsBannerImpl,
                             roundStatus = RoundStatus.Successful
                         )

@@ -66,7 +66,7 @@ internal class BMBannerAdImpl :
                     true -> {
                         emitEvent(
                             AdEvent.Bid(
-                                AuctionResult.Bidding.Success(
+                                AuctionResult.Bidding(
                                     adSource = this@BMBannerAdImpl,
                                     roundStatus = RoundStatus.Successful
                                 )

@@ -63,7 +63,7 @@ internal class BMRewardedAdImpl :
                     true -> {
                         emitEvent(
                             AdEvent.Bid(
-                                AuctionResult.Network.Success(
+                                AuctionResult.Network(
                                     adSource = this@BMRewardedAdImpl,
                                     roundStatus = RoundStatus.Successful
                                 )
