@@ -29,14 +29,14 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
         attributesFlow.value = attributesFlow.value.copy(
             age = age
         )
-        logInfo(Tag, "Updated age=$age")
+        logInfo(TAG, "Updated age=$age")
     }
 
     override fun setGender(gender: Gender?) {
         attributesFlow.value = attributesFlow.value.copy(
             gender = gender
         )
-        logInfo(Tag, "Updated gender=$gender")
+        logInfo(TAG, "Updated gender=$gender")
     }
 
     override fun putCustomAttribute(attribute: String, value: Any?) {
@@ -53,35 +53,35 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
                     }
             )
         }
-        logInfo(Tag, "Updated attribute=($attribute, $value)")
+        logInfo(TAG, "Updated attribute=($attribute, $value)")
     }
 
     override fun setCustomAttributes(attributes: Map<String, Any>) {
         this.attributesFlow.value = this.attributesFlow.value.copy(
             customAttributes = attributes
         )
-        logInfo(Tag, "Updated attributes=$attributes")
+        logInfo(TAG, "Updated attributes=$attributes")
     }
 
     override fun setLevel(level: Int) {
         attributesFlow.value = attributesFlow.value.copy(
             gameLevel = level
         )
-        logInfo(Tag, "Updated level=$level")
+        logInfo(TAG, "Updated level=$level")
     }
 
     override fun setTotalInAppAmount(inAppAmount: Double) {
         attributesFlow.value = attributesFlow.value.copy(
             inAppAmount = inAppAmount
         )
-        logInfo(Tag, "Updated inAppAmount=$inAppAmount")
+        logInfo(TAG, "Updated inAppAmount=$inAppAmount")
     }
 
     override fun setPaying(isPaying: Boolean) {
         attributesFlow.value = attributesFlow.value.copy(
             isPaying = isPaying
         )
-        logInfo(Tag, "Updated isPaying=$isPaying")
+        logInfo(TAG, "Updated isPaying=$isPaying")
     }
 
     override fun parseSegmentId(rootJsonResponse: String) {
@@ -96,9 +96,9 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
     }
 
     override fun setSegmentId(segmentId: String?) {
-        logInfo(Tag, "Updated SegmentId($segmentId)")
+        logInfo(TAG, "Updated SegmentId($segmentId)")
         this.segmentId = segmentId
     }
 }
 
-private const val Tag = "Segment"
+private const val TAG = "Segment"

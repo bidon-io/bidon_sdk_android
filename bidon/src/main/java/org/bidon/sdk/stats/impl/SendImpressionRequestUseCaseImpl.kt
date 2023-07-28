@@ -44,7 +44,7 @@ internal class SendImpressionRequestUseCaseImpl(
             data = body,
             extras = BidonSdk.getExtras() + extras
         )
-        logInfo(Tag, "Request body: $requestBody")
+        logInfo(TAG, "Request body: $requestBody")
 
         get<JsonHttpRequest>().invoke(
             path = urlPath,
@@ -53,11 +53,11 @@ internal class SendImpressionRequestUseCaseImpl(
             val baseResponse = JsonParsers.parseOrNull<BaseResponse>(jsonResponse)
             requireNotNull(baseResponse)
         }.onFailure {
-            logError(Tag, "Error while sending impression $urlPath", it)
+            logError(TAG, "Error while sending impression $urlPath", it)
         }.onSuccess {
-            logInfo(Tag, "Impression $urlPath was sent successfully")
+            logInfo(TAG, "Impression $urlPath was sent successfully")
         }
     }
 }
 
-private const val Tag = "ImpressionRequestUseCase"
+private const val TAG = "ImpressionRequestUseCase"

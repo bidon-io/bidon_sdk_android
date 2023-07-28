@@ -73,22 +73,22 @@ internal class BigoAdsRewardedAdImpl :
         val loader = RewardVideoAdLoader.Builder().withAdLoadListener(object : AdLoadListener<RewardVideoAd> {
             override fun onError(adError: AdError) {
                 val error = adError.asBidonError()
-                logError(Tag, "Error while loading ad: $adError. $this", error)
+                logError(TAG, "Error while loading ad: $adError. $this", error)
                 emitEvent(AdEvent.LoadFailed(error))
             }
 
             override fun onAdLoaded(rewardVideoAd: RewardVideoAd) {
-                logInfo(Tag, "onAdLoaded: $rewardVideoAd, $this")
+                logInfo(TAG, "onAdLoaded: $rewardVideoAd, $this")
                 this@BigoAdsRewardedAdImpl.rewardVideoAd = rewardVideoAd
                 rewardVideoAd.setAdInteractionListener(object : RewardAdInteractionListener {
                     override fun onAdError(error: AdError) {
                         val cause = error.asBidonError()
-                        logError(Tag, "onAdError: $this", cause)
+                        logError(TAG, "onAdError: $this", cause)
                         emitEvent(AdEvent.ShowFailed(cause))
                     }
 
                     override fun onAdImpression() {
-                        logInfo(Tag, "onAdImpression: $this")
+                        logInfo(TAG, "onAdImpression: $this")
                         val ad = getAd(this@BigoAdsRewardedAdImpl) ?: return
                         emitEvent(
                             AdEvent.PaidRevenue(
@@ -103,32 +103,32 @@ internal class BigoAdsRewardedAdImpl :
                     }
 
                     override fun onAdClicked() {
-                        logInfo(Tag, "onAdClicked: $this")
+                        logInfo(TAG, "onAdClicked: $this")
                         val ad = getAd(this@BigoAdsRewardedAdImpl) ?: return
                         emitEvent(AdEvent.Clicked(ad))
                     }
 
                     override fun onAdOpened() {
-                        logInfo(Tag, "onAdOpened: $this")
+                        logInfo(TAG, "onAdOpened: $this")
                         val ad = getAd(this@BigoAdsRewardedAdImpl) ?: return
                         emitEvent(AdEvent.Shown(ad))
                     }
 
                     override fun onAdClosed() {
-                        logInfo(Tag, "onAdClosed: $this")
+                        logInfo(TAG, "onAdClosed: $this")
                         val ad = getAd(this@BigoAdsRewardedAdImpl) ?: return
                         emitEvent(AdEvent.Closed(ad))
                     }
 
                     override fun onAdRewarded() {
-                        logInfo(Tag, "onAdRewarded: $this")
+                        logInfo(TAG, "onAdRewarded: $this")
                         val ad = getAd(this@BigoAdsRewardedAdImpl) ?: return
                         emitEvent(AdEvent.OnReward(ad, null))
                     }
                 })
                 emitEvent(
                     AdEvent.Bid(
-                        AuctionResult.Bidding.Success(
+                        AuctionResult.Bidding(
                             adSource = this@BigoAdsRewardedAdImpl,
                             roundStatus = RoundStatus.Successful
                         )
@@ -159,4 +159,4 @@ internal class BigoAdsRewardedAdImpl :
     }
 }
 
-private const val Tag = "BigoAdsRewardedAd"
+private const val TAG = "BigoAdsRewardedAd"

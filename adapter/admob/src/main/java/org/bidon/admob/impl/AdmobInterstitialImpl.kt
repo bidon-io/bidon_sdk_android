@@ -71,22 +71,22 @@ internal class AdmobInterstitialImpl :
     private val interstitialListener by lazy {
         object : FullScreenContentCallback() {
             override fun onAdClicked() {
-                logInfo(Tag, "onAdClicked: $this")
+                logInfo(TAG, "onAdClicked: $this")
                 emitEvent(AdEvent.Clicked(requiredInterstitialAd.asAd()))
             }
 
             override fun onAdDismissedFullScreenContent() {
-                logInfo(Tag, "onAdDismissedFullScreenContent: $this")
+                logInfo(TAG, "onAdDismissedFullScreenContent: $this")
                 emitEvent(AdEvent.Closed(requiredInterstitialAd.asAd()))
             }
 
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
-                logError(Tag, "onAdFailedToShowFullScreenContent: $this", error.asBidonError())
+                logError(TAG, "onAdFailedToShowFullScreenContent: $this", error.asBidonError())
                 emitEvent(AdEvent.ShowFailed(error.asBidonError()))
             }
 
             override fun onAdImpression() {
-                logInfo(Tag, "onAdShown: $this")
+                logInfo(TAG, "onAdShown: $this")
                 emitEvent(AdEvent.Shown(requiredInterstitialAd.asAd()))
             }
 
@@ -98,7 +98,7 @@ internal class AdmobInterstitialImpl :
         get() = interstitialAd != null
 
     override fun destroy() {
-        logInfo(Tag, "destroy $this")
+        logInfo(TAG, "destroy $this")
         interstitialAd?.onPaidEventListener = null
         interstitialAd?.fullScreenContentCallback = null
         interstitialAd = null
@@ -119,7 +119,7 @@ internal class AdmobInterstitialImpl :
     }
 
     override fun fill(adParams: AdmobFullscreenAdAuctionParams) {
-        logInfo(Tag, "Starting with $adParams: $this")
+        logInfo(TAG, "Starting with $adParams: $this")
         param = adParams
         val adRequest = AdRequest.Builder()
             .addNetworkExtrasBundle(AdMobAdapter::class.java, BidonSdk.regulation.asBundle())
@@ -129,7 +129,7 @@ internal class AdmobInterstitialImpl :
             val requestListener = object : InterstitialAdLoadCallback() {
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     logError(
-                        Tag,
+                        TAG,
                         "onAdFailedToLoad: $loadAdError. $this",
                         loadAdError.asBidonError()
                     )
@@ -137,7 +137,7 @@ internal class AdmobInterstitialImpl :
                 }
 
                 override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                    logInfo(Tag, "onAdLoaded: $this")
+                    logInfo(TAG, "onAdLoaded: $this")
                     this@AdmobInterstitialImpl.interstitialAd = interstitialAd
                     interstitialAd.onPaidEventListener = paidListener
                     interstitialAd.fullScreenContentCallback = interstitialListener
@@ -148,7 +148,7 @@ internal class AdmobInterstitialImpl :
         } else {
             val error = BidonError.NoAppropriateAdUnitId
             logError(
-                tag = Tag,
+                tag = TAG,
                 message = "No appropriate AdUnitId found. PriceFloor=${adParams.pricefloor}, " +
                     "but LineItem with max pricefloor=${param?.lineItem?.pricefloor}",
                 error = error
@@ -158,7 +158,7 @@ internal class AdmobInterstitialImpl :
     }
 
     override fun show(activity: Activity) {
-        logInfo(Tag, "Starting show: $this")
+        logInfo(TAG, "Starting show: $this")
         if (interstitialAd == null) {
             emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
         } else {
@@ -181,4 +181,4 @@ internal class AdmobInterstitialImpl :
     }
 }
 
-private const val Tag = "AdmobInterstitial"
+private const val TAG = "AdmobInterstitial"

@@ -61,7 +61,7 @@ internal class TestBiddingInterstitialImpl(
             Process.Succeed -> {
                 emitEvent(
                     AdEvent.Bid(
-                        AuctionResult.Bidding.Success(
+                        AuctionResult.Bidding(
                             adSource = this,
                             roundStatus = RoundStatus.Successful,
                         )

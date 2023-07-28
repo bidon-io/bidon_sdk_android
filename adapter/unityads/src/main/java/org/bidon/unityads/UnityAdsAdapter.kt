@@ -66,7 +66,7 @@ class UnityAdsAdapter :
                     }
 
                     override fun onInitializationFailed(error: UnityAds.UnityAdsInitializationError?, message: String?) {
-                        logError(Tag, "Error while initialization: $message, $error", error.asBidonError())
+                        logError(TAG, "Error while initialization: $message, $error", error.asBidonError())
                         continuation.resumeWithException(error.asBidonError())
                     }
                 }
@@ -99,4 +99,4 @@ class UnityAdsAdapter :
     }
 }
 
-private const val Tag = "UnityAdsAdapter"
+private const val TAG = "UnityAdsAdapter"

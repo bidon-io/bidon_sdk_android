@@ -21,11 +21,9 @@ import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
+import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
-import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceType.isTablet
@@ -58,7 +56,7 @@ internal class BMBannerAdImpl :
     private val requestListener by lazy {
         object : AdRequest.AdRequestListener<BannerRequest> {
             override fun onRequestSuccess(request: BannerRequest, result: BMAuctionResult) {
-                logInfo(Tag, "onRequestSuccess $result: $this")
+                logInfo(TAG, "onRequestSuccess $result: $this")
                 adRequest = request
                 when (isBiddingRequest) {
                     false -> {
@@ -68,7 +66,7 @@ internal class BMBannerAdImpl :
                     true -> {
                         emitEvent(
                             AdEvent.Bid(
-                                AuctionResult.Bidding.Success(
+                                AuctionResult.Bidding(
                                     adSource = this@BMBannerAdImpl,
                                     roundStatus = RoundStatus.Successful
                                 )
@@ -80,13 +78,13 @@ internal class BMBannerAdImpl :
 
             override fun onRequestFailed(request: BannerRequest, bmError: BMError) {
                 val error = bmError.asBidonErrorOnBid(demandId)
-                logError(Tag, "onRequestFailed $bmError. $this", error)
+                logError(TAG, "onRequestFailed $bmError. $this", error)
                 adRequest = request
                 emitEvent(AdEvent.LoadFailed(error))
             }
 
             override fun onRequestExpired(request: BannerRequest) {
-                logInfo(Tag, "onRequestExpired: $this")
+                logInfo(TAG, "onRequestExpired: $this")
                 adRequest = request
                 emitEvent(AdEvent.LoadFailed(BidonError.Expired(demandId)))
             }
@@ -96,20 +94,20 @@ internal class BMBannerAdImpl :
     private val bannerListener by lazy {
         object : BannerListener {
             override fun onAdLoaded(bannerView: BannerView) {
-                logInfo(Tag, "onAdLoaded: $this")
+                logInfo(TAG, "onAdLoaded: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 emitEvent(AdEvent.Fill(bannerView.asAd()))
             }
 
             override fun onAdLoadFailed(bannerView: BannerView, bmError: BMError) {
                 val error = bmError.asBidonErrorOnFill(demandId)
-                logError(Tag, "onAdLoadFailed: $this", error)
+                logError(TAG, "onAdLoadFailed: $this", error)
                 this@BMBannerAdImpl.bannerView = bannerView
                 emitEvent(AdEvent.LoadFailed(error))
             }
 
             override fun onAdImpression(bannerView: BannerView) {
-                logInfo(Tag, "onAdShown: $this")
+                logInfo(TAG, "onAdShown: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 // tracked impression/shown by [BannerView]
                 emitEvent(
@@ -121,13 +119,13 @@ internal class BMBannerAdImpl :
             }
 
             override fun onAdClicked(bannerView: BannerView) {
-                logInfo(Tag, "onAdClicked: $this")
+                logInfo(TAG, "onAdClicked: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 emitEvent(AdEvent.Clicked(bannerView.asAd()))
             }
 
             override fun onAdExpired(bannerView: BannerView) {
-                logInfo(Tag, "onAdExpired: $this")
+                logInfo(TAG, "onAdExpired: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 emitEvent(AdEvent.Expired(bannerView.asAd()))
             }
@@ -170,7 +168,7 @@ internal class BMBannerAdImpl :
     }
 
     override fun destroy() {
-        logInfo(Tag, "destroy $this")
+        logInfo(TAG, "destroy $this")
         adRequest?.destroy()
         adRequest = null
         bannerView?.setListener(null)
@@ -196,7 +194,7 @@ internal class BMBannerAdImpl :
     }
 
     private fun request(adParams: BMBannerAuctionParams, requestListener: AdRequest.AdRequestListener<BannerRequest>) {
-        logInfo(Tag, "Starting with $adParams: $this")
+        logInfo(TAG, "Starting with $adParams: $this")
         context = adParams.context
         bannerFormat = adParams.bannerFormat
         val requestBuilder = BannerRequest.Builder()
@@ -216,7 +214,7 @@ internal class BMBannerAdImpl :
     }
 
     private fun fillRequest(adRequest: BannerRequest?) {
-        logInfo(Tag, "Starting fill: $this")
+        logInfo(TAG, "Starting fill: $this")
         val context = context
         if (context == null) {
             emitEvent(AdEvent.LoadFailed(BidonError.NoContextFound))
@@ -255,4 +253,4 @@ internal class BMBannerAdImpl :
     }
 }
 
-private const val Tag = "BidMachineBanner"
+private const val TAG = "BidMachineBanner"

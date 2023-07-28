@@ -98,7 +98,7 @@ fun BannerScreen(navController: NavHostController) {
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 50.dp),
                     factory = { context ->
-                        logInfo(Tag, "AndroidView factory")
+                        logInfo(TAG, "AndroidView factory")
                         BannerView(
                             context = context,
                         ).apply {
@@ -143,7 +143,7 @@ fun BannerScreen(navController: NavHostController) {
                         }
                     },
                     update = {
-                        logInfo(Tag, "AndroidView update: $it")
+                        logInfo(TAG, "AndroidView update: $it")
                     }
                 )
             }
@@ -188,7 +188,7 @@ fun BannerScreen(navController: NavHostController) {
             }
             Row {
                 AppButton(text = "Show") {
-                    logInfo(Tag, "Recompose. ShowClicked: $bannerView")
+                    logInfo(TAG, "Recompose. ShowClicked: $bannerView")
                     bannerView?.showAd()
                 }
                 Spacer(modifier = Modifier.padding(horizontal = 4.dp))
@@ -265,8 +265,8 @@ private fun MutableState<List<String>>.log(string: String) {
     synchronized(this) {
         this.value = this.value + string
     }
-    logInfo(Tag, string)
+    logInfo(TAG, string)
 }
 
-private const val Tag = "BannerScreen"
+private const val TAG = "BannerScreen"
 private const val DefaultAutoRefreshTimeoutMs = 10000L

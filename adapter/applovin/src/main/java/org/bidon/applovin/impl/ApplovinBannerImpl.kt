@@ -46,7 +46,7 @@ internal class ApplovinBannerImpl(
     private val listener by lazy {
         object : AppLovinAdDisplayListener, AppLovinAdClickListener {
             override fun adDisplayed(ad: AppLovinAd) {
-                logInfo(Tag, "adDisplayed: $ad")
+                logInfo(TAG, "adDisplayed: $ad")
                 emitEvent(
                     AdEvent.PaidRevenue(
                         ad = ad.asAd(),
@@ -57,12 +57,12 @@ internal class ApplovinBannerImpl(
             }
 
             override fun adHidden(ad: AppLovinAd) {
-                logInfo(Tag, "adHidden: $ad")
+                logInfo(TAG, "adHidden: $ad")
                 emitEvent(AdEvent.ShowFailed(BidonError.NoFill(demandId)))
             }
 
             override fun adClicked(ad: AppLovinAd) {
-                logInfo(Tag, "adClicked: $ad")
+                logInfo(TAG, "adClicked: $ad")
                 emitEvent(AdEvent.Clicked(ad.asAd()))
             }
         }
@@ -72,7 +72,7 @@ internal class ApplovinBannerImpl(
         get() = applovinAd != null
 
     override fun destroy() {
-        logInfo(Tag, "destroy $this")
+        logInfo(TAG, "destroy $this")
         adView?.setAdLoadListener(null)
         adView = null
         applovinAd = null
@@ -92,7 +92,7 @@ internal class ApplovinBannerImpl(
     }
 
     override fun fill(adParams: ApplovinBannerAuctionParams) {
-        logInfo(Tag, "Starting with $adParams: $this")
+        logInfo(TAG, "Starting with $adParams: $this")
         param = adParams
         val adSize = adParams.bannerFormat.asApplovinAdSize() ?: error(
             BidonError.AdFormatIsNotSupported(
@@ -108,13 +108,13 @@ internal class ApplovinBannerImpl(
             }
         val requestListener = object : AppLovinAdLoadListener {
             override fun adReceived(ad: AppLovinAd) {
-                logInfo(Tag, "adReceived: $this")
+                logInfo(TAG, "adReceived: $this")
                 applovinAd = ad
                 emitEvent(AdEvent.Fill(requireNotNull(ad.asAd())))
             }
 
             override fun failedToReceiveAd(errorCode: Int) {
-                logInfo(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
+                logInfo(TAG, "failedToReceiveAd: errorCode=$errorCode. $this")
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
@@ -164,4 +164,4 @@ internal class ApplovinBannerImpl(
     }
 }
 
-private const val Tag = "ApplovinBanner"
+private const val TAG = "ApplovinBanner"

@@ -43,11 +43,11 @@ internal class ApplovinInterstitialImpl(
     private val requestListener by lazy {
         object : AppLovinAdLoadListener {
             override fun adReceived(ad: AppLovinAd) {
-                logInfo(Tag, "adReceived: $this")
+                logInfo(TAG, "adReceived: $this")
                 applovinAd = ad
                 emitEvent(
                     AdEvent.Bid(
-                        AuctionResult.Network.Success(
+                        AuctionResult.Network(
                             adSource = this@ApplovinInterstitialImpl,
                             roundStatus = RoundStatus.Successful
                         )
@@ -56,7 +56,7 @@ internal class ApplovinInterstitialImpl(
             }
 
             override fun failedToReceiveAd(errorCode: Int) {
-                logInfo(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
+                logInfo(TAG, "failedToReceiveAd: errorCode=$errorCode. $this")
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
@@ -71,7 +71,7 @@ internal class ApplovinInterstitialImpl(
             override fun videoPlaybackEnded(ad: AppLovinAd, percentViewed: Double, fullyWatched: Boolean) {}
 
             override fun adDisplayed(ad: AppLovinAd) {
-                logInfo(Tag, "adDisplayed: $this")
+                logInfo(TAG, "adDisplayed: $this")
                 emitEvent(AdEvent.Shown(ad.asAd()))
                 emitEvent(
                     AdEvent.PaidRevenue(
@@ -82,12 +82,12 @@ internal class ApplovinInterstitialImpl(
             }
 
             override fun adHidden(ad: AppLovinAd) {
-                logInfo(Tag, "adHidden: $this")
+                logInfo(TAG, "adHidden: $this")
                 emitEvent(AdEvent.Closed(ad.asAd()))
             }
 
             override fun adClicked(ad: AppLovinAd) {
-                logInfo(Tag, "adClicked: $this")
+                logInfo(TAG, "adClicked: $this")
                 emitEvent(AdEvent.Clicked(ad.asAd()))
             }
         }
@@ -97,7 +97,7 @@ internal class ApplovinInterstitialImpl(
         get() = applovinAd != null
 
     override fun destroy() {
-        logInfo(Tag, "destroy")
+        logInfo(TAG, "destroy")
         applovinAd = null
     }
 
@@ -114,7 +114,7 @@ internal class ApplovinInterstitialImpl(
     }
 
     override fun fill(adParams: ApplovinFullscreenAdAuctionParams) {
-        logInfo(Tag, "Starting with $adParams: $this")
+        logInfo(TAG, "Starting with $adParams: $this")
         lineItem = adParams.lineItem
         val adService: AppLovinAdService = applovinSdk.adService
         val zoneId = adParams.lineItem.adUnitId
@@ -124,13 +124,13 @@ internal class ApplovinInterstitialImpl(
             adService.loadNextAdForZoneId(zoneId, requestListener)
         }
         runCatching {
-            logInfo(Tag, "Starting fill: $this")
+            logInfo(TAG, "Starting fill: $this")
             emitEvent(AdEvent.Fill(requireNotNull(applovinAd?.asAd())))
         }
     }
 
     override fun show(activity: Activity) {
-        logInfo(Tag, "Starting show: $this")
+        logInfo(TAG, "Starting show: $this")
         val applovinAd = applovinAd
         if (applovinAd != null) {
             val adDialog = AppLovinInterstitialAd.create(applovinSdk, activity).apply {
@@ -158,4 +158,4 @@ internal class ApplovinInterstitialImpl(
     }
 }
 
-private const val Tag = "ApplovinInterstitial"
+private const val TAG = "ApplovinInterstitial"

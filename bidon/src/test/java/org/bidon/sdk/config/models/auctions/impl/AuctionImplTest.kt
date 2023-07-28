@@ -18,6 +18,7 @@ import org.bidon.sdk.ads.banner.helper.DeviceType
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.impl.AuctionImpl
+import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.Round
@@ -59,7 +60,10 @@ internal class AuctionImplTest : ConcurrentTest() {
     private val statRequestUseCase: StatsRequestUseCase by lazy { mockk(relaxed = true) }
 
     private val auctionStat: AuctionStat by lazy {
-        AuctionStatImpl(statRequestUseCase)
+        AuctionStatImpl(
+            statRequestUseCase,
+            resolver = MaxEcpmAuctionResolver
+        )
     }
 
     private val testee: Auction by lazy {
@@ -120,7 +124,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                     biddingIds = listOf(),
                 ),
                 Round(
-                    id = "round_2",
+                    id = "ROUND_2",
                     timeoutMs = 25,
                     demandIds = listOf(Admob),
                     biddingIds = listOf(),
@@ -171,7 +175,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 requireNotNull(winnerAd)
                 assertThat(winnerAd.adUnitId).isEqualTo("admob2")
                 assertThat(winnerAd.ecpm).isEqualTo(2.2235)
-                assertThat(winnerAd.roundId).isEqualTo("round_2")
+                assertThat(winnerAd.roundId).isEqualTo("ROUND_2")
                 assertThat(winner.adSource.getStats().ecpm).isEqualTo(2.2235)
                 val roundStat = slot<List<RoundStat>>()
                 val demandAd = slot<DemandAd>()
@@ -182,17 +186,17 @@ internal class AuctionImplTest : ConcurrentTest() {
                 assertThat(actualRoundStat[0].auctionId).isEqualTo("auctionId_123")
                 assertThat(actualRoundStat[0].roundId).isEqualTo("round_1")
                 assertThat(actualRoundStat[0].demands).hasSize(2)
-                assertThat(actualRoundStat[0].demands[0].roundStatus).isEqualTo(RoundStatus.Lose)
+                assertThat(actualRoundStat[0].demands[0].roundStatusCode).isEqualTo(RoundStatus.Lose.code)
                 assertThat(actualRoundStat[0].demands[0].ecpm).isEqualTo(1.2235)
                 assertThat(actualRoundStat[0].demands[0].fillStartTs).isNull()
-                assertThat(actualRoundStat[0].demands[1].roundStatus).isEqualTo(RoundStatus.Lose)
+                assertThat(actualRoundStat[0].demands[1].roundStatusCode).isEqualTo(RoundStatus.Lose.code)
                 assertThat(actualRoundStat[0].demands[1].ecpm).isEqualTo(0.25)
                 assertThat(actualRoundStat[0].demands[1].fillStartTs).isNull()
                 // WINNER
                 assertThat(actualRoundStat[1].auctionId).isEqualTo("auctionId_123")
-                assertThat(actualRoundStat[1].roundId).isEqualTo("round_2")
+                assertThat(actualRoundStat[1].roundId).isEqualTo("ROUND_2")
                 assertThat(actualRoundStat[1].demands).hasSize(1)
-                assertThat(actualRoundStat[1].demands[0].roundStatus).isEqualTo(RoundStatus.Win)
+                assertThat(actualRoundStat[1].demands[0].roundStatusCode).isEqualTo(RoundStatus.Win.code)
                 assertThat(actualRoundStat[1].demands[0].ecpm).isEqualTo(2.2235)
                 assertThat(actualRoundStat[1].demands[0].adUnitId).isEqualTo("admob2")
                 assertThat(actualRoundStat[1].demands[0].fillStartTs).isNotNull()
@@ -355,7 +359,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 biddingIds = listOf(),
             ),
             Round(
-                id = "round_2",
+                id = "ROUND_2",
                 timeoutMs = 25,
                 demandIds = listOf(Admob),
                 biddingIds = listOf(),
