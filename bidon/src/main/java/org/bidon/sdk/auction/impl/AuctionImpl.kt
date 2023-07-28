@@ -95,7 +95,7 @@ internal class AuctionImpl(
 
                         // Finding winner / notifying losers
                         val finalResults = resultsCollector.getAll()
-                        logInfo(TAG, "Action finished with ${finalResults.size} results")
+                        logInfo(TAG, "Action finished with ${finalResults.size} results (keep maximum ${ResultsCollector.MaxAuctionResultsAmount})")
                         finalResults.forEachIndexed { index, auctionResult ->
                             logInfo(TAG, "Action result #$index: $auctionResult")
                         }
