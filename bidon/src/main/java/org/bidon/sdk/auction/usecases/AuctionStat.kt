@@ -373,7 +373,6 @@ internal class AuctionStatImpl(
     ): ResultBody {
         val isSucceed = winner?.roundStatus == RoundStatus.Successful
         val stat = winner?.adSource?.getStats()
-        logInfo(TAG, "isSucceed=$isSucceed, stat: $stat")
         return ResultBody(
             status = when {
                 isAuctionCanceled -> RoundStatus.AuctionCancelled.code
