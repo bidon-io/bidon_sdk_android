@@ -177,7 +177,7 @@ internal class ExecuteRoundUseCaseImpl(
         round: Round,
         adSources: List<AdLoadingType.Bidding<AdAuctionParams>>
     ) {
-        (round.demandIds - adSources.map { (it as AdSource<*>).demandId.demandId }.toSet())
+        (round.biddingIds - adSources.map { (it as AdSource<*>).demandId.demandId }.toSet())
             .takeIf { it.isNotEmpty() }
             ?.also { unknownDemandIds ->
                 logError(
