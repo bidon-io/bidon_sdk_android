@@ -108,7 +108,8 @@ internal class AuctionStatImpl(
                             roundStatusCode = RoundStatus.values().first {
                                 it.code == bid.roundStatusCode
                             }.getFinalStatus(
-                                isWinner = bid.demandId == (winner as? AuctionResult.Bidding)?.adSource?.demandId?.demandId
+                                isWinner = bid.demandId != null &&
+                                    bid.demandId == (winner as? AuctionResult.Bidding)?.adSource?.demandId?.demandId
                             ).code
                         )
                     }
@@ -298,6 +299,7 @@ internal class AuctionStatImpl(
                                     ecpm = null,
                                 )
                             }
+
                             is AuctionResult.Network -> error("unexpected")
                         }
                     }

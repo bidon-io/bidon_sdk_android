@@ -97,6 +97,7 @@ internal class ConductBiddingAuctionUseCaseImpl(
                         round = round
                     )
                 }
+                Unit
             } ?: run {
                 resultsCollector.biddingTimeoutReached()
             }
