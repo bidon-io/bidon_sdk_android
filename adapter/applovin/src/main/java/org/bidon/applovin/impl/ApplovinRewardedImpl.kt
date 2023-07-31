@@ -20,7 +20,6 @@ import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.models.LineItem
-import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -106,11 +105,8 @@ internal class ApplovinRewardedImpl(
 
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = lineItems
-                .minByPricefloorOrNull(demandId, pricefloor)
-                ?.also(onLineItemConsumed)
             ApplovinFullscreenAdAuctionParams(
-                lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
+                lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
                 timeoutMs = timeout,
             )
         }
@@ -127,7 +123,7 @@ internal class ApplovinRewardedImpl(
             override fun adReceived(ad: AppLovinAd) {
                 logInfo(TAG, "adReceived: $this")
                 applovinAd = ad
-                emitEvent(AdEvent.Fill(requireNotNull(applovinAd?.asAd())))
+                emitEvent(AdEvent.Fill(ad.asAd()))
             }
 
             override fun failedToReceiveAd(errorCode: Int) {
@@ -135,6 +131,7 @@ internal class ApplovinRewardedImpl(
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
+        logInfo(TAG, "Starting fill: $this")
         incentivizedInterstitial.preload(requestListener)
     }
 

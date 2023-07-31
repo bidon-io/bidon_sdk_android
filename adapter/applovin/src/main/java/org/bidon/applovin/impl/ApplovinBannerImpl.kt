@@ -20,7 +20,6 @@ import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceType.isTablet
-import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -80,12 +79,9 @@ internal class ApplovinBannerImpl(
 
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = lineItems
-                .minByPricefloorOrNull(demandId, pricefloor)
-                ?.also(onLineItemConsumed)
             ApplovinBannerAuctionParams(
                 context = activity.applicationContext,
-                lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
+                lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
                 bannerFormat = bannerFormat
             )
         }
@@ -110,7 +106,7 @@ internal class ApplovinBannerImpl(
             override fun adReceived(ad: AppLovinAd) {
                 logInfo(TAG, "adReceived: $this")
                 applovinAd = ad
-                emitEvent(AdEvent.Fill(requireNotNull(ad.asAd())))
+                emitEvent(AdEvent.Fill(ad.asAd()))
             }
 
             override fun failedToReceiveAd(errorCode: Int) {

@@ -1,34 +1,29 @@
-package org.bidon.sdk.auction.impl
+package org.bidon.sdk.auction.usecases.impl
 
 import kotlinx.coroutines.withContext
 import org.bidon.sdk.BidonSdk
-import org.bidon.sdk.adapter.AdapterInfo
-import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.banner.helper.GetOrientationUseCase
 import org.bidon.sdk.ads.ext.asAdRequestBody
 import org.bidon.sdk.ads.ext.asAdType
 import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.models.AdObjectRequest
-import org.bidon.sdk.auction.models.AuctionResponse
-import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
+import org.bidon.sdk.auction.models.BidRequest
+import org.bidon.sdk.auction.models.BiddingResponse
+import org.bidon.sdk.auction.usecases.BidRequestUseCase
 import org.bidon.sdk.databinders.DataBinderType
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
-import org.bidon.sdk.segment.SegmentSynchronizer
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.json.JsonParsers
 import org.bidon.sdk.utils.networking.JsonHttpRequest
 import org.bidon.sdk.utils.networking.requests.CreateRequestBodyUseCase
+import java.util.UUID
 
-/**
- * Created by Bidon Team on 06/02/2023.
- */
-internal class GetAuctionRequestUseCaseImpl(
+internal class BidRequestUseCaseImpl(
     private val createRequestBody: CreateRequestBodyUseCase,
     private val getOrientation: GetOrientationUseCase,
-    private val segmentSynchronizer: SegmentSynchronizer,
-) : GetAuctionRequestUseCase {
+) : BidRequestUseCase {
     private val binders: List<DataBinderType> = listOf(
         DataBinderType.AvailableAdapters,
         DataBinderType.Device,
@@ -41,35 +36,43 @@ internal class GetAuctionRequestUseCaseImpl(
         DataBinderType.Test,
     )
 
-    override suspend fun request(
-        additionalData: AdTypeParam,
+    override suspend fun invoke(
+        adTypeParam: AdTypeParam,
+        tokens: List<Pair<DemandId, String>>,
+        extras: Map<String, Any>,
+        bidfloor: Double,
         auctionId: String,
-        demandAd: DemandAd,
-        adapters: Map<String, AdapterInfo>,
-    ): Result<AuctionResponse> {
+        roundId: String,
+        auctionConfigurationId: Int?,
+    ): Result<BiddingResponse> {
         return withContext(SdkDispatchers.IO) {
-            val (banner, interstitial, rewarded) = additionalData.asAdRequestBody()
-            val adObject = AdObjectRequest(
+            val (banner, interstitial, rewarded) = adTypeParam.asAdRequestBody()
+            val bidRequestBody = BidRequest(
                 auctionId = auctionId,
+                impressionId = UUID.randomUUID().toString(),
+                demands = tokens.associate { (demandId, token) ->
+                    demandId.demandId to BidRequest.Token(token)
+                },
+                bidfloor = bidfloor,
+                orientationCode = getOrientation().code,
+                roundId = roundId,
+                auctionConfigurationId = auctionConfigurationId,
                 banner = banner,
                 interstitial = interstitial,
                 rewarded = rewarded,
-                orientationCode = getOrientation().code,
-                pricefloor = additionalData.pricefloor
             )
             val requestBody = createRequestBody(
                 binders = binders,
-                dataKeyName = "ad_object",
-                data = adObject,
-                extras = BidonSdk.getExtras() + demandAd.getExtras()
+                dataKeyName = "imp",
+                data = bidRequestBody,
+                extras = BidonSdk.getExtras() + extras
             )
             logInfo(TAG, "Request body: $requestBody")
             get<JsonHttpRequest>().invoke(
-                path = "$AuctionRequestPath/${additionalData.asAdType().code}",
+                path = "$BidRequestPath/${adTypeParam.asAdType().code}",
                 body = requestBody,
             ).mapCatching { jsonResponse ->
-                segmentSynchronizer.parseSegmentId(jsonResponse)
-                requireNotNull(JsonParsers.parseOrNull<AuctionResponse>(jsonResponse))
+                requireNotNull(JsonParsers.parseOrNull<BiddingResponse>(jsonResponse))
             }.onFailure {
                 logError(TAG, "Error while loading auction data", it)
             }.onSuccess {
@@ -79,5 +82,5 @@ internal class GetAuctionRequestUseCaseImpl(
     }
 }
 
-private const val AuctionRequestPath = "auction"
-private const val TAG = "AuctionRequestUseCase"
+private const val TAG = "BidRequestUseCase"
+private const val BidRequestPath = "bidding"

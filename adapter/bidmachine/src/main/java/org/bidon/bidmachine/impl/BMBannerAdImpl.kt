@@ -29,7 +29,7 @@ import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceType.isTablet
 import org.bidon.sdk.ads.banner.helper.getHeightDp
 import org.bidon.sdk.ads.banner.helper.getWidthDp
-import org.bidon.sdk.auction.AuctionResult
+import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -162,7 +162,7 @@ internal class BMBannerAdImpl :
                 timeout = timeout,
                 context = activity.applicationContext,
                 bannerFormat = bannerFormat,
-                payload = payload
+                payload = json?.optString("payload")
             )
         }
     }

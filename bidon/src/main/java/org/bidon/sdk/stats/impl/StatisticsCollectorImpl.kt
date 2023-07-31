@@ -6,9 +6,9 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
-import org.bidon.sdk.auction.models.BannerRequestBody
-import org.bidon.sdk.auction.models.InterstitialRequestBody
-import org.bidon.sdk.auction.models.RewardedRequestBody
+import org.bidon.sdk.auction.models.BannerRequest
+import org.bidon.sdk.auction.models.InterstitialRequest
+import org.bidon.sdk.auction.models.RewardedRequest
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
@@ -249,18 +249,18 @@ class StatisticsCollectorImpl : StatisticsCollector {
         )
     }
 
-    private fun getData(adType: StatisticsCollector.AdType): Triple<BannerRequestBody?, InterstitialRequestBody?, RewardedRequestBody?> {
+    private fun getData(adType: StatisticsCollector.AdType): Triple<BannerRequest?, InterstitialRequest?, RewardedRequest?> {
         return when (adType) {
             is StatisticsCollector.AdType.Banner -> {
-                Triple(BannerRequestBody(formatCode = adType.format.code), null, null)
+                Triple(BannerRequest(formatCode = adType.format.code), null, null)
             }
 
             StatisticsCollector.AdType.Interstitial -> {
-                Triple(null, InterstitialRequestBody(), null)
+                Triple(null, InterstitialRequest(), null)
             }
 
             StatisticsCollector.AdType.Rewarded -> {
-                Triple(null, null, RewardedRequestBody())
+                Triple(null, null, RewardedRequest())
             }
         }
     }

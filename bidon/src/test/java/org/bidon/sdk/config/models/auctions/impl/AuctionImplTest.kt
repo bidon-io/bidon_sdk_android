@@ -21,11 +21,11 @@ import org.bidon.sdk.auction.impl.AuctionImpl
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.LineItem
-import org.bidon.sdk.auction.models.Round
+import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.AuctionStat
-import org.bidon.sdk.auction.usecases.AuctionStatImpl
+import org.bidon.sdk.auction.usecases.ExecuteRoundUseCase
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
-import org.bidon.sdk.auction.usecases.models.ExecuteRoundUseCase
+import org.bidon.sdk.auction.usecases.impl.AuctionStatImpl
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.config.models.adapters.Process
 import org.bidon.sdk.config.models.adapters.TestAdapter
@@ -117,13 +117,13 @@ internal class AuctionImplTest : ConcurrentTest() {
         )
         val auctionConfig = AuctionResponse(
             rounds = listOf(
-                Round(
+                RoundRequest(
                     id = "round_1",
                     timeoutMs = 15,
                     demandIds = listOf(Applovin, Admob),
                     biddingIds = listOf(),
                 ),
-                Round(
+                RoundRequest(
                     id = "ROUND_2",
                     timeoutMs = 25,
                     demandIds = listOf(Admob),
@@ -352,13 +352,13 @@ internal class AuctionImplTest : ConcurrentTest() {
 
     private fun getAuctionResponse() = AuctionResponse(
         rounds = listOf(
-            Round(
+            RoundRequest(
                 id = "round_1",
                 timeoutMs = 15,
                 demandIds = listOf(Applovin, Admob),
                 biddingIds = listOf(),
             ),
-            Round(
+            RoundRequest(
                 id = "ROUND_2",
                 timeoutMs = 25,
                 demandIds = listOf(Admob),

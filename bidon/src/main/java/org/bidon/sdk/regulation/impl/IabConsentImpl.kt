@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.bidon.sdk.regulation.impl
 
 import android.content.Context

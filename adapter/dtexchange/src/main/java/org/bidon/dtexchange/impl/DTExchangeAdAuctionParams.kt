@@ -21,10 +21,11 @@ class DTExchangeBannerAuctionParams(
     val bannerFormat: BannerFormat,
     val lineItem: LineItem,
 ) : AdAuctionParams {
-    override val adUnitId: String get() = requireNotNull(lineItem.adUnitId)
+    val spotId: String get() = requireNotNull(lineItem.adUnitId)
+    override val adUnitId: String? get() = lineItem.adUnitId
     override val pricefloor: Double get() = lineItem.pricefloor
 
     override fun toString(): String {
-        return "DTExchangeBannerAuctionParams(bannerFormat=$bannerFormat, lineItem=$lineItem, pricefloor=$pricefloor)"
+        return "DTExchangeBannerAuctionParams(bannerFormat=$bannerFormat, lineItem=$lineItem)"
     }
 }

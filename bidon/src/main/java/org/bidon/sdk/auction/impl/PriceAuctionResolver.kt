@@ -1,7 +1,7 @@
 package org.bidon.sdk.auction.impl
 
 import org.bidon.sdk.auction.AuctionResolver
-import org.bidon.sdk.auction.AuctionResult
+import org.bidon.sdk.auction.models.AuctionResult
 
 /**
  * Created by Bidon Team on 06/02/2023.

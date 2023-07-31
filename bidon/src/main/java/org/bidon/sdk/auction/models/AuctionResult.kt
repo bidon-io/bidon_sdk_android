@@ -1,4 +1,4 @@
-package org.bidon.sdk.auction
+package org.bidon.sdk.auction.models
 
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.stats.models.RoundStatus

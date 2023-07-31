@@ -14,7 +14,6 @@ import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceType
-import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
@@ -38,11 +37,8 @@ internal class UnityAdsBanner :
 
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = lineItems
-                .minByPricefloorOrNull(demandId, pricefloor)
-                ?.also(onLineItemConsumed) ?: error(BidonError.NoAppropriateAdUnitId)
             UnityAdsBannerAuctionParams(
-                lineItem = lineItem,
+                lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
                 bannerFormat = bannerFormat,
                 activity = activity,
             )
@@ -61,59 +57,49 @@ internal class UnityAdsBanner :
     override fun fill(adParams: UnityAdsBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
         param = adParams
-        val adUnitId = adParams.adUnitId
-        if (adUnitId.isNotBlank()) {
-            val unityBannerSize = when (adParams.bannerFormat) {
-                BannerFormat.LeaderBoard -> UnityBannerSize(728, 90)
-                BannerFormat.Banner -> UnityBannerSize(320, 50)
-                BannerFormat.Adaptive -> if (DeviceType.isTablet) {
-                    UnityBannerSize(728, 90)
-                } else {
-                    UnityBannerSize(320, 50)
-                }
-
-                BannerFormat.MRec -> UnityBannerSize(300, 250)
+        val adUnitId = requireNotNull(adParams.lineItem.adUnitId)
+        val unityBannerSize = when (adParams.bannerFormat) {
+            BannerFormat.LeaderBoard -> UnityBannerSize(728, 90)
+            BannerFormat.Banner -> UnityBannerSize(320, 50)
+            BannerFormat.Adaptive -> if (DeviceType.isTablet) {
+                UnityBannerSize(728, 90)
+            } else {
+                UnityBannerSize(320, 50)
             }
-            val adView = BannerView(adParams.activity, adParams.adUnitId, unityBannerSize).also {
-                bannerAdView = it
-            }
-            adView.listener = object : BannerView.IListener {
-                override fun onBannerLoaded(bannerAdView: BannerView?) {
-                    this@UnityAdsBanner.bannerAdView = bannerAdView
-                    isAdReadyToShow = true
-                    emitEvent(AdEvent.Fill(requireNotNull(bannerAdView?.asAd())))
-                }
 
-                override fun onBannerClick(bannerAdView: BannerView?) {
-                    logInfo(TAG, "onAdClicked: $this")
-                    bannerAdView?.let {
-                        emitEvent(AdEvent.Clicked(it.asAd()))
-                    }
-                }
-
-                override fun onBannerFailedToLoad(
-                    bannerAdView: BannerView?,
-                    errorInfo: BannerErrorInfo?
-                ) {
-                    val cause = errorInfo.asBidonError()
-                    logError(TAG, "Error while loading ad: $errorInfo. $this", cause)
-                    isAdReadyToShow = false
-                    emitEvent(AdEvent.LoadFailed(cause))
-                }
-
-                override fun onBannerLeftApplication(bannerView: BannerView?) {
-                }
-            }
-            adView.load()
-        } else {
-            val error = BidonError.NoAppropriateAdUnitId
-            logError(
-                tag = TAG,
-                message = "No appropriate AdUnitId found for price_floor=${adParams.lineItem.pricefloor}",
-                error = error
-            )
-            emitEvent(AdEvent.LoadFailed(error))
+            BannerFormat.MRec -> UnityBannerSize(300, 250)
         }
+        val adView = BannerView(adParams.activity, adUnitId, unityBannerSize).also {
+            bannerAdView = it
+        }
+        adView.listener = object : BannerView.IListener {
+            override fun onBannerLoaded(bannerAdView: BannerView?) {
+                this@UnityAdsBanner.bannerAdView = bannerAdView
+                isAdReadyToShow = true
+                emitEvent(AdEvent.Fill(requireNotNull(bannerAdView?.asAd())))
+            }
+
+            override fun onBannerClick(bannerAdView: BannerView?) {
+                logInfo(TAG, "onAdClicked: $this")
+                bannerAdView?.let {
+                    emitEvent(AdEvent.Clicked(it.asAd()))
+                }
+            }
+
+            override fun onBannerFailedToLoad(
+                bannerAdView: BannerView?,
+                errorInfo: BannerErrorInfo?
+            ) {
+                val cause = errorInfo.asBidonError()
+                logError(TAG, "Error while loading ad: $errorInfo. $this", cause)
+                isAdReadyToShow = false
+                emitEvent(AdEvent.LoadFailed(cause))
+            }
+
+            override fun onBannerLeftApplication(bannerView: BannerView?) {
+            }
+        }
+        adView.load()
     }
 
     override fun destroy() {
@@ -131,7 +117,7 @@ internal class UnityAdsBanner :
         roundId = roundId,
         currencyCode = AdValue.USD,
         auctionId = auctionId,
-        adUnitId = param?.adUnitId
+        adUnitId = param?.lineItem?.adUnitId
     )
 }
 

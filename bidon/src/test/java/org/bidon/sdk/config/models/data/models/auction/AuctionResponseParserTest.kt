@@ -3,7 +3,7 @@ package org.bidon.sdk.config.models.data.models.auction
 import com.google.common.truth.Truth.assertThat
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.LineItem
-import org.bidon.sdk.auction.models.Round
+import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.utils.json.JsonParsers
 import org.junit.Test
 
@@ -24,13 +24,13 @@ internal class AuctionResponseParserTest {
 
     private val expectedModel = AuctionResponse(
         rounds = listOf(
-            Round(
+            RoundRequest(
                 id = "postbid",
                 timeoutMs = 15,
                 demandIds = listOf("admob", "bidmachine"),
                 biddingIds = listOf(),
             ),
-            Round(
+            RoundRequest(
                 id = "prebid",
                 timeoutMs = 25,
                 demandIds = listOf("bidmachine"),

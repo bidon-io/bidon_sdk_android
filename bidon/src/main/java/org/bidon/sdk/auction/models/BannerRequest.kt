@@ -6,9 +6,9 @@ import org.bidon.sdk.utils.serializer.Serializable
 /**
  * Created by Bidon Team on 06/02/2023.
  *
- * @param [formatCode] is a [BannerRequestBody.StatFormat.code]
+ * @param [formatCode] is a [BannerRequest.StatFormat.code]
  */
-data class BannerRequestBody(
+data class BannerRequest(
     @field:JsonName("format")
     val formatCode: String,
 ) : Serializable {

@@ -1,4 +1,4 @@
-package org.bidon.sdk.auction.usecases
+package org.bidon.sdk.auction.usecases.impl
 
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
@@ -12,38 +12,19 @@ import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
-import org.bidon.sdk.auction.models.Round
+import org.bidon.sdk.auction.models.RoundRequest
+import org.bidon.sdk.auction.usecases.ConductNetworkRoundUseCase
+import org.bidon.sdk.auction.usecases.models.NetworksResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.asRoundStatus
 
-/**
- * Created by Aleksei Cherniaev on 31/05/2023.
- */
-internal interface ConductNetworkAuctionUseCase {
-    /**
-     * @param participantIds Bidding Demand Ids
-     */
-    fun invoke(
-        context: Context,
-        networkSources: List<AdLoadingType.Network<AdAuctionParams>>,
-        participantIds: List<String>,
-        adTypeParam: AdTypeParam,
-        demandAd: DemandAd,
-        lineItems: List<LineItem>,
-        round: Round,
-        pricefloor: Double,
-        scope: CoroutineScope,
-        resultsCollector: ResultsCollector,
-    ): DeferredRoundResult
-}
-
 @Suppress("UNCHECKED_CAST")
-internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
+internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
     override fun invoke(
         context: Context,
         networkSources: List<AdLoadingType.Network<AdAuctionParams>>,
@@ -51,11 +32,11 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
         adTypeParam: AdTypeParam,
         demandAd: DemandAd,
         lineItems: List<LineItem>,
-        round: Round,
+        round: RoundRequest,
         pricefloor: Double,
         scope: CoroutineScope,
         resultsCollector: ResultsCollector,
-    ): DeferredRoundResult {
+    ): NetworksResult {
         val mutableLineItems = lineItems.toMutableList()
         runCatching {
             val participants = networkSources.filter {
@@ -94,12 +75,12 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
                     }
                 }
             }
-            return DeferredRoundResult(
+            return NetworksResult(
                 results = deferredList,
                 remainingLineItems = mutableLineItems.toList()
             )
         }.getOrNull() ?: run {
-            return DeferredRoundResult(
+            return NetworksResult(
                 results = emptyList(),
                 remainingLineItems = lineItems
             )
@@ -110,7 +91,7 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
         adSource: AdLoadingType.Network<AdAuctionParams>,
         adTypeParam: AdTypeParam,
         pricefloor: Double,
-        round: Round,
+        round: RoundRequest,
         availableLineItemsForDemand: List<LineItem>,
         onLineItemConsumed: (LineItem) -> Unit
     ): AdEvent {
@@ -171,4 +152,4 @@ internal class ConductNetworkAuctionUseCaseImpl : ConductNetworkAuctionUseCase {
     }
 }
 
-private const val TAG = "ConductNetworkAuctionUseCase"
+private const val TAG = "ConductNetworkNetworkUseCase"

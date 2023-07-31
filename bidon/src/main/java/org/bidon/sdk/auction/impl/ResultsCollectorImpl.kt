@@ -1,12 +1,16 @@
-package org.bidon.sdk.auction
+package org.bidon.sdk.auction.impl
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import org.bidon.sdk.adapter.WinLossNotifiable
-import org.bidon.sdk.auction.AuctionResult.UnknownAdapter.Type
-import org.bidon.sdk.auction.models.Bid
-import org.bidon.sdk.auction.models.Round
+import org.bidon.sdk.auction.AuctionResolver
+import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.models.AuctionResult
+import org.bidon.sdk.auction.models.AuctionResult.UnknownAdapter.Type
+import org.bidon.sdk.auction.models.BidResponse
+import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.models.BiddingResult
+import org.bidon.sdk.auction.usecases.models.RoundResult
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.models.RoundStatus
@@ -33,7 +37,7 @@ internal class ResultsCollectorImpl(
         }
     }
 
-    override fun serverBiddingFinished(bids: List<Bid>?) {
+    override fun serverBiddingFinished(bids: List<BidResponse>?) {
         roundResult.update { curRoundResult ->
             require(curRoundResult is RoundResult.Results)
             RoundResult.Results(
@@ -60,7 +64,7 @@ internal class ResultsCollectorImpl(
         }
     }
 
-    override fun startRound(round: Round, pricefloor: Double) {
+    override fun startRound(round: RoundRequest, pricefloor: Double) {
         roundResult.value = RoundResult.Results(
             biddingResult = BiddingResult.ServerBiddingStarted(serverBiddingStartTs = SystemTimeNow),
             networkResults = emptyList(),

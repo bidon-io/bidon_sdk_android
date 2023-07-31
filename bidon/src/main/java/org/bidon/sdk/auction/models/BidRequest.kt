@@ -6,9 +6,9 @@ import org.bidon.sdk.utils.serializer.Serializable
 /**
  * Created by Aleksei Cherniaev on 31/05/2023.
  *
- * @param orientationCode is [AdObjectRequestBody.Orientation.code]
+ * @param orientationCode is [AdObjectRequest.Orientation.code]
  */
-internal data class BidRequestBody(
+internal data class BidRequest(
     @field:JsonName("auction_configuration_id")
     val auctionConfigurationId: Int?,
     @field:JsonName("id")
@@ -24,11 +24,11 @@ internal data class BidRequestBody(
     @field:JsonName("demands")
     val demands: Map<String, Token>,
     @field:JsonName("banner")
-    val banner: BannerRequestBody?,
+    val banner: BannerRequest?,
     @field:JsonName("interstitial")
-    val interstitial: InterstitialRequestBody?,
+    val interstitial: InterstitialRequest?,
     @field:JsonName("rewarded")
-    val rewarded: RewardedRequestBody?,
+    val rewarded: RewardedRequest?,
 
 ) : Serializable {
 
