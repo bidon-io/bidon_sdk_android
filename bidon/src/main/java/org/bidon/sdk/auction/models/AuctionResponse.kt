@@ -8,7 +8,7 @@ import org.json.JSONObject
  * Created by Bidon Team on 06/02/2023.
  */
 internal data class AuctionResponse(
-    val rounds: List<Round>?,
+    val rounds: List<RoundRequest>?,
     val lineItems: List<LineItem>?,
     val pricefloor: Double?,
     val token: String?,

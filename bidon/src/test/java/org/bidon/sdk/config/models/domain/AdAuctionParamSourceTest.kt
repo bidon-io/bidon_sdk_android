@@ -1,12 +1,13 @@
-package org.bidon.sdk.config.domain
+package org.bidon.sdk.config.models.domain
 
 import com.google.common.truth.Truth.assertThat
+import io.mockk.mockk
+import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.auction.models.LineItem
-import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.junit.Test
 
-class LineItemTest {
+class AdAuctionParamSourceTest {
     @Test
     fun `it should find min LineItem with greater given pricefloor`() {
         val list = listOf(
@@ -41,7 +42,17 @@ class LineItemTest {
                 adUnitId = "unit 1.7"
             ),
         )
-        val result = list.minByPricefloorOrNull(DemandId("demand id123"), 1.5)
+        val adAuctionParam = AdAuctionParamSource(
+            activity = mockk(),
+            pricefloor = 1.5,
+            timeout = 1000,
+            lineItems = list,
+            onLineItemConsumed = {},
+            json = null,
+            optBannerFormat = null,
+            optContainerWidth = null
+        )
+        val result = adAuctionParam.popLineItem(DemandId("demand id123"))
 
         assertThat(result).isEqualTo(
             LineItem(
@@ -86,10 +97,17 @@ class LineItemTest {
                 adUnitId = "unit 1.7"
             ),
         )
-        val result = list.minByPricefloorOrNull(
-            demandId = DemandId(demandId = "demand id123"),
-            pricefloor = 2.9
+        val adAuctionParam = AdAuctionParamSource(
+            activity = mockk(),
+            pricefloor = 2.9,
+            timeout = 1000,
+            lineItems = list,
+            onLineItemConsumed = {},
+            json = null,
+            optBannerFormat = null,
+            optContainerWidth = null
         )
+        val result = adAuctionParam.popLineItem(DemandId("demand id123"))
         assertThat(result).isEqualTo(
             null
         )

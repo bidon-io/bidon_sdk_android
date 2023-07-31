@@ -10,8 +10,7 @@ import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.AuctionResult
-import org.bidon.sdk.auction.models.minByPricefloorOrNull
+import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -49,16 +48,17 @@ internal class BigoAdsInterstitialImpl :
 
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = lineItems
-                .minByPricefloorOrNull(demandId, pricefloor)
-                ?.also(onLineItemConsumed)
             BigoBannerAuctionParams(
                 bannerFormat = bannerFormat,
-                payload = requireNotNull(payload) {
-                    "Payload is required for BigoAds banner ad"
+                payload = requireNotNull(json?.optString("payload")) {
+                    "Payload is required for BigoAds"
                 },
-                slotId = requireNotNull(lineItem?.adUnitId),
-                pricefloor = lineItem?.pricefloor ?: pricefloor,
+                slotId = requireNotNull(json?.optString("slot_id")) {
+                    "Slot id is required for BigoAds"
+                },
+                bidPrice = requireNotNull(json?.optDouble("price")) {
+                    "Bid price is required for BigoAds"
+                },
             )
         }
     }
@@ -94,7 +94,7 @@ internal class BigoAdsInterstitialImpl :
                             AdEvent.PaidRevenue(
                                 ad = ad,
                                 adValue = AdValue(
-                                    adRevenue = adParams.pricefloor,
+                                    adRevenue = adParams.bidPrice,
                                     precision = Precision.Precise,
                                     currency = AdValue.USD,
                                 )
@@ -113,6 +113,7 @@ internal class BigoAdsInterstitialImpl :
                         val ad = getAd(this@BigoAdsInterstitialImpl) ?: return
                         emitEvent(AdEvent.Shown(ad))
                     }
+
                     override fun onAdClosed() {
                         logInfo(TAG, "onAdClosed: $this")
                         val ad = getAd(this@BigoAdsInterstitialImpl) ?: return

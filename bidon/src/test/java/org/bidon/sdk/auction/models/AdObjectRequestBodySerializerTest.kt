@@ -12,13 +12,13 @@ internal class AdObjectRequestBodySerializerTest {
 
     @Test
     fun `AdObjectRequestBody Serializer full`() {
-        val data = AdObjectRequestBody(
+        val data = AdObjectRequest(
             pricefloor = 1.23,
             auctionId = "aId",
-            orientationCode = AdObjectRequestBody.Orientation.Portrait.code,
-            banner = BannerRequestBody(BannerRequestBody.StatFormat.LeaderBoard728x90.code),
-            interstitial = InterstitialRequestBody(),
-            rewarded = RewardedRequestBody(),
+            orientationCode = AdObjectRequest.Orientation.Portrait.code,
+            banner = BannerRequest(BannerRequest.StatFormat.LeaderBoard728x90.code),
+            interstitial = InterstitialRequest(),
+            rewarded = RewardedRequest(),
         )
         val actual = data.serialize()
 
@@ -38,11 +38,11 @@ internal class AdObjectRequestBodySerializerTest {
 
     @Test
     fun `AdObjectRequestBody Serializer only banner`() {
-        val data = AdObjectRequestBody(
+        val data = AdObjectRequest(
             pricefloor = 1.23,
             auctionId = "aId",
-            orientationCode = AdObjectRequestBody.Orientation.Portrait.code,
-            banner = BannerRequestBody(BannerRequestBody.StatFormat.LeaderBoard728x90.code),
+            orientationCode = AdObjectRequest.Orientation.Portrait.code,
+            banner = BannerRequest(BannerRequest.StatFormat.LeaderBoard728x90.code),
             interstitial = null,
             rewarded = null,
         )
@@ -62,12 +62,12 @@ internal class AdObjectRequestBodySerializerTest {
 
     @Test
     fun `AdObjectRequestBody Serializer only INTERSTITIAL`() {
-        val data = AdObjectRequestBody(
+        val data = AdObjectRequest(
             pricefloor = 1.23,
             auctionId = "aId",
-            orientationCode = AdObjectRequestBody.Orientation.Portrait.code,
+            orientationCode = AdObjectRequest.Orientation.Portrait.code,
             banner = null,
-            interstitial = InterstitialRequestBody(),
+            interstitial = InterstitialRequest(),
             rewarded = null,
         )
         val actual = data.serialize()
@@ -84,13 +84,13 @@ internal class AdObjectRequestBodySerializerTest {
 
     @Test
     fun `AdObjectRequestBody Serializer only REWARDED`() {
-        val data = AdObjectRequestBody(
+        val data = AdObjectRequest(
             pricefloor = 1.23,
             auctionId = "aId",
-            orientationCode = AdObjectRequestBody.Orientation.Portrait.code,
+            orientationCode = AdObjectRequest.Orientation.Portrait.code,
             banner = null,
             interstitial = null,
-            rewarded = RewardedRequestBody(),
+            rewarded = RewardedRequest(),
         )
         val actual = data.serialize()
 

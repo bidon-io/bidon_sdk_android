@@ -2,9 +2,9 @@ package org.bidon.sdk.ads.ext
 
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.models.BannerRequestBody
-import org.bidon.sdk.auction.models.InterstitialRequestBody
-import org.bidon.sdk.auction.models.RewardedRequestBody
+import org.bidon.sdk.auction.models.BannerRequest
+import org.bidon.sdk.auction.models.InterstitialRequest
+import org.bidon.sdk.auction.models.RewardedRequest
 
 /**
  * Created by Aleksei Cherniaev on 31/05/2023.
@@ -12,12 +12,12 @@ import org.bidon.sdk.auction.models.RewardedRequestBody
 
 internal fun AdTypeParam.asBannerRequestBody() = when (this) {
     is AdTypeParam.Banner -> {
-        BannerRequestBody(
+        BannerRequest(
             formatCode = when (this.bannerFormat) {
-                BannerFormat.Banner -> BannerRequestBody.StatFormat.Banner320x50
-                BannerFormat.LeaderBoard -> BannerRequestBody.StatFormat.LeaderBoard728x90
-                BannerFormat.MRec -> BannerRequestBody.StatFormat.MRec300x250
-                BannerFormat.Adaptive -> BannerRequestBody.StatFormat.AdaptiveBanner320x50
+                BannerFormat.Banner -> BannerRequest.StatFormat.Banner320x50
+                BannerFormat.LeaderBoard -> BannerRequest.StatFormat.LeaderBoard728x90
+                BannerFormat.MRec -> BannerRequest.StatFormat.MRec300x250
+                BannerFormat.Adaptive -> BannerRequest.StatFormat.AdaptiveBanner320x50
             }.code,
         )
     }
@@ -26,16 +26,16 @@ internal fun AdTypeParam.asBannerRequestBody() = when (this) {
     is AdTypeParam.Rewarded -> null
 }
 
-internal fun AdTypeParam.asAdRequestBody(): Triple<BannerRequestBody?, InterstitialRequestBody?, RewardedRequestBody?> {
+internal fun AdTypeParam.asAdRequestBody(): Triple<BannerRequest?, InterstitialRequest?, RewardedRequest?> {
     return when (this) {
         is AdTypeParam.Banner -> {
             Triple(
-                first = BannerRequestBody(
+                first = BannerRequest(
                     formatCode = when (this.bannerFormat) {
-                        BannerFormat.Banner -> BannerRequestBody.StatFormat.Banner320x50
-                        BannerFormat.LeaderBoard -> BannerRequestBody.StatFormat.LeaderBoard728x90
-                        BannerFormat.MRec -> BannerRequestBody.StatFormat.MRec300x250
-                        BannerFormat.Adaptive -> BannerRequestBody.StatFormat.AdaptiveBanner320x50
+                        BannerFormat.Banner -> BannerRequest.StatFormat.Banner320x50
+                        BannerFormat.LeaderBoard -> BannerRequest.StatFormat.LeaderBoard728x90
+                        BannerFormat.MRec -> BannerRequest.StatFormat.MRec300x250
+                        BannerFormat.Adaptive -> BannerRequest.StatFormat.AdaptiveBanner320x50
                     }.code,
                 ),
                 second = null,
@@ -46,7 +46,7 @@ internal fun AdTypeParam.asAdRequestBody(): Triple<BannerRequestBody?, Interstit
         is AdTypeParam.Interstitial -> {
             Triple(
                 first = null,
-                second = InterstitialRequestBody(),
+                second = InterstitialRequest(),
                 third = null
             )
         }
@@ -55,7 +55,7 @@ internal fun AdTypeParam.asAdRequestBody(): Triple<BannerRequestBody?, Interstit
             Triple(
                 first = null,
                 second = null,
-                third = RewardedRequestBody()
+                third = RewardedRequest()
             )
         }
     }

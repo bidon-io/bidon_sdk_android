@@ -15,7 +15,6 @@ import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.rewarded.Reward
-import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -114,12 +113,8 @@ internal class AdmobRewardedImpl :
 
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = lineItems
-                .minByPricefloorOrNull(demandId, pricefloor)
-                ?.also(onLineItemConsumed)
             AdmobFullscreenAdAuctionParams(
-                lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
-                pricefloor = pricefloor,
+                lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
                 context = activity.applicationContext
             )
         }
@@ -131,37 +126,26 @@ internal class AdmobRewardedImpl :
         val adRequest = AdRequest.Builder()
             .addNetworkExtrasBundle(AdMobAdapter::class.java, BidonSdk.regulation.asBundle())
             .build()
-        val adUnitId = param?.lineItem?.adUnitId
-        if (!adUnitId.isNullOrBlank()) {
-            val requestListener = object : RewardedAdLoadCallback() {
-                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                    logError(
-                        TAG,
-                        "Error while loading ad. LoadAdError=$loadAdError.\n$this",
-                        loadAdError.asBidonError()
-                    )
-                    emitEvent(AdEvent.LoadFailed(loadAdError.asBidonError()))
-                }
-
-                override fun onAdLoaded(rewardedAd: RewardedAd) {
-                    logInfo(TAG, "onAdLoaded. RewardedAd=$rewardedAd, $this")
-                    this@AdmobRewardedImpl.rewardedAd = rewardedAd
-                    requiredRewardedAd.onPaidEventListener = paidListener
-                    requiredRewardedAd.fullScreenContentCallback = rewardedListener
-                    emitEvent(AdEvent.Fill(requiredRewardedAd.asAd()))
-                }
+        val adUnitId = requireNotNull(param?.lineItem?.adUnitId)
+        val requestListener = object : RewardedAdLoadCallback() {
+            override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                logError(
+                    TAG,
+                    "Error while loading ad. LoadAdError=$loadAdError.\n$this",
+                    loadAdError.asBidonError()
+                )
+                emitEvent(AdEvent.LoadFailed(loadAdError.asBidonError()))
             }
-            RewardedAd.load(adParams.context, adUnitId, adRequest, requestListener)
-        } else {
-            val error = BidonError.NoAppropriateAdUnitId
-            logError(
-                tag = TAG,
-                message = "No appropriate AdUnitId found. PriceFloor=${adParams.pricefloor}, " +
-                    "but LineItem with max pricefloor=${param?.lineItem?.pricefloor}",
-                error = error
-            )
-            emitEvent(AdEvent.LoadFailed(error))
+
+            override fun onAdLoaded(rewardedAd: RewardedAd) {
+                logInfo(TAG, "onAdLoaded. RewardedAd=$rewardedAd, $this")
+                this@AdmobRewardedImpl.rewardedAd = rewardedAd
+                requiredRewardedAd.onPaidEventListener = paidListener
+                requiredRewardedAd.fullScreenContentCallback = rewardedListener
+                emitEvent(AdEvent.Fill(requiredRewardedAd.asAd()))
+            }
         }
+        RewardedAd.load(adParams.context, adUnitId, adRequest, requestListener)
     }
 
     override fun show(activity: Activity) {

@@ -13,8 +13,7 @@ import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.getHeightDp
 import org.bidon.sdk.ads.banner.helper.getWidthDp
-import org.bidon.sdk.auction.AuctionResult
-import org.bidon.sdk.auction.models.minByPricefloorOrNull
+import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
@@ -56,16 +55,17 @@ internal class BigoAdsBannerImpl :
 
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = lineItems
-                .minByPricefloorOrNull(demandId, pricefloor)
-                ?.also(onLineItemConsumed)
             BigoBannerAuctionParams(
                 bannerFormat = bannerFormat,
-                payload = requireNotNull(payload) {
+                payload = requireNotNull(json?.optString("payload")) {
                     "Payload is required for BigoAds banner ad"
                 },
-                slotId = requireNotNull(lineItem?.adUnitId),
-                pricefloor = lineItem?.pricefloor ?: pricefloor,
+                slotId = requireNotNull(json?.optString("slot_id")) {
+                    "Slot id is required for BigoAds banner ad"
+                },
+                bidPrice = requireNotNull(json?.optDouble("price")) {
+                    "Bid price is required for BigoAds banner ad"
+                },
             )
         }
     }
@@ -119,7 +119,7 @@ internal class BigoAdsBannerImpl :
                             AdEvent.PaidRevenue(
                                 ad = ad,
                                 adValue = AdValue(
-                                    adRevenue = adParam?.pricefloor ?: 0.0,
+                                    adRevenue = adParam?.bidPrice ?: 0.0,
                                     precision = Precision.Precise,
                                     currency = USD,
                                 )

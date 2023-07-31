@@ -6,7 +6,7 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionHolder
-import org.bidon.sdk.auction.AuctionResult
+import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo

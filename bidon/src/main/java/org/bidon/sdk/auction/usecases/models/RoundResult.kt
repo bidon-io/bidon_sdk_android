@@ -1,7 +1,7 @@
-package org.bidon.sdk.auction
+package org.bidon.sdk.auction.usecases.models
 
-import org.bidon.sdk.auction.models.Round
-import org.bidon.sdk.auction.usecases.models.BiddingResult
+import org.bidon.sdk.auction.models.AuctionResult
+import org.bidon.sdk.auction.models.RoundRequest
 
 /**
  * Created by Aleksei Cherniaev on 26/07/2023.
@@ -10,7 +10,7 @@ internal sealed interface RoundResult {
     object Idle : RoundResult
 
     class Results(
-        val round: Round,
+        val round: RoundRequest,
         val pricefloor: Double,
         val biddingResult: BiddingResult,
         val networkResults: List<AuctionResult>,

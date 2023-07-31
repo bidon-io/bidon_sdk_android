@@ -26,7 +26,7 @@ import org.bidon.sdk.ads.banner.helper.impl.dpToPx
 import org.bidon.sdk.ads.banner.helper.wrapUserBannerListener
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
-import org.bidon.sdk.auction.AuctionResult
+import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.config.impl.asBidonErrorOrUnspecified
 import org.bidon.sdk.databinders.extras.Extras

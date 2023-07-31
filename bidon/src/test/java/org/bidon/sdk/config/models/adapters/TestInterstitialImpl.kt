@@ -13,8 +13,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.AuctionResult
-import org.bidon.sdk.auction.models.minByPricefloorOrNull
+import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
@@ -86,9 +85,7 @@ internal class TestInterstitialImpl(
 
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = lineItems
-                .minByPricefloorOrNull(demandId, pricefloor)
-                ?.also(onLineItemConsumed) ?: error(BidonError.NoAppropriateAdUnitId)
+            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             TestInterstitialParameters(lineItem)
         }
     }

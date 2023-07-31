@@ -1,4 +1,4 @@
-package org.bidon.sdk.auction.impl
+package org.bidon.sdk.auction.usecases.impl
 
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -14,17 +14,17 @@ import org.bidon.sdk.adapter.SupportsRegulation
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.ResultsCollector
-import org.bidon.sdk.auction.RoundResult
 import org.bidon.sdk.auction.models.AuctionResponse
-import org.bidon.sdk.auction.models.BannerRequestBody
+import org.bidon.sdk.auction.models.AuctionResult
+import org.bidon.sdk.auction.models.BannerRequest
 import org.bidon.sdk.auction.models.LineItem
-import org.bidon.sdk.auction.models.Round
-import org.bidon.sdk.auction.usecases.ConductBiddingAuctionUseCase
-import org.bidon.sdk.auction.usecases.ConductNetworkAuctionUseCase
+import org.bidon.sdk.auction.models.RoundRequest
+import org.bidon.sdk.auction.usecases.ConductBiddingRoundUseCase
+import org.bidon.sdk.auction.usecases.ConductNetworkRoundUseCase
+import org.bidon.sdk.auction.usecases.ExecuteRoundUseCase
 import org.bidon.sdk.auction.usecases.models.BiddingResult
-import org.bidon.sdk.auction.usecases.models.ExecuteRoundUseCase
+import org.bidon.sdk.auction.usecases.models.RoundResult
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.regulation.Regulation
@@ -32,15 +32,15 @@ import org.bidon.sdk.stats.StatisticsCollector
 
 internal class ExecuteRoundUseCaseImpl(
     private val adaptersSource: AdaptersSource,
-    private val conductBiddingAuction: ConductBiddingAuctionUseCase,
-    private val conductNetworkAuction: ConductNetworkAuctionUseCase,
+    private val conductBiddingAuction: ConductBiddingRoundUseCase,
+    private val conductNetworkAuction: ConductNetworkRoundUseCase,
     private val regulation: Regulation,
 ) : ExecuteRoundUseCase {
     override suspend fun invoke(
         demandAd: DemandAd,
         auctionResponse: AuctionResponse,
         adTypeParam: AdTypeParam,
-        round: Round,
+        round: RoundRequest,
         pricefloor: Double,
         lineItems: List<LineItem>,
         resultsCollector: ResultsCollector,
@@ -154,7 +154,7 @@ internal class ExecuteRoundUseCaseImpl(
         adTypeParam: AdTypeParam,
         auctionResponse: AuctionResponse,
         demandAd: DemandAd,
-        round: Round
+        round: RoundRequest
     ) {
         adSource.addRoundInfo(
             auctionId = auctionResponse.auctionId,
@@ -174,7 +174,7 @@ internal class ExecuteRoundUseCaseImpl(
     }
 
     private fun ResultsCollector.findUnknownBiddingAdapters(
-        round: Round,
+        round: RoundRequest,
         adSources: List<AdLoadingType.Bidding<AdAuctionParams>>
     ) {
         (round.biddingIds - adSources.map { (it as AdSource<*>).demandId.demandId }.toSet())
@@ -191,7 +191,7 @@ internal class ExecuteRoundUseCaseImpl(
     }
 
     private fun ResultsCollector.findUnknownNetworkAdapters(
-        round: Round,
+        round: RoundRequest,
         adSources: List<AdLoadingType.Network<AdAuctionParams>>
     ) {
         (round.demandIds - adSources.map { (it as AdSource<*>).demandId.demandId }.toSet())
@@ -234,10 +234,10 @@ internal class ExecuteRoundUseCaseImpl(
             is AdTypeParam.Banner -> {
                 StatisticsCollector.AdType.Banner(
                     format = when (bannerFormat) {
-                        BannerFormat.Banner -> BannerRequestBody.StatFormat.Banner320x50
-                        BannerFormat.LeaderBoard -> BannerRequestBody.StatFormat.LeaderBoard728x90
-                        BannerFormat.MRec -> BannerRequestBody.StatFormat.MRec300x250
-                        BannerFormat.Adaptive -> BannerRequestBody.StatFormat.AdaptiveBanner320x50
+                        BannerFormat.Banner -> BannerRequest.StatFormat.Banner320x50
+                        BannerFormat.LeaderBoard -> BannerRequest.StatFormat.LeaderBoard728x90
+                        BannerFormat.MRec -> BannerRequest.StatFormat.MRec300x250
+                        BannerFormat.Adaptive -> BannerRequest.StatFormat.AdaptiveBanner320x50
                     }
                 )
             }

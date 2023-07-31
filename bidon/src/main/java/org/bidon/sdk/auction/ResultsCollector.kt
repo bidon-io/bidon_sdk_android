@@ -1,15 +1,17 @@
 package org.bidon.sdk.auction
 
-import org.bidon.sdk.auction.models.Bid
-import org.bidon.sdk.auction.models.Round
+import org.bidon.sdk.auction.models.AuctionResult
+import org.bidon.sdk.auction.models.BidResponse
+import org.bidon.sdk.auction.models.RoundRequest
+import org.bidon.sdk.auction.usecases.models.RoundResult
 
 /**
  * Created by Aleksei Cherniaev on 05/07/2023.
  */
 internal interface ResultsCollector {
-    fun startRound(round: Round, pricefloor: Double)
+    fun startRound(round: RoundRequest, pricefloor: Double)
     fun serverBiddingStarted()
-    fun serverBiddingFinished(bids: List<Bid>?)
+    fun serverBiddingFinished(bids: List<BidResponse>?)
     fun add(result: AuctionResult)
     fun getRoundResults(): RoundResult
 

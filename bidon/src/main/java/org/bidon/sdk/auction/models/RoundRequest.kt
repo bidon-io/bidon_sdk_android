@@ -6,17 +6,17 @@ import org.json.JSONObject
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-data class Round(
+data class RoundRequest(
     val id: String,
     val timeoutMs: Long,
     val demandIds: List<String>,
     val biddingIds: List<String>
 )
 
-internal class RoundParser : JsonParser<Round> {
-    override fun parseOrNull(jsonString: String): Round? = runCatching {
+internal class RoundParser : JsonParser<RoundRequest> {
+    override fun parseOrNull(jsonString: String): RoundRequest? = runCatching {
         val json = JSONObject(jsonString)
-        Round(
+        RoundRequest(
             id = json.getString("id"),
             timeoutMs = json.getLong("timeout"),
             demandIds = buildList {

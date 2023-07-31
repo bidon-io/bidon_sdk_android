@@ -22,7 +22,7 @@ import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.impl.pxToDp
-import org.bidon.sdk.auction.models.minByPricefloorOrNull
+import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -46,9 +46,7 @@ internal class DTExchangeBanner :
 
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = lineItems
-                .minByPricefloorOrNull(demandId, pricefloor)
-                ?.also(onLineItemConsumed) ?: error("BidonError.NoAppropriateAdUnitId")
+            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             DTExchangeBannerAuctionParams(
                 lineItem = lineItem,
                 bannerFormat = bannerFormat,
@@ -65,7 +63,7 @@ internal class DTExchangeBanner :
         // Adding the adview controller
         val controller = InneractiveAdViewUnitController()
         adSpot.addUnitController(controller)
-        val adRequest = InneractiveAdRequest(adParams.adUnitId)
+        val adRequest = InneractiveAdRequest(adParams.spotId)
         adSpot.setRequestListener(object : InneractiveAdSpot.RequestListener {
             override fun onInneractiveSuccessfulAdRequest(inneractiveAdSpot: InneractiveAdSpot?) {
                 logInfo(TAG, "onInneractiveSuccessfulAdRequest: $inneractiveAdSpot")
@@ -167,7 +165,7 @@ internal class DTExchangeBanner :
     private fun InneractiveAdSpot.asAd() = Ad(
         ecpm = param?.lineItem?.pricefloor ?: 0.0,
         auctionId = auctionId,
-        adUnitId = param?.adUnitId,
+        adUnitId = param?.spotId,
         networkName = demandId.demandId,
         currencyCode = AdValue.USD,
         demandAd = demandAd,

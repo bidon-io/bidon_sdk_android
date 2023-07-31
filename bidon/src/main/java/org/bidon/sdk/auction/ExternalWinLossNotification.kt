@@ -14,7 +14,6 @@ internal interface ExternalWinLossNotification {
          * The publisher should be informed about failed loading in case of auction is cancelled.
          */
         onAuctionCancelled: () -> Unit,
-
         onNotified: () -> Unit,
     )
 }

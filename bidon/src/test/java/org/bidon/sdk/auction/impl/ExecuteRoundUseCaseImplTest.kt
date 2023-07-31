@@ -19,14 +19,15 @@ import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.helper.DeviceType
 import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.AuctionResult
 import org.bidon.sdk.auction.models.AuctionResponse
+import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
-import org.bidon.sdk.auction.models.Round
-import org.bidon.sdk.auction.usecases.ConductBiddingAuctionUseCase
-import org.bidon.sdk.auction.usecases.ConductNetworkAuctionUseCase
-import org.bidon.sdk.auction.usecases.DeferredRoundResult
-import org.bidon.sdk.auction.usecases.models.ExecuteRoundUseCase
+import org.bidon.sdk.auction.models.RoundRequest
+import org.bidon.sdk.auction.usecases.ConductBiddingRoundUseCase
+import org.bidon.sdk.auction.usecases.ConductNetworkRoundUseCase
+import org.bidon.sdk.auction.usecases.ExecuteRoundUseCase
+import org.bidon.sdk.auction.usecases.impl.ExecuteRoundUseCaseImpl
+import org.bidon.sdk.auction.usecases.models.NetworksResult
 import org.bidon.sdk.config.models.adapters.Process
 import org.bidon.sdk.config.models.adapters.TestAdapter
 import org.bidon.sdk.config.models.adapters.TestAdapterParameters
@@ -53,13 +54,13 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
 
     private val auctionConfig = AuctionResponse(
         rounds = listOf(
-            Round(
+            RoundRequest(
                 id = "round_1",
                 timeoutMs = 15,
                 demandIds = listOf(Applovin, Admob),
                 biddingIds = listOf(),
             ),
-            Round(
+            RoundRequest(
                 id = "ROUND_2",
                 timeoutMs = 25,
                 demandIds = listOf(Admob),
@@ -93,8 +94,8 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
     private val activity: Activity by lazy { mockk(relaxed = true) }
     private val adaptersSource: AdaptersSource = mockk()
     private val regulation: Regulation = mockk(relaxed = true)
-    private val conductBiddingAuction: ConductBiddingAuctionUseCase = mockk()
-    private val conductNetworkAuction: ConductNetworkAuctionUseCase = mockk()
+    private val conductBiddingAuction: ConductBiddingRoundUseCase = mockk()
+    private val conductNetworkAuction: ConductNetworkRoundUseCase = mockk()
 
     private val testee: ExecuteRoundUseCase by lazy {
         ExecuteRoundUseCaseImpl(
@@ -142,7 +143,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
         // mockk results
         coEvery {
             conductNetworkAuction.invoke(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
-        } returns DeferredRoundResult(
+        } returns NetworksResult(
             results = listOf(
                 CoroutineScope(mainDispatcherOverridden!!).async {
                     AuctionResult.Network(
@@ -192,7 +193,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
             demandAd = DemandAd(AdType.Interstitial),
             auctionResponse = auctionConfig,
             adTypeParam = AdTypeParam.Interstitial(activity, 1.0),
-            round = Round(
+            round = RoundRequest(
                 id = "round_1",
                 timeoutMs = 15000,
                 demandIds = listOf("Unknown_network1", Admob, "Unknown_network2"),

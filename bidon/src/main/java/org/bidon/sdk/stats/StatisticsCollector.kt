@@ -3,7 +3,7 @@ package org.bidon.sdk.stats
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
-import org.bidon.sdk.auction.models.BannerRequestBody
+import org.bidon.sdk.auction.models.BannerRequest
 import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.stats.models.RoundStatus
 
@@ -41,6 +41,6 @@ interface StatisticsCollector {
     sealed interface AdType {
         object Rewarded : AdType
         object Interstitial : AdType
-        data class Banner(val format: BannerRequestBody.StatFormat) : AdType
+        data class Banner(val format: BannerRequest.StatFormat) : AdType
     }
 }

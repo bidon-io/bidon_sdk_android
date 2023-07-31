@@ -10,16 +10,16 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
-import org.bidon.sdk.auction.AuctionResult
-import org.bidon.sdk.auction.AuctionState
+import org.bidon.sdk.auction.Auction.AuctionState
 import org.bidon.sdk.auction.ResultsCollector
-import org.bidon.sdk.auction.RoundResult
 import org.bidon.sdk.auction.models.AuctionResponse
+import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
-import org.bidon.sdk.auction.models.Round
+import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.AuctionStat
+import org.bidon.sdk.auction.usecases.ExecuteRoundUseCase
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
-import org.bidon.sdk.auction.usecases.models.ExecuteRoundUseCase
+import org.bidon.sdk.auction.usecases.models.RoundResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.models.RoundStatus
@@ -95,7 +95,10 @@ internal class AuctionImpl(
 
                         // Finding winner / notifying losers
                         val finalResults = resultsCollector.getAll()
-                        logInfo(TAG, "Action finished with ${finalResults.size} results")
+                        logInfo(
+                            TAG,
+                            "Action finished with ${finalResults.size} results (keeps maximum: ${ResultsCollector.MaxAuctionResultsAmount})"
+                        )
                         finalResults.forEachIndexed { index, auctionResult ->
                             logInfo(TAG, "Action result #$index: $auctionResult")
                         }
@@ -182,7 +185,7 @@ internal class AuctionImpl(
     }
 
     private suspend fun conductRounds(
-        rounds: List<Round>,
+        rounds: List<RoundRequest>,
         sourcePriceFloor: Double,
         pricefloor: Double,
         demandAd: DemandAd,

@@ -11,19 +11,19 @@ import org.junit.Test
 internal class BidRequestBodyTest {
     @Test
     fun serialize() {
-        val body = BidRequestBody(
+        val body = BidRequest(
             impressionId = "imp123",
             demands = mapOf(
-                "bidmachine" to BidRequestBody.Token(token = "bm_token_123")
+                "bidmachine" to BidRequest.Token(token = "bm_token_123")
             ),
-            banner = BannerRequestBody(formatCode = BannerRequestBody.StatFormat.AdaptiveBanner320x50.code),
+            banner = BannerRequest(formatCode = BannerRequest.StatFormat.AdaptiveBanner320x50.code),
             bidfloor = 1.24,
-            orientationCode = AdObjectRequestBody.Orientation.Landscape.code,
+            orientationCode = AdObjectRequest.Orientation.Landscape.code,
             roundId = "round123",
             auctionId = "auc123",
             auctionConfigurationId = 12,
-            rewarded = RewardedRequestBody(),
-            interstitial = InterstitialRequestBody(),
+            rewarded = RewardedRequest(),
+            interstitial = InterstitialRequest(),
         )
         val actual = body.serialize()
         println(actual)
@@ -53,19 +53,19 @@ internal class BidRequestBodyTest {
 
     @Test
     fun array() {
-        val body = BidRequestBody(
+        val body = BidRequest(
             impressionId = "imp123",
             demands = mapOf(
-                "bidmachine" to BidRequestBody.Token(token = "bm_token_123")
+                "bidmachine" to BidRequest.Token(token = "bm_token_123")
             ),
-            banner = BannerRequestBody(formatCode = BannerRequestBody.StatFormat.AdaptiveBanner320x50.code),
+            banner = BannerRequest(formatCode = BannerRequest.StatFormat.AdaptiveBanner320x50.code),
             bidfloor = 1.24,
-            orientationCode = AdObjectRequestBody.Orientation.Landscape.code,
+            orientationCode = AdObjectRequest.Orientation.Landscape.code,
             roundId = "round123",
             auctionId = "auc123",
             auctionConfigurationId = 12,
-            rewarded = RewardedRequestBody(),
-            interstitial = InterstitialRequestBody(),
+            rewarded = RewardedRequest(),
+            interstitial = InterstitialRequest(),
         )
         val actual = listOf(body).serialize()
         println(actual)

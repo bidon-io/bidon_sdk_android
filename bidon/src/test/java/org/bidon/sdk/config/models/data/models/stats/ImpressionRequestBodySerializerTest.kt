@@ -1,8 +1,8 @@
 package org.bidon.sdk.config.models.data.models.stats
 
 import com.google.common.truth.Truth.assertThat
-import org.bidon.sdk.auction.models.BannerRequestBody
-import org.bidon.sdk.auction.models.InterstitialRequestBody
+import org.bidon.sdk.auction.models.BannerRequest
+import org.bidon.sdk.auction.models.InterstitialRequest
 import org.bidon.sdk.stats.models.ImpressionRequestBody
 import org.bidon.sdk.utils.serializer.serialize
 import org.json.JSONObject
@@ -37,8 +37,8 @@ class ImpressionRequestBodySerializerTest {
             ecpm = 2.33,
             demandId = "demandId123",
             rewarded = null,
-            interstitial = InterstitialRequestBody(),
-            banner = BannerRequestBody(formatCode = "1"),
+            interstitial = InterstitialRequest(),
+            banner = BannerRequest(formatCode = "1"),
             adUnitId = "adUnitId43",
             roundId = "round123"
         ).serialize()

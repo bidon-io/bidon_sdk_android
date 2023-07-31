@@ -18,7 +18,6 @@ import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.getHeightDp
 import org.bidon.sdk.ads.banner.helper.getWidthDp
-import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
@@ -75,13 +74,9 @@ internal class AdmobBannerImpl :
 
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = lineItems
-                .minByPricefloorOrNull(demandId, pricefloor)
-                ?.also(onLineItemConsumed)
             AdmobBannerAuctionParams(
-                lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
+                lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
                 bannerFormat = bannerFormat,
-                pricefloor = pricefloor,
                 context = activity.applicationContext,
                 containerWidth = containerWidth
             )
