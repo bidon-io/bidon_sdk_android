@@ -178,7 +178,7 @@ internal class BMInterstitialAdImpl :
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             BMFullscreenAuctionParams(
-                pricefloor = pricefloor,
+                price = pricefloor,
                 timeout = timeout,
                 context = activity.applicationContext,
                 payload = json?.optString("payload")
@@ -207,7 +207,7 @@ internal class BMInterstitialAdImpl :
         context = adParams.context
         val requestBuilder = InterstitialRequest.Builder()
             .setAdContentType(AdContentType.All)
-            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
+            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.price))
             .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
             .setBidPayload(adParams.payload)
             .setLoadingTimeOut(adParams.timeout.toInt())

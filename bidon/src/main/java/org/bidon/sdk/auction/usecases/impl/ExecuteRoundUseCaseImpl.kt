@@ -210,21 +210,32 @@ internal class ExecuteRoundUseCaseImpl(
 
     private fun List<Adapter>.getAdSources(adType: AdType) = when (adType) {
         AdType.Interstitial -> {
-            this.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>()
-                .map { adapter ->
+            this.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>().mapNotNull { adapter ->
+                kotlin.runCatching {
                     adapter.interstitial().apply { addDemandId((adapter as Adapter).demandId) }
-                }
+                }.onFailure {
+                    logError(TAG, "Failed to create interstitial ad source", it)
+                }.getOrNull()
+            }
         }
 
         AdType.Rewarded -> {
-            this.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().map { adapter ->
-                adapter.rewarded().apply { addDemandId((adapter as Adapter).demandId) }
+            this.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().mapNotNull { adapter ->
+                kotlin.runCatching {
+                    adapter.rewarded().apply { addDemandId((adapter as Adapter).demandId) }
+                }.onFailure {
+                    logError(TAG, "Failed to create rewarded ad source", it)
+                }.getOrNull()
             }
         }
 
         AdType.Banner -> {
-            this.filterIsInstance<AdProvider.Banner<AdAuctionParams>>().map { adapter ->
-                adapter.banner().apply { addDemandId((adapter as Adapter).demandId) }
+            this.filterIsInstance<AdProvider.Banner<AdAuctionParams>>().mapNotNull { adapter ->
+                runCatching {
+                    adapter.banner().apply { addDemandId((adapter as Adapter).demandId) }
+                }.onFailure {
+                    logError(TAG, "Failed to create banner ad source", it)
+                }.getOrNull()
             }
         }
     }

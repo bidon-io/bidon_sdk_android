@@ -90,6 +90,7 @@ internal fun MainScreen(
                                 DefaultAdapters.DataExchangeAdapter -> "DT Exchange"
                                 DefaultAdapters.UnityAdsAdapter -> "Unity Ads"
                                 DefaultAdapters.BigoAdsAdapter -> "Bigo Ads"
+                                DefaultAdapters.MintegralAdapter -> "Mintegral"
                             }
                         },
                         onItemClicked = {

@@ -268,13 +268,15 @@ internal class AuctionStatImpl(
                     bidStartTs = br.serverBiddingStartTs,
                     bidFinishTs = br.serverBiddingFinishTs,
                     bids = br.results.map { auctionResult ->
+
                         when (auctionResult) {
                             is AuctionResult.Bidding -> {
+                                val bid = br.bids.first { it.demandId == auctionResult.adSource.demandId.demandId }
                                 val stat = auctionResult.adSource.getStats()
                                 DemandStat.Bidding.Bid(
-                                    roundStatusCode = stat.roundStatus?.code ?: RoundStatus.UnknownAdapter.code,
-                                    ecpm = stat.ecpm,
-                                    demandId = stat.demandId.demandId,
+                                    roundStatusCode = auctionResult.roundStatus.code,
+                                    ecpm = bid.price,
+                                    demandId = bid.demandId ?: stat.demandId.demandId,
                                     fillStartTs = stat.fillStartTs,
                                     fillFinishTs = stat.fillFinishTs,
                                 )

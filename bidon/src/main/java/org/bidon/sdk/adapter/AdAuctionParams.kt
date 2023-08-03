@@ -12,11 +12,18 @@ import org.json.JSONObject
  */
 interface AdAuctionParams {
     val adUnitId: String?
-    val pricefloor: Double
+
+    /**
+     * DSP line item eCPM or Bidding bid price
+     */
+    val price: Double
 }
 
 class AdAuctionParamSource(
     val activity: Activity,
+    /**
+     * DSP pricefloor or Bidding bid price
+     */
     val pricefloor: Double,
     val timeout: Long,
     private val lineItems: List<LineItem> = emptyList(),

@@ -48,8 +48,7 @@ internal class BigoAdsRewardedAdImpl :
 
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            BigoBannerAuctionParams(
-                bannerFormat = bannerFormat,
+            BigoFullscreenAuctionParams(
                 payload = requireNotNull(json?.optString("payload")) {
                     "Payload is required for BigoAds"
                 },

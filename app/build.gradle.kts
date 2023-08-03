@@ -93,6 +93,7 @@ dependencies {
     implementation(project(":adapter:dtexchange"))
     implementation(project(":adapter:unityads"))
     implementation(project(":adapter:bigoads"))
+    implementation(project(":adapter:mintegral"))
 
     implementation(Dependencies.Google.PlayServicesAdsIdentifier)
 
