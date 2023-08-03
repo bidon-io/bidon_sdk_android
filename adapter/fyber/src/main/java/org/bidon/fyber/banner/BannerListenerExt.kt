@@ -8,12 +8,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 
-private const val Tag = "BannerListener"
+private const val TAG = "BannerListener"
 internal fun MutableSharedFlow<BannerInterceptor>.initBannerListener() {
     val bannerInterceptorFlow = this
     Banner.setBannerListener(object : BannerListener {
         override fun onError(placementId: String, bannerError: BannerError?) {
-            logError(Tag, "banner onError: $placementId", bannerError?.failure?.asBidonError())
+            logError(TAG, "banner onError: $placementId", bannerError?.failure?.asBidonError())
             Banner.destroy(placementId)
             bannerInterceptorFlow.tryEmit(
                 BannerInterceptor.Error(placementId, bannerError?.failure.asBidonError())
@@ -21,28 +21,28 @@ internal fun MutableSharedFlow<BannerInterceptor>.initBannerListener() {
         }
 
         override fun onLoad(placementId: String) {
-            logInfo(Tag, "banner onLoad: $placementId")
+            logInfo(TAG, "banner onLoad: $placementId")
             bannerInterceptorFlow.tryEmit(
                 BannerInterceptor.Loaded(placementId)
             )
         }
 
         override fun onShow(placementId: String, impressionData: ImpressionData) {
-            logInfo(Tag, "banner onShow: $placementId")
+            logInfo(TAG, "banner onShow: $placementId")
             bannerInterceptorFlow.tryEmit(
                 BannerInterceptor.Shown(placementId, impressionData)
             )
         }
 
         override fun onClick(placementId: String) {
-            logInfo(Tag, "banner onClick: $placementId")
+            logInfo(TAG, "banner onClick: $placementId")
             bannerInterceptorFlow.tryEmit(
                 BannerInterceptor.Clicked(placementId)
             )
         }
 
         override fun onRequestStart(placementId: String) {
-            logInfo(Tag, "banner onRequestStart: $placementId")
+            logInfo(TAG, "banner onRequestStart: $placementId")
             bannerInterceptorFlow.tryEmit(
                 BannerInterceptor.RequestStarted(placementId)
             )

@@ -3,12 +3,12 @@ package org.bidon.sdk.ads.banner
 import android.app.Activity
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.databinders.extras.Extras
-import org.bidon.sdk.stats.LossNotifier
+import org.bidon.sdk.stats.WinLossNotifier
 
 /**
- * Created by Bidon Team on 06/02/2023.
+ * Created by Aleksei Cherniaev on 06/02/2023.
  */
-interface BannerAd : LossNotifier, Extras {
+interface BannerAd : WinLossNotifier, Extras {
     /**
      * Loaded Ad's size
      */

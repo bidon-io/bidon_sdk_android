@@ -116,7 +116,7 @@ internal class RawRequestClient {
 
     private fun logResponseResult(request: RawRequest, responseCode: Int, url: URL, rawResponse: ByteArray?) {
         logInfo(
-            Tag,
+            TAG,
             " <-- ${request.method} $responseCode $url, raw response(size: ${rawResponse?.size}, data: ${rawResponse?.toHexString()})"
         )
     }
@@ -143,7 +143,7 @@ internal class RawRequestClient {
             }
             rawResponse = bytesOutputStream.toByteArray()
         } catch (cause: Exception) {
-            logError(Tag, "Error while obtaining data", cause)
+            logError(TAG, "Error while obtaining data", cause)
         } finally {
             responseInputStream?.close()
             responseBytesOutputStream?.flush()
@@ -162,4 +162,4 @@ private const val DefaultConnectTimeoutMs = 40_000
 private const val BufferSize = 1024
 internal const val EndOfStream = -1
 internal const val NoResponseCode = -1
-private const val Tag = "RawRequestClient"
+private const val TAG = "RawRequestClient"

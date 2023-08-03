@@ -14,7 +14,9 @@
             <option value="$PROJECT_DIR$/adapter/admob" />
             <option value="$PROJECT_DIR$/adapter/applovin" />
             <option value="$PROJECT_DIR$/adapter/bidmachine" />
+            <option value="$PROJECT_DIR$/adapter/bigoads" />
             <option value="$PROJECT_DIR$/adapter/dtexchange" />
+            <option value="$PROJECT_DIR$/adapter/mintegral" />
             <option value="$PROJECT_DIR$/adapter/unityads" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/bidon" />

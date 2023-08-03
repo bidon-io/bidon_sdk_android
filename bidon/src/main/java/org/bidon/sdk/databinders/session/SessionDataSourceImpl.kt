@@ -38,14 +38,14 @@ internal class SessionDataSourceImpl(
         val stat = StatFs(Environment.getDataDirectory().absolutePath)
         stat.availableBlocks.toLong() * stat.blockSize.toLong()
     } catch (throwable: Throwable) {
-        logError(Tag, throwable.message ?: "", throwable)
+        logError(TAG, throwable.message ?: "", throwable)
         0L
     }
 
     override fun getStorageUsed(): Long = try {
         getStorageSize() - getStorageFree()
     } catch (throwable: Throwable) {
-        logError(Tag, throwable.message ?: "", throwable)
+        logError(TAG, throwable.message ?: "", throwable)
         0L
     }
 
@@ -58,7 +58,7 @@ internal class SessionDataSourceImpl(
         ?: try {
             getMemoryInfo(context).totalMem.also { totalRamSize = it }
         } catch (e: Exception) {
-            logError(Tag, e.message ?: "", e)
+            logError(TAG, e.message ?: "", e)
             0L
         }
 
@@ -72,7 +72,7 @@ internal class SessionDataSourceImpl(
         Debug.getMemoryInfo(memInfo)
         memInfo.totalPss * 1024L
     } catch (throwable: Throwable) {
-        logError(Tag, throwable.message ?: "", throwable)
+        logError(TAG, throwable.message ?: "", throwable)
         0
     }
 
@@ -93,7 +93,7 @@ internal class SessionDataSourceImpl(
         }
         getAverageClock(freqSum, minFreqSum, maxFreqSum)
     } catch (throwable: Throwable) {
-        logError(Tag, throwable.message ?: "", throwable)
+        logError(TAG, throwable.message ?: "", throwable)
         0f
     }
 
@@ -119,7 +119,7 @@ internal class SessionDataSourceImpl(
                 }
             }
         } catch (throwable: Throwable) {
-            logError(Tag, throwable.message ?: "", throwable)
+            logError(TAG, throwable.message ?: "", throwable)
         }
         return NoBatteryData
     }
@@ -147,7 +147,7 @@ internal class SessionDataSourceImpl(
                 totalStorageSize = stat.blockCountLong * stat.blockSizeLong
             }
         } catch (throwable: Throwable) {
-            logError(Tag, throwable.message ?: "", throwable)
+            logError(TAG, throwable.message ?: "", throwable)
         }
         return totalStorageSize
     }
@@ -196,7 +196,7 @@ internal class SessionDataSourceImpl(
                 coreCount = it
             }
         } catch (throwable: Throwable) {
-            logError(Tag, throwable.message ?: "", throwable)
+            logError(TAG, throwable.message ?: "", throwable)
             Runtime.getRuntime().availableProcessors().also {
                 coreCount = it
             }
@@ -286,10 +286,10 @@ internal class SessionDataSourceImpl(
         try {
             closeable?.close()
         } catch (e: Throwable) {
-            logError(Tag, e.message ?: "", e)
+            logError(TAG, e.message ?: "", e)
         }
     }
 }
 
-private const val Tag = "SessionDataSource"
+private const val TAG = "SessionDataSource"
 private const val NoBatteryData = -1f

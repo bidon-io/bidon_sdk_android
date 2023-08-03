@@ -16,6 +16,7 @@ import org.bidon.sdk.config.usecases.InitAndRegisterAdaptersUseCase
 import org.bidon.sdk.databinders.session.SessionTracker
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.segment.SegmentSynchronizer
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.DI
 import org.bidon.sdk.utils.di.get
@@ -23,7 +24,7 @@ import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
 import org.bidon.sdk.utils.networking.BidonEndpoints
 
 /**
- * Created by Bidon Team on 06/02/2023.
+ * Created by Aleksei Cherniaev on 06/02/2023.
  */
 internal class BidonInitializerImpl : BidonInitializer {
     private val dispatcher by lazy { SdkDispatchers.Single }
@@ -40,6 +41,7 @@ internal class BidonInitializerImpl : BidonInitializer {
     private val adapterInstanceCreator: AdapterInstanceCreator get() = get()
     private val keyValueStorage: KeyValueStorage get() = get()
     private val bidOnEndpoints: BidonEndpoints get() = get()
+    private val segmentSynchronizer: SegmentSynchronizer get() = get()
 
     init {
         DI.setFactories()
@@ -47,6 +49,7 @@ internal class BidonInitializerImpl : BidonInitializer {
 
     override val isInitialized: Boolean
         get() = initializationState.value == SdkState.Initialized
+    override var isTestMode: Boolean = false
 
     override fun registerDefaultAdapters() {
         useDefaultAdapters = true
@@ -87,16 +90,25 @@ internal class BidonInitializerImpl : BidonInitializer {
              */
             DI.init(context)
             scope.launch {
+                obtainSegmentId()
                 runCatching {
                     init(context, appKey, timeStart)
                 }.onFailure {
-                    logError(Tag, "Error while initialization", it)
+                    logError(TAG, "Error while initialization", it)
                     initializationState.value = SdkState.InitializationFailed
                 }.onSuccess {
-                    logInfo(Tag, "Initialized in ${System.currentTimeMillis() - timeStart} ms.")
+                    logInfo(TAG, "Initialized in ${System.currentTimeMillis() - timeStart} ms.")
                     initializationState.value = SdkState.Initialized
                 }
                 notifyInitialized()
+            }
+        }
+    }
+
+    private suspend fun obtainSegmentId() {
+        withContext(SdkDispatchers.IO) {
+            keyValueStorage.segmentId?.let {
+                segmentSynchronizer.setSegmentId(segmentId = it)
             }
         }
     }
@@ -111,7 +123,7 @@ internal class BidonInitializerImpl : BidonInitializer {
             adapterClasses = publisherAdapterClasses
         )
 
-        logInfo(Tag, "Created adapters instances: $defaultAdapters")
+        logInfo(TAG, "Created adapters instances: $defaultAdapters")
         val body = ConfigRequestBody(
             adapters = (defaultAdapters + publisherAdapters.values).associate {
                 it.demandId.demandId to it.adapterInfo
@@ -120,17 +132,18 @@ internal class BidonInitializerImpl : BidonInitializer {
         return getConfigRequest.request(body)
             .map { configResponse ->
                 logInfo(
-                    Tag,
+                    TAG,
                     "Config data received in ${System.currentTimeMillis() - timeStart} ms.: $configResponse"
                 )
-                logInfo(Tag, "Starting adapters initialization")
+                logInfo(TAG, "Starting adapters initialization")
                 initAndRegisterAdapters(
                     context = context,
                     adapters = (defaultAdapters + publisherAdapters.values).distinctBy { it::class },
                     configResponse = configResponse,
+                    isTestMode = isTestMode
                 )
             }.onFailure {
-                logError(Tag, "Error while Config-request", it)
+                logError(TAG, "Error while Config-request", it)
             }
     }
 
@@ -139,7 +152,7 @@ internal class BidonInitializerImpl : BidonInitializer {
          * Just retrieve instance to start session time
          */
         val sessionTracker = get<SessionTracker>()
-        logInfo(Tag, "Session started with sessionId=${sessionTracker.sessionId}")
+        logInfo(TAG, "Session started with sessionId=${sessionTracker.sessionId}")
     }
 
     private fun notifyInitialized() {
@@ -149,4 +162,4 @@ internal class BidonInitializerImpl : BidonInitializer {
     }
 }
 
-private const val Tag = "BidonInitializer"
+private const val TAG = "BidonInitializer"

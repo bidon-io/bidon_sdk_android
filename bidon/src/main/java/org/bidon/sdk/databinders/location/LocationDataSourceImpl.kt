@@ -11,8 +11,10 @@ import android.location.LocationManager
 import android.os.Process
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.utils.ext.SystemTimeNow
 import java.lang.ref.WeakReference
 import java.util.*
+import kotlin.math.roundToInt
 
 internal class LocationDataSourceImpl(
     private val context: Context
@@ -30,7 +32,7 @@ internal class LocationDataSourceImpl(
             val addresses = Geocoder(context, Locale.getDefault()).getFromLocation(location.latitude, location.longitude, 1)
             addresses?.first()
         } catch (e: Exception) {
-            logError(Tag, "Error while retrieving location", e)
+            logError(TAG, "Error while retrieving location", e)
             null
         }
     }
@@ -39,8 +41,8 @@ internal class LocationDataSourceImpl(
 
     override fun getLatitude(): Double? = deviceLocation?.latitude
     override fun getLongitude(): Double? = deviceLocation?.longitude
-    override fun getAccuracy(): Float? = deviceLocation?.accuracy
-    override fun getLastFix(): Long? = deviceLocation?.time
+    override fun getAccuracy(): Int? = deviceLocation?.accuracy?.roundToInt()
+    override fun getLastFix(): Long? = deviceLocation?.time?.let { (SystemTimeNow - it) / 1000 }
     override fun getCountry(): String? = address?.countryCode
     override fun getRegion(): String? = address?.adminArea
     override fun getCity(): String? = address?.locality
@@ -67,13 +69,13 @@ internal class LocationDataSourceImpl(
         return locationManager.getBestProvider(Criteria(), false)?.let {
             try {
                 locationManager.getLastKnownLocation(it).also {
-                    logInfo(Tag, "Location $it")
+                    logInfo(TAG, "Location $it")
                 }
             } catch (e: SecurityException) {
-                logError(Tag, "failed to retrieve GPS location: permission not granted", e)
+                logError(TAG, "failed to retrieve GPS location: permission not granted", e)
                 null
             } catch (e: IllegalArgumentException) {
-                logError(Tag, "failed to retrieve GPS location: device has no GPS provider", e)
+                logError(TAG, "failed to retrieve GPS location: device has no GPS provider", e)
                 null
             }
         }
@@ -101,5 +103,5 @@ internal class LocationDataSourceImpl(
     }
 }
 
-private const val Tag = "Location"
+private const val TAG = "Location"
 private const val HourInMs = 1000 * 60 * 60

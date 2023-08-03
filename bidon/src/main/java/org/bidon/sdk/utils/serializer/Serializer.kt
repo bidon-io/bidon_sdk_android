@@ -17,3 +17,4 @@ internal interface Serializable {
 internal annotation class JsonName(val key: String)
 
 internal fun Serializable.serialize() = BidonSerializer.serialize(this)
+internal fun List<Serializable>.serialize() = BidonSerializer.serializeToArray(this)

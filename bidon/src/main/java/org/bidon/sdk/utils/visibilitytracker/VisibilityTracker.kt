@@ -37,14 +37,14 @@ internal class VisibilityTracker(
         if (isStarted.compareAndSet(/* expectedValue = */ false, /* newValue = */ true)) {
             this.onViewShown = onViewShown
             this.view = view
-            logInfo(Tag, "Start tracking - $view")
+            logInfo(TAG, "Start tracking - $view")
             view.viewTreeObserver.addOnPreDrawListener(preDrawListener)
             checkVisible()
         }
     }
 
     fun stop() {
-        logInfo(Tag, "Stop tracking - $view")
+        logInfo(TAG, "Stop tracking - $view")
         view?.viewTreeObserver?.removeOnPreDrawListener(preDrawListener)
         shownObserverJob?.cancel()
         shownObserverJob = null
@@ -60,7 +60,7 @@ internal class VisibilityTracker(
             pauseResumeObserver.lifecycleFlow.first { state ->
                 (state == ActivityLifecycleState.Resumed).also {
                     if (!it) {
-                        logInfo(Tag, "Paused. Application in background.")
+                        logInfo(TAG, "Paused. Application in background.")
                     }
                 }
             }
@@ -68,7 +68,7 @@ internal class VisibilityTracker(
                 delay(requiredOnScreenTime)
                 if (view.isOnTop(visibilityParams)) {
                     if (showTracked.compareAndSet(false, true)) {
-                        logInfo(Tag, "Tracked - $view")
+                        logInfo(TAG, "Tracked - $view")
                         onViewShown?.invoke()
                     }
                     stop()
@@ -86,4 +86,4 @@ internal class VisibilityTracker(
 }
 
 private const val DefCheckDelay = 100L
-private const val Tag = "VisibilityTracker"
+private const val TAG = "VisibilityTracker"

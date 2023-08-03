@@ -1,6 +1,5 @@
 package org.bidon.applovin.impl
 
-import android.app.Activity
 import com.applovin.adview.AppLovinAdView
 import com.applovin.sdk.AppLovinAd
 import com.applovin.sdk.AppLovinAdClickListener
@@ -8,74 +7,46 @@ import com.applovin.sdk.AppLovinAdDisplayListener
 import com.applovin.sdk.AppLovinAdLoadListener
 import com.applovin.sdk.AppLovinAdSize
 import com.applovin.sdk.AppLovinSdk
-import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bidon.applovin.ApplovinBannerAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
+import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
-import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.adapter.impl.AdEventFlow
+import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceType.isTablet
-import org.bidon.sdk.auction.AuctionResult
-import org.bidon.sdk.auction.models.LineItem
-import org.bidon.sdk.auction.models.minByPricefloorOrNull
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.RoundStatus
 
+/**
+ * I have no idea how it works. There is no documentation.
+ *
+ * https://appodeal.slack.com/archives/C02PE4GAFU0/p1661421318406689
+ */
 internal class ApplovinBannerImpl(
-    override val demandId: DemandId,
-    private val demandAd: DemandAd,
-    private val roundId: String,
     private val applovinSdk: AppLovinSdk,
-    private val auctionId: String
 ) : AdSource.Banner<ApplovinBannerAuctionParams>,
-    StatisticsCollector by StatisticsCollectorImpl(
-        auctionId = auctionId,
-        roundId = roundId,
-        demandId = demandId,
-        demandAd = demandAd,
-    ) {
+    AdLoadingType.Network<ApplovinBannerAuctionParams>,
+    AdEventFlow by AdEventFlowImpl(),
+    StatisticsCollector by StatisticsCollectorImpl() {
 
     private var adView: AppLovinAdView? = null
     private var applovinAd: AppLovinAd? = null
     private var param: ApplovinBannerAuctionParams? = null
 
-    private val requestListener by lazy {
-        object : AppLovinAdLoadListener {
-            override fun adReceived(ad: AppLovinAd) {
-                logInfo(Tag, "adReceived: $this")
-                applovinAd = ad
-                adEvent.tryEmit(
-                    AdEvent.Bid(
-                        AuctionResult(
-                            ecpm = param?.lineItem?.pricefloor ?: 0.0,
-                            adSource = this@ApplovinBannerImpl,
-                            roundStatus = RoundStatus.Successful
-                        )
-                    )
-                )
-            }
-
-            override fun failedToReceiveAd(errorCode: Int) {
-                logInfo(Tag, "failedToReceiveAd: errorCode=$errorCode. $this")
-                adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
-            }
-        }
-    }
-
     private val listener by lazy {
         object : AppLovinAdDisplayListener, AppLovinAdClickListener {
             override fun adDisplayed(ad: AppLovinAd) {
-                logInfo(Tag, "adDisplayed: $ad")
-                adEvent.tryEmit(
+                logInfo(TAG, "adDisplayed: $ad")
+                emitEvent(
                     AdEvent.PaidRevenue(
                         ad = ad.asAd(),
                         adValue = param?.lineItem?.pricefloor.asBidonAdValue()
@@ -85,52 +56,39 @@ internal class ApplovinBannerImpl(
             }
 
             override fun adHidden(ad: AppLovinAd) {
-                logInfo(Tag, "adHidden: $ad")
-                adEvent.tryEmit(AdEvent.ShowFailed(BidonError.NoFill(demandId)))
+                logInfo(TAG, "adHidden: $ad")
+                emitEvent(AdEvent.ShowFailed(BidonError.NoFill(demandId)))
             }
 
             override fun adClicked(ad: AppLovinAd) {
-                logInfo(Tag, "adClicked: $ad")
-                adEvent.tryEmit(AdEvent.Clicked(ad.asAd()))
+                logInfo(TAG, "adClicked: $ad")
+                emitEvent(AdEvent.Clicked(ad.asAd()))
             }
         }
     }
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val isAdReadyToShow: Boolean
         get() = applovinAd != null
 
-    override val ad: Ad?
-        get() = applovinAd?.asAd() ?: adView?.asAd()
-
     override fun destroy() {
-        logInfo(Tag, "destroy $this")
+        logInfo(TAG, "destroy $this")
         adView?.setAdLoadListener(null)
         adView = null
         applovinAd = null
     }
 
-    override fun getAuctionParams(
-        activity: Activity,
-        pricefloor: Double,
-        timeout: Long,
-        lineItems: List<LineItem>,
-        bannerFormat: BannerFormat,
-        onLineItemConsumed: (LineItem) -> Unit,
-        containerWidth: Float
-    ): Result<AdAuctionParams> = runCatching {
-        val lineItem = lineItems
-            .minByPricefloorOrNull(demandId, pricefloor)
-            ?.also(onLineItemConsumed)
-        ApplovinBannerAuctionParams(
-            context = activity.applicationContext,
-            lineItem = lineItem ?: error(BidonError.NoAppropriateAdUnitId),
-            bannerFormat = bannerFormat
-        )
+    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+        return auctionParamsScope {
+            ApplovinBannerAuctionParams(
+                context = activity.applicationContext,
+                lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                bannerFormat = bannerFormat
+            )
+        }
     }
 
-    override fun bid(adParams: ApplovinBannerAuctionParams) {
-        logInfo(Tag, "Starting with $adParams: $this")
+    override fun fill(adParams: ApplovinBannerAuctionParams) {
+        logInfo(TAG, "Starting with $adParams: $this")
         param = adParams
         val adSize = adParams.bannerFormat.asApplovinAdSize() ?: error(
             BidonError.AdFormatIsNotSupported(
@@ -138,23 +96,26 @@ internal class ApplovinBannerImpl(
                 adParams.bannerFormat
             )
         )
-        val bannerView = AppLovinAdView(applovinSdk, adSize, adParams.lineItem.adUnitId, adParams.context).also {
-            it.setAdClickListener(listener)
-            it.setAdDisplayListener(listener)
-            adView = it
+        val bannerView =
+            AppLovinAdView(applovinSdk, adSize, adParams.lineItem.adUnitId, adParams.context).also {
+                it.setAdClickListener(listener)
+                it.setAdDisplayListener(listener)
+                adView = it
+            }
+        val requestListener = object : AppLovinAdLoadListener {
+            override fun adReceived(ad: AppLovinAd) {
+                logInfo(TAG, "adReceived: $this")
+                applovinAd = ad
+                emitEvent(AdEvent.Fill(ad.asAd()))
+            }
+
+            override fun failedToReceiveAd(errorCode: Int) {
+                logInfo(TAG, "failedToReceiveAd: errorCode=$errorCode. $this")
+                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+            }
         }
         bannerView.setAdLoadListener(requestListener)
         bannerView.loadNextAd()
-    }
-
-    override fun fill() {
-        runCatching {
-            logInfo(Tag, "Starting fill: $this")
-            adEvent.tryEmit(AdEvent.Fill(requireNotNull(applovinAd?.asAd())))
-        }
-    }
-
-    override fun show(activity: Activity) {
     }
 
     override fun getAdView(): AdViewHolder {
@@ -169,20 +130,6 @@ internal class ApplovinBannerImpl(
                 null -> error("unexpected")
             },
             heightDp = adView.size.height
-        )
-    }
-
-    private fun AppLovinAdView?.asAd(): Ad {
-        return Ad(
-            demandAd = demandAd,
-            ecpm = param?.lineItem?.pricefloor ?: 0.0,
-            demandAdObject = this ?: demandAd,
-            networkName = demandId.demandId,
-            dsp = null,
-            roundId = roundId,
-            currencyCode = AdValue.USD,
-            auctionId = auctionId,
-            adUnitId = param?.lineItem?.adUnitId
         )
     }
 
@@ -213,4 +160,4 @@ internal class ApplovinBannerImpl(
     }
 }
 
-private const val Tag = "ApplovinBanner"
+private const val TAG = "ApplovinBanner"

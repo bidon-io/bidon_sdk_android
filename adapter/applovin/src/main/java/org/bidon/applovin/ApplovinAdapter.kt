@@ -1,6 +1,7 @@
 package org.bidon.applovin
 
 import android.content.Context
+import com.applovin.sdk.AppLovinPrivacySettings
 import com.applovin.sdk.AppLovinSdk
 import com.applovin.sdk.AppLovinSdkSettings
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -12,6 +13,7 @@ import org.bidon.applovin.impl.ApplovinRewardedImpl
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.logs.logging.Logger
+import org.bidon.sdk.regulation.Regulation
 import org.json.JSONObject
 import kotlin.coroutines.resume
 
@@ -20,12 +22,14 @@ val ApplovinDemandId = DemandId("applovin")
 @Suppress("unused")
 class ApplovinAdapter :
     Adapter,
+    SupportsRegulation,
     Initializable<ApplovinParameters>,
     AdProvider.Banner<ApplovinBannerAuctionParams>,
     AdProvider.Interstitial<ApplovinFullscreenAdAuctionParams>,
     AdProvider.Rewarded<ApplovinFullscreenAdAuctionParams> {
 
     private var applovinSdk: AppLovinSdk? = null
+    private var context: Context? = null
 
     override val demandId: DemandId = ApplovinDemandId
     override val adapterInfo = AdapterInfo(
@@ -35,6 +39,7 @@ class ApplovinAdapter :
 
     override suspend fun init(context: Context, configParams: ApplovinParameters): Unit =
         suspendCancellableCoroutine { continuation ->
+            this.context = context
             val instance =
                 AppLovinSdk.getInstance(configParams.key, AppLovinSdkSettings(context), context)
                     .also {
@@ -57,45 +62,28 @@ class ApplovinAdapter :
         )
     }
 
-    override fun interstitial(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
+    override fun updateRegulation(regulation: Regulation) {
+        context?.let { context ->
+            AppLovinPrivacySettings.setHasUserConsent(regulation.gdprConsent, context)
+            AppLovinPrivacySettings.setIsAgeRestrictedUser(regulation.coppaApplies, context)
+        }
+    }
+
+    override fun interstitial(): AdSource.Interstitial<ApplovinFullscreenAdAuctionParams> {
         return ApplovinInterstitialImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
             applovinSdk = requireNotNull(applovinSdk),
-            auctionId = auctionId
         )
     }
 
-    override fun rewarded(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Rewarded<ApplovinFullscreenAdAuctionParams> {
+    override fun rewarded(): AdSource.Rewarded<ApplovinFullscreenAdAuctionParams> {
         return ApplovinRewardedImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
             applovinSdk = requireNotNull(applovinSdk),
-            auctionId = auctionId
         )
     }
 
-    override fun banner(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Banner<ApplovinBannerAuctionParams> {
+    override fun banner(): AdSource.Banner<ApplovinBannerAuctionParams> {
         return ApplovinBannerImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
             applovinSdk = requireNotNull(applovinSdk),
-            auctionId = auctionId
         )
     }
 }
