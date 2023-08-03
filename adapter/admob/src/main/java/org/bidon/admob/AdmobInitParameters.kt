@@ -15,7 +15,7 @@ class AdmobBannerAuctionParams(
     val containerWidth: Float,
 ) : AdAuctionParams {
     override val adUnitId: String? get() = lineItem.adUnitId
-    override val pricefloor: Double get() = lineItem.pricefloor
+    override val price: Double get() = lineItem.pricefloor
 
     override fun toString(): String {
         return "AdmobBannerAuctionParams($lineItem)"
@@ -27,7 +27,7 @@ class AdmobFullscreenAdAuctionParams(
     val lineItem: LineItem,
 ) : AdAuctionParams {
     override val adUnitId: String? get() = lineItem.adUnitId
-    override val pricefloor: Double get() = lineItem.pricefloor
+    override val price: Double get() = lineItem.pricefloor
 
     override fun toString(): String {
         return "AdmobFullscreenAdAuctionParams(lineItem=$lineItem)"

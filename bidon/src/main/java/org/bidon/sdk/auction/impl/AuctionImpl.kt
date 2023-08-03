@@ -53,17 +53,18 @@ internal class AuctionImpl(
         onSuccess: (results: List<AuctionResult>) -> Unit,
         onFailure: (Throwable) -> Unit
     ) {
-        runCatching {
-            if (state.compareAndSet(
-                    expect = AuctionState.Initialized,
-                    update = AuctionState.InProgress
-                )
-            ) {
-                require(job?.isActive != true) {
-                    "Auction is active"
-                }
-                this.adTypeParam = adTypeParamData
-                job = scope.launch {
+        if (state.compareAndSet(
+                expect = AuctionState.Initialized,
+                update = AuctionState.InProgress
+            )
+        ) {
+            if (job?.isActive == true) {
+                logInfo(TAG, "Action in progress $this")
+                return
+            }
+            this.adTypeParam = adTypeParamData
+            job = scope.launch {
+                runCatching {
                     val auctionId = UUID.randomUUID().toString()
                     logInfo(TAG, "Action started $this")
                     // Request for Auction-data at /auction
@@ -75,57 +76,21 @@ internal class AuctionImpl(
                         adapters = adaptersSource.adapters.associate {
                             it.demandId.demandId to it.adapterInfo
                         }
-                    ).onSuccess { auctionData ->
-//                        require(auctionId == auctionData.auctionId) {
-//                            "auction_id has been changed"
-//                        }
-                        _auctionDataResponse = auctionData
-                        _demandAd = demandAd
-                        mutableLineItems.addAll(auctionData.lineItems ?: emptyList())
-
-                        // Start auction
-                        conductRounds(
-                            rounds = auctionData.rounds ?: listOf(),
-                            sourcePriceFloor = auctionData.pricefloor ?: 0.0,
-                            pricefloor = auctionData.pricefloor ?: 0.0,
-                            demandAd = demandAd,
-                            adTypeParamData = adTypeParamData,
-                        )
-                        logInfo(TAG, "Rounds completed")
-
-                        // Finding winner / notifying losers
-                        val finalResults = resultsCollector.getAll()
-                        logInfo(
-                            TAG,
-                            "Action finished with ${finalResults.size} results (keeps maximum: ${ResultsCollector.MaxAuctionResultsAmount})"
-                        )
-                        finalResults.forEachIndexed { index, auctionResult ->
-                            logInfo(TAG, "Action result #$index: $auctionResult")
+                    ).mapCatching { auctionData ->
+                        check(auctionId == auctionData.auctionId) {
+                            "auction_id has been changed"
                         }
-
-                        // Sending auction statistics
-                        auctionStat.sendAuctionStats(
+                        conductAuction(
                             auctionData = auctionData,
                             demandAd = demandAd,
-                        )
-
-                        notifyWinLoss(finalResults)
-
-                        // Finish auction
-                        state.value = AuctionState.Finished
-                    }.getOrThrow()
-                    // Wait for auction is completed
-                    state.first { it == AuctionState.Finished }
-                    val results = resultsCollector.getAll()
-                    clearData()
-                    if (results.isNotEmpty()) {
-                        onSuccess.invoke(results)
-                    } else {
-                        onFailure(BidonError.NoAuctionResults)
-                    }
-                }
+                            adTypeParamData = adTypeParamData,
+                        ).ifEmpty {
+                            throw BidonError.NoAuctionResults
+                        }.also(onSuccess)
+                    }.onFailure(onFailure)
+                }.onFailure(onFailure)
             }
-        }.onFailure(onFailure)
+        }
     }
 
     override fun cancel() {
@@ -148,6 +113,52 @@ internal class AuctionImpl(
             }
         }
         job = null
+    }
+
+    private suspend fun conductAuction(
+        auctionData: AuctionResponse,
+        demandAd: DemandAd,
+        adTypeParamData: AdTypeParam,
+    ): List<AuctionResult> {
+        _auctionDataResponse = auctionData
+        _demandAd = demandAd
+        mutableLineItems.addAll(auctionData.lineItems ?: emptyList())
+
+        // Start auction
+        conductRounds(
+            rounds = auctionData.rounds ?: listOf(),
+            sourcePriceFloor = auctionData.pricefloor ?: 0.0,
+            pricefloor = auctionData.pricefloor ?: 0.0,
+            demandAd = demandAd,
+            adTypeParamData = adTypeParamData,
+        )
+        logInfo(TAG, "Rounds completed")
+
+        // Finding winner / notifying losers
+        val finalResults = resultsCollector.getAll()
+        logInfo(
+            TAG,
+            "Action finished with ${finalResults.size} results (keeps maximum: ${ResultsCollector.MaxAuctionResultsAmount})"
+        )
+        finalResults.forEachIndexed { index, auctionResult ->
+            logInfo(TAG, "Action result #$index: $auctionResult")
+        }
+
+        // Sending auction statistics
+        auctionStat.sendAuctionStats(
+            auctionData = auctionData,
+            demandAd = demandAd,
+        )
+
+        notifyWinLoss(finalResults)
+
+        // Finish auction
+        state.value = AuctionState.Finished
+        // Wait for auction is completed
+        state.first { it == AuctionState.Finished }
+        val results = resultsCollector.getAll()
+        clearData()
+        return results
     }
 
     private suspend fun proceedRoundResults() {

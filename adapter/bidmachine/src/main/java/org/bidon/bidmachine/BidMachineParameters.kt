@@ -14,26 +14,26 @@ data class BidMachineParameters(
 class BMBannerAuctionParams(
     val context: Context,
     val bannerFormat: BannerFormat,
-    override val pricefloor: Double,
+    override val price: Double,
     val timeout: Long,
     val payload: String?,
 ) : AdAuctionParams {
     override val adUnitId: String? = null
 
     override fun toString(): String {
-        return "BMBannerAuctionParams(bannerFormat=$bannerFormat, pricefloor=$pricefloor, timeout=$timeout)"
+        return "BMBannerAuctionParams(bannerFormat=$bannerFormat, pricefloor=$price, timeout=$timeout)"
     }
 }
 
 class BMFullscreenAuctionParams(
     val context: Context,
-    override val pricefloor: Double,
+    override val price: Double,
     val timeout: Long,
     val payload: String?,
 ) : AdAuctionParams {
     override val adUnitId: String? = null
 
     override fun toString(): String {
-        return "BMFullscreenAuctionParams(pricefloor=$pricefloor, timeout=$timeout)"
+        return "BMFullscreenAuctionParams(pricefloor=$price, timeout=$timeout)"
     }
 }

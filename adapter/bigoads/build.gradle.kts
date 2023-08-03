@@ -6,7 +6,7 @@ plugins {
 }
 
 project.extra.apply {
-    this.set("AdapterArtifactId", "bidmachine-adapter")
+    this.set("AdapterArtifactId", "bigoads-adapter")
     this.set("AdapterVersionName", Versions.Adapters.BigoAds)
 }
 

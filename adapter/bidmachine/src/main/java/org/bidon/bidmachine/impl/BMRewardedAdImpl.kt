@@ -189,7 +189,7 @@ internal class BMRewardedAdImpl :
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             BMFullscreenAuctionParams(
-                pricefloor = pricefloor,
+                price = pricefloor,
                 timeout = timeout,
                 context = activity.applicationContext,
                 payload = json?.optString("payload")
@@ -217,7 +217,7 @@ internal class BMRewardedAdImpl :
         logInfo(TAG, "Starting with $adParams: $this")
         context = adParams.context
         val requestBuilder = RewardedRequest.Builder()
-            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
+            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.price))
             .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
             .setLoadingTimeOut(adParams.timeout.toInt())
             .setListener(requestListener)

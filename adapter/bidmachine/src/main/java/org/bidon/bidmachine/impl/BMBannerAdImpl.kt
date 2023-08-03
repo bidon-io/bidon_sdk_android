@@ -93,10 +93,17 @@ internal class BMBannerAdImpl :
 
     private val bannerListener by lazy {
         object : BannerListener {
+
             override fun onAdLoaded(bannerView: BannerView) {
                 logInfo(TAG, "onAdLoaded: $this")
                 this@BMBannerAdImpl.bannerView = bannerView
                 emitEvent(AdEvent.Fill(bannerView.asAd()))
+            }
+
+            override fun onAdShowFailed(bannerView: BannerView, bmError: BMError) {
+                logInfo(TAG, "onAdShowFailed: $this")
+                this@BMBannerAdImpl.bannerView = bannerView
+                emitEvent(AdEvent.ShowFailed(bmError.asBidonErrorOnFill(demandId)))
             }
 
             override fun onAdLoadFailed(bannerView: BannerView, bmError: BMError) {
@@ -158,7 +165,7 @@ internal class BMBannerAdImpl :
     override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             BMBannerAuctionParams(
-                pricefloor = pricefloor,
+                price = pricefloor,
                 timeout = timeout,
                 context = activity.applicationContext,
                 bannerFormat = bannerFormat,
@@ -199,7 +206,7 @@ internal class BMBannerAdImpl :
         bannerFormat = adParams.bannerFormat
         val requestBuilder = BannerRequest.Builder()
             .setSize(adParams.bannerFormat.asBidMachineBannerSize())
-            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.pricefloor))
+            .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.price))
             .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
             .setLoadingTimeOut(adParams.timeout.toInt())
             .setListener(requestListener)

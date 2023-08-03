@@ -112,7 +112,7 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
             }
 
             // FILL
-            adSource.markFillStarted(adParam.adUnitId, adParam.pricefloor)
+            adSource.markFillStarted(adParam.adUnitId, adParam.price)
             adSource.fill(adParam)
             val fillAdEvent = adSource.adEvent.first {
                 // wait for results
@@ -129,7 +129,7 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
                 is AdEvent.LoadFailed -> {
                     adSource.markFillFinished(
                         roundStatus = fillAdEvent.cause.asRoundStatus(),
-                        ecpm = adParam.pricefloor
+                        ecpm = adParam.price
                     )
                 }
 
