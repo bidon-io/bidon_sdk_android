@@ -1,6 +1,6 @@
 import ext.BIDON_API_KEY
 import java.io.FileInputStream
-import java.util.*
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -85,6 +85,8 @@ dependencies {
 //    implementation("io.bidon:applovin-adapter:0.1.0.1-Beta")
 //    implementation("io.bidon:dtexchange-adapter:0.1.0.1-Beta")
 //    implementation("io.bidon:unityads-adapter:0.1.0.1-Beta")
+//    implementation("io.bidon:bigoads-adapter:0.1.0.1-Beta")
+//    implementation("io.bidon:mintegral-adapter:0.1.0.1-Beta")
 
     implementation(project(":bidon"))
     implementation(project(":adapter:bidmachine"))
@@ -99,17 +101,17 @@ dependencies {
 
     implementation("com.google.accompanist:accompanist-permissions:0.29.1-alpha")
     implementation("androidx.multidex:multidex:2.0.1")
-    implementation("androidx.core:core-ktx:1.9.0")
+    implementation(Dependencies.Android.CoreKtx)
+    implementation(Dependencies.Android.Annotation)
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.8.0")
+    implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.fragment:fragment-ktx:1.5.5")
-    implementation("androidx.activity:activity-ktx:1.6.1")
-    implementation("androidx.annotation:annotation:1.6.0")
+    implementation("androidx.fragment:fragment-ktx:1.6.1")
+    implementation("androidx.activity:activity-ktx:1.7.2")
 
     // compose
-    val composeVersion = "1.3.1"
-    val material3Version = "1.0.1"
+    val composeVersion = "1.4.3"
+    val material3Version = "1.1.1"
     implementation("androidx.compose.runtime:runtime:$composeVersion")
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.ui:ui-tooling:$composeVersion")
@@ -119,9 +121,9 @@ dependencies {
     implementation("androidx.compose.material3:material3:$material3Version")
     implementation("androidx.compose.material:material-icons-core:$composeVersion")
     implementation("androidx.compose.material:material-icons-extended:$composeVersion")
-    implementation("androidx.activity:activity-compose:1.6.1")
+    implementation("androidx.activity:activity-compose:1.7.2")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha07")
-    implementation("androidx.navigation:navigation-compose:2.5.3")
+    implementation("androidx.navigation:navigation-compose:2.6.0")
     implementation("com.google.accompanist:accompanist-flowlayout:0.23.1")
     // Tests
     testImplementation("junit:junit:4.13.2")
