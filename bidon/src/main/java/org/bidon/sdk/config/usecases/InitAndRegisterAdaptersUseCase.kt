@@ -11,6 +11,7 @@ internal interface InitAndRegisterAdaptersUseCase {
     suspend operator fun invoke(
         context: Context,
         adapters: List<Adapter>,
-        configResponse: ConfigResponse
+        configResponse: ConfigResponse,
+        isTestMode: Boolean
     )
 }

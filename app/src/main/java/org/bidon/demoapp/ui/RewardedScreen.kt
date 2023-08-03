@@ -154,14 +154,20 @@ fun RewardedScreen(
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.horizontalScroll(rememberScrollState())) {
-                AppOutlinedButton(
+                AppTextButton(
                     modifier = Modifier.padding(start = 0.dp),
                     text = "Notify Loss"
                 ) {
                     rewardedAd.notifyLoss(
-                        winnerDemandId = "other_monetization_sdk",
+                        winnerDemandId = "some_winner_demand",
                         winnerEcpm = 123.456
                     )
+                    logFlow.log("NotifyLoss")
+                }
+                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                AppTextButton(text = "Notify Win") {
+                    rewardedAd.notifyWin()
+                    logFlow.log("NotifyWin")
                 }
             }
             LazyColumn(
@@ -192,7 +198,7 @@ private fun MutableState<List<String>>.log(string: String) {
     synchronized(this) {
         this.value = this.value + string
     }
-    logInfo(Tag, string)
+    logInfo(TAG, string)
 }
 
-private const val Tag = "RewardedScreen"
+private const val TAG = "RewardedScreen"

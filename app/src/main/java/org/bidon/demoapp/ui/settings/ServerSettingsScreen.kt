@@ -1,8 +1,17 @@
 package org.bidon.demoapp.ui.settings
 
 import android.content.SharedPreferences
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.MaterialTheme
@@ -15,12 +24,15 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import org.bidon.demoapp.component.*
+import org.bidon.demoapp.component.AppButton
+import org.bidon.demoapp.component.AppToolbar
+import org.bidon.demoapp.component.Body1Text
+import org.bidon.demoapp.component.CaptionText
 import org.bidon.demoapp.theme.getShapeByPositionFor
 import org.bidon.demoapp.ui.settings.data.Host
-import org.bidon.sdk.utils.networking.NetworkSettings
 
 private const val MockUrl = "https://ef5347ef-7389-4095-8a57-cc78c827f8b2.mock.pstmn.io"
+internal const val AppBaqendBaseUrl = "https://b.appbaqend.com"
 
 @Composable
 internal fun ServerSettingsScreen(
@@ -30,7 +42,7 @@ internal fun ServerSettingsScreen(
     val host = remember {
         mutableStateOf(
             when (sharedPreferences.getString("host", "")) {
-                NetworkSettings.BidonBaseUrl -> Host.Production
+                AppBaqendBaseUrl -> Host.Production
                 MockUrl -> Host.MockServer
                 else -> Host.Production
             }
@@ -69,7 +81,7 @@ internal fun ServerSettingsScreen(
                 .align(Alignment.CenterHorizontally),
             onClick = {
                 val hostValue = when (host.value) {
-                    Host.Production -> "https://b.appbaqend.com"
+                    Host.Production -> AppBaqendBaseUrl
                     Host.MockServer -> MockUrl
                 }
                 sharedPreferences.edit().putString("host", hostValue).apply()
@@ -116,7 +128,7 @@ private fun RenderHosts(hosts: List<Host>, selectedHost: Host, onClick: (Host) -
                     )
                     CaptionText(
                         text = when (host) {
-                            Host.Production -> "https://b.appbaqend.com"
+                            Host.Production -> AppBaqendBaseUrl
                             Host.MockServer -> MockUrl
                         },
                         maxLines = 1

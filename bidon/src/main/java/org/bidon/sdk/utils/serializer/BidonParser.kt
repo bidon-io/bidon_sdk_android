@@ -33,7 +33,7 @@ internal object BidonParser {
                 type.startsWith("kotlin.collections.List") -> {
                     val arg = parseParams.parameter.type.arguments[0]
                     if (arg.type?.isSubtypeOf(Serializable::class.starProjectedType) == true) {
-                        jsonArrayToList(json.getJSONArray(parseParams.fieldName), parser = { jsonStr ->
+                        jsonArrayToList(json.getJSONArray(parseParams.fieldName), parser = {
                             // parse<>(jsonStr)
                         })
                     } else {

@@ -5,14 +5,16 @@ import org.bidon.sdk.adapter.AdProvider
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.adapter.AdapterInfo
-import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Initializable
+import org.bidon.sdk.adapter.SupportsRegulation
+import org.bidon.sdk.regulation.Regulation
 
 internal class TestAdapter(
     override val demandId: DemandId,
     private val testAdapterParameters: TestAdapterParameters,
 ) : Adapter,
+    SupportsRegulation,
     Initializable<TestAdapterParameters>,
     AdProvider.Interstitial<TestInterstitialParameters> {
 
@@ -24,16 +26,12 @@ internal class TestAdapter(
 
     override fun parseConfigParam(json: String) = testAdapterParameters
 
-    override fun interstitial(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Interstitial<TestInterstitialParameters> {
+    override fun interstitial(): AdSource.Interstitial<TestInterstitialParameters> {
         return TestInterstitialImpl(
-            demandId = demandId,
-            auctionId = auctionId,
-            roundId = roundId,
             testParameters = testAdapterParameters
         )
+    }
+
+    override fun updateRegulation(regulation: Regulation) {
     }
 }

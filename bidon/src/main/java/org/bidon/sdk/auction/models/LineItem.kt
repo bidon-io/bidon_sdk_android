@@ -1,6 +1,5 @@
 package org.bidon.sdk.auction.models
 
-import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.utils.json.JsonParser
 import org.json.JSONObject
 
@@ -12,17 +11,6 @@ data class LineItem(
     val pricefloor: Double = 0.0,
     val adUnitId: String?,
 )
-
-/**
- * Finding first [LineItem], which has the minimum LineItem.pricefloor, but greater then given [pricefloor].
- */
-fun List<LineItem>.minByPricefloorOrNull(demandId: DemandId, pricefloor: Double): LineItem? {
-    return this
-        .filter { it.demandId == demandId.demandId }
-        .filterNot { it.adUnitId.isNullOrBlank() }
-        .sortedBy { it.pricefloor }
-        .firstOrNull { it.pricefloor > pricefloor }
-}
 
 internal class LineItemParser : JsonParser<LineItem> {
     override fun parseOrNull(jsonString: String): LineItem? = runCatching {

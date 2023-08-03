@@ -36,13 +36,14 @@ internal class JsonHttpRequest(
                 is RawResponse.Success -> {
                     require(response.code in 200 until 300)
                     response.requestBody?.let { String(it) }.orEmpty().also {
-                        logInfo(Tag, "Response: $it")
+                        logInfo(TAG, "Response: $it")
                     }
                 }
+
                 is RawResponse.Failure -> {
                     val baseResponse = JsonParsers.parseOrNull<BaseResponse>(String(response.responseBody ?: byteArrayOf()))
-                    logInfo(Tag, "Request failed ${String(response.responseBody ?: byteArrayOf())}")
-                    logInfo(Tag, "Request failed $baseResponse")
+                    logInfo(TAG, "Request failed ${String(response.responseBody ?: byteArrayOf())}")
+                    logInfo(TAG, "Request failed $baseResponse")
                     when (response.code) {
                         422 -> {
                             if ((baseResponse?.error?.message == BidonError.AppKeyIsInvalid.message)) {
@@ -51,6 +52,7 @@ internal class JsonHttpRequest(
                                 throw BidonError.NetworkError(demandId = null, message = baseResponse?.error?.message)
                             }
                         }
+
                         500 -> throw BidonError.InternalServerSdkError(message = baseResponse?.error?.message)
                         else -> throw BidonError.Unspecified(demandId = null, sourceError = response.httpError)
                     }
@@ -59,7 +61,7 @@ internal class JsonHttpRequest(
         }.onSuccess { jsonString ->
             withContext(SdkDispatchers.IO) {
                 JSONObject(jsonString).optString("token", "").takeIf { !it.isNullOrBlank() }?.let {
-                    logInfo(Tag, "New token saved: $it")
+                    logInfo(TAG, "New token saved: $it")
                     tokenDataSource.token = Token(token = it)
                 }
             }
@@ -67,4 +69,4 @@ internal class JsonHttpRequest(
     }
 }
 
-private const val Tag = "JsonHttpRequest"
+private const val TAG = "JsonHttpRequest"

@@ -3,12 +3,19 @@ package org.bidon.sdk.utils.serializer
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.utils.json.jsonArray
 import org.bidon.sdk.utils.json.jsonObject
+import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.javaField
 
 internal object BidonSerializer {
+    fun serializeToArray(data: List<Any>): JSONArray {
+        return jsonArray {
+            putValues(data.map { serialize(it) })
+        }
+    }
+
     fun serialize(data: Any): JSONObject {
         return jsonObject {
             data.getSerialParams().forEach { field ->
@@ -44,6 +51,34 @@ internal object BidonSerializer {
                             putValues(array)
                         }
                     }
+
+                    is Map<*, *> -> {
+                        jsonObject {
+                            field.value.forEach { (key, value) ->
+                                if (key != null) {
+                                    require(key is String) {
+                                        "key is not String type: key=($key) is ${key::class.java})"
+                                    }
+                                    key hasValue when (value) {
+                                        null -> null
+                                        is Serializable -> serialize(value)
+                                        is String -> value
+                                        is Double -> value
+                                        is Int -> value
+                                        is Long -> value
+                                        is Float -> value
+                                        is Boolean -> value
+                                        is Char -> value
+                                        else -> {
+                                            logFailure(data, field)
+                                            null
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     else -> {
                         logFailure(data, field)
                         null
@@ -63,7 +98,7 @@ internal object BidonSerializer {
                         value = readInstanceProperty(this, field.name)
                     )
                 } else {
-                    logError(Tag, "No annotation @SerialName set to field: ${field.name}", Serializable.Error.NotAnnotatedField)
+                    logError(TAG, "No annotation @SerialName set to field: ${field.name}", Serializable.Error.NotAnnotatedField)
                     null
                 }
             } else {
@@ -73,7 +108,7 @@ internal object BidonSerializer {
     }
 
     private fun logFailure(data: Any, field: SerialParams) {
-        logError(Tag, "Error while serializing: $data. Field: $field", Serializable.Error.UnknownClass)
+        logError(TAG, "Error while serializing: $data. Field: $field", Serializable.Error.UnknownClass)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -91,4 +126,4 @@ internal object BidonSerializer {
     )
 }
 
-private const val Tag = "BidonSerializer"
+private const val TAG = "BidonSerializer"

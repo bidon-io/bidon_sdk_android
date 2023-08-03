@@ -37,10 +37,10 @@ internal class AppDataSourceImpl(
             @Suppress("DEPRECATION")
             packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
         } catch (throwable: Throwable) {
-            logError(Tag, message = throwable.message ?: "", error = throwable)
+            logError(TAG, message = throwable.message ?: "", error = throwable)
         }
         return packageInfo
     }
 }
 
-private const val Tag = "AppDataSource"
+private const val TAG = "AppDataSource"

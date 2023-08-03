@@ -10,11 +10,13 @@ internal data class Round(
     @field:JsonName("id")
     val id: String,
     @field:JsonName("pricefloor")
-    val pricefloor: Double,
+    val pricefloor: Double?,
     @field:JsonName("winner_id")
     val winnerDemandId: String?,
     @field:JsonName("winner_ecpm")
     val winnerEcpm: Double?,
     @field:JsonName("demands")
-    val demands: List<Demand>,
+    val demands: List<DemandStat.Network>,
+    @field:JsonName("bidding")
+    val bidding: DemandStat.Bidding?,
 ) : Serializable

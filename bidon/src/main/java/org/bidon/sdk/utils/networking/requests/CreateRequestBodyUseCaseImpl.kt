@@ -18,6 +18,7 @@ internal class CreateRequestBodyUseCaseImpl(
         binders: List<DataBinderType>,
         dataKeyName: String?,
         data: T?,
+        list: List<T>,
         extras: Map<String, Any>
     ): JSONObject {
         val bindData = binders
@@ -30,13 +31,20 @@ internal class CreateRequestBodyUseCaseImpl(
             if (extras.isNotEmpty()) {
                 "ext" hasValue JSONObject(extras).toString()
             }
-            if (data != null && dataKeyName != null) {
-                dataKeyName hasValue data.serialize()
+            if (dataKeyName != null) {
+                when {
+                    data != null -> {
+                        dataKeyName hasValue data.serialize()
+                    }
+                    list.isNotEmpty() -> {
+                        dataKeyName hasValue list.serialize()
+                    }
+                }
             }
         }.also {
-            logInfo(Tag, "$it")
+            logInfo(TAG, "$it")
         }
     }
 }
 
-private const val Tag = "CreateRequestBodyUseCase"
+private const val TAG = "CreateRequestBodyUseCase"
