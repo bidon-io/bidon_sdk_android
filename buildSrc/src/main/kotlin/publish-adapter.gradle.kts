@@ -47,7 +47,7 @@ afterEvaluate {
                 name = "Bidon"
                 repo?.let {
                     url = uri("https://artifactory.bidon.org/artifactory/$repo")
-                    println("Artifactory repo: $url")
+                    println("Artifactory repo: $url. $getArtifactId, $getVersionName")
                     credentials {
                         uname?.let {
                             username = uname

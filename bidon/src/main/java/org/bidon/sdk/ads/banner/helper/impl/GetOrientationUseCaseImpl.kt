@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import org.bidon.sdk.ads.banner.helper.GetOrientationUseCase
-import org.bidon.sdk.auction.models.AdObjectRequestBody.Orientation
+import org.bidon.sdk.auction.models.AdObjectRequest.Orientation
 /**
  * Created by Bidon Team on 06/02/2023.
  */

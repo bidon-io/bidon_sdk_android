@@ -5,8 +5,8 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.bidon.sdk.base.ConcurrentTest
 import org.bidon.sdk.config.models.User
+import org.bidon.sdk.config.models.base.ConcurrentTest
 import org.bidon.sdk.config.models.json_scheme_utils.assertEquals
 import org.bidon.sdk.config.models.json_scheme_utils.expectedJsonStructure
 import org.bidon.sdk.databinders.DataProvider
@@ -35,8 +35,6 @@ internal class CreateRequestBodyUseCaseImplTest : ConcurrentTest() {
                 platformAdvertisingId = "123",
                 trackingAuthorizationStatus = "asd",
                 applicationId = "a.a.a",
-                consent = null,
-                coppa = false
             ),
             dataKeyName = "user_key"
         )
@@ -51,7 +49,6 @@ internal class CreateRequestBodyUseCaseImplTest : ConcurrentTest() {
                 "idfa" hasValue "123"
                 "tracking_authorization_status" hasValue "asd"
                 "idg" hasValue "a.a.a"
-                "coppa" hasValue false
             }
         )
     }
@@ -71,8 +68,6 @@ internal class CreateRequestBodyUseCaseImplTest : ConcurrentTest() {
                 platformAdvertisingId = "123",
                 trackingAuthorizationStatus = "asd",
                 applicationId = null,
-                consent = null,
-                coppa = false
             ),
             dataKeyName = "user_key"
         )

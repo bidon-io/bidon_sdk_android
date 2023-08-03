@@ -4,33 +4,34 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
-import org.bidon.sdk.auction.models.BannerRequestBody
-import org.bidon.sdk.auction.models.InterstitialRequestBody
-import org.bidon.sdk.auction.models.RewardedRequestBody
-import org.bidon.sdk.stats.BidStat
+import org.bidon.sdk.auction.models.BannerRequest
+import org.bidon.sdk.auction.models.InterstitialRequest
+import org.bidon.sdk.auction.models.RewardedRequest
+import org.bidon.sdk.logs.analytic.AdValue
+import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
+import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.stats.models.ImpressionRequestBody
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.usecases.SendImpressionRequestUseCase
-import org.bidon.sdk.stats.usecases.SendLossRequestUseCase
+import org.bidon.sdk.stats.usecases.SendWinLossRequestUseCase
+import org.bidon.sdk.stats.usecases.WinLossRequestData
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.ext.SystemTimeNow
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-class StatisticsCollectorImpl(
-    auctionId: String,
-    roundId: String,
-    demandId: DemandId,
-    private val demandAd: DemandAd
-) : StatisticsCollector {
+class StatisticsCollectorImpl : StatisticsCollector {
 
     private var auctionConfigurationId: Int = 0
+    private var externalWinNotificationsEnabled: Boolean = true
+    private lateinit var adType: StatisticsCollector.AdType
 
     private val impressionId: String by lazy {
         UUID.randomUUID().toString()
@@ -40,30 +41,70 @@ class StatisticsCollectorImpl(
         get<SendImpressionRequestUseCase>()
     }
     private val sendLossRequest by lazy {
-        get<SendLossRequestUseCase>()
+        get<SendWinLossRequestUseCase>()
     }
 
     private val isShowSent = AtomicBoolean(false)
+    private val isWinLossSent = AtomicBoolean(false)
     private val isClickSent = AtomicBoolean(false)
     private val isRewardSent = AtomicBoolean(false)
     private val scope by lazy {
         CoroutineScope(SdkDispatchers.IO)
     }
 
+    private var _demandAd: DemandAd? = null
     private var stat: BidStat = BidStat(
-        auctionId = auctionId,
-        roundId = roundId,
-        demandId = demandId,
+        auctionId = null,
+        roundId = null,
+        demandId = DemandId(""),
         adUnitId = null,
-        bidStartTs = null,
-        bidFinishTs = null,
         fillStartTs = null,
         fillFinishTs = null,
         roundStatus = null,
-        ecpm = null
+        ecpm = 0.0
     )
 
-    override fun sendShowImpression(adType: StatisticsCollector.AdType) {
+    override val demandAd: DemandAd
+        get() = requireNotNull(_demandAd) { "DemandAd is not set" }
+    override val demandId: DemandId
+        get() = requireNotNull(stat.demandId) { "DemandId is not set" }
+    override val auctionId: String
+        get() = requireNotNull(stat.auctionId) { "AuctionId is not set" }
+    override val roundId: String
+        get() = requireNotNull(stat.roundId) { "RoundId is not set" }
+
+    override fun getAd(demandAdObject: Any): Ad? {
+        val demandId = stat.demandId
+        val roundId = stat.roundId ?: return null
+        val auctionId = stat.auctionId ?: return null
+        return Ad(
+            demandAd = demandAd,
+            ecpm = stat.ecpm,
+            networkName = demandId.demandId,
+            adUnitId = stat.adUnitId,
+            currencyCode = AdValue.USD,
+            roundId = roundId,
+            auctionId = auctionId,
+            dsp = null,
+            demandAdObject = demandAdObject,
+        )
+    }
+
+    override fun addDemandId(demandId: DemandId) {
+        stat = stat.copy(
+            demandId = demandId
+        )
+    }
+
+    override fun addRoundInfo(auctionId: String, roundId: String, demandAd: DemandAd) {
+        this._demandAd = demandAd
+        stat = stat.copy(
+            auctionId = auctionId,
+            roundId = roundId,
+        )
+    }
+
+    override fun sendShowImpression() {
         if (!isShowSent.getAndSet(true)) {
             scope.launch {
                 val key = SendImpressionRequestUseCase.Type.Show.key
@@ -78,7 +119,7 @@ class StatisticsCollectorImpl(
         }
     }
 
-    override fun sendClickImpression(adType: StatisticsCollector.AdType) {
+    override fun sendClickImpression() {
         if (!isClickSent.getAndSet(true)) {
             scope.launch {
                 val key = SendImpressionRequestUseCase.Type.Click.key
@@ -87,7 +128,7 @@ class StatisticsCollectorImpl(
                     urlPath = "$key/$lastSegment",
                     bodyKey = "bid",
                     body = createImpressionRequestBody(adType),
-                    extras = demandAd.getExtras()
+                    extras = _demandAd?.getExtras().orEmpty()
                 )
             }
         }
@@ -108,40 +149,59 @@ class StatisticsCollectorImpl(
         }
     }
 
-    override fun sendLoss(winnerDemandId: String, winnerEcpm: Double, adType: StatisticsCollector.AdType) {
-        scope.launch {
-            sendLossRequest.invoke(
-                winnerDemandId = winnerDemandId,
-                winnerEcpm = winnerEcpm,
-                demandAd = demandAd,
-                bodyKey = "bid",
-                body = createImpressionRequestBody(adType)
-            )
+    override fun sendLoss(winnerDemandId: String, winnerEcpm: Double) {
+        if (!externalWinNotificationsEnabled) {
+            logInfo(TAG, "External WinLoss Notifications disabled: external_win_notifications=false")
+            return
         }
+        if (!isShowSent.getAndSet(true) && !isWinLossSent.getAndSet(true)) {
+            scope.launch {
+                sendLossRequest.invoke(
+                    WinLossRequestData.Loss(
+                        winnerDemandId = winnerDemandId,
+                        winnerEcpm = winnerEcpm,
+                        demandAd = demandAd,
+                        body = createImpressionRequestBody(adType)
+                    )
+                )
+            }
+        }
+    }
+
+    override fun sendWin() {
+        if (!externalWinNotificationsEnabled) {
+            logInfo(TAG, "External WinLoss Notifications disabled: external_win_notifications=false")
+            return
+        }
+        if (!isShowSent.get() && !isWinLossSent.getAndSet(true)) {
+            scope.launch {
+                sendLossRequest.invoke(
+                    WinLossRequestData.Win(
+                        demandAd = demandAd,
+                        body = createImpressionRequestBody(adType)
+                    )
+                )
+            }
+        }
+    }
+
+    override fun setStatisticAdType(adType: StatisticsCollector.AdType) {
+        this.adType = adType
     }
 
     override fun addAuctionConfigurationId(auctionConfigurationId: Int) {
         this.auctionConfigurationId = auctionConfigurationId
     }
 
-    override fun markBidStarted(adUnitId: String?) {
-        stat = stat.copy(
-            bidStartTs = SystemTimeNow,
-            adUnitId = adUnitId
-        )
+    override fun addExternalWinNotificationsEnabled(enabled: Boolean) {
+        externalWinNotificationsEnabled = enabled
     }
 
-    override fun markBidFinished(roundStatus: RoundStatus, ecpm: Double?) {
-        stat = stat.copy(
-            bidFinishTs = SystemTimeNow,
-            roundStatus = roundStatus,
-            ecpm = ecpm,
-        )
-    }
-
-    override fun markFillStarted() {
+    override fun markFillStarted(adUnitId: String?, pricefloor: Double?) {
         stat = stat.copy(
             fillStartTs = SystemTimeNow,
+            adUnitId = adUnitId,
+            ecpm = pricefloor ?: stat.ecpm
         )
     }
 
@@ -149,7 +209,7 @@ class StatisticsCollectorImpl(
         stat = stat.copy(
             fillFinishTs = SystemTimeNow,
             roundStatus = roundStatus,
-            ecpm = ecpm
+            ecpm = ecpm ?: 0.0
         )
     }
 
@@ -161,7 +221,7 @@ class StatisticsCollectorImpl(
 
     override fun markLoss() {
         stat = stat.copy(
-            roundStatus = RoundStatus.Loss
+            roundStatus = RoundStatus.Lose
         )
     }
 
@@ -171,33 +231,36 @@ class StatisticsCollectorImpl(
         )
     }
 
-    override fun buildBidStatistic(): BidStat = stat
+    override fun getStats(): BidStat = stat
 
     private fun createImpressionRequestBody(adType: StatisticsCollector.AdType): ImpressionRequestBody {
         val (banner, interstitial, rewarded) = getData(adType)
         return ImpressionRequestBody(
-            auctionId = stat.auctionId,
+            auctionId = auctionId,
+            roundId = roundId,
             auctionConfigurationId = auctionConfigurationId,
             impressionId = impressionId,
-            demandId = stat.demandId.demandId,
+            demandId = demandId.demandId,
             adUnitId = stat.adUnitId,
-            ecpm = stat.ecpm ?: 0.0,
+            ecpm = stat.ecpm,
             banner = banner,
             interstitial = interstitial,
             rewarded = rewarded,
         )
     }
 
-    private fun getData(adType: StatisticsCollector.AdType): Triple<BannerRequestBody?, InterstitialRequestBody?, RewardedRequestBody?> {
+    private fun getData(adType: StatisticsCollector.AdType): Triple<BannerRequest?, InterstitialRequest?, RewardedRequest?> {
         return when (adType) {
             is StatisticsCollector.AdType.Banner -> {
-                Triple(BannerRequestBody(formatCode = adType.format.code), null, null)
+                Triple(BannerRequest(formatCode = adType.format.code), null, null)
             }
+
             StatisticsCollector.AdType.Interstitial -> {
-                Triple(null, InterstitialRequestBody(), null)
+                Triple(null, InterstitialRequest(), null)
             }
+
             StatisticsCollector.AdType.Rewarded -> {
-                Triple(null, null, RewardedRequestBody())
+                Triple(null, null, RewardedRequest())
             }
         }
     }
@@ -208,3 +271,5 @@ class StatisticsCollectorImpl(
         StatisticsCollector.AdType.Rewarded -> AdType.Rewarded
     }
 }
+
+private const val TAG = "StatisticsCollector"

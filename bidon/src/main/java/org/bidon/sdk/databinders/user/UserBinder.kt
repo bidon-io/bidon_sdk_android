@@ -20,8 +20,6 @@ internal class UserBinder(
             platformAdvertisingId = dataSource.getAdvertisingId(),
             trackingAuthorizationStatus = dataSource.getTrackingAuthorizationStatus(),
             applicationId = dataSource.getApplicationId(),
-            consent = null,
-            coppa = false,
         )
     }
 }

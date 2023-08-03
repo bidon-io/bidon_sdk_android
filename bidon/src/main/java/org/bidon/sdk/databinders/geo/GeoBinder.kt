@@ -9,6 +9,7 @@ import org.json.JSONObject
 /**
  * Created by Bidon Team on 06/02/2023.
  */
+@Deprecated("Moved to Device")
 internal class GeoBinder(
     private val dataSource: LocationDataSource
 ) : DataBinder<JSONObject> {
@@ -22,7 +23,7 @@ internal class GeoBinder(
                 lat = dataSource.getLatitude(),
                 lon = dataSource.getLongitude(),
                 accuracy = dataSource.getAccuracy(),
-                lastfix = dataSource.getLastFix(),
+                lastFix = dataSource.getLastFix(),
                 country = dataSource.getCountry(),
                 city = dataSource.getCity(),
                 zip = dataSource.getZip(),

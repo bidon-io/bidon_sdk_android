@@ -31,22 +31,22 @@ internal class PauseResumeObserverImpl(
 
                 override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
                 override fun onActivityDestroyed(activity: Activity) {
-                    logInfo(Tag, "Activity Destroyed (current: ${weakActivity?.get()}) $activity")
+                    logInfo(TAG, "Activity Destroyed (current: ${weakActivity?.get()}) $activity")
                     if (activity == weakActivity?.get()) {
                         weakActivity = null
                     }
                 }
 
                 override fun onActivityResumed(activity: Activity) {
-                    logInfo(Tag, "Activity Resumed (current: ${weakActivity?.get()}) $activity")
+                    logInfo(TAG, "Activity Resumed (current: ${weakActivity?.get()}) $activity")
                     weakActivity = WeakReference(activity)
                     lifecycleFlow.value = ActivityLifecycleState.Resumed
                 }
 
                 override fun onActivityPaused(activity: Activity) {
-                    logInfo(Tag, "Activity <Paused> (current: ${weakActivity?.get()}) $activity")
+                    logInfo(TAG, "Activity <Paused> (current: ${weakActivity?.get()}) $activity")
                     if (activity == weakActivity?.get()) {
-                        logInfo(Tag, "Activity Paused $activity")
+                        logInfo(TAG, "Activity Paused $activity")
                         lifecycleFlow.value = ActivityLifecycleState.Paused
                     }
                 }
@@ -60,4 +60,4 @@ internal class PauseResumeObserverImpl(
     }
 }
 
-private const val Tag = "PauseResumeObserver"
+private const val TAG = "PauseResumeObserver"

@@ -15,8 +15,8 @@ internal class GeoSerializerTest {
         val geo = Geo(
             lat = 52.2388276,
             lon = 20.9767103,
-            accuracy = 13.407f,
-            lastfix = 1677171891497,
+            accuracy = 13,
+            lastFix = 1677171891497,
             country = "Poland",
             city = "Warsaw",
             zip = "01-233",
@@ -26,7 +26,7 @@ internal class GeoSerializerTest {
         actual.assertEquals(
             expectedJsonStructure {
                 "utcoffset" hasValue 1
-                "accuracy" hasValue 13.407
+                "accuracy" hasValue 13
                 "lon" hasValue 20.9767103
                 "lastfix" hasValue 1677171891497
                 "lat" hasValue 52.2388276
@@ -42,8 +42,8 @@ internal class GeoSerializerTest {
         val geo = Geo(
             lat = 52.2388276,
             lon = 20.9767103,
-            accuracy = 13.407f,
-            lastfix = 1677171891497,
+            accuracy = 13,
+            lastFix = 1677171891497,
             country = null,
             city = null,
             zip = null,
@@ -53,7 +53,7 @@ internal class GeoSerializerTest {
         actual.assertEquals(
             expectedJsonStructure {
                 "utcoffset" hasValue 1
-                "accuracy" hasValue 13.407
+                "accuracy" hasValue 13
                 "lon" hasValue 20.9767103
                 "lastfix" hasValue 1677171891497
                 "lat" hasValue 52.2388276

@@ -14,7 +14,7 @@ internal class AdapterInstanceCreatorImpl : org.bidon.sdk.config.AdapterInstance
         val adaptersClasses = classes.mapNotNull { clazz ->
             obtainServiceClass(clazz)
         }
-        logInfo(Tag, "Available adapters classes: ${adaptersClasses.joinToString { it.simpleName }}")
+        logInfo(TAG, "Available adapters classes: ${adaptersClasses.joinToString { it.simpleName }}")
         return adaptersClasses.mapNotNull {
             getAdapterInstance(clazz = it)
         }
@@ -27,7 +27,7 @@ internal class AdapterInstanceCreatorImpl : org.bidon.sdk.config.AdapterInstance
             @Suppress("UNCHECKED_CAST")
             Class.forName(requiredClass, initialize, classLoader) as Class<Adapter>
         } catch (e: Exception) {
-            logError(Tag, "Adapter class not found: $requiredClass", e)
+            logError(TAG, "Adapter class not found: $requiredClass", e)
             null
         }
     }
@@ -36,10 +36,10 @@ internal class AdapterInstanceCreatorImpl : org.bidon.sdk.config.AdapterInstance
         return try {
             clazz.newInstance() as Adapter
         } catch (e: Exception) {
-            logError(Tag, "Error while creating instance of $clazz", e)
+            logError(TAG, "Error while creating instance of $clazz", e)
             null
         }
     }
 }
 
-private const val Tag = "AdapterInstanceCreator"
+private const val TAG = "AdapterInstanceCreator"

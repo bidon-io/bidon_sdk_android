@@ -7,7 +7,7 @@ import org.bidon.sdk.utils.serializer.serialize
 import org.junit.Test
 
 /**
- * Created by Bidon Team on 23/02/2023.
+ * Created by Aleksei Cherniaev on 23/02/2023.
  */
 internal class DeviceSerializerTest {
 
@@ -30,7 +30,17 @@ internal class DeviceSerializerTest {
             pxRatio = 23.3f,
             javaScriptSupport = 1,
             type = "TABLET",
-            osApiLevel = "33"
+            osApiLevel = "33",
+            geo = Geo(
+                lat = 52.2388276,
+                lon = 20.9767103,
+                accuracy = 13,
+                lastFix = 1677171891497,
+                country = "Poland",
+                city = "Warsaw",
+                zip = "01-233",
+                utcOffset = 1
+            )
         )
         val actual = device.serialize()
 
@@ -53,6 +63,16 @@ internal class DeviceSerializerTest {
                 "make" hasValue "sony"
                 "type" hasValue "TABLET"
                 "os_api_level" hasValue "33"
+                "geo" hasJson expectedJsonStructure {
+                    "utcoffset" hasValue 1
+                    "accuracy" hasValue 13
+                    "lon" hasValue 20.9767103
+                    "lastfix" hasValue 1677171891497
+                    "lat" hasValue 52.2388276
+                    "country" hasValue "Poland"
+                    "city" hasValue "Warsaw"
+                    "zip" hasValue "01-233"
+                }
             }
         )
     }
@@ -76,7 +96,8 @@ internal class DeviceSerializerTest {
             pxRatio = 23.3f,
             javaScriptSupport = null,
             type = "PHONE",
-            osApiLevel = "33"
+            osApiLevel = "33",
+            geo = null
         )
         val actual = device.serialize()
 

@@ -3,12 +3,12 @@ package org.bidon.sdk.config.models.data.models.auction
 import com.google.common.truth.Truth.assertThat
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.LineItem
-import org.bidon.sdk.auction.models.Round
+import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.utils.json.JsonParsers
 import org.junit.Test
 
 /**
- * Created by Bidon Team on 08/02/2023.
+ * Created by Aleksei Cherniaev on 08/02/2023.
  */
 internal class AuctionResponseParserTest {
 
@@ -24,15 +24,17 @@ internal class AuctionResponseParserTest {
 
     private val expectedModel = AuctionResponse(
         rounds = listOf(
-            Round(
+            RoundRequest(
                 id = "postbid",
                 timeoutMs = 15,
-                demandIds = listOf("admob", "bidmachine")
+                demandIds = listOf("admob", "bidmachine"),
+                biddingIds = listOf(),
             ),
-            Round(
+            RoundRequest(
                 id = "prebid",
                 timeoutMs = 25,
-                demandIds = listOf("bidmachine")
+                demandIds = listOf("bidmachine"),
+                biddingIds = listOf("asd"),
             ),
         ),
         auctionConfigurationId = 10,
@@ -50,7 +52,8 @@ internal class AuctionResponseParserTest {
                 adUnitId = "AAAA1"
             ),
         ),
-        pricefloor = 0.01
+        pricefloor = 0.01,
+        externalWinNotificationsEnabled = false
     )
 
     private val responseJsonStr = """
@@ -69,7 +72,10 @@ internal class AuctionResponseParserTest {
               "timeout": 25,
               "demands": [
                 "bidmachine"
-              ]
+              ],
+              "bidding": [
+                "asd"
+              ],
             }
           ],
           "line_items": [
@@ -88,7 +94,8 @@ internal class AuctionResponseParserTest {
           "fill_timeout": 10000,
           "pricefloor": 0.01,
           "auction_id":"49975154-b82a-444b-a7f0-30bd749e7fce",
-          "auction_configuration_id":10
+          "auction_configuration_id":10,
+          "external_win_notifications":false
         }
     """.trimIndent()
 }
