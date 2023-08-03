@@ -35,10 +35,10 @@ internal class DeviceDataSourceImpl(
         Ethernet("ETHERNET"),
         WiFI("WIFI"),
         CellularUnknown("CELLULAR"),
-        Cellular2G("CELLULAR_2G"),
-        Cellular3G("CELLULAR_3G"),
-        Cellular4G("CELLULAR_4G"),
-        Cellular5G("CELLULAR_5G"),
+        Cellular2G("CELLULAR_2_G"),
+        Cellular3G("CELLULAR_3_G"),
+        Cellular4G("CELLULAR_4_G"),
+        Cellular5G("CELLULAR_5_G"),
     }
 
     override fun getUserAgent(): String {
@@ -165,7 +165,7 @@ internal class DeviceDataSourceImpl(
                 val pi = pm.getPackageInfo("com.google.android.webview", 0)
                 builder.append(" Chrome/").append(pi.versionName)
             } catch (throwable: Throwable) {
-                logError(Tag, throwable.message ?: "", throwable)
+                logError(TAG, throwable.message ?: "", throwable)
             }
             builder.append(" Mobile")
             try {
@@ -180,11 +180,11 @@ internal class DeviceDataSourceImpl(
                     .append("/")
                     .append(packageInfo.versionName)
             } catch (throwable: Throwable) {
-                logError(Tag, throwable.message ?: "", throwable)
+                logError(TAG, throwable.message ?: "", throwable)
             }
             builder.toString()
         } catch (throwable: Throwable) {
-            logError(Tag, throwable.message ?: "", throwable)
+            logError(TAG, throwable.message ?: "", throwable)
             null
         }
     }
@@ -194,11 +194,11 @@ internal class DeviceDataSourceImpl(
         try {
             result = System.getProperty("http.agent", "")
         } catch (throwable: Throwable) {
-            logError(Tag, throwable.message ?: "", throwable)
+            logError(TAG, throwable.message ?: "", throwable)
         }
         return result
     }
 }
 
 private const val AndroidPlatform = "android"
-private const val Tag = "DeviceDataSource"
+private const val TAG = "DeviceDataSource"

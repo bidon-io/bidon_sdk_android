@@ -1,8 +1,8 @@
 package org.bidon.sdk.stats.models
 
-import org.bidon.sdk.auction.models.BannerRequestBody
-import org.bidon.sdk.auction.models.InterstitialRequestBody
-import org.bidon.sdk.auction.models.RewardedRequestBody
+import org.bidon.sdk.auction.models.BannerRequest
+import org.bidon.sdk.auction.models.InterstitialRequest
+import org.bidon.sdk.auction.models.RewardedRequest
 import org.bidon.sdk.utils.serializer.JsonName
 import org.bidon.sdk.utils.serializer.Serializable
 
@@ -12,6 +12,8 @@ import org.bidon.sdk.utils.serializer.Serializable
 internal data class ImpressionRequestBody(
     @field:JsonName("auction_id")
     val auctionId: String,
+    @field:JsonName("round_id")
+    val roundId: String,
     @field:JsonName("auction_configuration_id")
     val auctionConfigurationId: Int,
     @field:JsonName("imp_id")
@@ -23,9 +25,9 @@ internal data class ImpressionRequestBody(
     @field:JsonName("ecpm")
     val ecpm: Double,
     @field:JsonName("banner")
-    val banner: BannerRequestBody?,
+    val banner: BannerRequest?,
     @field:JsonName("interstitial")
-    val interstitial: InterstitialRequestBody?,
+    val interstitial: InterstitialRequest?,
     @field:JsonName("rewarded")
-    val rewarded: RewardedRequestBody?,
+    val rewarded: RewardedRequest?,
 ) : Serializable

@@ -1,7 +1,7 @@
 package org.bidon.sdk.stats.usecases
 
 import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.stats.RoundStat
+import org.bidon.sdk.stats.models.StatsRequestBody
 import org.bidon.sdk.utils.networking.BaseResponse
 
 /**
@@ -9,9 +9,7 @@ import org.bidon.sdk.utils.networking.BaseResponse
  */
 internal interface StatsRequestUseCase {
     suspend operator fun invoke(
-        auctionId: String,
-        auctionConfigurationId: Int,
-        results: List<RoundStat>,
-        demandAd: DemandAd
+        statsRequestBody: StatsRequestBody,
+        demandAd: DemandAd,
     ): Result<BaseResponse>
 }

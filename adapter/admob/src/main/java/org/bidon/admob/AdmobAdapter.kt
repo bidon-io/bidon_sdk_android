@@ -37,39 +37,16 @@ class AdmobAdapter :
         }
     }
 
-    override fun interstitial(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Interstitial<AdmobFullscreenAdAuctionParams> {
-        return AdmobInterstitialImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
-            auctionId = auctionId
-        )
+    override fun interstitial(): AdSource.Interstitial<AdmobFullscreenAdAuctionParams> {
+        return AdmobInterstitialImpl()
     }
 
-    override fun rewarded(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Rewarded<AdmobFullscreenAdAuctionParams> {
-        return AdmobRewardedImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
-            auctionId = auctionId
-        )
+    override fun rewarded(): AdSource.Rewarded<AdmobFullscreenAdAuctionParams> {
+        return AdmobRewardedImpl()
     }
 
-    override fun banner(demandAd: DemandAd, roundId: String, auctionId: String): AdSource.Banner<AdmobBannerAuctionParams> {
-        return AdmobBannerImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
-            auctionId = auctionId
-        )
+    override fun banner(): AdSource.Banner<AdmobBannerAuctionParams> {
+        return AdmobBannerImpl()
     }
 
     override fun parseConfigParam(json: String): AdmobInitParameters = AdmobInitParameters

@@ -4,15 +4,17 @@ import kotlinx.coroutines.withContext
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.AdapterInfo
 import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.ads.AdType
-import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.GetOrientationUseCase
+import org.bidon.sdk.ads.ext.asAdRequestBody
+import org.bidon.sdk.ads.ext.asAdType
 import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.models.*
+import org.bidon.sdk.auction.models.AdObjectRequest
+import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
 import org.bidon.sdk.databinders.DataBinderType
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.segment.SegmentSynchronizer
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.json.JsonParsers
@@ -25,16 +27,18 @@ import org.bidon.sdk.utils.networking.requests.CreateRequestBodyUseCase
 internal class GetAuctionRequestUseCaseImpl(
     private val createRequestBody: CreateRequestBodyUseCase,
     private val getOrientation: GetOrientationUseCase,
+    private val segmentSynchronizer: SegmentSynchronizer,
 ) : GetAuctionRequestUseCase {
     private val binders: List<DataBinderType> = listOf(
         DataBinderType.AvailableAdapters,
         DataBinderType.Device,
         DataBinderType.App,
         DataBinderType.Token,
-        DataBinderType.Geo,
         DataBinderType.Session,
         DataBinderType.User,
         DataBinderType.Segment,
+        DataBinderType.Reg,
+        DataBinderType.Test,
     )
 
     override suspend fun request(
@@ -44,8 +48,8 @@ internal class GetAuctionRequestUseCaseImpl(
         adapters: Map<String, AdapterInfo>,
     ): Result<AuctionResponse> {
         return withContext(SdkDispatchers.IO) {
-            val (banner, interstitial, rewarded) = getData(additionalData)
-            val adObject = AdObjectRequestBody(
+            val (banner, interstitial, rewarded) = additionalData.asAdRequestBody()
+            val adObject = AdObjectRequest(
                 auctionId = auctionId,
                 banner = banner,
                 interstitial = interstitial,
@@ -59,48 +63,21 @@ internal class GetAuctionRequestUseCaseImpl(
                 data = adObject,
                 extras = BidonSdk.getExtras() + demandAd.getExtras()
             )
-            logInfo(Tag, "Request body: $requestBody")
+            logInfo(TAG, "Request body: $requestBody")
             get<JsonHttpRequest>().invoke(
                 path = "$AuctionRequestPath/${additionalData.asAdType().code}",
                 body = requestBody,
             ).mapCatching { jsonResponse ->
+                segmentSynchronizer.parseSegmentId(jsonResponse)
                 requireNotNull(JsonParsers.parseOrNull<AuctionResponse>(jsonResponse))
             }.onFailure {
-                logError(Tag, "Error while loading auction data", it)
+                logError(TAG, "Error while loading auction data", it)
             }.onSuccess {
-                logInfo(Tag, "Loaded auction data: $it")
+                logInfo(TAG, "Loaded auction data: $it")
             }
         }
-    }
-
-    private fun getData(data: AdTypeParam): Triple<BannerRequestBody?, InterstitialRequestBody?, RewardedRequestBody?> {
-        return when (data) {
-            is AdTypeParam.Banner -> {
-                val banner = BannerRequestBody(
-                    formatCode = when (data.bannerFormat) {
-                        BannerFormat.Banner -> BannerRequestBody.StatFormat.Banner320x50
-                        BannerFormat.LeaderBoard -> BannerRequestBody.StatFormat.LeaderBoard728x90
-                        BannerFormat.MRec -> BannerRequestBody.StatFormat.MRec300x250
-                        BannerFormat.Adaptive -> BannerRequestBody.StatFormat.AdaptiveBanner320x50
-                    }.code,
-                )
-                Triple(first = banner, second = null, third = null)
-            }
-            is AdTypeParam.Interstitial -> {
-                Triple(first = null, second = InterstitialRequestBody(), third = null)
-            }
-            is AdTypeParam.Rewarded -> {
-                Triple(first = null, second = null, third = RewardedRequestBody())
-            }
-        }
-    }
-
-    private fun AdTypeParam.asAdType() = when (this) {
-        is AdTypeParam.Banner -> AdType.Banner
-        is AdTypeParam.Interstitial -> AdType.Interstitial
-        is AdTypeParam.Rewarded -> AdType.Rewarded
     }
 }
 
 private const val AuctionRequestPath = "auction"
-private const val Tag = "AuctionRequestUseCase"
+private const val TAG = "AuctionRequestUseCase"

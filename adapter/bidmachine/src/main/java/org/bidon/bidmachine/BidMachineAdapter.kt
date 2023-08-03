@@ -10,7 +10,9 @@ import org.bidon.bidmachine.impl.BMInterstitialAdImpl
 import org.bidon.bidmachine.impl.BMRewardedAdImpl
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
 import org.bidon.sdk.logs.logging.Logger
+import org.bidon.sdk.regulation.Regulation
 import org.json.JSONObject
 import kotlin.coroutines.resume
 
@@ -22,10 +24,14 @@ internal typealias BMAuctionResult = io.bidmachine.models.AuctionResult
 @Suppress("unused")
 class BidMachineAdapter :
     Adapter,
+    SupportsRegulation,
+    SupportsTestMode by SupportsTestModeImpl(),
     Initializable<BidMachineParameters>,
     AdProvider.Banner<BMBannerAuctionParams>,
     AdProvider.Rewarded<BMFullscreenAuctionParams>,
     AdProvider.Interstitial<BMFullscreenAuctionParams> {
+
+    private var context: Context? = null
 
     override val demandId = BidMachineDemandId
     override val adapterInfo = AdapterInfo(
@@ -35,7 +41,9 @@ class BidMachineAdapter :
 
     override suspend fun init(context: Context, configParams: BidMachineParameters): Unit =
         suspendCancellableCoroutine { continuation ->
+            this.context = context
             val sourceId = configParams.sellerId
+            BidMachine.setTestMode(isTestMode)
             BidMachine.setLoggingEnabled(BidonSdk.loggerLevel != Logger.Level.Off)
             BidMachine.initialize(context, sourceId) {
                 continuation.resume(Unit)
@@ -57,42 +65,25 @@ class BidMachineAdapter :
         )
     }
 
-    override fun interstitial(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Interstitial<BMFullscreenAuctionParams> {
-        return BMInterstitialAdImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
-            auctionId = auctionId
+    override fun updateRegulation(regulation: Regulation) {
+        BidMachine.setUSPrivacyString(regulation.usPrivacyString)
+        BidMachine.setCoppa(regulation.coppaApplies)
+        BidMachine.setSubjectToGDPR(regulation.gdprConsent)
+        BidMachine.setConsentConfig(
+            /* hasConsent = */ !regulation.gdprConsentString.isNullOrBlank(),
+            /* consentString = */ regulation.gdprConsentString
         )
     }
 
-    override fun rewarded(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Rewarded<BMFullscreenAuctionParams> {
-        return BMRewardedAdImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
-            auctionId = auctionId
-        )
+    override fun interstitial(): AdSource.Interstitial<BMFullscreenAuctionParams> {
+        return BMInterstitialAdImpl()
     }
 
-    override fun banner(
-        demandAd: DemandAd,
-        roundId: String,
-        auctionId: String
-    ): AdSource.Banner<BMBannerAuctionParams> {
-        return BMBannerAdImpl(
-            demandId = demandId,
-            demandAd = demandAd,
-            roundId = roundId,
-            auctionId = auctionId
-        )
+    override fun rewarded(): AdSource.Rewarded<BMFullscreenAuctionParams> {
+        return BMRewardedAdImpl()
+    }
+
+    override fun banner(): AdSource.Banner<BMBannerAuctionParams> {
+        return BMBannerAdImpl()
     }
 }

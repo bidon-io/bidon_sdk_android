@@ -1,7 +1,7 @@
 package org.bidon.sdk.ads.banner.helper
 
 import org.bidon.sdk.ads.Ad
-import org.bidon.sdk.auction.AuctionResult
+import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 
 /**

@@ -16,8 +16,6 @@ internal class UserSerializerTest {
             platformAdvertisingId = "123",
             trackingAuthorizationStatus = "asd",
             applicationId = "a.a.a",
-            consent = null,
-            coppa = false
         ).serialize()
 
         actual.assertEquals(
@@ -25,7 +23,6 @@ internal class UserSerializerTest {
                 "idfa" hasValue "123"
                 "tracking_authorization_status" hasValue "asd"
                 "idg" hasValue "a.a.a"
-                "coppa" hasValue false
             }
         )
     }
