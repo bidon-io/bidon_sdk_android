@@ -15,6 +15,7 @@ import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
+import org.bidon.sdk.ads.rewarded.Reward
 import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
@@ -131,6 +132,15 @@ internal class MintegralRewardedImpl :
                 this@MintegralRewardedImpl.mBridgeIds = mBridgeIds
                 val ad = getAd(this@MintegralRewardedImpl) ?: return
                 emitEvent(AdEvent.Closed(ad))
+                emitEvent(AdEvent.OnReward(
+                    ad = ad,
+                    reward = rewardInfo?.let {
+                        Reward(
+                            label = it.rewardName,
+                            amount = it.rewardAmount.toIntOrNull() ?: 0
+                        )
+                    }
+                ))
             }
 
             override fun onShowFail(mBridgeIds: MBridgeIds?, message: String?) {
