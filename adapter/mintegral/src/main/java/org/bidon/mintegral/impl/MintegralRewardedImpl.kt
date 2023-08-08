@@ -132,15 +132,17 @@ internal class MintegralRewardedImpl :
                 this@MintegralRewardedImpl.mBridgeIds = mBridgeIds
                 val ad = getAd(this@MintegralRewardedImpl) ?: return
                 emitEvent(AdEvent.Closed(ad))
-                emitEvent(AdEvent.OnReward(
-                    ad = ad,
-                    reward = rewardInfo?.let {
-                        Reward(
-                            label = it.rewardName,
-                            amount = it.rewardAmount.toIntOrNull() ?: 0
-                        )
-                    }
-                ))
+                emitEvent(
+                    AdEvent.OnReward(
+                        ad = ad,
+                        reward = rewardInfo?.let {
+                            Reward(
+                                label = it.rewardName,
+                                amount = it.rewardAmount.toIntOrNull() ?: 0
+                            )
+                        }
+                    )
+                )
             }
 
             override fun onShowFail(mBridgeIds: MBridgeIds?, message: String?) {
