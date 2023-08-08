@@ -12,7 +12,6 @@ import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.models.BiddingResult
 import org.bidon.sdk.auction.usecases.models.RoundResult
 import org.bidon.sdk.logs.logging.impl.logInfo
-import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.ext.SystemTimeNow
 
@@ -138,7 +137,7 @@ internal class ResultsCollectorImpl(
                  */
                 val isAbovePricefloor = it.adSource.getStats().ecpm >= sourcePriceFloor
                 if (!isAbovePricefloor) {
-                    (it.adSource as StatisticsCollector).markBelowPricefloor()
+                    it.adSource.markBelowPricefloor()
                 }
                 isAbovePricefloor
             }
