@@ -92,6 +92,7 @@ internal fun MainScreen(
                                 DefaultAdapters.VungleAdapter -> "Vungle"
                                 DefaultAdapters.BigoAdsAdapter -> "Bigo Ads"
                                 DefaultAdapters.MintegralAdapter -> "Mintegral"
+                                DefaultAdapters.MetaAdapter -> "Meta/Facebook"
                             }
                         },
                         onItemClicked = {

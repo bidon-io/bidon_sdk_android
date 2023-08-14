@@ -16,6 +16,7 @@
             <option value="$PROJECT_DIR$/adapter/bidmachine" />
             <option value="$PROJECT_DIR$/adapter/bigoads" />
             <option value="$PROJECT_DIR$/adapter/dtexchange" />
+            <option value="$PROJECT_DIR$/adapter/meta" />
             <option value="$PROJECT_DIR$/adapter/mintegral" />
             <option value="$PROJECT_DIR$/adapter/unityads" />
             <option value="$PROJECT_DIR$/adapter/vungle" />
