@@ -47,6 +47,7 @@ include(
     ":adapter:vungle",
     ":adapter:bigoads",
     ":adapter:mintegral",
+    ":adapter:meta",
 //    ":adapter:fyber",
 //    ":adapter:ironsource",
 //    ":adapter:appsflyer"

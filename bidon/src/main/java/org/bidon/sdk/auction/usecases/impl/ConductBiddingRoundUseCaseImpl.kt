@@ -69,8 +69,9 @@ internal class ConductBiddingRoundUseCaseImpl(
                 ).onFailure {
                     logError(TAG, "Error while server bidding", it)
                 }.getOrNull()
-                val bids =
-                    bidResponse?.bids?.takeIf { it.isNotEmpty() && bidResponse.status == BiddingResponse.BidStatus.Success }
+                val bids = bidResponse?.bids?.takeIf {
+                    it.isNotEmpty() && bidResponse.status == BiddingResponse.BidStatus.Success
+                }
                 resultsCollector.serverBiddingFinished(bids)
 
                 /**
@@ -111,7 +112,10 @@ internal class ConductBiddingRoundUseCaseImpl(
                 (it as AdSource<*>).demandId.demandId == bid.demandId
             } as AdSource<*>
             if (!filled) {
-                adSource.markFillStarted(null, bid.price)
+                adSource.markFillStarted(
+                    adUnitId = null,
+                    pricefloor = bid.price
+                )
                 val fillResult = loadAd(
                     biddingSources = biddingSources,
                     bid = bid,
@@ -122,6 +126,10 @@ internal class ConductBiddingRoundUseCaseImpl(
                         filled = true
                     }
                 }
+                adSource.markFillFinished(
+                    roundStatus = fillResult.roundStatus,
+                    ecpm = bid.price
+                )
                 resultsCollector.add(fillResult)
             } else {
                 val lose = AuctionResult.Bidding(
@@ -151,12 +159,11 @@ internal class ConductBiddingRoundUseCaseImpl(
                 optContainerWidth = (adTypeParam as? AdTypeParam.Banner)?.containerWidth,
                 json = bid.json
             )
-        ).onFailure {
-            return AuctionResult.Bidding(
-                roundStatus = RoundStatus.NoAppropriateAdUnitId,
-                adSource = adSource,
-            )
-        }.getOrThrow()
+        ).getOrNull() ?: return AuctionResult.Bidding(
+            roundStatus = RoundStatus.NoAppropriateAdUnitId,
+            adSource = adSource,
+        )
+
         /**
          * Start loading ad
          */
@@ -168,7 +175,7 @@ internal class ConductBiddingRoundUseCaseImpl(
         }
         return when (bidAdEvent) {
             is AdEvent.Bid -> {
-                adSource.fillWinner(bidPrice = bid.price)
+                adSource.fillWinner()
             }
 
             is AdEvent.LoadFailed,
@@ -185,24 +192,16 @@ internal class ConductBiddingRoundUseCaseImpl(
         }
     }
 
-    private suspend fun AdLoadingType.Bidding<AdAuctionParams>.fillWinner(
-        bidPrice: Double,
-    ): AuctionResult.Bidding {
+    private suspend fun AdLoadingType.Bidding<AdAuctionParams>.fillWinner(): AuctionResult.Bidding {
         val winnerAdSource = this
         winnerAdSource as AdSource<AdAuctionParams>
-
         // Start Fill Ad
-        winnerAdSource.markFillStarted(adUnitId = null, pricefloor = bidPrice)
         winnerAdSource.fill()
         // Wait for fill result
         val fillAdEvent = winnerAdSource.adEvent.first {
             it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
         }
         return if (fillAdEvent is AdEvent.Fill) {
-            winnerAdSource.markFillFinished(
-                roundStatus = RoundStatus.Successful,
-                ecpm = bidPrice
-            )
             AuctionResult.Bidding(
                 adSource = winnerAdSource,
                 roundStatus = RoundStatus.Successful
@@ -213,10 +212,6 @@ internal class ConductBiddingRoundUseCaseImpl(
                 is AdEvent.LoadFailed -> fillAdEvent.cause.asRoundStatus()
                 else -> error("unexpected")
             }
-            winnerAdSource.markFillFinished(
-                roundStatus = roundStatus,
-                ecpm = bidPrice
-            )
             AuctionResult.Bidding(
                 roundStatus = roundStatus,
                 adSource = winnerAdSource,

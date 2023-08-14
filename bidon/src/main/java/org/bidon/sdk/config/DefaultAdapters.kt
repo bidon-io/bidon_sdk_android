@@ -15,4 +15,5 @@ enum class DefaultAdapters(val classPath: String) {
     BigoAdsAdapter(classPath = "org.bidon.bigoads.BigoAdsAdapter"),
     MintegralAdapter(classPath = "org.bidon.mintegral.MintegralAdapter"),
     VungleAdapter(classPath = "org.bidon.vungle.VungleAdapter"),
+    MetaAdapter(classPath = "org.bidon.meta.MetaAudienceAdapter"),
 }
