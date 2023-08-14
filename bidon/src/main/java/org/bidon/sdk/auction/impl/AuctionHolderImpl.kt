@@ -8,7 +8,6 @@ import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionHolder
 import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
-import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.ext.asFailure
@@ -55,7 +54,6 @@ internal class AuctionHolderImpl(
                 },
                 onFailure = {
                     nextWinner = null
-                    logError(TAG, "Auction failed", it)
                     onResult.invoke(it.asFailure())
                     auctionState.value = AuctionHolderState.Idle
                 }

@@ -5,6 +5,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.WinLossNotifiable
@@ -21,6 +22,7 @@ import org.bidon.sdk.auction.usecases.ExecuteRoundUseCase
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
 import org.bidon.sdk.auction.usecases.models.RoundResult
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.SdkDispatchers
@@ -77,8 +79,10 @@ internal class AuctionImpl(
                             it.demandId.demandId to it.adapterInfo
                         }
                     ).mapCatching { auctionData ->
-                        check(auctionId == auctionData.auctionId) {
-                            "auction_id has been changed"
+                        if (!BidonSdk.bidon.isTestMode) {
+                            check(auctionId == auctionData.auctionId) {
+                                "auction_id has been changed"
+                            }
                         }
                         conductAuction(
                             auctionData = auctionData,
@@ -87,8 +91,14 @@ internal class AuctionImpl(
                         ).ifEmpty {
                             throw BidonError.NoAuctionResults
                         }.also(onSuccess)
-                    }.onFailure(onFailure)
-                }.onFailure(onFailure)
+                    }.onFailure {
+                        logError(TAG, "Auction failed", it)
+                        onFailure(it)
+                    }
+                }.onFailure {
+                    logError(TAG, "Auction failed", it)
+                    onFailure(it)
+                }
             }
         }
     }
