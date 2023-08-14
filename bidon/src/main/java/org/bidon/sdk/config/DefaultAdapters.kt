@@ -10,13 +10,9 @@ enum class DefaultAdapters(val classPath: String) {
     AdmobAdapter(classPath = "org.bidon.admob.AdmobAdapter"),
     BidmachineAdapter(classPath = "org.bidon.bidmachine.BidMachineAdapter"),
     ApplovinAdapter(classPath = "org.bidon.applovin.ApplovinAdapter"),
-    DataExchangeAdapter(classPath = "org.bidon.dtexchange.DTExchangeAdapter"),
+    DTExchangeAdapter(classPath = "org.bidon.dtexchange.DTExchangeAdapter"),
     UnityAdsAdapter(classPath = "org.bidon.unityads.UnityAdsAdapter"),
     BigoAdsAdapter(classPath = "org.bidon.bigoads.BigoAdsAdapter"),
     MintegralAdapter(classPath = "org.bidon.mintegral.MintegralAdapter"),
-
-//    AppsflyerAdapter(classPath = "org.bidon.appsflyer.AppsflyerAnalytics"),
-//    FyberFairBidAdapter(classPath = "org.bidon.fyber.FairBidAdapter"),
-//    IronSourceAdapter(classPath = "org.bidon.ironsource.IronSourceAdapter"),
-//    MaxAdapter(classPath = "org.bidon.applovin.MaxAdapter"),
+    VungleAdapter(classPath = "org.bidon.vungle.VungleAdapter"),
 }

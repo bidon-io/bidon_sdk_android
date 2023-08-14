@@ -14,6 +14,7 @@ object Versions {
         val UnityAds = "$mainVersion.0"
         val BigoAds = "$mainVersion.0"
         val Mintegral = "$mainVersion.1"
+        val Vungle = "$mainVersion.0"
 
         val IronSource = "$mainVersion.0"
         val Appsflyer = "$mainVersion.0"
