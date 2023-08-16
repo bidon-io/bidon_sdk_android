@@ -68,12 +68,6 @@ internal class VungleBannerImpl :
 
     override fun adRequest(adParams: VungleBannerAuctionParams) {
         this.adParams = adParams
-        val a = this.adParams
-        val s = a?.bannerId
-        if (s != null) {
-            a.bannerId
-        }
-
         Banners.loadBanner(
             adParams.bannerId, adParams.payload, adParams.config,
             object : LoadAdCallback {
