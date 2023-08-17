@@ -50,7 +50,9 @@ internal class UnityAdsRewarded :
             override fun onUnityAdsAdLoaded(placementId: String?) {
                 logInfo(TAG, "onUnityAdsAdLoaded: $this")
                 isAdReadyToShow = true
-                emitEvent(AdEvent.Fill(requireNotNull(getAd(this@UnityAdsRewarded))))
+                getAd(this@UnityAdsRewarded)?.let {
+                    emitEvent(AdEvent.Fill(it))
+                }
             }
 
             override fun onUnityAdsFailedToLoad(placementId: String?, error: UnityAds.UnityAdsLoadError?, message: String?) {
@@ -106,6 +108,7 @@ internal class UnityAdsRewarded :
                             emitEvent(AdEvent.OnReward(ad = it, reward = null))
                             sendRewardImpression()
                         }
+
                         UnityAds.UnityAdsShowCompletionState.SKIPPED,
                         null -> {
                             // do nothing

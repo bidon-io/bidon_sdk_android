@@ -49,10 +49,9 @@ internal class BMBannerAdImpl :
     private var adRequest: BannerRequest? = null
     private var bannerView: BannerView? = null
     private var bannerFormat: BannerFormat? = null
-    override val isAdReadyToShow: Boolean
-        get() = bannerView?.canShow() == true
 
     private var isBiddingRequest = true
+
     private val requestListener by lazy {
         object : AdRequest.AdRequestListener<BannerRequest> {
             override fun onRequestSuccess(request: BannerRequest, result: BMAuctionResult) {
@@ -91,53 +90,8 @@ internal class BMBannerAdImpl :
         }
     }
 
-    private val bannerListener by lazy {
-        object : BannerListener {
-
-            override fun onAdLoaded(bannerView: BannerView) {
-                logInfo(TAG, "onAdLoaded: $this")
-                this@BMBannerAdImpl.bannerView = bannerView
-                emitEvent(AdEvent.Fill(bannerView.asAd()))
-            }
-
-            override fun onAdShowFailed(bannerView: BannerView, bmError: BMError) {
-                logInfo(TAG, "onAdShowFailed: $this")
-                this@BMBannerAdImpl.bannerView = bannerView
-                emitEvent(AdEvent.ShowFailed(bmError.asBidonErrorOnFill(demandId)))
-            }
-
-            override fun onAdLoadFailed(bannerView: BannerView, bmError: BMError) {
-                val error = bmError.asBidonErrorOnFill(demandId)
-                logError(TAG, "onAdLoadFailed: $this", error)
-                this@BMBannerAdImpl.bannerView = bannerView
-                emitEvent(AdEvent.LoadFailed(error))
-            }
-
-            override fun onAdImpression(bannerView: BannerView) {
-                logInfo(TAG, "onAdShown: $this")
-                this@BMBannerAdImpl.bannerView = bannerView
-                // tracked impression/shown by [BannerView]
-                emitEvent(
-                    AdEvent.PaidRevenue(
-                        ad = bannerView.asAd(),
-                        adValue = bannerView.auctionResult.asBidonAdValue()
-                    )
-                )
-            }
-
-            override fun onAdClicked(bannerView: BannerView) {
-                logInfo(TAG, "onAdClicked: $this")
-                this@BMBannerAdImpl.bannerView = bannerView
-                emitEvent(AdEvent.Clicked(bannerView.asAd()))
-            }
-
-            override fun onAdExpired(bannerView: BannerView) {
-                logInfo(TAG, "onAdExpired: $this")
-                this@BMBannerAdImpl.bannerView = bannerView
-                emitEvent(AdEvent.Expired(bannerView.asAd()))
-            }
-        }
-    }
+    override val isAdReadyToShow: Boolean
+        get() = bannerView?.canShow() == true
 
     override fun getToken(context: Context): String = BidMachine.getBidToken(context)
 
@@ -174,13 +128,12 @@ internal class BMBannerAdImpl :
         }
     }
 
-    override fun destroy() {
-        logInfo(TAG, "destroy $this")
-        adRequest?.destroy()
-        adRequest = null
-        bannerView?.setListener(null)
-        bannerView?.destroy()
-        bannerView = null
+    override fun notifyLoss(winnerNetworkName: String, winnerNetworkPrice: Double) {
+        adRequest?.notifyMediationLoss(winnerNetworkName, winnerNetworkPrice)
+    }
+
+    override fun notifyWin() {
+        adRequest?.notifyMediationWin()
     }
 
     override fun getAdView(): AdViewHolder {
@@ -192,12 +145,13 @@ internal class BMBannerAdImpl :
         )
     }
 
-    override fun notifyLoss(winnerNetworkName: String, winnerNetworkPrice: Double) {
-        adRequest?.notifyMediationLoss(winnerNetworkName, winnerNetworkPrice)
-    }
-
-    override fun notifyWin() {
-        adRequest?.notifyMediationWin()
+    override fun destroy() {
+        logInfo(TAG, "destroy $this")
+        adRequest?.destroy()
+        adRequest = null
+        bannerView?.setListener(null)
+        bannerView?.destroy()
+        bannerView = null
     }
 
     private fun request(adParams: BMBannerAuctionParams, requestListener: AdRequest.AdRequestListener<BannerRequest>) {
@@ -229,7 +183,47 @@ internal class BMBannerAdImpl :
             val bannerView = BannerView(context).also {
                 bannerView = it
             }
-            bannerView.setListener(bannerListener)
+            bannerView.setListener(
+                object : BannerListener {
+
+                    override fun onAdLoaded(bannerView: BannerView) {
+                        logInfo(TAG, "onAdLoaded: $this")
+                        emitEvent(AdEvent.Fill(bannerView.asAd()))
+                    }
+
+                    override fun onAdShowFailed(bannerView: BannerView, bmError: BMError) {
+                        logInfo(TAG, "onAdShowFailed: $this")
+                        emitEvent(AdEvent.ShowFailed(bmError.asBidonErrorOnFill(demandId)))
+                    }
+
+                    override fun onAdLoadFailed(bannerView: BannerView, bmError: BMError) {
+                        val error = bmError.asBidonErrorOnFill(demandId)
+                        logError(TAG, "onAdLoadFailed: $this", error)
+                        emitEvent(AdEvent.LoadFailed(error))
+                    }
+
+                    override fun onAdImpression(bannerView: BannerView) {
+                        logInfo(TAG, "onAdShown: $this")
+                        // tracked impression/shown by [BannerView]
+                        emitEvent(
+                            AdEvent.PaidRevenue(
+                                ad = bannerView.asAd(),
+                                adValue = bannerView.auctionResult.asBidonAdValue()
+                            )
+                        )
+                    }
+
+                    override fun onAdClicked(bannerView: BannerView) {
+                        logInfo(TAG, "onAdClicked: $this")
+                        emitEvent(AdEvent.Clicked(bannerView.asAd()))
+                    }
+
+                    override fun onAdExpired(bannerView: BannerView) {
+                        logInfo(TAG, "onAdExpired: $this")
+                        emitEvent(AdEvent.Expired(bannerView.asAd()))
+                    }
+                }
+            )
             bannerView.load(adRequest)
         }
     }

@@ -51,7 +51,9 @@ internal class UnityAdsInterstitial :
             override fun onUnityAdsAdLoaded(placementId: String?) {
                 logInfo(TAG, "onUnityAdsAdLoaded: $this")
                 isAdReadyToShow = true
-                emitEvent(AdEvent.Fill(requireNotNull(getAd(this@UnityAdsInterstitial))))
+                getAd(this@UnityAdsInterstitial)?.let {
+                    emitEvent(AdEvent.Fill(it))
+                }
             }
 
             override fun onUnityAdsFailedToLoad(

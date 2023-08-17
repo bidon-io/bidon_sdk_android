@@ -76,7 +76,9 @@ internal class UnityAdsBanner :
             override fun onBannerLoaded(bannerAdView: BannerView?) {
                 this@UnityAdsBanner.bannerAdView = bannerAdView
                 isAdReadyToShow = true
-                emitEvent(AdEvent.Fill(requireNotNull(bannerAdView?.asAd())))
+                bannerAdView?.asAd()?.let {
+                    emitEvent(AdEvent.Fill(it))
+                }
             }
 
             override fun onBannerClick(bannerAdView: BannerView?) {
