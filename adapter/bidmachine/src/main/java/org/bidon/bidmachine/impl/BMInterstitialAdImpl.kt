@@ -58,7 +58,7 @@ internal class BMInterstitialAdImpl :
                 adRequest = request
                 when (isBiddingRequest) {
                     false -> {
-                        fillRequest(request, interstitialListener)
+                        fillRequest(request)
                     }
 
                     true -> {
@@ -89,60 +89,6 @@ internal class BMInterstitialAdImpl :
         }
     }
 
-    private val interstitialListener by lazy {
-        object : InterstitialListener {
-            override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                logInfo(TAG, "onAdLoaded: $this")
-                this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                emitEvent(AdEvent.Fill(interstitialAd.asAd()))
-            }
-
-            override fun onAdLoadFailed(interstitialAd: InterstitialAd, bmError: BMError) {
-                val error = bmError.asBidonErrorOnFill(demandId)
-                logError(TAG, "onAdLoadFailed: $this", error)
-                this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                emitEvent(AdEvent.LoadFailed(error))
-            }
-
-            override fun onAdShowFailed(interstitialAd: InterstitialAd, bmError: BMError) {
-                val error = bmError.asBidonErrorOnFill(demandId)
-                logError(TAG, "onAdShowFailed: $this", error)
-                this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                emitEvent(AdEvent.ShowFailed(error))
-            }
-
-            override fun onAdImpression(interstitialAd: InterstitialAd) {
-                logInfo(TAG, "onAdShown: $this")
-                this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                emitEvent(AdEvent.Shown(interstitialAd.asAd()))
-                emitEvent(
-                    AdEvent.PaidRevenue(
-                        ad = interstitialAd.asAd(),
-                        adValue = interstitialAd.auctionResult.asBidonAdValue()
-                    )
-                )
-            }
-
-            override fun onAdClicked(interstitialAd: InterstitialAd) {
-                logInfo(TAG, "onAdClicked: $this")
-                this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                emitEvent(AdEvent.Clicked(interstitialAd.asAd()))
-            }
-
-            override fun onAdExpired(interstitialAd: InterstitialAd) {
-                logInfo(TAG, "onAdExpired: $this")
-                this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                emitEvent(AdEvent.Expired(interstitialAd.asAd()))
-            }
-
-            override fun onAdClosed(interstitialAd: InterstitialAd, boolean: Boolean) {
-                logInfo(TAG, "onAdClosed: $this")
-                this@BMInterstitialAdImpl.interstitialAd = interstitialAd
-                emitEvent(AdEvent.Closed(interstitialAd.asAd()))
-            }
-        }
-    }
-
     override fun getToken(context: Context): String = BidMachine.getBidToken(context)
 
     override fun adRequest(adParams: BMFullscreenAuctionParams) {
@@ -155,7 +101,7 @@ internal class BMInterstitialAdImpl :
      */
     override fun fill() {
         isBiddingRequest = true
-        fillRequest(adRequest, interstitialListener)
+        fillRequest(adRequest)
     }
 
     /**
@@ -222,18 +168,60 @@ internal class BMInterstitialAdImpl :
             .request(adParams.context)
     }
 
-    private fun fillRequest(adRequest: InterstitialRequest?, listener: InterstitialListener) {
+    private fun fillRequest(adRequest: InterstitialRequest?) {
         logInfo(TAG, "Starting fill: $this")
         val context = context
         if (context == null) {
             emitEvent(AdEvent.LoadFailed(BidonError.NoContextFound))
         } else {
-            InterstitialAd(context)
-                .also {
-                    interstitialAd = it
+            interstitialAd = InterstitialAd(context)
+            val interstitialListener = object : InterstitialListener {
+                override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                    logInfo(TAG, "onAdLoaded: $this")
+                    emitEvent(AdEvent.Fill(interstitialAd.asAd()))
                 }
-                .setListener(listener)
-                .load(adRequest)
+
+                override fun onAdLoadFailed(interstitialAd: InterstitialAd, bmError: BMError) {
+                    val error = bmError.asBidonErrorOnFill(demandId)
+                    logError(TAG, "onAdLoadFailed: $this", error)
+                    emitEvent(AdEvent.LoadFailed(error))
+                }
+
+                override fun onAdShowFailed(interstitialAd: InterstitialAd, bmError: BMError) {
+                    val error = bmError.asBidonErrorOnFill(demandId)
+                    logError(TAG, "onAdShowFailed: $this", error)
+                    emitEvent(AdEvent.ShowFailed(error))
+                }
+
+                override fun onAdImpression(interstitialAd: InterstitialAd) {
+                    logInfo(TAG, "onAdShown: $this")
+                    emitEvent(AdEvent.Shown(interstitialAd.asAd()))
+                    emitEvent(
+                        AdEvent.PaidRevenue(
+                            ad = interstitialAd.asAd(),
+                            adValue = interstitialAd.auctionResult.asBidonAdValue()
+                        )
+                    )
+                }
+
+                override fun onAdClicked(interstitialAd: InterstitialAd) {
+                    logInfo(TAG, "onAdClicked: $this")
+                    emitEvent(AdEvent.Clicked(interstitialAd.asAd()))
+                }
+
+                override fun onAdExpired(interstitialAd: InterstitialAd) {
+                    logInfo(TAG, "onAdExpired: $this")
+                    emitEvent(AdEvent.Expired(interstitialAd.asAd()))
+                }
+
+                override fun onAdClosed(interstitialAd: InterstitialAd, boolean: Boolean) {
+                    logInfo(TAG, "onAdClosed: $this")
+                    emitEvent(AdEvent.Closed(interstitialAd.asAd()))
+                }
+            }
+            interstitialAd
+                ?.setListener(interstitialListener)
+                ?.load(adRequest)
         }
     }
 

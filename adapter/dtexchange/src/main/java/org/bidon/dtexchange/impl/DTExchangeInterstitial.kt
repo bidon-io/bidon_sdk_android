@@ -105,7 +105,9 @@ internal class DTExchangeInterstitial :
                 override fun onInneractiveSuccessfulAdRequest(inneractiveAdSpot: InneractiveAdSpot?) {
                     logInfo(TAG, "onInneractiveSuccessfulAdRequest: $inneractiveAdSpot")
                     this@DTExchangeInterstitial.inneractiveAdSpot = inneractiveAdSpot
-                    emitEvent(AdEvent.Fill(requireNotNull(inneractiveAdSpot?.asAd())))
+                    inneractiveAdSpot?.let {
+                        emitEvent(AdEvent.Fill(it.asAd()))
+                    }
                 }
 
                 override fun onInneractiveFailedAdRequest(

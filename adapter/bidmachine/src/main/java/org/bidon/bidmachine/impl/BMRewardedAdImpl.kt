@@ -57,7 +57,7 @@ internal class BMRewardedAdImpl :
                 adRequest = request
                 when (isBiddingRequest) {
                     false -> {
-                        fillRequest(request, rewardedListener)
+                        fillRequest(request)
                     }
 
                     true -> {
@@ -88,72 +88,6 @@ internal class BMRewardedAdImpl :
         }
     }
 
-    private val rewardedListener by lazy {
-        object : RewardedListener {
-            override fun onAdRewarded(rewardedAd: RewardedAd) {
-                logInfo(TAG, "onAdRewarded $rewardedAd: $this")
-                this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                emitEvent(
-                    AdEvent.OnReward(
-                        ad = rewardedAd.asAd(),
-                        reward = null
-                    )
-                )
-                sendRewardImpression()
-            }
-
-            override fun onAdLoaded(rewardedAd: RewardedAd) {
-                logInfo(TAG, "onAdLoaded: $this")
-                this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                emitEvent(AdEvent.Fill(rewardedAd.asAd()))
-            }
-
-            override fun onAdLoadFailed(rewardedAd: RewardedAd, bmError: BMError) {
-                val error = bmError.asBidonErrorOnFill(demandId)
-                logError(TAG, "onAdLoadFailed: $this", error)
-                this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                emitEvent(AdEvent.LoadFailed(error))
-            }
-
-            override fun onAdShowFailed(rewardedAd: RewardedAd, bmError: BMError) {
-                val error = bmError.asBidonErrorOnFill(demandId)
-                logError(TAG, "onAdShowFailed: $this", error)
-                this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                emitEvent(AdEvent.ShowFailed(error))
-            }
-
-            override fun onAdImpression(rewardedAd: RewardedAd) {
-                logInfo(TAG, "onAdShown: $this")
-                this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                emitEvent(AdEvent.Shown(rewardedAd.asAd()))
-                emitEvent(
-                    AdEvent.PaidRevenue(
-                        ad = rewardedAd.asAd(),
-                        adValue = rewardedAd.auctionResult.asBidonAdValue()
-                    )
-                )
-            }
-
-            override fun onAdClicked(rewardedAd: RewardedAd) {
-                logInfo(TAG, "onAdClicked: $this")
-                this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                emitEvent(AdEvent.Clicked(rewardedAd.asAd()))
-            }
-
-            override fun onAdExpired(rewardedAd: RewardedAd) {
-                logInfo(TAG, "onAdExpired: $this")
-                this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                emitEvent(AdEvent.Expired(rewardedAd.asAd()))
-            }
-
-            override fun onAdClosed(rewardedAd: RewardedAd, boolean: Boolean) {
-                logInfo(TAG, "onAdClosed: $this")
-                this@BMRewardedAdImpl.rewardedAd = rewardedAd
-                emitEvent(AdEvent.Closed(rewardedAd.asAd()))
-            }
-        }
-    }
-
     override fun getToken(context: Context): String = BidMachine.getBidToken(context)
 
     override fun adRequest(adParams: BMFullscreenAuctionParams) {
@@ -166,7 +100,7 @@ internal class BMRewardedAdImpl :
      */
     override fun fill() {
         isBiddingRequest = true
-        fillRequest(adRequest, rewardedListener)
+        fillRequest(adRequest)
     }
 
     /**
@@ -231,18 +165,71 @@ internal class BMRewardedAdImpl :
             .request(adParams.context)
     }
 
-    private fun fillRequest(adRequest: RewardedRequest?, listener: RewardedListener) {
+    private fun fillRequest(adRequest: RewardedRequest?) {
         logInfo(TAG, "Starting fill: $this")
         val context = context
         if (context == null) {
             emitEvent(AdEvent.LoadFailed(BidonError.NoContextFound))
         } else {
-            RewardedAd(context)
-                .also {
-                    rewardedAd = it
+            rewardedAd = RewardedAd(context)
+            val rewardedListener = object : RewardedListener {
+                override fun onAdRewarded(rewardedAd: RewardedAd) {
+                    logInfo(TAG, "onAdRewarded $rewardedAd: $this")
+                    emitEvent(
+                        AdEvent.OnReward(
+                            ad = rewardedAd.asAd(),
+                            reward = null
+                        )
+                    )
+                    sendRewardImpression()
                 }
-                .setListener(listener)
-                .load(adRequest)
+
+                override fun onAdLoaded(rewardedAd: RewardedAd) {
+                    logInfo(TAG, "onAdLoaded: $this")
+                    emitEvent(AdEvent.Fill(rewardedAd.asAd()))
+                }
+
+                override fun onAdLoadFailed(rewardedAd: RewardedAd, bmError: BMError) {
+                    val error = bmError.asBidonErrorOnFill(demandId)
+                    logError(TAG, "onAdLoadFailed: $this", error)
+                    emitEvent(AdEvent.LoadFailed(error))
+                }
+
+                override fun onAdShowFailed(rewardedAd: RewardedAd, bmError: BMError) {
+                    val error = bmError.asBidonErrorOnFill(demandId)
+                    logError(TAG, "onAdShowFailed: $this", error)
+                    emitEvent(AdEvent.ShowFailed(error))
+                }
+
+                override fun onAdImpression(rewardedAd: RewardedAd) {
+                    logInfo(TAG, "onAdShown: $this")
+                    emitEvent(AdEvent.Shown(rewardedAd.asAd()))
+                    emitEvent(
+                        AdEvent.PaidRevenue(
+                            ad = rewardedAd.asAd(),
+                            adValue = rewardedAd.auctionResult.asBidonAdValue()
+                        )
+                    )
+                }
+
+                override fun onAdClicked(rewardedAd: RewardedAd) {
+                    logInfo(TAG, "onAdClicked: $this")
+                    emitEvent(AdEvent.Clicked(rewardedAd.asAd()))
+                }
+
+                override fun onAdExpired(rewardedAd: RewardedAd) {
+                    logInfo(TAG, "onAdExpired: $this")
+                    emitEvent(AdEvent.Expired(rewardedAd.asAd()))
+                }
+
+                override fun onAdClosed(rewardedAd: RewardedAd, boolean: Boolean) {
+                    logInfo(TAG, "onAdClosed: $this")
+                    emitEvent(AdEvent.Closed(rewardedAd.asAd()))
+                }
+            }
+            rewardedAd
+                ?.setListener(rewardedListener)
+                ?.load(adRequest)
         }
     }
 
