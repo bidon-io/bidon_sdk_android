@@ -1,9 +1,8 @@
 package org.bidon.sdk.auction.usecases
 
 import android.content.Context
-import org.bidon.sdk.adapter.AdAuctionParams
-import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.models.RoundRequest
@@ -17,7 +16,7 @@ internal interface ConductBiddingRoundUseCase {
      */
     suspend fun invoke(
         context: Context,
-        biddingSources: List<AdLoadingType.Bidding<AdAuctionParams>>,
+        biddingSources: List<Mode.Bidding>,
         participantIds: List<String>,
         adTypeParam: AdTypeParam,
         demandAd: DemandAd,

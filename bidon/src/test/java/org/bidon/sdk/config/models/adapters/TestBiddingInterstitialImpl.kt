@@ -10,23 +10,21 @@ import kotlinx.coroutines.launch
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
-import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.RoundStatus
 
 internal class TestBiddingInterstitialImpl(
     override val demandId: DemandId,
     private val testParameters: TestAdapterParameters,
 ) : AdSource.Interstitial<TestInterstitialParameters>,
-    AdLoadingType.Bidding<TestInterstitialParameters>,
+    Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -50,40 +48,13 @@ internal class TestBiddingInterstitialImpl(
     override val isAdReadyToShow: Boolean
         get() = testParameters.fill == Process.Succeed
 
-    override fun getToken(context: Context): String {
+    override suspend fun getToken(context: Context): String {
         return "token123"
     }
 
-    override fun adRequest(adParams: TestInterstitialParameters) {
-        this.adParams = adParams
-        when (testParameters.bid) {
-            Process.Succeed -> {
-                emitEvent(
-                    AdEvent.Bid(
-                        AuctionResult.Bidding(
-                            adSource = this,
-                            roundStatus = RoundStatus.Successful,
-                        )
-                    )
-                )
-            }
-
-            Process.Failed -> {
-                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
-            }
-
-            Process.Timeout -> {
-                CoroutineScope(Dispatchers.Main).launch {
-                    delay(60_000L)
-                    error("should not be here")
-                }
-            }
-        }
-    }
-
-    override fun fill() {
+    override fun load(adParams: TestInterstitialParameters) {
         when (testParameters.fill) {
-            Process.Succeed -> emitEvent(AdEvent.Fill(ad!!!!))
+            Process.Succeed -> emitEvent(AdEvent.Fill(ad!!))
             Process.Failed -> emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             Process.Timeout -> {
                 CoroutineScope(Dispatchers.Main).launch {
@@ -98,7 +69,7 @@ internal class TestBiddingInterstitialImpl(
 
     override fun destroy() {}
 
-    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+    override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             TestInterstitialParameters(lineItem)
