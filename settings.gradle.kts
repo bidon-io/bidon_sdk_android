@@ -13,6 +13,7 @@ dependencyResolutionManagement {
         google()
         // mavenLocal()
         mavenCentral()
+        maven("https://cboost.jfrog.io/artifactory/chartboost-mediation/")
         maven {
             url = uri("https://artifacts.applovin.com/android")
         }
@@ -44,8 +45,10 @@ include(
     ":adapter:applovin",
     ":adapter:dtexchange",
     ":adapter:unityads",
+    ":adapter:vungle",
     ":adapter:bigoads",
     ":adapter:mintegral",
+    ":adapter:meta",
 //    ":adapter:fyber",
 //    ":adapter:ironsource",
 //    ":adapter:appsflyer"

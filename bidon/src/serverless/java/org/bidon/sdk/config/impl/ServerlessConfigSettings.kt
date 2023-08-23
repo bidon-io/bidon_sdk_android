@@ -14,7 +14,7 @@ object ServerlessConfigSettings {
         DefaultAdapters.AdmobAdapter to true,
         DefaultAdapters.BidmachineAdapter to true,
         DefaultAdapters.ApplovinAdapter to true,
-        DefaultAdapters.DataExchangeAdapter to true,
+        DefaultAdapters.DTExchangeAdapter to true,
         DefaultAdapters.UnityAdsAdapter to true,
     )
 
@@ -24,7 +24,7 @@ object ServerlessConfigSettings {
                 "admob" -> DefaultAdapters.AdmobAdapter
                 "applovin" -> DefaultAdapters.ApplovinAdapter
                 "bidmachine" -> DefaultAdapters.BidmachineAdapter
-                "dtexchange" -> DefaultAdapters.DataExchangeAdapter
+                "dtexchange" -> DefaultAdapters.DTExchangeAdapter
                 "unityads" -> DefaultAdapters.UnityAdsAdapter
                 else -> error("Unknown adapter")
             } to true
@@ -40,10 +40,12 @@ object ServerlessConfigSettings {
                         DefaultAdapters.AdmobAdapter -> "admob" to admobOptions
                         DefaultAdapters.BidmachineAdapter -> "bidmachine" to bidmachineOptions
                         DefaultAdapters.ApplovinAdapter -> "applovin" to jsonObject { }
-                        DefaultAdapters.DataExchangeAdapter -> "dtexchange" to dtexchangeOptions
+                        DefaultAdapters.DTExchangeAdapter -> "dtexchange" to dtexchangeOptions
                         DefaultAdapters.UnityAdsAdapter -> "unityads" to unityadsOptions
                         DefaultAdapters.BigoAdsAdapter -> TODO()
                         DefaultAdapters.MintegralAdapter -> TODO()
+                        DefaultAdapters.VungleAdapter -> TODO()
+                        DefaultAdapters.MetaAdapter -> TODO()
                     }
                 } else {
                     null
