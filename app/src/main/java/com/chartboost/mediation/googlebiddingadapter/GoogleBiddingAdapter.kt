@@ -77,6 +77,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
+import org.bidon.admob.impl.DeleteMe
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.ext.asFailure
 import kotlin.coroutines.resume

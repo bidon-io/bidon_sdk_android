@@ -27,7 +27,9 @@ internal class GetAdAuctionParamsUseCase {
                             containerWidth = containerWidth,
                             price = pricefloor,
                             adUnitId = requireNotNull(json?.getString("ad_unit_id")),
-                            payload = requireNotNull(json?.getString("payload"))
+                            payload = (DeleteMe.payloadFlow.value as? DeleteMe.AdType.Banner)?.payload?.also {
+                                DeleteMe.setPayload(null)
+                            } ?: requireNotNull(json?.getString("payload"))
                         )
                     } else {
                         AdmobBannerAuctionParams.Network(
@@ -46,7 +48,11 @@ internal class GetAdAuctionParamsUseCase {
                             context = activity.applicationContext,
                             price = pricefloor,
                             adUnitId = requireNotNull(json?.getString("ad_unit_id")),
-                            payload = requireNotNull(json?.getString("payload"))
+                            payload = (DeleteMe.payloadFlow.value as? DeleteMe.AdType.Rewarded)?.payload?.also {
+                                DeleteMe.setPayload(null)
+                            } ?: (DeleteMe.payloadFlow.value as? DeleteMe.AdType.Interstitial)?.payload?.also {
+                                DeleteMe.setPayload(null)
+                            } ?: requireNotNull(json?.getString("payload"))
                         )
                     } else {
                         AdmobFullscreenAdAuctionParams.Network(
