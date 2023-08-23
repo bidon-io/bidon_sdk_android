@@ -2,6 +2,7 @@ package org.bidon.sdk.config.models.data.models.auction
 
 import com.google.common.truth.Truth.assertThat
 import org.bidon.sdk.auction.models.AuctionResponse
+import org.bidon.sdk.auction.models.AuctionResponseParser
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.utils.json.JsonParsers
@@ -98,4 +99,54 @@ internal class AuctionResponseParserTest {
           "external_win_notifications":false
         }
     """.trimIndent()
+
+    @Test
+    fun `it should parse auction_configuration_id as String`() {
+        val responseJsonStr = """
+        {
+          "rounds": [
+            {
+              "id": "postbid",
+              "timeout": 15,
+              "demands": [
+                "admob",
+                "bidmachine"
+              ]
+            },
+            {
+              "id": "prebid",
+              "timeout": 25,
+              "demands": [
+                "bidmachine"
+              ],
+              "bidding": [
+                "asd"
+              ],
+            }
+          ],
+          "line_items": [
+            {
+              "id": "admob",
+              "pricefloor": 0.25,
+              "ad_unit_id": "AAAA2"
+            },
+           {
+              "id": "bidmachine",
+              "pricefloor": 1.2235,
+              "ad_unit_id": "AAAA1"
+            }
+          ],
+          "token": "asdsad",
+          "fill_timeout": 10000,
+          "pricefloor": 0.01,
+          "auction_id":"49975154-b82a-444b-a7f0-30bd749e7fce",
+          "auction_configuration_id":"10",
+          "external_win_notifications":false
+        }
+        """.trimIndent()
+        val res = AuctionResponseParser().parseOrNull(responseJsonStr)
+        assertThat(res?.auctionConfigurationId).isEqualTo(10)
+        println(res)
+        Int.MAX_VALUE
+    }
 }

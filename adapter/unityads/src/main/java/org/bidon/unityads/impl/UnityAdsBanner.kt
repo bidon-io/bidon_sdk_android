@@ -6,9 +6,9 @@ import com.unity3d.services.banners.UnityBannerSize
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
-import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
@@ -27,7 +27,7 @@ import org.bidon.unityads.ext.asBidonError
  */
 internal class UnityAdsBanner :
     AdSource.Banner<UnityAdsBannerAuctionParams>,
-    AdLoadingType.Network<UnityAdsBannerAuctionParams>,
+    Mode.Network,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
     private var bannerAdView: BannerView? = null
@@ -35,7 +35,7 @@ internal class UnityAdsBanner :
 
     override var isAdReadyToShow: Boolean = false
 
-    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+    override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             UnityAdsBannerAuctionParams(
                 lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
@@ -54,7 +54,7 @@ internal class UnityAdsBanner :
         )
     }
 
-    override fun fill(adParams: UnityAdsBannerAuctionParams) {
+    override fun load(adParams: UnityAdsBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
         param = adParams
         val adUnitId = requireNotNull(adParams.lineItem.adUnitId)
@@ -76,7 +76,9 @@ internal class UnityAdsBanner :
             override fun onBannerLoaded(bannerAdView: BannerView?) {
                 this@UnityAdsBanner.bannerAdView = bannerAdView
                 isAdReadyToShow = true
-                emitEvent(AdEvent.Fill(requireNotNull(bannerAdView?.asAd())))
+                bannerAdView?.asAd()?.let {
+                    emitEvent(AdEvent.Fill(it))
+                }
             }
 
             override fun onBannerClick(bannerAdView: BannerView?) {
