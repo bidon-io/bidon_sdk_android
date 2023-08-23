@@ -288,7 +288,6 @@ class BannerView @JvmOverloads constructor(
         winnerSubscriberJob = adSource.adEvent.onEach { adEvent ->
             logInfo(TAG, "$adEvent")
             when (adEvent) {
-                is AdEvent.Bid,
                 is AdEvent.OnReward,
                 is AdEvent.Closed,
                 is AdEvent.LoadFailed,

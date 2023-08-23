@@ -11,12 +11,11 @@ import org.bidon.mintegral.MintegralAuctionParam
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
-import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.rewarded.Reward
-import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -24,7 +23,6 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.RoundStatus
 
 /**
  * Created by Aleksei Cherniaev on 20/06/2023.
@@ -33,7 +31,7 @@ import org.bidon.sdk.stats.models.RoundStatus
  */
 internal class MintegralRewardedImpl :
     AdSource.Rewarded<MintegralAuctionParam>,
-    AdLoadingType.Bidding<MintegralAuctionParam>,
+    Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -44,9 +42,9 @@ internal class MintegralRewardedImpl :
     override val isAdReadyToShow: Boolean
         get() = rewardedAd?.isBidReady == true
 
-    override fun getToken(context: Context): String? = BidManager.getBuyerUid(context)
+    override suspend fun getToken(context: Context): String? = BidManager.getBuyerUid(context)
 
-    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+    override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             MintegralAuctionParam(
                 activity = activity,
@@ -60,7 +58,7 @@ internal class MintegralRewardedImpl :
         }
     }
 
-    override fun adRequest(adParams: MintegralAuctionParam) {
+    override fun load(adParams: MintegralAuctionParam) {
         logInfo(TAG, "Starting with $adParams: $this")
         this.adParams = adParams
         val handler = MBBidRewardVideoHandler(
@@ -72,29 +70,15 @@ internal class MintegralRewardedImpl :
         }
         handler.setRewardVideoListener(object : RewardVideoListener {
             override fun onVideoLoadSuccess(mBridgeIds: MBridgeIds?) {
-                logInfo(TAG, "onResourceLoadSuccess $mBridgeIds")
+                logInfo(TAG, "onVideoLoadSuccess $mBridgeIds")
                 this@MintegralRewardedImpl.mBridgeIds = mBridgeIds
-                emitEvent(
-                    AdEvent.Bid(
-                        result = AuctionResult.Bidding(
-                            adSource = this@MintegralRewardedImpl,
-                            roundStatus = RoundStatus.Successful
-                        )
-                    )
-                )
+                fillAd()
             }
 
             override fun onLoadSuccess(mBridgeIds: MBridgeIds?) {
-                logInfo(TAG, "onResourceLoadSuccess $mBridgeIds")
+                logInfo(TAG, "onLoadSuccess $mBridgeIds")
                 this@MintegralRewardedImpl.mBridgeIds = mBridgeIds
-                emitEvent(
-                    AdEvent.Bid(
-                        result = AuctionResult.Bidding(
-                            adSource = this@MintegralRewardedImpl,
-                            roundStatus = RoundStatus.Successful
-                        )
-                    )
-                )
+                fillAd()
             }
 
             override fun onVideoLoadFail(mBridgeIds: MBridgeIds?, message: String?) {
@@ -160,16 +144,6 @@ internal class MintegralRewardedImpl :
         handler.loadFromBid(adParams.payload)
     }
 
-    override fun fill() {
-        logInfo(TAG, "Starting fill: $this")
-        val ad = getAd(this)
-        if (mBridgeIds != null && ad != null) {
-            emitEvent(AdEvent.Fill(ad))
-        } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
-        }
-    }
-
     override fun show(activity: Activity) {
         logInfo(TAG, "Starting show: $this")
         if (isAdReadyToShow) {
@@ -183,6 +157,16 @@ internal class MintegralRewardedImpl :
         logInfo(TAG, "destroy $this")
         rewardedAd?.clearVideoCache()
         rewardedAd = null
+    }
+
+    private fun fillAd() {
+        logInfo(TAG, "Starting fill: $this")
+        val ad = getAd(this)
+        if (mBridgeIds != null && ad != null) {
+            emitEvent(AdEvent.Fill(ad))
+        } else {
+            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+        }
     }
 }
 

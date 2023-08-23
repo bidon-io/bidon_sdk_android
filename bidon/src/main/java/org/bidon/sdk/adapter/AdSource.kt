@@ -10,8 +10,9 @@ import org.bidon.sdk.stats.StatisticsCollector
 sealed interface AdSource<T : AdAuctionParams> : StatisticsCollector, AdEventFlow {
     val isAdReadyToShow: Boolean
 
+    fun load(adParams: T)
     fun destroy()
-    fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams>
+    fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams>
 
     interface Interstitial<T : AdAuctionParams> : AdSource<T> {
         /**

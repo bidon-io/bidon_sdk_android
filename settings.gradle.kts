@@ -13,6 +13,7 @@ dependencyResolutionManagement {
         google()
         // mavenLocal()
         mavenCentral()
+        maven("https://cboost.jfrog.io/artifactory/chartboost-mediation/")
         maven {
             url = uri("https://artifacts.applovin.com/android")
         }

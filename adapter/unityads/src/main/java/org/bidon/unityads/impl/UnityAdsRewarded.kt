@@ -8,8 +8,8 @@ import com.unity3d.ads.UnityAdsShowOptions
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
-import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.auction.models.LineItem
@@ -27,7 +27,7 @@ import org.bidon.unityads.ext.asBidonError
  */
 internal class UnityAdsRewarded :
     AdSource.Rewarded<UnityAdsFullscreenAuctionParams>,
-    AdLoadingType.Network<UnityAdsFullscreenAuctionParams>,
+    Mode.Network,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -35,7 +35,7 @@ internal class UnityAdsRewarded :
 
     override var isAdReadyToShow: Boolean = false
 
-    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+    override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             UnityAdsFullscreenAuctionParams(
                 lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
@@ -43,7 +43,7 @@ internal class UnityAdsRewarded :
         }
     }
 
-    override fun fill(adParams: UnityAdsFullscreenAuctionParams) {
+    override fun load(adParams: UnityAdsFullscreenAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
         lineItem = adParams.lineItem
         val loadListener = object : IUnityAdsLoadListener {
@@ -106,7 +106,6 @@ internal class UnityAdsRewarded :
                     when (state) {
                         UnityAds.UnityAdsShowCompletionState.COMPLETED -> {
                             emitEvent(AdEvent.OnReward(ad = it, reward = null))
-                            sendRewardImpression()
                         }
 
                         UnityAds.UnityAdsShowCompletionState.SKIPPED,
