@@ -1,7 +1,7 @@
 object Versions {
     private val major = 0
     private val minor = 3
-    private val patch = 0
+    private val patch = 1
     private val semantic: String? = null//"-alpha.1"
 
     val BidonVersionName = mainVersion + semanticVersion
@@ -13,7 +13,7 @@ object Versions {
         val DTExchange = "$mainVersion.0"
         val UnityAds = "$mainVersion.0"
         val BigoAds = "$mainVersion.0"
-        val Mintegral = "$mainVersion.1"
+        val Mintegral = "$mainVersion.0"
         val Vungle = "$mainVersion.0"
         val Meta = "$mainVersion.0"
 

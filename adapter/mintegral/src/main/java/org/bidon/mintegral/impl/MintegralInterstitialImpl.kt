@@ -11,11 +11,10 @@ import org.bidon.mintegral.MintegralAuctionParam
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
-import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
@@ -24,7 +23,6 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.RoundStatus
 
 /**
  * Created by Aleksei Cherniaev on 20/06/2023.
@@ -33,7 +31,7 @@ import org.bidon.sdk.stats.models.RoundStatus
  */
 internal class MintegralInterstitialImpl :
     AdSource.Interstitial<MintegralAuctionParam>,
-    AdLoadingType.Bidding<MintegralAuctionParam>,
+    Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -44,9 +42,9 @@ internal class MintegralInterstitialImpl :
     override val isAdReadyToShow: Boolean
         get() = interstitialAd?.isBidReady == true
 
-    override fun getToken(context: Context): String? = BidManager.getBuyerUid(context)
+    override suspend fun getToken(context: Context): String? = BidManager.getBuyerUid(context)
 
-    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+    override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             MintegralAuctionParam(
                 activity = activity,
@@ -60,7 +58,7 @@ internal class MintegralInterstitialImpl :
         }
     }
 
-    override fun adRequest(adParams: MintegralAuctionParam) {
+    override fun load(adParams: MintegralAuctionParam) {
         logInfo(TAG, "Starting with $adParams: $this")
         this.adParams = adParams
         val handler = MBBidNewInterstitialHandler(
@@ -75,14 +73,13 @@ internal class MintegralInterstitialImpl :
             override fun onResourceLoadSuccess(mBridgeIds: MBridgeIds?) {
                 logInfo(TAG, "onResourceLoadSuccess $mBridgeIds")
                 this@MintegralInterstitialImpl.mBridgeIds = mBridgeIds
-                emitEvent(
-                    AdEvent.Bid(
-                        result = AuctionResult.Bidding(
-                            adSource = this@MintegralInterstitialImpl,
-                            roundStatus = RoundStatus.Successful
-                        )
-                    )
-                )
+                logInfo(TAG, "Starting fill: $this")
+                val ad = getAd(this)
+                if (mBridgeIds != null && ad != null) {
+                    emitEvent(AdEvent.Fill(ad))
+                } else {
+                    emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+                }
             }
 
             override fun onResourceLoadFail(mBridgeIds: MBridgeIds?, message: String?) {
@@ -137,16 +134,6 @@ internal class MintegralInterstitialImpl :
             override fun onEndcardShow(mBridgeIds: MBridgeIds?) {}
         })
         handler.loadFromBid(adParams.payload)
-    }
-
-    override fun fill() {
-        logInfo(TAG, "Starting fill: $this")
-        val ad = getAd(this)
-        if (mBridgeIds != null && ad != null) {
-            emitEvent(AdEvent.Fill(ad))
-        } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
-        }
     }
 
     override fun show(activity: Activity) {

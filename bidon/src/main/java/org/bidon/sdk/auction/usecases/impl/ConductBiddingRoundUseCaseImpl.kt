@@ -6,9 +6,9 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
-import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.models.AuctionResult
@@ -20,7 +20,6 @@ import org.bidon.sdk.auction.usecases.ConductBiddingRoundUseCase
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.models.RoundStatus
-import org.bidon.sdk.stats.models.asRoundStatus
 
 @Suppress("UNCHECKED_CAST")
 internal class ConductBiddingRoundUseCaseImpl(
@@ -29,7 +28,7 @@ internal class ConductBiddingRoundUseCaseImpl(
 
     override suspend fun invoke(
         context: Context,
-        biddingSources: List<AdLoadingType.Bidding<AdAuctionParams>>,
+        biddingSources: List<Mode.Bidding>,
         participantIds: List<String>,
         adTypeParam: AdTypeParam,
         demandAd: DemandAd,
@@ -102,7 +101,7 @@ internal class ConductBiddingRoundUseCaseImpl(
     private suspend fun fillBids(
         resultsCollector: ResultsCollector,
         bids: List<BidResponse>,
-        biddingSources: List<AdLoadingType.Bidding<AdAuctionParams>>,
+        biddingSources: List<Mode.Bidding>,
         adTypeParam: AdTypeParam,
         round: RoundRequest
     ) {
@@ -122,7 +121,9 @@ internal class ConductBiddingRoundUseCaseImpl(
                     adTypeParam = adTypeParam,
                     round = round,
                 ).also {
+                    logInfo(TAG, "fillResult: ${it.roundStatus}, ${(it as? AuctionResult.Bidding)?.adSource}")
                     if (it.roundStatus == RoundStatus.Successful) {
+                        logInfo(TAG, "fillResult: ${it.roundStatus}")
                         filled = true
                     }
                 }
@@ -142,7 +143,7 @@ internal class ConductBiddingRoundUseCaseImpl(
     }
 
     private suspend fun loadAd(
-        biddingSources: List<AdLoadingType.Bidding<AdAuctionParams>>,
+        biddingSources: List<Mode.Bidding>,
         bid: BidResponse,
         adTypeParam: AdTypeParam,
         round: RoundRequest,
@@ -150,7 +151,7 @@ internal class ConductBiddingRoundUseCaseImpl(
         val adSource = biddingSources.first {
             (it as AdSource<*>).demandId.demandId == bid.demandId
         }
-        val adParam = (adSource as AdSource<AdAuctionParams>).obtainAuctionParam(
+        val adParam = (adSource as AdSource<AdAuctionParams>).getAuctionParam(
             AdAuctionParamSource(
                 activity = adTypeParam.activity,
                 pricefloor = bid.price,
@@ -168,21 +169,25 @@ internal class ConductBiddingRoundUseCaseImpl(
          * Start loading ad
          */
         // Load AdRequest
-        adSource.adRequest(adParam)
+        adSource.load(adParam)
+        logInfo(TAG, "adSource.load($adParam)")
         // Wait for ad-request result
         val bidAdEvent = adSource.adEvent.first {
-            it is AdEvent.Bid || it is AdEvent.LoadFailed || it is AdEvent.Expired
+            it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
         }
         return when (bidAdEvent) {
-            is AdEvent.Bid -> {
-                adSource.fillWinner()
-            }
-
             is AdEvent.LoadFailed,
             is AdEvent.Expired -> {
                 AuctionResult.Bidding(
                     roundStatus = RoundStatus.NoFill,
                     adSource = adSource,
+                )
+            }
+
+            is AdEvent.Fill -> {
+                AuctionResult.Bidding(
+                    adSource = adSource,
+                    roundStatus = RoundStatus.Successful
                 )
             }
 
@@ -192,34 +197,7 @@ internal class ConductBiddingRoundUseCaseImpl(
         }
     }
 
-    private suspend fun AdLoadingType.Bidding<AdAuctionParams>.fillWinner(): AuctionResult.Bidding {
-        val winnerAdSource = this
-        winnerAdSource as AdSource<AdAuctionParams>
-        // Start Fill Ad
-        winnerAdSource.fill()
-        // Wait for fill result
-        val fillAdEvent = winnerAdSource.adEvent.first {
-            it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
-        }
-        return if (fillAdEvent is AdEvent.Fill) {
-            AuctionResult.Bidding(
-                adSource = winnerAdSource,
-                roundStatus = RoundStatus.Successful
-            )
-        } else {
-            val roundStatus = when (fillAdEvent) {
-                is AdEvent.Expired -> RoundStatus.NoFill
-                is AdEvent.LoadFailed -> fillAdEvent.cause.asRoundStatus()
-                else -> error("unexpected")
-            }
-            AuctionResult.Bidding(
-                roundStatus = roundStatus,
-                adSource = winnerAdSource,
-            )
-        }
-    }
-
-    private fun List<AdLoadingType.Bidding<AdAuctionParams>>.getTokens(
+    private suspend fun List<Mode.Bidding>.getTokens(
         context: Context
     ) = this.mapNotNull { adSource ->
         adSource.getToken(context)?.let { token ->

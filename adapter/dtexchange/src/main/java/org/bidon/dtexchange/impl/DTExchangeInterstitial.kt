@@ -15,8 +15,8 @@ import org.bidon.dtexchange.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
-import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
@@ -31,15 +31,31 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
  */
 internal class DTExchangeInterstitial :
     AdSource.Interstitial<DTExchangeAdAuctionParams>,
-    AdLoadingType.Network<DTExchangeAdAuctionParams>,
+    Mode.Network,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var auctionParams: DTExchangeAdAuctionParams? = null
     private var inneractiveAdSpot: InneractiveAdSpot? = null
 
-    private val impressionListener by lazy {
-        object : InneractiveFullscreenAdEventsListenerWithImpressionData {
+    override val isAdReadyToShow: Boolean
+        get() = inneractiveAdSpot?.isReady == true
+
+    override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+        return auctionParamsScope {
+            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+            DTExchangeAdAuctionParams(lineItem)
+        }
+    }
+
+    override fun load(adParams: DTExchangeAdAuctionParams) {
+        logInfo(TAG, "Starting with $adParams: $this")
+        auctionParams = adParams
+        val spot = InneractiveAdSpotManager.get().createSpot()
+        val controller = InneractiveFullscreenUnitController()
+        val videoController = InneractiveFullscreenVideoContentController()
+        controller.addContentController(videoController)
+        controller.eventsListener = object : InneractiveFullscreenAdEventsListenerWithImpressionData {
             override fun onAdImpression(
                 adSpot: InneractiveAdSpot?,
                 impressionData: ImpressionData?
@@ -78,26 +94,6 @@ internal class DTExchangeInterstitial :
                 }
             }
         }
-    }
-
-    override val isAdReadyToShow: Boolean
-        get() = inneractiveAdSpot?.isReady == true
-
-    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
-        return auctionParamsScope {
-            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
-            DTExchangeAdAuctionParams(lineItem)
-        }
-    }
-
-    override fun fill(adParams: DTExchangeAdAuctionParams) {
-        logInfo(TAG, "Starting with $adParams: $this")
-        auctionParams = adParams
-        val spot = InneractiveAdSpotManager.get().createSpot()
-        val controller = InneractiveFullscreenUnitController()
-        val videoController = InneractiveFullscreenVideoContentController()
-        controller.addContentController(videoController)
-        controller.eventsListener = impressionListener
         spot.addUnitController(controller)
         val adRequest = InneractiveAdRequest(adParams.spotId)
         spot.setRequestListener(

@@ -16,8 +16,8 @@ import org.bidon.dtexchange.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
-import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
@@ -33,27 +33,31 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
  */
 internal class DTExchangeRewarded :
     AdSource.Rewarded<DTExchangeAdAuctionParams>,
-    AdLoadingType.Network<DTExchangeAdAuctionParams>,
+    Mode.Network,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var auctionParams: DTExchangeAdAuctionParams? = null
     private var inneractiveAdSpot: InneractiveAdSpot? = null
 
-    private val adRewardedListener by lazy {
-        InneractiveFullScreenAdRewardedListener { inneractiveAdSpot ->
-            emitEvent(
-                AdEvent.OnReward(
-                    ad = inneractiveAdSpot.asAd(),
-                    reward = null
-                )
-            )
-            sendRewardImpression()
+    override val isAdReadyToShow: Boolean
+        get() = inneractiveAdSpot?.isReady == true
+
+    override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+        return auctionParamsScope {
+            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+            DTExchangeAdAuctionParams(lineItem)
         }
     }
 
-    private val impressionListener by lazy {
-        object : InneractiveFullscreenAdEventsListenerWithImpressionData {
+    override fun load(adParams: DTExchangeAdAuctionParams) {
+        logInfo(TAG, "Starting with $adParams: $this")
+        auctionParams = adParams
+        val spot = InneractiveAdSpotManager.get().createSpot()
+        val controller = InneractiveFullscreenUnitController()
+        val videoController = InneractiveFullscreenVideoContentController()
+        controller.addContentController(videoController)
+        controller.eventsListener = object : InneractiveFullscreenAdEventsListenerWithImpressionData {
             override fun onAdImpression(
                 adSpot: InneractiveAdSpot?,
                 impressionData: ImpressionData?
@@ -64,19 +68,14 @@ internal class DTExchangeRewarded :
                 emitEvent(AdEvent.Shown(ad))
             }
 
-            override fun onAdImpression(adSpot: InneractiveAdSpot?) {
-            }
+            override fun onAdImpression(adSpot: InneractiveAdSpot?) {}
+            override fun onAdWillCloseInternalBrowser(adSpot: InneractiveAdSpot?) {}
+            override fun onAdWillOpenExternalApp(adSpot: InneractiveAdSpot?) {}
 
             override fun onAdClicked(adSpot: InneractiveAdSpot?) {
                 adSpot?.asAd()?.let {
                     emitEvent(AdEvent.Clicked(ad = it))
                 }
-            }
-
-            override fun onAdWillCloseInternalBrowser(adSpot: InneractiveAdSpot?) {
-            }
-
-            override fun onAdWillOpenExternalApp(adSpot: InneractiveAdSpot?) {
             }
 
             override fun onAdEnteredErrorState(
@@ -92,27 +91,14 @@ internal class DTExchangeRewarded :
                 }
             }
         }
-    }
-
-    override val isAdReadyToShow: Boolean
-        get() = inneractiveAdSpot?.isReady == true
-
-    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
-        return auctionParamsScope {
-            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
-            DTExchangeAdAuctionParams(lineItem)
+        controller.rewardedListener = InneractiveFullScreenAdRewardedListener { inneractiveAdSpot ->
+            emitEvent(
+                AdEvent.OnReward(
+                    ad = inneractiveAdSpot.asAd(),
+                    reward = null
+                )
+            )
         }
-    }
-
-    override fun fill(adParams: DTExchangeAdAuctionParams) {
-        logInfo(TAG, "Starting with $adParams: $this")
-        auctionParams = adParams
-        val spot = InneractiveAdSpotManager.get().createSpot()
-        val controller = InneractiveFullscreenUnitController()
-        val videoController = InneractiveFullscreenVideoContentController()
-        controller.addContentController(videoController)
-        controller.eventsListener = impressionListener
-        controller.rewardedListener = adRewardedListener
         spot.addUnitController(controller)
 
         val adRequest = InneractiveAdRequest(adParams.spotId)

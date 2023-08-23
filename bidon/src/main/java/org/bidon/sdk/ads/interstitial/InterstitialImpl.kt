@@ -155,7 +155,6 @@ internal class InterstitialImpl(
         require(adSource is AdSource.Interstitial<*>)
         observeCallbacksJob = adSource.adEvent.onEach { adEvent ->
             when (adEvent) {
-                is AdEvent.Bid,
                 is AdEvent.OnReward,
                 is AdEvent.Fill -> {
                     // do nothing

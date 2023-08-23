@@ -11,11 +11,10 @@ import org.bidon.meta.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
-import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -23,14 +22,13 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.RoundStatus
 
 /**
  * Created by Aleksei Cherniaev on 08/08/2023.
  */
 class MetaInterstitialImpl :
     AdSource.Interstitial<MetaFullscreenAuctionParams>,
-    AdLoadingType.Bidding<MetaFullscreenAuctionParams>,
+    Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -40,11 +38,11 @@ class MetaInterstitialImpl :
     override val isAdReadyToShow: Boolean
         get() = interstitialAd?.isAdLoaded ?: false
 
-    override fun getToken(context: Context): String? {
+    override suspend fun getToken(context: Context): String? {
         return BidderTokenProvider.getBidderToken(context)
     }
 
-    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+    override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             MetaFullscreenAuctionParams(
                 context = activity.applicationContext,
@@ -61,7 +59,7 @@ class MetaInterstitialImpl :
         }
     }
 
-    override fun adRequest(adParams: MetaFullscreenAuctionParams) {
+    override fun load(adParams: MetaFullscreenAuctionParams) {
         this.adParams = adParams
         val interstitial = InterstitialAd(adParams.context, adParams.placementId).also {
             interstitialAd = it
@@ -71,20 +69,22 @@ class MetaInterstitialImpl :
                 .withAdListener(object : InterstitialAdListener {
                     override fun onError(ad: Ad?, adError: AdError?) {
                         val error = adError.asBidonError()
-                        logError(TAG, "Error while loading ad: AdError(${adError?.errorCode}: ${adError?.errorMessage}). $this", error)
+                        logError(
+                            TAG,
+                            "Error while loading ad: AdError(${adError?.errorCode}: ${adError?.errorMessage}). $this",
+                            error
+                        )
                         emitEvent(AdEvent.LoadFailed(error))
                     }
 
                     override fun onAdLoaded(ad: Ad?) {
                         logInfo(TAG, "onAdLoaded $ad: $interstitialAd, $this")
-                        emitEvent(
-                            AdEvent.Bid(
-                                AuctionResult.Bidding(
-                                    adSource = this@MetaInterstitialImpl,
-                                    roundStatus = RoundStatus.Successful
-                                )
-                            )
-                        )
+                        val bidonAd = getAd(this)
+                        if (interstitialAd != null && bidonAd != null) {
+                            emitEvent(AdEvent.Fill(bidonAd))
+                        } else {
+                            emitEvent(AdEvent.ShowFailed(BidonError.BannerAdNotReady))
+                        }
                     }
 
                     override fun onAdClicked(ad: Ad?) {
@@ -123,15 +123,6 @@ class MetaInterstitialImpl :
                 .withBid(adParams.payload)
                 .build()
         )
-    }
-
-    override fun fill() {
-        val ad = getAd(this)
-        if (interstitialAd != null && ad != null) {
-            emitEvent(AdEvent.Fill(ad))
-        } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.BannerAdNotReady))
-        }
     }
 
     override fun destroy() {

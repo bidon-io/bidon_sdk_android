@@ -10,12 +10,11 @@ import com.vungle.warren.error.VungleException
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
-import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -23,7 +22,6 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.vungle.VungleBannerAuctionParams
 import org.bidon.vungle.ext.asBidonError
 
@@ -32,14 +30,14 @@ import org.bidon.vungle.ext.asBidonError
  */
 internal class VungleBannerImpl :
     AdSource.Banner<VungleBannerAuctionParams>,
-    AdLoadingType.Bidding<VungleBannerAuctionParams>,
+    Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var adParams: VungleBannerAuctionParams? = null
     private var banner: VungleBanner? = null
 
-    override fun getToken(context: Context): String? = Vungle.getAvailableBidTokens(context)
+    override suspend fun getToken(context: Context): String? = Vungle.getAvailableBidTokens(context)
 
     override val isAdReadyToShow: Boolean
         get() = adParams?.let {
@@ -50,7 +48,7 @@ internal class VungleBannerImpl :
             )
         } ?: false
 
-    override fun obtainAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+    override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             VungleBannerAuctionParams(
                 bannerFormat = bannerFormat,
@@ -66,21 +64,14 @@ internal class VungleBannerImpl :
         }
     }
 
-    override fun adRequest(adParams: VungleBannerAuctionParams) {
+    override fun load(adParams: VungleBannerAuctionParams) {
         this.adParams = adParams
         Banners.loadBanner(
             adParams.bannerId, adParams.payload, adParams.config,
             object : LoadAdCallback {
                 override fun onAdLoad(placementId: String?) {
                     logInfo(TAG, "onAdLoad =$placementId. $this")
-                    emitEvent(
-                        AdEvent.Bid(
-                            AuctionResult.Bidding(
-                                adSource = this@VungleBannerImpl,
-                                roundStatus = RoundStatus.Successful
-                            )
-                        )
-                    )
+                    fillAd(adParams)
                 }
 
                 override fun onError(placementId: String?, exception: VungleException?) {
@@ -91,15 +82,17 @@ internal class VungleBannerImpl :
         )
     }
 
-    override fun fill() {
-        val adParam = adParams
+    private fun fillAd(adParam: VungleBannerAuctionParams) {
         val bidonAd = getAd(this)
-        if (adParam != null && bidonAd != null) {
+        if (bidonAd != null) {
             this.banner = Banners.getBanner(
                 /* placementId = */ adParam.bannerId,
                 /* markup = */ adParam.payload,
                 /* bannerAdConfig = */ adParam.config,
                 /* playAdCallback = */ object : PlayAdCallback {
+
+                    override fun onAdRewarded(placementId: String?) {}
+                    override fun onAdLeftApplication(placementId: String?) {}
                     override fun creativeId(creativeId: String?) {}
 
                     @Deprecated("Deprecated in Java")
@@ -117,10 +110,6 @@ internal class VungleBannerImpl :
                         val ad = getAd(this@VungleBannerImpl) ?: return
                         emitEvent(AdEvent.Clicked(ad))
                     }
-
-                    override fun onAdRewarded(placementId: String?) {}
-
-                    override fun onAdLeftApplication(placementId: String?) {}
 
                     override fun onError(placementId: String?, exception: VungleException?) {
                         logError(TAG, "onAdError: $this", exception)
