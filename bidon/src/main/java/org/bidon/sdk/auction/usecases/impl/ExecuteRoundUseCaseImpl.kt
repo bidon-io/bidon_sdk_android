@@ -4,12 +4,12 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.bidon.sdk.adapter.AdAuctionParams
-import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdProvider
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.SupportsRegulation
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.BannerFormat
@@ -62,7 +62,7 @@ internal class ExecuteRoundUseCaseImpl(
             val biddingAdSources = filteredBiddingAdapters
                 .getAdSources(demandAd.adType)
                 .onEach { applyParams(it, adTypeParam, auctionResponse, demandAd, round) }
-                .filterIsInstance<AdLoadingType.Bidding<AdAuctionParams>>()
+                .filterIsInstance<Mode.Bidding>()
             // Start Bidding demands auction
             val biddingDemands = biddingAdSources.map {
                 (it as AdSource<*>).demandId.demandId
@@ -95,7 +95,7 @@ internal class ExecuteRoundUseCaseImpl(
             logInfo(TAG, "$logText network adapters [${filteredAdNetworkAdapters.joinToString { it.demandId.demandId }}]")
             val networkAdSources = filteredAdNetworkAdapters.getAdSources(demandAd.adType)
                 .onEach { applyParams(it, adTypeParam, auctionResponse, demandAd, round) }
-                .filterIsInstance<AdLoadingType.Network<AdAuctionParams>>()
+                .filterIsInstance<Mode.Network>()
 
             /**
              * Find unknown adapters
@@ -175,7 +175,7 @@ internal class ExecuteRoundUseCaseImpl(
 
     private fun ResultsCollector.findUnknownBiddingAdapters(
         round: RoundRequest,
-        adSources: List<AdLoadingType.Bidding<AdAuctionParams>>
+        adSources: List<Mode.Bidding>
     ) {
         (round.biddingIds - adSources.map { (it as AdSource<*>).demandId.demandId }.toSet())
             .takeIf { it.isNotEmpty() }
@@ -192,7 +192,7 @@ internal class ExecuteRoundUseCaseImpl(
 
     private fun ResultsCollector.findUnknownNetworkAdapters(
         round: RoundRequest,
-        adSources: List<AdLoadingType.Network<AdAuctionParams>>
+        adSources: List<Mode.Network>
     ) {
         (round.demandIds - adSources.map { (it as AdSource<*>).demandId.demandId }.toSet())
             .takeIf { it.isNotEmpty() }

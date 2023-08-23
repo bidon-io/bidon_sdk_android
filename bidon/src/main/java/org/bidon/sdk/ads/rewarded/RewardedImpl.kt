@@ -156,7 +156,6 @@ internal class RewardedImpl(
         require(adSource is AdSource.Rewarded<*>)
         observeCallbacksJob = adSource.adEvent.onEach { adEvent ->
             when (adEvent) {
-                is AdEvent.Bid,
                 is AdEvent.Fill -> {
                     // do nothing
                 }

@@ -2,7 +2,6 @@ package org.bidon.sdk.adapter
 
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.rewarded.Reward
-import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 
@@ -11,7 +10,6 @@ import org.bidon.sdk.logs.analytic.AdValue
  */
 sealed interface AdEvent {
     class Expired(val ad: Ad) : AdEvent
-    class Bid(val result: AuctionResult) : AdEvent
     class LoadFailed(val cause: BidonError) : AdEvent
     class Fill(val ad: Ad) : AdEvent
     class Clicked(val ad: Ad) : AdEvent

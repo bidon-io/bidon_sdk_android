@@ -8,9 +8,9 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
-import org.bidon.sdk.adapter.AdLoadingType
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.models.AuctionResult
@@ -27,7 +27,7 @@ import org.bidon.sdk.stats.models.asRoundStatus
 internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
     override fun invoke(
         context: Context,
-        networkSources: List<AdLoadingType.Network<AdAuctionParams>>,
+        networkSources: List<Mode.Network>,
         participantIds: List<String>,
         adTypeParam: AdTypeParam,
         demandAd: DemandAd,
@@ -88,7 +88,7 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
     }
 
     private suspend fun loadAd(
-        adSource: AdLoadingType.Network<AdAuctionParams>,
+        adSource: Mode.Network,
         adTypeParam: AdTypeParam,
         pricefloor: Double,
         round: RoundRequest,
@@ -97,7 +97,7 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
     ): AdEvent {
         adSource as AdSource<AdAuctionParams>
         return withTimeoutOrNull(round.timeoutMs) {
-            val adParam = adSource.obtainAuctionParam(
+            val adParam = adSource.getAuctionParam(
                 AdAuctionParamSource(
                     activity = adTypeParam.activity,
                     timeout = round.timeoutMs,
@@ -113,7 +113,7 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
 
             // FILL
             adSource.markFillStarted(adParam.adUnitId, adParam.price)
-            adSource.fill(adParam)
+            adSource.load(adParam)
             val fillAdEvent = adSource.adEvent.first {
                 // wait for results
                 it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
