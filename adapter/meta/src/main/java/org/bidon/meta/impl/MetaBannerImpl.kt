@@ -70,12 +70,8 @@ class MetaBannerImpl :
                 .withAdListener(object : AdListener {
                     override fun onError(ad: Ad?, adError: AdError?) {
                         val error = adError.asBidonError()
-                        logError(
-                            TAG,
-                            "Error while loading ad: AdError(${adError?.errorCode}: ${adError?.errorMessage}). $this",
-                            error
-                        )
-                        emitEvent(AdEvent.LoadFailed(error))
+                        logError(TAG, "Error while loading ad(${adError?.errorCode}: ${adError?.errorMessage}). $this", error)
+                        emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                     }
 
                     override fun onAdLoaded(ad: Ad?) {

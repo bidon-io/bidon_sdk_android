@@ -61,7 +61,7 @@ internal class AdmobRewardedImpl(
         val requestListener = object : RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(TAG, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
-                emitEvent(AdEvent.LoadFailed(loadAdError.asBidonError()))
+                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
 
             override fun onAdLoaded(rewardedAd: RewardedAd) {

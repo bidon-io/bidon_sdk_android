@@ -61,7 +61,7 @@ internal class AdmobInterstitialImpl(
         val requestListener = object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(TAG, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
-                emitEvent(AdEvent.LoadFailed(loadAdError.asBidonError()))
+                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
 
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
