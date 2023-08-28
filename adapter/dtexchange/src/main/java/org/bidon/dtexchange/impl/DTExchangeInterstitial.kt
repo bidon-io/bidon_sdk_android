@@ -111,7 +111,7 @@ internal class DTExchangeInterstitial :
                     inneractiveErrorCode: InneractiveErrorCode?
                 ) {
                     logInfo(TAG, "onInneractiveFailedAdRequest: $inneractiveErrorCode")
-                    emitEvent(AdEvent.LoadFailed(inneractiveErrorCode.asBidonError()))
+                    emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                 }
             }
         )

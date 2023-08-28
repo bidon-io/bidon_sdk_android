@@ -76,7 +76,7 @@ internal class DTExchangeBanner :
                 inneractiveErrorCode: InneractiveErrorCode?
             ) {
                 logInfo(TAG, "onInneractiveFailedAdRequest: $inneractiveErrorCode")
-                emitEvent(AdEvent.LoadFailed(inneractiveErrorCode.asBidonError()))
+                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         })
         adSpot.requestAd(adRequest)

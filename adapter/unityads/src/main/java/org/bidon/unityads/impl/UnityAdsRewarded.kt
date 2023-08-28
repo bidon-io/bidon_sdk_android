@@ -61,7 +61,7 @@ internal class UnityAdsRewarded :
                     message = "onUnityAdsFailedToLoad: placementId=$placementId, error=$error, message=$message",
                     error = error?.asBidonError()
                 )
-                emitEvent(AdEvent.LoadFailed(error.asBidonError()))
+                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
         UnityAds.load(adParams.lineItem.adUnitId, loadListener)

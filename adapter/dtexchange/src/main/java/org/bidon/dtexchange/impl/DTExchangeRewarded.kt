@@ -121,7 +121,7 @@ internal class DTExchangeRewarded :
                         "Error while bidding: $inneractiveErrorCode",
                         inneractiveErrorCode.asBidonError()
                     )
-                    emitEvent(AdEvent.LoadFailed(inneractiveErrorCode.asBidonError()))
+                    emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                 }
             }
         )
