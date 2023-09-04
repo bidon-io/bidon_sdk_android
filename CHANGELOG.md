@@ -1,4 +1,4 @@
-# Release 0.3.2
+# Release 0.3.2 (2023.09.04)
 
 ## New Features:
 [BDN-362](https://appodeal.atlassian.net/browse/BDN-362) Turned off MobileAds.disableMediationAdapterInitialization() for AdMob
