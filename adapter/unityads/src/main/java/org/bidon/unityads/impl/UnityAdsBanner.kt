@@ -95,7 +95,7 @@ internal class UnityAdsBanner :
                 val cause = errorInfo.asBidonError()
                 logError(TAG, "Error while loading ad: $errorInfo. $this", cause)
                 isAdReadyToShow = false
-                emitEvent(AdEvent.LoadFailed(cause))
+                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
 
             override fun onBannerLeftApplication(bannerView: BannerView?) {

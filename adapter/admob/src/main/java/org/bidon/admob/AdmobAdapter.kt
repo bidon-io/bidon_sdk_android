@@ -33,7 +33,7 @@ class AdmobAdapter :
     override suspend fun init(context: Context, configParams: AdmobInitParameters): Unit = suspendCoroutine { continuation ->
         // Since Bidon is the mediator, no need to initialize Google Bidding's partner SDKs.
         // https://developers.google.com/android/reference/com/google/android/gms/ads/MobileAds?hl=en#disableMediationAdapterInitialization(android.content.Context)
-        MobileAds.disableMediationAdapterInitialization(context)
+        // MobileAds.disableMediationAdapterInitialization(context)
         this.configParams = configParams
         /**
          * Don't forget set Automatic refresh is Disabled for each AdUnit.
