@@ -76,7 +76,7 @@ internal class VungleBannerImpl :
 
                 override fun onError(placementId: String?, exception: VungleException?) {
                     logError(TAG, "onError placementId=$placementId. $this", exception)
-                    emitEvent(AdEvent.LoadFailed(exception.asBidonError()))
+                    emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                 }
             }
         )
