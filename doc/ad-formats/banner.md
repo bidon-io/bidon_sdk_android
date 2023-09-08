@@ -29,9 +29,6 @@ banner.setBannerListener(object : BannerListener {
     override fun onAdClicked(ad: Ad) {
     }
 
-    override fun onAdClosed(ad: Ad) {
-    }
-
     override fun onAdExpired(ad: Ad) {
     }
 
