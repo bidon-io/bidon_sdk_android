@@ -1,12 +1,16 @@
 package org.bidon.demoapp
 
+import android.app.Activity
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
@@ -18,6 +22,8 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -25,6 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -38,6 +47,7 @@ import org.bidon.demoapp.ui.TestModeKey
 import org.bidon.demoapp.ui.settings.TestModeInfo
 
 class MainActivity : FragmentActivity() {
+    @RequiresApi(Build.VERSION_CODES.Q)
     @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,14 +66,17 @@ class MainActivity : FragmentActivity() {
                 }
 
                 ModalBottomSheetLayout(
+                    modifier = Modifier,
                     sheetState = modalSheetState,
                     sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
                     sheetContent = {
                         SdkSettings()
                     }
                 ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
                         Column {
                             NavigationGraph(
                                 navController = navController,
@@ -71,6 +84,7 @@ class MainActivity : FragmentActivity() {
                         }
                         FloatingActionButton(
                             modifier = Modifier
+                                .safeDrawingPadding()
                                 .align(Alignment.BottomEnd)
                                 .padding(24.dp),
                             onClick = {
@@ -85,6 +99,17 @@ class MainActivity : FragmentActivity() {
                                 tint = Color.White,
                             )
                         }
+//                        Box(
+//                            modifier = Modifier
+//                                .size(100.dp)
+//                                .background(Color.Red)
+//                        )
+//                        Box(
+//                            modifier = Modifier
+//                                .size(100.dp)
+//                                .background(Color.Red)
+//                                .align(Alignment.BottomEnd)
+//                        )
                     }
                 }
             }
@@ -101,6 +126,30 @@ class MainActivity : FragmentActivity() {
                     .firstOrNull { !it.status.isGranted }
                     ?.launchPermissionRequest()
             })
+        }
+    }
+}
+
+@Composable
+fun HideSystemBars() {
+    val context = LocalContext.current
+
+    DisposableEffect(Unit) {
+        val window = (context as Activity).window
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+
+        insetsController.apply {
+            hide(WindowInsetsCompat.Type.statusBars())
+            hide(WindowInsetsCompat.Type.navigationBars())
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+
+        onDispose {
+            insetsController.apply {
+                show(WindowInsetsCompat.Type.statusBars())
+                show(WindowInsetsCompat.Type.navigationBars())
+                // systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+            }
         }
     }
 }
