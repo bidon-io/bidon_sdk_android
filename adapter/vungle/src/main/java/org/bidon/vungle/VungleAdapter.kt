@@ -48,7 +48,8 @@ class VungleAdapter :
 
     override suspend fun init(context: Context, configParams: VungleParameters) = suspendCancellableCoroutine { continuation ->
         Vungle.init(
-            configParams.appId, context,
+            configParams.appId,
+            context,
             object : InitCallback {
                 override fun onSuccess() {
                     continuation.resume(Unit)

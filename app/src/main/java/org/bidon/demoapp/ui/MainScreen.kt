@@ -2,6 +2,7 @@ package org.bidon.demoapp.ui
 
 import android.app.Activity
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
 import androidx.navigation.NavHostController
 import org.bidon.demoapp.BannerViewActivity
 import org.bidon.demoapp.BuildConfig
@@ -37,9 +39,12 @@ import org.bidon.demoapp.component.AppTextButton
 import org.bidon.demoapp.component.Body1Text
 import org.bidon.demoapp.component.CaptionText
 import org.bidon.demoapp.component.H5Text
+import org.bidon.demoapp.component.ItemSelector
 import org.bidon.demoapp.component.MultiSelector
 import org.bidon.demoapp.navigation.Screen
 import org.bidon.demoapp.theme.AppColors
+import org.bidon.demoapp.ui.FullscreenModeExt.immersiveSystemUI
+import org.bidon.demoapp.ui.FullscreenModeExt.translucentSystemUI
 import org.bidon.demoapp.ui.settings.AppBaqendBaseUrl
 import org.bidon.demoapp.ui.settings.TestModeInfo
 import org.bidon.sdk.BidonSdk
@@ -54,10 +59,22 @@ internal fun MainScreen(
     initState: MutableState<MainScreenState>,
     sharedPreferences: SharedPreferences
 ) {
+    val activity = LocalContext.current as Activity
+    val shared = LocalContext.current.getSharedPreferences("app_test", Context.MODE_PRIVATE)
+
     val adapters = remember {
         mutableStateOf(DefaultAdapters.values().toList())
     }
     val isTestMode = TestModeInfo.isTesMode.collectAsState()
+    val fullscreenModeState = remember {
+        mutableStateOf(
+            shared.getInt("fullscreen", FullscreenMode.Default.code).let { code ->
+                FullscreenMode.values().first { it.code == code }
+            }.also {
+                setFullscreenMode(it, activity)
+            }
+        )
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -106,6 +123,26 @@ internal fun MainScreen(
                     AppTextButton(text = "Deselect All", modifier = Modifier.padding(bottom = 16.dp)) {
                         adapters.value = emptyList()
                     }
+                    ItemSelector(
+                        modifier = Modifier.padding(top = 16.dp),
+                        title = "Fullscreen Mode",
+                        items = FullscreenMode.values().toList(),
+                        selectedItem = fullscreenModeState.value,
+                        getItemTitle = {
+                            when (it) {
+                                // FullscreenMode.Normal -> "Normal"
+                                FullscreenMode.TranslucentNavigation -> "Translucent"
+                                FullscreenMode.Immersive -> "Immersive"
+                            }
+                        },
+                        onItemClicked = {
+                            fullscreenModeState.value = it
+                            shared.edit {
+                                putInt("fullscreen", it.code)
+                            }
+                            setFullscreenMode(it, activity)
+                        }
+                    )
                     AppTextButton(text = "Server settings", modifier = Modifier.padding(top = 0.dp)) {
                         navController.navigate(Screen.ServerSettings.route)
                     }
@@ -173,6 +210,9 @@ internal fun MainScreen(
                         Intent(context, BannerViewActivity::class.java)
                     )
                 }
+                AppButton(text = "Positioned Banner") {
+                    navController.navigate(Screen.PositionedBanners.route)
+                }
                 TextButton(modifier = Modifier.padding(top = 0.dp), onClick = {
                     val packageManager: PackageManager = context.packageManager
                     val intent: Intent = packageManager.getLaunchIntentForPackage(context.packageName)!!
@@ -185,6 +225,14 @@ internal fun MainScreen(
                 }
             }
         }
+    }
+}
+
+private fun setFullscreenMode(fullscreenMode: FullscreenMode, activity: Activity) {
+    when (fullscreenMode) {
+        // FullscreenMode.Normal -> normalSystemUI()
+        FullscreenMode.TranslucentNavigation -> activity.translucentSystemUI()
+        FullscreenMode.Immersive -> activity.immersiveSystemUI()
     }
 }
 
