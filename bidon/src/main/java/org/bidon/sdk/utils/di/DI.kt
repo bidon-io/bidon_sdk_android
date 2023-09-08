@@ -12,6 +12,12 @@ import org.bidon.sdk.ads.banner.helper.PauseResumeObserver
 import org.bidon.sdk.ads.banner.helper.impl.ActivityLifecycleObserver
 import org.bidon.sdk.ads.banner.helper.impl.GetOrientationUseCaseImpl
 import org.bidon.sdk.ads.banner.helper.impl.PauseResumeObserverImpl
+import org.bidon.sdk.ads.banner.refresh.BannersCache
+import org.bidon.sdk.ads.banner.refresh.BannersCacheImpl
+import org.bidon.sdk.ads.banner.render.AdRenderer
+import org.bidon.sdk.ads.banner.render.AdRendererImpl
+import org.bidon.sdk.ads.banner.render.CalculateAdContainerParamsUseCase
+import org.bidon.sdk.ads.banner.render.RenderInspectorImpl
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionHolder
 import org.bidon.sdk.auction.AuctionResolver
@@ -278,6 +284,17 @@ internal object DI {
             factory<ResultsCollector> {
                 ResultsCollectorImpl(resolver = get())
             }
+            factory<AdRenderer> {
+                AdRendererImpl(
+                    inspector = get(),
+                    calculateAdContainerParams = get()
+                )
+            }
+            factory<AdRenderer.RenderInspector> {
+                RenderInspectorImpl()
+            }
+            factory<BannersCache> { BannersCacheImpl() }
+            factory { CalculateAdContainerParamsUseCase() }
         }
     }
 }
