@@ -49,7 +49,8 @@ class BannerView @JvmOverloads constructor(
     BannerAd,
     Extras by demandAd {
 
-    private var bannerFormat: BannerFormat = BannerFormat.Banner
+    var format: BannerFormat = BannerFormat.Banner
+        private set
     private var pricefloor: Double = BidonSdk.DefaultPricefloor
     private var userListener: BannerListener? = null
     private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
@@ -84,13 +85,17 @@ class BannerView @JvmOverloads constructor(
         }
     }
 
+    private var internalAdSize: AdSize? = null
+
     override val adSize: AdSize?
-        get() = (winner?.adSource as? AdSource.Banner)?.getAdView()?.let {
-            AdSize(widthDp = it.widthDp, heightDp = it.heightDp)
+        get() = internalAdSize ?: (winner?.adSource as? AdSource.Banner)?.getAdView()?.let { holder ->
+            AdSize(widthDp = holder.widthDp, heightDp = holder.heightDp).also {
+                internalAdSize = it
+            }
         }
 
     override fun setBannerFormat(bannerFormat: BannerFormat) {
-        this.bannerFormat = bannerFormat
+        this.format = bannerFormat
     }
 
     override fun loadAd(activity: Activity, pricefloor: Double) {
@@ -168,7 +173,7 @@ class BannerView @JvmOverloads constructor(
             }
 
             AdLifecycle.Displayed -> {
-                winner?.adSource?.ad?.let { userListener?.onAdShown(ad = it) }
+                // do nothing
             }
 
             AdLifecycle.LoadingFailed,
@@ -255,7 +260,7 @@ class BannerView @JvmOverloads constructor(
             adTypeParamData = AdTypeParam.Banner(
                 activity = activity,
                 pricefloor = pricefloor,
-                bannerFormat = bannerFormat,
+                bannerFormat = format,
                 containerWidth = width.toFloat()
             ),
             onSuccess = { auctionResults ->

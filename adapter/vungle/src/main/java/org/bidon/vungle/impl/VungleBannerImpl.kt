@@ -94,6 +94,7 @@ internal class VungleBannerImpl :
                     override fun onAdRewarded(placementId: String?) {}
                     override fun onAdLeftApplication(placementId: String?) {}
                     override fun creativeId(creativeId: String?) {}
+                    override fun onAdStart(placementId: String?) {}
 
                     @Deprecated("Deprecated in Java")
                     override fun onAdEnd(placementId: String?, completed: Boolean, isCTAClicked: Boolean) {
@@ -114,12 +115,6 @@ internal class VungleBannerImpl :
                     override fun onError(placementId: String?, exception: VungleException?) {
                         logError(TAG, "onAdError: $this", exception)
                         emitEvent(AdEvent.ShowFailed(exception.asBidonError()))
-                    }
-
-                    override fun onAdStart(placementId: String?) {
-                        logInfo(TAG, "onAdStart: $this")
-                        val ad = getAd(this@VungleBannerImpl) ?: return
-                        emitEvent(AdEvent.Shown(ad))
                     }
 
                     override fun onAdViewed(placementId: String?) {
