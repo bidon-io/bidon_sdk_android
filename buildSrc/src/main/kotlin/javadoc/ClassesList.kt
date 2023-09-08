@@ -19,6 +19,8 @@ object ClassesList {
         "org/bidon/sdk/ads/banner/BannerFormat.kt",
         "org/bidon/sdk/ads/banner/BannerView.kt",
         "org/bidon/sdk/ads/banner/BannerListener.kt",
+        "org/bidon/sdk/ads/banner/BannerManager.kt",
+        "org/bidon/sdk/ads/banner/PositionedBanner.kt",
         "org/bidon/sdk/ads/interstitial/InterstitialImpl.kt",
         "org/bidon/sdk/ads/interstitial/InterstitialAd.kt",
         "org/bidon/sdk/ads/interstitial/InterstitialListener.kt",
