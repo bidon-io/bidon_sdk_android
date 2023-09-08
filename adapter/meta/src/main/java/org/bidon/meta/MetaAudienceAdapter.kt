@@ -23,8 +23,8 @@ import org.bidon.sdk.adapter.SupportsTestMode
 import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
-import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.regulation.Regulation
+import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -53,11 +53,12 @@ class MetaAudienceAdapter :
             AdSettings.setDebugBuild(true)
         }
         AdSettings.setTestMode(isTestMode)
+        configParams.mediationService?.let {
+            AdSettings.setMediationService(it)
+        }
         AudienceNetworkAds
             .buildInitSettings(context)
             .withInitListener { initResult ->
-                logInfo(TAG, "AudienceNetworkAds.isInitialized: ${AudienceNetworkAds.isInitialized(context)}")
-
                 if (initResult.isSuccess) {
                     it.resume(Unit)
                 } else {
@@ -68,7 +69,11 @@ class MetaAudienceAdapter :
             .initialize()
     }
 
-    override fun parseConfigParam(json: String): MetaParams = MetaParams
+    override fun parseConfigParam(json: String): MetaParams {
+        return MetaParams(
+            mediationService = JSONObject(json).optString("mediation_service")
+        )
+    }
 
     override fun updateRegulation(regulation: Regulation) {
         AdSettings.setMixedAudience(regulation.coppaApplies)
