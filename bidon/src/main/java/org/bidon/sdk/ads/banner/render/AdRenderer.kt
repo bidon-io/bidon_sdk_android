@@ -4,8 +4,8 @@ import android.app.Activity
 import android.graphics.Point
 import android.graphics.PointF
 import android.view.View
+import org.bidon.sdk.ads.banner.BannerAd
 import org.bidon.sdk.ads.banner.BannerPosition
-import org.bidon.sdk.ads.banner.BannerView
 
 /**
  * Created by Aleksei Cherniaev on 05/09/2023.
@@ -13,7 +13,7 @@ import org.bidon.sdk.ads.banner.BannerView
 internal interface AdRenderer {
     fun render(
         activity: Activity,
-        bannerView: BannerView,
+        bannerView: BannerAd,
         positionState: PositionState,
         animate: Boolean,
         handleConfigurationChanges: Boolean,

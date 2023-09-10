@@ -90,7 +90,6 @@ internal class CachedInterstitialImpl(
             ),
             onSuccess = { auctionResult ->
                 logInfo(tag, "Ad loaded ${auctionResult.adSource.ad}")
-                subscribeToWinner(auctionResult.adSource)
                 listener.onAdLoaded(
                     requireNotNull(auctionResult.adSource.ad) {
                         "[Ad] should exist when action succeeds"

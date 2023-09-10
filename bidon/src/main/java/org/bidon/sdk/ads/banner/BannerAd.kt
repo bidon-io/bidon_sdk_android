@@ -13,6 +13,7 @@ interface BannerAd : WinLossNotifier, Extras {
      * Loaded Ad's size
      */
     val adSize: AdSize?
+    val format: BannerFormat
 
     fun setBannerFormat(bannerFormat: BannerFormat)
     fun loadAd(activity: Activity, pricefloor: Double = BidonSdk.DefaultPricefloor)
