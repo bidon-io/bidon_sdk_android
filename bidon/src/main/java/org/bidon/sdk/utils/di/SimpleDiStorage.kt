@@ -85,3 +85,7 @@ internal object SimpleDiStorage {
         }
     }
 }
+
+object SimpleDiStorageHelper {
+    val instances get() = SimpleDiStorage.instances
+}

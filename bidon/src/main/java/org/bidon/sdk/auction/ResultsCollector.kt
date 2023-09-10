@@ -25,6 +25,6 @@ internal interface ResultsCollector {
         /**
          * How many succeeded result to hold
          */
-        const val MaxAuctionResultsAmount = 2
+        const val MaxAuctionResultsAmount = 4
     }
 }

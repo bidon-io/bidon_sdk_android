@@ -2,6 +2,7 @@ package org.bidon.sdk.utils.di
 
 import android.app.Application
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.impl.AdaptersSourceImpl
@@ -18,12 +19,16 @@ import org.bidon.sdk.ads.banner.render.AdRenderer
 import org.bidon.sdk.ads.banner.render.AdRendererImpl
 import org.bidon.sdk.ads.banner.render.CalculateAdContainerParamsUseCase
 import org.bidon.sdk.ads.banner.render.RenderInspectorImpl
+import org.bidon.sdk.ads.interstitial.AdCache
+import org.bidon.sdk.ads.interstitial.AdCacheImpl
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionHolder
 import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.RoundManager
+import org.bidon.sdk.auction.RoundManagerImpl
+import org.bidon.sdk.auction.impl.AuctionAutoImpl
 import org.bidon.sdk.auction.impl.AuctionHolderImpl
-import org.bidon.sdk.auction.impl.AuctionImpl
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.impl.ResultsCollectorImpl
 import org.bidon.sdk.auction.usecases.AuctionStat
@@ -87,6 +92,7 @@ import org.bidon.sdk.stats.impl.StatsRequestUseCaseImpl
 import org.bidon.sdk.stats.usecases.SendImpressionRequestUseCase
 import org.bidon.sdk.stats.usecases.SendWinLossRequestUseCase
 import org.bidon.sdk.stats.usecases.StatsRequestUseCase
+import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorageImpl
 import org.bidon.sdk.utils.networking.BidonEndpoints
@@ -172,13 +178,22 @@ internal object DI {
             factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
             factory<AuctionResolver> { MaxEcpmAuctionResolver }
             factory<Auction> {
-                AuctionImpl(
+                AuctionAutoImpl(
                     adaptersSource = get(),
                     getAuctionRequest = get(),
                     executeRound = get(),
                     auctionStat = get(),
+                    roundManager = get()
                 )
             }
+//            factory<Auction> {
+//                AuctionImpl(
+//                    adaptersSource = get(),
+//                    getAuctionRequest = get(),
+//                    executeRound = get(),
+//                    auctionStat = get(),
+//                )
+//            }
             factory<AuctionStat> {
                 AuctionStatImpl(
                     statsRequest = get(),
@@ -294,7 +309,14 @@ internal object DI {
                 RenderInspectorImpl()
             }
             factory<BannersCache> { BannersCacheImpl() }
+            factoryWithParams<AdCache> { (demandAd) ->
+                AdCacheImpl(
+                    demandAd = demandAd as DemandAd,
+                    scope = CoroutineScope(SdkDispatchers.Default)
+                )
+            }
             factory { CalculateAdContainerParamsUseCase() }
+            factory<RoundManager> { RoundManagerImpl() }
         }
     }
 }

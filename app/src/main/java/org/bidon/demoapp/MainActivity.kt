@@ -45,12 +45,20 @@ import org.bidon.demoapp.theme.AppTheme
 import org.bidon.demoapp.ui.SdkSettings
 import org.bidon.demoapp.ui.TestModeKey
 import org.bidon.demoapp.ui.settings.TestModeInfo
+import org.bidon.sdk.auction.usecases.LineItemsPortal
 
 class MainActivity : FragmentActivity() {
     @RequiresApi(Build.VERSION_CODES.Q)
     @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        /**
+         * LineItems
+         */
+        LineItemsPortal.interstitialLineItems.addAll(LineItems.Interstitial.all)
+        LineItemsPortal.bannerLineItems.addAll(LineItems.Banners.all)
+
         setContent {
             val coroutineScope = rememberCoroutineScope()
             val modalSheetState = rememberModalBottomSheetState(
