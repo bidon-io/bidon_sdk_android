@@ -12,9 +12,9 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import android.widget.FrameLayout.LayoutParams
+import org.bidon.sdk.ads.banner.BannerAd
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.BannerPosition
-import org.bidon.sdk.ads.banner.BannerView
 import org.bidon.sdk.ads.banner.render.AdRenderer.PositionState
 import org.bidon.sdk.ads.banner.render.ApplyInsetUseCase.applyWindowInsets
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -50,7 +50,7 @@ internal class AdRendererImpl(
 
     override fun render(
         activity: Activity,
-        bannerView: BannerView,
+        bannerView: BannerAd,
         positionState: PositionState,
         animate: Boolean,
         handleConfigurationChanges: Boolean,
@@ -87,7 +87,7 @@ internal class AdRendererImpl(
                 }
                 bannerView.showAd()
                 adContainer?.addAdView(bannerView)
-                setAdViewsVisible(bannerView)
+                setAdViewsVisible(bannerView as ViewGroup)
                 renderListener.onRendered()
             }
             true
@@ -97,7 +97,7 @@ internal class AdRendererImpl(
         }
     }
 
-    private fun BannerView.fits(positionState: PositionState): Boolean {
+    private fun BannerAd.fits(positionState: PositionState): Boolean {
         if (positionState !is PositionState.Place) return true
         return when (positionState.position) {
             BannerPosition.HorizontalTop,
@@ -152,7 +152,7 @@ internal class AdRendererImpl(
     private fun createAdContainer(
         activity: Activity,
         positionState: PositionState,
-        bannerView: BannerView
+        bannerView: BannerAd
     ) {
         adContainer?.removeAllViews()
         rootContainer?.removeAllViews()
@@ -187,7 +187,7 @@ internal class AdRendererImpl(
         this.y = translatedY
     }
 
-    private fun FrameLayout.addAdView(bannerView: BannerView) {
+    private fun FrameLayout.addAdView(bannerView: BannerAd) {
         val adContainer: FrameLayout = this
         val oldAdView = adContainer.getChildAt(0)
         val isViewsTheSame = oldAdView == bannerView
@@ -196,7 +196,7 @@ internal class AdRendererImpl(
             return
         }
         adContainer.setBackgroundColor(Color.TRANSPARENT)
-        adContainer.addView(bannerView, LayoutParams(bannerView.obtainWidth(), bannerView.obtainHeight(), Gravity.CENTER))
+        adContainer.addView(bannerView as View, LayoutParams(bannerView.obtainWidth(), bannerView.obtainHeight(), Gravity.CENTER))
         oldAdView?.animate()
             ?.alpha(0.0f)
             ?.setDuration(800)
@@ -221,14 +221,14 @@ internal class AdRendererImpl(
         )
     }
 
-    private fun BannerView.obtainWidth() = this.adSize?.widthDp?.dp ?: when (format) {
+    private fun BannerAd.obtainWidth() = this.adSize?.widthDp?.dp ?: when (format) {
         BannerFormat.MRec -> 300.dp
         BannerFormat.LeaderBoard -> 728.dp
         BannerFormat.Banner -> 320.dp
         BannerFormat.Adaptive -> WRAP_CONTENT
     }
 
-    private fun BannerView.obtainHeight() = this.adSize?.heightDp?.dp ?: when (format) {
+    private fun BannerAd.obtainHeight() = this.adSize?.heightDp?.dp ?: when (format) {
         BannerFormat.MRec -> 250.dp
         BannerFormat.LeaderBoard -> 90.dp
         BannerFormat.Banner -> 50.dp
