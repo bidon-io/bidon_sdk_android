@@ -12,7 +12,7 @@ import org.bidon.sdk.auction.models.LineItem
  */
 object LineItems {
     object Interstitial {
-        val all get() = unityAds + admob + applovin
+        val all get() = bigoads // + unityAds + admob + applovin
 
         private val unityAds = listOf(
             LineItem(demandId = "unityads", pricefloor = 1.0, adUnitId = "unity_inter_1_"),
@@ -57,6 +57,10 @@ object LineItems {
             LineItem(demandId = "applovin", pricefloor = 50.0, adUnitId = "cd2281f8cfe4d5e7"),
             LineItem(demandId = "applovin", pricefloor = 70.0, adUnitId = "6ebb8e46b8984c08"),
             LineItem(demandId = "applovin", pricefloor = 95.0, adUnitId = "ec1e3701da66ef14")
+        )
+
+        private val bigoads = listOf(
+            LineItem(demandId = "bigoads", pricefloor = 1.0, adUnitId = "10137724-10060400"),
         )
     }
 

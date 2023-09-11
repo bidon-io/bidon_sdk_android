@@ -42,6 +42,7 @@ internal class BigoAdsBannerImpl :
     private var bannerAd: BannerAd? = null
     private var bannerFormat: BannerFormat? = null
     private var adParam: BigoBannerAuctionParams? = null
+    private var isBiddingMode = false
 
     override val isAdReadyToShow: Boolean
         get() = bannerAd != null
@@ -52,20 +53,7 @@ internal class BigoAdsBannerImpl :
     }
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
-        return auctionParamsScope {
-            BigoBannerAuctionParams(
-                bannerFormat = bannerFormat,
-                payload = requireNotNull(json?.optString("payload")) {
-                    "Payload is required for BigoAds banner ad"
-                },
-                slotId = requireNotNull(json?.optString("slot_id")) {
-                    "Slot id is required for BigoAds banner ad"
-                },
-                bidPrice = requireNotNull(json?.optDouble("price")) {
-                    "Bid price is required for BigoAds banner ad"
-                },
-            )
-        }
+        return GetAuctionParamUseCase().getBannerParams(auctionParamsScope, isBiddingMode)
     }
 
     override fun getAdView(): AdViewHolder? {
@@ -75,14 +63,18 @@ internal class BigoAdsBannerImpl :
         return AdViewHolder(bannerAd.adView(), width, height)
     }
 
-    override suspend fun getToken(context: Context): String? = BigoAdSdk.getBidderToken()
-
+    override suspend fun getToken(context: Context): String? {
+        isBiddingMode = true
+        return BigoAdSdk.getBidderToken()
+    }
     override fun load(adParams: BigoBannerAuctionParams) {
         val builder = BannerAdRequest.Builder()
         this.bannerFormat = adParams.bannerFormat
         this.adParam = adParams
+        adParams.payload?.let {
+            builder.withBid(it)
+        }
         builder
-            .withBid(adParams.payload)
             .withSlotId(adParams.slotId)
             .withAdSizes(
                 when (adParams.bannerFormat) {
