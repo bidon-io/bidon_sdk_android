@@ -27,7 +27,8 @@ internal interface RoundManager {
 
     data class NextRound(
         val lineItems: List<LineItem>,
-        val roundRequest: RoundRequest
+        val roundRequest: RoundRequest,
+        val roundIndex: Int
     )
 }
 
@@ -105,7 +106,8 @@ internal class RoundManagerImpl : RoundManager {
                 timeoutMs = 15000,
                 demandIds = demands.map { it.first },
                 biddingIds = emptyList()
-            )
+            ),
+            roundIndex = flow.value.index
         )
     }
 

@@ -12,7 +12,7 @@ import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.ads.banner.render.AdRenderer
 import org.bidon.sdk.ads.banner.render.AdRenderer.PositionState
-import org.bidon.sdk.ads.interstitial.AdCache
+import org.bidon.sdk.ads.cache.AdCache
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
@@ -30,17 +30,16 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class CachedBanner private constructor(
     private val adCache: AdCache,
-    private val extras: Extras,
-    private val demandAd: DemandAd = DemandAd(AdType.Banner),
+    private val extras: Extras = adCache.demandAd,
+    private val demandAd: DemandAd = adCache.demandAd,
 ) : PositionedBanner,
     WinLossNotifier,
-    Extras {
+    Extras by extras {
 
     constructor() : this(
         adCache = get {
             params(DemandAd(AdType.Banner))
         },
-        extras = get()
     ) {
         logInfo(tag, "Created $this")
     }
@@ -221,16 +220,6 @@ class CachedBanner private constructor(
 
     override fun setBannerListener(listener: BannerListener?) {
         publisherListener = listener
-    }
-
-    override fun addExtra(key: String, value: Any?) {
-        extras.addExtra(key, value)
-        nextBannerView?.addExtra(key, value)
-        currentBannerView?.addExtra(key, value)
-    }
-
-    override fun getExtras(): Map<String, Any> {
-        return extras.getExtras()
     }
 
     override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {

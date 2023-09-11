@@ -1,12 +1,11 @@
-package org.bidon.sdk.ads.interstitial
+package org.bidon.sdk.ads.cache.impl
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.ads.interstitial.AdCache.Companion.CacheCapacity
-import org.bidon.sdk.ads.interstitial.AdCache.Companion.CacheItemToStartLoading
+import org.bidon.sdk.ads.cache.AdCache
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.models.AuctionResult
@@ -16,34 +15,13 @@ import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.ext.TAG
 import java.util.PriorityQueue
 
-/**
- * Created by Aleksei Cherniaev on 10/09/2023.
- */
-internal interface AdCache {
-    fun cache(
-        adTypeParam: AdTypeParam,
-        onSuccess: (AuctionResult) -> Unit,
-        onFailure: (BidonError) -> Unit,
-    )
-
-    fun peek(): AuctionResult?
-    fun poll(): AuctionResult?
-
-    fun clear()
-
-    companion object {
-        const val CacheItemToStartLoading = 3
-        const val CacheCapacity = 6
-    }
-}
-
 internal class AdCacheImpl(
-    private val demandAd: DemandAd,
+    override val demandAd: DemandAd,
     private val scope: CoroutineScope
 ) : AdCache {
     private val Tag get() = TAG
 
-    private val cache = PriorityQueue<AuctionResult>(CacheCapacity) { ad1, ad2 ->
+    private val cache = PriorityQueue<AuctionResult>(AdCache.CacheCapacity) { ad1, ad2 ->
         ((ad2.adSource.getStats().ecpm - ad1.adSource.getStats().ecpm) * 1000000).toInt()
     }
 
@@ -52,7 +30,7 @@ internal class AdCacheImpl(
         onSuccess: (AuctionResult) -> Unit,
         onFailure: (BidonError) -> Unit,
     ) {
-        if (cache.size >= CacheItemToStartLoading) {
+        if (cache.size >= AdCache.CacheItemToStartLoading) {
             logInfo(Tag, "Cache has enough ads, size=${cache.size}")
             return
         }
@@ -75,12 +53,11 @@ internal class AdCacheImpl(
         )
     }
 
-    override fun peek(): AuctionResult? {
-        return cache.peek()
-    }
+    override fun peek(): AuctionResult? = cache.peek()
+    override fun poll(): AuctionResult? = cache.poll()
 
-    override fun poll(): AuctionResult? {
-        return cache.poll()
+    override fun clear() {
+        cache.clear()
     }
 
     private fun trackExpired(actionResult: AuctionResult) {
@@ -89,9 +66,5 @@ internal class AdCacheImpl(
                 cache.remove(actionResult)
             }
         }.launchIn(scope)
-    }
-
-    override fun clear() {
-        cache.clear()
     }
 }

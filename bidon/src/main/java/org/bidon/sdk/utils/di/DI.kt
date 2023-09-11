@@ -19,8 +19,8 @@ import org.bidon.sdk.ads.banner.render.AdRenderer
 import org.bidon.sdk.ads.banner.render.AdRendererImpl
 import org.bidon.sdk.ads.banner.render.CalculateAdContainerParamsUseCase
 import org.bidon.sdk.ads.banner.render.RenderInspectorImpl
-import org.bidon.sdk.ads.interstitial.AdCache
-import org.bidon.sdk.ads.interstitial.AdCacheImpl
+import org.bidon.sdk.ads.cache.AdCache
+import org.bidon.sdk.ads.cache.impl.AdCacheImpl
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionHolder
 import org.bidon.sdk.auction.AuctionResolver
