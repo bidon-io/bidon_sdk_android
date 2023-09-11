@@ -93,7 +93,7 @@ internal class UnityAdsBanner :
                 errorInfo: BannerErrorInfo?
             ) {
                 val cause = errorInfo.asBidonError()
-                logError(TAG, "Error while loading ad: $errorInfo. $this", cause)
+                logError(TAG, "Error while loading ad ${errorInfo?.errorCode} ${errorInfo?.errorMessage}. $this", cause)
                 isAdReadyToShow = false
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
