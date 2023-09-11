@@ -65,7 +65,7 @@ internal class ResultsCollectorImpl(
 
     override fun startRound(round: RoundRequest, pricefloor: Double) {
         roundResult.value = RoundResult.Results(
-            biddingResult = BiddingResult.ServerBiddingStarted(serverBiddingStartTs = SystemTimeNow),
+            biddingResult = BiddingResult.Idle,
             networkResults = emptyList(),
             pricefloor = pricefloor,
             round = round
