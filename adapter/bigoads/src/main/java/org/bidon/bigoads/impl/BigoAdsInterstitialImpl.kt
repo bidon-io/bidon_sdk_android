@@ -32,9 +32,11 @@ internal class BigoAdsInterstitialImpl :
     AdSource.Interstitial<BigoFullscreenAuctionParams>,
     AdEventFlow by AdEventFlowImpl(),
     Mode.Bidding,
+    Mode.Network,
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var interstitialAd: InterstitialAd? = null
+    private var isBiddingMode = false
 
     override val isAdReadyToShow: Boolean
         get() = interstitialAd != null && interstitialAd?.isExpired != false
@@ -45,22 +47,13 @@ internal class BigoAdsInterstitialImpl :
     }
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
-        return auctionParamsScope {
-            BigoFullscreenAuctionParams(
-                payload = requireNotNull(json?.optString("payload")) {
-                    "Payload is required for Bigo Ads"
-                },
-                slotId = requireNotNull(json?.optString("slot_id")) {
-                    "Slot id is required for Bigo Ads"
-                },
-                bidPrice = requireNotNull(json?.optDouble("price")) {
-                    "Bid price is required for Bigo Ads"
-                },
-            )
-        }
+        return GetAuctionParamUseCase().getFullscreenParams(auctionParamsScope, isBiddingMode)
     }
 
-    override suspend fun getToken(context: Context): String? = BigoAdSdk.getBidderToken()
+    override suspend fun getToken(context: Context): String? {
+        isBiddingMode = true
+        return BigoAdSdk.getBidderToken()
+    }
 
     override fun show(activity: Activity) {
         val interstitialAd = interstitialAd
@@ -73,14 +66,16 @@ internal class BigoAdsInterstitialImpl :
 
     override fun load(adParams: BigoFullscreenAuctionParams) {
         val builder = InterstitialAdRequest.Builder()
+        adParams.payload?.let {
+            builder.withBid(it)
+        }
         builder
-            .withBid(adParams.payload)
             .withSlotId(adParams.slotId)
         val loader = InterstitialAdLoader.Builder()
             .withAdLoadListener(object : AdLoadListener<InterstitialAd> {
                 override fun onError(adError: AdError) {
                     val error = adError.asBidonError()
-                    logError(TAG, "Error while loading ad: $adError. $this", error)
+                    logError(TAG, "Error while loading ad: ${adError.code} ${adError.message}. $this", error)
                     emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                 }
 

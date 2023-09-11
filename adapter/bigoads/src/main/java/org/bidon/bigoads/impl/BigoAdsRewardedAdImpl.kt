@@ -35,6 +35,7 @@ internal class BigoAdsRewardedAdImpl :
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var rewardVideoAd: RewardVideoAd? = null
+    private var isBiddingMode = false
 
     override val isAdReadyToShow: Boolean
         get() = rewardVideoAd != null && rewardVideoAd?.isExpired != false
@@ -45,23 +46,13 @@ internal class BigoAdsRewardedAdImpl :
     }
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
-        return auctionParamsScope {
-            BigoFullscreenAuctionParams(
-                payload = requireNotNull(json?.optString("payload")) {
-                    "Payload is required for BigoAds"
-                },
-                slotId = requireNotNull(json?.optString("slot_id")) {
-                    "Slot id is required for BigoAds"
-                },
-                bidPrice = requireNotNull(json?.optDouble("price")) {
-                    "Bid price is required for BigoAds"
-                },
-            )
-        }
+        return GetAuctionParamUseCase().getFullscreenParams(auctionParamsScope, isBiddingMode)
     }
 
-    override suspend fun getToken(context: Context): String? = BigoAdSdk.getBidderToken()
-
+    override suspend fun getToken(context: Context): String? {
+        isBiddingMode = true
+        return BigoAdSdk.getBidderToken()
+    }
     override fun show(activity: Activity) {
         val rewardVideoAd = rewardVideoAd
         if (rewardVideoAd == null) {
@@ -73,8 +64,10 @@ internal class BigoAdsRewardedAdImpl :
 
     override fun load(adParams: BigoFullscreenAuctionParams) {
         val builder = RewardVideoAdRequest.Builder()
+        adParams.payload?.let {
+            builder.withBid(it)
+        }
         builder
-            .withBid(adParams.payload)
             .withSlotId(adParams.slotId)
         val loader = RewardVideoAdLoader.Builder().withAdLoadListener(object : AdLoadListener<RewardVideoAd> {
             override fun onError(adError: AdError) {

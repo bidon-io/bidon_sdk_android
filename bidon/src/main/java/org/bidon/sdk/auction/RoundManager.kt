@@ -22,7 +22,8 @@ internal interface RoundManager {
         val index: Int,
         val minPrice: Double,
         val maxPrice: Double,
-        val lineItems: List<LineItem>
+        val lineItems: List<LineItem>,
+        val isBiddingConducted: Boolean
     )
 
     data class NextRound(
@@ -38,17 +39,21 @@ internal class RoundManagerImpl : RoundManager {
             index = 0,
             minPrice = 0.0,
             maxPrice = 0.0,
-            lineItems = emptyList()
+            lineItems = emptyList(),
+            isBiddingConducted = false
         )
     )
 
     override fun addLineItems(lineItems: List<LineItem>) {
+        logInfo(TAG, "Add line items. Count = ${lineItems.size}")
+        logInfo(TAG, "Add line items. $lineItems")
         flow.update {
             AdaptiveRound(
                 minPrice = lineItems.minBy { it.pricefloor }.pricefloor - 0.001,
                 maxPrice = lineItems.maxBy { it.pricefloor }.pricefloor - 0.001,
                 lineItems = lineItems,
-                index = 0
+                index = 0,
+                isBiddingConducted = false
             )
         }
     }
@@ -81,7 +86,28 @@ internal class RoundManagerImpl : RoundManager {
         val adaptiveRound = flow.value
         val lineItems = adaptiveRound.lineItems.sortedBy { it.pricefloor }.ifEmpty {
             logInfo(TAG, "No line items. Rounds finished.")
-            return null
+            return if (!flow.value.isBiddingConducted) {
+                flow.update { round ->
+                    round.copy(
+                        isBiddingConducted = true
+                    )
+                }
+                RoundManager.NextRound(
+                    lineItems = emptyList(),
+                    roundRequest = RoundRequest(
+                        id = "ROUND-BIDDING",
+                        timeoutMs = 15000,
+                        demandIds = emptyList(),
+                        biddingIds = listOf("bigoads"),
+                    ),
+                    roundIndex = flow.value.index
+                )
+            } else {
+                /**
+                 * All rounds finished
+                 */
+                null
+            }
         }
         val middlePrice = lineItems[lineItems.size / 2].pricefloor - 0.001
         val demands = lineItems.groupBy { it.demandId }
@@ -105,10 +131,12 @@ internal class RoundManagerImpl : RoundManager {
                 id = "ROUND-${flow.value.index}",
                 timeoutMs = 15000,
                 demandIds = demands.map { it.first },
-                biddingIds = emptyList()
+                biddingIds = emptyList(),
             ),
             roundIndex = flow.value.index
-        )
+        ).also {
+            logInfo(TAG, "Next round: $it")
+        }
     }
 
     private fun List<LineItem>.minByPricefloorOrNull(pricefloor: Double): LineItem? {

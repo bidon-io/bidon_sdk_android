@@ -19,6 +19,7 @@ import org.bidon.sdk.auction.usecases.AuctionStat
 import org.bidon.sdk.auction.usecases.ExecuteRoundUseCase
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
 import org.bidon.sdk.auction.usecases.LineItemsPortal
+import org.bidon.sdk.auction.usecases.models.BiddingResult
 import org.bidon.sdk.auction.usecases.models.RoundResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
@@ -223,7 +224,9 @@ internal class AuctionAutoImpl(
          */
         val results = resultsCollector.getRoundResults()
         if (results is RoundResult.Results) {
-            val newMinPricefloor = results.networkResults.filter {
+            val allResults = results.networkResults +
+                (results.biddingResult as? BiddingResult.FilledAd)?.results.orEmpty()
+            val newMinPricefloor = allResults.filter {
                 it.roundStatus == RoundStatus.Successful
             }.maxOfOrNull { it.adSource.getStats().ecpm }
             if (newMinPricefloor != null) {

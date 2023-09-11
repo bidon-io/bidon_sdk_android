@@ -27,4 +27,3 @@ internal interface AdCache {
         const val CacheCapacity = 6
     }
 }
-
