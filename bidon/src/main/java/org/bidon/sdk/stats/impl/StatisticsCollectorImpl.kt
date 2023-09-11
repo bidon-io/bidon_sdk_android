@@ -13,6 +13,7 @@ import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.models.BidStat
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.ImpressionRequestBody
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.usecases.SendImpressionRequestUseCase
@@ -63,6 +64,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
         fillFinishTs = null,
         roundStatus = null,
         ecpm = 0.0,
+        bidType = null,
     )
 
     override val demandAd: DemandAd
@@ -99,12 +101,19 @@ class StatisticsCollectorImpl : StatisticsCollector {
         )
     }
 
-    override fun addRoundInfo(auctionId: String, roundId: String, roundIndex: Int, demandAd: DemandAd) {
+    override fun addRoundInfo(
+        auctionId: String,
+        roundId: String,
+        roundIndex: Int,
+        demandAd: DemandAd,
+        bidType: BidType
+    ) {
         this._demandAd = demandAd
         stat = stat.copy(
             auctionId = auctionId,
             roundId = roundId,
             roundIndex = roundIndex,
+            bidType = bidType
         )
     }
 
@@ -251,6 +260,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
             interstitial = interstitial,
             rewarded = rewarded,
             roundIndex = roundIndex,
+            bidType = stat.bidType?.code,
         )
     }
 

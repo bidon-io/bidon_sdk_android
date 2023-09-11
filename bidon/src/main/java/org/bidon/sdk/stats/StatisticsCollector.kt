@@ -5,6 +5,7 @@ import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.models.BannerRequest
 import org.bidon.sdk.stats.models.BidStat
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.RoundStatus
 
 /**
@@ -35,7 +36,13 @@ interface StatisticsCollector {
     fun addAuctionConfigurationId(auctionConfigurationId: Int)
     fun addExternalWinNotificationsEnabled(enabled: Boolean)
     fun addDemandId(demandId: DemandId)
-    fun addRoundInfo(auctionId: String, roundId: String, roundIndex: Int, demandAd: DemandAd)
+    fun addRoundInfo(
+        auctionId: String,
+        roundId: String,
+        roundIndex: Int,
+        demandAd: DemandAd,
+        bidType: BidType
+    )
 
     fun getStats(): BidStat
 
