@@ -14,6 +14,8 @@ internal data class ImpressionRequestBody(
     val auctionId: String,
     @field:JsonName("round_id")
     val roundId: String,
+    @field:JsonName("round_idx")
+    val roundIndex: Int,
     @field:JsonName("auction_configuration_id")
     val auctionConfigurationId: Int,
     @field:JsonName("imp_id")

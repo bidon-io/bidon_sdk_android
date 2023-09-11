@@ -1,3 +1,7 @@
+# dev
+## New Features:
+[BDN-380](https://appodeal.atlassian.net/browse/BDN-380) Add Round Number To Bidon Analytics
+
 # Release 0.4.0 (2023.09.08)
 ## New Features:
 [BDN-377](https://appodeal.atlassian.net/browse/BDN-377) Add meditation_service to Meta Audience Adapter

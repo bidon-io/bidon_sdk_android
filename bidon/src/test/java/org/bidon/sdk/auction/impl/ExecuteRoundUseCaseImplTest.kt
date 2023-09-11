@@ -199,6 +199,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                 demandIds = listOf("Unknown_network1", Admob, "Unknown_network2"),
                 biddingIds = listOf(BidMachine),
             ),
+            roundIndex = 1,
             pricefloor = 0.4,
             lineItems = emptyList(),
             resultsCollector = mockk(relaxed = true),

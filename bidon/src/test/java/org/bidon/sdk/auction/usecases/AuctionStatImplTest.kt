@@ -109,7 +109,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     auctionId = "auction_id_123",
                                     fillStartTs = 916,
                                     fillFinishTs = 917,
-                                    roundStatus = RoundStatus.Successful
+                                    roundStatus = RoundStatus.Successful,
+                                    roundIndex = 2,
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -125,7 +126,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     auctionId = "auction_id_123",
                                     fillStartTs = 916,
                                     fillFinishTs = 917,
-                                    roundStatus = RoundStatus.Successful
+                                    roundStatus = RoundStatus.Successful,
+                                    roundIndex = 2,
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -147,7 +149,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 auctionId = "auction_id_123",
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
-                                roundStatus = RoundStatus.Successful
+                                roundStatus = RoundStatus.Successful,
+                                roundIndex = 2,
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -163,7 +166,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 auctionId = "auction_id_123",
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
-                                roundStatus = RoundStatus.NoFill
+                                roundStatus = RoundStatus.NoFill,
+                                roundIndex = 2,
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },
@@ -275,7 +279,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     auctionId = "auction_id_123",
                                     fillStartTs = 916,
                                     fillFinishTs = 917,
-                                    roundStatus = RoundStatus.Successful
+                                    roundStatus = RoundStatus.Successful,
+                                    roundIndex = 2,
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -293,7 +298,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 auctionId = "auction_id_123",
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
-                                roundStatus = RoundStatus.Successful
+                                roundStatus = RoundStatus.Successful,
+                                roundIndex = 2,
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -309,7 +315,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 auctionId = "auction_id_123",
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
-                                roundStatus = RoundStatus.NoFill
+                                roundStatus = RoundStatus.NoFill,
+                                roundIndex = 2,
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },
@@ -441,7 +448,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     auctionId = "auction_id_123",
                                     fillStartTs = 916,
                                     fillFinishTs = 917,
-                                    roundStatus = RoundStatus.Successful
+                                    roundStatus = RoundStatus.Successful,
+                                    roundIndex = 2,
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -460,6 +468,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
                                 roundStatus = RoundStatus.Successful,
+                                roundIndex = 2,
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -475,7 +484,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 auctionId = "auction_id_123",
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
-                                roundStatus = RoundStatus.NoFill
+                                roundStatus = RoundStatus.NoFill,
+                                roundIndex = 2,
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },
