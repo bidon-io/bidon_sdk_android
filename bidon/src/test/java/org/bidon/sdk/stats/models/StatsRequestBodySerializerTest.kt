@@ -73,7 +73,8 @@ class StatsRequestBodySerializerTest {
                 adUnitId = "id123",
                 auctionStartTs = 1000,
                 auctionFinishTs = 1300,
-                roundId = "id13"
+                roundId = "id13",
+                bidType = BidType.CPM.code
             )
         ).serialize()
         println(json)
@@ -86,6 +87,7 @@ class StatsRequestBodySerializerTest {
                     "ad_unit_id" hasValue "id123"
                     "auction_start_ts" hasValue 1000
                     "auction_finish_ts" hasValue 1300
+                    "bid_type" hasValue "cpm"
                 }
                 "auction_id" hasValue "id123"
                 "auction_configuration_id" hasValue 4
