@@ -20,6 +20,7 @@ class ImpressionRequestBodySerializerTest {
           "interstitial": {},
           "auction_id": "id123",
           "round_id": "round123",
+          "round_idx": 2,
           "banner": {
             "format": "1"
           },
@@ -40,7 +41,8 @@ class ImpressionRequestBodySerializerTest {
             interstitial = InterstitialRequest(),
             banner = BannerRequest(formatCode = "1"),
             adUnitId = "adUnitId43",
-            roundId = "round123"
+            roundId = "round123",
+            roundIndex = 2,
         ).serialize()
 
         assertThat(json.toString()).isEqualTo(JSONObject(testJsonStr).toString())

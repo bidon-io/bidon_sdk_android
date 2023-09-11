@@ -41,6 +41,7 @@ internal class ExecuteRoundUseCaseImpl(
         auctionResponse: AuctionResponse,
         adTypeParam: AdTypeParam,
         round: RoundRequest,
+        roundIndex: Int,
         pricefloor: Double,
         lineItems: List<LineItem>,
         resultsCollector: ResultsCollector,
@@ -61,7 +62,16 @@ internal class ExecuteRoundUseCaseImpl(
             logInfo(TAG, "$logText bidding adapters [${filteredBiddingAdapters.joinToString { it.demandId.demandId }}]")
             val biddingAdSources = filteredBiddingAdapters
                 .getAdSources(demandAd.adType)
-                .onEach { applyParams(it, adTypeParam, auctionResponse, demandAd, round) }
+                .onEach {
+                    applyParams(
+                        adSource = it,
+                        adTypeParam = adTypeParam,
+                        auctionResponse = auctionResponse,
+                        demandAd = demandAd,
+                        round = round,
+                        roundIndex = roundIndex
+                    )
+                }
                 .filterIsInstance<Mode.Bidding>()
             // Start Bidding demands auction
             val biddingDemands = biddingAdSources.map {
@@ -94,7 +104,16 @@ internal class ExecuteRoundUseCaseImpl(
             }.onEach(::applyRegulation)
             logInfo(TAG, "$logText network adapters [${filteredAdNetworkAdapters.joinToString { it.demandId.demandId }}]")
             val networkAdSources = filteredAdNetworkAdapters.getAdSources(demandAd.adType)
-                .onEach { applyParams(it, adTypeParam, auctionResponse, demandAd, round) }
+                .onEach {
+                    applyParams(
+                        adSource = it,
+                        adTypeParam = adTypeParam,
+                        auctionResponse = auctionResponse,
+                        demandAd = demandAd,
+                        round = round,
+                        roundIndex = roundIndex
+                    )
+                }
                 .filterIsInstance<Mode.Network>()
 
             /**
@@ -154,12 +173,14 @@ internal class ExecuteRoundUseCaseImpl(
         adTypeParam: AdTypeParam,
         auctionResponse: AuctionResponse,
         demandAd: DemandAd,
-        round: RoundRequest
+        round: RoundRequest,
+        roundIndex: Int
     ) {
         adSource.addRoundInfo(
             auctionId = auctionResponse.auctionId,
             roundId = round.id,
             demandAd = demandAd,
+            roundIndex = roundIndex
         )
         adSource.setStatisticAdType(adTypeParam.asStatisticAdType())
         adSource.addAuctionConfigurationId(auctionResponse.auctionConfigurationId ?: 0)

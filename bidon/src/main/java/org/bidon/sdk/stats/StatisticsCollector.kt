@@ -16,6 +16,7 @@ interface StatisticsCollector {
     val demandId: DemandId
     val auctionId: String
     val roundId: String
+    val roundIndex: Int
     fun getAd(demandAdObject: Any): Ad?
 
     fun sendShowImpression()
@@ -34,7 +35,7 @@ interface StatisticsCollector {
     fun addAuctionConfigurationId(auctionConfigurationId: Int)
     fun addExternalWinNotificationsEnabled(enabled: Boolean)
     fun addDemandId(demandId: DemandId)
-    fun addRoundInfo(auctionId: String, roundId: String, demandAd: DemandAd)
+    fun addRoundInfo(auctionId: String, roundId: String, roundIndex: Int, demandAd: DemandAd)
 
     fun getStats(): BidStat
 
