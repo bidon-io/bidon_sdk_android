@@ -1,33 +1,18 @@
 package org.bidon.sdk.config.models.data.models.stats
 
-import com.google.common.truth.Truth.assertThat
 import org.bidon.sdk.auction.models.BannerRequest
 import org.bidon.sdk.auction.models.InterstitialRequest
+import org.bidon.sdk.config.models.json_scheme_utils.assertEquals
+import org.bidon.sdk.config.models.json_scheme_utils.expectedJsonStructure
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.ImpressionRequestBody
 import org.bidon.sdk.utils.serializer.serialize
-import org.json.JSONObject
 import org.junit.Test
 
 /**
  * Created by Bidon Team on 08/02/2023.
  */
 class ImpressionRequestBodySerializerTest {
-    private val testJsonStr = """
-        {
-          "ad_unit_id": "adUnitId43",
-          "demand_id": "demandId123",
-          "ecpm": 2.33,
-          "interstitial": {},
-          "auction_id": "id123",
-          "round_id": "round123",
-          "round_idx": 2,
-          "banner": {
-            "format": "1"
-          },
-          "auction_configuration_id": 4,
-          "imp_id": "impr123"
-        }        
-    """.trimIndent()
 
     @Test
     fun `it should serialize impression request`() {
@@ -43,8 +28,25 @@ class ImpressionRequestBodySerializerTest {
             adUnitId = "adUnitId43",
             roundId = "round123",
             roundIndex = 2,
+            bidType = BidType.RTB.code
         ).serialize()
 
-        assertThat(json.toString()).isEqualTo(JSONObject(testJsonStr).toString())
+        json.assertEquals(
+            expectedJsonStructure {
+                "ad_unit_id" hasValue "adUnitId43"
+                "demand_id" hasValue "demandId123"
+                "ecpm" hasValue 2.33
+                "interstitial" hasJson expectedJsonStructure {}
+                "auction_id" hasValue "id123"
+                "round_id" hasValue "round123"
+                "round_idx" hasValue 2
+                "banner" hasJson expectedJsonStructure {
+                    "format" hasValue "1"
+                }
+                "bid_type" hasValue "rtb"
+                "auction_configuration_id" hasValue 4
+                "imp_id" hasValue "impr123"
+            }
+        )
     }
 }

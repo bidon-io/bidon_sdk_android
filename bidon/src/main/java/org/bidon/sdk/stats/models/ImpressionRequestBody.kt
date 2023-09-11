@@ -22,6 +22,8 @@ internal data class ImpressionRequestBody(
     val impressionId: String,
     @field:JsonName("demand_id")
     val demandId: String,
+    @field:JsonName("bid_type")
+    val bidType: String?,
     @field:JsonName("ad_unit_id")
     val adUnitId: String?,
     @field:JsonName("ecpm")
