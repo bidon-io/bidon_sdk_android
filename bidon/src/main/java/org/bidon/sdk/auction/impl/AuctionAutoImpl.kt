@@ -210,6 +210,7 @@ internal class AuctionAutoImpl(
             auctionResponse = auctionDataResponse,
             lineItems = nextRound.lineItems,
             resultsCollector = resultsCollector,
+            roundIndex = nextRound.roundIndex,
             onFinish = { remainingLineItems ->
                 if (remainingLineItems.isNotEmpty()) {
                     logError(TAG, "Remaining line items must not be: $remainingLineItems", IllegalStateException())
