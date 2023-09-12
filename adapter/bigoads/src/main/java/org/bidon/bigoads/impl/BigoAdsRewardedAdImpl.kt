@@ -63,11 +63,11 @@ internal class BigoAdsRewardedAdImpl :
     }
 
     override fun load(adParams: BigoFullscreenAuctionParams) {
-        val builder = RewardVideoAdRequest.Builder()
+        val adRequest = RewardVideoAdRequest.Builder()
         adParams.payload?.let {
-            builder.withBid(it)
+            adRequest.withBid(it)
         }
-        builder
+        adRequest
             .withSlotId(adParams.slotId)
         val loader = RewardVideoAdLoader.Builder().withAdLoadListener(object : AdLoadListener<RewardVideoAd> {
             override fun onError(adError: AdError) {
@@ -83,7 +83,7 @@ internal class BigoAdsRewardedAdImpl :
             }
         })
         loader.build()
-            .loadAd(builder.build())
+            .loadAd(adRequest.build())
     }
 
     private fun fillAd(

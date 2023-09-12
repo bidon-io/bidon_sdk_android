@@ -60,6 +60,7 @@ object LineItems {
         )
 
         private val bigoads = listOf(
+            LineItem(demandId = "bigoads", pricefloor = 2.0, adUnitId = "10137724-10068211"),
             LineItem(demandId = "bigoads", pricefloor = 1.0, adUnitId = "10137724-10060400"),
         )
     }

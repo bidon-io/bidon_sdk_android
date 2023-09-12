@@ -65,11 +65,11 @@ internal class BigoAdsInterstitialImpl :
     }
 
     override fun load(adParams: BigoFullscreenAuctionParams) {
-        val builder = InterstitialAdRequest.Builder()
+        val adRequest = InterstitialAdRequest.Builder()
         adParams.payload?.let {
-            builder.withBid(it)
+            adRequest.withBid(it)
         }
-        builder
+        adRequest
             .withSlotId(adParams.slotId)
         val loader = InterstitialAdLoader.Builder()
             .withAdLoadListener(object : AdLoadListener<InterstitialAd> {
@@ -86,7 +86,7 @@ internal class BigoAdsInterstitialImpl :
                 }
             })
         loader.build()
-            .loadAd(builder.build())
+            .loadAd(adRequest.build())
     }
 
     private fun fill(
