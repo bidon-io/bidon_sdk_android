@@ -25,6 +25,9 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
     override var segmentId: String? = null
         private set
 
+    override var segmentUid: ULong? = null
+        private set
+
     override fun setAge(age: Int?) {
         attributesFlow.value = attributesFlow.value.copy(
             age = age
@@ -92,12 +95,24 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
                 ?.takeIf { it.isNotEmpty() }
             keyValueStorage.segmentId = newSegmentId
             setSegmentId(newSegmentId)
+            val newSegmentUid = JSONObject(rootJsonResponse)
+                .optJSONObject("segment")
+                ?.optString("uid", "")
+                ?.takeIf { it.isNotEmpty() }?.toULongOrNull()
+            keyValueStorage.segmentUid = newSegmentUid
+            setSegmentUid(newSegmentUid)
         }
     }
 
+    @Deprecated("Use segmentUid instead")
     override fun setSegmentId(segmentId: String?) {
         logInfo(TAG, "Updated SegmentId($segmentId)")
         this.segmentId = segmentId
+    }
+
+    override fun setSegmentUid(segmentUid: ULong?) {
+        logInfo(TAG, "Updated SegmentUid($segmentUid)")
+        this.segmentUid = segmentUid
     }
 }
 

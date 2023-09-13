@@ -28,7 +28,9 @@ class ImpressionRequestBodySerializerTest {
             adUnitId = "adUnitId43",
             roundId = "round123",
             roundIndex = 2,
-            bidType = BidType.RTB.code
+            bidType = BidType.RTB.code,
+            auctionConfigurationUid = 4UL,
+            lineItemUid = 1698961007059140608UL,
         ).serialize()
 
         json.assertEquals(
@@ -45,6 +47,8 @@ class ImpressionRequestBodySerializerTest {
                 }
                 "bid_type" hasValue "rtb"
                 "auction_configuration_id" hasValue 4
+                "auction_configuration_uid" hasValue 4UL
+                "line_item_uid" hasValue 1698961007059140608UL
                 "imp_id" hasValue "impr123"
             }
         )

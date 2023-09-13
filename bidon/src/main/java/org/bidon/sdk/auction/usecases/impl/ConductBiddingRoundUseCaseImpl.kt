@@ -112,7 +112,7 @@ internal class ConductBiddingRoundUseCaseImpl(
             } as AdSource<*>
             if (!filled) {
                 adSource.markFillStarted(
-                    adUnitId = null,
+                    lineItem = null,
                     pricefloor = bid.price
                 )
                 val fillResult = loadAd(

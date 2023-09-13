@@ -19,6 +19,7 @@ class StatsRequestBodySerializerTest {
         val json = StatsRequestBody(
             auctionId = "id123",
             auctionConfigurationId = 4,
+            auctionConfigurationUid = 4UL,
             rounds = listOf(
                 Round(
                     id = "id13",
@@ -29,7 +30,8 @@ class StatsRequestBodySerializerTest {
                             ecpm = 1.2,
                             fillFinishTs = 3,
                             fillStartTs = 4,
-                            roundStatusCode = "code"
+                            roundStatusCode = "code",
+                            lineItemUid = 123UL,
                         ),
                         DemandStat.Network(
                             demandId = "d6",
@@ -38,6 +40,7 @@ class StatsRequestBodySerializerTest {
                             ecpm = null,
                             fillFinishTs = null,
                             fillStartTs = null,
+                            lineItemUid = 123UL,
                         )
                     ),
                     pricefloor = 34.2,
@@ -74,8 +77,9 @@ class StatsRequestBodySerializerTest {
                 auctionStartTs = 1000,
                 auctionFinishTs = 1300,
                 roundId = "id13",
-                bidType = BidType.CPM.code
-            )
+                bidType = BidType.CPM.code,
+                lineItemUid = 123UL,
+            ),
         ).serialize()
         println(json)
         json.assertEquals(

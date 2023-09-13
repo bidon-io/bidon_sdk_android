@@ -19,6 +19,8 @@ internal data class ResultBody(
     val ecpm: Double?,
     @field:JsonName("ad_unit_id")
     val adUnitId: String?,
+    @field:JsonName("line_item_uid")
+    val lineItemUid: ULong?,
     @field:JsonName("auction_start_ts")
     val auctionStartTs: Long,
     @field:JsonName("auction_finish_ts")

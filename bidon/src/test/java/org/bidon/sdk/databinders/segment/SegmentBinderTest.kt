@@ -1,7 +1,5 @@
 package org.bidon.sdk.databinders.segment
 
-import io.mockk.every
-import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.bidon.sdk.config.models.json_scheme_utils.Whatever
 import org.bidon.sdk.config.models.json_scheme_utils.assertEquals
@@ -17,7 +15,33 @@ import org.junit.Test
  */
 internal class SegmentBinderTest {
 
-    private val segmentSynchronizer: SegmentSynchronizer = mockk()
+    private val segmentSynchronizer: SegmentSynchronizer = object : SegmentSynchronizer {
+        override val attributes: SegmentAttributes
+            get() = SegmentAttributes(
+                age = 28,
+                gender = Gender.Female,
+                customAttributes = mapOf(
+                    "k1" to "v1", "k2" to false
+                ),
+                inAppAmount = 100.0,
+                isPaying = false,
+                gameLevel = 58,
+            )
+
+        override val segmentUid: ULong = 123456UL
+
+        @Deprecated("not used")
+        override val segmentId: String = "0123456"
+
+        override fun parseSegmentId(rootJsonResponse: String) {}
+
+        @Deprecated("not used")
+        override fun setSegmentId(segmentId: String?) {
+        }
+
+        override fun setSegmentUid(segmentUid: ULong?) {}
+    }
+
     private val testee by lazy {
         SegmentBinder(
             segmentSynchronizer = segmentSynchronizer
@@ -26,23 +50,13 @@ internal class SegmentBinderTest {
 
     @Test
     fun serialize() = runTest {
-        every { segmentSynchronizer.segmentId } returns "0123456"
-        every { segmentSynchronizer.attributes } returns SegmentAttributes(
-            age = 28,
-            gender = Gender.Female,
-            customAttributes = mapOf(
-                "k1" to "v1", "k2" to false
-            ),
-            inAppAmount = 100.0,
-            isPaying = false,
-            gameLevel = 58,
-        )
         val segment = testee.getJsonObject()!!
 
         // check `id` is correct
         segment.assertEquals(
             expectedJsonStructure {
                 "id" hasValue "0123456"
+                "uid" hasValue 123456UL
 
                 // check `ext` JSON Encoded String later
                 "ext" has Whatever.String
