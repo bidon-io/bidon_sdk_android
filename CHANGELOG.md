@@ -1,3 +1,8 @@
+# Release 0.3.3 (2023.09.13)
+## Bugfixes:
+[BDN-391](https://appodeal.atlassian.net/browse/BDN-391) Sync Adapter version between Appodeal vs Bidon
+
+
 # Release 0.4.0 (2023.09.08)
 ## New Features:
 [BDN-377](https://appodeal.atlassian.net/browse/BDN-377) Add meditation_service to Meta Audience Adapter
@@ -5,7 +10,6 @@
 
 
 # Release 0.3.2 (2023.09.04)
-
 ## New Features:
 [BDN-362](https://appodeal.atlassian.net/browse/BDN-362) Turned off MobileAds.disableMediationAdapterInitialization() for AdMob
 
