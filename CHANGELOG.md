@@ -2,6 +2,7 @@
 ## New Features:
 [BDN-380](https://appodeal.atlassian.net/browse/BDN-380) Add Round Number To Bidon Analytics
 [BDN-379](https://appodeal.atlassian.net/browse/BDN-379) Separate Bidding And Non-Bidding Data In Bidon Analytics
+[BDN-390](https://appodeal.atlassian.net/browse/BDN-390) Replace Publicly Exposed Integer Auto-incremental Identifiers With Secure IDs
 
 ## Bugfixes:
 [BDN-382](https://appodeal.atlassian.net/browse/BDN-382) Fix stats of empty bidding rounds
