@@ -42,7 +42,7 @@ interface PositionedBanner {
      * Shows if banner is ready to show
      */
     fun isReady(): Boolean
-    fun showAd(activity: Activity)
+    fun showAd(activity: Activity, placement: String = "default")
     fun destroyAd()
     fun setBannerListener(listener: BannerListener?)
 }

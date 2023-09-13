@@ -14,12 +14,14 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.ext.TAG
 import java.util.PriorityQueue
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal class AdCacheImpl(
     override val demandAd: DemandAd,
     private val scope: CoroutineScope
 ) : AdCache {
     private val Tag get() = TAG
+    private val isLoading = AtomicBoolean(false)
 
     private val cache = PriorityQueue<AuctionResult>(AdCache.CacheCapacity) { ad1, ad2 ->
         ((ad2.adSource.getStats().ecpm - ad1.adSource.getStats().ecpm) * 1000000).toInt()
@@ -34,23 +36,27 @@ internal class AdCacheImpl(
             logInfo(Tag, "Cache has enough ads, size=${cache.size}")
             return
         }
-        logInfo(Tag, "Cache ad: $adTypeParam")
-        val auction: Auction = get()
-        auction.start(
-            demandAd = demandAd,
-            adTypeParamData = adTypeParam,
-            onSuccess = { results ->
-                results.forEach { trackExpired(it) }
-                cache.addAll(results)
-                logInfo(Tag, "Cache size: ${cache.size}")
-                logInfo(Tag, "Items ${cache.joinToString { it.adSource.getStats().ecpm.toString() }}")
-                logInfo(Tag, "Items ${cache.joinToString { it.adSource.getStats().demandId.demandId }}")
-                onSuccess(results.first())
-            },
-            onFailure = {
-                onFailure((it as? BidonError) ?: BidonError.Unspecified(demandId = null, it))
-            }
-        )
+        if (!isLoading.getAndSet(true)) {
+            logInfo(Tag, "Cache ad: $adTypeParam")
+            val auction: Auction = get()
+            auction.start(
+                demandAd = demandAd,
+                adTypeParamData = adTypeParam,
+                onSuccess = { results ->
+                    results.forEach { trackExpired(it) }
+                    cache.addAll(results)
+                    logInfo(Tag, "Cache size: ${cache.size}")
+                    logInfo(Tag, "Items ${cache.joinToString { it.adSource.getStats().ecpm.toString() }}")
+                    logInfo(Tag, "Items ${cache.joinToString { it.adSource.getStats().demandId.demandId }}")
+                    isLoading.set(false)
+                    onSuccess(results.first())
+                },
+                onFailure = {
+                    isLoading.set(false)
+                    onFailure((it as? BidonError) ?: BidonError.Unspecified(demandId = null, it))
+                }
+            )
+        }
     }
 
     override fun peek(): AuctionResult? = cache.peek()
