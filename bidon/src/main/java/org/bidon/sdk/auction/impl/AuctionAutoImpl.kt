@@ -230,19 +230,13 @@ internal class AuctionAutoImpl(
         val results = resultsCollector.getRoundResults()
         if (results is RoundResult.Results) {
             val allResults = results.networkResults +
-                (results.biddingResult as? BiddingResult.FilledAd)?.results.orEmpty()
+                    (results.biddingResult as? BiddingResult.FilledAd)?.results.orEmpty()
             val newMinPricefloor = allResults.filter {
                 it.roundStatus == RoundStatus.Successful
             }.maxOfOrNull { it.adSource.getStats().ecpm }
-            if (newMinPricefloor != null) {
-                roundManager.notifyLoaded(
-                    newMinPricefloor = newMinPricefloor
-                )
-            } else {
-                roundManager.notifyFail(
-                    newMaxPricefloor = nextRound.lineItems.first().pricefloor
-                )
-            }
+            roundManager.notifyLoaded(
+                newMinPricefloor = newMinPricefloor ?: nextRound.lineItems.first().pricefloor
+            )
             onEach.invoke(
                 allResults.filter {
                     it.roundStatus == RoundStatus.Successful
