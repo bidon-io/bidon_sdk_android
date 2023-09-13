@@ -21,6 +21,10 @@ internal class KeyValueStorageImpl(private val context: Context) : KeyValueStora
         get() = Key.SegmentId.getString()
         set(value) = Key.SegmentId.saveString(value)
 
+    override var segmentUid: ULong?
+        get() = Key.SegmentUid.getString()?.toULong()
+        set(value) = Key.SegmentUid.saveString(value.toString())
+
     override val applicationId: String
         get() = Key.ClientApplicationId.getString() ?: UUID.randomUUID().toString().also {
             Key.ClientApplicationId.saveString(it)

@@ -13,6 +13,8 @@ internal sealed interface DemandStat {
         val demandId: String,
         @field:JsonName("ad_unit_id")
         val adUnitId: String?,
+        @field:JsonName("line_item_uid")
+        val lineItemUid: ULong?,
         @field:JsonName("status")
         val roundStatusCode: String,
         @field:JsonName("ecpm")

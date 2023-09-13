@@ -8,6 +8,9 @@ import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
  */
 internal interface SegmentSynchronizer {
     val attributes: SegmentAttributes
+    val segmentUid: ULong?
+
+    @Deprecated("Use segmentUid instead")
     val segmentId: String?
 
     /**
@@ -18,5 +21,7 @@ internal interface SegmentSynchronizer {
     /**
      * For reading previous segmentId from [KeyValueStorage]
      */
+    @Deprecated("Use setSegmentUid instead")
     fun setSegmentId(segmentId: String?)
+    fun setSegmentUid(segmentUid: ULong?)
 }

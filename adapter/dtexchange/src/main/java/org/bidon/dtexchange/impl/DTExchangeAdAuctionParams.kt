@@ -9,20 +9,18 @@ import org.bidon.sdk.auction.models.LineItem
  * Created by Bidon Team on 28/02/2023.
  */
 data class DTExchangeAdAuctionParams(
-    val lineItem: LineItem
+    override val lineItem: LineItem
 ) : AdAuctionParams {
     val spotId: String get() = requireNotNull(lineItem.adUnitId)
-    override val adUnitId: String? get() = lineItem.adUnitId
     override val price: Double get() = lineItem.pricefloor
 }
 
 class DTExchangeBannerAuctionParams(
     val context: Context,
     val bannerFormat: BannerFormat,
-    val lineItem: LineItem,
+    override val lineItem: LineItem,
 ) : AdAuctionParams {
     val spotId: String get() = requireNotNull(lineItem.adUnitId)
-    override val adUnitId: String? get() = lineItem.adUnitId
     override val price: Double get() = lineItem.pricefloor
 
     override fun toString(): String {

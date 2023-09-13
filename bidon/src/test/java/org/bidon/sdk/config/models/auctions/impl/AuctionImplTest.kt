@@ -136,22 +136,26 @@ internal class AuctionImplTest : ConcurrentTest() {
                 LineItem(
                     demandId = Applovin,
                     pricefloor = 0.25,
-                    adUnitId = "AAAA2"
+                    adUnitId = "AAAA2",
+                    uid = 1UL,
                 ),
                 LineItem(
                     demandId = Admob,
                     pricefloor = 1.2235,
-                    adUnitId = "admob1"
+                    adUnitId = "admob1",
+                    uid = 1UL,
                 ),
                 LineItem(
                     demandId = Admob,
                     pricefloor = 2.2235,
-                    adUnitId = "admob2"
+                    adUnitId = "admob2",
+                    uid = 1UL,
                 ),
             ),
             pricefloor = 0.01,
             token = null,
-            externalWinNotificationsEnabled = true
+            externalWinNotificationsEnabled = true,
+            auctionConfigurationUid = 10UL,
         )
         coEvery {
             getAuctionRequestUseCase.request(
@@ -201,6 +205,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 assertThat(actualRoundStat[1].demands[0].adUnitId).isEqualTo("admob2")
                 assertThat(actualRoundStat[1].demands[0].fillStartTs).isNotNull()
                 assertThat(actualRoundStat[1].demands[0].fillFinishTs).isNotNull()
+                assertThat(actualRoundStat[1].demands[0].lineItemUid).isEqualTo(1UL)
             },
             onFailure = {
                 error("unexpected: $it")
@@ -371,21 +376,25 @@ internal class AuctionImplTest : ConcurrentTest() {
             LineItem(
                 demandId = Applovin,
                 pricefloor = 2.25,
-                adUnitId = "AAAA2"
+                adUnitId = "AAAA2",
+                uid = 1UL,
             ),
             LineItem(
                 demandId = Admob,
                 pricefloor = 1.2235,
-                adUnitId = "admob1"
+                adUnitId = "admob1",
+                uid = 1UL,
             ),
             LineItem(
                 demandId = Admob,
                 pricefloor = 3.2235,
-                adUnitId = "admob2"
+                adUnitId = "admob2",
+                uid = 1UL,
             ),
         ),
         pricefloor = 0.01,
         token = null,
-        externalWinNotificationsEnabled = true
+        externalWinNotificationsEnabled = true,
+        auctionConfigurationUid = 10UL,
     )
 }
