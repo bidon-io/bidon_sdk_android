@@ -54,7 +54,8 @@ internal class AuctionAutoImpl(
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
         onSuccess: (results: List<AuctionResult>) -> Unit,
-        onFailure: (Throwable) -> Unit
+        onFailure: (Throwable) -> Unit,
+        onEach: (roundResults: List<AuctionResult>) -> Unit
     ) {
         if (state.compareAndSet(
                 expect = Auction.AuctionState.Initialized,
@@ -97,6 +98,7 @@ internal class AuctionAutoImpl(
                             auctionData = auctionData,
                             demandAd = demandAd,
                             adTypeParamData = adTypeParamData,
+                            onEach = onEach
                         ).ifEmpty {
                             throw BidonError.NoAuctionResults
                         }.also(onSuccess)
@@ -138,6 +140,7 @@ internal class AuctionAutoImpl(
         auctionData: AuctionResponse,
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
+        onEach: (roundResults: List<AuctionResult>) -> Unit,
     ): List<AuctionResult> {
         _auctionDataResponse = auctionData
         _demandAd = demandAd
@@ -147,6 +150,7 @@ internal class AuctionAutoImpl(
             pricefloor = adTypeParamData.pricefloor,
             demandAd = demandAd,
             adTypeParamData = adTypeParamData,
+            onEach = onEach
         )
         logInfo(TAG, "Rounds completed")
 
@@ -197,6 +201,7 @@ internal class AuctionAutoImpl(
         pricefloor: Double,
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
+        onEach: (roundResults: List<AuctionResult>) -> Unit,
     ) {
         val nextRound = roundManager.popNextRound(pricefloor) ?: return
         resultsCollector.startRound(nextRound.roundRequest, pricefloor)
@@ -238,6 +243,11 @@ internal class AuctionAutoImpl(
                     newMaxPricefloor = nextRound.lineItems.first().pricefloor
                 )
             }
+            onEach.invoke(
+                allResults.filter {
+                    it.roundStatus == RoundStatus.Successful
+                }
+            )
         }
 
         // Save round results
@@ -250,6 +260,7 @@ internal class AuctionAutoImpl(
             pricefloor = nextPriceFloor,
             demandAd = demandAd,
             adTypeParamData = adTypeParamData,
+            onEach = onEach,
         )
     }
 }

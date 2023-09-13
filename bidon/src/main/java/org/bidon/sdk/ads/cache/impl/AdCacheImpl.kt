@@ -36,24 +36,29 @@ internal class AdCacheImpl(
             logInfo(Tag, "Cache has enough ads, size=${cache.size}")
             return
         }
+        val isSuccessInvoked = AtomicBoolean(false)
         if (!isLoading.getAndSet(true)) {
             logInfo(Tag, "Cache ad: $adTypeParam")
             val auction: Auction = get()
             auction.start(
                 demandAd = demandAd,
                 adTypeParamData = adTypeParam,
-                onSuccess = { results ->
+                onSuccess = { _ ->
+                    isLoading.set(false)
+                },
+                onFailure = {
+                    isLoading.set(false)
+                    onFailure((it as? BidonError) ?: BidonError.Unspecified(demandId = null, it))
+                },
+                onEach = { results ->
                     results.forEach { trackExpired(it) }
                     cache.addAll(results)
                     logInfo(Tag, "Cache size: ${cache.size}")
                     logInfo(Tag, "Items ${cache.joinToString { it.adSource.getStats().ecpm.toString() }}")
                     logInfo(Tag, "Items ${cache.joinToString { it.adSource.getStats().demandId.demandId }}")
-                    isLoading.set(false)
-                    onSuccess(results.first())
-                },
-                onFailure = {
-                    isLoading.set(false)
-                    onFailure((it as? BidonError) ?: BidonError.Unspecified(demandId = null, it))
+                    if (!isSuccessInvoked.getAndSet(true)) {
+                        onSuccess(results.first())
+                    }
                 }
             )
         }
