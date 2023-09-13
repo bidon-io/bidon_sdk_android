@@ -115,7 +115,8 @@ internal class AuctionStatImpl(
             auctionId = auctionId,
             auctionConfigurationId = auctionData.auctionConfigurationId ?: -1,
             auctionStartTs = auctionStartTs,
-            auctionFinishTs = SystemTimeNow
+            auctionFinishTs = SystemTimeNow,
+            auctionConfigurationUid = auctionData.auctionConfigurationUid ?: 0UL
         )
         scope.launch(SdkDispatchers.Default) {
             statsRequest.invoke(
@@ -155,6 +156,7 @@ internal class AuctionStatImpl(
                 adUnitId = null,
                 fillStartTs = null,
                 fillFinishTs = null,
+                lineItemUid = null,
             )
         }
     }
@@ -179,6 +181,7 @@ internal class AuctionStatImpl(
                                     adUnitId = null,
                                     fillStartTs = null,
                                     fillFinishTs = null,
+                                    lineItemUid = null,
                                 )
                             },
                             bidding = if (round.biddingIds.isNotEmpty()) {
@@ -225,7 +228,8 @@ internal class AuctionStatImpl(
                     demandId = stat.demandId.demandId,
                     fillStartTs = stat.fillStartTs,
                     fillFinishTs = stat.fillFinishTs,
-                    adUnitId = stat.adUnitId
+                    adUnitId = stat.adUnitId,
+                    lineItemUid = stat.lineItemUid,
                 )
             }
 
@@ -236,7 +240,8 @@ internal class AuctionStatImpl(
                     fillStartTs = null,
                     fillFinishTs = null,
                     ecpm = null,
-                    adUnitId = null
+                    adUnitId = null,
+                    lineItemUid = null,
                 )
             }
 
@@ -344,6 +349,7 @@ internal class AuctionStatImpl(
     private fun List<RoundStat>.asStatsRequestBody(
         auctionId: String,
         auctionConfigurationId: Int,
+        auctionConfigurationUid: ULong,
         auctionStartTs: Long,
         auctionFinishTs: Long,
     ): StatsRequestBody {
@@ -358,9 +364,10 @@ internal class AuctionStatImpl(
                     winnerDemandId = stat.winnerDemandId?.demandId,
                     pricefloor = stat.pricefloor,
                     demands = stat.demands,
-                    bidding = stat.bidding
+                    bidding = stat.bidding,
                 )
-            }
+            },
+            auctionConfigurationUid = auctionConfigurationUid
         )
     }
 
@@ -384,6 +391,7 @@ internal class AuctionStatImpl(
             auctionFinishTs = auctionFinishTs,
             roundId = stat?.roundId,
             bidType = stat?.bidType?.code,
+            lineItemUid = stat?.lineItemUid,
         )
     }
 }
