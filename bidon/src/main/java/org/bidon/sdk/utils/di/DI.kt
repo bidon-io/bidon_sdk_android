@@ -3,6 +3,7 @@ package org.bidon.sdk.utils.di
 import android.app.Application
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.impl.AdaptersSourceImpl
@@ -20,7 +21,9 @@ import org.bidon.sdk.ads.banner.render.AdRendererImpl
 import org.bidon.sdk.ads.banner.render.CalculateAdContainerParamsUseCase
 import org.bidon.sdk.ads.banner.render.RenderInspectorImpl
 import org.bidon.sdk.ads.cache.AdCache
+import org.bidon.sdk.ads.cache.Refresher
 import org.bidon.sdk.ads.cache.impl.AdCacheImpl
+import org.bidon.sdk.ads.cache.impl.RefresherImpl
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionHolder
 import org.bidon.sdk.auction.AuctionResolver
@@ -317,6 +320,7 @@ internal object DI {
             }
             factory { CalculateAdContainerParamsUseCase() }
             factory<RoundManager> { RoundManagerImpl() }
+            factory<Refresher> { RefresherImpl(dispatcher = Dispatchers.Default) }
         }
     }
 }
