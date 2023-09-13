@@ -52,7 +52,7 @@ internal class MintegralInterstitialImpl :
                 payload = requireNotNull(json?.getString("payload")) {
                     "Payload is required for Mintegral"
                 },
-                adUnitId = json?.getString("unit_id"),
+                unitId = json?.getString("unit_id"),
                 placementId = json?.getString("placement_id"),
             )
         }
@@ -64,7 +64,7 @@ internal class MintegralInterstitialImpl :
         val handler = MBBidNewInterstitialHandler(
             adParams.activity,
             adParams.placementId,
-            adParams.adUnitId
+            adParams.unitId
         ).also {
             interstitialAd = it
         }
