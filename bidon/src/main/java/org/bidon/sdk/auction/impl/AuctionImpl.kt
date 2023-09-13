@@ -53,7 +53,8 @@ internal class AuctionImpl(
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
         onSuccess: (results: List<AuctionResult>) -> Unit,
-        onFailure: (Throwable) -> Unit
+        onFailure: (Throwable) -> Unit,
+        onEach: (roundResults: List<AuctionResult>) -> Unit
     ) {
         if (state.compareAndSet(
                 expect = AuctionState.Initialized,

@@ -11,7 +11,11 @@ internal interface Auction {
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
         onSuccess: (results: List<AuctionResult>) -> Unit,
-        onFailure: (Throwable) -> Unit
+        onFailure: (Throwable) -> Unit,
+        /**
+         * Calls on each success round results
+         */
+        onEach: (roundResults: List<AuctionResult>) -> Unit = {}
     )
 
     /**

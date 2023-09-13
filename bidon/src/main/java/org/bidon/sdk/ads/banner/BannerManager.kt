@@ -100,7 +100,7 @@ class BannerManager private constructor(
 
     override fun isReady(): Boolean = currentBannerView?.isReady() == true || nextBannerView?.isReady() == true
 
-    override fun showAd(activity: Activity) {
+    override fun showAd(activity: Activity, placement: String) {
         weakActivity = WeakReference(activity)
         logInfo(tag, "Show ad")
         if (!BidonSdk.isInitialized()) {
