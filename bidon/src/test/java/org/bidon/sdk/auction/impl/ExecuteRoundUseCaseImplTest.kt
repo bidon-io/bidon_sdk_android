@@ -73,22 +73,26 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
             LineItem(
                 demandId = Applovin,
                 pricefloor = 0.25,
-                adUnitId = "AAAA2"
+                adUnitId = "AAAA2",
+                uid = 1UL,
             ),
             LineItem(
                 demandId = Admob,
                 pricefloor = 1.2235,
-                adUnitId = "admob1"
+                adUnitId = "admob1",
+                uid = 1UL,
             ),
             LineItem(
                 demandId = Admob,
                 pricefloor = 2.2235,
-                adUnitId = "admob2"
+                adUnitId = "admob2",
+                uid = 1UL,
             ),
         ),
         pricefloor = 0.01,
         token = null,
-        externalWinNotificationsEnabled = true
+        externalWinNotificationsEnabled = true,
+        auctionConfigurationUid = 10UL,
     )
 
     private val activity: Activity by lazy { mockk(relaxed = true) }

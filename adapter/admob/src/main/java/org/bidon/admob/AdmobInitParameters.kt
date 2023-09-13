@@ -23,9 +23,9 @@ sealed interface AdmobBannerAuctionParams : AdAuctionParams {
         override val context: Context,
         override val bannerFormat: BannerFormat,
         override val containerWidth: Float,
-        val lineItem: LineItem,
+        override val lineItem: LineItem,
     ) : AdmobBannerAuctionParams {
-        override val adUnitId: String = requireNotNull(lineItem.adUnitId)
+        val adUnitId: String = requireNotNull(lineItem.adUnitId)
         override val price: Double get() = lineItem.pricefloor
 
         override fun toString(): String {
@@ -38,9 +38,10 @@ sealed interface AdmobBannerAuctionParams : AdAuctionParams {
         override val bannerFormat: BannerFormat,
         override val containerWidth: Float,
         override val price: Double,
-        override val adUnitId: String,
+        val adUnitId: String,
         val payload: String,
     ) : AdmobBannerAuctionParams {
+        override val lineItem: LineItem? = null
 
         override fun toString(): String {
             return "AdmobBannerAuctionParams($adUnitId, bidPrice=$price, payload=${payload.take(20)})"
@@ -53,9 +54,9 @@ sealed interface AdmobFullscreenAdAuctionParams : AdAuctionParams {
 
     class Network(
         override val context: Context,
-        val lineItem: LineItem,
+        override val lineItem: LineItem,
     ) : AdmobFullscreenAdAuctionParams {
-        override val adUnitId: String = requireNotNull(lineItem.adUnitId)
+        val adUnitId: String = requireNotNull(lineItem.adUnitId)
         override val price: Double get() = lineItem.pricefloor
 
         override fun toString(): String {
@@ -66,9 +67,10 @@ sealed interface AdmobFullscreenAdAuctionParams : AdAuctionParams {
     class Bidding(
         override val context: Context,
         override val price: Double,
-        override val adUnitId: String,
+        val adUnitId: String,
         val payload: String,
     ) : AdmobFullscreenAdAuctionParams {
+        override val lineItem: LineItem? = null
 
         override fun toString(): String {
             return "AdmobFullscreenAdAuctionParams($adUnitId, bidPrice=$price, payload=${payload.take(20)})"
