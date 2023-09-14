@@ -21,7 +21,9 @@ import org.bidon.sdk.ads.banner.render.AdRendererImpl
 import org.bidon.sdk.ads.banner.render.CalculateAdContainerParamsUseCase
 import org.bidon.sdk.ads.banner.render.RenderInspectorImpl
 import org.bidon.sdk.ads.cache.AdCache
+import org.bidon.sdk.ads.cache.AdCache2
 import org.bidon.sdk.ads.cache.Refresher
+import org.bidon.sdk.ads.cache.impl.AdCache2Impl
 import org.bidon.sdk.ads.cache.impl.AdCacheImpl
 import org.bidon.sdk.ads.cache.impl.RefresherImpl
 import org.bidon.sdk.auction.Auction
@@ -316,6 +318,14 @@ internal object DI {
                 AdCacheImpl(
                     demandAd = demandAd as DemandAd,
                     scope = CoroutineScope(SdkDispatchers.Default)
+                )
+            }
+            factoryWithParams<AdCache2> { (demandAd) ->
+                AdCache2Impl(
+                    demandAd = demandAd as DemandAd,
+                    scope = CoroutineScope(SdkDispatchers.Default),
+                    pauseResumeObserver = get(),
+                    resolver = get()
                 )
             }
             factory { CalculateAdContainerParamsUseCase() }

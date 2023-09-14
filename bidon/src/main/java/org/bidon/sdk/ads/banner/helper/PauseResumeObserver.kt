@@ -7,3 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 internal interface PauseResumeObserver {
     val lifecycleFlow: StateFlow<ActivityLifecycleState>
 }
+
+internal interface Cancellable {
+    fun cancel()
+}

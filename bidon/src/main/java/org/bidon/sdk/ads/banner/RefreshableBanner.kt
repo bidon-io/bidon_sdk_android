@@ -3,16 +3,24 @@ package org.bidon.sdk.ads.banner
 import android.app.Activity
 import android.graphics.Point
 import android.graphics.PointF
+import androidx.annotation.Keep
 import androidx.core.view.children
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
+import org.bidon.sdk.ads.banner.helper.ActivityLifecycleState
+import org.bidon.sdk.ads.banner.helper.PauseResumeObserver
 import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.ads.banner.render.AdRenderer
 import org.bidon.sdk.ads.banner.render.AdRenderer.PositionState
-import org.bidon.sdk.ads.cache.AdCache
+import org.bidon.sdk.ads.cache.AdCache2
 import org.bidon.sdk.ads.cache.Refreshable
 import org.bidon.sdk.ads.cache.Refreshable.Companion.DefaultRefreshTimeout
 import org.bidon.sdk.ads.cache.Refresher
@@ -22,7 +30,6 @@ import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
-import org.bidon.sdk.stats.WinLossNotifier
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.ext.TAG
 import java.lang.ref.WeakReference
@@ -31,35 +38,73 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Created by Aleksei Cherniaev on 05/09/2023.
  */
+@Keep
 class RefreshableBanner private constructor(
-    private val adCache: AdCache,
+    private val adCache: AdCache2,
     private val refresher: Refresher,
+    private val pauseResumeObserver: PauseResumeObserver,
     private val extras: Extras = adCache.demandAd,
     private val demandAd: DemandAd = adCache.demandAd,
+    private val scope: CoroutineScope = CoroutineScope(Dispatchers.Main),
 ) : PositionedBanner,
     Refreshable,
-    WinLossNotifier,
     Extras by extras {
 
     constructor() : this(
         adCache = get {
             params(DemandAd(AdType.Banner))
         },
-        refresher = get()
+        refresher = get(),
+        pauseResumeObserver = get()
     ) {
         logInfo(tag, "Created $this")
     }
 
     private val tag get() = TAG
     private var weakActivity = WeakReference<Activity>(null)
+    private val getActivity: Activity?
+        get() = weakActivity.get()?.takeIf { !it.isDestroyed && !it.isFinishing }
+
     private var refreshTimeout: Long = DefaultRefreshTimeout
-    private var nextBannerView: BannerView2? = null
+    private val displaying = MutableStateFlow(false)
+    private var placement: String = "default"
     private var currentBannerView: BannerView2? = null
     private var bannerFormat: BannerFormat = BannerFormat.Banner
     private val showAfterLoad = AtomicBoolean(false)
     private var positionState: PositionState = PositionState.Default
     private var publisherListener: BannerListener? = null
     private val adRenderer: AdRenderer by lazy { get() }
+    private var displayingJob: Job? = null
+
+    private val listener = object : BannerListener {
+        override fun onAdLoaded(ad: Ad) {
+            publisherListener?.onAdLoaded(ad)
+        }
+
+        override fun onAdLoadFailed(cause: BidonError) {
+            publisherListener?.onAdLoadFailed(cause)
+        }
+
+        override fun onAdShown(ad: Ad) {
+            publisherListener?.onAdShown(ad)
+        }
+
+        override fun onAdClicked(ad: Ad) {
+            publisherListener?.onAdClicked(ad)
+        }
+
+        override fun onAdExpired(ad: Ad) {
+            publisherListener?.onAdExpired(ad)
+        }
+
+        override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
+            publisherListener?.onRevenuePaid(ad, adValue)
+        }
+
+        override fun onAdShowFailed(cause: BidonError) {
+            publisherListener?.onAdShowFailed(cause)
+        }
+    }
 
     override val adSize: AdSize?
         get() = currentBannerView?.adSize
@@ -91,126 +136,96 @@ class RefreshableBanner private constructor(
     }
 
     override fun loadAd(activity: Activity, pricefloor: Double) {
-        weakActivity = WeakReference(activity)
         if (!BidonSdk.isInitialized()) {
-            publisherListener?.onAdLoadFailed(BidonError.SdkNotInitialized)
+            listener.onAdLoadFailed(BidonError.SdkNotInitialized)
             return
         }
-        nextBannerView = adCache.poll()?.let { winner ->
-            getBannerView(activity, winner)
-        }
-        val minCachedPricefloor = adCache.peek()?.adSource?.getStats()?.ecpm ?: 0.0
         adCache.cache(
             adTypeParam = AdTypeParam.Banner(
                 activity = activity,
-                pricefloor = maxOf(pricefloor, minCachedPricefloor),
+                pricefloor = pricefloor,
                 bannerFormat = bannerFormat,
                 containerWidth = bannerFormat.getWidthDp().toFloat()
             ),
-            onSuccess = { auctionResult ->
-                publisherListener?.onAdLoaded(auctionResult.adSource.ad!!)
-                if (nextBannerView == null) {
-                    nextBannerView = adCache.poll()?.let { winner ->
-                        getBannerView(activity, winner)
-                    }
-                }
-                if (showAfterLoad.getAndSet(false)) {
-                    weakActivity.get()?.let { activity ->
-                        showAd(activity)
-                    }
-                }
-            },
-            onFailure = { cause ->
-                publisherListener?.onAdLoadFailed(cause)
-                refresher.startRefresh("_failure_refresh_", 3000L) {
-                    if (adCache.peek() == null) {
-                        loadAd(activity, pricefloor)
-                    }
-                }
-            }
         )
     }
 
-    private fun getBannerView(
-        activity: Activity,
-        winner: AuctionResult
-    ) = BannerView2(
-        context = activity.applicationContext,
-        auctionResult = winner,
-        demandAd = demandAd
-    ).apply {
-        setBannerFormat(bannerFormat)
-    }
-
-    override fun isReady(): Boolean = currentBannerView?.isReady() == true || nextBannerView?.isReady() == true
+    override fun isReady(): Boolean = currentBannerView?.isReady() == true
 
     override fun showAd(activity: Activity, placement: String) {
-        weakActivity = WeakReference(activity)
         logInfo(tag, "Show ad")
         if (!BidonSdk.isInitialized()) {
             publisherListener?.onAdLoadFailed(BidonError.SdkNotInitialized)
             return
         }
-        val bannerView = nextBannerView ?: currentBannerView
+        this.placement = placement
+        this.weakActivity = WeakReference(activity)
+        this.displaying.value = true
+        if (currentBannerView != null) {
+            render(placement)
+        } else {
+            displayAd(placement)
+        }
+    }
+
+    override fun hideAd() {
+        logInfo(tag, "Hide ad")
+        displaying.value = false
+        adRenderer.hide()
+        displayingJob?.cancel()
+        displayingJob = null
+    }
+
+    override fun destroyAd() {
+        logInfo(tag, "Destroy ad")
+        hideAd()
+        currentBannerView?.destroyAd()
+        currentBannerView = null
+    }
+
+    override fun setBannerListener(listener: BannerListener?) {
+        publisherListener = listener
+    }
+
+
+    private fun displayAd(placement: String) {
+        displayingJob?.cancel()
+        displayingJob = scope.launch {
+            val next = adCache.poll()
+            val activity = weakActivity.get() ?: return@launch
+            displaying.first { it }
+            pauseResumeObserver.lifecycleFlow.first { it == ActivityLifecycleState.Resumed }
+            currentBannerView = getBannerView(activity, next)
+            render(placement)
+        }
+    }
+
+    private fun render(placement: String) {
+        val activity = getActivity ?: return
+        val bannerView = currentBannerView
         if (bannerView == null) {
             logInfo(tag, "No loaded ad")
             showAfterLoad.set(true)
             publisherListener?.onAdShowFailed(BidonError.BannerAdNotReady)
             return
         }
+        showAfterLoad.set(false)
+        bannerView.setBannerListener(listener)
         if (!bannerView.isReady()) {
             logInfo(tag, "Source network banner is not ready ${bannerView.children.firstOrNull()}")
         }
-        nextBannerView = null
-        currentBannerView = bannerView
 
         /**
          * RenderAd
          */
-        showAfterLoad.set(false)
-        logInfo(tag, "RenderAd at $activity")
-        bannerView.setBannerListener(
-            object : BannerListener {
-                override fun onAdLoaded(ad: Ad) {}
-                override fun onAdLoadFailed(cause: BidonError) {}
-
-                override fun onAdShown(ad: Ad) {
-                    loadAd(activity, pricefloor = 0.0)
-                    publisherListener?.onAdShown(ad)
-                    if (refreshTimeout > 0L) {
-                        refresher.startRefresh(placement, refreshTimeout) {
-                            if (refreshTimeout > 0L) {
-                                showAd(activity, placement)
-                            }
-                        }
-                    }
-                }
-
-                override fun onAdClicked(ad: Ad) {
-                    publisherListener?.onAdClicked(ad)
-                }
-
-                override fun onAdExpired(ad: Ad) {
-                    publisherListener?.onAdExpired(ad)
-                }
-
-                override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
-                    publisherListener?.onRevenuePaid(ad, adValue)
-                }
-
-                override fun onAdShowFailed(cause: BidonError) {
-                    publisherListener?.onAdShowFailed(cause)
-                }
-            }
-        )
+        logInfo(tag, "RenderAd $bannerView at $activity")
         adRenderer.render(
             activity = activity,
             bannerView = bannerView,
             positionState = positionState,
             animate = true,
             handleConfigurationChanges = false,
-            renderListener =
-            object : AdRenderer.RenderListener {
+            renderListener = object : AdRenderer.RenderListener {
                 override fun onRendered() {
                     logInfo(tag, "RenderListener.onRendered")
                 }
@@ -226,32 +241,29 @@ class RefreshableBanner private constructor(
                 }
             }
         )
+        startAutoRefresh(placement)
     }
 
-    override fun hideAd() {
-        logInfo(tag, "Hide ad")
-        adRenderer.hide()
+    private fun startAutoRefresh(placement: String) {
+        if (refreshTimeout > 0L) {
+            logInfo(tag, "Refresh started with timeout $refreshTimeout ms")
+            refresher.startRefresh(placement, refreshTimeout) {
+                logInfo(tag, "Refresh timed out. Current timeout is $refreshTimeout ms")
+                if (refreshTimeout > 0L) {
+                    displayAd(placement)
+                }
+            }
+        }
     }
 
-    override fun destroyAd() {
-        logInfo(tag, "Destroy ad")
-        hideAd()
-        currentBannerView?.destroyAd()
-        currentBannerView = null
-        nextBannerView?.destroyAd()
-        nextBannerView = null
-    }
-
-    override fun setBannerListener(listener: BannerListener?) {
-        publisherListener = listener
-    }
-
-    override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {
-        nextBannerView?.notifyLoss(winnerDemandId, winnerEcpm)
-        nextBannerView = null
-    }
-
-    override fun notifyWin() {
-        nextBannerView?.notifyWin()
+    private fun getBannerView(
+        activity: Activity,
+        winner: AuctionResult
+    ) = BannerView2(
+        context = activity.applicationContext,
+        auctionResult = winner,
+        demandAd = demandAd
+    ).apply {
+        setBannerFormat(bannerFormat)
     }
 }

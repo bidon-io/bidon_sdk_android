@@ -17,7 +17,14 @@ internal interface AdCache {
         onFailure: (BidonError) -> Unit,
     )
 
+    /**
+     * Exposes only
+     */
     fun peek(): AuctionResult?
+
+    /**
+     * Removes from cache and exposes
+     */
     fun poll(): AuctionResult?
 
     fun clear()
@@ -25,5 +32,28 @@ internal interface AdCache {
     companion object {
         const val CacheItemToStartLoading = 3
         const val CacheCapacity = 6
+    }
+}
+
+internal interface AdCache2 {
+    val demandAd: DemandAd
+
+    fun cache(adTypeParam: AdTypeParam)
+
+    /**
+     * Exposes only
+     */
+    fun peek(): AuctionResult?
+
+    /**
+     * Removes from cache and exposes
+     */
+    suspend fun poll(): AuctionResult
+
+    fun clear()
+
+    companion object {
+        const val CacheItemToStartLoading = 3
+        const val CacheCapacity = 10
     }
 }

@@ -32,35 +32,46 @@ internal class AdCacheImpl(
         onSuccess: (AuctionResult) -> Unit,
         onFailure: (BidonError) -> Unit,
     ) {
+        logInfo(Tag, "Cache started: ${cache.size}")
         if (cache.size >= AdCache.CacheItemToStartLoading) {
             logInfo(Tag, "Cache has enough ads, size=${cache.size}")
             return
         }
         val isSuccessInvoked = AtomicBoolean(false)
         if (!isLoading.getAndSet(true)) {
+            val auctionResults = mutableListOf<AuctionResult>()
             logInfo(Tag, "Cache ad: $adTypeParam")
             val auction: Auction = get()
             auction.start(
                 demandAd = demandAd,
                 adTypeParamData = adTypeParam,
                 onSuccess = { _ ->
+                    logInfo(Tag, "Cache size after succeed: ${cache.size}")
+                    logInfo(Tag, "Items ${cache.joinToString { it.adSource.getStats().ecpm.toString() }}")
+                    logInfo(Tag, "Items ${cache.joinToString { it.adSource.getStats().demandId.demandId }}")
                     isLoading.set(false)
                 },
                 onFailure = {
+                    logInfo(Tag, "Cache size after auction failed: ${cache.size}")
+                    logInfo(Tag, "Items ${cache.joinToString { it.adSource.getStats().ecpm.toString() }}")
+                    logInfo(Tag, "Items ${cache.joinToString { it.adSource.getStats().demandId.demandId }}")
                     isLoading.set(false)
                     onFailure((it as? BidonError) ?: BidonError.Unspecified(demandId = null, it))
                 },
                 onEach = { results ->
                     results.forEach { trackExpired(it) }
+                    auctionResults.addAll(results)
                     cache.addAll(results)
-                    logInfo(Tag, "Cache size: ${cache.size}")
+                    logInfo(Tag, "Cache size after round completed: ${cache.size}")
                     logInfo(Tag, "Items ${cache.joinToString { it.adSource.getStats().ecpm.toString() }}")
                     logInfo(Tag, "Items ${cache.joinToString { it.adSource.getStats().demandId.demandId }}")
-                    if (!isSuccessInvoked.getAndSet(true)) {
+                    if (results.isNotEmpty() && !isSuccessInvoked.getAndSet(true)) {
                         onSuccess(results.first())
                     }
                 }
             )
+        } else {
+            logInfo(Tag, "Cache is already loading")
         }
     }
 

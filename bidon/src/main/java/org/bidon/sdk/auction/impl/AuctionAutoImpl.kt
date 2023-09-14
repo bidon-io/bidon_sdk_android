@@ -3,7 +3,6 @@ package org.bidon.sdk.auction.impl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.AdaptersSource
@@ -93,7 +92,7 @@ internal class AuctionAutoImpl(
                                 AdType.Rewarded -> error("Rewarded ads are not supported")
                             }
                         )
-                        roundManager.notifyLoaded(newMinPricefloor = adTypeParamData.pricefloor)
+                        roundManager.setInitialPricefloor(newMinPricefloor = adTypeParamData.pricefloor)
                         conductAuction(
                             auctionData = auctionData,
                             demandAd = demandAd,
@@ -174,8 +173,6 @@ internal class AuctionAutoImpl(
 
         // Finish auction
         state.value = Auction.AuctionState.Finished
-        // Wait for auction is completed
-        state.first { it == Auction.AuctionState.Finished }
         clearData()
         return finalResults
     }
@@ -229,19 +226,23 @@ internal class AuctionAutoImpl(
          */
         val results = resultsCollector.getRoundResults()
         if (results is RoundResult.Results) {
-            val allResults = results.networkResults +
-                    (results.biddingResult as? BiddingResult.FilledAd)?.results.orEmpty()
-            val newMinPricefloor = allResults.filter {
+            val allResults = (results.networkResults +
+                    (results.biddingResult as? BiddingResult.FilledAd)?.results.orEmpty())
+            val successfulResults = allResults.filter {
                 it.roundStatus == RoundStatus.Successful
-            }.maxOfOrNull { it.adSource.getStats().ecpm }
-            roundManager.notifyLoaded(
-                newMinPricefloor = newMinPricefloor ?: nextRound.lineItems.first().pricefloor
-            )
-            onEach.invoke(
-                allResults.filter {
-                    it.roundStatus == RoundStatus.Successful
+            }
+            if (successfulResults.isEmpty()) {
+                nextRound.lineItems.lastOrNull()?.pricefloor?.let {
+                    roundManager.notifyFail(newMaxPricefloor = it)
                 }
-            )
+            } else {
+                val newMinPricefloor = successfulResults.maxOfOrNull { it.adSource.getStats().ecpm }
+                    ?: nextRound.lineItems.firstOrNull()?.pricefloor
+                newMinPricefloor?.let {
+                    roundManager.notifyLoaded(newMinPricefloor = it)
+                }
+                onEach.invoke(successfulResults)
+            }
         }
 
         // Save round results

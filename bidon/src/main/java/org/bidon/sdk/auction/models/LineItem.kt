@@ -7,7 +7,7 @@ import org.json.JSONObject
  * Created by Bidon Team on 06/02/2023.
  */
 data class LineItem(
-    val uid: ULong?,
+    val uid: ULong? = null,
     val demandId: String?,
     val pricefloor: Double = 0.0,
     val adUnitId: String?,
