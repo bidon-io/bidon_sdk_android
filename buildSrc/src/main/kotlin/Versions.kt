@@ -16,6 +16,7 @@ object Versions {
         val Mintegral = "$mainVersion.0"
         val Vungle = "$mainVersion.0"
         val Meta = "$mainVersion.0"
+        val Inmobi = "$mainVersion.0"
 
         val IronSource = "$mainVersion.0"
         val Appsflyer = "$mainVersion.0"
