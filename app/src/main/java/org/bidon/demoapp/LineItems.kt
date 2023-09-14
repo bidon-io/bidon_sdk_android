@@ -12,8 +12,8 @@ import org.bidon.sdk.auction.models.LineItem
  */
 object LineItems {
     object Interstitial {
-//        val all get() = bigoads // + unityAds + admob + applovin
-        val all get() = bigoads + unityAds + admob + applovin
+        val all get() = unityAds + admob + applovin
+//        val all get() = bigoads + unityAds + admob + applovin
 
         private val unityAds = listOf(
             LineItem(demandId = "unityads", pricefloor = 1.0, adUnitId = "unity_inter_1_"),

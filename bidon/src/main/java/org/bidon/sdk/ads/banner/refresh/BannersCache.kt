@@ -14,6 +14,7 @@ import java.util.SortedMap
 /**
  * Created by Aleksei Cherniaev on 05/09/2023.
  */
+@Deprecated("")
 internal interface BannersCache {
     /**
      * Just load next banner
@@ -40,6 +41,7 @@ internal interface BannersCache {
     fun clear()
 }
 
+@Deprecated("")
 internal class BannersCacheImpl : BannersCache {
     private val Tag get() = TAG
     private val cache = sortedMapOf<Ad, BannerView>({ ad1, ad2 ->

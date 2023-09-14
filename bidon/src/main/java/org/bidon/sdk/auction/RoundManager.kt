@@ -14,6 +14,7 @@ import org.bidon.sdk.utils.ext.TAG
 internal interface RoundManager {
     fun addLineItems(lineItems: List<LineItem>)
     fun notifyFail(newMaxPricefloor: Double)
+    fun setInitialPricefloor(newMinPricefloor: Double)
     fun notifyLoaded(newMinPricefloor: Double)
 
     fun popNextRound(pricefloor: Double): NextRound?
@@ -70,6 +71,10 @@ internal class RoundManagerImpl : RoundManager {
         }
     }
 
+    override fun setInitialPricefloor(newMinPricefloor: Double) {
+        notifyLoaded(newMinPricefloor)
+    }
+
     override fun notifyLoaded(newMinPricefloor: Double) {
         logInfo(TAG, "Round loaded. NewMinPricefloor = $newMinPricefloor")
         flow.update { type ->
@@ -113,7 +118,7 @@ internal class RoundManagerImpl : RoundManager {
         val demands = lineItems.groupBy { it.demandId }
             .mapNotNull { (demandId, lineItems) ->
                 demandId ?: return null
-                val minLineItem = lineItems.minByPricefloorOrNull(middlePrice) ?: return null
+                val minLineItem = lineItems.minByPricefloorOrNull(middlePrice) ?: return@mapNotNull null
                 demandId to minLineItem
             }.ifEmpty {
                 logInfo(TAG, "No demands with pricefloor > $middlePrice. Rounds finished.")

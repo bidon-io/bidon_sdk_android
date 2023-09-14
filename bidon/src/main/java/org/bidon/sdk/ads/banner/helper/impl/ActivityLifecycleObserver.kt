@@ -5,17 +5,47 @@ import android.app.Application
 import android.os.Bundle
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.bidon.sdk.ads.banner.helper.ActivityLifecycleState
+import org.bidon.sdk.ads.banner.helper.Cancellable
 import org.bidon.sdk.ads.banner.helper.PauseResumeObserver
 import org.bidon.sdk.logs.logging.impl.logInfo
 import java.lang.ref.WeakReference
+
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-internal class ActivityLifecycleObserver(activity: Activity) : PauseResumeObserver {
+internal class ActivityLifecycleObserver(activity: Activity) : PauseResumeObserver, Cancellable {
 
     override val lifecycleFlow = MutableStateFlow(getInitialState(activity))
 
     private var weakActivity: WeakReference<Activity>? = WeakReference(activity)
+    private var application: Application? = null
+    private val listener = object : Application.ActivityLifecycleCallbacks {
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+        override fun onActivityStarted(activity: Activity) {}
+        override fun onActivityStopped(activity: Activity) {}
+
+        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+        override fun onActivityDestroyed(activity: Activity) {
+            if (activity == weakActivity?.get()) {
+                logInfo(TAG, "Activity Destroyed $activity")
+                weakActivity = null
+            }
+        }
+
+        override fun onActivityResumed(activity: Activity) {
+            if (activity == weakActivity?.get()) {
+                logInfo(TAG, "Activity Resumed $activity")
+                lifecycleFlow.value = ActivityLifecycleState.Resumed
+            }
+        }
+
+        override fun onActivityPaused(activity: Activity) {
+            if (activity == weakActivity?.get()) {
+                logInfo(TAG, "Activity Paused $activity")
+                lifecycleFlow.value = ActivityLifecycleState.Paused
+            }
+        }
+    }
 
     private fun getInitialState(activity: Activity): ActivityLifecycleState {
         registerApplicationObserver(activity.application)
@@ -27,35 +57,14 @@ internal class ActivityLifecycleObserver(activity: Activity) : PauseResumeObserv
     }
 
     private fun registerApplicationObserver(application: Application) {
-        application.registerActivityLifecycleCallbacks(
-            object : Application.ActivityLifecycleCallbacks {
-                override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
-                override fun onActivityStarted(activity: Activity) {}
-                override fun onActivityStopped(activity: Activity) {}
+        this.application = application
+        application.registerActivityLifecycleCallbacks(listener)
+    }
 
-                override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
-                override fun onActivityDestroyed(activity: Activity) {
-                    if (activity == weakActivity?.get()) {
-                        logInfo(TAG, "Activity Destroyed $activity")
-                        weakActivity = null
-                    }
-                }
-
-                override fun onActivityResumed(activity: Activity) {
-                    if (activity == weakActivity?.get()) {
-                        logInfo(TAG, "Activity Resumed $activity")
-                        lifecycleFlow.value = ActivityLifecycleState.Resumed
-                    }
-                }
-
-                override fun onActivityPaused(activity: Activity) {
-                    if (activity == weakActivity?.get()) {
-                        logInfo(TAG, "Activity Paused $activity")
-                        lifecycleFlow.value = ActivityLifecycleState.Paused
-                    }
-                }
-            }
-        )
+    override fun cancel() {
+        weakActivity = null
+        application?.unregisterActivityLifecycleCallbacks(listener)
+        lifecycleFlow.value = ActivityLifecycleState.Paused
     }
 }
 
