@@ -65,13 +65,13 @@ internal class AdRendererImpl(
         )
         logInfo(tag, "${bannerView.adSize}. Obtained size: ${bannerView.obtainWidth()} x ${bannerView.obtainHeight()}")
         if (!inspector.isActivityValid(activity)) {
-            hide()
+            hide(activity)
             renderListener.onRenderFailed()
             return
         }
         if (this.positionState != positionState) {
             logInfo(tag, "Position changed: ${this.positionState} -> $positionState")
-            hide()
+            hide(activity)
         }
         if (inspector.isRenderPermitted()) {
             activity.runOnUiThread {
@@ -118,9 +118,11 @@ internal class AdRendererImpl(
         }
     }
 
-    override fun hide() {
-        adContainer?.removeAllViews()
-        adContainer = null
+    override fun hide(activity: Activity) {
+        activity.runOnUiThread {
+            adContainer?.removeAllViews()
+            adContainer = null
+        }
     }
 
     private fun setAdViewsVisible(adView: ViewGroup) {
@@ -212,7 +214,7 @@ internal class AdRendererImpl(
             onActivityDestroyed = { destroyedActivity ->
                 logInfo(tag, "Activity destroyed: $destroyedActivity")
                 if (this@AdRendererImpl.activity.get() == destroyedActivity) {
-                    hide()
+                    hide(activity)
                     rootContainer?.removeAllViews()
                     rootContainer = null
                     this@AdRendererImpl.activity = WeakReference(null)
