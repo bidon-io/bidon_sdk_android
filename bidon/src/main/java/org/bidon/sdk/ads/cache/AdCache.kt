@@ -7,7 +7,14 @@ import org.bidon.sdk.auction.models.AuctionResult
 internal interface AdCache {
     val demandAd: DemandAd
 
-    fun cache(adTypeParam: AdTypeParam)
+    /**
+     * Caches ads.
+     * @param onEach is called when each ad is loaded
+     */
+    fun cache(
+        adTypeParam: AdTypeParam,
+        onEach: (AuctionResult) -> Unit
+    )
 
     /**
      * Exposes only

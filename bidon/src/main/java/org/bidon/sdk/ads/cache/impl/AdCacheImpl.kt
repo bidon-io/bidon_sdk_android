@@ -37,7 +37,10 @@ internal class AdCacheImpl(
     private val results = MutableStateFlow(emptyList<AuctionResult>())
     private var job: Job? = null
 
-    override fun cache(adTypeParam: AdTypeParam) {
+    override fun cache(
+        adTypeParam: AdTypeParam,
+        onEach: (AuctionResult) -> Unit
+    ) {
         job?.cancel()
         job = scope.launch {
             results.value = emptyList()
@@ -45,7 +48,7 @@ internal class AdCacheImpl(
                 results.first { it.size < cacheItemToStartLoading }
                 isLoading.first { !it }
                 pauseResumeObserver.lifecycleFlow.first { it == ActivityLifecycleState.Resumed }
-                load(adTypeParam)
+                load(adTypeParam, onEach)
                 delay(MIN_CACHE_TIMEOUT)
             }
         }
@@ -65,7 +68,7 @@ internal class AdCacheImpl(
         results.value = emptyList()
     }
 
-    private fun load(adTypeParam: AdTypeParam) {
+    private fun load(adTypeParam: AdTypeParam, onEach: (AuctionResult) -> Unit) {
         logInfo(Tag, "Cache started: ${results.value.asString()}")
         if (results.value.size >= cacheItemToStartLoading) {
             logInfo(Tag, "Cache has enough ads")
@@ -92,6 +95,7 @@ internal class AdCacheImpl(
                         results.update {
                             resolver.sortWinners(it + roundResults).take(cacheCapacity)
                         }
+                        results.value.firstOrNull()?.let(onEach)
                         roundResults.forEach { trackExpired(it) }
                         logInfo(Tag, "Round completed: ${results.value.asString()}")
                     }

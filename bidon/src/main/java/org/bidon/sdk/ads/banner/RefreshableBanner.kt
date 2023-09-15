@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.helper.ActivityLifecycleState
@@ -151,6 +152,10 @@ class RefreshableBanner private constructor(
                 bannerFormat = bannerFormat,
                 containerWidth = bannerFormat.getWidthDp().toFloat()
             ),
+            onEach = { auctionResult ->
+                logInfo(tag, "Ad is loaded and available to show.")
+                auctionResult.adSource.ad?.let { listener.onAdLoaded(it) }
+            }
         )
     }
 
