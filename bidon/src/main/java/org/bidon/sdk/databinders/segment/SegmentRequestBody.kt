@@ -11,7 +11,7 @@ internal data class SegmentRequestBody(
     @field:JsonName("id")
     val id: String?,
     @field:JsonName("uid")
-    val uid: ULong?,
+    val uid: String?,
     /**
      * JSON Encoded String of [SegmentAttributesRequestBody]
      */
