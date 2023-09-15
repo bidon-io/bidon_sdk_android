@@ -46,18 +46,18 @@ internal class AuctionResponseParserTest {
                 demandId = "admob",
                 pricefloor = 0.25,
                 adUnitId = "AAAA2",
-                uid = 1UL,
+                uid = "1",
             ),
             LineItem(
                 demandId = "bidmachine",
                 pricefloor = 1.2235,
                 adUnitId = "AAAA1",
-                uid = 1UL,
+                uid = "1",
             ),
         ),
         pricefloor = 0.01,
         externalWinNotificationsEnabled = false,
-        auctionConfigurationUid = 10UL,
+        auctionConfigurationUid = "10",
     )
 
     private val responseJsonStr = """
@@ -87,13 +87,13 @@ internal class AuctionResponseParserTest {
               "id": "admob",
               "pricefloor": 0.25,
               "ad_unit_id": "AAAA2",
-               "uid": 1
+               "uid": "1"
             },
            {
               "id": "bidmachine",
               "pricefloor": 1.2235,
               "ad_unit_id": "AAAA1",
-               "uid": 1
+               "uid": "1"
             }
           ],
           "token": "asdsad",
@@ -101,7 +101,7 @@ internal class AuctionResponseParserTest {
           "pricefloor": 0.01,
           "auction_id":"49975154-b82a-444b-a7f0-30bd749e7fce",
           "auction_configuration_id":10,
-          "auction_configuration_uid":10,
+          "auction_configuration_uid":"10",
           "external_win_notifications":false
         }
     """.trimIndent()
@@ -147,12 +147,12 @@ internal class AuctionResponseParserTest {
           "pricefloor": 0.01,
           "auction_id":"49975154-b82a-444b-a7f0-30bd749e7fce",
           "auction_configuration_id":"10",
-          "auction_configuration_uid":10923190123,
+          "auction_configuration_uid":"10923190123",
           "external_win_notifications":false
         }
         """.trimIndent()
         val res = AuctionResponseParser().parseOrNull(responseJsonStr)
         assertThat(res?.auctionConfigurationId).isEqualTo(10)
-        assertThat(res?.auctionConfigurationUid).isEqualTo(10923190123UL)
+        assertThat(res?.auctionConfigurationUid).isEqualTo("10923190123")
     }
 }

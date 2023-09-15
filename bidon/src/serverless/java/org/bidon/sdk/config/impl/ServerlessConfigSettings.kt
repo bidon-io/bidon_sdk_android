@@ -46,6 +46,7 @@ object ServerlessConfigSettings {
                         DefaultAdapters.MintegralAdapter -> TODO()
                         DefaultAdapters.VungleAdapter -> TODO()
                         DefaultAdapters.MetaAdapter -> TODO()
+                        DefaultAdapters.InmobiAdapter -> TODO()
                     }
                 } else {
                     null

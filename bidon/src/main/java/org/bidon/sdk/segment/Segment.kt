@@ -11,7 +11,13 @@ interface Segment {
     /**
      * Current user's Segment ID
      */
+    @Deprecated("Use segmentUid instead")
     val segmentId: String?
+
+    /**
+     * Snowflake ID
+     */
+    val segmentUid: String?
 
     fun setAge(@IntRange(from = 0, to = 150) age: Int?)
     fun setGender(gender: Gender?)

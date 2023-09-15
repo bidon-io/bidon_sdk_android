@@ -49,6 +49,7 @@ include(
     ":adapter:bigoads",
     ":adapter:mintegral",
     ":adapter:meta",
+    ":adapter:inmobi",
 //    ":adapter:fyber",
 //    ":adapter:ironsource",
 //    ":adapter:appsflyer"

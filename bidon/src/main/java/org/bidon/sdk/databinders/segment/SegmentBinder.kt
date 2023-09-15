@@ -33,7 +33,7 @@ internal class SegmentBinder(
         } else {
             null
         }
-        if (segmentId == null && ext == null && segmentUid == null) {
+        if (segmentId == null && ext == null && segmentUid.isNullOrBlank()) {
             return null
         }
         return SegmentRequestBody(

@@ -31,7 +31,7 @@ object ServerlessAuctionConfig {
             token = token,
             rounds = rounds,
             externalWinNotificationsEnabled = true,
-            auctionConfigurationUid = null,
+            auctionConfigurationUid = "a"
         )
     }
 }

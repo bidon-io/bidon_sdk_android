@@ -110,6 +110,7 @@ internal fun MainScreen(
                                 DefaultAdapters.BigoAdsAdapter -> "Bigo Ads"
                                 DefaultAdapters.MintegralAdapter -> "Mintegral"
                                 DefaultAdapters.MetaAdapter -> "Meta/Facebook"
+                                DefaultAdapters.InmobiAdapter -> "Inmobi"
                             }
                         },
                         onItemClicked = {

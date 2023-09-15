@@ -25,7 +25,7 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
     override var segmentId: String? = null
         private set
 
-    override var segmentUid: ULong? = null
+    override var segmentUid: String? = null
         private set
 
     override fun setAge(age: Int?) {
@@ -98,7 +98,7 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
             val newSegmentUid = JSONObject(rootJsonResponse)
                 .optJSONObject("segment")
                 ?.optString("uid", "")
-                ?.takeIf { it.isNotEmpty() }?.toULongOrNull()
+                ?.takeIf { it.isNotEmpty() }
             keyValueStorage.segmentUid = newSegmentUid
             setSegmentUid(newSegmentUid)
         }
@@ -110,7 +110,7 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
         this.segmentId = segmentId
     }
 
-    override fun setSegmentUid(segmentUid: ULong?) {
+    override fun setSegmentUid(segmentUid: String?) {
         logInfo(TAG, "Updated SegmentUid($segmentUid)")
         this.segmentUid = segmentUid
     }

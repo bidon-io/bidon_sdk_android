@@ -15,37 +15,37 @@ class AdAuctionParamSourceTest {
                 demandId = "demand id123",
                 pricefloor = 0.1,
                 adUnitId = "unit 0.1",
-                uid = 1UL,
+                uid = "1",
             ),
             LineItem(
                 demandId = null,
                 pricefloor = 1.6,
                 adUnitId = "unit 1.6",
-                uid = 1UL,
+                uid = "1",
             ),
             LineItem(
                 demandId = "demand id123",
                 pricefloor = 2.9,
                 adUnitId = "unit 2.9",
-                uid = 1UL,
+                uid = "1",
             ),
             LineItem(
                 demandId = "demand id123",
                 pricefloor = 1.5,
                 adUnitId = "unit 1.5",
-                uid = 1UL,
+                uid = "1",
             ),
             LineItem(
                 demandId = "demand id123",
                 pricefloor = 1.71,
                 adUnitId = "unit 1.71",
-                uid = 2UL,
+                uid = "2",
             ),
             LineItem(
                 demandId = "demand id321",
                 pricefloor = 1.7,
                 adUnitId = "unit 1.7",
-                uid = 1UL,
+                uid = "1",
             ),
         )
         val adAuctionParam = AdAuctionParamSource(
@@ -65,7 +65,7 @@ class AdAuctionParamSourceTest {
                 demandId = "demand id123",
                 pricefloor = 1.71,
                 adUnitId = "unit 1.71",
-                uid = 2UL,
+                uid = "2",
             )
         )
     }
@@ -77,37 +77,37 @@ class AdAuctionParamSourceTest {
                 demandId = "demand id123",
                 pricefloor = 0.1,
                 adUnitId = "unit 0.1",
-                uid = 1UL,
+                uid = "1",
             ),
             LineItem(
                 demandId = null,
                 pricefloor = 1.6,
                 adUnitId = "unit 1.6",
-                uid = 1UL,
+                uid = "1",
             ),
             LineItem(
                 demandId = "demand id123",
                 pricefloor = 2.9,
                 adUnitId = "unit 2.9",
-                uid = 1UL,
+                uid = "1",
             ),
             LineItem(
                 demandId = "demand id123",
                 pricefloor = 1.5,
                 adUnitId = "unit 1.5",
-                uid = 1UL,
+                uid = "1",
             ),
             LineItem(
                 demandId = "demand id123",
                 pricefloor = 1.71,
                 adUnitId = "unit 1.71",
-                uid = 1UL,
+                uid = "1",
             ),
             LineItem(
                 demandId = "demand id321",
                 pricefloor = 1.7,
                 adUnitId = "unit 1.7",
-                uid = 1UL,
+                uid = "1",
             ),
         )
         val adAuctionParam = AdAuctionParamSource(
