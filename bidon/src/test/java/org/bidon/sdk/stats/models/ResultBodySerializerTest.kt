@@ -20,7 +20,7 @@ internal class ResultBodySerializerTest {
             auctionStartTs = 1000,
             ecpm = null,
             bidType = BidType.CPM.code,
-            lineItemUid = 123UL,
+            lineItemUid = "123",
         ).serialize()
 
         actual.assertEquals(
@@ -30,7 +30,7 @@ internal class ResultBodySerializerTest {
                 "auction_start_ts" hasValue 1000
                 "auction_finish_ts" hasValue 1020
                 "bid_type" hasValue "cpm"
-                "line_item_uid" hasValue 123UL
+                "line_item_uid" hasValue "123"
             }
         )
     }

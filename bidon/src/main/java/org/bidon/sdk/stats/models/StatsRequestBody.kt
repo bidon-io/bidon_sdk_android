@@ -13,7 +13,7 @@ internal data class StatsRequestBody(
     @field:JsonName("auction_configuration_id")
     val auctionConfigurationId: Int,
     @field:JsonName("auction_configuration_uid")
-    val auctionConfigurationUid: ULong,
+    val auctionConfigurationUid: String,
     @field:JsonName("rounds")
     val rounds: List<Round>,
     @field:JsonName("result")

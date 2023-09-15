@@ -157,7 +157,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 roundStatus = RoundStatus.Successful,
                                 roundIndex = 2,
                                 bidType = BidType.CPM,
-                                lineItemUid = 123UL,
+                                lineItemUid = "123",
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -176,7 +176,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 roundStatus = RoundStatus.NoFill,
                                 roundIndex = 2,
                                 bidType = BidType.CPM,
-                                lineItemUid = 123UL,
+                                lineItemUid = "123",
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },
@@ -209,7 +209,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                             ecpm = 1.3,
                             fillStartTs = 986,
                             fillFinishTs = 987,
-                            lineItemUid = 123UL,
+                            lineItemUid = "123",
                         ),
                         DemandStat.Network(
                             demandId = "dem2",
@@ -218,7 +218,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                             ecpm = 1.5,
                             fillStartTs = 986,
                             fillFinishTs = 987,
-                            lineItemUid = 123UL,
+                            lineItemUid = "123",
                         ),
                         getDemandStatAdapter("dem3", RoundStatus.UnknownAdapter),
                         getDemandStatAdapter("dem4", RoundStatus.UnknownAdapter),
@@ -293,7 +293,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     roundStatus = RoundStatus.Successful,
                                     roundIndex = 2,
                                     bidType = BidType.RTB,
-                                    lineItemUid = 123UL,
+                                    lineItemUid = "123",
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -314,7 +314,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 roundStatus = RoundStatus.Successful,
                                 roundIndex = 2,
                                 bidType = BidType.CPM,
-                                lineItemUid = 123UL,
+                                lineItemUid = "123",
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -333,7 +333,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 roundStatus = RoundStatus.NoFill,
                                 roundIndex = 2,
                                 bidType = BidType.CPM,
-                                lineItemUid = 123UL,
+                                lineItemUid = "123",
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },
@@ -379,7 +379,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                             ecpm = 1.3,
                             fillStartTs = 986,
                             fillFinishTs = 987,
-                            lineItemUid = 123UL,
+                            lineItemUid = "123",
                         ),
                         DemandStat.Network(
                             demandId = "dem2",
@@ -388,7 +388,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                             ecpm = 10.5,
                             fillStartTs = 986,
                             fillFinishTs = 987,
-                            lineItemUid = 123UL,
+                            lineItemUid = "123",
                         ),
                         getDemandStatAdapter("dem3", RoundStatus.UnknownAdapter),
                         getDemandStatAdapter("dem4", RoundStatus.UnknownAdapter),
@@ -425,7 +425,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
             pricefloor = 0.01,
             token = null,
             externalWinNotificationsEnabled = true,
-            auctionConfigurationUid = 10UL,
+            auctionConfigurationUid = "10",
         )
         testee.markAuctionStarted(auctionId = "auction_id_123")
         testee.addRoundResults(
@@ -492,7 +492,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 roundStatus = RoundStatus.Successful,
                                 roundIndex = 2,
                                 bidType = BidType.CPM,
-                                lineItemUid = 123UL,
+                                lineItemUid = "123",
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -511,7 +511,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 roundStatus = RoundStatus.NoFill,
                                 roundIndex = 2,
                                 bidType = BidType.CPM,
-                                lineItemUid = 123UL,
+                                lineItemUid = "123",
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },
@@ -543,7 +543,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 ecpm = 1.3,
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
-                                lineItemUid = 123UL,
+                                lineItemUid = "123",
                             ),
                             DemandStat.Network(
                                 demandId = "dem2",
@@ -552,7 +552,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 ecpm = 10.5,
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
-                                lineItemUid = 123UL,
+                                lineItemUid = "123",
                             )
                         ),
                         bidding = DemandStat.Bidding(
@@ -605,7 +605,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     bidType = BidType.RTB.code,
                     lineItemUid = null,
                 ),
-                auctionConfigurationUid = 10UL,
+                auctionConfigurationUid = "10",
             )
         )
     }
