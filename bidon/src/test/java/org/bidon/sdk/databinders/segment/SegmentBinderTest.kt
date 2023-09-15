@@ -28,7 +28,7 @@ internal class SegmentBinderTest {
                 gameLevel = 58,
             )
 
-        override val segmentUid: ULong = 123456UL
+        override val segmentUid: String = "123456"
 
         @Deprecated("not used")
         override val segmentId: String = "0123456"
@@ -39,7 +39,7 @@ internal class SegmentBinderTest {
         override fun setSegmentId(segmentId: String?) {
         }
 
-        override fun setSegmentUid(segmentUid: ULong?) {}
+        override fun setSegmentUid(segmentUid: String?) {}
     }
 
     private val testee by lazy {
@@ -56,7 +56,7 @@ internal class SegmentBinderTest {
         segment.assertEquals(
             expectedJsonStructure {
                 "id" hasValue "0123456"
-                "uid" hasValue 123456UL
+                "uid" hasValue "123456"
 
                 // check `ext` JSON Encoded String later
                 "ext" has Whatever.String
