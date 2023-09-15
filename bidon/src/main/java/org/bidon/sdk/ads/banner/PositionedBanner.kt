@@ -28,7 +28,7 @@ interface PositionedBanner {
         anchor: PointF
     )
 
-    fun hideAd()
+    fun hideAd(activity: Activity)
 
     /**
      * Common interface for [BannerView]
@@ -43,6 +43,6 @@ interface PositionedBanner {
      */
     fun isReady(): Boolean
     fun showAd(activity: Activity)
-    fun destroyAd()
+    fun destroyAd(activity: Activity)
     fun setBannerListener(listener: BannerListener?)
 }

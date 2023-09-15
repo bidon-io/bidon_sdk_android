@@ -20,7 +20,7 @@ internal interface AdRenderer {
         renderListener: RenderListener
     )
 
-    fun hide()
+    fun hide(activity: Activity)
 
     interface RenderListener {
         fun onRendered()

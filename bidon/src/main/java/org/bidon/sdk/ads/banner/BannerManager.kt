@@ -174,14 +174,14 @@ class BannerManager private constructor(
         )
     }
 
-    override fun hideAd() {
+    override fun hideAd(activity: Activity) {
         logInfo(tag, "Hide ad")
-        adRenderer.hide()
+        adRenderer.hide(activity)
     }
 
-    override fun destroyAd() {
+    override fun destroyAd(activity: Activity) {
         logInfo(tag, "Destroy ad")
-        hideAd()
+        hideAd(activity)
         currentBannerView?.destroyAd()
         currentBannerView = null
         nextBannerView?.destroyAd()
