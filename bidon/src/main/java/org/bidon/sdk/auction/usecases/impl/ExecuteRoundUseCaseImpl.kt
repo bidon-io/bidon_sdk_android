@@ -168,6 +168,8 @@ internal class ExecuteRoundUseCaseImpl(
                     logInfo(TAG, "Round '${round.id}' finished with ${it.size} results: $it")
                     it
                 }
+        }.onFailure {
+            logError(TAG, "Round '${round.id}' failed", it)
         }
     }
 

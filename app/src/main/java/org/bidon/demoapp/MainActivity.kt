@@ -56,7 +56,9 @@ class MainActivity : FragmentActivity() {
         /**
          * LineItems
          */
+        LineItemsPortal.interstitialLineItems.clear()
         LineItemsPortal.interstitialLineItems.addAll(LineItems.Interstitial.all)
+        LineItemsPortal.bannerLineItems.clear()
         LineItemsPortal.bannerLineItems.addAll(LineItems.Banners.all)
 
         setContent {
