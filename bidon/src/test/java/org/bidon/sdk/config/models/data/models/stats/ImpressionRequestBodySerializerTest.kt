@@ -29,8 +29,8 @@ class ImpressionRequestBodySerializerTest {
             roundId = "round123",
             roundIndex = 2,
             bidType = BidType.RTB.code,
-            auctionConfigurationUid = 4UL,
-            lineItemUid = 1698961007059140608UL,
+            auctionConfigurationUid = "4",
+            lineItemUid = "1698961007059140608",
         ).serialize()
 
         json.assertEquals(

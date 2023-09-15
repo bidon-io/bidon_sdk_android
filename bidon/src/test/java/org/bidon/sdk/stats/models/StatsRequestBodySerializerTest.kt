@@ -19,7 +19,7 @@ class StatsRequestBodySerializerTest {
         val json = StatsRequestBody(
             auctionId = "id123",
             auctionConfigurationId = 4,
-            auctionConfigurationUid = 4UL,
+            auctionConfigurationUid = "4",
             rounds = listOf(
                 Round(
                     id = "id13",
@@ -31,7 +31,7 @@ class StatsRequestBodySerializerTest {
                             fillFinishTs = 3,
                             fillStartTs = 4,
                             roundStatusCode = "code",
-                            lineItemUid = 123UL,
+                            lineItemUid = "123",
                         ),
                         DemandStat.Network(
                             demandId = "d6",
@@ -40,7 +40,7 @@ class StatsRequestBodySerializerTest {
                             ecpm = null,
                             fillFinishTs = null,
                             fillStartTs = null,
-                            lineItemUid = 123UL,
+                            lineItemUid = "123",
                         )
                     ),
                     pricefloor = 34.2,
@@ -78,7 +78,7 @@ class StatsRequestBodySerializerTest {
                 auctionFinishTs = 1300,
                 roundId = "id13",
                 bidType = BidType.CPM.code,
-                lineItemUid = 123UL,
+                lineItemUid = "123",
             ),
         ).serialize()
         println(json)

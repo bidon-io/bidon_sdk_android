@@ -26,7 +26,7 @@ internal object BidonSerializer {
                     is Double -> field.value
                     is Int -> field.value
                     is Long -> field.value
-                    is ULong -> field.value
+                    is String -> field.value
                     is Float -> field.value
                     is Boolean -> field.value
                     is Char -> field.value
@@ -40,7 +40,7 @@ internal object BidonSerializer {
                                     is Double -> value
                                     is Int -> value
                                     is Long -> value
-                                    is ULong -> value
+                                    is String -> value
                                     is Float -> value
                                     is Boolean -> value
                                     is Char -> value
@@ -68,7 +68,7 @@ internal object BidonSerializer {
                                         is Double -> value
                                         is Int -> value
                                         is Long -> value
-                                        is ULong -> value
+                                        is String -> value
                                         is Float -> value
                                         is Boolean -> value
                                         is Char -> value
