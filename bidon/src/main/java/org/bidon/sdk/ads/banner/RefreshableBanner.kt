@@ -20,7 +20,7 @@ import org.bidon.sdk.ads.banner.helper.PauseResumeObserver
 import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.ads.banner.render.AdRenderer
 import org.bidon.sdk.ads.banner.render.AdRenderer.PositionState
-import org.bidon.sdk.ads.cache.AdCache2
+import org.bidon.sdk.ads.cache.AdCache
 import org.bidon.sdk.ads.cache.Refreshable
 import org.bidon.sdk.ads.cache.Refreshable.Companion.DefaultRefreshTimeout
 import org.bidon.sdk.ads.cache.Refresher
@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 @Keep
 class RefreshableBanner private constructor(
-    private val adCache: AdCache2,
+    private val adCache: AdCache,
     private val refresher: Refresher,
     private val pauseResumeObserver: PauseResumeObserver,
     private val extras: Extras = adCache.demandAd,
@@ -52,7 +52,11 @@ class RefreshableBanner private constructor(
 
     constructor() : this(
         adCache = get {
-            params(DemandAd(AdType.Banner))
+            params(
+                DemandAd(AdType.Banner),
+                MIN_CACHE_SIZE,
+                CACHE_CAPACITY
+            )
         },
         refresher = get(),
         pauseResumeObserver = get()
@@ -187,7 +191,6 @@ class RefreshableBanner private constructor(
         publisherListener = listener
     }
 
-
     private fun displayAd(placement: String) {
         displayingJob?.cancel()
         displayingJob = scope.launch {
@@ -267,3 +270,6 @@ class RefreshableBanner private constructor(
         setBannerFormat(bannerFormat)
     }
 }
+
+private const val MIN_CACHE_SIZE = 2
+private const val CACHE_CAPACITY = 10
