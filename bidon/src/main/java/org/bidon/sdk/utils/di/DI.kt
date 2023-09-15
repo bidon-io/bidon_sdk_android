@@ -309,14 +309,12 @@ internal object DI {
             factory<AdRenderer.RenderInspector> {
                 RenderInspectorImpl()
             }
-            factoryWithParams<AdCache> { (demandAd, cacheItemToStartLoading, cacheCapacity) ->
+            factoryWithParams<AdCache> { (demandAd) ->
                 AdCacheImpl(
                     demandAd = demandAd as DemandAd,
                     scope = CoroutineScope(SdkDispatchers.Default),
                     pauseResumeObserver = get(),
                     resolver = get(),
-                    cacheItemToStartLoading = cacheItemToStartLoading as Int,
-                    cacheCapacity = cacheCapacity as Int
                 )
             }
             factory { CalculateAdContainerParamsUseCase() }
