@@ -4,7 +4,7 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.models.AuctionResult
 
-internal interface AdCache {
+internal interface AdCache : Cacheable {
     val demandAd: DemandAd
 
     /**
@@ -29,6 +29,8 @@ internal interface AdCache {
     fun clear()
 
     companion object {
-        const val MIN_CACHE_TIMEOUT = 5000L
+        const val MIN_CACHE_SIZE = 1
+        const val CACHE_CAPACITY = 4
+        const val MIN_CACHE_TIMEOUT = 1000L
     }
 }

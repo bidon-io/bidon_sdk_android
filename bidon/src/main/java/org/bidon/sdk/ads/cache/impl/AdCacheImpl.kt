@@ -15,6 +15,8 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.ads.banner.helper.ActivityLifecycleState
 import org.bidon.sdk.ads.banner.helper.PauseResumeObserver
 import org.bidon.sdk.ads.cache.AdCache
+import org.bidon.sdk.ads.cache.AdCache.Companion.CACHE_CAPACITY
+import org.bidon.sdk.ads.cache.AdCache.Companion.MIN_CACHE_SIZE
 import org.bidon.sdk.ads.cache.AdCache.Companion.MIN_CACHE_TIMEOUT
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
@@ -26,8 +28,6 @@ import org.bidon.sdk.utils.ext.TAG
 
 internal class AdCacheImpl(
     override val demandAd: DemandAd,
-    private val cacheItemToStartLoading: Int,
-    private val cacheCapacity: Int,
     private val scope: CoroutineScope,
     private val pauseResumeObserver: PauseResumeObserver,
     private val resolver: AuctionResolver,
@@ -37,19 +37,33 @@ internal class AdCacheImpl(
     private val results = MutableStateFlow(emptyList<AuctionResult>())
     private var job: Job? = null
 
+    private var minCacheSize: Int = MIN_CACHE_SIZE
+    private var cacheCapacity: Int = CACHE_CAPACITY
+    private var minCacheTimeoutMs: Long = MIN_CACHE_TIMEOUT
+
+    override fun setCacheCapacity(capacity: Int) {
+        cacheCapacity = capacity
+    }
+
+    override fun setMinCacheSize(minSize: Int) {
+        minCacheSize = minSize
+    }
+
     override fun cache(
         adTypeParam: AdTypeParam,
         onEach: (AuctionResult) -> Unit
     ) {
+        minCacheTimeoutMs = MIN_CACHE_TIMEOUT
         job?.cancel()
         job = scope.launch {
             results.value = emptyList()
             while (true) {
-                results.first { it.size < cacheItemToStartLoading }
+                results.first { it.size < minCacheSize }
                 isLoading.first { !it }
                 pauseResumeObserver.lifecycleFlow.first { it == ActivityLifecycleState.Resumed }
                 load(adTypeParam, onEach)
-                delay(MIN_CACHE_TIMEOUT)
+                delay(minCacheTimeoutMs)
+                minCacheTimeoutMs = minOf(minCacheTimeoutMs * 2, 60_000L)
             }
         }
     }
@@ -70,7 +84,7 @@ internal class AdCacheImpl(
 
     private fun load(adTypeParam: AdTypeParam, onEach: (AuctionResult) -> Unit) {
         logInfo(Tag, "Cache started: ${results.value.asString()}")
-        if (results.value.size >= cacheItemToStartLoading) {
+        if (results.value.size >= minCacheSize) {
             logInfo(Tag, "Cache has enough ads")
             return
         }
@@ -91,11 +105,12 @@ internal class AdCacheImpl(
                     isLoading.value = false
                 },
                 onEach = { roundResults ->
+                    minCacheTimeoutMs = MIN_CACHE_TIMEOUT
                     scope.launch {
                         results.update {
                             resolver.sortWinners(it + roundResults).take(cacheCapacity)
                         }
-                        results.value.firstOrNull()?.let(onEach)
+                        onEach(results.value.first())
                         roundResults.forEach { trackExpired(it) }
                         logInfo(Tag, "Round completed: ${results.value.asString()}")
                     }

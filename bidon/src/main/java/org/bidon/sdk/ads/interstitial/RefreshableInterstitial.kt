@@ -16,6 +16,7 @@ import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.cache.AdCache
+import org.bidon.sdk.ads.cache.Cacheable
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.databinders.extras.Extras
@@ -25,22 +26,18 @@ import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.ext.TAG
 
-internal class RefreshableInterstitialImpl(
+class RefreshableInterstitialAd(
     dispatcher: CoroutineDispatcher = SdkDispatchers.Main,
     private val demandAd: DemandAd = DemandAd(AdType.Interstitial),
     private val scope: CoroutineScope = CoroutineScope(dispatcher),
-) : Interstitial, Extras by demandAd {
+) : Interstitial, Cacheable, Extras by demandAd {
     private val tag get() = TAG
     private var userListener: InterstitialListener? = null
     private var observeCallbacksJob: Job? = null
 
     private val adCache: AdCache by lazy {
         get {
-            params(
-                demandAd,
-                MIN_CACHE_SIZE,
-                CACHE_CAPACITY
-            )
+            params(demandAd)
         }
     }
     private val listener by lazy {
@@ -63,6 +60,14 @@ internal class RefreshableInterstitialImpl(
                 auctionResult.adSource.ad?.let { listener.onAdLoaded(it) }
             }
         )
+    }
+
+    override fun setCacheCapacity(capacity: Int) {
+        adCache.setCacheCapacity(capacity)
+    }
+
+    override fun setMinCacheSize(minSize: Int) {
+        adCache.setMinCacheSize(minSize)
     }
 
     override fun showAd(activity: Activity) {

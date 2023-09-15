@@ -13,3 +13,8 @@ interface Refreshable {
         const val DefaultRefreshTimeout = 5000L
     }
 }
+
+interface Cacheable {
+    fun setCacheCapacity(capacity: Int)
+    fun setMinCacheSize(minSize: Int)
+}

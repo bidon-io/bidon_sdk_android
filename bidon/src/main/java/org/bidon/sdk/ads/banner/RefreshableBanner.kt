@@ -22,6 +22,7 @@ import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.ads.banner.render.AdRenderer
 import org.bidon.sdk.ads.banner.render.AdRenderer.PositionState
 import org.bidon.sdk.ads.cache.AdCache
+import org.bidon.sdk.ads.cache.Cacheable
 import org.bidon.sdk.ads.cache.Refreshable
 import org.bidon.sdk.ads.cache.Refreshable.Companion.DefaultRefreshTimeout
 import org.bidon.sdk.ads.cache.Refresher
@@ -30,6 +31,7 @@ import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.analytic.AdValue
+import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.ext.TAG
@@ -41,6 +43,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 @Keep
 class RefreshableBanner private constructor(
+    private val bannerFormat: BannerFormat,
     private val adCache: AdCache,
     private val refresher: Refresher,
     private val pauseResumeObserver: PauseResumeObserver,
@@ -49,9 +52,11 @@ class RefreshableBanner private constructor(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Main),
 ) : PositionedBanner,
     Refreshable,
+    Cacheable,
     Extras by extras {
 
-    constructor() : this(
+    constructor(bannerFormat: BannerFormat) : this(
+        bannerFormat = bannerFormat,
         adCache = get {
             params(
                 DemandAd(AdType.Banner),
@@ -74,7 +79,6 @@ class RefreshableBanner private constructor(
     private val displaying = MutableStateFlow(false)
     private var placement: String = "default"
     private var currentBannerView: BannerView2? = null
-    private var bannerFormat: BannerFormat = BannerFormat.Banner
     private val showAfterLoad = AtomicBoolean(false)
     private var positionState: PositionState = PositionState.Default
     private var publisherListener: BannerListener? = null
@@ -118,6 +122,14 @@ class RefreshableBanner private constructor(
         this.refreshTimeout = timeoutMs
     }
 
+    override fun setCacheCapacity(capacity: Int) {
+        adCache.setCacheCapacity(capacity)
+    }
+
+    override fun setMinCacheSize(minSize: Int) {
+        adCache.setMinCacheSize(minSize)
+    }
+
     /**
      * Positioning functions
      */
@@ -137,7 +149,7 @@ class RefreshableBanner private constructor(
      * BannerView's functions
      */
     override fun setBannerFormat(bannerFormat: BannerFormat) {
-        this.bannerFormat = bannerFormat
+        logError(tag, "Banner format can't be changed after initialization", IllegalStateException())
     }
 
     override fun loadAd(activity: Activity, pricefloor: Double) {
