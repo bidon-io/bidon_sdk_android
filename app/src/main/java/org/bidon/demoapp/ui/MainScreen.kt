@@ -111,6 +111,7 @@ internal fun MainScreen(
                                 DefaultAdapters.MintegralAdapter -> "Mintegral"
                                 DefaultAdapters.MetaAdapter -> "Meta/Facebook"
                                 DefaultAdapters.InmobiAdapter -> "Inmobi"
+                                DefaultAdapters.YandexAdapter -> "Yandex"
                             }
                         },
                         onItemClicked = {
