@@ -26,9 +26,9 @@ import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionHolder
 import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.ResultsCollector
-import org.bidon.sdk.auction.RoundManager
-import org.bidon.sdk.auction.RoundManagerImpl
-import org.bidon.sdk.auction.impl.AuctionAutoImpl
+import org.bidon.sdk.auction.SmartRound
+import org.bidon.sdk.auction.SmartRoundImpl
+import org.bidon.sdk.auction.impl.SmartAuctionImpl
 import org.bidon.sdk.auction.impl.AuctionHolderImpl
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.impl.ResultsCollectorImpl
@@ -179,12 +179,12 @@ internal object DI {
             factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
             factory<AuctionResolver> { MaxEcpmAuctionResolver }
             factory<Auction> {
-                AuctionAutoImpl(
+                SmartAuctionImpl(
                     adaptersSource = get(),
                     getAuctionRequest = get(),
                     executeRound = get(),
                     auctionStat = get(),
-                    roundManager = get()
+                    smartRound = get()
                 )
             }
 //            factory<Auction> {
@@ -318,7 +318,7 @@ internal object DI {
                 )
             }
             factory { CalculateAdContainerParamsUseCase() }
-            factory<RoundManager> { RoundManagerImpl() }
+            factory<SmartRound> { SmartRoundImpl() }
             factory<Refresher> { RefresherImpl(dispatcher = Dispatchers.Default) }
         }
     }

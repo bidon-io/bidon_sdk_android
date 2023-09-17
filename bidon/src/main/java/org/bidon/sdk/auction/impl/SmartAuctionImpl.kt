@@ -11,7 +11,7 @@ import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.ResultsCollector
-import org.bidon.sdk.auction.RoundManager
+import org.bidon.sdk.auction.SmartRound
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.auction.usecases.AuctionStat
@@ -32,12 +32,12 @@ import java.util.UUID
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-internal class AuctionAutoImpl(
+internal class SmartAuctionImpl(
     private val adaptersSource: AdaptersSource,
     private val getAuctionRequest: GetAuctionRequestUseCase,
     private val executeRound: ExecuteRoundUseCase,
     private val auctionStat: AuctionStat,
-    private val roundManager: RoundManager
+    private val smartRound: SmartRound
 ) : Auction {
     private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
     private val state = MutableStateFlow(Auction.AuctionState.Initialized)
@@ -85,14 +85,19 @@ internal class AuctionAutoImpl(
                                 "auction_id has been changed"
                             }
                         }
-                        roundManager.addLineItems(
-                            when (demandAd.adType) {
-                                AdType.Banner -> LineItemsPortal.bannerLineItems
-                                AdType.Interstitial -> LineItemsPortal.interstitialLineItems
-                                AdType.Rewarded -> error("Rewarded ads are not supported")
+                        smartRound.addLineItems(
+                            lineItems = when (demandAd.adType) {
+                                AdType.Banner -> LineItemsPortal.dspBannerLineItems
+                                AdType.Interstitial -> LineItemsPortal.dspInterstitialLineItems
+                                AdType.Rewarded -> LineItemsPortal.dspRewardedAdLineItems
+                            },
+                            bidding = when (demandAd.adType) {
+                                AdType.Banner -> LineItemsPortal.biddingBannerParticipants
+                                AdType.Interstitial -> LineItemsPortal.biddingInterstitialParticipants
+                                AdType.Rewarded -> LineItemsPortal.biddingRewardedAdParticipants
                             }
                         )
-                        roundManager.setInitialPricefloor(newMinPricefloor = adTypeParamData.pricefloor)
+                        smartRound.setInitialPricefloor(newMinPricefloor = adTypeParamData.pricefloor)
                         conductAuction(
                             auctionData = auctionData,
                             demandAd = demandAd,
@@ -200,7 +205,7 @@ internal class AuctionAutoImpl(
         adTypeParamData: AdTypeParam,
         onEach: (roundResults: List<AuctionResult>) -> Unit,
     ) {
-        val nextRound = roundManager.popNextRound(pricefloor) ?: return
+        val nextRound = smartRound.popNextRound(pricefloor) ?: return
         resultsCollector.startRound(nextRound.roundRequest, pricefloor)
         logInfo(TAG, "Round started: ${nextRound.roundRequest}")
         logInfo(TAG, "Round started: ${nextRound.lineItems}")
@@ -222,26 +227,26 @@ internal class AuctionAutoImpl(
         )
 
         /**
-         * Notify [RoundManager] about round results
+         * Notify [SmartRound] about round results
          */
         val results = resultsCollector.getRoundResults()
         if (results is RoundResult.Results) {
             val allResults = (
-                results.networkResults +
-                    (results.biddingResult as? BiddingResult.FilledAd)?.results.orEmpty()
-                )
+                    results.networkResults +
+                            (results.biddingResult as? BiddingResult.FilledAd)?.results.orEmpty()
+                    )
             val successfulResults = allResults.filter {
                 it.roundStatus == RoundStatus.Successful
             }
             if (successfulResults.isEmpty()) {
                 nextRound.lineItems.lastOrNull()?.pricefloor?.let {
-                    roundManager.notifyFail(newMaxPricefloor = it)
+                    smartRound.notifyFail(newMaxPricefloor = it)
                 }
             } else {
                 val newMinPricefloor = successfulResults.maxOfOrNull { it.adSource.getStats().ecpm }
                     ?: nextRound.lineItems.firstOrNull()?.pricefloor
                 newMinPricefloor?.let {
-                    roundManager.notifyLoaded(newMinPricefloor = it)
+                    smartRound.notifyLoaded(newMinPricefloor = it)
                 }
                 onEach.invoke(successfulResults)
             }
