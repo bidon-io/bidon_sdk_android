@@ -17,7 +17,7 @@ object Versions {
         val Vungle = "$mainVersion.0" + semanticVersion
         val Meta = "$mainVersion.0" + semanticVersion
         val Inmobi = "$mainVersion.0" + semanticVersion
-        val Yandex = "$mainVersion.0"
+        val Yandex = "$mainVersion.0" + semanticVersion
 
         val IronSource = "$mainVersion.0" + semanticVersion
         val Appsflyer = "$mainVersion.0" + semanticVersion
