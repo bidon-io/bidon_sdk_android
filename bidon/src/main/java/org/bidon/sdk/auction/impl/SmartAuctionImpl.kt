@@ -232,9 +232,9 @@ internal class SmartAuctionImpl(
         val results = resultsCollector.getRoundResults()
         if (results is RoundResult.Results) {
             val allResults = (
-                    results.networkResults +
-                            (results.biddingResult as? BiddingResult.FilledAd)?.results.orEmpty()
-                    )
+                results.networkResults +
+                    (results.biddingResult as? BiddingResult.FilledAd)?.results.orEmpty()
+                )
             val successfulResults = allResults.filter {
                 it.roundStatus == RoundStatus.Successful
             }

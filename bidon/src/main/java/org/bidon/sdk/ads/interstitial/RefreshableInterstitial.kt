@@ -26,10 +26,14 @@ import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.ext.TAG
 
+/**
+ * @param useDifferentDemands see [AdCache.useDifferentDemands]
+ */
 class RefreshableInterstitialAd(
     dispatcher: CoroutineDispatcher = SdkDispatchers.Main,
     private val demandAd: DemandAd = DemandAd(AdType.Interstitial),
     private val scope: CoroutineScope = CoroutineScope(dispatcher),
+    useDifferentDemands: Boolean = false
 ) : Interstitial, Cacheable, Extras by demandAd {
     private val tag get() = TAG
     private var userListener: InterstitialListener? = null
@@ -40,8 +44,15 @@ class RefreshableInterstitialAd(
             params(demandAd)
         }
     }
+
     private val listener by lazy {
         getInterstitialListener()
+    }
+
+    init {
+        if (useDifferentDemands) {
+            adCache.useDifferentDemands()
+        }
     }
 
     override fun loadAd(activity: Activity, pricefloor: Double) {

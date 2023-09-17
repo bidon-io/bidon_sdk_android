@@ -55,14 +55,19 @@ class RefreshableBanner private constructor(
     Cacheable,
     Extras by extras {
 
-    constructor(bannerFormat: BannerFormat) : this(
+    /**
+     * @param useDifferentDemands see [AdCache.useDifferentDemands]
+     */
+    constructor(bannerFormat: BannerFormat, useDifferentDemands: Boolean = false) : this(
         bannerFormat = bannerFormat,
-        adCache = get {
+        adCache = get<AdCache> {
             params(
                 DemandAd(AdType.Banner),
                 MIN_CACHE_SIZE,
                 CACHE_CAPACITY
             )
+        }.apply {
+            if (useDifferentDemands) useDifferentDemands()
         },
         refresher = get(),
         pauseResumeObserver = get()
