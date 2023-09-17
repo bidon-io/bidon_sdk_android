@@ -56,10 +56,12 @@ class MainActivity : FragmentActivity() {
         /**
          * LineItems
          */
-        LineItemsPortal.interstitialLineItems.clear()
-        LineItemsPortal.interstitialLineItems.addAll(LineItems.Interstitial.all)
-        LineItemsPortal.bannerLineItems.clear()
-        LineItemsPortal.bannerLineItems.addAll(LineItems.Banners.all)
+        LineItemsPortal {
+            dspInterstitialLineItems = LineItems.Interstitial.dsp
+            dspBannerLineItems = LineItems.Banners.dsp
+            biddingInterstitialParticipants = LineItems.Interstitial.bidding
+            biddingBannerParticipants = LineItems.Banners.bidding
+        }
 
         setContent {
             val coroutineScope = rememberCoroutineScope()

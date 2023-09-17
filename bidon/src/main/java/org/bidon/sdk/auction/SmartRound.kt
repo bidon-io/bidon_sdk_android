@@ -2,7 +2,7 @@ package org.bidon.sdk.auction
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import org.bidon.sdk.auction.RoundManager.AdaptiveRound
+import org.bidon.sdk.auction.SmartRound.AdaptiveRound
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -11,8 +11,8 @@ import org.bidon.sdk.utils.ext.TAG
 /**
  * Created by Aleksei Cherniaev on 08/09/2023.
  */
-internal interface RoundManager {
-    fun addLineItems(lineItems: List<LineItem>)
+internal interface SmartRound {
+    fun addLineItems(lineItems: List<LineItem>, bidding: List<String>)
     fun notifyFail(newMaxPricefloor: Double)
     fun setInitialPricefloor(newMinPricefloor: Double)
     fun notifyLoaded(newMinPricefloor: Double)
@@ -24,7 +24,7 @@ internal interface RoundManager {
         val minPrice: Double,
         val maxPrice: Double,
         val lineItems: List<LineItem>,
-        val isBiddingConducted: Boolean
+        val bidding: List<String>,
     )
 
     data class NextRound(
@@ -34,18 +34,18 @@ internal interface RoundManager {
     )
 }
 
-internal class RoundManagerImpl : RoundManager {
+internal class SmartRoundImpl : SmartRound {
     private val flow = MutableStateFlow(
         AdaptiveRound(
             index = 0,
             minPrice = 0.0,
             maxPrice = 0.0,
             lineItems = emptyList(),
-            isBiddingConducted = false
+            bidding = emptyList()
         )
     )
 
-    override fun addLineItems(lineItems: List<LineItem>) {
+    override fun addLineItems(lineItems: List<LineItem>, bidding: List<String>) {
         logInfo(TAG, "Add line items. Count = ${lineItems.size}")
         logInfo(TAG, "Add line items. $lineItems")
         flow.update {
@@ -53,8 +53,8 @@ internal class RoundManagerImpl : RoundManager {
                 minPrice = lineItems.minBy { it.pricefloor }.pricefloor - 0.001,
                 maxPrice = lineItems.maxBy { it.pricefloor }.pricefloor - 0.001,
                 lineItems = lineItems,
+                bidding = bidding,
                 index = 0,
-                isBiddingConducted = false
             )
         }
     }
@@ -87,23 +87,24 @@ internal class RoundManagerImpl : RoundManager {
         }
     }
 
-    override fun popNextRound(pricefloor: Double): RoundManager.NextRound? {
+    override fun popNextRound(pricefloor: Double): SmartRound.NextRound? {
         val adaptiveRound = flow.value
         val lineItems = adaptiveRound.lineItems.sortedBy { it.pricefloor }.ifEmpty {
             logInfo(TAG, "No line items. Rounds finished.")
-            return if (!flow.value.isBiddingConducted) {
+            return if (flow.value.bidding.isNotEmpty()) {
+                val bidding = flow.value.bidding
                 flow.update { round ->
                     round.copy(
-                        isBiddingConducted = true
+                        bidding = emptyList()
                     )
                 }
-                RoundManager.NextRound(
+                SmartRound.NextRound(
                     lineItems = emptyList(),
                     roundRequest = RoundRequest(
                         id = "ROUND-BIDDING",
                         timeoutMs = 15000,
                         demandIds = emptyList(),
-                        biddingIds = listOf("bigoads"),
+                        biddingIds = bidding,
                     ),
                     roundIndex = flow.value.index
                 )
@@ -130,7 +131,7 @@ internal class RoundManagerImpl : RoundManager {
                 lineItems = round.lineItems - demands.map { it.second }.toSet(),
             )
         }
-        return RoundManager.NextRound(
+        return SmartRound.NextRound(
             lineItems = demands.map { it.second },
             roundRequest = RoundRequest(
                 id = "ROUND-${flow.value.index}",
