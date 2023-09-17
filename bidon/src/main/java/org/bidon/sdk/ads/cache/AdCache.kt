@@ -26,6 +26,11 @@ internal interface AdCache : Cacheable {
      */
     suspend fun poll(): AuctionResult
 
+    /**
+     * Use different demands if possible. Need to be A/B-tested.
+     */
+    fun useDifferentDemands()
+
     fun clear()
 
     companion object {

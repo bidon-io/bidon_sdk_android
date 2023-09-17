@@ -36,7 +36,8 @@ internal class AdCacheImpl(
     private val isLoading = MutableStateFlow(false)
     private val results = MutableStateFlow(emptyList<AuctionResult>())
     private var job: Job? = null
-
+    private var previousDemandId: String? = null
+    private var tryUseDifferentDemands: Boolean = false
     private var minCacheSize: Int = MIN_CACHE_SIZE
     private var cacheCapacity: Int = CACHE_CAPACITY
     private var minCacheTimeoutMs: Long = MIN_CACHE_TIMEOUT
@@ -71,9 +72,17 @@ internal class AdCacheImpl(
     override fun peek(): AuctionResult? = results.value.firstOrNull()
 
     override suspend fun poll(): AuctionResult {
-        val next = results.first { it.isNotEmpty() }.first()
+        var next = results.first { it.isNotEmpty() }.first()
+        if (tryUseDifferentDemands && previousDemandId == next.adSource.getStats().demandId.demandId) {
+            next = results.value.firstOrNull { it.adSource.getStats().demandId.demandId != previousDemandId } ?: next
+        }
+        previousDemandId = next.adSource.getStats().demandId.demandId
         results.update { it - next }
         return next
+    }
+
+    override fun useDifferentDemands() {
+        tryUseDifferentDemands = true
     }
 
     override fun clear() {

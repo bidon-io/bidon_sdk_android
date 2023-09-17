@@ -28,10 +28,10 @@ import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.SmartRound
 import org.bidon.sdk.auction.SmartRoundImpl
-import org.bidon.sdk.auction.impl.SmartAuctionImpl
 import org.bidon.sdk.auction.impl.AuctionHolderImpl
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.impl.ResultsCollectorImpl
+import org.bidon.sdk.auction.impl.SmartAuctionImpl
 import org.bidon.sdk.auction.usecases.AuctionStat
 import org.bidon.sdk.auction.usecases.BidRequestUseCase
 import org.bidon.sdk.auction.usecases.ConductBiddingRoundUseCase

@@ -2,7 +2,7 @@ object Versions {
     private val major = 0
     private val minor = 4
     private val patch = 0
-    private val semantic: String = "-alpha.5"
+    private val semantic: String = "-alpha.6"
 
     val BidonVersionName = mainVersion + semanticVersion
 
@@ -17,6 +17,7 @@ object Versions {
         val Vungle = "$mainVersion.0" + semanticVersion
         val Meta = "$mainVersion.0" + semanticVersion
         val Inmobi = "$mainVersion.0" + semanticVersion
+        val Yandex = "$mainVersion.0"
 
         val IronSource = "$mainVersion.0" + semanticVersion
         val Appsflyer = "$mainVersion.0" + semanticVersion

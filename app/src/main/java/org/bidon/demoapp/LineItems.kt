@@ -12,8 +12,8 @@ import org.bidon.sdk.auction.models.LineItem
  */
 object LineItems {
     object Interstitial {
-        val dsp get() = unityAds + admob + applovin
-        val bidding get() = listOf("bigoads", "bidmachine")
+        val dsp get() = unityAds + admob + applovin + yandex
+        val bidding get() = listOf("bigoads", "bidmachine", "vungle")
 
         private val unityAds = listOf(
             LineItem(demandId = "unityads", pricefloor = 1.0, adUnitId = "unity_inter_1_", uid = ""),
@@ -60,6 +60,21 @@ object LineItems {
             LineItem(demandId = "applovin", pricefloor = 95.0, adUnitId = "ec1e3701da66ef14", uid = ""),
         )
 
+        private val yandex = listOf(
+            LineItem(demandId = "yandex", pricefloor = 1.0, adUnitId = "R-M-3032723-2", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 2.0, adUnitId = "R-M-3032723-17", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 5.0, adUnitId = "R-M-3032723-18", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 7.0, adUnitId = "R-M-3032723-19", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 10.0, adUnitId = "R-M-3032723-20", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 15.0, adUnitId = "R-M-3032723-21", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 20.0, adUnitId = "R-M-3032723-22", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 25.0, adUnitId = "R-M-3032723-23", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 35.0, adUnitId = "R-M-3032723-24", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 50.0, adUnitId = "R-M-3032723-25", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 70.0, adUnitId = "R-M-3032723-26", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 95.0, adUnitId = "R-M-3032723-27", uid = ""),
+        )
+
         private val bigoads = listOf(
             LineItem(demandId = "bigoads", pricefloor = 2.0, adUnitId = "10137724-10068211", uid = ""),
             LineItem(demandId = "bigoads", pricefloor = 1.0, adUnitId = "10137724-10060400", uid = ""),
@@ -67,7 +82,7 @@ object LineItems {
     }
 
     object Banners {
-        val dsp get() = unityAds + admob + applovin
+        val dsp get() = unityAds + admob + applovin + yandex
         val bidding get() = listOf("bigoads", "bidmachine")
 
         private val unityAds = listOf(
@@ -116,6 +131,23 @@ object LineItems {
             LineItem(demandId = "applovin", pricefloor = 4.0, adUnitId = "f15ca10b889ec5e1", uid = ""),
             LineItem(demandId = "applovin", pricefloor = 5.0, adUnitId = "063324ab333adc7e", uid = ""),
             LineItem(demandId = "applovin", pricefloor = 7.0, adUnitId = "9ff21515af0cabdc", uid = ""),
+        )
+
+        private val yandex = listOf(
+            LineItem(demandId = "yandex", pricefloor = 0.01, adUnitId = "R-M-3032723-1", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 0.05, adUnitId = "R-M-3032723-3", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 0.1, adUnitId = "R-M-3032723-4", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 0.2, adUnitId = "R-M-3032723-5", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 0.3, adUnitId = "R-M-3032723-6", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 0.5, adUnitId = "R-M-3032723-7", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 0.7, adUnitId = "R-M-3032723-8", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 1.0, adUnitId = "R-M-3032723-9", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 1.5, adUnitId = "R-M-3032723-10", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 2.0, adUnitId = "R-M-3032723-11", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 3.0, adUnitId = "R-M-3032723-12", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 4.0, adUnitId = "R-M-3032723-13", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 5.0, adUnitId = "R-M-3032723-14", uid = ""),
+            LineItem(demandId = "yandex", pricefloor = 7.0, adUnitId = "R-M-3032723-15", uid = ""),
         )
     }
 }
