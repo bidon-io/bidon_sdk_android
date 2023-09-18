@@ -2,7 +2,7 @@ object Versions {
     private val major = 0
     private val minor = 4
     private val patch = 0
-    private val semantic: String = "-alpha.6"
+    private val semantic: String = "-alpha.7"
 
     val BidonVersionName = mainVersion + semanticVersion
 

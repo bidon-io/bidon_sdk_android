@@ -32,7 +32,7 @@ internal class AdCacheImpl(
     private val pauseResumeObserver: PauseResumeObserver,
     private val resolver: AuctionResolver,
 ) : AdCache {
-    private val Tag get() = TAG
+    private val Tag = "${TAG}_${demandAd.adType.code}"
     private val isLoading = MutableStateFlow(false)
     private val results = MutableStateFlow(emptyList<AuctionResult>())
     private var job: Job? = null

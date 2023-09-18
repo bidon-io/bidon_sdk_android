@@ -59,7 +59,10 @@ internal class GetConfigRequestUseCaseImpl(
                 val jsonResponse = JSONObject(jsonString)
                 segmentSynchronizer.parseSegmentId(jsonString)
                 val config = jsonResponse.getString("init")
-                requireNotNull(JsonParsers.parseOrNull(config))
+                val a = requireNotNull(JsonParsers.parseOrNull<ConfigResponse>(config))
+                a.copy(
+                    adapters = a.adapters + ("yandex" to jsonObject { })
+                )
             }
         }
     }
