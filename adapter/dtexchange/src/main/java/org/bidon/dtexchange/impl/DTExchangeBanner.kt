@@ -66,6 +66,7 @@ internal class DTExchangeBanner :
             override fun onInneractiveSuccessfulAdRequest(inneractiveAdSpot: InneractiveAdSpot?) {
                 logInfo(TAG, "onInneractiveSuccessfulAdRequest: $inneractiveAdSpot")
                 this@DTExchangeBanner.adSpot = inneractiveAdSpot
+                createViewHolder(inneractiveAdSpot)
                 inneractiveAdSpot?.let {
                     emitEvent(AdEvent.Fill(it.asAd()))
                 }
@@ -83,9 +84,7 @@ internal class DTExchangeBanner :
     }
 
     override fun getAdView(): AdViewHolder? {
-        return adViewHolder ?: synchronized(this) {
-            adViewHolder ?: createViewHolder(adSpot)
-        }
+        return adViewHolder
     }
 
     override fun destroy() {

@@ -7,6 +7,8 @@ import org.bidon.sdk.BidonSdk
 
 /**
  * Created by Aleksei Cherniaev on 04/09/2023.
+ *
+ * [showAd], [hideAd], [destroyAd], [notifyLoss] need activity to be passed as parameter, mainly for Unity UI thread.
  */
 interface PositionedBanner {
     /**
@@ -28,8 +30,6 @@ interface PositionedBanner {
         anchor: PointF
     )
 
-    fun hideAd(activity: Activity)
-
     /**
      * Common interface for [BannerView]
      */
@@ -43,6 +43,10 @@ interface PositionedBanner {
      */
     fun isReady(): Boolean
     fun showAd(activity: Activity)
+    fun hideAd(activity: Activity)
     fun destroyAd(activity: Activity)
     fun setBannerListener(listener: BannerListener?)
+
+    fun notifyLoss(activity: Activity, winnerDemandId: String, winnerEcpm: Double)
+    fun notifyWin()
 }

@@ -119,10 +119,8 @@ internal class AdRendererImpl(
     }
 
     override fun hide(activity: Activity) {
-        activity.runOnUiThread {
-            adContainer?.removeAllViews()
-            adContainer = null
-        }
+        adContainer?.removeAllViews()
+        adContainer = null
     }
 
     private fun setAdViewsVisible(adView: ViewGroup) {
