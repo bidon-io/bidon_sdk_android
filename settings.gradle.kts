@@ -50,7 +50,7 @@ include(
     ":adapter:mintegral",
     ":adapter:meta",
     ":adapter:inmobi",
-    ":adapter:yandex",
+//    ":adapter:yandex",
 //    ":adapter:fyber",
 //    ":adapter:ironsource",
 //    ":adapter:appsflyer"
