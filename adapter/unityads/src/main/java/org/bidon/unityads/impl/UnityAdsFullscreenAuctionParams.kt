@@ -16,9 +16,9 @@ data class UnityAdsFullscreenAuctionParams(
 }
 
 class UnityAdsBannerAuctionParams(
+    val activity: Activity,
     val bannerFormat: BannerFormat,
     val lineItem: LineItem,
-    val activity: Activity,
 ) : AdAuctionParams {
     override val adUnitId: String? get() = lineItem.adUnitId
     override val price: Double get() = lineItem.pricefloor

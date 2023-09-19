@@ -1,5 +1,6 @@
 package org.bidon.bidmachine
 
+import android.app.Activity
 import android.content.Context
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdapterParameters
@@ -12,7 +13,7 @@ data class BidMachineParameters(
 ) : AdapterParameters
 
 class BMBannerAuctionParams(
-    val context: Context,
+    val activity: Activity,
     val bannerFormat: BannerFormat,
     override val price: Double,
     val timeout: Long,

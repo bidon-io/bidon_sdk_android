@@ -16,16 +16,6 @@ import java.util.SortedMap
  */
 internal interface BannersCache {
     /**
-     * Just load next banner
-     */
-    fun load(
-        activity: Activity,
-        format: BannerFormat,
-        pricefloor: Double,
-        extras: Extras,
-    )
-
-    /**
      * Get and automatically load next banner
      */
     fun get(
@@ -46,35 +36,6 @@ internal class BannersCacheImpl : BannersCache {
         ((ad2.ecpm - ad1.ecpm) * 1000000).toInt()
     })
 
-    override fun load(
-        activity: Activity,
-        format: BannerFormat,
-        pricefloor: Double,
-        extras: Extras,
-    ) {
-        val banner = BannerView(activity.applicationContext)
-        banner.setBannerFormat(format)
-        banner.setExtras(extras)
-        banner.setBannerListener(object : BannerListener {
-            override fun onAdLoaded(ad: Ad) {
-                logInfo(Tag, "Banner loaded: $ad")
-                if (cache.containsValue(banner)) return
-                cache[ad] = banner
-            }
-
-            override fun onAdLoadFailed(cause: BidonError) {
-                logInfo(Tag, "Banner load failed: $cause")
-            }
-
-            override fun onAdShown(ad: Ad) {}
-
-            override fun onAdExpired(ad: Ad) {
-                cache.removeBannerView(banner)
-            }
-        })
-        banner.loadAd(activity, pricefloor)
-    }
-
     override fun get(
         activity: Activity,
         format: BannerFormat,
@@ -88,27 +49,29 @@ internal class BannersCacheImpl : BannersCache {
             onLoaded(ad, banner)
             return
         }
-        val banner = BannerView(activity.applicationContext)
-        banner.setExtras(extras)
-        banner.setBannerFormat(format)
-        banner.setBannerListener(object : BannerListener {
-            override fun onAdLoaded(ad: Ad) {
-                logInfo(Tag, "Banner loaded: $ad")
-                onLoaded(ad, banner)
-            }
+        activity.runOnUiThread {
+            val banner = BannerView(activity.applicationContext)
+            banner.setExtras(extras)
+            banner.setBannerFormat(format)
+            banner.setBannerListener(object : BannerListener {
+                override fun onAdLoaded(ad: Ad) {
+                    logInfo(Tag, "Banner loaded: $ad")
+                    onLoaded(ad, banner)
+                }
 
-            override fun onAdLoadFailed(cause: BidonError) {
-                logInfo(Tag, "Banner load failed: $cause")
-                onFailed(cause)
-            }
+                override fun onAdLoadFailed(cause: BidonError) {
+                    logInfo(Tag, "Banner load failed: $cause")
+                    onFailed(cause)
+                }
 
-            override fun onAdShown(ad: Ad) {}
+                override fun onAdShown(ad: Ad) {}
 
-            override fun onAdExpired(ad: Ad) {
-                cache.removeBannerView(banner)
-            }
-        })
-        banner.loadAd(activity, pricefloor)
+                override fun onAdExpired(ad: Ad) {
+                    cache.removeBannerView(banner)
+                }
+            })
+            banner.loadAd(activity, pricefloor)
+        }
     }
 
     override fun clear() {

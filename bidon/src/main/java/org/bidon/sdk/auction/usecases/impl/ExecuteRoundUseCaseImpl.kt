@@ -61,7 +61,9 @@ internal class ExecuteRoundUseCaseImpl(
             logInfo(TAG, "$logText bidding adapters [${filteredBiddingAdapters.joinToString { it.demandId.demandId }}]")
             val biddingAdSources = filteredBiddingAdapters
                 .getAdSources(demandAd.adType)
-                .onEach { applyParams(it, adTypeParam, auctionResponse, demandAd, round) }
+                .onEach {
+                    applyParams(it, adTypeParam, auctionResponse, demandAd, round)
+                }
                 .filterIsInstance<Mode.Bidding>()
             // Start Bidding demands auction
             val biddingDemands = biddingAdSources.map {
@@ -208,10 +210,10 @@ internal class ExecuteRoundUseCaseImpl(
             }
     }
 
-    private fun List<Adapter>.getAdSources(adType: AdType) = when (adType) {
+    private fun List<Adapter>.getAdSources(adType: AdType): List<AdSource<AdAuctionParams>> = when (adType) {
         AdType.Interstitial -> {
             this.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>().mapNotNull { adapter ->
-                kotlin.runCatching {
+                runCatching {
                     adapter.interstitial().apply { addDemandId((adapter as Adapter).demandId) }
                 }.onFailure {
                     logError(TAG, "Failed to create interstitial ad source", it)
@@ -221,7 +223,7 @@ internal class ExecuteRoundUseCaseImpl(
 
         AdType.Rewarded -> {
             this.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().mapNotNull { adapter ->
-                kotlin.runCatching {
+                runCatching {
                     adapter.rewarded().apply { addDemandId((adapter as Adapter).demandId) }
                 }.onFailure {
                     logError(TAG, "Failed to create rewarded ad source", it)

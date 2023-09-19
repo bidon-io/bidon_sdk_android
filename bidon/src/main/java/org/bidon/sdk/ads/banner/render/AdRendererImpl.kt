@@ -195,6 +195,9 @@ internal class AdRendererImpl(
             logInfo(this@AdRendererImpl.tag, "View and position does not changed")
             return
         }
+        bannerView.parent?.let {
+            (it as ViewGroup).removeView(bannerView)
+        }
         adContainer.setBackgroundColor(Color.TRANSPARENT)
         adContainer.addView(bannerView, LayoutParams(bannerView.obtainWidth(), bannerView.obtainHeight(), Gravity.CENTER))
         oldAdView?.animate()

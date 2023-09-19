@@ -1,6 +1,6 @@
 package org.bidon.dtexchange.impl
 
-import android.content.Context
+import android.app.Activity
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.LineItem
@@ -17,7 +17,7 @@ data class DTExchangeAdAuctionParams(
 }
 
 class DTExchangeBannerAuctionParams(
-    val context: Context,
+    val activity: Activity,
     val bannerFormat: BannerFormat,
     val lineItem: LineItem,
 ) : AdAuctionParams {

@@ -54,6 +54,7 @@ internal class BigoAdsBannerImpl :
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             BigoBannerAuctionParams(
+                activity = activity,
                 bannerFormat = bannerFormat,
                 payload = requireNotNull(json?.optString("payload")) {
                     "Payload is required for BigoAds banner ad"
@@ -140,8 +141,10 @@ internal class BigoAdsBannerImpl :
                 }
             }
         })
-        loader.build()
-            .loadAd(builder.build())
+        adParams.activity.runOnUiThread {
+            loader.build()
+                .loadAd(builder.build())
+        }
     }
 }
 
