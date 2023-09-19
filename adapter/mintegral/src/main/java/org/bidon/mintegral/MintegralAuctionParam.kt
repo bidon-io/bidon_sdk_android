@@ -1,7 +1,6 @@
 package org.bidon.mintegral
 
 import android.app.Activity
-import android.content.Context
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
 
@@ -21,7 +20,7 @@ class MintegralAuctionParam(
 }
 
 class MintegralBannerAuctionParam(
-    val context: Context,
+    val activity: Activity,
     val bannerFormat: BannerFormat,
     override val price: Double,
     override val adUnitId: String?,

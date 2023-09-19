@@ -45,7 +45,7 @@ class MetaBannerImpl :
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             MetaBannerAuctionParams(
-                context = activity.applicationContext,
+                activity = activity,
                 placementId = requireNotNull(json?.optString("placement_id")) {
                     "Placement id is required for Meta"
                 },
@@ -61,53 +61,55 @@ class MetaBannerImpl :
     }
 
     override fun load(adParams: MetaBannerAuctionParams) {
-        this.adParams = adParams
-        val banner = AdView(adParams.context, adParams.placementId, adParams.bannerSize).also {
-            bannerView = it
-        }
-        banner.loadAd(
-            banner.buildLoadAdConfig()
-                .withAdListener(object : AdListener {
-                    override fun onError(ad: Ad?, adError: AdError?) {
-                        val error = adError.asBidonError()
-                        logError(TAG, "Error while loading ad(${adError?.errorCode}: ${adError?.errorMessage}). $this", error)
-                        emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
-                    }
-
-                    override fun onAdLoaded(ad: Ad?) {
-                        logInfo(TAG, "onAdLoaded $ad: $bannerView, $this")
-                        val bidonAd = getAd(this)
-                        if (bannerView != null && bidonAd != null) {
-                            emitEvent(AdEvent.Fill(bidonAd))
-                        } else {
-                            emitEvent(AdEvent.ShowFailed(BidonError.BannerAdNotReady))
+        adParams.activity.runOnUiThread {
+            this.adParams = adParams
+            val banner = AdView(adParams.activity.applicationContext, adParams.placementId, adParams.bannerSize).also {
+                bannerView = it
+            }
+            banner.loadAd(
+                banner.buildLoadAdConfig()
+                    .withAdListener(object : AdListener {
+                        override fun onError(ad: Ad?, adError: AdError?) {
+                            val error = adError.asBidonError()
+                            logError(TAG, "Error while loading ad(${adError?.errorCode}: ${adError?.errorMessage}). $this", error)
+                            emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                         }
-                    }
 
-                    override fun onAdClicked(ad: Ad?) {
-                        logInfo(TAG, "onAdClicked: $this")
-                        val bidonAd = getAd(this@MetaBannerImpl) ?: return
-                        emitEvent(AdEvent.Clicked(bidonAd))
-                    }
+                        override fun onAdLoaded(ad: Ad?) {
+                            logInfo(TAG, "onAdLoaded $ad: $bannerView, $this")
+                            val bidonAd = getAd(this)
+                            if (bannerView != null && bidonAd != null) {
+                                emitEvent(AdEvent.Fill(bidonAd))
+                            } else {
+                                emitEvent(AdEvent.ShowFailed(BidonError.BannerAdNotReady))
+                            }
+                        }
 
-                    override fun onLoggingImpression(ad: Ad?) {
-                        logInfo(TAG, "onLoggingImpression: $ad, $this")
-                        val bidonAd = getAd(this@MetaBannerImpl) ?: return
-                        emitEvent(
-                            AdEvent.PaidRevenue(
-                                ad = bidonAd,
-                                adValue = AdValue(
-                                    adRevenue = adParams.price,
-                                    precision = Precision.Precise,
-                                    currency = AdValue.USD,
+                        override fun onAdClicked(ad: Ad?) {
+                            logInfo(TAG, "onAdClicked: $this")
+                            val bidonAd = getAd(this@MetaBannerImpl) ?: return
+                            emitEvent(AdEvent.Clicked(bidonAd))
+                        }
+
+                        override fun onLoggingImpression(ad: Ad?) {
+                            logInfo(TAG, "onLoggingImpression: $ad, $this")
+                            val bidonAd = getAd(this@MetaBannerImpl) ?: return
+                            emitEvent(
+                                AdEvent.PaidRevenue(
+                                    ad = bidonAd,
+                                    adValue = AdValue(
+                                        adRevenue = adParams.price,
+                                        precision = Precision.Precise,
+                                        currency = AdValue.USD,
+                                    )
                                 )
                             )
-                        )
-                    }
-                })
-                .withBid(adParams.payload)
-                .build()
-        )
+                        }
+                    })
+                    .withBid(adParams.payload)
+                    .build()
+            )
+        }
     }
 
     override fun destroy() {

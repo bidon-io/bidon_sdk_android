@@ -51,6 +51,7 @@ internal class VungleBannerImpl :
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             VungleBannerAuctionParams(
+                activity = activity,
                 bannerFormat = bannerFormat,
                 containerWidth = containerWidth,
                 bannerId = requireNotNull(json?.getString("placement_id")) {
@@ -66,20 +67,24 @@ internal class VungleBannerImpl :
 
     override fun load(adParams: VungleBannerAuctionParams) {
         this.adParams = adParams
-        Banners.loadBanner(
-            adParams.bannerId, adParams.payload, adParams.config,
-            object : LoadAdCallback {
-                override fun onAdLoad(placementId: String?) {
-                    logInfo(TAG, "onAdLoad =$placementId. $this")
-                    fillAd(adParams)
-                }
+        adParams.activity.runOnUiThread {
+            Banners.loadBanner(
+                adParams.bannerId, adParams.payload, adParams.config,
+                object : LoadAdCallback {
+                    override fun onAdLoad(placementId: String?) {
+                        logInfo(TAG, "onAdLoad =$placementId. $this")
+                        adParams.activity.runOnUiThread {
+                            fillAd(adParams)
+                        }
+                    }
 
-                override fun onError(placementId: String?, exception: VungleException?) {
-                    logError(TAG, "onError placementId=$placementId. $this", exception)
-                    emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                    override fun onError(placementId: String?, exception: VungleException?) {
+                        logError(TAG, "onError placementId=$placementId. $this", exception)
+                        emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 
     private fun fillAd(adParam: VungleBannerAuctionParams) {

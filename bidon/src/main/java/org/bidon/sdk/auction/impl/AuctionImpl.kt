@@ -1,7 +1,6 @@
 package org.bidon.sdk.auction.impl
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -92,19 +91,19 @@ internal class AuctionImpl(
                         ).ifEmpty {
                             throw BidonError.NoAuctionResults
                         }.also {
-                            scope.launch(Dispatchers.Main.immediate) {
+                            adTypeParamData.activity.runOnUiThread {
                                 onSuccess(it)
                             }
                         }
                     }.onFailure {
                         logError(TAG, "Auction failed", it)
-                        scope.launch(Dispatchers.Main.immediate) {
+                        adTypeParamData.activity.runOnUiThread {
                             onFailure(it)
                         }
                     }
                 }.onFailure {
                     logError(TAG, "Auction failed", it)
-                    scope.launch(Dispatchers.Main.immediate) {
+                    adTypeParamData.activity.runOnUiThread {
                         onFailure(it)
                     }
                 }

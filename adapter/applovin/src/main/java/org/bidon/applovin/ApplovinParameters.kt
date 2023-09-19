@@ -1,6 +1,6 @@
 package org.bidon.applovin
 
-import android.content.Context
+import android.app.Activity
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdapterParameters
 import org.bidon.sdk.ads.banner.BannerFormat
@@ -11,7 +11,7 @@ data class ApplovinParameters(
 ) : AdapterParameters
 
 class ApplovinBannerAuctionParams(
-    val context: Context,
+    val activity: Activity,
     val bannerFormat: BannerFormat,
     val lineItem: LineItem,
 ) : AdAuctionParams {

@@ -1,5 +1,6 @@
 package org.bidon.admob
 
+import android.app.Activity
 import android.content.Context
 import com.google.android.gms.ads.AdSize
 import org.bidon.admob.ext.toAdmobAdSize
@@ -14,13 +15,13 @@ data class AdmobInitParameters(
 ) : AdapterParameters
 
 sealed interface AdmobBannerAuctionParams : AdAuctionParams {
+    val activity: Activity
     val bannerFormat: BannerFormat
-    val context: Context
     val containerWidth: Float
-    val adSize: AdSize get() = bannerFormat.toAdmobAdSize(context, containerWidth)
+    val adSize: AdSize get() = bannerFormat.toAdmobAdSize(activity, containerWidth)
 
     class Network(
-        override val context: Context,
+        override val activity: Activity,
         override val bannerFormat: BannerFormat,
         override val containerWidth: Float,
         val lineItem: LineItem,
@@ -34,7 +35,7 @@ sealed interface AdmobBannerAuctionParams : AdAuctionParams {
     }
 
     class Bidding(
-        override val context: Context,
+        override val activity: Activity,
         override val bannerFormat: BannerFormat,
         override val containerWidth: Float,
         override val price: Double,
