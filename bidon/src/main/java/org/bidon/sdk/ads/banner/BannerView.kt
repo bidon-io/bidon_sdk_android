@@ -99,7 +99,7 @@ class BannerView @JvmOverloads constructor(
     }
 
     override fun loadAd(activity: Activity, pricefloor: Double) {
-        logInfo(TAG, "LoadAd. $this")
+        logInfo(TAG, "LoadAd. $this. ${Thread.currentThread()}")
         if (!BidonSdk.isInitialized()) {
             logInfo(TAG, "Sdk is not initialized")
             listener.onAdLoadFailed(BidonError.SdkNotInitialized)
@@ -137,7 +137,7 @@ class BannerView @JvmOverloads constructor(
     }
 
     override fun showAd() {
-        logInfo(TAG, "ShowAd invoked")
+        logInfo(TAG, "ShowAd invoked. ${Thread.currentThread()}")
         if (!BidonSdk.isInitialized()) {
             logInfo(TAG, "Sdk is not initialized")
             listener.onAdShowFailed(BidonError.SdkNotInitialized)
