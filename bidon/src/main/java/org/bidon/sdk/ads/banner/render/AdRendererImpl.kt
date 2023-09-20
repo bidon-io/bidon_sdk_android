@@ -57,7 +57,7 @@ internal class AdRendererImpl(
         renderListener: AdRenderer.RenderListener
     ) {
         observeActivity(activity)
-        logInfo(tag, "Render banner $bannerView at $activity")
+        logInfo(tag, "Render banner $bannerView at $activity. ${Thread.currentThread()}")
         logInfo(
             tag = tag,
             message = "--> AdContainer($adContainer), AdView($bannerView), $positionState, " +
@@ -74,23 +74,21 @@ internal class AdRendererImpl(
             hide(activity)
         }
         if (inspector.isRenderPermitted()) {
-            activity.runOnUiThread {
-                this.positionState = positionState
-                this.activity = WeakReference(activity)
-                withRootContainer(activity) {
-                    if (!bannerView.fits(positionState)) {
-                        logInfo(tag, "Banner does not fit")
-                        renderListener.onVisibilityIssued()
-                        return@withRootContainer
-                    }
-                    if (!inspector.isViewVisibleOnScreen(view = adContainer)) {
-                        createAdContainer(activity, positionState, bannerView)
-                    }
-                    bannerView.showAd()
-                    adContainer?.addAdView(bannerView)
-                    setAdViewsVisible(bannerView)
-                    renderListener.onRendered()
+            this.positionState = positionState
+            this.activity = WeakReference(activity)
+            withRootContainer(activity) {
+                if (!bannerView.fits(positionState)) {
+                    logInfo(tag, "Banner does not fit")
+                    renderListener.onVisibilityIssued()
+                    return@withRootContainer
                 }
+                if (!inspector.isViewVisibleOnScreen(view = adContainer)) {
+                    createAdContainer(activity, positionState, bannerView)
+                }
+                bannerView.showAd()
+                adContainer?.addAdView(bannerView)
+                setAdViewsVisible(bannerView)
+                renderListener.onRendered()
             }
         } else {
             renderListener.onRenderFailed()

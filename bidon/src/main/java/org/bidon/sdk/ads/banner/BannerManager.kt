@@ -70,117 +70,133 @@ class BannerManager private constructor(
     }
 
     override fun loadAd(activity: Activity, pricefloor: Double) {
-        weakActivity = WeakReference(activity)
-        if (!BidonSdk.isInitialized()) {
-            publisherListener?.onAdLoadFailed(BidonError.SdkNotInitialized)
-            return
-        }
-        nextBannerView = null
-        bannersCache.get(
-            activity = activity,
-            format = bannerFormat ?: BannerFormat.Banner,
-            pricefloor = pricefloor,
-            extras = extras,
-            onLoaded = { ad, bannerView ->
-                this.nextBannerView = bannerView
-                publisherListener?.onAdLoaded(ad)
-                if (showAfterLoad.getAndSet(false)) {
-                    weakActivity.get()?.let { activity ->
-                        showAd(activity)
-                    }
-                }
-            },
-            onFailed = { cause ->
-                publisherListener?.onAdLoadFailed(cause)
+        activity.runOnUiThread {
+            weakActivity = WeakReference(activity)
+            if (!BidonSdk.isInitialized()) {
+                publisherListener?.onAdLoadFailed(BidonError.SdkNotInitialized)
+                return@runOnUiThread
             }
-        )
+            nextBannerView = null
+            bannersCache.get(
+                activity = activity,
+                format = bannerFormat ?: BannerFormat.Banner,
+                pricefloor = pricefloor,
+                extras = extras,
+                onLoaded = { ad, bannerView ->
+                    this.nextBannerView = bannerView
+                    publisherListener?.onAdLoaded(ad)
+                    if (showAfterLoad.getAndSet(false)) {
+                        weakActivity.get()?.let { activity ->
+                            showAd(activity)
+                        }
+                    }
+                },
+                onFailed = { cause ->
+                    publisherListener?.onAdLoadFailed(cause)
+                }
+            )
+        }
     }
 
     override fun isReady(): Boolean = currentBannerView?.isReady() == true || nextBannerView?.isReady() == true
 
     override fun showAd(activity: Activity) {
-        weakActivity = WeakReference(activity)
-        logInfo(tag, "Show ad")
-        if (!BidonSdk.isInitialized()) {
-            publisherListener?.onAdLoadFailed(BidonError.SdkNotInitialized)
-            return
-        }
-        val bannerView = nextBannerView ?: currentBannerView
-        if (bannerView == null) {
-            logInfo(tag, "No loaded ad")
-            showAfterLoad.set(true)
-            publisherListener?.onAdShowFailed(BidonError.BannerAdNotReady)
-            return
-        }
-        if (!bannerView.isReady()) {
-            logInfo(tag, "Source network banner is not ready ${bannerView.children.firstOrNull()}")
-        }
-        nextBannerView = null
-        currentBannerView = bannerView
-
-        /**
-         * RenderAd
-         */
-        logInfo(tag, "RenderAd at $activity")
-        bannerView.setBannerListener(
-            object : BannerListener {
-                override fun onAdLoaded(ad: Ad) {}
-                override fun onAdLoadFailed(cause: BidonError) {}
-
-                override fun onAdShown(ad: Ad) {
-                    publisherListener?.onAdShown(ad)
-                }
-
-                override fun onAdClicked(ad: Ad) {
-                    publisherListener?.onAdClicked(ad)
-                }
-
-                override fun onAdExpired(ad: Ad) {
-                    publisherListener?.onAdExpired(ad)
-                }
-
-                override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
-                    publisherListener?.onRevenuePaid(ad, adValue)
-                }
-
-                override fun onAdShowFailed(cause: BidonError) {
-                    publisherListener?.onAdShowFailed(cause)
-                }
+        logInfo(tag, "Show ad. ${Thread.currentThread()}")
+        activity.runOnUiThread {
+            weakActivity = WeakReference(activity)
+            if (!BidonSdk.isInitialized()) {
+                publisherListener?.onAdLoadFailed(BidonError.SdkNotInitialized)
+                return@runOnUiThread
             }
-        )
-        adRenderer.render(
-            activity = activity,
-            bannerView = bannerView,
-            positionState = positionState,
-            animate = true,
-            handleConfigurationChanges = false,
-            renderListener = object : AdRenderer.RenderListener {
-                override fun onRendered() {
-                    logInfo(tag, "RenderListener.onRendered")
-                }
-
-                override fun onRenderFailed() {
-                    logInfo(tag, "RenderListener.onRenderFailed")
-                }
-
-                override fun onVisibilityIssued() {
-                    bannerView.destroyAd()
-                    publisherListener?.onAdShowFailed(BidonError.BannerAdNotReady)
-                    logInfo(tag, "RenderListener.onVisibilityIssued")
-                }
+            val bannerView = nextBannerView ?: currentBannerView
+            if (bannerView == null) {
+                logInfo(tag, "No loaded ad")
+                showAfterLoad.set(true)
+                publisherListener?.onAdShowFailed(BidonError.BannerAdNotReady)
+                return@runOnUiThread
             }
-        )
+            if (!bannerView.isReady()) {
+                logInfo(tag, "Source network banner is not ready ${bannerView.children.firstOrNull()}")
+            }
+            nextBannerView = null
+            currentBannerView = bannerView
+
+            /**
+             * RenderAd
+             */
+            logInfo(tag, "RenderAd at $activity")
+            bannerView.setBannerListener(
+                object : BannerListener {
+                    override fun onAdLoaded(ad: Ad) {}
+                    override fun onAdLoadFailed(cause: BidonError) {}
+
+                    override fun onAdShown(ad: Ad) {
+                        activity.runOnUiThread {
+                            publisherListener?.onAdShown(ad)
+                        }
+                    }
+
+                    override fun onAdClicked(ad: Ad) {
+                        activity.runOnUiThread {
+                            publisherListener?.onAdClicked(ad)
+                        }
+                    }
+
+                    override fun onAdExpired(ad: Ad) {
+                        activity.runOnUiThread {
+                            publisherListener?.onAdExpired(ad)
+                        }
+                    }
+
+                    override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
+                        activity.runOnUiThread {
+                            publisherListener?.onRevenuePaid(ad, adValue)
+                        }
+                    }
+
+                    override fun onAdShowFailed(cause: BidonError) {
+                        activity.runOnUiThread {
+                            publisherListener?.onAdShowFailed(cause)
+                        }
+                    }
+                }
+            )
+            adRenderer.render(
+                activity = activity,
+                bannerView = bannerView,
+                positionState = positionState,
+                animate = true,
+                handleConfigurationChanges = false,
+                renderListener = object : AdRenderer.RenderListener {
+                    override fun onRendered() {
+                        logInfo(tag, "RenderListener.onRendered")
+                    }
+
+                    override fun onRenderFailed() {
+                        logInfo(tag, "RenderListener.onRenderFailed")
+                    }
+
+                    override fun onVisibilityIssued() {
+                        activity.runOnUiThread {
+                            bannerView.destroyAd()
+                            publisherListener?.onAdShowFailed(BidonError.BannerAdNotReady)
+                            logInfo(tag, "RenderListener.onVisibilityIssued")
+                        }
+                    }
+                }
+            )
+        }
     }
 
     override fun hideAd(activity: Activity) {
+        logInfo(tag, "Hide ad. ${Thread.currentThread()}")
         activity.runOnUiThread {
-            logInfo(tag, "Hide ad")
             adRenderer.hide(activity)
         }
     }
 
     override fun destroyAd(activity: Activity) {
-        logInfo(tag, "Destroy ad")
+        logInfo(tag, "Destroy ad. ${Thread.currentThread()}")
         hideAd(activity)
         activity.runOnUiThread {
             currentBannerView?.destroyAd()
