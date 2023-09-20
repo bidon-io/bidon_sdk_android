@@ -3,6 +3,8 @@
 [BDN-377](https://appodeal.atlassian.net/browse/BDN-377) Add meditation_service to Meta Audience Adapter
 [BDN-191](https://appodeal.atlassian.net/browse/BDN-191) BannerManager + BannerPosition
 
+## Bugfixes:
+[BDN-413](https://appodeal.atlassian.net/browse/BDN-413) Change IABTCF_gdprApplies type to Int
 
 # Release 0.3.2 (2023.09.04)
 
