@@ -22,7 +22,7 @@ internal class GetAdAuctionParamsUseCase {
                 AdType.Banner -> {
                     if (isBiddingMode) {
                         AdmobBannerAuctionParams.Bidding(
-                            context = activity.applicationContext,
+                            activity = activity,
                             bannerFormat = bannerFormat,
                             containerWidth = containerWidth,
                             price = pricefloor,
@@ -33,7 +33,7 @@ internal class GetAdAuctionParamsUseCase {
                         AdmobBannerAuctionParams.Network(
                             lineItem = popLineItem(AdmobDemandId) ?: error(BidonError.NoAppropriateAdUnitId),
                             bannerFormat = bannerFormat,
-                            context = activity.applicationContext,
+                            activity = activity,
                             containerWidth = containerWidth,
                         )
                     }

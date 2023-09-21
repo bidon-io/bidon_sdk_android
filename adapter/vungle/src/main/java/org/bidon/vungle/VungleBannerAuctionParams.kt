@@ -1,17 +1,18 @@
 package org.bidon.vungle
 
+import android.app.Activity
 import com.vungle.warren.AdConfig
 import com.vungle.warren.BannerAdConfig
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.LineItem
 
-data class VungleBannerAuctionParams(
+class VungleBannerAuctionParams(
+    val activity: Activity,
     override val price: Double,
     val bannerFormat: BannerFormat,
     val payload: String,
     val bannerId: String,
-    val containerWidth: Float,
 ) : AdAuctionParams {
     override val lineItem: LineItem? = null
     val bannerSize

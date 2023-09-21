@@ -239,10 +239,10 @@ internal class ExecuteRoundUseCaseImpl(
             }
     }
 
-    private fun List<Adapter>.getAdSources(adType: AdType) = when (adType) {
+    private fun List<Adapter>.getAdSources(adType: AdType): List<AdSource<AdAuctionParams>> = when (adType) {
         AdType.Interstitial -> {
             this.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>().mapNotNull { adapter ->
-                kotlin.runCatching {
+                runCatching {
                     adapter.interstitial().apply { addDemandId((adapter as Adapter).demandId) }
                 }.onFailure {
                     logError(TAG, "Failed to create interstitial ad source", it)
@@ -252,7 +252,7 @@ internal class ExecuteRoundUseCaseImpl(
 
         AdType.Rewarded -> {
             this.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().mapNotNull { adapter ->
-                kotlin.runCatching {
+                runCatching {
                     adapter.rewarded().apply { addDemandId((adapter as Adapter).demandId) }
                 }.onFailure {
                     logError(TAG, "Failed to create rewarded ad source", it)

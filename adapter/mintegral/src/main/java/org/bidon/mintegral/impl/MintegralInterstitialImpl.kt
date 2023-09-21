@@ -78,7 +78,7 @@ internal class MintegralInterstitialImpl :
                 if (mBridgeIds != null && ad != null) {
                     emitEvent(AdEvent.Fill(ad))
                 } else {
-                    emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+                    emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
                 }
             }
 
@@ -141,7 +141,7 @@ internal class MintegralInterstitialImpl :
         if (isAdReadyToShow) {
             interstitialAd?.showFromBid()
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 

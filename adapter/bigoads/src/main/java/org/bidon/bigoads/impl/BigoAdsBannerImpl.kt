@@ -96,7 +96,7 @@ internal class BigoAdsBannerImpl :
                 this@BigoAdsBannerImpl.bannerAd = bannerAd
                 val ad = getAd(this)
                 if (ad == null) {
-                    emitEvent(AdEvent.ShowFailed(BidonError.BannerAdNotReady))
+                    emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
                 } else {
                     bannerAd.setAdInteractionListener(object : AdInteractionListener {
                         override fun onAdError(error: AdError) {
@@ -132,8 +132,10 @@ internal class BigoAdsBannerImpl :
                 }
             }
         })
-        loader.build()
-            .loadAd(adRequest.build())
+        adParams.activity.runOnUiThread {
+            loader.build()
+                .loadAd(builder.build())
+        }
     }
 }
 

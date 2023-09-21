@@ -176,13 +176,13 @@ fun PositionedBannerScreen(
                         modifier = Modifier.padding(end = 12.dp),
                         text = "Hide",
                     ) {
-                        banner.hideAd()
+                        banner.hideAd(activity)
                     }
                     AppButton(
                         modifier = Modifier.padding(end = 12.dp),
                         text = "Destroy",
                     ) {
-                        banner.destroyAd()
+                        banner.destroyAd(activity)
                     }
                 }
             }

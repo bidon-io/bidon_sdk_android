@@ -94,14 +94,22 @@ internal class AuctionImpl(
                             adTypeParamData = adTypeParamData,
                         ).ifEmpty {
                             throw BidonError.NoAuctionResults
-                        }.also(onSuccess)
+                        }.also {
+                            adTypeParamData.activity.runOnUiThread {
+                                onSuccess(it)
+                            }
+                        }
                     }.onFailure {
                         logError(TAG, "Auction failed", it)
-                        onFailure(it)
+                        adTypeParamData.activity.runOnUiThread {
+                            onFailure(it)
+                        }
                     }
                 }.onFailure {
                     logError(TAG, "Auction failed", it)
-                    onFailure(it)
+                    adTypeParamData.activity.runOnUiThread {
+                        onFailure(it)
+                    }
                 }
             }
         }

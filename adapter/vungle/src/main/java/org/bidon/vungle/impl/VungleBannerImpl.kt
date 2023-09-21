@@ -51,8 +51,8 @@ internal class VungleBannerImpl :
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             VungleBannerAuctionParams(
+                activity = activity,
                 bannerFormat = bannerFormat,
-                containerWidth = containerWidth,
                 bannerId = requireNotNull(json?.getString("placement_id")) {
                     "Banner id is required"
                 },
@@ -66,20 +66,24 @@ internal class VungleBannerImpl :
 
     override fun load(adParams: VungleBannerAuctionParams) {
         this.adParams = adParams
-        Banners.loadBanner(
-            adParams.bannerId, adParams.payload, adParams.config,
-            object : LoadAdCallback {
-                override fun onAdLoad(placementId: String?) {
-                    logInfo(TAG, "onAdLoad =$placementId. $this")
-                    fillAd(adParams)
-                }
+        adParams.activity.runOnUiThread {
+            Banners.loadBanner(
+                adParams.bannerId, adParams.payload, adParams.config,
+                object : LoadAdCallback {
+                    override fun onAdLoad(placementId: String?) {
+                        logInfo(TAG, "onAdLoad =$placementId. $this")
+                        adParams.activity.runOnUiThread {
+                            fillAd(adParams)
+                        }
+                    }
 
-                override fun onError(placementId: String?, exception: VungleException?) {
-                    logError(TAG, "onError placementId=$placementId. $this", exception)
-                    emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                    override fun onError(placementId: String?, exception: VungleException?) {
+                        logError(TAG, "onError placementId=$placementId. $this", exception)
+                        emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 
     private fun fillAd(adParam: VungleBannerAuctionParams) {
@@ -137,18 +141,18 @@ internal class VungleBannerImpl :
             }
             emitEvent(AdEvent.Fill(bidonAd))
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.BannerAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 
     override fun getAdView(): AdViewHolder? {
         val adParam = adParams ?: run {
-            AdEvent.ShowFailed(BidonError.BannerAdNotReady)
+            AdEvent.ShowFailed(BidonError.AdNotReady)
             return null
         }
         val banner = banner
         if (!isAdReadyToShow || banner == null) {
-            AdEvent.ShowFailed(BidonError.BannerAdNotReady)
+            AdEvent.ShowFailed(BidonError.AdNotReady)
             return null
         }
         return AdViewHolder(

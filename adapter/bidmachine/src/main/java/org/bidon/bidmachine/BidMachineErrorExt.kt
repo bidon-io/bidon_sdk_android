@@ -9,7 +9,7 @@ internal fun BMError.asBidonErrorOnFill(demandId: DemandId): BidonError = when (
     BMError.Server,
     BMError.NoConnection -> BidonError.NetworkError(demandId)
     BMError.TimeoutError -> BidonError.NetworkError(demandId)
-    BMError.AlreadyShown -> BidonError.FullscreenAdNotReady
+    BMError.AlreadyShown -> BidonError.AdNotReady
     BMError.Expired -> BidonError.Expired(demandId)
     else -> {
         if (this.code == BMError.NO_CONTENT) {
@@ -25,7 +25,7 @@ internal fun BMError.asBidonErrorOnBid(demandId: DemandId): BidonError = when (t
     BMError.Server,
     BMError.NoConnection -> BidonError.NetworkError(demandId)
     BMError.TimeoutError -> BidonError.NetworkError(demandId)
-    BMError.AlreadyShown -> BidonError.FullscreenAdNotReady
+    BMError.AlreadyShown -> BidonError.AdNotReady
     BMError.Expired -> BidonError.Expired(demandId)
     else -> {
         if (this.code == BMError.NO_CONTENT) {

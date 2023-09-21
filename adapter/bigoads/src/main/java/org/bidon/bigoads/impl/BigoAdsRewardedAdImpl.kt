@@ -56,7 +56,7 @@ internal class BigoAdsRewardedAdImpl :
     override fun show(activity: Activity) {
         val rewardVideoAd = rewardVideoAd
         if (rewardVideoAd == null) {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         } else {
             rewardVideoAd.show()
         }
@@ -92,7 +92,7 @@ internal class BigoAdsRewardedAdImpl :
     ) {
         val ad = getAd(this)
         if (ad == null) {
-            emitEvent(AdEvent.ShowFailed(BidonError.BannerAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         } else {
             rewardVideoAd.setAdInteractionListener(object : RewardAdInteractionListener {
                 override fun onAdError(error: AdError) {

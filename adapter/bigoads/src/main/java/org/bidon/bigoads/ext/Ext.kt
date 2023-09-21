@@ -30,7 +30,7 @@ internal fun AdError.asBidonError() = when (this.code) {
 
     AdError.ERROR_CODE_ASSETS_ERROR,
     AdError.ERROR_CODE_FULLSCREEN_AD_FAILED_TO_SHOW,
-    AdError.ERROR_CODE_FULLSCREEN_AD_FAILED_TO_OPEN -> BidonError.FullscreenAdNotReady
+    AdError.ERROR_CODE_FULLSCREEN_AD_FAILED_TO_OPEN -> BidonError.AdNotReady
 
     AdError.ERROR_CODE_VIDEO_ERROR,
     AdError.ERROR_CODE_ACTIVITY_CREATE_ERROR,

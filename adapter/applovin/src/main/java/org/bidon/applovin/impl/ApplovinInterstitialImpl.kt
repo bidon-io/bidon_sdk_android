@@ -120,7 +120,7 @@ internal class ApplovinInterstitialImpl(
             }
             adDialog.showAndRender(applovinAd)
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 
