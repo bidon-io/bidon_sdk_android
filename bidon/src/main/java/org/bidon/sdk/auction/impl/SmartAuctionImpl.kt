@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
@@ -23,6 +24,7 @@ import org.bidon.sdk.auction.usecases.models.RoundResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
@@ -52,9 +54,10 @@ internal class SmartAuctionImpl(
     override fun start(
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
+        existing: Map<DemandId, BidStat>,
         onSuccess: (results: List<AuctionResult>) -> Unit,
         onFailure: (Throwable) -> Unit,
-        onEach: (roundResults: List<AuctionResult>) -> Unit
+        onEach: (roundResults: List<AuctionResult>) -> Unit,
     ) {
         if (state.compareAndSet(
                 expect = Auction.AuctionState.Initialized,
@@ -76,9 +79,13 @@ internal class SmartAuctionImpl(
                         additionalData = adTypeParamData,
                         auctionId = auctionId,
                         demandAd = demandAd,
-                        adapters = adaptersSource.adapters.associate {
-                            it.demandId.demandId to it.adapterInfo
-                        }
+                        adapters = adaptersSource.adapters
+                            .filter {
+                                it.demandId !in existing.keys
+                            }
+                            .associate {
+                                it.demandId.demandId to it.adapterInfo
+                            }
                     ).mapCatching { auctionData ->
                         if (!BidonSdk.bidon.isTestMode) {
                             check(auctionId == auctionData.auctionId) {

@@ -56,7 +56,8 @@ internal class AuctionHolderImpl(
                     nextWinner = null
                     onResult.invoke(it.asFailure())
                     auctionState.value = AuctionHolderState.Idle
-                }
+                },
+                existing = emptyMap()
             )
         } else {
             onResult.invoke(BidonError.AuctionInProgress.asFailure())

@@ -285,7 +285,8 @@ class BannerView @JvmOverloads constructor(
                 adLifecycleFlow.value = AdLifecycle.LoadingFailed
                 loadingError = it.asBidonErrorOrUnspecified()
                 listener.onAdLoadFailed(cause = it.asBidonErrorOrUnspecified())
-            }
+            },
+            existing = emptyMap()
         )
     }
 
