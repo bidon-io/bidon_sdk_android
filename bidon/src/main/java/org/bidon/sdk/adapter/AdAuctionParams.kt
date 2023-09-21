@@ -11,8 +11,7 @@ import org.json.JSONObject
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 interface AdAuctionParams {
-    val adUnitId: String?
-
+    val lineItem: LineItem?
     /**
      * DSP line item eCPM or Bidding bid price
      */

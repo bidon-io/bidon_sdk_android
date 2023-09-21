@@ -112,7 +112,7 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
             }
 
             // FILL
-            adSource.markFillStarted(adParam.adUnitId, adParam.price)
+            adSource.markFillStarted(adParam.lineItem, adParam.price)
             adSource.load(adParam)
             val fillAdEvent = adSource.adEvent.first {
                 // wait for results

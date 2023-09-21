@@ -6,6 +6,7 @@ import com.facebook.ads.AdSize
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceType.isTablet
+import org.bidon.sdk.auction.models.LineItem
 
 class MetaFullscreenAuctionParams(
     val context: Context,
@@ -13,8 +14,7 @@ class MetaFullscreenAuctionParams(
     val payload: String,
     override val price: Double
 ) : AdAuctionParams {
-    override val adUnitId: String
-        get() = placementId
+    override val lineItem: LineItem? = null
 }
 
 class MetaBannerAuctionParams(
@@ -24,8 +24,8 @@ class MetaBannerAuctionParams(
     val payload: String,
     override val price: Double
 ) : AdAuctionParams {
-    override val adUnitId: String
-        get() = placementId
+
+    override val lineItem: LineItem? = null
 
     val bannerSize: AdSize
         get() = when (bannerFormat) {
