@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import kotlinx.coroutines.CoroutineScope
@@ -119,7 +120,7 @@ class BannerView2 @JvmOverloads constructor(
                 if (!isLoaded) {
                     logInfo(TAG, "Not loaded. Current state: ${adLifecycleFlow.value}")
                     LogLifecycleAdStateUseCase.invoke(adLifecycle = adLifecycleFlow.value)
-                    userListener?.onAdShowFailed(BidonError.BannerAdNotReady)
+                    userListener?.onAdShowFailed(BidonError.AdNotReady)
                     return
                 }
                 val bannerSource = (auctionResult.adSource as AdSource.Banner)
@@ -134,9 +135,13 @@ class BannerView2 @JvmOverloads constructor(
             AdLifecycle.LoadingFailed,
             AdLifecycle.DisplayingFailed,
             AdLifecycle.Destroyed -> {
-                userListener?.onAdShowFailed(BidonError.BannerAdNotReady)
+                userListener?.onAdShowFailed(BidonError.AdNotReady)
             }
         }
+    }
+
+    override fun removeFromParent() {
+        (this.parent as? ViewGroup)?.removeView(this)
     }
 
     override fun setBannerListener(listener: BannerListener?) {

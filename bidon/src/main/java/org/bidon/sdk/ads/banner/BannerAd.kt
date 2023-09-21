@@ -1,6 +1,7 @@
 package org.bidon.sdk.ads.banner
 
 import android.app.Activity
+import android.view.ViewGroup
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.stats.WinLossNotifier
@@ -25,4 +26,6 @@ interface BannerAd : WinLossNotifier, Extras {
     fun showAd()
     fun destroyAd()
     fun setBannerListener(listener: BannerListener?)
+
+    fun removeFromParent()
 }

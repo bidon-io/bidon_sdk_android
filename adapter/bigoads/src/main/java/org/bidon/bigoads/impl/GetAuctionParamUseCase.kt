@@ -42,6 +42,7 @@ internal class GetAuctionParamUseCase {
         return auctionParamsScope {
             if (isBiddingMode) {
                 BigoBannerAuctionParams(
+                    activity = activity,
                     bannerFormat = bannerFormat,
                     payload = requireNotNull(json?.optString("payload")) {
                         "Payload is required for BigoAds banner ad"
@@ -56,6 +57,7 @@ internal class GetAuctionParamUseCase {
             } else {
                 val lineItem = popLineItem(BigoAdsDemandId) ?: error("unexpected")
                 BigoBannerAuctionParams(
+                    activity = activity,
                     bannerFormat = bannerFormat,
                     payload = null,
                     slotId = requireNotNull(lineItem.adUnitId),

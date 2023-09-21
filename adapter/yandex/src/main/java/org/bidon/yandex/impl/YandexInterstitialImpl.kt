@@ -108,7 +108,7 @@ internal class YandexInterstitialImpl :
     override fun show(activity: Activity) {
         logInfo(TAG, "Starting show: $this")
         if (interstitialAd == null) {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         } else {
             interstitialAd?.show()
         }

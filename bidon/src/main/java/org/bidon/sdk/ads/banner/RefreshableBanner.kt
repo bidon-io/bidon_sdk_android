@@ -178,7 +178,7 @@ class RefreshableBanner private constructor(
 
     override fun isReady(): Boolean = currentBannerView?.isReady() == true
 
-    override fun showAd(activity: Activity, placement: String) {
+    fun showAd(activity: Activity, placement: String) {
         logInfo(tag, "Show ad")
         if (!BidonSdk.isInitialized()) {
             publisherListener?.onAdLoadFailed(BidonError.SdkNotInitialized)
@@ -194,17 +194,19 @@ class RefreshableBanner private constructor(
         }
     }
 
-    override fun hideAd() {
+    override fun showAd(activity: Activity) {}
+
+    override fun hideAd(activity: Activity) {
         logInfo(tag, "Hide ad")
         displaying.value = false
-        adRenderer.hide()
+        adRenderer.hide(activity)
         displayingJob?.cancel()
         displayingJob = null
     }
 
-    override fun destroyAd() {
+    override fun destroyAd(activity: Activity) {
         logInfo(tag, "Destroy ad")
-        hideAd()
+        hideAd(activity)
         currentBannerView?.destroyAd()
         currentBannerView = null
     }
@@ -212,6 +214,9 @@ class RefreshableBanner private constructor(
     override fun setBannerListener(listener: BannerListener?) {
         publisherListener = listener
     }
+
+    override fun notifyLoss(activity: Activity, winnerDemandId: String, winnerEcpm: Double) {}
+    override fun notifyWin() {}
 
     private fun displayAd(placement: String) {
         displayingJob?.cancel()
@@ -231,7 +236,7 @@ class RefreshableBanner private constructor(
         if (bannerView == null) {
             logInfo(tag, "No loaded ad")
             showAfterLoad.set(true)
-            publisherListener?.onAdShowFailed(BidonError.BannerAdNotReady)
+            publisherListener?.onAdShowFailed(BidonError.AdNotReady)
             return
         }
         showAfterLoad.set(false)
@@ -261,7 +266,7 @@ class RefreshableBanner private constructor(
 
                 override fun onVisibilityIssued() {
                     bannerView.destroyAd()
-                    publisherListener?.onAdShowFailed(BidonError.BannerAdNotReady)
+                    publisherListener?.onAdShowFailed(BidonError.AdNotReady)
                     logInfo(tag, "RenderListener.onVisibilityIssued")
                 }
             }
