@@ -13,9 +13,8 @@ data class ApplovinParameters(
 class ApplovinBannerAuctionParams(
     val activity: Activity,
     val bannerFormat: BannerFormat,
-    val lineItem: LineItem,
+    override val lineItem: LineItem,
 ) : AdAuctionParams {
-    override val adUnitId: String? get() = lineItem.adUnitId
     override val price: Double get() = lineItem.pricefloor
 
     override fun toString(): String {
@@ -24,10 +23,9 @@ class ApplovinBannerAuctionParams(
 }
 
 class ApplovinFullscreenAdAuctionParams(
-    val lineItem: LineItem,
+    override val lineItem: LineItem,
     val timeoutMs: Long
 ) : AdAuctionParams {
-    override val adUnitId: String? get() = lineItem.adUnitId
     override val price: Double get() = lineItem.pricefloor
 
     override fun toString(): String {

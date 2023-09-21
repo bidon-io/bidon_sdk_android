@@ -149,6 +149,7 @@ internal class AuctionImpl(
             pricefloor = auctionData.pricefloor ?: 0.0,
             demandAd = demandAd,
             adTypeParamData = adTypeParamData,
+            roundIndex = 0,
         )
         logInfo(TAG, "Rounds completed")
 
@@ -215,6 +216,7 @@ internal class AuctionImpl(
 
     private suspend fun conductRounds(
         rounds: List<RoundRequest>,
+        roundIndex: Int,
         sourcePriceFloor: Double,
         pricefloor: Double,
         demandAd: DemandAd,
@@ -225,6 +227,7 @@ internal class AuctionImpl(
         // Execute round
         executeRound(
             round = round,
+            roundIndex = roundIndex,
             pricefloor = pricefloor,
             demandAd = demandAd,
             adTypeParam = adTypeParamData,
@@ -249,6 +252,7 @@ internal class AuctionImpl(
             pricefloor = nextPriceFloor,
             demandAd = demandAd,
             adTypeParamData = adTypeParamData,
+            roundIndex = roundIndex + 1,
         )
     }
 }

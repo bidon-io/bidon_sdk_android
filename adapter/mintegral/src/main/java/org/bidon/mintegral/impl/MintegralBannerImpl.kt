@@ -53,7 +53,7 @@ internal class MintegralBannerImpl :
                 payload = requireNotNull(json?.getString("payload")) {
                     "Payload is required for Mintegral"
                 },
-                adUnitId = json?.getString("unit_id"),
+                unitId = json?.getString("unit_id"),
                 placementId = json?.getString("placement_id"),
                 bannerFormat = bannerFormat,
             )
@@ -64,7 +64,7 @@ internal class MintegralBannerImpl :
         logInfo(TAG, "Starting with $adParams: $this")
         adParams.activity.runOnUiThread {
             this.adParams = adParams
-            val mbBannerView = MBBannerView(adParams.activity.applicationContext).also {
+            val mbBannerView = MBBannerView(adParams.context).also {
                 bannerView = it
             }
             val size = when (adParams.bannerFormat) {

@@ -4,9 +4,9 @@ import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.auction.models.LineItem
 
 internal data class TestInterstitialParameters(
-    val lineItem: LineItem
+    override val lineItem: LineItem
 ) : AdAuctionParams {
-    override val adUnitId: String? get() = lineItem.adUnitId
+    val adUnitId: String? get() = lineItem.adUnitId
     override val price: Double
         get() = lineItem.pricefloor
 }

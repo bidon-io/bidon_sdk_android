@@ -5,6 +5,7 @@ import com.vungle.warren.AdConfig
 import com.vungle.warren.BannerAdConfig
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.auction.models.LineItem
 
 class VungleBannerAuctionParams(
     val activity: Activity,
@@ -14,6 +15,7 @@ class VungleBannerAuctionParams(
     val bannerId: String,
     val containerWidth: Float,
 ) : AdAuctionParams {
+    override val lineItem: LineItem? = null
     override val adUnitId: String get() = bannerId
     val bannerSize
         get() = when (bannerFormat) {
@@ -34,6 +36,5 @@ class VungleFullscreenAuctionParams(
     val placementId: String,
     val payload: String
 ) : AdAuctionParams {
-    override val adUnitId: String
-        get() = placementId
+    override val lineItem: LineItem? = null
 }
