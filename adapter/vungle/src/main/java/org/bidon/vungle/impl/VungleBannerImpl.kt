@@ -53,7 +53,6 @@ internal class VungleBannerImpl :
             VungleBannerAuctionParams(
                 activity = activity,
                 bannerFormat = bannerFormat,
-                containerWidth = containerWidth,
                 bannerId = requireNotNull(json?.getString("placement_id")) {
                     "Banner id is required"
                 },

@@ -64,7 +64,7 @@ internal class MintegralBannerImpl :
         logInfo(TAG, "Starting with $adParams: $this")
         adParams.activity.runOnUiThread {
             this.adParams = adParams
-            val mbBannerView = MBBannerView(adParams.context).also {
+            val mbBannerView = MBBannerView(adParams.activity.applicationContext).also {
                 bannerView = it
             }
             val size = when (adParams.bannerFormat) {
@@ -75,7 +75,7 @@ internal class MintegralBannerImpl :
             }.also {
                 bannerSize = it
             }
-            mbBannerView.init(size, adParams.placementId, adParams.adUnitId)
+            mbBannerView.init(size, adParams.placementId, adParams.unitId)
             mbBannerView.setBannerAdListener(object : BannerAdListener {
                 override fun onLoadFailed(mBridgeIds: MBridgeIds?, message: String?) {
                     logError(TAG, "onLoadFailed $mBridgeIds", Throwable(message))
