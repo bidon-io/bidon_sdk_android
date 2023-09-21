@@ -42,6 +42,10 @@ object BidonSdk {
         get() = bidon.baseUrl
 
     @JvmStatic
+    val isTestMode: Boolean
+        get() = bidon.isTestMode
+
+    @JvmStatic
     fun isInitialized(): Boolean = bidon.isInitialized
 
     @JvmStatic
