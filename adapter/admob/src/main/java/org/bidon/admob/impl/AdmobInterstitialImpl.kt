@@ -118,7 +118,8 @@ internal class AdmobInterstitialImpl(
             roundId = roundId,
             currencyCode = AdValue.USD,
             auctionId = auctionId,
-            adUnitId = adUnitId
+            adUnitId = adUnitId,
+            bidType = bidType
         )
     }
 }

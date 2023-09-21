@@ -1,6 +1,5 @@
 package org.bidon.sdk.segment
 
-import androidx.annotation.IntRange
 import org.bidon.sdk.segment.models.Gender
 
 /**
@@ -18,9 +17,23 @@ interface Segment {
      * Snowflake ID
      */
     val segmentUid: String?
+    var age: Int?
+    var gender: Gender?
 
-    fun setAge(@IntRange(from = 0, to = 150) age: Int?)
-    fun setGender(gender: Gender?)
+    /**
+     * How many levels user has passed (for games mostly)
+     */
+    var level: Int?
+
+    /**
+     * Total amount of in-app purchases made by user
+     */
+    var totalInAppAmount: Double?
+
+    /**
+     * Indicates whether or not user made at least one in-app purchase
+     */
+    var isPaying: Boolean
 
     /**
      * Supported value types are bool, int, long, double, string, Json-object.
@@ -34,19 +47,4 @@ interface Segment {
      * If value is null, then the existing attribute will be removed.
      */
     fun putCustomAttribute(attribute: String, value: Any?)
-
-    /**
-     * How many levels user has passed (for games mostly)
-     */
-    fun setLevel(level: Int)
-
-    /**
-     * Total amount of in-app purchases made by user
-     */
-    fun setTotalInAppAmount(inAppAmount: Double)
-
-    /**
-     * Indicates whether or not user made at least one in-app purchase
-     */
-    fun setPaying(isPaying: Boolean)
 }
