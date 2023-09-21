@@ -16,6 +16,7 @@ interface StatisticsCollector {
 
     val demandAd: DemandAd
     val demandId: DemandId
+    val bidType: BidType
     val auctionId: String
     val roundId: String
     val roundIndex: Int

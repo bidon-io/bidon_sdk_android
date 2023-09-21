@@ -45,8 +45,8 @@ internal class UnityAdsBanner :
         }
     }
 
-    override fun getAdView(): AdViewHolder {
-        val bannerAdView = requireNotNull(bannerAdView)
+    override fun getAdView(): AdViewHolder? {
+        val bannerAdView = bannerAdView ?: return null
         return AdViewHolder(
             networkAdview = bannerAdView,
             widthDp = bannerAdView.size.width,
@@ -123,7 +123,8 @@ internal class UnityAdsBanner :
         roundId = roundId,
         currencyCode = AdValue.USD,
         auctionId = auctionId,
-        adUnitId = param?.lineItem?.adUnitId
+        adUnitId = param?.lineItem?.adUnitId,
+        bidType = bidType,
     )
 }
 

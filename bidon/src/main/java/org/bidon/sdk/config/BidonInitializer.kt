@@ -11,6 +11,7 @@ internal interface BidonInitializer {
 
     val isInitialized: Boolean
     var isTestMode: Boolean
+    val baseUrl: String
 
     /**
      * Default adapters is in [DefaultAdapters]

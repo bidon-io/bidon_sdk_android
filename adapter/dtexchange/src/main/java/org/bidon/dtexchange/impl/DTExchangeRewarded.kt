@@ -152,7 +152,8 @@ internal class DTExchangeRewarded :
         demandAd = demandAd,
         dsp = demandSource ?: this.mediationNameString,
         roundId = roundId,
-        demandAdObject = this
+        demandAdObject = this,
+        bidType = bidType,
     )
 }
 
