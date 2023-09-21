@@ -38,14 +38,17 @@ class BannerManager private constructor(
     private var weakActivity = WeakReference<Activity>(null)
     private var nextBannerView: BannerView? = null
     private var currentBannerView: BannerView? = null
-    private var bannerFormat: BannerFormat? = null
     private val showAfterLoad = AtomicBoolean(false)
     private var positionState: PositionState = PositionState.Default
     private var publisherListener: BannerListener? = null
     private val adRenderer: AdRenderer by lazy { get() }
+    private var _bannerFormat: BannerFormat = BannerFormat.Banner
 
-    override val adSize: AdSize?
-        get() = currentBannerView?.adSize
+    override val bannerFormat: BannerFormat get() = _bannerFormat
+    override val adSize: AdSize? get() = currentBannerView?.adSize
+
+    override var isDisplaying: Boolean = false
+        private set
 
     /**
      * Positioning functions
@@ -53,6 +56,11 @@ class BannerManager private constructor(
     override fun setPosition(position: BannerPosition) {
         logInfo(tag, "Set position $position")
         positionState = PositionState.Place(position)
+        if (isDisplaying) {
+            weakActivity.get()?.let { activity ->
+                showAd(activity)
+            }
+        }
     }
 
     override fun setCustomPosition(offset: Point, rotation: Int, anchor: PointF) {
@@ -60,13 +68,18 @@ class BannerManager private constructor(
         positionState = PositionState.Coordinate(
             AdRenderer.AdContainerParams(offset, rotation, anchor)
         )
+        if (isDisplaying) {
+            weakActivity.get()?.let { activity ->
+                showAd(activity)
+            }
+        }
     }
 
     /**
      * BannerView's functions
      */
     override fun setBannerFormat(bannerFormat: BannerFormat) {
-        this.bannerFormat = bannerFormat
+        _bannerFormat = bannerFormat
     }
 
     override fun loadAd(activity: Activity, pricefloor: Double) {
@@ -170,6 +183,7 @@ class BannerManager private constructor(
                 renderListener = object : AdRenderer.RenderListener {
                     override fun onRendered() {
                         logInfo(tag, "RenderListener.onRendered")
+                        isDisplaying = true
                     }
 
                     override fun onRenderFailed() {
@@ -179,6 +193,7 @@ class BannerManager private constructor(
                     override fun onVisibilityIssued() {
                         activity.runOnUiThread {
                             bannerView.destroyAd()
+                            isDisplaying = false
                             publisherListener?.onAdShowFailed(BidonError.AdNotReady)
                             logInfo(tag, "RenderListener.onVisibilityIssued")
                         }
@@ -192,6 +207,7 @@ class BannerManager private constructor(
         logInfo(tag, "Hide ad. ${Thread.currentThread()}")
         activity.runOnUiThread {
             adRenderer.hide(activity)
+            isDisplaying = false
         }
     }
 
