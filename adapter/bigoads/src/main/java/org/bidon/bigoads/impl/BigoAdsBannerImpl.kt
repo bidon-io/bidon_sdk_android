@@ -134,7 +134,7 @@ internal class BigoAdsBannerImpl :
         })
         adParams.activity.runOnUiThread {
             loader.build()
-                .loadAd(builder.build())
+                .loadAd(adRequest.build())
         }
     }
 }

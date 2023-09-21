@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import kotlinx.coroutines.CoroutineScope
@@ -182,6 +183,10 @@ class BannerView @JvmOverloads constructor(
                 userListener?.onAdShowFailed(loadingError ?: BidonError.AdNotReady)
             }
         }
+    }
+
+    override fun removeFromParent() {
+        (this.parent as? ViewGroup)?.removeView(this)
     }
 
     override fun setBannerListener(listener: BannerListener?) {

@@ -96,7 +96,7 @@ class RefreshableInterstitialAd(
                 (winner.adSource as AdSource.Interstitial).show(activity)
             } ?: run {
                 logInfo(tag, "Ad is not loaded yet.")
-                listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
+                listener.onAdShowFailed(BidonError.AdNotReady)
             }
         }
     }
