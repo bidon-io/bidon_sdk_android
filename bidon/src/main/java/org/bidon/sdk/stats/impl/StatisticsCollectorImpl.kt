@@ -79,12 +79,15 @@ class StatisticsCollectorImpl : StatisticsCollector {
     override val roundId: String
         get() = requireNotNull(stat.roundId) { "RoundId is not set" }
     override val roundIndex: Int
-        get() = requireNotNull(stat.roundIndex) { "RoundId is not set" }
+        get() = requireNotNull(stat.roundIndex) { "RoundIndex is not set" }
+    override val bidType: BidType
+        get() = requireNotNull(stat.bidType) { "BidType is not set" }
 
     override fun getAd(demandAdObject: Any): Ad? {
         val demandId = stat.demandId
         val roundId = stat.roundId ?: return null
         val auctionId = stat.auctionId ?: return null
+        val bidType = stat.bidType ?: return null
         return Ad(
             demandAd = demandAd,
             ecpm = stat.ecpm,
@@ -95,6 +98,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
             auctionId = auctionId,
             dsp = null,
             demandAdObject = demandAdObject,
+            bidType = bidType,
         )
     }
 
