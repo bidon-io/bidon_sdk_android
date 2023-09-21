@@ -101,13 +101,13 @@ internal class RewardedImpl(
         logInfo(TAG, "Show")
         if (auctionHolder.isAuctionActive) {
             logInfo(TAG, "Show failed. Auction in progress.")
-            listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
+            listener.onAdShowFailed(BidonError.AdNotReady)
             return
         }
         when (val adSource = auctionHolder.popWinnerForShow()) {
             null -> {
                 logInfo(TAG, "Show failed. No Auction results.")
-                listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
+                listener.onAdShowFailed(BidonError.AdNotReady)
             }
 
             else -> {

@@ -95,7 +95,7 @@ internal class AdmobRewardedImpl(
         logInfo(TAG, "Starting show: $this")
         val rewardedAd = rewardedAd
         if (rewardedAd == null) {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         } else {
             rewardedAd.show(activity) { rewardItem ->
                 logInfo(TAG, "onUserEarnedReward $rewardItem: $this")

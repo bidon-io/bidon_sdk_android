@@ -102,7 +102,7 @@ internal class InterstitialImpl(
         when (val adSource = auctionHolder.popWinnerForShow()) {
             null -> {
                 logInfo(TAG, "Show failed. No Auction results.")
-                listener.onAdShowFailed(BidonError.FullscreenAdNotReady)
+                listener.onAdShowFailed(BidonError.AdNotReady)
             }
 
             else -> {

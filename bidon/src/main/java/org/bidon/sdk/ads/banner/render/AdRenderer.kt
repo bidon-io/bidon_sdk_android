@@ -18,9 +18,9 @@ internal interface AdRenderer {
         animate: Boolean,
         handleConfigurationChanges: Boolean,
         renderListener: RenderListener
-    ): Boolean
+    )
 
-    fun hide()
+    fun hide(activity: Activity)
 
     interface RenderListener {
         fun onRendered()

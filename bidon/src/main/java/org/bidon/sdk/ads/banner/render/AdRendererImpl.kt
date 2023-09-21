@@ -55,9 +55,9 @@ internal class AdRendererImpl(
         animate: Boolean,
         handleConfigurationChanges: Boolean,
         renderListener: AdRenderer.RenderListener
-    ): Boolean {
+    ) {
         observeActivity(activity)
-        logInfo(tag, "Render banner $bannerView at $activity")
+        logInfo(tag, "Render banner $bannerView at $activity. ${Thread.currentThread()}")
         logInfo(
             tag = tag,
             message = "--> AdContainer($adContainer), AdView($bannerView), $positionState, " +
@@ -65,15 +65,15 @@ internal class AdRendererImpl(
         )
         logInfo(tag, "${bannerView.adSize}. Obtained size: ${bannerView.obtainWidth()} x ${bannerView.obtainHeight()}")
         if (!inspector.isActivityValid(activity)) {
-            hide()
+            hide(activity)
             renderListener.onRenderFailed()
-            return false
+            return
         }
         if (this.positionState != positionState) {
             logInfo(tag, "Position changed: ${this.positionState} -> $positionState")
-            hide()
+            hide(activity)
         }
-        return if (inspector.isRenderPermitted()) {
+        if (inspector.isRenderPermitted()) {
             this.positionState = positionState
             this.activity = WeakReference(activity)
             withRootContainer(activity) {
@@ -90,10 +90,8 @@ internal class AdRendererImpl(
                 setAdViewsVisible(bannerView as ViewGroup)
                 renderListener.onRendered()
             }
-            true
         } else {
             renderListener.onRenderFailed()
-            false
         }
     }
 
@@ -118,7 +116,7 @@ internal class AdRendererImpl(
         }
     }
 
-    override fun hide() {
+    override fun hide(activity: Activity) {
         adContainer?.removeAllViews()
         adContainer = null
     }
@@ -195,6 +193,9 @@ internal class AdRendererImpl(
             logInfo(this@AdRendererImpl.tag, "View and position does not changed")
             return
         }
+        bannerView.parent?.let {
+            (it as ViewGroup).removeView(bannerView)
+        }
         adContainer.setBackgroundColor(Color.TRANSPARENT)
         adContainer.addView(bannerView as View, LayoutParams(bannerView.obtainWidth(), bannerView.obtainHeight(), Gravity.CENTER))
         oldAdView?.animate()
@@ -212,7 +213,7 @@ internal class AdRendererImpl(
             onActivityDestroyed = { destroyedActivity ->
                 logInfo(tag, "Activity destroyed: $destroyedActivity")
                 if (this@AdRendererImpl.activity.get() == destroyedActivity) {
-                    hide()
+                    hide(activity)
                     rootContainer?.removeAllViews()
                     rootContainer = null
                     this@AdRendererImpl.activity = WeakReference(null)

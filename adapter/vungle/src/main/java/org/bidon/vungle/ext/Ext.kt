@@ -15,6 +15,6 @@ internal fun VungleException?.asBidonError() = when (this?.exceptionCode) {
     VungleException.AD_EXPIRED -> BidonError.Expired(VungleDemandId)
     VungleException.APPLICATION_CONTEXT_REQUIRED -> BidonError.NoContextFound
     VungleException.VUNGLE_NOT_INTIALIZED -> BidonError.SdkNotInitialized
-    VungleException.ALREADY_PLAYING_ANOTHER_AD -> BidonError.FullscreenAdNotReady
+    VungleException.ALREADY_PLAYING_ANOTHER_AD -> BidonError.AdNotReady
     else -> BidonError.Unspecified(VungleDemandId)
 }

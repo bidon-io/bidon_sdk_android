@@ -140,7 +140,7 @@ internal class ApplovinRewardedImpl(
         if (rewardedAd?.isAdReadyToDisplay == true && appLovinAd != null) {
             rewardedAd?.show(appLovinAd, activity, listener, listener, listener, listener)
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 

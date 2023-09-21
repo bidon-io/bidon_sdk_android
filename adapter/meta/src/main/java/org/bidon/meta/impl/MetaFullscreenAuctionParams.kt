@@ -1,5 +1,6 @@
 package org.bidon.meta.impl
 
+import android.app.Activity
 import android.content.Context
 import com.facebook.ads.AdSize
 import org.bidon.sdk.adapter.AdAuctionParams
@@ -17,7 +18,7 @@ class MetaFullscreenAuctionParams(
 }
 
 class MetaBannerAuctionParams(
-    val context: Context,
+    val activity: Activity,
     val bannerFormat: BannerFormat,
     val placementId: String,
     val payload: String,

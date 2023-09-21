@@ -23,7 +23,7 @@ internal fun UnityAds.UnityAdsLoadError?.asBidonError() = when (this) {
 }
 
 internal fun UnityAds.UnityAdsShowError?.asBidonError() = when (this) {
-    UnityAds.UnityAdsShowError.NOT_READY -> BidonError.FullscreenAdNotReady
+    UnityAds.UnityAdsShowError.NOT_READY -> BidonError.AdNotReady
     UnityAds.UnityAdsShowError.NO_CONNECTION -> BidonError.NetworkError(UnityAdsDemandId)
     UnityAds.UnityAdsShowError.INVALID_ARGUMENT,
     UnityAds.UnityAdsShowError.VIDEO_PLAYER_ERROR,

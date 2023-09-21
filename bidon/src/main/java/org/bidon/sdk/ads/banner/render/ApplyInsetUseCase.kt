@@ -11,6 +11,7 @@ import androidx.core.view.WindowInsetsCompat
 internal object ApplyInsetUseCase {
     fun FrameLayout.applyWindowInsets(): FrameLayout {
         ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
+            if (view == null || insets == null) return@setOnApplyWindowInsetsListener insets
             val systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
             (view.layoutParams as FrameLayout.LayoutParams).setMargins(

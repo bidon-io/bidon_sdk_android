@@ -54,58 +54,60 @@ internal class AdmobBannerImpl(
     @SuppressLint("MissingPermission")
     override fun load(adParams: AdmobBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
-        val adRequest = getAdRequest(adParams)
-        param = adParams
-        val adView = AdView(adParams.context).also {
-            adView = it
-        }
-        val requestListener = object : AdListener() {
-            override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                logError(TAG, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
-                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+        adParams.activity.runOnUiThread {
+            val adRequest = getAdRequest(adParams)
+            param = adParams
+            val adView = AdView(adParams.activity.applicationContext).also {
+                adView = it
             }
+            val requestListener = object : AdListener() {
+                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                    logError(TAG, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
+                    emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                }
 
-            override fun onAdLoaded() {
-                logInfo(TAG, "onAdLoaded: $this")
-                isAdReadyToShow = true
-                emitEvent(AdEvent.Fill(ad = adView.asAd()))
+                override fun onAdLoaded() {
+                    logInfo(TAG, "onAdLoaded: $this")
+                    isAdReadyToShow = true
+                    emitEvent(AdEvent.Fill(ad = adView.asAd()))
+                }
+
+                override fun onAdClicked() {
+                    logInfo(TAG, "onAdClicked: $this")
+                    emitEvent(AdEvent.Clicked(adView.asAd()))
+                }
+
+                override fun onAdClosed() {
+                    logInfo(TAG, "onAdClosed: $this")
+                    emitEvent(AdEvent.Closed(adView.asAd()))
+                }
+
+                override fun onAdImpression() {
+                    logInfo(TAG, "onAdImpression: $this")
+                    // tracked impression/shown by [BannerView]
+                }
+
+                override fun onAdOpened() {}
             }
-
-            override fun onAdClicked() {
-                logInfo(TAG, "onAdClicked: $this")
-                emitEvent(AdEvent.Clicked(adView.asAd()))
+            val adUnitId = when (adParams) {
+                is AdmobBannerAuctionParams.Bidding -> adParams.adUnitId
+                is AdmobBannerAuctionParams.Network -> adParams.adUnitId
             }
+            adView.apply {
+                this.setAdSize(adParams.adSize)
+                this.adUnitId = adUnitId
+                this.adListener = requestListener
 
-            override fun onAdClosed() {
-                logInfo(TAG, "onAdClosed: $this")
-                emitEvent(AdEvent.Closed(adView.asAd()))
-            }
-
-            override fun onAdImpression() {
-                logInfo(TAG, "onAdImpression: $this")
-                // tracked impression/shown by [BannerView]
-            }
-
-            override fun onAdOpened() {}
-        }
-        val adUnitId = when (adParams) {
-            is AdmobBannerAuctionParams.Bidding -> adParams.adUnitId
-            is AdmobBannerAuctionParams.Network -> adParams.adUnitId
-        }
-        adView.apply {
-            this.setAdSize(adParams.adSize)
-            this.adUnitId = adUnitId
-            this.adListener = requestListener
-
-            this.onPaidEventListener = OnPaidEventListener { adValue ->
-                emitEvent(
-                    AdEvent.PaidRevenue(
-                        ad = adView.asAd(),
-                        adValue = adValue.asBidonAdValue()
+                this.onPaidEventListener = OnPaidEventListener { adValue ->
+                    emitEvent(
+                        AdEvent.PaidRevenue(
+                            ad = adView.asAd(),
+                            adValue = adValue.asBidonAdValue()
+                        )
                     )
-                )
+                }
+                adView.loadAd(adRequest)
             }
-            adView.loadAd(adRequest)
         }
     }
 

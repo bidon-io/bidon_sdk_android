@@ -79,7 +79,7 @@ class MetaRewardedAdImpl :
                         if (rewardedVideoAd != null && bidonAd != null) {
                             emitEvent(AdEvent.Fill(bidonAd))
                         } else {
-                            emitEvent(AdEvent.ShowFailed(BidonError.BannerAdNotReady))
+                            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
                         }
                     }
 
@@ -133,7 +133,7 @@ class MetaRewardedAdImpl :
         if (rewardedAd != null && rewardedAd.isAdLoaded) {
             rewardedAd.show()
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 }
