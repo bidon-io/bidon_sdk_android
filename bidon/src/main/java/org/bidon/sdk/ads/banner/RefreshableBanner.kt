@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 @Keep
 class RefreshableBanner private constructor(
-    private val bannerFormat: BannerFormat,
+    override val bannerFormat: BannerFormat,
     private val adCache: AdCache,
     private val refresher: Refresher,
     private val pauseResumeObserver: PauseResumeObserver,
@@ -122,6 +122,9 @@ class RefreshableBanner private constructor(
 
     override val adSize: AdSize?
         get() = currentBannerView?.adSize
+
+    override var isDisplaying: Boolean = false
+        private set
 
     override fun setRefreshTimeout(timeoutMs: Long) {
         this.refreshTimeout = timeoutMs
@@ -258,6 +261,7 @@ class RefreshableBanner private constructor(
             renderListener = object : AdRenderer.RenderListener {
                 override fun onRendered() {
                     logInfo(tag, "RenderListener.onRendered")
+                    isDisplaying = true
                 }
 
                 override fun onRenderFailed() {
