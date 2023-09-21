@@ -99,9 +99,16 @@ internal class AdCacheImpl(
         }
         if (!isLoading.getAndUpdate { true }) {
             logInfo(Tag, "Cache ad: $adTypeParam")
+            val existing = results.value.groupBy { auctionResult ->
+                val a = auctionResult.adSource.getStats()
+                a.demandId
+            }.map { (demandId, results) ->
+                demandId to results.maxBy { it.adSource.getStats().ecpm }.adSource.getStats()
+            }.toMap()
             val auction: Auction = get()
             auction.start(
                 demandAd = demandAd,
+                existing = existing,
                 adTypeParamData = adTypeParam.copy(
                     pricefloor = maxOf(adTypeParam.pricefloor, results.value.firstOrNull()?.adSource?.getStats()?.ecpm ?: 0.0)
                 ),
