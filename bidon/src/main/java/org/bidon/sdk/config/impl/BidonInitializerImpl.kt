@@ -50,6 +50,8 @@ internal class BidonInitializerImpl : BidonInitializer {
     override val isInitialized: Boolean
         get() = initializationState.value == SdkState.Initialized
     override var isTestMode: Boolean = false
+    override val baseUrl: String
+        get() = bidOnEndpoints.activeEndpoint
 
     override fun registerDefaultAdapters() {
         useDefaultAdapters = true

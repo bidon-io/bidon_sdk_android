@@ -38,6 +38,10 @@ object BidonSdk {
         get() = bidon.regulation
 
     @JvmStatic
+    val baseUrl: String
+        get() = bidon.baseUrl
+
+    @JvmStatic
     fun isInitialized(): Boolean = bidon.isInitialized
 
     @JvmStatic
