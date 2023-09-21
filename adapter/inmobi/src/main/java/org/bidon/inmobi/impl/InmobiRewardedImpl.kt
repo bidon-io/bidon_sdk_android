@@ -112,7 +112,7 @@ internal class InmobiRewardedImpl :
         if (isAdReadyToShow) {
             rewardedAd?.show()
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 

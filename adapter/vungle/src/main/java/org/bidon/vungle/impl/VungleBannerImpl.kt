@@ -141,18 +141,18 @@ internal class VungleBannerImpl :
             }
             emitEvent(AdEvent.Fill(bidonAd))
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.BannerAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 
     override fun getAdView(): AdViewHolder? {
         val adParam = adParams ?: run {
-            AdEvent.ShowFailed(BidonError.BannerAdNotReady)
+            AdEvent.ShowFailed(BidonError.AdNotReady)
             return null
         }
         val banner = banner
         if (!isAdReadyToShow || banner == null) {
-            AdEvent.ShowFailed(BidonError.BannerAdNotReady)
+            AdEvent.ShowFailed(BidonError.AdNotReady)
             return null
         }
         return AdViewHolder(

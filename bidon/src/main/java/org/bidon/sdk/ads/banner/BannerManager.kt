@@ -112,7 +112,7 @@ class BannerManager private constructor(
             if (bannerView == null) {
                 logInfo(tag, "No loaded ad")
                 showAfterLoad.set(true)
-                publisherListener?.onAdShowFailed(BidonError.BannerAdNotReady)
+                publisherListener?.onAdShowFailed(BidonError.AdNotReady)
                 return@runOnUiThread
             }
             if (!bannerView.isReady()) {
@@ -179,7 +179,7 @@ class BannerManager private constructor(
                     override fun onVisibilityIssued() {
                         activity.runOnUiThread {
                             bannerView.destroyAd()
-                            publisherListener?.onAdShowFailed(BidonError.BannerAdNotReady)
+                            publisherListener?.onAdShowFailed(BidonError.AdNotReady)
                             logInfo(tag, "RenderListener.onVisibilityIssued")
                         }
                     }

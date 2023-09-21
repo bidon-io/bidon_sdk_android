@@ -90,7 +90,7 @@ internal class MintegralBannerImpl :
                     if (mBridgeIds != null && ad != null) {
                         emitEvent(AdEvent.Fill(ad))
                     } else {
-                        emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+                        emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
                     }
                 }
 
@@ -138,7 +138,7 @@ internal class MintegralBannerImpl :
                 )
             }
         }
-        emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+        emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         return null
     }
 
