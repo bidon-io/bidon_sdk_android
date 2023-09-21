@@ -149,7 +149,7 @@ internal class MintegralRewardedImpl :
         if (isAdReadyToShow) {
             rewardedAd?.showFromBid()
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 
@@ -165,7 +165,7 @@ internal class MintegralRewardedImpl :
         if (mBridgeIds != null && ad != null) {
             emitEvent(AdEvent.Fill(ad))
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 }

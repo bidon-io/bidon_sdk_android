@@ -79,7 +79,7 @@ class MetaInterstitialImpl :
                         if (interstitialAd != null && bidonAd != null) {
                             emitEvent(AdEvent.Fill(bidonAd))
                         } else {
-                            emitEvent(AdEvent.ShowFailed(BidonError.BannerAdNotReady))
+                            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
                         }
                     }
 
@@ -132,7 +132,7 @@ class MetaInterstitialImpl :
         if (interstitialAd != null && interstitialAd.isAdLoaded) {
             interstitialAd.show()
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 }

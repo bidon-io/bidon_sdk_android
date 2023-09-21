@@ -159,13 +159,13 @@ class BannerView @JvmOverloads constructor(
                 if (!isLoaded) {
                     logInfo(TAG, "Not loaded. Current state: ${adLifecycleFlow.value}")
                     LogLifecycleAdStateUseCase.invoke(adLifecycle = adLifecycleFlow.value)
-                    userListener?.onAdShowFailed(loadingError ?: BidonError.BannerAdNotReady)
+                    userListener?.onAdShowFailed(loadingError ?: BidonError.AdNotReady)
                     return
                 }
                 val bannerSource = (winner?.adSource as? AdSource.Banner) ?: run {
                     logInfo(TAG, "AdSource(${winner?.adSource}: no ad view.")
                     LogLifecycleAdStateUseCase.invoke(adLifecycle = adLifecycleFlow.value)
-                    userListener?.onAdShowFailed(loadingError ?: BidonError.BannerAdNotReady)
+                    userListener?.onAdShowFailed(loadingError ?: BidonError.AdNotReady)
                     return
                 }
                 // Success
@@ -179,7 +179,7 @@ class BannerView @JvmOverloads constructor(
             AdLifecycle.LoadingFailed,
             AdLifecycle.DisplayingFailed,
             AdLifecycle.Destroyed -> {
-                userListener?.onAdShowFailed(loadingError ?: BidonError.BannerAdNotReady)
+                userListener?.onAdShowFailed(loadingError ?: BidonError.AdNotReady)
             }
         }
     }

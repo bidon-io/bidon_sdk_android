@@ -134,7 +134,7 @@ internal class DTExchangeRewarded :
         if (inneractiveAdSpot?.isReady == true && controller != null) {
             controller.show(activity)
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 

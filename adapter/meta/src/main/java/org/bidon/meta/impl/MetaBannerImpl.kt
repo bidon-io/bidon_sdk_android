@@ -81,7 +81,7 @@ class MetaBannerImpl :
                             if (bannerView != null && bidonAd != null) {
                                 emitEvent(AdEvent.Fill(bidonAd))
                             } else {
-                                emitEvent(AdEvent.ShowFailed(BidonError.BannerAdNotReady))
+                                emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
                             }
                         }
 

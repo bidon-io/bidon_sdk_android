@@ -32,8 +32,7 @@ sealed class BidonError : Throwable() {
     class AdFormatIsNotSupported(val demandId: String, val bannerFormat: BannerFormat) : BidonError()
     class Unspecified(val demandId: DemandId?, val sourceError: Throwable? = null) : BidonError()
 
-    object FullscreenAdNotReady : BidonError()
-    object BannerAdNotReady : BidonError()
+    object AdNotReady : BidonError()
     object NoAppropriateAdUnitId : BidonError()
 
     class Expired(val demandId: DemandId?) : BidonError()

@@ -107,7 +107,7 @@ internal class InmobiInterstitialImpl :
         if (isAdReadyToShow) {
             interstitial?.show()
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 
