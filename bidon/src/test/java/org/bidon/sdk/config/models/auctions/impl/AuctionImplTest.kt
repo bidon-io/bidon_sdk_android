@@ -210,7 +210,7 @@ internal class AuctionImplTest : ConcurrentTest() {
             onFailure = {
                 error("unexpected: $it")
             },
-            existing = existing
+            existing = emptyMap()
         )
     }
 
@@ -267,7 +267,7 @@ internal class AuctionImplTest : ConcurrentTest() {
             onFailure = {
                 error("unexpected: $it")
             },
-            existing = existing
+            existing = emptyMap()
         )
     }
 
@@ -311,7 +311,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 // THEN it should expose NoAuctionResults
                 assertThat(it).isEqualTo(BidonError.NoAuctionResults)
             },
-            existing = existing
+            existing = emptyMap()
         )
     }
 
@@ -355,7 +355,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 // THEN it should expose NoAuctionResults
                 assertThat(it).isEqualTo(BidonError.NoAuctionResults)
             },
-            existing = existing
+            existing = emptyMap()
         )
     }
 
