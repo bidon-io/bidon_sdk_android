@@ -12,6 +12,21 @@ import org.bidon.sdk.BidonSdk
  */
 interface PositionedBanner {
     /**
+     * Common interface for [BannerView]
+     */
+    val adSize: AdSize?
+
+    /**
+     * Shows if banner is displaying
+     */
+    val isDisplaying: Boolean
+
+    /**
+     * Predefined [BannerFormat].
+     */
+    val bannerFormat: BannerFormat
+
+    /**
      * Predefined [BannerPosition].
      * Always uses safe area insets.
      */
@@ -29,11 +44,6 @@ interface PositionedBanner {
         rotation: Int,
         anchor: PointF
     )
-
-    /**
-     * Common interface for [BannerView]
-     */
-    val adSize: AdSize?
 
     fun setBannerFormat(bannerFormat: BannerFormat)
     fun loadAd(activity: Activity, pricefloor: Double = BidonSdk.DefaultPricefloor)

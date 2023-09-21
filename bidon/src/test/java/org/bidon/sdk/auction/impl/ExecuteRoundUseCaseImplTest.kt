@@ -39,6 +39,7 @@ import org.bidon.sdk.config.models.base.ConcurrentTest
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
 import org.bidon.sdk.mockkLog
 import org.bidon.sdk.regulation.Regulation
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.di.DI
 import org.bidon.sdk.utils.mainDispatcherOverridden
@@ -162,7 +163,9 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                                 demandAdObject = mockk(relaxed = true),
                                 dsp = null,
                                 ecpm = 1.3,
-                                auctionId = "a123"
+                                auctionId = "a123",
+                                bidType = BidType.CPM,
+
                             )
                         },
                         roundStatus = RoundStatus.Successful
@@ -183,7 +186,8 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                     demandAdObject = mockk(relaxed = true),
                     dsp = null,
                     ecpm = 2.3,
-                    auctionId = "a123"
+                    auctionId = "a123",
+                    bidType = BidType.CPM,
                 )
             },
             roundStatus = RoundStatus.Successful
