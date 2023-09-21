@@ -112,8 +112,8 @@ internal class BMBannerAdImpl :
         adRequest?.notifyMediationWin()
     }
 
-    override fun getAdView(): AdViewHolder {
-        val adView = requireNotNull(bannerView)
+    override fun getAdView(): AdViewHolder? {
+        val adView = bannerView ?: return null
         return AdViewHolder(
             networkAdview = adView,
             widthDp = bannerFormat?.asBidMachineBannerSize()?.width ?: bannerFormat.getWidthDp(),

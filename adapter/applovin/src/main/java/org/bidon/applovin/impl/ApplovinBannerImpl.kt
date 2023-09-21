@@ -120,8 +120,8 @@ internal class ApplovinBannerImpl(
         }
     }
 
-    override fun getAdView(): AdViewHolder {
-        val adView = requireNotNull(adView)
+    override fun getAdView(): AdViewHolder? {
+        val adView = adView ?: return null
         return AdViewHolder(
             networkAdview = adView,
             widthDp = adView.size.width.takeIf { it > 0 } ?: when (param?.bannerFormat) {

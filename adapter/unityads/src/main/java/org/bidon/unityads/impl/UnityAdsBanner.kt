@@ -45,8 +45,8 @@ internal class UnityAdsBanner :
         }
     }
 
-    override fun getAdView(): AdViewHolder {
-        val bannerAdView = requireNotNull(bannerAdView)
+    override fun getAdView(): AdViewHolder? {
+        val bannerAdView = bannerAdView ?: return null
         return AdViewHolder(
             networkAdview = bannerAdView,
             widthDp = bannerAdView.size.width,
