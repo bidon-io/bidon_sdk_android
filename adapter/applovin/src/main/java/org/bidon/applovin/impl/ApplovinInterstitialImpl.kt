@@ -134,7 +134,8 @@ internal class ApplovinInterstitialImpl(
             roundId = roundId,
             currencyCode = AdValue.USD,
             auctionId = auctionId,
-            adUnitId = lineItem?.adUnitId
+            adUnitId = lineItem?.adUnitId,
+            bidType = bidType,
         )
     }
 }

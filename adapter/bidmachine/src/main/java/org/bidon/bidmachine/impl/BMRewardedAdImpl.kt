@@ -201,7 +201,8 @@ internal class BMRewardedAdImpl :
             dsp = this.auctionResult?.demandSource,
             networkName = demandId.demandId,
             auctionId = auctionId,
-            adUnitId = null
+            adUnitId = null,
+            bidType = bidType
         )
     }
 }

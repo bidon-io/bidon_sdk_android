@@ -123,7 +123,8 @@ internal class UnityAdsBanner :
         roundId = roundId,
         currencyCode = AdValue.USD,
         auctionId = auctionId,
-        adUnitId = param?.lineItem?.adUnitId
+        adUnitId = param?.lineItem?.adUnitId,
+        bidType = bidType,
     )
 }
 

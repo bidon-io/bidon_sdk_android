@@ -127,7 +127,8 @@ internal class AdmobRewardedImpl(
             roundId = roundId,
             currencyCode = AdValue.USD,
             auctionId = auctionId,
-            adUnitId = this.adUnitId
+            adUnitId = this.adUnitId,
+            bidType = bidType
         )
     }
 }
