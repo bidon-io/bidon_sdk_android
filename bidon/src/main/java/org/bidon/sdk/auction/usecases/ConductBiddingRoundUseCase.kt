@@ -24,6 +24,7 @@ internal interface ConductBiddingRoundUseCase {
         auctionId: String,
         round: RoundRequest,
         auctionConfigurationId: Int?,
+        auctionConfigurationUid: String?,
         resultsCollector: ResultsCollector,
     )
 }
