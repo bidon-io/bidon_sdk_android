@@ -91,6 +91,7 @@ internal class ExecuteRoundUseCaseImpl(
                         auctionId = auctionResponse.auctionId,
                         round = round,
                         auctionConfigurationId = auctionResponse.auctionConfigurationId,
+                        auctionConfigurationUid = auctionResponse.auctionConfigurationUid,
                         resultsCollector = resultsCollector
                     )
                 }

@@ -36,6 +36,7 @@ internal class ConductBiddingRoundUseCaseImpl(
         auctionId: String,
         round: RoundRequest,
         auctionConfigurationId: Int?,
+        auctionConfigurationUid: String?,
         resultsCollector: ResultsCollector,
     ) {
         runCatching {
@@ -65,6 +66,7 @@ internal class ConductBiddingRoundUseCaseImpl(
                     auctionId = auctionId,
                     roundId = round.id,
                     auctionConfigurationId = auctionConfigurationId,
+                    auctionConfigurationUid = auctionConfigurationUid
                 ).onFailure {
                     logError(TAG, "Error while server bidding", it)
                 }.getOrNull()
