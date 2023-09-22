@@ -193,7 +193,19 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
             roundStatus = RoundStatus.Successful
         )
         coEvery {
-            conductBiddingAuction.invoke(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            conductBiddingAuction.invoke(
+                context = any(),
+                biddingSources = any(),
+                participantIds = any(),
+                adTypeParam = any(),
+                demandAd = any(),
+                bidfloor = any(),
+                auctionId = any(),
+                round = any(),
+                auctionConfigurationId = any(),
+                auctionConfigurationUid = any(),
+                resultsCollector = any()
+            )
         } returns Unit
 
         // it should conduct round with 2 results
