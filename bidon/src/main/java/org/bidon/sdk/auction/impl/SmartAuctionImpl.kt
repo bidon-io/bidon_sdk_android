@@ -94,17 +94,33 @@ internal class SmartAuctionImpl(
                         }
                         smartRound.addLineItems(
                             lineItems = when (demandAd.adType) {
-                                AdType.Banner -> LineItemsPortal.dspBannerLineItems
-                                AdType.Interstitial -> LineItemsPortal.dspInterstitialLineItems
-                                AdType.Rewarded -> LineItemsPortal.dspRewardedAdLineItems
+                                AdType.Banner -> LineItemsPortal.dspBannerLineItems.filter { lineItem ->
+                                    lineItem.demandId !in existing.keys.map { it.demandId }
+                                }
+
+                                AdType.Interstitial -> LineItemsPortal.dspInterstitialLineItems.filter { lineItem ->
+                                    lineItem.demandId !in existing.keys.map { it.demandId }
+                                }
+
+                                AdType.Rewarded -> LineItemsPortal.dspRewardedAdLineItems.filter { lineItem ->
+                                    lineItem.demandId !in existing.keys.map { it.demandId }
+                                }
                             },
                             bidding = when (demandAd.adType) {
-                                AdType.Banner -> LineItemsPortal.biddingBannerParticipants
-                                AdType.Interstitial -> LineItemsPortal.biddingInterstitialParticipants
-                                AdType.Rewarded -> LineItemsPortal.biddingRewardedAdParticipants
-                            }
+                                AdType.Banner -> LineItemsPortal.biddingBannerParticipants.filter { demandId ->
+                                    demandId !in existing.keys.map { it.demandId }
+                                }
+
+                                AdType.Interstitial -> LineItemsPortal.biddingInterstitialParticipants.filter { demandId ->
+                                    demandId !in existing.keys.map { it.demandId }
+                                }
+
+                                AdType.Rewarded -> LineItemsPortal.biddingRewardedAdParticipants.filter { demandId ->
+                                    demandId !in existing.keys.map { it.demandId }
+                                }
+                            },
+                            minPrice = adTypeParamData.pricefloor
                         )
-                        smartRound.setInitialPricefloor(newMinPricefloor = adTypeParamData.pricefloor)
                         conductAuction(
                             auctionData = auctionData,
                             demandAd = demandAd,

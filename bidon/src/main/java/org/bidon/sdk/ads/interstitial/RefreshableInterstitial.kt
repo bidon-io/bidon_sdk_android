@@ -33,7 +33,6 @@ class RefreshableInterstitialAd(
     dispatcher: CoroutineDispatcher = SdkDispatchers.Main,
     private val demandAd: DemandAd = DemandAd(AdType.Interstitial),
     private val scope: CoroutineScope = CoroutineScope(dispatcher),
-    useDifferentDemands: Boolean = false
 ) : Interstitial, Cacheable, Extras by demandAd {
     private val tag get() = TAG
     private var userListener: InterstitialListener? = null
@@ -47,12 +46,6 @@ class RefreshableInterstitialAd(
 
     private val listener by lazy {
         getInterstitialListener()
-    }
-
-    init {
-        if (useDifferentDemands) {
-            adCache.useDifferentDemands()
-        }
     }
 
     override fun loadAd(activity: Activity, pricefloor: Double) {
@@ -73,12 +66,8 @@ class RefreshableInterstitialAd(
         )
     }
 
-    override fun setCacheCapacity(capacity: Int) {
-        adCache.setCacheCapacity(capacity)
-    }
-
-    override fun setMinCacheSize(minSize: Int) {
-        adCache.setMinCacheSize(minSize)
+    override fun withSettings(settings: Cacheable.Settings) {
+        adCache.withSettings(settings)
     }
 
     override fun showAd(activity: Activity) {

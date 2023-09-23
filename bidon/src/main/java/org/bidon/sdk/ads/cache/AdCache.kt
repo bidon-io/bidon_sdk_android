@@ -26,16 +26,5 @@ internal interface AdCache : Cacheable {
      */
     suspend fun poll(): AuctionResult
 
-    /**
-     * Use different demands if possible. Need to be A/B-tested.
-     */
-    fun useDifferentDemands()
-
     fun clear()
-
-    companion object {
-        const val MIN_CACHE_SIZE = 1
-        const val CACHE_CAPACITY = 4
-        const val MIN_CACHE_TIMEOUT = 1000L
-    }
 }

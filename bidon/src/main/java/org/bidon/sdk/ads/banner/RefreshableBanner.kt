@@ -55,19 +55,10 @@ class RefreshableBanner private constructor(
     Cacheable,
     Extras by extras {
 
-    /**
-     * @param useDifferentDemands see [AdCache.useDifferentDemands]
-     */
-    constructor(bannerFormat: BannerFormat, useDifferentDemands: Boolean = false) : this(
+    constructor(bannerFormat: BannerFormat) : this(
         bannerFormat = bannerFormat,
         adCache = get<AdCache> {
-            params(
-                DemandAd(AdType.Banner),
-                MIN_CACHE_SIZE,
-                CACHE_CAPACITY
-            )
-        }.apply {
-            if (useDifferentDemands) useDifferentDemands()
+            params(DemandAd(AdType.Banner))
         },
         refresher = get(),
         pauseResumeObserver = get()
@@ -130,14 +121,6 @@ class RefreshableBanner private constructor(
         this.refreshTimeout = timeoutMs
     }
 
-    override fun setCacheCapacity(capacity: Int) {
-        adCache.setCacheCapacity(capacity)
-    }
-
-    override fun setMinCacheSize(minSize: Int) {
-        adCache.setMinCacheSize(minSize)
-    }
-
     /**
      * Positioning functions
      */
@@ -197,7 +180,9 @@ class RefreshableBanner private constructor(
         }
     }
 
-    override fun showAd(activity: Activity) {}
+    override fun showAd(activity: Activity) {
+        showAd(activity, "default")
+    }
 
     override fun hideAd(activity: Activity) {
         logInfo(tag, "Hide ad")
@@ -300,7 +285,8 @@ class RefreshableBanner private constructor(
     ).apply {
         setBannerFormat(bannerFormat)
     }
-}
 
-private const val MIN_CACHE_SIZE = 2
-private const val CACHE_CAPACITY = 10
+    override fun withSettings(settings: Cacheable.Settings) {
+        adCache.withSettings(settings)
+    }
+}
