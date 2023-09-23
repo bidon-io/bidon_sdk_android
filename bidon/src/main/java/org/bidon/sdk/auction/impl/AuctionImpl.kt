@@ -79,10 +79,8 @@ internal class AuctionImpl(
                             it.demandId.demandId to it.adapterInfo
                         }
                     ).mapCatching { auctionData ->
-                        if (!BidonSdk.bidon.isTestMode) {
-                            check(auctionId == auctionData.auctionId) {
-                                "auction_id has been changed"
-                            }
+                        if (auctionId != auctionData.auctionId) {
+                            logError(TAG, "Auction ID has been changed", IllegalStateException())
                         }
                         conductAuction(
                             auctionData = auctionData,
