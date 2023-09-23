@@ -15,6 +15,7 @@ import org.bidon.sdk.adapter.SupportsRegulation
 import org.bidon.sdk.adapter.SupportsTestMode
 import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
 import org.bidon.sdk.logs.logging.impl.logError
+import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.regulation.Regulation
 import org.bidon.unityads.ext.adapterVersion
 import org.bidon.unityads.ext.asBidonError
@@ -25,6 +26,7 @@ import org.bidon.unityads.impl.UnityAdsFullscreenAuctionParams
 import org.bidon.unityads.impl.UnityAdsInterstitial
 import org.bidon.unityads.impl.UnityAdsRewarded
 import org.json.JSONObject
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -53,19 +55,23 @@ class UnityAdsAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun init(context: Context, configParams: UnityAdsParameters) =
+    override suspend fun init(context: Context, configParams: UnityAdsParameters): Unit =
         suspendCancellableCoroutine { continuation ->
             this.context = context
+            val isContinued = AtomicBoolean(false)
             UnityAds.initialize(
                 context,
                 configParams.unityGameId,
                 isTestMode,
                 object : IUnityAdsInitializationListener {
                     override fun onInitializationComplete() {
+                        if (!isContinued.getAndSet(true)) return
+                        logInfo(TAG, "Initialization complete.")
                         continuation.resume(Unit)
                     }
 
                     override fun onInitializationFailed(error: UnityAds.UnityAdsInitializationError?, message: String?) {
+                        if (!isContinued.getAndSet(true)) return
                         logError(TAG, "Error while initialization: $message, $error", error.asBidonError())
                         continuation.resumeWithException(error.asBidonError())
                     }

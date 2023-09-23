@@ -1,8 +1,12 @@
 package org.bidon.sdk.ads.cache
 
+import androidx.annotation.Keep
+
+@Keep
 interface Cacheable {
     fun withSettings(settings: Settings)
 
+    @Keep
     data class Settings(
         val minCacheSize: Int,
         val cacheCapacity: Int,

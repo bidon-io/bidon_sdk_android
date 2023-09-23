@@ -1,6 +1,7 @@
 package org.bidon.sdk.ads.interstitial
 
 import android.app.Activity
+import androidx.annotation.Keep
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -29,6 +30,7 @@ import org.bidon.sdk.utils.ext.TAG
 /**
  * @param useDifferentDemands see [AdCache.useDifferentDemands]
  */
+@Keep
 class RefreshableInterstitialAd(
     dispatcher: CoroutineDispatcher = SdkDispatchers.Main,
     private val demandAd: DemandAd = DemandAd(AdType.Interstitial),
