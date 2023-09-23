@@ -133,7 +133,10 @@ internal class AdRendererImpl(
         adContainer?.removeAllViews()
         rootContainer?.removeAllViews()
         val layoutParam = LayoutParams(MATCH_PARENT, MATCH_PARENT)
-        rootContainer = FrameLayout(activity).applyWindowInsets()
+        rootContainer = FrameLayout(activity).applyWindowInsets().apply {
+            this.clipChildren = false
+            this.clipToPadding = false
+        }
         activity.addContentView(rootContainer, layoutParam)
         rootContainer?.viewTreeObserver?.addOnGlobalLayoutListener(
             object : ViewTreeObserver.OnGlobalLayoutListener {
@@ -180,12 +183,16 @@ internal class AdRendererImpl(
         val translatedY = offset.y - pivot.y * height
         this.pivotX = width * pivot.x
         this.pivotY = height * pivot.y
+        this.clipChildren = false
+        this.clipToPadding = false
         this.rotation = rotation.toFloat()
         this.x = translatedX
         this.y = translatedY
     }
 
     private fun FrameLayout.addAdView(bannerView: BannerView) {
+        bannerView.clipChildren = false
+        bannerView.clipToPadding = false
         val adContainer: FrameLayout = this
         val oldAdView = adContainer.getChildAt(0)
         val isViewsTheSame = oldAdView == bannerView
