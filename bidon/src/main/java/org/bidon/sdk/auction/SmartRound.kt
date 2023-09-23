@@ -12,9 +12,8 @@ import org.bidon.sdk.utils.ext.TAG
  * Created by Aleksei Cherniaev on 08/09/2023.
  */
 internal interface SmartRound {
-    fun addLineItems(lineItems: List<LineItem>, bidding: List<String>)
+    fun addLineItems(lineItems: List<LineItem>, bidding: List<String>, minPrice: Double)
     fun notifyFail(newMaxPricefloor: Double)
-    fun setInitialPricefloor(newMinPricefloor: Double)
     fun notifyLoaded(newMinPricefloor: Double)
 
     fun popNextRound(pricefloor: Double): NextRound?
@@ -45,14 +44,16 @@ internal class SmartRoundImpl : SmartRound {
         )
     )
 
-    override fun addLineItems(lineItems: List<LineItem>, bidding: List<String>) {
+    override fun addLineItems(lineItems: List<LineItem>, bidding: List<String>, minPrice: Double) {
         logInfo(TAG, "Add line items. Count = ${lineItems.size}")
         logInfo(TAG, "Add line items. $lineItems")
         flow.update {
             AdaptiveRound(
-                minPrice = lineItems.minBy { it.pricefloor }.pricefloor - 0.001,
+                minPrice = minOf(minPrice, lineItems.minBy { it.pricefloor }.pricefloor - 0.001),
                 maxPrice = lineItems.maxBy { it.pricefloor }.pricefloor - 0.001,
-                lineItems = lineItems,
+                lineItems = lineItems.filterNot {
+                    it.pricefloor <= minPrice
+                },
                 bidding = bidding,
                 index = 0,
             )
@@ -69,10 +70,6 @@ internal class SmartRoundImpl : SmartRound {
                 }
             ) ?: type
         }
-    }
-
-    override fun setInitialPricefloor(newMinPricefloor: Double) {
-        notifyLoaded(newMinPricefloor)
     }
 
     override fun notifyLoaded(newMinPricefloor: Double) {

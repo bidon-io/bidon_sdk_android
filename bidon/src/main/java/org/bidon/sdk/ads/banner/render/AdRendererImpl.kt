@@ -191,8 +191,8 @@ internal class AdRendererImpl(
     }
 
     private fun FrameLayout.addAdView(bannerView: BannerAd) {
-        bannerView.clipChildren = false
-        bannerView.clipToPadding = false
+        (bannerView as ViewGroup).clipChildren = false
+        (bannerView as ViewGroup).clipToPadding = false
         val adContainer: FrameLayout = this
         val oldAdView = adContainer.getChildAt(0)
         val isViewsTheSame = oldAdView == bannerView
