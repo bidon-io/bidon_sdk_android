@@ -54,6 +54,8 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                             adapter
                         }
                     }
+                }.onFailure {
+                    logError(TAG, "Adapter not initialized: ${demandId.demandId}", it)
                 }
             }
         }
