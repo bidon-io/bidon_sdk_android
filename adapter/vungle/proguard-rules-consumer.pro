@@ -2,6 +2,9 @@
 
 -keep class org.bidon.vungle.VungleAdapter { *; }
 
+-keepclasseswithmembernames class com.vungle.warren.model.** { *;}
+-keepclasseswithmembernames class com.google.gson.reflect.** { *;}
+
 # Vungle
 -dontwarn com.vungle.warren.downloader.DownloadRequestMediator$Status
 -dontwarn com.vungle.warren.error.VungleError$ErrorCode
