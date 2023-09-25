@@ -37,7 +37,8 @@ internal class AdRendererImpl(
     private val tag get() = TAG
 
     /**
-     * RootContainer is the only one view for every [activity]
+     * RootContainer is the only one view for every [activity].
+     * Implements insets and contains [adContainer] and [BannerView].
      */
     private var rootContainer: FrameLayout? = null
 
@@ -168,14 +169,27 @@ internal class AdRendererImpl(
                 bannerHeight = bannerView.obtainHeight(),
             )
         }
+        bannerView.rotation = rotation.toFloat()
+        val (width, height) = when ((positionState as? PositionState.Place)?.position) {
+            BannerPosition.VerticalLeft,
+            BannerPosition.VerticalRight -> bannerView.obtainHeight() to bannerView.obtainWidth()
+
+            else -> bannerView.obtainWidth() to bannerView.obtainHeight()
+        }
         adContainer.setParams(
             offset = offset,
             pivot = anchor,
-            rotation = rotation,
-            width = bannerView.obtainWidth(),
-            height = bannerView.obtainHeight()
+            rotation = 0,
+            width = width,
+            height = height
         )
-        rootContainer?.addView(adContainer, LayoutParams(bannerView.obtainWidth(), bannerView.obtainHeight()))
+        rootContainer?.addView(
+            adContainer,
+            LayoutParams(
+                width,
+                height
+            )
+        )
     }
 
     private fun FrameLayout.setParams(offset: Point, pivot: PointF, rotation: Int, width: Int, height: Int) {
@@ -183,8 +197,8 @@ internal class AdRendererImpl(
         val translatedY = offset.y - pivot.y * height
         this.pivotX = width * pivot.x
         this.pivotY = height * pivot.y
-        this.clipChildren = false
-        this.clipToPadding = false
+//        this.clipChildren = false
+//        this.clipToPadding = false
         this.rotation = rotation.toFloat()
         this.x = translatedX
         this.y = translatedY
