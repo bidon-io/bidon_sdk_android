@@ -2,29 +2,77 @@ package org.bidon.sdk.ads.banner.render
 
 import android.graphics.Point
 import android.graphics.PointF
+import android.view.ViewGroup
 import org.bidon.sdk.ads.banner.BannerPosition
 
 internal class CalculateAdContainerParamsUseCase {
     operator fun invoke(
-        position: BannerPosition,
+        positionState: AdRenderer.PositionState,
         screenSize: Point,
+        bannerWidth: Int,
         bannerHeight: Int,
-    ): AdRenderer.AdContainerParams {
-        val (pivotX, pivotY, rotation) = when (position) {
-            BannerPosition.HorizontalTop -> Triple(0.5f, 0f, 0)
-            BannerPosition.HorizontalBottom -> Triple(0.5f, 1f, 0)
-            BannerPosition.VerticalLeft -> Triple(0.5f, 0.5f, -90)
-            BannerPosition.VerticalRight -> Triple(0.5f, 0.5f, 90)
+    ): AdViewsParameters {
+
+        val params = when (positionState) {
+            is AdRenderer.PositionState.Coordinate -> positionState.adContainerParams
+
+            is AdRenderer.PositionState.Place -> when (positionState.position) {
+                BannerPosition.HorizontalTop -> AdRenderer.AdContainerParams(
+                    offset = Point(0, 0),
+                    pivot = PointF(0f, 0f),
+                    rotation = 0
+                )
+
+                BannerPosition.HorizontalBottom -> AdRenderer.AdContainerParams(
+                    offset = Point(0, screenSize.y),
+                    pivot = PointF(0f, 1f),
+                    rotation = 0
+                )
+
+                BannerPosition.VerticalLeft -> AdRenderer.AdContainerParams(
+                    offset = Point(0, 0),
+                    pivot = PointF(0f, 0f),
+                    rotation = -90
+                )
+
+                BannerPosition.VerticalRight -> AdRenderer.AdContainerParams(
+                    offset = Point(screenSize.x, 0),
+                    pivot = PointF(1f, 0f),
+                    rotation = 90
+                )
+            }
         }
-        return AdRenderer.AdContainerParams(
-            rotation = rotation,
-            offset = when (position) {
-                BannerPosition.HorizontalTop -> Point(screenSize.x / 2, 0)
-                BannerPosition.HorizontalBottom -> Point(screenSize.x / 2, screenSize.y)
-                BannerPosition.VerticalLeft -> Point(bannerHeight / 2, screenSize.y / 2)
-                BannerPosition.VerticalRight -> Point(screenSize.x - bannerHeight / 2, screenSize.y / 2)
-            },
-            pivot = PointF(pivotX, pivotY)
+
+        val (width, height) = when ((positionState as? AdRenderer.PositionState.Place)?.position) {
+            BannerPosition.VerticalLeft,
+            BannerPosition.VerticalRight -> bannerHeight to bannerWidth
+
+            else -> bannerWidth to bannerHeight
+        }
+        return AdViewsParameters(
+            baseParams = params,
+            adContainerWidth = width,
+            adContainerHeight = height,
+            adContainerLayoutParamsWidth = width.takeIf {
+                (positionState as? AdRenderer.PositionState.Place)?.position in arrayOf(
+                    BannerPosition.VerticalRight,
+                    BannerPosition.VerticalLeft
+                )
+            } ?: ViewGroup.LayoutParams.MATCH_PARENT,
+            adContainerLayoutParamsHeight = height.takeIf {
+                (positionState as? AdRenderer.PositionState.Place)?.position in arrayOf(
+                    BannerPosition.HorizontalTop,
+                    BannerPosition.HorizontalBottom
+                )
+            } ?: ViewGroup.LayoutParams.MATCH_PARENT,
         )
     }
 }
+
+internal data class AdViewsParameters(
+    val baseParams: AdRenderer.AdContainerParams,
+    val adContainerWidth: Int,
+    val adContainerHeight: Int,
+    val adContainerLayoutParamsWidth: Int,
+    val adContainerLayoutParamsHeight: Int,
+)
