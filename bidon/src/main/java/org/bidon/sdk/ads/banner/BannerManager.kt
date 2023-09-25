@@ -216,8 +216,9 @@ class BannerManager private constructor(
 
     override fun destroyAd(activity: Activity) {
         logInfo(tag, "Destroy ad. ${Thread.currentThread()}")
-        hideAd(activity)
         activity.runOnUiThread {
+            adRenderer.destroy(activity)
+            isDisplaying = false
             currentBannerView?.destroyAd()
             currentBannerView = null
             nextBannerView?.destroyAd()

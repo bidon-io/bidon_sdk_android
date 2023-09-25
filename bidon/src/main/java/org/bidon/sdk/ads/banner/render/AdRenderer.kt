@@ -21,6 +21,7 @@ internal interface AdRenderer {
     )
 
     fun hide(activity: Activity)
+    fun destroy(activity: Activity)
 
     interface RenderListener {
         fun onRendered()
