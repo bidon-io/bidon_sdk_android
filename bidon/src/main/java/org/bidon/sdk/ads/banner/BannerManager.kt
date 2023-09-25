@@ -89,10 +89,13 @@ class BannerManager private constructor(
                 publisherListener?.onAdLoadFailed(BidonError.SdkNotInitialized)
                 return@runOnUiThread
             }
+            if (currentBannerView == null) {
+                currentBannerView = nextBannerView
+            }
             nextBannerView = null
             bannersCache.get(
                 activity = activity,
-                format = bannerFormat ?: BannerFormat.Banner,
+                format = bannerFormat,
                 pricefloor = pricefloor,
                 extras = extras,
                 onLoaded = { ad, bannerView ->
