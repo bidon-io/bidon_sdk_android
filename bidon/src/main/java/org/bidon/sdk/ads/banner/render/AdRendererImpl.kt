@@ -62,7 +62,7 @@ internal class AdRendererImpl(
         logInfo(
             tag = tag,
             message = "--> AdContainer($adContainer), AdView($bannerView), $positionState, " +
-                "${bannerView.format}, animate($animate), "
+                    "${bannerView.format}, animate($animate), "
         )
         logInfo(tag, "${bannerView.adSize}. Obtained size: ${bannerView.obtainWidth()} x ${bannerView.obtainHeight()}")
         if (!inspector.isActivityValid(activity)) {
@@ -96,6 +96,21 @@ internal class AdRendererImpl(
         }
     }
 
+    override fun hide(activity: Activity) {
+        adContainer?.removeAllViews()
+        adContainer = null
+    }
+
+    override fun destroy(activity: Activity) {
+        hide(activity)
+        rootContainer?.let {
+            it.removeAllViews()
+            (it.parent as? ViewGroup)?.removeView(it)
+        }
+        rootContainer = null
+        this.activity = WeakReference(null)
+    }
+
     private fun BannerView.fits(positionState: PositionState): Boolean {
         if (positionState !is PositionState.Place) return true
         return when (positionState.position) {
@@ -115,11 +130,6 @@ internal class AdRendererImpl(
         } else {
             onRootContainerReady()
         }
-    }
-
-    override fun hide(activity: Activity) {
-        adContainer?.removeAllViews()
-        adContainer = null
     }
 
     private fun setAdViewsVisible(adView: ViewGroup) {
