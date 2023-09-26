@@ -62,7 +62,7 @@ internal class AdRendererImpl(
         logInfo(
             tag = tag,
             message = "--> AdContainer($adContainer), AdView($bannerView), $positionState, " +
-                    "${bannerView.format}, animate($animate), "
+                "${bannerView.format}, animate($animate), "
         )
         logInfo(tag, "${bannerView.adSize}. Obtained size: ${bannerView.obtainWidth()} x ${bannerView.obtainHeight()}")
         if (!inspector.isActivityValid(activity)) {
@@ -83,9 +83,16 @@ internal class AdRendererImpl(
                     renderListener.onVisibilityIssued()
                     return@withRootContainer
                 }
+                val params = calculateAdContainerParams(
+                    positionState = positionState,
+                    screenSize = safeAreaScreenSize,
+                    bannerWidth = bannerView.obtainWidth(),
+                    bannerHeight = bannerView.obtainHeight(),
+                )
                 if (!inspector.isViewVisibleOnScreen(view = adContainer)) {
-                    createAdContainer(activity, positionState, bannerView)
+                    createAdContainer(activity, params)
                 }
+                bannerView.rotation = params.baseParams.rotation.toFloat()
                 bannerView.showAd()
                 adContainer?.addAdView(bannerView)
                 setAdViewsVisible(bannerView)
@@ -163,21 +170,13 @@ internal class AdRendererImpl(
 
     private fun createAdContainer(
         activity: Activity,
-        positionState: PositionState,
-        bannerView: BannerView
+        params: AdViewsParameters
     ) {
         adContainer?.removeAllViews()
         rootContainer?.removeAllViews()
         val adContainer = FrameLayout(activity).also {
             this.adContainer = it
         }
-        val params = calculateAdContainerParams(
-            positionState = positionState,
-            screenSize = safeAreaScreenSize,
-            bannerWidth = bannerView.obtainWidth(),
-            bannerHeight = bannerView.obtainHeight(),
-        )
-        bannerView.rotation = params.baseParams.rotation.toFloat()
         adContainer.setParams(
             offset = params.baseParams.offset,
             pivot = params.baseParams.pivot,

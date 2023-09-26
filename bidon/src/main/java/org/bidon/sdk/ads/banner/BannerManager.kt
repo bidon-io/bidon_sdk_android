@@ -37,6 +37,8 @@ class BannerManager private constructor(
     private val tag get() = TAG
     private var weakActivity = WeakReference<Activity>(null)
     private var nextBannerView: BannerView? = null
+    private var nextAd: Ad? = null
+
     private var currentBannerView: BannerView? = null
     private val showAfterLoad = AtomicBoolean(false)
     private var positionState: PositionState = PositionState.Default
@@ -89,10 +91,12 @@ class BannerManager private constructor(
                 publisherListener?.onAdLoadFailed(BidonError.SdkNotInitialized)
                 return@runOnUiThread
             }
-            if (currentBannerView == null) {
-                currentBannerView = nextBannerView
+            val nextBannerView = nextBannerView
+            if (nextBannerView != null) {
+                logInfo(tag, "Ad is already loaded")
+                nextAd?.let { publisherListener?.onAdLoaded(it) }
+                return@runOnUiThread
             }
-            nextBannerView = null
             bannersCache.get(
                 activity = activity,
                 format = bannerFormat,
@@ -100,8 +104,9 @@ class BannerManager private constructor(
                 extras = extras,
                 onLoaded = { ad, bannerView ->
                     this.nextBannerView = bannerView
+                    this.nextAd = ad
                     publisherListener?.onAdLoaded(ad)
-                    if (showAfterLoad.getAndSet(false)) {
+                    if (showAfterLoad.getAndSet(false) || isDisplaying) {
                         weakActivity.get()?.let { activity ->
                             showAd(activity)
                         }
@@ -114,7 +119,7 @@ class BannerManager private constructor(
         }
     }
 
-    override fun isReady(): Boolean = currentBannerView?.isReady() == true || nextBannerView?.isReady() == true
+    override fun isReady(): Boolean = nextBannerView?.isReady() == true
 
     override fun showAd(activity: Activity) {
         logInfo(tag, "Show ad. ${Thread.currentThread()}")
@@ -135,6 +140,7 @@ class BannerManager private constructor(
                 logInfo(tag, "Source network banner is not ready ${bannerView.children.firstOrNull()}")
             }
             nextBannerView = null
+            nextAd = null
             currentBannerView = bannerView
 
             /**
@@ -196,7 +202,6 @@ class BannerManager private constructor(
                     override fun onVisibilityIssued() {
                         activity.runOnUiThread {
                             bannerView.destroyAd()
-                            isDisplaying = false
                             publisherListener?.onAdShowFailed(BidonError.AdNotReady)
                             logInfo(tag, "RenderListener.onVisibilityIssued")
                         }
@@ -209,20 +214,23 @@ class BannerManager private constructor(
     override fun hideAd(activity: Activity) {
         logInfo(tag, "Hide ad. ${Thread.currentThread()}")
         activity.runOnUiThread {
-            adRenderer.hide(activity)
             isDisplaying = false
+            showAfterLoad.set(false)
+            adRenderer.hide(activity)
         }
     }
 
     override fun destroyAd(activity: Activity) {
         logInfo(tag, "Destroy ad. ${Thread.currentThread()}")
         activity.runOnUiThread {
-            adRenderer.destroy(activity)
             isDisplaying = false
+            showAfterLoad.set(false)
+            adRenderer.destroy(activity)
             currentBannerView?.destroyAd()
             currentBannerView = null
             nextBannerView?.destroyAd()
             nextBannerView = null
+            nextAd = null
             bannersCache.clear()
         }
     }
@@ -245,6 +253,7 @@ class BannerManager private constructor(
         activity.runOnUiThread {
             nextBannerView?.notifyLoss(winnerDemandId, winnerEcpm)
             nextBannerView = null
+            nextAd = null
         }
     }
 

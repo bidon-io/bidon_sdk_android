@@ -10,6 +10,7 @@ import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.ext.TAG
 import java.util.SortedMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Created by Aleksei Cherniaev on 05/09/2023.
@@ -32,6 +33,7 @@ internal interface BannersCache {
 
 internal class BannersCacheImpl : BannersCache {
     private val Tag get() = TAG
+    private val isLoading = AtomicBoolean(false)
     private val cache = sortedMapOf<Ad, BannerView>({ ad1, ad2 ->
         ((ad2.ecpm - ad1.ecpm) * 1000000).toInt()
     })
@@ -49,28 +51,32 @@ internal class BannersCacheImpl : BannersCache {
             onLoaded(ad, banner)
             return
         }
-        activity.runOnUiThread {
-            val banner = BannerView(activity.applicationContext)
-            banner.setExtras(extras)
-            banner.setBannerFormat(format)
-            banner.setBannerListener(object : BannerListener {
-                override fun onAdLoaded(ad: Ad) {
-                    logInfo(Tag, "Banner loaded: $ad")
-                    onLoaded(ad, banner)
-                }
+        if (!isLoading.getAndSet(true)) {
+            activity.runOnUiThread {
+                val banner = BannerView(activity.applicationContext)
+                banner.setExtras(extras)
+                banner.setBannerFormat(format)
+                banner.setBannerListener(object : BannerListener {
+                    override fun onAdLoaded(ad: Ad) {
+                        logInfo(Tag, "Banner loaded: $ad")
+                        onLoaded(ad, banner)
+                        isLoading.set(false)
+                    }
 
-                override fun onAdLoadFailed(cause: BidonError) {
-                    logInfo(Tag, "Banner load failed: $cause")
-                    onFailed(cause)
-                }
+                    override fun onAdLoadFailed(cause: BidonError) {
+                        logInfo(Tag, "Banner load failed: $cause")
+                        onFailed(cause)
+                        isLoading.set(false)
+                    }
 
-                override fun onAdShown(ad: Ad) {}
+                    override fun onAdShown(ad: Ad) {}
 
-                override fun onAdExpired(ad: Ad) {
-                    cache.removeBannerView(banner)
-                }
-            })
-            banner.loadAd(activity, pricefloor)
+                    override fun onAdExpired(ad: Ad) {
+                        cache.removeBannerView(banner)
+                    }
+                })
+                banner.loadAd(activity, pricefloor)
+            }
         }
     }
 
