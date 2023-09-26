@@ -99,15 +99,17 @@ internal class InterstitialImpl(
             listener.onAdShowFailed(BidonError.AuctionInProgress)
             return
         }
-        when (val adSource = auctionHolder.popWinnerForShow()) {
-            null -> {
-                logInfo(TAG, "Show failed. No Auction results.")
-                listener.onAdShowFailed(BidonError.AdNotReady)
-            }
+        activity.runOnUiThread {
+            when (val adSource = auctionHolder.popWinnerForShow()) {
+                null -> {
+                    logInfo(TAG, "Show failed. No Auction results.")
+                    listener.onAdShowFailed(BidonError.AdNotReady)
+                }
 
-            else -> {
-                scope.launch(Dispatchers.Main.immediate) {
-                    (adSource as AdSource.Interstitial).show(activity)
+                else -> {
+                    scope.launch(Dispatchers.Main.immediate) {
+                        (adSource as AdSource.Interstitial).show(activity)
+                    }
                 }
             }
         }
