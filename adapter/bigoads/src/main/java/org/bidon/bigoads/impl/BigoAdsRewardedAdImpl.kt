@@ -114,7 +114,7 @@ internal class BigoAdsRewardedAdImpl :
                         AdEvent.PaidRevenue(
                             ad = ad,
                             adValue = AdValue(
-                                adRevenue = adParams.bidPrice,
+                                adRevenue = adParams.bidPrice / 1000.0,
                                 precision = Precision.Precise,
                                 currency = AdValue.USD,
                             )

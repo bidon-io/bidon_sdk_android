@@ -121,7 +121,7 @@ internal class BigoAdsBannerImpl :
                                 AdEvent.PaidRevenue(
                                     ad = ad,
                                     adValue = AdValue(
-                                        adRevenue = adParam?.bidPrice ?: 0.0,
+                                        adRevenue = adParams.bidPrice / 1000.0,
                                         precision = Precision.Precise,
                                         currency = USD,
                                     )

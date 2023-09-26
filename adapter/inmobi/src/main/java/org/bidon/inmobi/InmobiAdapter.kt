@@ -30,6 +30,8 @@ import kotlin.coroutines.resumeWithException
 
 /**
  * Created by Aleksei Cherniaev on 11/09/2023.
+ *
+ * [Documentation](https://support.inmobi.com/monetize/sdk-documentation/android-guidelines/overview-android-guidelines#add-the-inmobi-sdk)
  */
 internal val InmobiDemandId = DemandId("inmobi")
 
