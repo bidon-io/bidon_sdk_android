@@ -1,7 +1,6 @@
 package org.bidon.admob
 
 import android.app.Activity
-import android.content.Context
 import com.google.android.gms.ads.AdSize
 import org.bidon.admob.ext.toAdmobAdSize
 import org.bidon.sdk.adapter.AdAuctionParams
@@ -51,10 +50,10 @@ sealed interface AdmobBannerAuctionParams : AdAuctionParams {
 }
 
 sealed interface AdmobFullscreenAdAuctionParams : AdAuctionParams {
-    val context: Context
+    val activity: Activity
 
     class Network(
-        override val context: Context,
+        override val activity: Activity,
         override val lineItem: LineItem,
     ) : AdmobFullscreenAdAuctionParams {
         val adUnitId: String = requireNotNull(lineItem.adUnitId)
@@ -66,7 +65,7 @@ sealed interface AdmobFullscreenAdAuctionParams : AdAuctionParams {
     }
 
     class Bidding(
-        override val context: Context,
+        override val activity: Activity,
         override val price: Double,
         val adUnitId: String,
         val payload: String,

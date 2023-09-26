@@ -67,28 +67,30 @@ internal class AdmobRewardedImpl(
             override fun onAdLoaded(rewardedAd: RewardedAd) {
                 logInfo(TAG, "onAdLoaded. RewardedAd=$rewardedAd, $this")
                 this@AdmobRewardedImpl.rewardedAd = rewardedAd
-                rewardedAd.onPaidEventListener = OnPaidEventListener { adValue ->
-                    emitEvent(
-                        AdEvent.PaidRevenue(
-                            ad = rewardedAd.asAd(),
-                            adValue = adValue.asBidonAdValue()
+                adParams.activity.runOnUiThread {
+                    rewardedAd.onPaidEventListener = OnPaidEventListener { adValue ->
+                        emitEvent(
+                            AdEvent.PaidRevenue(
+                                ad = rewardedAd.asAd(),
+                                adValue = adValue.asBidonAdValue()
+                            )
                         )
+                    }
+                    rewardedAd.fullScreenContentCallback = getFullScreenContentCallback.createCallback(
+                        adEventFlow = this@AdmobRewardedImpl,
+                        getAd = {
+                            rewardedAd.asAd()
+                        },
                     )
+                    emitEvent(AdEvent.Fill(rewardedAd.asAd()))
                 }
-                rewardedAd.fullScreenContentCallback = getFullScreenContentCallback.createCallback(
-                    adEventFlow = this@AdmobRewardedImpl,
-                    getAd = {
-                        rewardedAd.asAd()
-                    },
-                )
-                emitEvent(AdEvent.Fill(rewardedAd.asAd()))
             }
         }
         val adUnitId = when (adParams) {
             is AdmobFullscreenAdAuctionParams.Bidding -> adParams.adUnitId
             is AdmobFullscreenAdAuctionParams.Network -> adParams.adUnitId
         }
-        RewardedAd.load(adParams.context, adUnitId, adRequest, requestListener)
+        RewardedAd.load(adParams.activity, adUnitId, adRequest, requestListener)
     }
 
     override fun show(activity: Activity) {

@@ -67,28 +67,30 @@ internal class AdmobInterstitialImpl(
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
                 logInfo(TAG, "onAdLoaded: $this")
                 this@AdmobInterstitialImpl.interstitialAd = interstitialAd
-                interstitialAd.onPaidEventListener = OnPaidEventListener { adValue ->
-                    emitEvent(
-                        AdEvent.PaidRevenue(
-                            ad = interstitialAd.asAd(),
-                            adValue = adValue.asBidonAdValue()
+                adParams.activity.runOnUiThread {
+                    interstitialAd.onPaidEventListener = OnPaidEventListener { adValue ->
+                        emitEvent(
+                            AdEvent.PaidRevenue(
+                                ad = interstitialAd.asAd(),
+                                adValue = adValue.asBidonAdValue()
+                            )
                         )
+                    }
+                    interstitialAd.fullScreenContentCallback = getFullScreenContentCallback.createCallback(
+                        adEventFlow = this@AdmobInterstitialImpl,
+                        getAd = {
+                            interstitialAd.asAd()
+                        },
                     )
+                    emitEvent(AdEvent.Fill(requireNotNull(interstitialAd.asAd())))
                 }
-                interstitialAd.fullScreenContentCallback = getFullScreenContentCallback.createCallback(
-                    adEventFlow = this@AdmobInterstitialImpl,
-                    getAd = {
-                        interstitialAd.asAd()
-                    },
-                )
-                emitEvent(AdEvent.Fill(requireNotNull(interstitialAd.asAd())))
             }
         }
         val adUnitId = when (adParams) {
             is AdmobFullscreenAdAuctionParams.Bidding -> adParams.adUnitId
             is AdmobFullscreenAdAuctionParams.Network -> adParams.adUnitId
         }
-        InterstitialAd.load(adParams.context, adUnitId, adRequest, requestListener)
+        InterstitialAd.load(adParams.activity, adUnitId, adRequest, requestListener)
     }
 
     override fun show(activity: Activity) {
