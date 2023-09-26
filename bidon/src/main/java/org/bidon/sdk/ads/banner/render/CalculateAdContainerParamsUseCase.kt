@@ -42,29 +42,41 @@ internal class CalculateAdContainerParamsUseCase {
                 )
             }
         }
+        val (width, height) = when (positionState) {
+            is AdRenderer.PositionState.Coordinate -> bannerWidth to bannerHeight
+            is AdRenderer.PositionState.Place -> when (positionState.position) {
+                BannerPosition.HorizontalTop,
+                BannerPosition.HorizontalBottom -> bannerWidth to bannerHeight
 
-        val (width, height) = when ((positionState as? AdRenderer.PositionState.Place)?.position) {
-            BannerPosition.VerticalLeft,
-            BannerPosition.VerticalRight -> bannerHeight to bannerWidth
-
-            else -> bannerWidth to bannerHeight
+                BannerPosition.VerticalLeft,
+                BannerPosition.VerticalRight -> bannerHeight to bannerWidth
+            }
         }
+
         return AdViewsParameters(
             baseParams = params,
             adContainerWidth = width,
             adContainerHeight = height,
-            adContainerLayoutParamsWidth = width.takeIf {
-                (positionState as? AdRenderer.PositionState.Place)?.position in arrayOf(
-                    BannerPosition.VerticalRight,
-                    BannerPosition.VerticalLeft
-                )
-            } ?: ViewGroup.LayoutParams.MATCH_PARENT,
-            adContainerLayoutParamsHeight = height.takeIf {
-                (positionState as? AdRenderer.PositionState.Place)?.position in arrayOf(
-                    BannerPosition.HorizontalTop,
-                    BannerPosition.HorizontalBottom
-                )
-            } ?: ViewGroup.LayoutParams.MATCH_PARENT,
+            adContainerLayoutParamsWidth = when (positionState) {
+                is AdRenderer.PositionState.Coordinate -> width
+                is AdRenderer.PositionState.Place -> width.takeIf {
+                    positionState.position in arrayOf(
+                        BannerPosition.VerticalRight,
+                        BannerPosition.VerticalLeft
+                    )
+                } ?: ViewGroup.LayoutParams.MATCH_PARENT
+            },
+            adContainerLayoutParamsHeight = when (positionState) {
+                is AdRenderer.PositionState.Coordinate -> height
+                is AdRenderer.PositionState.Place -> {
+                    height.takeIf {
+                        positionState.position in arrayOf(
+                            BannerPosition.HorizontalTop,
+                            BannerPosition.HorizontalBottom
+                        )
+                    } ?: ViewGroup.LayoutParams.MATCH_PARENT
+                }
+            }
         )
     }
 }
