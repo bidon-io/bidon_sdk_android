@@ -37,7 +37,8 @@ internal class AdRendererImpl(
     private val tag get() = TAG
 
     /**
-     * RootContainer is the only one view for every [activity]
+     * RootContainer is the only one view for every [activity].
+     * Implements insets and contains [adContainer] and [BannerView].
      */
     private var rootContainer: FrameLayout? = null
 
@@ -82,9 +83,16 @@ internal class AdRendererImpl(
                     renderListener.onVisibilityIssued()
                     return@withRootContainer
                 }
+                val params = calculateAdContainerParams(
+                    positionState = positionState,
+                    screenSize = safeAreaScreenSize,
+                    bannerWidth = bannerView.obtainWidth(),
+                    bannerHeight = bannerView.obtainHeight(),
+                )
                 if (!inspector.isViewVisibleOnScreen(view = adContainer)) {
-                    createAdContainer(activity, positionState, bannerView)
+                    createAdContainer(activity, params)
                 }
+                bannerView.rotation = params.baseParams.rotation.toFloat()
                 bannerView.showAd()
                 adContainer?.addAdView(bannerView)
                 setAdViewsVisible(bannerView as ViewGroup)
@@ -96,6 +104,22 @@ internal class AdRendererImpl(
     }
 
     private fun BannerAd.fits(positionState: PositionState): Boolean {
+    override fun hide(activity: Activity) {
+        adContainer?.removeAllViews()
+        adContainer = null
+    }
+
+    override fun destroy(activity: Activity) {
+        hide(activity)
+        rootContainer?.let {
+            it.removeAllViews()
+            (it.parent as? ViewGroup)?.removeView(it)
+        }
+        rootContainer = null
+        this.activity = WeakReference(null)
+    }
+
+    private fun BannerView.fits(positionState: PositionState): Boolean {
         if (positionState !is PositionState.Place) return true
         return when (positionState.position) {
             BannerPosition.HorizontalTop,
@@ -114,11 +138,6 @@ internal class AdRendererImpl(
         } else {
             onRootContainerReady()
         }
-    }
-
-    override fun hide(activity: Activity) {
-        adContainer?.removeAllViews()
-        adContainer = null
     }
 
     private fun setAdViewsVisible(adView: ViewGroup) {
@@ -152,40 +171,30 @@ internal class AdRendererImpl(
 
     private fun createAdContainer(
         activity: Activity,
-        positionState: PositionState,
-        bannerView: BannerAd
+        params: AdViewsParameters
     ) {
         adContainer?.removeAllViews()
         rootContainer?.removeAllViews()
         val adContainer = FrameLayout(activity).also {
             this.adContainer = it
         }
-        val (offset, rotation, anchor) = when (val state = positionState) {
-            is PositionState.Coordinate -> state.adContainerParams
-            is PositionState.Place -> calculateAdContainerParams(
-                position = state.position,
-                screenSize = safeAreaScreenSize,
-                bannerHeight = bannerView.obtainHeight(),
-            )
-        }
         adContainer.setParams(
-            offset = offset,
-            pivot = anchor,
-            rotation = rotation,
-            width = bannerView.obtainWidth(),
-            height = bannerView.obtainHeight()
+            offset = params.baseParams.offset,
+            pivot = params.baseParams.pivot,
+            width = params.adContainerWidth,
+            height = params.adContainerHeight
         )
-        rootContainer?.addView(adContainer, LayoutParams(bannerView.obtainWidth(), bannerView.obtainHeight()))
+        rootContainer?.addView(
+            adContainer,
+            LayoutParams(params.adContainerLayoutParamsWidth, params.adContainerLayoutParamsHeight)
+        )
     }
 
-    private fun FrameLayout.setParams(offset: Point, pivot: PointF, rotation: Int, width: Int, height: Int) {
+    private fun FrameLayout.setParams(offset: Point, pivot: PointF, width: Int, height: Int) {
         val translatedX = offset.x - pivot.x * width
         val translatedY = offset.y - pivot.y * height
         this.pivotX = width * pivot.x
         this.pivotY = height * pivot.y
-        this.clipChildren = false
-        this.clipToPadding = false
-        this.rotation = rotation.toFloat()
         this.x = translatedX
         this.y = translatedY
     }

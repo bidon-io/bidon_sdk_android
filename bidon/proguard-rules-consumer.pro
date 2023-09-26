@@ -1,4 +1,7 @@
 -keeppackagenames org.bidon.sdk.**
+-keep, includedescriptorclasses
+    class org.bidon.sdk.** { *;}
+
 -keep class org.bidon.sdk.adapter.Adapter {
     public <methods>;
 }
