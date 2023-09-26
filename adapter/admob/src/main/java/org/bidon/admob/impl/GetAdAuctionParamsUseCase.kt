@@ -43,7 +43,7 @@ internal class GetAdAuctionParamsUseCase {
                 AdType.Rewarded -> {
                     if (isBiddingMode) {
                         AdmobFullscreenAdAuctionParams.Bidding(
-                            context = activity.applicationContext,
+                            activity = activity,
                             price = pricefloor,
                             adUnitId = requireNotNull(json?.getString("ad_unit_id")),
                             payload = requireNotNull(json?.getString("payload"))
@@ -51,7 +51,7 @@ internal class GetAdAuctionParamsUseCase {
                     } else {
                         AdmobFullscreenAdAuctionParams.Network(
                             lineItem = popLineItem(AdmobDemandId) ?: error(BidonError.NoAppropriateAdUnitId),
-                            context = activity.applicationContext,
+                            activity = activity,
                         )
                     }
                 }
