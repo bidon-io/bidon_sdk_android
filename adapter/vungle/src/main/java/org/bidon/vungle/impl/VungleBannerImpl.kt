@@ -128,7 +128,7 @@ internal class VungleBannerImpl :
                             AdEvent.PaidRevenue(
                                 ad = ad,
                                 adValue = AdValue(
-                                    adRevenue = adParam.price,
+                                    adRevenue = adParam.price / 1000.0,
                                     precision = Precision.Precise,
                                     currency = AdValue.USD,
                                 )

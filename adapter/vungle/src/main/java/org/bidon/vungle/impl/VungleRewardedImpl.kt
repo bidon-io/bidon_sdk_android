@@ -130,7 +130,7 @@ internal class VungleRewardedImpl :
                             AdEvent.PaidRevenue(
                                 ad = ad,
                                 adValue = AdValue(
-                                    adRevenue = adParams.price,
+                                    adRevenue = adParams.price / 1000.0,
                                     precision = Precision.Precise,
                                     currency = AdValue.USD,
                                 )

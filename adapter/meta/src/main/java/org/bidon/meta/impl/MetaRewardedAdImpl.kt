@@ -96,7 +96,7 @@ class MetaRewardedAdImpl :
                             AdEvent.PaidRevenue(
                                 ad = bidonAd,
                                 adValue = AdValue(
-                                    adRevenue = adParams.price,
+                                    adRevenue = adParams.price / 1000.0,
                                     precision = Precision.Precise,
                                     currency = AdValue.USD,
                                 )
