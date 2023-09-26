@@ -62,7 +62,7 @@ internal class AdRendererImpl(
         logInfo(
             tag = tag,
             message = "--> AdContainer($adContainer), AdView($bannerView), $positionState, " +
-                "${bannerView.format}, animate($animate), "
+                    "${bannerView.format}, animate($animate), "
         )
         logInfo(tag, "${bannerView.adSize}. Obtained size: ${bannerView.obtainWidth()} x ${bannerView.obtainHeight()}")
         if (!inspector.isActivityValid(activity)) {
@@ -92,7 +92,7 @@ internal class AdRendererImpl(
                 if (!inspector.isViewVisibleOnScreen(view = adContainer)) {
                     createAdContainer(activity, params)
                 }
-                bannerView.rotation = params.baseParams.rotation.toFloat()
+                (bannerView as? View)?.rotation = params.baseParams.rotation.toFloat()
                 bannerView.showAd()
                 adContainer?.addAdView(bannerView)
                 setAdViewsVisible(bannerView as ViewGroup)
@@ -103,7 +103,6 @@ internal class AdRendererImpl(
         }
     }
 
-    private fun BannerAd.fits(positionState: PositionState): Boolean {
     override fun hide(activity: Activity) {
         adContainer?.removeAllViews()
         adContainer = null
@@ -119,7 +118,7 @@ internal class AdRendererImpl(
         this.activity = WeakReference(null)
     }
 
-    private fun BannerView.fits(positionState: PositionState): Boolean {
+    private fun BannerAd.fits(positionState: PositionState): Boolean {
         if (positionState !is PositionState.Place) return true
         return when (positionState.position) {
             BannerPosition.HorizontalTop,
@@ -211,7 +210,10 @@ internal class AdRendererImpl(
         }
         bannerView.removeFromParent()
         adContainer.setBackgroundColor(Color.TRANSPARENT)
-        adContainer.addView(bannerView as View, LayoutParams(bannerView.obtainWidth(), bannerView.obtainHeight(), Gravity.CENTER))
+        adContainer.addView(
+            bannerView as View,
+            LayoutParams(bannerView.obtainWidth(), bannerView.obtainHeight(), Gravity.CENTER)
+        )
         oldAdView?.animate()
             ?.alpha(0.0f)
             ?.setDuration(800)
