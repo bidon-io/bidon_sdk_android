@@ -13,6 +13,7 @@ import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.Auction.AuctionState
 import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.models.AdCoordinator
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.auction.models.LineItem
@@ -53,7 +54,7 @@ internal class AuctionImpl(
     override fun start(
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
-        existing: Map<DemandId, BidStat>,
+        adCoordinator: AdCoordinator,
         onSuccess: (results: List<AuctionResult>) -> Unit,
         onFailure: (Throwable) -> Unit,
         onEach: (roundResults: List<AuctionResult>) -> Unit,

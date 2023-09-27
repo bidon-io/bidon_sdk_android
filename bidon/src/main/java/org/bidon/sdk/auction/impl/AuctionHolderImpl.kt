@@ -57,7 +57,9 @@ internal class AuctionHolderImpl(
                     onResult.invoke(it.asFailure())
                     auctionState.value = AuctionHolderState.Idle
                 },
-                existing = emptyMap()
+                adCoordinator = get {
+                    params(demandAd.adType)
+                }
             )
         } else {
             onResult.invoke(BidonError.AuctionInProgress.asFailure())

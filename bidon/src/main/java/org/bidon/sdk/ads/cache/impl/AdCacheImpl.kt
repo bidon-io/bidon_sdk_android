@@ -20,7 +20,9 @@ import org.bidon.sdk.ads.cache.Cacheable
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionResolver
+import org.bidon.sdk.auction.models.AdCoordinator
 import org.bidon.sdk.auction.models.AuctionResult
+import org.bidon.sdk.auction.usecases.LineItemsPortal
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.utils.di.get
@@ -31,6 +33,7 @@ internal class AdCacheImpl(
     private val scope: CoroutineScope,
     private val pauseResumeObserver: PauseResumeObserver,
     private val resolver: AuctionResolver,
+    private val adCoordinator: AdCoordinator
 ) : AdCache {
     private val Tag = "${TAG}_${demandAd.adType.code}"
     private val isLoading = MutableStateFlow(false)
@@ -104,14 +107,14 @@ internal class AdCacheImpl(
             existing.forEach { (d, b) ->
                 logInfo(Tag, "Existing: $d -> $b")
             }
-
+            adCoordinator.startAuction(existing, adTypeParam.pricefloor)
             val auction: Auction = get()
             auction.start(
                 demandAd = demandAd,
-                existing = existing,
                 adTypeParamData = adTypeParam.copy(
                     pricefloor = maxOf(adTypeParam.pricefloor, results.value.firstOrNull()?.adSource?.getStats()?.ecpm ?: 0.0)
                 ),
+                adCoordinator = adCoordinator,
                 onSuccess = { _ ->
                     logInfo(Tag, "Auction completed ${results.value.asString()}")
                     isLoading.value = false
