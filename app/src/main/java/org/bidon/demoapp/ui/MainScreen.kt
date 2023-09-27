@@ -100,18 +100,7 @@ internal fun MainScreen(
                         items = DefaultAdapters.values().toList(),
                         selectedItems = adapters.value,
                         getItemTitle = {
-                            when (it) {
-                                DefaultAdapters.AdmobAdapter -> "Admob"
-                                DefaultAdapters.BidmachineAdapter -> "BidMachine"
-                                DefaultAdapters.ApplovinAdapter -> "Applovin"
-                                DefaultAdapters.DTExchangeAdapter -> "DT Exchange"
-                                DefaultAdapters.UnityAdsAdapter -> "Unity Ads"
-                                DefaultAdapters.VungleAdapter -> "Vungle"
-                                DefaultAdapters.BigoAdsAdapter -> "Bigo Ads"
-                                DefaultAdapters.MintegralAdapter -> "Mintegral"
-                                DefaultAdapters.MetaAdapter -> "Meta/Facebook"
-                                DefaultAdapters.InmobiAdapter -> "Inmobi"
-                            }
+                            it.name.substringBefore("Adapter")
                         },
                         onItemClicked = {
                             adapters.value = if (it in adapters.value) {
