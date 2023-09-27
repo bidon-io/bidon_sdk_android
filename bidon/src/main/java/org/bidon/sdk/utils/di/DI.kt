@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.impl.AdaptersSourceImpl
+import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.helper.CountDownTimer
 import org.bidon.sdk.ads.banner.helper.DeviceType
 import org.bidon.sdk.ads.banner.helper.GetOrientationUseCase
@@ -26,17 +27,21 @@ import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionHolder
 import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.ResultsCollector
-import org.bidon.sdk.auction.SmartRound
-import org.bidon.sdk.auction.SmartRoundImpl
+import org.bidon.sdk.auction.BinarySearchRound
+import org.bidon.sdk.auction.BinarySearchRoundImpl
 import org.bidon.sdk.auction.impl.AuctionHolderImpl
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.impl.ResultsCollectorImpl
 import org.bidon.sdk.auction.impl.SmartAuctionImpl
+import org.bidon.sdk.auction.models.AdCoordinator
+import org.bidon.sdk.auction.models.AdCoordinatorImpl
+import org.bidon.sdk.auction.models.AdItem
 import org.bidon.sdk.auction.usecases.AuctionStat
 import org.bidon.sdk.auction.usecases.BidRequestUseCase
 import org.bidon.sdk.auction.usecases.ConductBiddingRoundUseCase
 import org.bidon.sdk.auction.usecases.ConductNetworkRoundUseCase
 import org.bidon.sdk.auction.usecases.ExecuteRoundUseCase
+import org.bidon.sdk.auction.usecases.LineItemsPortal
 import org.bidon.sdk.auction.usecases.impl.AuctionStatImpl
 import org.bidon.sdk.auction.usecases.impl.BidRequestUseCaseImpl
 import org.bidon.sdk.auction.usecases.impl.ConductBiddingRoundUseCaseImpl
@@ -184,7 +189,6 @@ internal object DI {
                     getAuctionRequest = get(),
                     executeRound = get(),
                     auctionStat = get(),
-                    smartRound = get()
                 )
             }
 //            factory<Auction> {
@@ -315,10 +319,22 @@ internal object DI {
                     scope = CoroutineScope(SdkDispatchers.Default),
                     pauseResumeObserver = get(),
                     resolver = get(),
+                    adCoordinator = get {
+                        params(
+                            LineItemsPortal.getAll(demandAd.adType),
+                            LineItemsPortal.getBiddingParticipants(demandAd.adType)
+                        )
+                    },
+                )
+            }
+            factoryWithParams<AdCoordinator> { (allDspAdItems, allBiddingParticipants) ->
+                AdCoordinatorImpl(
+                    allDspAdItems = allDspAdItems as List<AdItem>,
+                    allBiddingParticipants = allBiddingParticipants as List<String>
                 )
             }
             factory { CalculateAdContainerParamsUseCase() }
-            factory<SmartRound> { SmartRoundImpl() }
+            factory<BinarySearchRound> { BinarySearchRoundImpl() }
             factory<Refresher> { RefresherImpl(dispatcher = Dispatchers.Default) }
         }
     }

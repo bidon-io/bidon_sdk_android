@@ -291,7 +291,9 @@ class BannerView @JvmOverloads constructor(
                 loadingError = it.asBidonErrorOrUnspecified()
                 listener.onAdLoadFailed(cause = it.asBidonErrorOrUnspecified())
             },
-            existing = emptyMap()
+            adCoordinator = get {
+                params(demandAd.adType)
+            }
         )
     }
 

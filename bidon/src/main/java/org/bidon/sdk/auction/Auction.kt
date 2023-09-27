@@ -2,6 +2,7 @@ package org.bidon.sdk.auction
 
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.auction.models.AdCoordinator
 import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.stats.models.BidStat
 
@@ -12,7 +13,7 @@ internal interface Auction {
     fun start(
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
-        existing: Map<DemandId, BidStat>,
+        adCoordinator: AdCoordinator,
         onSuccess: (results: List<AuctionResult>) -> Unit,
         onFailure: (Throwable) -> Unit,
         /**

@@ -45,6 +45,7 @@ import org.bidon.demoapp.theme.AppTheme
 import org.bidon.demoapp.ui.SdkSettings
 import org.bidon.demoapp.ui.TestModeKey
 import org.bidon.demoapp.ui.settings.TestModeInfo
+import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.auction.usecases.LineItemsPortal
 
 class MainActivity : FragmentActivity() {
@@ -57,10 +58,8 @@ class MainActivity : FragmentActivity() {
          * LineItems
          */
         LineItemsPortal {
-            dspInterstitialLineItems = LineItems.Interstitial.dsp
-            dspBannerLineItems = LineItems.Banners.dsp
-            biddingInterstitialParticipants = LineItems.Interstitial.bidding
-            biddingBannerParticipants = LineItems.Banners.bidding
+            AdType.Banner.use(LineItems.Banners.dsp, LineItems.Banners.bidding)
+            AdType.Interstitial.use(LineItems.Interstitial.dsp, LineItems.Interstitial.bidding)
         }
 
         setContent {

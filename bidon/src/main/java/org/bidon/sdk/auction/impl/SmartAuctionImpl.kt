@@ -7,24 +7,20 @@ import kotlinx.coroutines.launch
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
-import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.ResultsCollector
-import org.bidon.sdk.auction.SmartRound
+import org.bidon.sdk.auction.models.AdCoordinator
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.auction.usecases.AuctionStat
 import org.bidon.sdk.auction.usecases.ExecuteRoundUseCase
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
-import org.bidon.sdk.auction.usecases.LineItemsPortal
 import org.bidon.sdk.auction.usecases.models.BiddingResult
 import org.bidon.sdk.auction.usecases.models.RoundResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
-import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
@@ -39,7 +35,6 @@ internal class SmartAuctionImpl(
     private val getAuctionRequest: GetAuctionRequestUseCase,
     private val executeRound: ExecuteRoundUseCase,
     private val auctionStat: AuctionStat,
-    private val smartRound: SmartRound
 ) : Auction {
     private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
     private val state = MutableStateFlow(Auction.AuctionState.Initialized)
@@ -54,7 +49,7 @@ internal class SmartAuctionImpl(
     override fun start(
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
-        existing: Map<DemandId, BidStat>,
+        adCoordinator: AdCoordinator,
         onSuccess: (results: List<AuctionResult>) -> Unit,
         onFailure: (Throwable) -> Unit,
         onEach: (roundResults: List<AuctionResult>) -> Unit,
@@ -79,53 +74,21 @@ internal class SmartAuctionImpl(
                         additionalData = adTypeParamData,
                         auctionId = auctionId,
                         demandAd = demandAd,
-                        adapters = adaptersSource.adapters
-                            .filter {
-                                it.demandId !in existing.keys
-                            }
-                            .associate {
-                                it.demandId.demandId to it.adapterInfo
-                            }
+                        adapters = adaptersSource.adapters.associate {
+                            it.demandId.demandId to it.adapterInfo
+                        }
                     ).mapCatching { auctionData ->
                         if (!BidonSdk.bidon.isTestMode) {
                             check(auctionId == auctionData.auctionId) {
                                 "auction_id has been changed"
                             }
                         }
-                        smartRound.addLineItems(
-                            lineItems = when (demandAd.adType) {
-                                AdType.Banner -> LineItemsPortal.dspBannerLineItems.filter { lineItem ->
-                                    lineItem.demandId !in existing.keys.map { it.demandId }
-                                }
-
-                                AdType.Interstitial -> LineItemsPortal.dspInterstitialLineItems.filter { lineItem ->
-                                    lineItem.demandId !in existing.keys.map { it.demandId }
-                                }
-
-                                AdType.Rewarded -> LineItemsPortal.dspRewardedAdLineItems.filter { lineItem ->
-                                    lineItem.demandId !in existing.keys.map { it.demandId }
-                                }
-                            },
-                            bidding = when (demandAd.adType) {
-                                AdType.Banner -> LineItemsPortal.biddingBannerParticipants.filter { demandId ->
-                                    demandId !in existing.keys.map { it.demandId }
-                                }
-
-                                AdType.Interstitial -> LineItemsPortal.biddingInterstitialParticipants.filter { demandId ->
-                                    demandId !in existing.keys.map { it.demandId }
-                                }
-
-                                AdType.Rewarded -> LineItemsPortal.biddingRewardedAdParticipants.filter { demandId ->
-                                    demandId !in existing.keys.map { it.demandId }
-                                }
-                            },
-                            minPrice = adTypeParamData.pricefloor
-                        )
                         conductAuction(
                             auctionData = auctionData,
                             demandAd = demandAd,
                             adTypeParamData = adTypeParamData,
-                            onEach = onEach
+                            onEach = onEach,
+                            adCoordinator = adCoordinator
                         ).ifEmpty {
                             throw BidonError.NoAuctionResults
                         }.also(onSuccess)
@@ -167,6 +130,7 @@ internal class SmartAuctionImpl(
         auctionData: AuctionResponse,
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
+        adCoordinator: AdCoordinator,
         onEach: (roundResults: List<AuctionResult>) -> Unit,
     ): List<AuctionResult> {
         _auctionDataResponse = auctionData
@@ -177,7 +141,8 @@ internal class SmartAuctionImpl(
             pricefloor = adTypeParamData.pricefloor,
             demandAd = demandAd,
             adTypeParamData = adTypeParamData,
-            onEach = onEach
+            onEach = onEach,
+            adCoordinator = adCoordinator
         )
         logInfo(TAG, "Rounds completed")
 
@@ -227,8 +192,9 @@ internal class SmartAuctionImpl(
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
         onEach: (roundResults: List<AuctionResult>) -> Unit,
+        adCoordinator: AdCoordinator,
     ) {
-        val nextRound = smartRound.popNextRound(pricefloor) ?: return
+        val nextRound = adCoordinator.popNextRound(pricefloor) ?: return
         resultsCollector.startRound(nextRound.roundRequest, pricefloor)
         logInfo(TAG, "Round started: ${nextRound.roundRequest}")
         logInfo(TAG, "Round started: ${nextRound.lineItems}")
@@ -250,26 +216,26 @@ internal class SmartAuctionImpl(
         )
 
         /**
-         * Notify [SmartRound] about round results
+         * Notify [AdCoordinator] about round results
          */
         val results = resultsCollector.getRoundResults()
         if (results is RoundResult.Results) {
             val allResults = (
-                results.networkResults +
-                    (results.biddingResult as? BiddingResult.FilledAd)?.results.orEmpty()
-                )
+                    results.networkResults +
+                            (results.biddingResult as? BiddingResult.FilledAd)?.results.orEmpty()
+                    )
             val successfulResults = allResults.filter {
                 it.roundStatus == RoundStatus.Successful
             }
             if (successfulResults.isEmpty()) {
                 nextRound.lineItems.lastOrNull()?.pricefloor?.let {
-                    smartRound.notifyFail(newMaxPricefloor = it)
+                    adCoordinator.notifyFail(newMaxPricefloor = it)
                 }
             } else {
                 val newMinPricefloor = successfulResults.maxOfOrNull { it.adSource.getStats().ecpm }
                     ?: nextRound.lineItems.firstOrNull()?.pricefloor
                 newMinPricefloor?.let {
-                    smartRound.notifyLoaded(newMinPricefloor = it)
+                    adCoordinator.notifyLoaded(newMinPricefloor = it)
                 }
                 onEach.invoke(successfulResults)
             }
@@ -286,6 +252,7 @@ internal class SmartAuctionImpl(
             demandAd = demandAd,
             adTypeParamData = adTypeParamData,
             onEach = onEach,
+            adCoordinator = adCoordinator,
         )
     }
 }

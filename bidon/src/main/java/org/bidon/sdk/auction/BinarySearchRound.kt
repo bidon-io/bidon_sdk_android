@@ -2,7 +2,7 @@ package org.bidon.sdk.auction
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import org.bidon.sdk.auction.SmartRound.AdaptiveRound
+import org.bidon.sdk.auction.BinarySearchRound.AdaptiveRound
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -11,7 +11,7 @@ import org.bidon.sdk.utils.ext.TAG
 /**
  * Created by Aleksei Cherniaev on 08/09/2023.
  */
-internal interface SmartRound {
+internal interface BinarySearchRound {
     fun addLineItems(lineItems: List<LineItem>, bidding: List<String>, minPrice: Double)
     fun notifyFail(newMaxPricefloor: Double)
     fun notifyLoaded(newMinPricefloor: Double)
@@ -33,7 +33,7 @@ internal interface SmartRound {
     )
 }
 
-internal class SmartRoundImpl : SmartRound {
+internal class BinarySearchRoundImpl : BinarySearchRound {
     private val flow = MutableStateFlow(
         AdaptiveRound(
             index = 0,
@@ -84,7 +84,7 @@ internal class SmartRoundImpl : SmartRound {
         }
     }
 
-    override fun popNextRound(pricefloor: Double): SmartRound.NextRound? {
+    override fun popNextRound(pricefloor: Double): BinarySearchRound.NextRound? {
         val adaptiveRound = flow.value
         val lineItems = adaptiveRound.lineItems.sortedBy { it.pricefloor }.ifEmpty {
             logInfo(TAG, "No line items. Rounds finished.")
@@ -95,7 +95,7 @@ internal class SmartRoundImpl : SmartRound {
                         bidding = emptyList()
                     )
                 }
-                SmartRound.NextRound(
+                BinarySearchRound.NextRound(
                     lineItems = emptyList(),
                     roundRequest = RoundRequest(
                         id = "ROUND-BIDDING",
@@ -128,7 +128,7 @@ internal class SmartRoundImpl : SmartRound {
                 lineItems = round.lineItems - demands.map { it.second }.toSet(),
             )
         }
-        return SmartRound.NextRound(
+        return BinarySearchRound.NextRound(
             lineItems = demands.map { it.second },
             roundRequest = RoundRequest(
                 id = "ROUND-${flow.value.index}",

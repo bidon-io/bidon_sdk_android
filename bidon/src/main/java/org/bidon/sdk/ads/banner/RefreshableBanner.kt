@@ -80,6 +80,7 @@ class RefreshableBanner private constructor(
     private var publisherListener: BannerListener? = null
     private val adRenderer: AdRenderer by lazy { get() }
     private var displayingJob: Job? = null
+    private val pause = MutableStateFlow(false)
 
     private val listener = object : BannerListener {
         override fun onAdLoaded(ad: Ad) {
@@ -164,22 +165,6 @@ class RefreshableBanner private constructor(
 
     override fun isReady(): Boolean = currentBannerView?.isReady() == true
 
-    fun showAd(activity: Activity, placement: String) {
-        logInfo(tag, "Show ad")
-        if (!BidonSdk.isInitialized()) {
-            publisherListener?.onAdLoadFailed(BidonError.SdkNotInitialized)
-            return
-        }
-        this.placement = placement
-        this.weakActivity = WeakReference(activity)
-        this.displaying.value = true
-        if (currentBannerView != null) {
-            render(placement)
-        } else {
-            displayAd(placement)
-        }
-    }
-
     override fun showAd(activity: Activity) {
         showAd(activity, "default")
     }
@@ -203,14 +188,53 @@ class RefreshableBanner private constructor(
         publisherListener = listener
     }
 
+    override fun withSettings(settings: Cacheable.Settings) {
+        adCache.withSettings(settings)
+    }
+
     override fun notifyLoss(activity: Activity, winnerDemandId: String, winnerEcpm: Double) {}
+
     override fun notifyWin() {}
+
+    fun pause() {
+        pause.value = true
+    }
+
+    fun resume() {
+        pause.value = false
+    }
+
+    fun showAd(activity: Activity, placement: String) {
+        logInfo(tag, "Show ad")
+        if (!BidonSdk.isInitialized()) {
+            publisherListener?.onAdLoadFailed(BidonError.SdkNotInitialized)
+            return
+        }
+        this.placement = placement
+        this.weakActivity = WeakReference(activity)
+        this.displaying.value = true
+        if (currentBannerView != null) {
+            render(placement)
+        } else {
+            displayAd(placement)
+        }
+    }
 
     private fun displayAd(placement: String) {
         displayingJob?.cancel()
         displayingJob = scope.launch {
+            /**
+             * Wait for resume
+             */
+            pause.first { !it }
+            /**
+             * Wait for next loaded ad
+             */
             val next = adCache.poll()
             val activity = weakActivity.get() ?: return@launch
+            /**
+             * Banner should not be hidden
+             */
             displaying.first { it }
             pauseResumeObserver.lifecycleFlow.first { it == ActivityLifecycleState.Resumed }
             currentBannerView = getBannerView(activity, next)
@@ -284,9 +308,5 @@ class RefreshableBanner private constructor(
         demandAd = demandAd
     ).apply {
         setBannerFormat(bannerFormat)
-    }
-
-    override fun withSettings(settings: Cacheable.Settings) {
-        adCache.withSettings(settings)
     }
 }
