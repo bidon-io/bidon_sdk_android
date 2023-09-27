@@ -51,6 +51,7 @@ include(
     ":adapter:meta",
     ":adapter:inmobi",
     ":adapter:yandex",
+    ":adapter:mobilefuse",
 //    ":adapter:fyber",
 //    ":adapter:ironsource",
 //    ":adapter:appsflyer"

@@ -17,11 +17,12 @@ object Versions {
         val Vungle = "$mainVersion.0" + semanticVersion
         val Meta = "$mainVersion.0" + semanticVersion
         val Inmobi = "$mainVersion.0" + semanticVersion
+        val MobileFuse = "$mainVersion.0" + semanticVersion
         val Yandex = "$mainVersion.0" + semanticVersion
 
-        val IronSource = "$mainVersion.0" + semanticVersion
-        val Appsflyer = "$mainVersion.0" + semanticVersion
-        val Fyber = "$mainVersion.0" + semanticVersion
+        val IronSource = "$mainVersion.0"
+        val Appsflyer = "$mainVersion.0"
+        val Fyber = "$mainVersion.0"
     }
 
     private val mainVersion get() = "$major.$minor.$patch"

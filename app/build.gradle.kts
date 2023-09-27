@@ -110,6 +110,7 @@ dependencies {
     implementation(project(":adapter:vungle"))
     implementation(project(":adapter:inmobi"))
     implementation(project(":adapter:yandex"))
+    implementation(project(":adapter:mobilefuse"))
 
     implementation(Dependencies.Google.PlayServicesAdsIdentifier)
 
