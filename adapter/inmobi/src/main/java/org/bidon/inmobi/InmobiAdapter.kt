@@ -2,6 +2,7 @@ package org.bidon.inmobi
 
 import android.content.Context
 import com.inmobi.sdk.InMobiSdk
+import com.inmobi.sdk.SdkInitializationListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -25,6 +26,7 @@ import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.regulation.Regulation
 import org.json.JSONObject
+import java.lang.Error
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -67,14 +69,19 @@ class InmobiAdapter :
                 // Provide user consent in IAB format
                 consentObject.put(InMobiSdk.IM_GDPR_CONSENT_IAB, reg.gdprConsentString)
             }
-            InMobiSdk.init(context, configParams.accountId, consentObject) { error ->
-                if (null != error) {
-                    logError(TAG, "InMobi Init Failed", error)
-                    it.resumeWithException(BidonError.SdkNotInitialized)
-                } else {
-                    it.resume(Unit)
+            InMobiSdk.init(
+                context, configParams.accountId, consentObject,
+                object : SdkInitializationListener {
+                    override fun onInitializationComplete(error: Error?) {
+                        if (null != error) {
+                            logError(TAG, "InMobi Init Failed", error)
+                            it.resumeWithException(BidonError.SdkNotInitialized)
+                        } else {
+                            it.resume(Unit)
+                        }
+                    }
                 }
-            }
+            )
         }
     }
 

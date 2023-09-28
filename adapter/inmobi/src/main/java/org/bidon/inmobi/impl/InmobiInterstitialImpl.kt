@@ -32,7 +32,7 @@ internal class InmobiInterstitialImpl :
     private var interstitial: InMobiInterstitial? = null
 
     override val isAdReadyToShow: Boolean
-        get() = interstitial?.isReady == true
+        get() = interstitial?.isReady() == true
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
