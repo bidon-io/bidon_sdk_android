@@ -35,6 +35,7 @@ internal class AdCacheImpl(
     private val resolver: AuctionResolver,
     private val adCoordinator: AdCoordinator
 ) : AdCache {
+
     private val Tag = "${TAG}_${demandAd.adType.code}"
     private val isLoading = MutableStateFlow(false)
     private val results = MutableStateFlow(emptyList<AuctionResult>())
