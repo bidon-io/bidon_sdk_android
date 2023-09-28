@@ -53,9 +53,7 @@ internal class BigoAdsInterstitialImpl :
                 slotId = requireNotNull(json?.optString("slot_id")) {
                     "Slot id is required for Bigo Ads"
                 },
-                bidPrice = requireNotNull(json?.optDouble("price")) {
-                    "Bid price is required for Bigo Ads"
-                },
+                bidPrice = pricefloor,
             )
         }
     }
