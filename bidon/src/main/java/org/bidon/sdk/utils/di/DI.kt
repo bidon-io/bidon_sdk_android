@@ -2,6 +2,7 @@ package org.bidon.sdk.utils.di
 
 import android.app.Application
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.impl.AdaptersSourceImpl
@@ -18,11 +19,11 @@ import org.bidon.sdk.ads.banner.render.AdRenderer
 import org.bidon.sdk.ads.banner.render.AdRendererImpl
 import org.bidon.sdk.ads.banner.render.CalculateAdContainerParamsUseCase
 import org.bidon.sdk.ads.banner.render.RenderInspectorImpl
+import org.bidon.sdk.ads.cache.AdCache
+import org.bidon.sdk.ads.cache.impl.AdCacheImpl
 import org.bidon.sdk.auction.Auction
-import org.bidon.sdk.auction.AuctionHolder
 import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.ResultsCollector
-import org.bidon.sdk.auction.impl.AuctionHolderImpl
 import org.bidon.sdk.auction.impl.AuctionImpl
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.impl.ResultsCollectorImpl
@@ -87,6 +88,7 @@ import org.bidon.sdk.stats.impl.StatsRequestUseCaseImpl
 import org.bidon.sdk.stats.usecases.SendImpressionRequestUseCase
 import org.bidon.sdk.stats.usecases.SendWinLossRequestUseCase
 import org.bidon.sdk.stats.usecases.StatsRequestUseCase
+import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorageImpl
 import org.bidon.sdk.utils.networking.BidonEndpoints
@@ -190,11 +192,6 @@ internal object DI {
                     activityLifecycleObserver = param as ActivityLifecycleObserver
                 )
             }
-            factoryWithParams<AuctionHolder> { (demandAd) ->
-                AuctionHolderImpl(
-                    demandAd = demandAd as DemandAd,
-                )
-            }
             factory<GetOrientationUseCase> { GetOrientationUseCaseImpl(context = get()) }
             factory { JsonHttpRequest(tokenDataSource = get()) }
             factory<ConductBiddingRoundUseCase> {
@@ -295,6 +292,13 @@ internal object DI {
             }
             factory<BannersCache> { BannersCacheImpl() }
             factory { CalculateAdContainerParamsUseCase() }
+            factoryWithParams<AdCache> { (demandAd) ->
+                AdCacheImpl(
+                    demandAd = demandAd as DemandAd,
+                    scope = CoroutineScope(SdkDispatchers.Main),
+                    resolver = get()
+                )
+            }
         }
     }
 }
