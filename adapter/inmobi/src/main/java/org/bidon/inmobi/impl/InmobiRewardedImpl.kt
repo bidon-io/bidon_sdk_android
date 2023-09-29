@@ -32,7 +32,7 @@ internal class InmobiRewardedImpl :
     private var rewardedAd: InMobiInterstitial? = null
 
     override val isAdReadyToShow: Boolean
-        get() = rewardedAd?.isReady == true
+        get() = rewardedAd?.isReady() == true
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
