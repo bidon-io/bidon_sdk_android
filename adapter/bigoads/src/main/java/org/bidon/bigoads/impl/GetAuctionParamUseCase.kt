@@ -20,9 +20,7 @@ internal class GetAuctionParamUseCase {
                     slotId = requireNotNull(json?.optString("slot_id")) {
                         "Slot id is required for Bigo Ads"
                     },
-                    bidPrice = requireNotNull(json?.optDouble("price")) {
-                        "Bid price is required for Bigo Ads"
-                    },
+                    bidPrice = pricefloor,
                 )
             } else {
                 val lineItem = popLineItem(BigoAdsDemandId) ?: error("unexpected")
@@ -50,9 +48,7 @@ internal class GetAuctionParamUseCase {
                     slotId = requireNotNull(json?.optString("slot_id")) {
                         "Slot id is required for BigoAds banner ad"
                     },
-                    bidPrice = requireNotNull(json?.optDouble("price")) {
-                        "Bid price is required for BigoAds banner ad"
-                    },
+                    bidPrice = pricefloor,
                 )
             } else {
                 val lineItem = popLineItem(BigoAdsDemandId) ?: error("unexpected")
