@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineScope
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.impl.AdaptersSourceImpl
@@ -23,13 +24,15 @@ import org.bidon.sdk.ads.cache.AdCache
 import org.bidon.sdk.ads.cache.Refresher
 import org.bidon.sdk.ads.cache.impl.AdCacheImpl
 import org.bidon.sdk.ads.cache.impl.RefresherImpl
+import org.bidon.sdk.ads.cache.AdCache
+import org.bidon.sdk.ads.cache.impl.AdCacheImpl
 import org.bidon.sdk.auction.Auction
-import org.bidon.sdk.auction.AuctionHolder
 import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.BinarySearchRound
 import org.bidon.sdk.auction.BinarySearchRoundImpl
 import org.bidon.sdk.auction.impl.AuctionHolderImpl
+import org.bidon.sdk.auction.impl.AuctionImpl
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.impl.ResultsCollectorImpl
 import org.bidon.sdk.auction.impl.SmartAuctionImpl
@@ -210,11 +213,6 @@ internal object DI {
                     activityLifecycleObserver = param as ActivityLifecycleObserver
                 )
             }
-            factoryWithParams<AuctionHolder> { (demandAd) ->
-                AuctionHolderImpl(
-                    demandAd = demandAd as DemandAd,
-                )
-            }
             factory<GetOrientationUseCase> { GetOrientationUseCaseImpl(context = get()) }
             factory { JsonHttpRequest(tokenDataSource = get()) }
             factory<ConductBiddingRoundUseCase> {
@@ -334,6 +332,13 @@ internal object DI {
                 )
             }
             factory { CalculateAdContainerParamsUseCase() }
+            factoryWithParams<AdCache> { (demandAd) ->
+                AdCacheImpl(
+                    demandAd = demandAd as DemandAd,
+                    scope = CoroutineScope(SdkDispatchers.Main),
+                    resolver = get()
+                )
+            }
             factory<BinarySearchRound> { BinarySearchRoundImpl() }
             factory<Refresher> { RefresherImpl(dispatcher = Dispatchers.Default) }
         }
