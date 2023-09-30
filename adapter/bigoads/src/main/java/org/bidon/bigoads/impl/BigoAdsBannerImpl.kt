@@ -68,6 +68,7 @@ internal class BigoAdsBannerImpl :
         return BigoAdSdk.getBidderToken()
     }
     override fun load(adParams: BigoBannerAuctionParams) {
+        logInfo(TAG, "load: $adParams")
         val adRequest = BannerAdRequest.Builder()
         this.bannerFormat = adParams.bannerFormat
         this.adParam = adParams
