@@ -88,8 +88,12 @@ object LineItems {
     }
 
     object Banners {
-        val dsp get() = emptyList<LineItem>() // unityAds + admob + applovin + yandex
-        val bidding get() = listOf("bigoads", "bidmachine", "vungle")
+        val dsp get() = vungle// emptyList<LineItem>() // unityAds + admob + applovin + yandex
+        val bidding get() = emptyList<String>() //  listOf("bigoads", "bidmachine")
+
+        private val vungle = listOf(
+            LineItem(demandId = "vungle", pricefloor = 0.01, adUnitId = "PLACEMENT_BANNER-1714730", uid = uuid()),
+        )
 
         private val unityAds = listOf(
             LineItem(demandId = "unityads", pricefloor = 0.01, adUnitId = "unity_banner_0_01", uid = uuid()),

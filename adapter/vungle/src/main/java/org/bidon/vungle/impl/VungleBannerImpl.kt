@@ -31,13 +31,18 @@ import org.bidon.vungle.ext.asBidonError
 internal class VungleBannerImpl :
     AdSource.Banner<VungleBannerAuctionParams>,
     Mode.Bidding,
+    Mode.Network,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var adParams: VungleBannerAuctionParams? = null
     private var banner: VungleBanner? = null
+    private var isBiddingMode = false
 
-    override suspend fun getToken(context: Context): String? = Vungle.getAvailableBidTokens(context)
+    override suspend fun getToken(context: Context): String? {
+        isBiddingMode = true
+        return Vungle.getAvailableBidTokens(context)
+    }
 
     override val isAdReadyToShow: Boolean
         get() = adParams?.let {
@@ -50,25 +55,40 @@ internal class VungleBannerImpl :
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            VungleBannerAuctionParams(
-                activity = activity,
-                bannerFormat = bannerFormat,
-                bannerId = requireNotNull(json?.getString("placement_id")) {
-                    "Banner id is required"
-                },
-                price = pricefloor,
-                payload = requireNotNull(json?.getString("payload")) {
-                    "Payload is required"
-                }
-            )
+            if (isBiddingMode) {
+                VungleBannerAuctionParams(
+                    activity = activity,
+                    bannerFormat = bannerFormat,
+                    bannerId = requireNotNull(json?.getString("placement_id")) {
+                        "Banner id is required"
+                    },
+                    price = pricefloor,
+                    payload = requireNotNull(json?.getString("payload")) {
+                        "Payload is required"
+                    }
+                )
+            } else {
+                val lineItem = popLineItem(demandId) ?: error("unexpected")
+                VungleBannerAuctionParams(
+                    activity = activity,
+                    bannerFormat = bannerFormat,
+                    bannerId = requireNotNull(lineItem.adUnitId) {
+                        "Banner id is required"
+                    },
+                    price = lineItem.pricefloor,
+                    payload = "",
+                    lineItem = lineItem
+                )
+            }
         }
     }
 
     override fun load(adParams: VungleBannerAuctionParams) {
+        logInfo(TAG, "load: $adParams")
         this.adParams = adParams
         adParams.activity.runOnUiThread {
             Banners.loadBanner(
-                adParams.bannerId, adParams.payload, adParams.config,
+                adParams.bannerId, adParams.payload.takeIf { it.isNotBlank() }, adParams.config,
                 object : LoadAdCallback {
                     override fun onAdLoad(placementId: String?) {
                         logInfo(TAG, "onAdLoad =$placementId. $this")

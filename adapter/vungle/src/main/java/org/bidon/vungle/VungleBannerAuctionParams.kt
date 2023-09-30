@@ -13,8 +13,8 @@ class VungleBannerAuctionParams(
     val bannerFormat: BannerFormat,
     val payload: String,
     val bannerId: String,
-) : AdAuctionParams {
     override val lineItem: LineItem? = null
+) : AdAuctionParams {
     val bannerSize
         get() = when (bannerFormat) {
             BannerFormat.LeaderBoard -> AdConfig.AdSize.BANNER_LEADERBOARD
@@ -26,6 +26,10 @@ class VungleBannerAuctionParams(
         BannerAdConfig().apply {
             this.adSize = bannerSize
         }
+    }
+
+    override fun toString(): String {
+        return "VungleBannerAuctionParams(price=$price, $bannerFormat, bannerId='$bannerId', lineItem=$lineItem, bannerSize=$bannerSize, config=$config, payload='$payload')"
     }
 }
 
