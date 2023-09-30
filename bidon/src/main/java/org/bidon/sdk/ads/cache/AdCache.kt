@@ -13,7 +13,8 @@ internal interface AdCache : Cacheable {
      */
     fun cache(
         adTypeParam: AdTypeParam,
-        onEach: (AuctionResult) -> Unit
+        onSuccess: (AuctionResult) -> Unit,
+        onFailure: (Throwable) -> Unit,
     )
 
     /**
@@ -22,9 +23,14 @@ internal interface AdCache : Cacheable {
     fun peek(): AuctionResult?
 
     /**
+     * Removes from cache if exists and exposes
+     */
+    fun pop(): AuctionResult?
+
+    /**
      * Removes from cache and exposes
      */
     suspend fun poll(): AuctionResult
 
-    fun clear()
+    fun clear(onAuctionCancelled: () -> Unit)
 }

@@ -32,5 +32,8 @@ internal class AdItem(
         }
         return a.sum() * lineItem.pricefloor
     }
-}
 
+    override fun toString(): String {
+        return "AdItem(lineItem=$lineItem, history=$history)"
+    }
+}

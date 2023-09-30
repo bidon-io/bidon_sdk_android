@@ -20,6 +20,7 @@ import org.bidon.sdk.ads.cache.AdCache
 import org.bidon.sdk.ads.cache.Cacheable
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.config.impl.asBidonErrorOrUnspecified
 import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -61,10 +62,13 @@ class RefreshableInterstitialAd(
                 activity = activity,
                 pricefloor = pricefloor,
             ),
-            onEach = { auctionResult ->
+            onSuccess = { auctionResult ->
                 logInfo(tag, "Ad is loaded and available to show.")
                 auctionResult.adSource.ad?.let { listener.onAdLoaded(it) }
-            }
+            },
+            onFailure = { cause ->
+                listener.onAdLoadFailed(cause.asBidonErrorOrUnspecified())
+            },
         )
     }
 

@@ -197,7 +197,7 @@ internal class SmartAuctionImpl(
         val nextRound = adCoordinator.popNextRound(pricefloor) ?: return
         resultsCollector.startRound(nextRound.roundRequest, pricefloor)
         logInfo(TAG, "Round started: ${nextRound.roundRequest}")
-        logInfo(TAG, "Round started: ${nextRound.lineItems}")
+        logInfo(TAG, "Round started: ${nextRound.adItems}")
         // Execute round
         executeRound(
             round = nextRound.roundRequest,
@@ -205,7 +205,7 @@ internal class SmartAuctionImpl(
             demandAd = demandAd,
             adTypeParam = adTypeParamData,
             auctionResponse = auctionDataResponse,
-            lineItems = nextRound.lineItems,
+            lineItems = nextRound.adItems.map { it.lineItem },
             resultsCollector = resultsCollector,
             roundIndex = nextRound.roundIndex,
             onFinish = { remainingLineItems ->
@@ -220,23 +220,13 @@ internal class SmartAuctionImpl(
          */
         val results = resultsCollector.getRoundResults()
         if (results is RoundResult.Results) {
-            val allResults = (
-                    results.networkResults +
-                            (results.biddingResult as? BiddingResult.FilledAd)?.results.orEmpty()
-                    )
+            val allResults = results.networkResults +
+                (results.biddingResult as? BiddingResult.FilledAd)?.results.orEmpty()
             val successfulResults = allResults.filter {
                 it.roundStatus == RoundStatus.Successful
             }
-            if (successfulResults.isEmpty()) {
-                nextRound.lineItems.lastOrNull()?.pricefloor?.let {
-                    adCoordinator.notifyFail(newMaxPricefloor = it)
-                }
-            } else {
-                val newMinPricefloor = successfulResults.maxOfOrNull { it.adSource.getStats().ecpm }
-                    ?: nextRound.lineItems.firstOrNull()?.pricefloor
-                newMinPricefloor?.let {
-                    adCoordinator.notifyLoaded(newMinPricefloor = it)
-                }
+            adCoordinator.notifyRoundCompleted(results, successfulResults)
+            if (successfulResults.isNotEmpty()) {
                 onEach.invoke(successfulResults)
             }
         }

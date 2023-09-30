@@ -4,11 +4,9 @@ import android.app.Application
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.CoroutineScope
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.impl.AdaptersSourceImpl
-import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.helper.CountDownTimer
 import org.bidon.sdk.ads.banner.helper.DeviceType
 import org.bidon.sdk.ads.banner.helper.GetOrientationUseCase
@@ -24,15 +22,11 @@ import org.bidon.sdk.ads.cache.AdCache
 import org.bidon.sdk.ads.cache.Refresher
 import org.bidon.sdk.ads.cache.impl.AdCacheImpl
 import org.bidon.sdk.ads.cache.impl.RefresherImpl
-import org.bidon.sdk.ads.cache.AdCache
-import org.bidon.sdk.ads.cache.impl.AdCacheImpl
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionResolver
+import org.bidon.sdk.auction.BinarySearchRoundCoordinator
+import org.bidon.sdk.auction.BinarySearchRoundCoordinatorImpl
 import org.bidon.sdk.auction.ResultsCollector
-import org.bidon.sdk.auction.BinarySearchRound
-import org.bidon.sdk.auction.BinarySearchRoundImpl
-import org.bidon.sdk.auction.impl.AuctionHolderImpl
-import org.bidon.sdk.auction.impl.AuctionImpl
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.impl.ResultsCollectorImpl
 import org.bidon.sdk.auction.impl.SmartAuctionImpl
@@ -319,7 +313,7 @@ internal object DI {
                     resolver = get(),
                     adCoordinator = get {
                         params(
-                            LineItemsPortal.getAll(demandAd.adType),
+                            LineItemsPortal.getAll(demandAd.adType).map { AdItem(it) },
                             LineItemsPortal.getBiddingParticipants(demandAd.adType)
                         )
                     },
@@ -332,14 +326,7 @@ internal object DI {
                 )
             }
             factory { CalculateAdContainerParamsUseCase() }
-            factoryWithParams<AdCache> { (demandAd) ->
-                AdCacheImpl(
-                    demandAd = demandAd as DemandAd,
-                    scope = CoroutineScope(SdkDispatchers.Main),
-                    resolver = get()
-                )
-            }
-            factory<BinarySearchRound> { BinarySearchRoundImpl() }
+            factory<BinarySearchRoundCoordinator> { BinarySearchRoundCoordinatorImpl() }
             factory<Refresher> { RefresherImpl(dispatcher = Dispatchers.Default) }
         }
     }

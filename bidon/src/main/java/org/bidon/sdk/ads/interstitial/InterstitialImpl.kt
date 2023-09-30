@@ -57,7 +57,6 @@ internal class InterstitialImpl(
                 pricefloor = pricefloor,
             ),
             onSuccess = { auctionResult ->
-                subscribeToWinner(auctionResult.adSource)
                 listener.onAdLoaded(
                     requireNotNull(auctionResult.adSource.ad) {
                         "[Ad] should exist when action succeeds"
@@ -83,6 +82,7 @@ internal class InterstitialImpl(
                 logInfo(TAG, "Show failed. No Auction results.")
                 listener.onAdShowFailed(BidonError.AdNotReady)
             } else {
+                subscribeToWinner(adSource)
                 adSource.show(activity)
             }
         }
