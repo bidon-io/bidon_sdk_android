@@ -29,6 +29,7 @@ import org.bidon.sdk.ads.cache.Refresher
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.config.impl.asBidonErrorOrUnspecified
 import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
@@ -156,10 +157,13 @@ class RefreshableBanner private constructor(
                 bannerFormat = bannerFormat,
                 containerWidth = bannerFormat.getWidthDp().toFloat()
             ),
-            onEach = { auctionResult ->
+            onSuccess = { auctionResult ->
                 logInfo(tag, "Ad is loaded and available to show.")
                 auctionResult.adSource.ad?.let { listener.onAdLoaded(it) }
-            }
+            },
+            onFailure = { cause ->
+                listener.onAdLoadFailed(cause = cause.asBidonErrorOrUnspecified())
+            },
         )
     }
 

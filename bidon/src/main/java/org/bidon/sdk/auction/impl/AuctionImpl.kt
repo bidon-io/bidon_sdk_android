@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
@@ -25,7 +24,6 @@ import org.bidon.sdk.auction.usecases.models.RoundResult
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
-import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get

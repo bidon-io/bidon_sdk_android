@@ -27,7 +27,6 @@ class AdItemTest {
         adItem.loaded(false)
         adItem.loaded(true)
 
-
         println(adItem.weight())
         error("Not implemented")
     }

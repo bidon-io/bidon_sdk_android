@@ -1,10 +1,8 @@
 package org.bidon.sdk.auction
 
 import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.auction.models.AdCoordinator
 import org.bidon.sdk.auction.models.AuctionResult
-import org.bidon.sdk.stats.models.BidStat
 
 /**
  * Created by Bidon Team on 07/09/2022.

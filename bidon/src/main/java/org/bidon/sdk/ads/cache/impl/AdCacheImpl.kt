@@ -22,7 +22,6 @@ import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.models.AdCoordinator
 import org.bidon.sdk.auction.models.AuctionResult
-import org.bidon.sdk.auction.usecases.LineItemsPortal
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.utils.di.get
@@ -44,6 +43,7 @@ internal class AdCacheImpl(
     private var previousDemandId: String? = null
     private var settings: Cacheable.Settings = Cacheable.DefaultSettings
     private var retryTimeout = settings.minCacheTimeoutMs
+    private var auction: Auction? = null
 
     override fun withSettings(settings: Cacheable.Settings) {
         this.settings = settings
@@ -51,7 +51,8 @@ internal class AdCacheImpl(
 
     override fun cache(
         adTypeParam: AdTypeParam,
-        onEach: (AuctionResult) -> Unit
+        onSuccess: (AuctionResult) -> Unit,
+        onFailure: (Throwable) -> Unit,
     ) {
         job?.cancel()
         job = scope.launch {
@@ -60,7 +61,7 @@ internal class AdCacheImpl(
                 results.first { it.size < settings.minCacheSize }
                 isLoading.first { !it }
                 pauseResumeObserver.lifecycleFlow.first { it == ActivityLifecycleState.Resumed }
-                load(adTypeParam, onEach)
+                load(adTypeParam, onSuccess, onFailure)
                 delay(retryTimeout)
                 retryTimeout = minOf(retryTimeout * 2, settings.maxCacheTimeoutMs)
             }
@@ -68,6 +69,12 @@ internal class AdCacheImpl(
     }
 
     override fun peek(): AuctionResult? = results.value.firstOrNull()
+
+    override fun pop(): AuctionResult? {
+        return results.getAndUpdate {
+            it.drop(1)
+        }.firstOrNull()
+    }
 
     override suspend fun poll(): AuctionResult {
         var next = results.first { it.isNotEmpty() }.first()
@@ -80,13 +87,15 @@ internal class AdCacheImpl(
         return next
     }
 
-    override fun clear() {
-        job?.cancel()
-        job = null
+    override fun clear(onAuctionCancelled: () -> Unit) {
         results.value = emptyList()
+        auction?.let {
+            it.cancel()
+            onAuctionCancelled()
+        }
     }
 
-    private fun load(adTypeParam: AdTypeParam, onEach: (AuctionResult) -> Unit) {
+    private fun load(adTypeParam: AdTypeParam, onSuccess: (AuctionResult) -> Unit, onFailure: (Throwable) -> Unit) {
         logInfo(Tag, "Cache started: ${results.value.asString()}")
         if (results.value.size >= settings.minCacheSize) {
             logInfo(Tag, "Cache has enough ads")
@@ -108,9 +117,9 @@ internal class AdCacheImpl(
             existing.forEach { (d, b) ->
                 logInfo(Tag, "Existing: $d -> $b")
             }
-            adCoordinator.startAuction(existing, adTypeParam.pricefloor)
-            val auction: Auction = get()
-            auction.start(
+            adCoordinator.onAuctionStarted(existing, adTypeParam.pricefloor, settings)
+            auction = get()
+            auction?.start(
                 demandAd = demandAd,
                 adTypeParamData = adTypeParam.copy(
                     pricefloor = maxOf(adTypeParam.pricefloor, results.value.firstOrNull()?.adSource?.getStats()?.ecpm ?: 0.0)
@@ -122,6 +131,7 @@ internal class AdCacheImpl(
                 },
                 onFailure = {
                     logInfo(Tag, "Auction failed: ${results.value.asString()}")
+                    onFailure(it)
                     isLoading.value = false
                 },
                 onEach = { roundResults ->
@@ -130,8 +140,8 @@ internal class AdCacheImpl(
                         results.update {
                             resolver.sortWinners(it + roundResults).take(settings.cacheCapacity)
                         }
-                        onEach(results.value.first())
-                        roundResults.forEach { trackExpired(it) }
+                        roundResults.intersect(results.value.toSet()).forEach { trackExpired(it) }
+                        onSuccess(results.value.first())
                         logInfo(Tag, "Round completed: ${results.value.asString()}")
                     }
                 }

@@ -18,8 +18,11 @@ interface Cacheable {
         /**
          * Use different demands if possible. Need to be A/B-tested.
          */
-        val useDifferentDemands: Boolean = false,
-        val skipCurrentDemand: Boolean = false,
+        val useDifferentDemands: Boolean = true,
+        val skipCurrentDemand: Boolean = true,
+
+        val useEfficientRound: Boolean = true,
+        val useBiddingRound: Boolean = true,
     )
 
     companion object {
@@ -33,8 +36,10 @@ interface Cacheable {
             cacheCapacity = CACHE_CAPACITY,
             minCacheTimeoutMs = START_RETRY_TIMEOUT,
             maxCacheTimeoutMs = MAX_CACHE_TIMEOUT,
-            useDifferentDemands = false,
-            skipCurrentDemand = false,
+            useDifferentDemands = true,
+            skipCurrentDemand = true,
+            useEfficientRound = true,
+            useBiddingRound = true,
         )
     }
 }

@@ -62,7 +62,7 @@ internal class AdRendererImpl(
         logInfo(
             tag = tag,
             message = "--> AdContainer($adContainer), AdView($bannerView), $positionState, " +
-                    "${bannerView.format}, animate($animate), "
+                "${bannerView.format}, animate($animate), "
         )
         logInfo(tag, "${bannerView.adSize}. Obtained size: ${bannerView.obtainWidth()} x ${bannerView.obtainHeight()}")
         if (!inspector.isActivityValid(activity)) {
