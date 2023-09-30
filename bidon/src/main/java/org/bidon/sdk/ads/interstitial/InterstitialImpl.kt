@@ -15,8 +15,8 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
+import org.bidon.sdk.ads.cache.AdCache
 import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.AuctionHolder
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.config.impl.asBidonErrorOrUnspecified
 import org.bidon.sdk.databinders.extras.Extras
@@ -32,7 +32,7 @@ internal class InterstitialImpl(
     private var userListener: InterstitialListener? = null
     private var observeCallbacksJob: Job? = null
 
-    private val auctionHolder: AuctionHolder by lazy {
+    private val adCache: AdCache by lazy {
         get {
             params(demandAd)
         }
@@ -50,41 +50,24 @@ internal class InterstitialImpl(
             listener.onAdLoadFailed(BidonError.SdkNotInitialized)
             return
         }
-        if (auctionHolder.isAdReady()) {
-            logInfo(TAG, "Ad is loaded and available to show.")
-            return
-        }
         logInfo(TAG, "Load (pricefloor=$pricefloor)")
-        if (!auctionHolder.isAuctionActive) {
-            auctionHolder.startAuction(
-                adTypeParam = AdTypeParam.Interstitial(
-                    activity = activity,
-                    pricefloor = pricefloor,
-                ),
-                onResult = { result ->
-                    result
-                        .onSuccess { auctionResults ->
-                            /**
-                             * Winner found
-                             */
-                            val winner = auctionResults.first()
-                            subscribeToWinner(winner.adSource)
-                            listener.onAdLoaded(
-                                requireNotNull(winner.adSource.ad) {
-                                    "[Ad] should exist when action succeeds"
-                                }
-                            )
-                        }.onFailure {
-                            /**
-                             * Auction failed
-                             */
-                            listener.onAdLoadFailed(cause = it.asBidonErrorOrUnspecified())
-                        }
-                }
-            )
-        } else {
-            logInfo(TAG, "Auction already in progress")
-        }
+        adCache.cache(
+            adTypeParam = AdTypeParam.Interstitial(
+                activity = activity,
+                pricefloor = pricefloor,
+            ),
+            onSuccess = { auctionResult ->
+                subscribeToWinner(auctionResult.adSource)
+                listener.onAdLoaded(
+                    requireNotNull(auctionResult.adSource.ad) {
+                        "[Ad] should exist when action succeeds"
+                    }
+                )
+            },
+            onFailure = { cause ->
+                listener.onAdLoadFailed(cause = cause.asBidonErrorOrUnspecified())
+            }
+        )
     }
 
     override fun showAd(activity: Activity) {
@@ -94,23 +77,13 @@ internal class InterstitialImpl(
             return
         }
         logInfo(TAG, "Show")
-        if (auctionHolder.isAuctionActive) {
-            logInfo(TAG, "Show failed. Auction in progress.")
-            listener.onAdShowFailed(BidonError.AuctionInProgress)
-            return
-        }
         activity.runOnUiThread {
-            when (val adSource = auctionHolder.popWinnerForShow()) {
-                null -> {
-                    logInfo(TAG, "Show failed. No Auction results.")
-                    listener.onAdShowFailed(BidonError.AdNotReady)
-                }
-
-                else -> {
-                    scope.launch(Dispatchers.Main.immediate) {
-                        (adSource as AdSource.Interstitial).show(activity)
-                    }
-                }
+            val adSource = adCache.pop()?.adSource as? AdSource.Interstitial
+            if (adSource == null) {
+                logInfo(TAG, "Show failed. No Auction results.")
+                listener.onAdShowFailed(BidonError.AdNotReady)
+            } else {
+                adSource.show(activity)
             }
         }
     }
@@ -121,32 +94,26 @@ internal class InterstitialImpl(
     }
 
     override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {
-        auctionHolder.notifyLoss(
-            winnerDemandId = winnerDemandId,
-            winnerEcpm = winnerEcpm,
-            onAuctionCancelled = {
-                userListener?.onAdLoadFailed(BidonError.AuctionCancelled)
-            },
-            onNotified = {
-                destroyAd()
-            }
-        )
+        adCache.pop()?.adSource?.sendLoss(winnerDemandId, winnerEcpm)
+        destroyAd()
     }
 
     override fun notifyWin() {
-        auctionHolder.notifyWin()
+        adCache.peek()?.adSource?.sendWin()
     }
 
     override fun destroyAd() {
         scope.launch(Dispatchers.Main.immediate) {
-            auctionHolder.destroy()
+            adCache.clear {
+                userListener?.onAdLoadFailed(BidonError.AuctionCancelled)
+            }
             observeCallbacksJob?.cancel()
             observeCallbacksJob = null
         }
     }
 
     override fun isReady(): Boolean {
-        return auctionHolder.isAdReady()
+        return adCache.peek()?.adSource?.isAdReadyToShow == true
     }
 
     /**
