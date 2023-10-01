@@ -88,7 +88,7 @@ object LineItems {
     }
 
     object Banners {
-        val dsp get() = bigoAds //+ unityAds + admob + applovin + yandex
+        val dsp get() = bigoAds // + unityAds + admob + applovin + yandex
         val bidding get() = listOf("bigoads", "bidmachine")
 
         private val vungle = listOf(
