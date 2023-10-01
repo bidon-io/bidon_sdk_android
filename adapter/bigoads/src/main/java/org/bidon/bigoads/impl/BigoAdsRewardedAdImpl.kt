@@ -32,6 +32,7 @@ internal class BigoAdsRewardedAdImpl :
     AdSource.Rewarded<BigoFullscreenAuctionParams>,
     AdEventFlow by AdEventFlowImpl(),
     Mode.Bidding,
+    Mode.Network,
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var rewardVideoAd: RewardVideoAd? = null

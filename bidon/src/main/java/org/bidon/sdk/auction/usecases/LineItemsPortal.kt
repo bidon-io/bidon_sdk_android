@@ -1,19 +1,21 @@
 package org.bidon.sdk.auction.usecases
 
+import androidx.annotation.Keep
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.auction.models.LineItem
 
 /**
  * Created by Aleksei Cherniaev on 10/09/2023.
  */
+@Keep
 object LineItemsPortal {
     operator fun invoke(scope: LineItemsPortal.() -> Unit) {
         scope(this)
     }
 
-    private var dspInterstitialAdItems = listOf<LineItem>()
-    private var dspRewardedAdItems = listOf<LineItem>()
-    private var dspBannerAdItems = listOf<LineItem>()
+    private var dspInterstitial = listOf<LineItem>()
+    private var dspRewardedAd = listOf<LineItem>()
+    private var dspBannerAd = listOf<LineItem>()
     private var biddingInterstitialParticipants = listOf<String>()
     private var biddingRewardedAdParticipants = listOf<String>()
     private var biddingBannerParticipants = listOf<String>()
@@ -21,17 +23,17 @@ object LineItemsPortal {
     fun AdType.use(lineItems: List<LineItem>, bidding: List<String>) {
         when (this) {
             AdType.Interstitial -> {
-                dspInterstitialAdItems = lineItems
+                dspInterstitial = lineItems
                 biddingInterstitialParticipants = bidding
             }
 
             AdType.Rewarded -> {
-                dspRewardedAdItems = lineItems
+                dspRewardedAd = lineItems
                 biddingRewardedAdParticipants = bidding
             }
 
             AdType.Banner -> {
-                dspBannerAdItems = lineItems
+                dspBannerAd = lineItems
                 biddingBannerParticipants = bidding
             }
         }
@@ -47,9 +49,9 @@ object LineItemsPortal {
 
     internal fun getAll(adType: AdType): List<LineItem> {
         return when (adType) {
-            AdType.Interstitial -> dspInterstitialAdItems
-            AdType.Rewarded -> dspRewardedAdItems
-            AdType.Banner -> dspBannerAdItems
+            AdType.Interstitial -> dspInterstitial
+            AdType.Rewarded -> dspRewardedAd
+            AdType.Banner -> dspBannerAd
         }
     }
 }

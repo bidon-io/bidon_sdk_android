@@ -58,8 +58,10 @@ class MainActivity : FragmentActivity() {
          * LineItems
          */
         LineItemsPortal {
+//            AdType.Banner.use(emptyList(), listOf("bigoads"))
+            AdType.Interstitial.use(emptyList(), listOf("bigoads"))
             AdType.Banner.use(LineItems.Banners.dsp, LineItems.Banners.bidding)
-            AdType.Interstitial.use(LineItems.Interstitial.dsp, LineItems.Interstitial.bidding)
+//            AdType.Interstitial.use(LineItems.Interstitial.dsp, LineItems.Interstitial.bidding)
         }
 
         setContent {

@@ -67,7 +67,7 @@ afterEvaluate {
                 afterEvaluate {
                     from(components["productionRelease"])
                 }
-                artifact(dokkaJar)
+//                artifact(dokkaJar)
                 artifact(sourcesJar)
                 groupId = "org.bidon" // Replace with group ID
                 artifactId = getArtifactId

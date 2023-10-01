@@ -36,6 +36,7 @@ import sg.bigo.ads.api.BannerAdRequest
 internal class BigoAdsBannerImpl :
     AdSource.Banner<BigoBannerAuctionParams>,
     Mode.Bidding,
+    Mode.Network,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -67,6 +68,7 @@ internal class BigoAdsBannerImpl :
         isBiddingMode = true
         return BigoAdSdk.getBidderToken()
     }
+
     override fun load(adParams: BigoBannerAuctionParams) {
         logInfo(TAG, "load: $adParams")
         val adRequest = BannerAdRequest.Builder()
@@ -85,54 +87,55 @@ internal class BigoAdsBannerImpl :
                     BannerFormat.LeaderBoard -> AdSize.BANNER
                 }
             )
-        val loader = BannerAdLoader.Builder().withAdLoadListener(object : AdLoadListener<BannerAd> {
-            override fun onError(adError: AdError) {
-                val error = adError.asBidonError()
-                logError(TAG, "Error while loading ad: $adError. $this", error)
-                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
-            }
+        val loader = BannerAdLoader.Builder()
+            .withAdLoadListener(object : AdLoadListener<BannerAd> {
+                override fun onError(adError: AdError) {
+                    val error = adError.asBidonError()
+                    logError(TAG, "Error while loading ad: ${adError.code} ${adError.message}. $this", error)
+                    emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                }
 
-            override fun onAdLoaded(bannerAd: BannerAd) {
-                logInfo(TAG, "onAdLoaded: $bannerAd, $this")
-                this@BigoAdsBannerImpl.bannerAd = bannerAd
-                val ad = getAd(this)
-                if (ad == null) {
-                    emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-                } else {
-                    bannerAd.setAdInteractionListener(object : AdInteractionListener {
-                        override fun onAdError(error: AdError) {
-                            val cause = error.asBidonError()
-                            logError(TAG, "onAdError: $this", cause)
-                            emitEvent(AdEvent.ShowFailed(cause))
-                        }
+                override fun onAdLoaded(bannerAd: BannerAd) {
+                    logInfo(TAG, "onAdLoaded: $bannerAd, $this")
+                    this@BigoAdsBannerImpl.bannerAd = bannerAd
+                    val ad = getAd(this)
+                    if (ad == null) {
+                        emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
+                    } else {
+                        bannerAd.setAdInteractionListener(object : AdInteractionListener {
+                            override fun onAdError(error: AdError) {
+                                val cause = error.asBidonError()
+                                logError(TAG, "onAdError: $this", cause)
+                                emitEvent(AdEvent.ShowFailed(cause))
+                            }
 
-                        override fun onAdImpression() {
-                            logInfo(TAG, "onAdImpression: $this")
-                            // tracked impression/shown by [BannerView]
-                            emitEvent(
-                                AdEvent.PaidRevenue(
-                                    ad = ad,
-                                    adValue = AdValue(
-                                        adRevenue = adParams.bidPrice / 1000.0,
-                                        precision = Precision.Precise,
-                                        currency = USD,
+                            override fun onAdImpression() {
+                                logInfo(TAG, "onAdImpression: $this")
+                                // tracked impression/shown by [BannerView]
+                                emitEvent(
+                                    AdEvent.PaidRevenue(
+                                        ad = ad,
+                                        adValue = AdValue(
+                                            adRevenue = adParams.bidPrice / 1000.0,
+                                            precision = Precision.Precise,
+                                            currency = USD,
+                                        )
                                     )
                                 )
-                            )
-                        }
+                            }
 
-                        override fun onAdClicked() {
-                            logInfo(TAG, "onAdClicked: $this")
-                            emitEvent(AdEvent.Clicked(ad))
-                        }
+                            override fun onAdClicked() {
+                                logInfo(TAG, "onAdClicked: $this")
+                                emitEvent(AdEvent.Clicked(ad))
+                            }
 
-                        override fun onAdOpened() {}
-                        override fun onAdClosed() {}
-                    })
-                    emitEvent(AdEvent.Fill(ad))
+                            override fun onAdOpened() {}
+                            override fun onAdClosed() {}
+                        })
+                        emitEvent(AdEvent.Fill(ad))
+                    }
                 }
-            }
-        })
+            })
         adParams.activity.runOnUiThread {
             loader.build()
                 .loadAd(adRequest.build())
