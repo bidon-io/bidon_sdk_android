@@ -141,7 +141,7 @@ internal class AdCacheImpl(
                             resolver.sortWinners(it + roundResults).take(settings.cacheCapacity)
                         }
                         roundResults.intersect(results.value.toSet()).forEach { trackExpired(it) }
-                        onSuccess(results.value.first())
+                        results.value.firstOrNull()?.let { onSuccess(it) }
                         logInfo(Tag, "Round completed: ${results.value.asString()}")
                     }
                 }

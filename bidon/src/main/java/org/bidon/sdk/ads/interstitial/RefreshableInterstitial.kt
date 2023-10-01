@@ -106,6 +106,10 @@ class RefreshableInterstitialAd(
     override fun destroyAd() {}
 
     override fun isReady(): Boolean {
+        if (!BidonSdk.isInitialized()) {
+            logInfo(tag, "Sdk is not initialized")
+            return false
+        }
         return adCache.peek()?.adSource?.isAdReadyToShow == true
     }
 
@@ -175,6 +179,3 @@ class RefreshableInterstitialAd(
         }
     }
 }
-
-private const val MIN_CACHE_SIZE = 1
-private const val CACHE_CAPACITY = 3
