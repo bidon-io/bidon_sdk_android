@@ -56,7 +56,6 @@ class BigoAdsAdapter :
             .apply {
                 configParams.channel?.let { setChannel(it) }
             }
-
         BigoAdSdk.initialize(context, config.build()) {
             continuation.resume(Unit)
         }
@@ -85,7 +84,7 @@ class BigoAdsAdapter :
         val (consentOptions, given) = if (regulation.gdpr in arrayOf(Gdpr.Given, Gdpr.Denied)) {
             ConsentOptions.GDPR to regulation.gdprConsent
         } else {
-            return
+            ConsentOptions.CCPA to false
         }
         context?.let { context ->
             BigoAdSdk.setUserConsent(

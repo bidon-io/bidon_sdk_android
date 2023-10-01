@@ -88,8 +88,8 @@ object LineItems {
     }
 
     object Banners {
-        val dsp get() = vungle// emptyList<LineItem>() // unityAds + admob + applovin + yandex
-        val bidding get() = emptyList<String>() //  listOf("bigoads", "bidmachine")
+        val dsp get() = bigoAds //+ unityAds + admob + applovin + yandex
+        val bidding get() = listOf("bigoads", "bidmachine")
 
         private val vungle = listOf(
             LineItem(demandId = "vungle", pricefloor = 0.01, adUnitId = "PLACEMENT_BANNER-1714730", uid = uuid()),
@@ -158,6 +158,23 @@ object LineItems {
             LineItem(demandId = "yandex", pricefloor = 4.0, adUnitId = "R-M-3032723-13", uid = uuid()),
             LineItem(demandId = "yandex", pricefloor = 5.0, adUnitId = "R-M-3032723-14", uid = uuid()),
             LineItem(demandId = "yandex", pricefloor = 7.0, adUnitId = "R-M-3032723-15", uid = uuid()),
+        )
+
+        private val bigoAds = listOf(
+            LineItem(demandId = "bigoads", pricefloor = 0.01, adUnitId = "10137724-10087047", uid = uuid()),
+            LineItem(demandId = "bigoads", pricefloor = 0.05, adUnitId = "10137724-10176570", uid = uuid()),
+            LineItem(demandId = "bigoads", pricefloor = 0.1, adUnitId = "10137724-10178596", uid = uuid()),
+            LineItem(demandId = "bigoads", pricefloor = 0.2, adUnitId = "10137724-10074785", uid = uuid()),
+            LineItem(demandId = "bigoads", pricefloor = 0.3, adUnitId = "10137724-10069788", uid = uuid()),
+            LineItem(demandId = "bigoads", pricefloor = 0.5, adUnitId = "10137724-10056383", uid = uuid()),
+            LineItem(demandId = "bigoads", pricefloor = 0.7, adUnitId = "10137724-10130611", uid = uuid()),
+            LineItem(demandId = "bigoads", pricefloor = 1.0, adUnitId = "10137724-10170501", uid = uuid()),
+            LineItem(demandId = "bigoads", pricefloor = 1.5, adUnitId = "10137724-10114089", uid = uuid()),
+            LineItem(demandId = "bigoads", pricefloor = 2.0, adUnitId = "10137724-10181067", uid = uuid()),
+            LineItem(demandId = "bigoads", pricefloor = 3.0, adUnitId = "10137724-10199882", uid = uuid()),
+            LineItem(demandId = "bigoads", pricefloor = 4.0, adUnitId = "10137724-10069379", uid = uuid()),
+            LineItem(demandId = "bigoads", pricefloor = 5.0, adUnitId = "10137724-10042034", uid = uuid()),
+            LineItem(demandId = "bigoads", pricefloor = 7.0, adUnitId = "10137724-10006114", uid = uuid())
         )
     }
 }

@@ -1,5 +1,6 @@
 package org.bidon.sdk.auction
 
+import androidx.annotation.Keep
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.auction.models.AdCoordinator
 import org.bidon.sdk.auction.models.AuctionResult
@@ -7,6 +8,7 @@ import org.bidon.sdk.auction.models.AuctionResult
 /**
  * Created by Bidon Team on 07/09/2022.
  */
+@Keep
 internal interface Auction {
     fun start(
         demandAd: DemandAd,
