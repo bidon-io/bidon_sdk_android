@@ -41,26 +41,13 @@ internal class BigoAdsRewardedAdImpl :
     override val isAdReadyToShow: Boolean
         get() = rewardVideoAd != null && rewardVideoAd?.isExpired != false
 
-    override fun destroy() {
-        rewardVideoAd?.destroy()
-        rewardVideoAd = null
-    }
-
-    override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
-        return GetAuctionParamUseCase().getFullscreenParams(auctionParamsScope, isBiddingMode)
-    }
-
     override suspend fun getToken(context: Context): String? {
         isBiddingMode = true
         return BigoAdSdk.getBidderToken()
     }
-    override fun show(activity: Activity) {
-        val rewardVideoAd = rewardVideoAd
-        if (rewardVideoAd == null) {
-            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-        } else {
-            rewardVideoAd.show()
-        }
+
+    override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+        return GetAuctionParamUseCase().getFullscreenParams(auctionParamsScope, isBiddingMode)
     }
 
     override fun load(adParams: BigoFullscreenAuctionParams) {
@@ -85,6 +72,20 @@ internal class BigoAdsRewardedAdImpl :
         })
         loader.build()
             .loadAd(adRequest.build())
+    }
+
+    override fun show(activity: Activity) {
+        val rewardVideoAd = rewardVideoAd
+        if (rewardVideoAd == null) {
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
+        } else {
+            rewardVideoAd.show()
+        }
+    }
+
+    override fun destroy() {
+        rewardVideoAd?.destroy()
+        rewardVideoAd = null
     }
 
     private fun fillAd(
