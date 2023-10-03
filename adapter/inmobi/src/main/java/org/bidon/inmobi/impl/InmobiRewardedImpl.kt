@@ -38,7 +38,7 @@ internal class InmobiRewardedImpl :
         return auctionParamsScope {
             val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             InmobiFullscreenAuctionParams(
-                activity = activity,
+                context = activity.applicationContext,
                 lineItem = lineItem,
                 price = lineItem.pricefloor,
             )
@@ -48,7 +48,7 @@ internal class InmobiRewardedImpl :
     override fun load(adParams: InmobiFullscreenAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
         val interstitialAd = InMobiInterstitial(
-            adParams.activity, adParams.placementId,
+            adParams.context, adParams.placementId,
             object : InterstitialAdEventListener() {
                 override fun onAdLoadSucceeded(interstitial: InMobiInterstitial, adMetaInfo: AdMetaInfo) {
                     logInfo(TAG, "onAdLoadSucceeded: $this")

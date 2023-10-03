@@ -20,6 +20,7 @@ import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
+import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -35,7 +36,7 @@ internal class DTExchangeInterstitial :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var auctionParams: DTExchangeAdAuctionParams? = null
+    private var lineItem: LineItem? = null
     private var inneractiveAdSpot: InneractiveAdSpot? = null
 
     override val isAdReadyToShow: Boolean
@@ -50,7 +51,7 @@ internal class DTExchangeInterstitial :
 
     override fun load(adParams: DTExchangeAdAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
-        auctionParams = adParams
+        lineItem = adParams.lineItem
         val spot = InneractiveAdSpotManager.get().createSpot()
         val controller = InneractiveFullscreenUnitController()
         val videoController = InneractiveFullscreenVideoContentController()
@@ -134,9 +135,9 @@ internal class DTExchangeInterstitial :
     }
 
     private fun InneractiveAdSpot.asAd(demandSource: String? = null) = Ad(
-        ecpm = auctionParams?.lineItem?.pricefloor ?: 0.0,
+        ecpm = lineItem?.pricefloor ?: 0.0,
         auctionId = auctionId,
-        adUnitId = auctionParams?.lineItem?.adUnitId,
+        adUnitId = lineItem?.adUnitId,
         networkName = demandId.demandId,
         currencyCode = AdValue.USD,
         demandAd = demandAd,

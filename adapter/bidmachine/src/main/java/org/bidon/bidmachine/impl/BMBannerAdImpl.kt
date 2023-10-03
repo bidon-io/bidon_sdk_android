@@ -88,7 +88,7 @@ internal class BMBannerAdImpl :
             }
             requestBuilder.build()
                 .also { adRequest = it }
-                .request(adParams.activity)
+                .request(adParams.activity.applicationContext)
         }
     }
 
