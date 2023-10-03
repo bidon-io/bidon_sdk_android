@@ -38,9 +38,9 @@ internal class AdmobRewardedImpl(
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var param: AdmobFullscreenAdAuctionParams? = null
     private var rewardedAd: RewardedAd? = null
     private var isBiddingMode: Boolean = false
+    private var price: Double? = null
 
     override val isAdReadyToShow: Boolean
         get() = rewardedAd != null
@@ -57,7 +57,7 @@ internal class AdmobRewardedImpl(
     override fun load(adParams: AdmobFullscreenAdAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
         val adRequest = getAdRequest(adParams)
-        param = adParams
+        price = adParams.price
         val requestListener = object : RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(TAG, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
@@ -116,13 +116,12 @@ internal class AdmobRewardedImpl(
         rewardedAd?.onPaidEventListener = null
         rewardedAd?.fullScreenContentCallback = null
         rewardedAd = null
-        param = null
     }
 
     private fun RewardedAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            ecpm = param?.price ?: 0.0,
+            ecpm = price ?: 0.0,
             demandAdObject = this,
             networkName = demandId.demandId,
             dsp = null,

@@ -32,7 +32,6 @@ class MetaInterstitialImpl :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var adParams: MetaFullscreenAuctionParams? = null
     private var interstitialAd: InterstitialAd? = null
 
     override val isAdReadyToShow: Boolean
@@ -60,7 +59,6 @@ class MetaInterstitialImpl :
     }
 
     override fun load(adParams: MetaFullscreenAuctionParams) {
-        this.adParams = adParams
         val interstitial = InterstitialAd(adParams.context, adParams.placementId).also {
             interstitialAd = it
         }
@@ -124,7 +122,6 @@ class MetaInterstitialImpl :
     override fun destroy() {
         interstitialAd?.destroy()
         interstitialAd = null
-        adParams = null
     }
 
     override fun show(activity: Activity) {

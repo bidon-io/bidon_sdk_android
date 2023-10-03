@@ -141,6 +141,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.33.1-alpha")
     implementation("com.google.accompanist:accompanist-flowlayout:0.23.1")
     // Tests
+    implementation("com.squareup.leakcanary:leakcanary-android:2.12")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

@@ -35,9 +35,7 @@ internal class MintegralRewardedImpl :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var adParams: MintegralAuctionParam? = null
     private var rewardedAd: MBBidRewardVideoHandler? = null
-    private var mBridgeIds: MBridgeIds? = null
 
     override val isAdReadyToShow: Boolean
         get() = rewardedAd?.isBidReady == true
@@ -60,9 +58,8 @@ internal class MintegralRewardedImpl :
 
     override fun load(adParams: MintegralAuctionParam) {
         logInfo(TAG, "Starting with $adParams: $this")
-        this.adParams = adParams
         val handler = MBBidRewardVideoHandler(
-            adParams.activity,
+            adParams.activity.applicationContext,
             adParams.placementId,
             adParams.unitId
         ).also {
@@ -71,32 +68,27 @@ internal class MintegralRewardedImpl :
         handler.setRewardVideoListener(object : RewardVideoListener {
             override fun onVideoLoadSuccess(mBridgeIds: MBridgeIds?) {
                 logInfo(TAG, "onVideoLoadSuccess $mBridgeIds")
-                this@MintegralRewardedImpl.mBridgeIds = mBridgeIds
                 fillAd()
             }
 
             override fun onLoadSuccess(mBridgeIds: MBridgeIds?) {
                 logInfo(TAG, "onLoadSuccess $mBridgeIds")
-                this@MintegralRewardedImpl.mBridgeIds = mBridgeIds
                 fillAd()
             }
 
             override fun onVideoLoadFail(mBridgeIds: MBridgeIds?, message: String?) {
                 logError(TAG, "onVideoLoadFail $mBridgeIds", Throwable(message))
-                this@MintegralRewardedImpl.mBridgeIds = mBridgeIds
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
 
             override fun onVideoAdClicked(mBridgeIds: MBridgeIds?) {
                 logInfo(TAG, "onVideoAdClicked $mBridgeIds")
-                this@MintegralRewardedImpl.mBridgeIds = mBridgeIds
                 val ad = getAd(this@MintegralRewardedImpl) ?: return
                 emitEvent(AdEvent.Clicked(ad))
             }
 
             override fun onAdShow(mBridgeIds: MBridgeIds?) {
                 logInfo(TAG, "onAdShow $mBridgeIds")
-                this@MintegralRewardedImpl.mBridgeIds = mBridgeIds
                 val ad = getAd(this@MintegralRewardedImpl) ?: return
                 emitEvent(AdEvent.Shown(ad))
                 emitEvent(
@@ -113,7 +105,6 @@ internal class MintegralRewardedImpl :
 
             override fun onAdClose(mBridgeIds: MBridgeIds?, rewardInfo: RewardInfo?) {
                 logInfo(TAG, "onAdClose $mBridgeIds, $rewardInfo")
-                this@MintegralRewardedImpl.mBridgeIds = mBridgeIds
                 val ad = getAd(this@MintegralRewardedImpl) ?: return
                 emitEvent(AdEvent.Closed(ad))
                 emitEvent(
@@ -131,7 +122,6 @@ internal class MintegralRewardedImpl :
 
             override fun onShowFail(mBridgeIds: MBridgeIds?, message: String?) {
                 logError(TAG, "onShowFail $mBridgeIds", Throwable(message))
-                this@MintegralRewardedImpl.mBridgeIds = mBridgeIds
                 emitEvent(AdEvent.ShowFailed(BidonError.Unspecified(demandId, Throwable(message))))
             }
 
@@ -146,9 +136,7 @@ internal class MintegralRewardedImpl :
 
     override fun show(activity: Activity) {
         logInfo(TAG, "Starting show: $this")
-        if (isAdReadyToShow) {
-            rewardedAd?.showFromBid()
-        } else {
+        rewardedAd?.showFromBid() ?: run {
             emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
@@ -162,7 +150,7 @@ internal class MintegralRewardedImpl :
     private fun fillAd() {
         logInfo(TAG, "Starting fill: $this")
         val ad = getAd(this)
-        if (mBridgeIds != null && ad != null) {
+        if (rewardedAd != null && ad != null) {
             emitEvent(AdEvent.Fill(ad))
         } else {
             emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))

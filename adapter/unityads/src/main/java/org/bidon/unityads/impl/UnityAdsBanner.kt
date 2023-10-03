@@ -14,6 +14,7 @@ import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceType
+import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
@@ -31,7 +32,7 @@ internal class UnityAdsBanner :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
     private var bannerAdView: BannerView? = null
-    private var param: UnityAdsBannerAuctionParams? = null
+    private var lineItem: LineItem? = null
 
     override var isAdReadyToShow: Boolean = false
 
@@ -55,8 +56,8 @@ internal class UnityAdsBanner :
     }
 
     override fun load(adParams: UnityAdsBannerAuctionParams) {
+        lineItem = adParams.lineItem
         logInfo(TAG, "Starting with $adParams")
-        param = adParams
         adParams.activity.runOnUiThread {
             val adUnitId = requireNotNull(adParams.lineItem.adUnitId)
             val unityBannerSize = when (adParams.bannerFormat) {
@@ -116,14 +117,14 @@ internal class UnityAdsBanner :
 
     private fun BannerView.asAd() = Ad(
         demandAd = demandAd,
-        ecpm = param?.lineItem?.pricefloor ?: 0.0,
+        ecpm = lineItem?.pricefloor ?: 0.0,
         demandAdObject = this,
         networkName = demandId.demandId,
         dsp = null,
         roundId = roundId,
         currencyCode = AdValue.USD,
         auctionId = auctionId,
-        adUnitId = param?.lineItem?.adUnitId,
+        adUnitId = lineItem?.adUnitId,
         bidType = bidType,
     )
 }

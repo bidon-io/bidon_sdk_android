@@ -41,7 +41,6 @@ internal class BigoAdsBannerImpl :
 
     private var bannerAd: BannerAd? = null
     private var bannerFormat: BannerFormat? = null
-    private var adParam: BigoBannerAuctionParams? = null
 
     override val isAdReadyToShow: Boolean
         get() = bannerAd != null
@@ -79,7 +78,6 @@ internal class BigoAdsBannerImpl :
     override fun load(adParams: BigoBannerAuctionParams) {
         val builder = BannerAdRequest.Builder()
         this.bannerFormat = adParams.bannerFormat
-        this.adParam = adParams
         builder
             .withBid(adParams.payload)
             .withSlotId(adParams.slotId)
