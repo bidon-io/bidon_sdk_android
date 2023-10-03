@@ -32,7 +32,6 @@ class MetaRewardedAdImpl :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var adParams: MetaFullscreenAuctionParams? = null
     private var rewardedVideoAd: RewardedVideoAd? = null
 
     override val isAdReadyToShow: Boolean
@@ -60,7 +59,6 @@ class MetaRewardedAdImpl :
     }
 
     override fun load(adParams: MetaFullscreenAuctionParams) {
-        this.adParams = adParams
         val rewardedAd = RewardedVideoAd(adParams.context, adParams.placementId).also {
             rewardedVideoAd = it
         }
@@ -125,7 +123,6 @@ class MetaRewardedAdImpl :
     override fun destroy() {
         rewardedVideoAd?.destroy()
         rewardedVideoAd = null
-        adParams = null
     }
 
     override fun show(activity: Activity) {

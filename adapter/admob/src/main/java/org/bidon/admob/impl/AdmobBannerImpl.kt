@@ -11,6 +11,7 @@ import org.bidon.sdk.adapter.*
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
+import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.getHeightDp
 import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.config.BidonError
@@ -39,8 +40,10 @@ internal class AdmobBannerImpl(
     override var isAdReadyToShow: Boolean = false
 
     private var isBiddingMode: Boolean = false
-    private var param: AdmobBannerAuctionParams? = null
     private var adView: AdView? = null
+    private var price: Double? = null
+    private var adSize: AdSize? = null
+    private var bannerFormat: BannerFormat? = null
 
     override suspend fun getToken(context: Context): String? {
         isBiddingMode = true
@@ -54,9 +57,11 @@ internal class AdmobBannerImpl(
     @SuppressLint("MissingPermission")
     override fun load(adParams: AdmobBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
+        price = adParams.price
+        adSize = adParams.adSize
+        bannerFormat = adParams.bannerFormat
         adParams.activity.runOnUiThread {
             val adRequest = getAdRequest(adParams)
-            param = adParams
             val adView = AdView(adParams.activity.applicationContext).also {
                 adView = it
             }
@@ -114,8 +119,8 @@ internal class AdmobBannerImpl(
     override fun getAdView(): AdViewHolder? = adView?.let {
         AdViewHolder(
             networkAdview = it,
-            widthDp = param?.adSize?.width ?: param?.bannerFormat.getWidthDp(),
-            heightDp = param?.adSize?.height ?: param?.bannerFormat.getHeightDp()
+            widthDp = adSize?.width ?: bannerFormat.getWidthDp(),
+            heightDp = adSize?.height ?: bannerFormat.getHeightDp()
         )
     }
 
@@ -123,13 +128,12 @@ internal class AdmobBannerImpl(
         logInfo(TAG, "destroy $this")
         adView?.onPaidEventListener = null
         adView = null
-        param = null
     }
 
     private fun AdView.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            ecpm = param?.price ?: 0.0,
+            ecpm = price ?: 0.0,
             demandAdObject = this,
             networkName = demandId.demandId,
             dsp = null,

@@ -37,9 +37,9 @@ internal class AdmobInterstitialImpl(
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var param: AdmobFullscreenAdAuctionParams? = null
     private var interstitialAd: InterstitialAd? = null
     private var isBiddingMode: Boolean = false
+    private var price: Double? = null
 
     override val isAdReadyToShow: Boolean
         get() = interstitialAd != null
@@ -57,7 +57,7 @@ internal class AdmobInterstitialImpl(
     override fun load(adParams: AdmobFullscreenAdAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
         val adRequest = getAdRequest(adParams)
-        param = adParams
+        price = adParams.price
         val requestListener = object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(TAG, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
@@ -107,13 +107,12 @@ internal class AdmobInterstitialImpl(
         interstitialAd?.onPaidEventListener = null
         interstitialAd?.fullScreenContentCallback = null
         interstitialAd = null
-        param = null
     }
 
     private fun InterstitialAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            ecpm = param?.price ?: 0.0,
+            ecpm = price ?: 0.0,
             demandAdObject = this,
             networkName = demandId.demandId,
             dsp = null,
