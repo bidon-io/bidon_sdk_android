@@ -12,6 +12,7 @@ import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
+import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.getHeightDp
 import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.config.BidonError
@@ -34,7 +35,7 @@ internal class InmobiBannerImpl :
 
     private var bannerView: InMobiBanner? = null
     private var adMetaInfo: AdMetaInfo? = null
-    private var adParams: InmobiBannerAuctionParams? = null
+    private var bannerFormat: BannerFormat? = null
     private val clicked = AtomicBoolean(false)
 
     override val isAdReadyToShow: Boolean
@@ -54,7 +55,7 @@ internal class InmobiBannerImpl :
 
     override fun load(adParams: InmobiBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
-        this.adParams = adParams
+        bannerFormat = adParams.bannerFormat
         val bannerView = InMobiBanner(adParams.activity.applicationContext, adParams.placementId).also {
             this.bannerView = it
         }
@@ -106,10 +107,10 @@ internal class InmobiBannerImpl :
     }
 
     override fun getAdView(): AdViewHolder? {
-        val adParams = adParams ?: return null
+        val bannerFormat = bannerFormat ?: return null
         val bannerAd = bannerView ?: return null
-        val width = adParams.bannerFormat.getWidthDp()
-        val height = adParams.bannerFormat.getHeightDp()
+        val width = bannerFormat.getWidthDp()
+        val height = bannerFormat.getHeightDp()
         return AdViewHolder(bannerAd, width, height)
     }
 
