@@ -39,29 +39,15 @@ internal class BigoAdsInterstitialImpl :
     private var isBiddingMode = false
 
     override val isAdReadyToShow: Boolean
-        get() = interstitialAd != null && interstitialAd?.isExpired != false
-
-    override fun destroy() {
-        interstitialAd?.destroy()
-        interstitialAd = null
-    }
-
-    override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
-        return GetAuctionParamUseCase().getFullscreenParams(auctionParamsScope, isBiddingMode)
-    }
+        get() = interstitialAd?.isExpired != false
 
     override suspend fun getToken(context: Context): String? {
         isBiddingMode = true
         return BigoAdSdk.getBidderToken()
     }
 
-    override fun show(activity: Activity) {
-        val interstitialAd = interstitialAd
-        if (interstitialAd == null) {
-            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-        } else {
-            interstitialAd.show()
-        }
+    override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
+        return GetAuctionParamUseCase().getFullscreenParams(auctionParamsScope, isBiddingMode)
     }
 
     override fun load(adParams: BigoFullscreenAuctionParams) {
@@ -74,8 +60,7 @@ internal class BigoAdsInterstitialImpl :
         val loader = InterstitialAdLoader.Builder()
             .withAdLoadListener(object : AdLoadListener<InterstitialAd> {
                 override fun onError(adError: AdError) {
-                    val error = adError.asBidonError()
-                    logError(TAG, "Error while loading ad: ${adError.code} ${adError.message}. $this", error)
+                    logError(TAG, "Error while loading ad: ${adError.code} ${adError.message}. $this", adError.asBidonError())
                     emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                 }
 
@@ -87,6 +72,20 @@ internal class BigoAdsInterstitialImpl :
             })
         loader.build()
             .loadAd(adRequest.build())
+    }
+
+    override fun show(activity: Activity) {
+        val interstitialAd = interstitialAd
+        if (interstitialAd == null) {
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
+        } else {
+            interstitialAd.show()
+        }
+    }
+
+    override fun destroy() {
+        interstitialAd?.destroy()
+        interstitialAd = null
     }
 
     private fun fill(

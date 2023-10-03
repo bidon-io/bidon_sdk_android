@@ -48,25 +48,13 @@ internal class BigoAdsBannerImpl :
     override val isAdReadyToShow: Boolean
         get() = bannerAd != null
 
-    override fun destroy() {
-        bannerAd?.destroy()
-        bannerAd = null
+    override suspend fun getToken(context: Context): String? {
+        isBiddingMode = true
+        return BigoAdSdk.getBidderToken()
     }
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return GetAuctionParamUseCase().getBannerParams(auctionParamsScope, isBiddingMode)
-    }
-
-    override fun getAdView(): AdViewHolder? {
-        val bannerAd = bannerAd ?: return null
-        val width = bannerFormat?.getWidthDp() ?: return null
-        val height = bannerFormat?.getHeightDp() ?: return null
-        return AdViewHolder(bannerAd.adView(), width, height)
-    }
-
-    override suspend fun getToken(context: Context): String? {
-        isBiddingMode = true
-        return BigoAdSdk.getBidderToken()
     }
 
     override fun load(adParams: BigoBannerAuctionParams) {
@@ -140,6 +128,18 @@ internal class BigoAdsBannerImpl :
             loader.build()
                 .loadAd(adRequest.build())
         }
+    }
+
+    override fun getAdView(): AdViewHolder? {
+        val bannerAd = bannerAd ?: return null
+        val width = bannerFormat?.getWidthDp() ?: return null
+        val height = bannerFormat?.getHeightDp() ?: return null
+        return AdViewHolder(bannerAd.adView(), width, height)
+    }
+
+    override fun destroy() {
+        bannerAd?.destroy()
+        bannerAd = null
     }
 }
 
