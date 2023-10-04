@@ -43,6 +43,10 @@ internal class RewardedImpl(
     }
 
     override fun isReady(): Boolean {
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return false
+        }
         return adCache.peek()?.adSource?.isAdReadyToShow == true
     }
 
@@ -54,7 +58,7 @@ internal class RewardedImpl(
         }
         logInfo(TAG, "Load (pricefloor=$pricefloor)")
         adCache.cache(
-            adTypeParam = AdTypeParam.Interstitial(
+            adTypeParam = AdTypeParam.Rewarded(
                 activity = activity,
                 pricefloor = pricefloor,
             ),
@@ -96,19 +100,29 @@ internal class RewardedImpl(
     }
 
     override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return
+        }
         adCache.pop()?.adSource?.sendLoss(winnerDemandId, winnerEcpm)
         destroyAd()
     }
 
     override fun notifyWin() {
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return
+        }
         adCache.peek()?.adSource?.sendWin()
     }
 
     override fun destroyAd() {
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return
+        }
         scope.launch(Dispatchers.Main.immediate) {
-            adCache.clear {
-                userListener?.onAdLoadFailed(BidonError.AuctionCancelled)
-            }
+            adCache.clear()
             observeCallbacksJob?.cancel()
             observeCallbacksJob = null
         }

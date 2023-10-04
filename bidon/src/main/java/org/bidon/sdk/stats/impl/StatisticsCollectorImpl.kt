@@ -11,6 +11,7 @@ import org.bidon.sdk.auction.models.InterstitialRequest
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.RewardedRequest
 import org.bidon.sdk.logs.analytic.AdValue
+import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.models.BidStat
@@ -68,6 +69,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
         roundStatus = null,
         ecpm = 0.0,
         bidType = null,
+        dspSource = null
     )
 
     override val demandAd: DemandAd
@@ -83,11 +85,15 @@ class StatisticsCollectorImpl : StatisticsCollector {
     override val bidType: BidType
         get() = requireNotNull(stat.bidType) { "BidType is not set" }
 
-    override fun getAd(demandAdObject: Any): Ad? {
+    override fun getAd(): Ad? {
         val demandId = stat.demandId
-        val roundId = stat.roundId ?: return null
-        val auctionId = stat.auctionId ?: return null
-        val bidType = stat.bidType ?: return null
+        val roundId = stat.roundId
+        val auctionId = stat.auctionId
+        val bidType = stat.bidType
+        if (roundId == null || auctionId == null || bidType == null) {
+            logError(TAG, "Ad is null", NullPointerException())
+            return null
+        }
         return Ad(
             demandAd = demandAd,
             ecpm = stat.ecpm,
@@ -96,8 +102,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
             currencyCode = AdValue.USD,
             roundId = roundId,
             auctionId = auctionId,
-            dsp = null,
-            demandAdObject = demandAdObject,
+            dsp = stat.dspSource,
             bidType = bidType,
         )
     }
@@ -232,6 +237,18 @@ class StatisticsCollectorImpl : StatisticsCollector {
             fillFinishTs = SystemTimeNow,
             roundStatus = roundStatus,
             ecpm = ecpm ?: 0.0
+        )
+    }
+
+    override fun setPrice(price: Double) {
+        stat = stat.copy(
+            ecpm = price
+        )
+    }
+
+    override fun setDsp(dspSource: String?) {
+        stat = stat.copy(
+            dspSource = dspSource
         )
     }
 

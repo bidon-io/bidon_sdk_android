@@ -66,7 +66,8 @@ internal class InmobiBannerImpl :
             override fun onAdLoadSucceeded(inMobiBanner: InMobiBanner, adMetaInfo: AdMetaInfo) {
                 this@InmobiBannerImpl.adMetaInfo = adMetaInfo
                 logInfo(TAG, "onAdLoadSucceeded: $this")
-                emitEvent(AdEvent.Fill(getAd(inMobiBanner) ?: return))
+                setPrice(adMetaInfo.bid)
+                emitEvent(AdEvent.Fill(getAd() ?: return))
             }
 
             override fun onAdLoadFailed(inMobiBanner: InMobiBanner, status: InMobiAdRequestStatus) {
@@ -82,19 +83,19 @@ internal class InmobiBannerImpl :
             override fun onAdClicked(inMobiBanner: InMobiBanner, map: MutableMap<Any, Any>?) {
                 logInfo(TAG, "onAdClicked: $map, $this")
                 if (!clicked.getAndSet(true)) {
-                    emitEvent(AdEvent.Clicked(getAd(inMobiBanner) ?: return))
+                    emitEvent(AdEvent.Clicked(getAd() ?: return))
                 }
             }
 
             override fun onAdImpression(inMobiBanner: InMobiBanner) {
                 logInfo(TAG, "onAdImpression: $this")
                 adMetaInfo?.let {
-                    val ad = getAd(inMobiBanner) ?: return
+                    val ad = getAd() ?: return
                     emitEvent(
                         AdEvent.PaidRevenue(
                             ad = ad,
                             adValue = AdValue(
-                                adRevenue = it.bid,
+                                adRevenue = it.bid / 1000.0,
                                 precision = Precision.Precise,
                                 currency = AdValue.USD,
                             )

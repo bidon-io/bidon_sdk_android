@@ -15,17 +15,17 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 internal class GetFullScreenContentCallbackUseCase {
     fun createCallback(
         adEventFlow: AdEventFlow,
-        getAd: () -> Ad
+        getAd: () -> Ad?
     ): FullScreenContentCallback {
         return object : FullScreenContentCallback() {
             override fun onAdClicked() {
                 logInfo(TAG, "onAdClicked: $this")
-                adEventFlow.emitEvent(AdEvent.Clicked(getAd()))
+                getAd()?.let { adEventFlow.emitEvent(AdEvent.Clicked(it)) }
             }
 
             override fun onAdDismissedFullScreenContent() {
                 logInfo(TAG, "onAdDismissedFullScreenContent: $this")
-                adEventFlow.emitEvent(AdEvent.Closed(getAd()))
+                getAd()?.let { adEventFlow.emitEvent(AdEvent.Closed(it)) }
             }
 
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
@@ -35,7 +35,7 @@ internal class GetFullScreenContentCallbackUseCase {
 
             override fun onAdImpression() {
                 logInfo(TAG, "onAdShown: $this")
-                adEventFlow.emitEvent(AdEvent.Shown(getAd()))
+                getAd()?.let { adEventFlow.emitEvent(AdEvent.Shown(it)) }
             }
 
             override fun onAdShowedFullScreenContent() {}

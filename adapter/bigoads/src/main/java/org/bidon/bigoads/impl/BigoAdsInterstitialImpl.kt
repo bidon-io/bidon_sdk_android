@@ -96,19 +96,16 @@ internal class BigoAdsInterstitialImpl :
         interstitialAd: InterstitialAd,
         adParams: BigoFullscreenAuctionParams
     ) {
-        val ad = getAd(this)
-        if (ad == null) {
-            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-        } else {
-            interstitialAd.setAdInteractionListener(object : AdInteractionListener {
-                override fun onAdError(error: AdError) {
-                    val cause = error.asBidonError()
-                    logError(TAG, "onAdError: $this", cause)
-                    emitEvent(AdEvent.ShowFailed(cause))
-                }
+        interstitialAd.setAdInteractionListener(object : AdInteractionListener {
+            override fun onAdError(error: AdError) {
+                val cause = error.asBidonError()
+                logError(TAG, "onAdError: $this", cause)
+                emitEvent(AdEvent.ShowFailed(cause))
+            }
 
-                override fun onAdImpression() {
-                    logInfo(TAG, "onAdImpression: $this")
+            override fun onAdImpression() {
+                logInfo(TAG, "onAdImpression: $this")
+                getAd()?.let { ad ->
                     emitEvent(
                         AdEvent.PaidRevenue(
                             ad = ad,
@@ -120,22 +117,30 @@ internal class BigoAdsInterstitialImpl :
                         )
                     )
                 }
+            }
 
-                override fun onAdClicked() {
-                    logInfo(TAG, "onAdClicked: $this")
+            override fun onAdClicked() {
+                logInfo(TAG, "onAdClicked: $this")
+                getAd()?.let { ad ->
                     emitEvent(AdEvent.Clicked(ad))
                 }
+            }
 
-                override fun onAdOpened() {
-                    logInfo(TAG, "onAdOpened: $this")
+            override fun onAdOpened() {
+                logInfo(TAG, "onAdOpened: $this")
+                getAd()?.let { ad ->
                     emitEvent(AdEvent.Shown(ad))
                 }
+            }
 
-                override fun onAdClosed() {
-                    logInfo(TAG, "onAdClosed: $this")
+            override fun onAdClosed() {
+                logInfo(TAG, "onAdClosed: $this")
+                getAd()?.let { ad ->
                     emitEvent(AdEvent.Closed(ad))
                 }
-            })
+            }
+        })
+        getAd()?.let { ad ->
             emitEvent(AdEvent.Fill(ad))
         }
     }

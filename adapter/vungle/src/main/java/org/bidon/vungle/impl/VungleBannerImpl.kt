@@ -95,7 +95,7 @@ internal class VungleBannerImpl :
     }
 
     private fun fillAd(adParam: VungleBannerAuctionParams) {
-        val bidonAd = getAd(this)
+        val bidonAd = getAd()
         if (bidonAd != null) {
             this.banner = Banners.getBanner(
                 /* placementId = */ adParam.bannerId,
@@ -114,13 +114,13 @@ internal class VungleBannerImpl :
 
                     override fun onAdEnd(placementId: String?) {
                         logInfo(TAG, "onAdEnd: $this")
-                        val ad = getAd(this@VungleBannerImpl) ?: return
+                        val ad = getAd() ?: return
                         emitEvent(AdEvent.Closed(ad))
                     }
 
                     override fun onAdClick(placementId: String?) {
                         logInfo(TAG, "onAdClick: $this")
-                        val ad = getAd(this@VungleBannerImpl) ?: return
+                        val ad = getAd() ?: return
                         emitEvent(AdEvent.Clicked(ad))
                     }
 
@@ -131,7 +131,7 @@ internal class VungleBannerImpl :
 
                     override fun onAdViewed(placementId: String?) {
                         logInfo(TAG, "onAdViewed: $this")
-                        val ad = getAd(this@VungleBannerImpl) ?: return
+                        val ad = getAd() ?: return
                         emitEvent(
                             AdEvent.PaidRevenue(
                                 ad = ad,

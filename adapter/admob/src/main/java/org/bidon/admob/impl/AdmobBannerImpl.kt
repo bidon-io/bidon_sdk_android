@@ -10,12 +10,10 @@ import org.bidon.admob.ext.asBidonAdValue
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.getHeightDp
 import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.config.BidonError
-import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
@@ -74,17 +72,17 @@ internal class AdmobBannerImpl(
                 override fun onAdLoaded() {
                     logInfo(TAG, "onAdLoaded: $this")
                     isAdReadyToShow = true
-                    emitEvent(AdEvent.Fill(ad = adView.asAd()))
+                    getAd()?.let { emitEvent(AdEvent.Fill(ad = it)) }
                 }
 
                 override fun onAdClicked() {
                     logInfo(TAG, "onAdClicked: $this")
-                    emitEvent(AdEvent.Clicked(adView.asAd()))
+                    getAd()?.let { emitEvent(AdEvent.Clicked(it)) }
                 }
 
                 override fun onAdClosed() {
                     logInfo(TAG, "onAdClosed: $this")
-                    emitEvent(AdEvent.Closed(adView.asAd()))
+                    getAd()?.let { emitEvent(AdEvent.Closed(it)) }
                 }
 
                 override fun onAdImpression() {
@@ -104,12 +102,9 @@ internal class AdmobBannerImpl(
                 this.adListener = requestListener
 
                 this.onPaidEventListener = OnPaidEventListener { adValue ->
-                    emitEvent(
-                        AdEvent.PaidRevenue(
-                            ad = adView.asAd(),
-                            adValue = adValue.asBidonAdValue()
-                        )
-                    )
+                    getAd()?.let {
+                        emitEvent(AdEvent.PaidRevenue(it, adValue.asBidonAdValue()))
+                    }
                 }
                 adView.loadAd(adRequest)
             }
@@ -128,21 +123,6 @@ internal class AdmobBannerImpl(
         logInfo(TAG, "destroy $this")
         adView?.onPaidEventListener = null
         adView = null
-    }
-
-    private fun AdView.asAd(): Ad {
-        return Ad(
-            demandAd = demandAd,
-            ecpm = price ?: 0.0,
-            demandAdObject = this,
-            networkName = demandId.demandId,
-            dsp = null,
-            roundId = roundId,
-            currencyCode = AdValue.USD,
-            auctionId = auctionId,
-            adUnitId = adUnitId,
-            bidType = bidType
-        )
     }
 }
 
