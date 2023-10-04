@@ -44,6 +44,14 @@ internal class InterstitialImpl(
         CoroutineScope(dispatcher)
     }
 
+    override fun isReady(): Boolean {
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return false
+        }
+        return adCache.peek()?.adSource?.isAdReadyToShow == true
+    }
+
     override fun loadAd(activity: Activity, pricefloor: Double) {
         if (!BidonSdk.isInitialized()) {
             logInfo(TAG, "Sdk is not initialized")
@@ -94,26 +102,32 @@ internal class InterstitialImpl(
     }
 
     override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return
+        }
         adCache.pop()?.adSource?.sendLoss(winnerDemandId, winnerEcpm)
         destroyAd()
     }
 
     override fun notifyWin() {
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return
+        }
         adCache.peek()?.adSource?.sendWin()
     }
 
     override fun destroyAd() {
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return
+        }
         scope.launch(Dispatchers.Main.immediate) {
-            adCache.clear {
-                userListener?.onAdLoadFailed(BidonError.AuctionCancelled)
-            }
+            adCache.clear()
             observeCallbacksJob?.cancel()
             observeCallbacksJob = null
         }
-    }
-
-    override fun isReady(): Boolean {
-        return adCache.peek()?.adSource?.isAdReadyToShow == true
     }
 
     /**

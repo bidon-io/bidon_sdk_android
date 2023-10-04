@@ -118,7 +118,6 @@ internal class UnityAdsBanner :
     private fun BannerView.asAd() = Ad(
         demandAd = demandAd,
         ecpm = lineItem?.pricefloor ?: 0.0,
-        demandAdObject = this,
         networkName = demandId.demandId,
         dsp = null,
         roundId = roundId,

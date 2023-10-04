@@ -70,7 +70,7 @@ internal class MintegralInterstitialImpl :
             override fun onResourceLoadSuccess(mBridgeIds: MBridgeIds?) {
                 logInfo(TAG, "onResourceLoadSuccess $mBridgeIds")
                 logInfo(TAG, "Starting fill: $this")
-                val ad = getAd(this)
+                val ad = getAd()
                 if (mBridgeIds != null && ad != null) {
                     emitEvent(AdEvent.Fill(ad))
                 } else {
@@ -85,7 +85,7 @@ internal class MintegralInterstitialImpl :
 
             override fun onAdShow(mBridgeIds: MBridgeIds?) {
                 logInfo(TAG, "onAdShow $mBridgeIds")
-                val ad = getAd(this@MintegralInterstitialImpl) ?: return
+                val ad = getAd() ?: return
                 emitEvent(AdEvent.Shown(ad))
                 emitEvent(
                     AdEvent.PaidRevenue(
@@ -101,7 +101,7 @@ internal class MintegralInterstitialImpl :
 
             override fun onAdClose(mBridgeIds: MBridgeIds?, rewardInfo: RewardInfo?) {
                 logInfo(TAG, "onAdClose $mBridgeIds, $rewardInfo")
-                val ad = getAd(this@MintegralInterstitialImpl) ?: return
+                val ad = getAd() ?: return
                 emitEvent(AdEvent.Closed(ad))
             }
 
@@ -112,7 +112,7 @@ internal class MintegralInterstitialImpl :
 
             override fun onAdClicked(mBridgeIds: MBridgeIds?) {
                 logInfo(TAG, "onAdClicked $mBridgeIds")
-                val ad = getAd(this@MintegralInterstitialImpl) ?: return
+                val ad = getAd() ?: return
                 emitEvent(AdEvent.Clicked(ad))
             }
 

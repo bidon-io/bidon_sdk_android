@@ -17,9 +17,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.config.BidonError
-import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
@@ -69,20 +67,17 @@ internal class AdmobInterstitialImpl(
                 this@AdmobInterstitialImpl.interstitialAd = interstitialAd
                 adParams.activity.runOnUiThread {
                     interstitialAd.onPaidEventListener = OnPaidEventListener { adValue ->
-                        emitEvent(
-                            AdEvent.PaidRevenue(
-                                ad = interstitialAd.asAd(),
-                                adValue = adValue.asBidonAdValue()
-                            )
-                        )
+                        getAd()?.let {
+                            emitEvent(AdEvent.PaidRevenue(it, adValue.asBidonAdValue()))
+                        }
                     }
                     interstitialAd.fullScreenContentCallback = getFullScreenContentCallback.createCallback(
                         adEventFlow = this@AdmobInterstitialImpl,
                         getAd = {
-                            interstitialAd.asAd()
+                            getAd()
                         },
                     )
-                    emitEvent(AdEvent.Fill(requireNotNull(interstitialAd.asAd())))
+                    getAd()?.let { emitEvent(AdEvent.Fill(it)) }
                 }
             }
         }
@@ -107,21 +102,6 @@ internal class AdmobInterstitialImpl(
         interstitialAd?.onPaidEventListener = null
         interstitialAd?.fullScreenContentCallback = null
         interstitialAd = null
-    }
-
-    private fun InterstitialAd.asAd(): Ad {
-        return Ad(
-            demandAd = demandAd,
-            ecpm = price ?: 0.0,
-            demandAdObject = this,
-            networkName = demandId.demandId,
-            dsp = null,
-            roundId = roundId,
-            currencyCode = AdValue.USD,
-            auctionId = auctionId,
-            adUnitId = adUnitId,
-            bidType = bidType
-        )
     }
 }
 

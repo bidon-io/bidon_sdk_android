@@ -13,8 +13,6 @@ import org.bidon.sdk.ads.banner.helper.PauseResumeObserver
 import org.bidon.sdk.ads.banner.helper.impl.ActivityLifecycleObserver
 import org.bidon.sdk.ads.banner.helper.impl.GetOrientationUseCaseImpl
 import org.bidon.sdk.ads.banner.helper.impl.PauseResumeObserverImpl
-import org.bidon.sdk.ads.banner.refresh.BannersCache
-import org.bidon.sdk.ads.banner.refresh.BannersCacheImpl
 import org.bidon.sdk.ads.banner.render.AdRenderer
 import org.bidon.sdk.ads.banner.render.AdRendererImpl
 import org.bidon.sdk.ads.banner.render.CalculateAdContainerParamsUseCase
@@ -50,8 +48,6 @@ import org.bidon.sdk.databinders.app.AppDataSourceImpl
 import org.bidon.sdk.databinders.device.DeviceBinder
 import org.bidon.sdk.databinders.device.DeviceDataSource
 import org.bidon.sdk.databinders.device.DeviceDataSourceImpl
-import org.bidon.sdk.databinders.extras.Extras
-import org.bidon.sdk.databinders.extras.ExtrasImpl
 import org.bidon.sdk.databinders.location.LocationDataSource
 import org.bidon.sdk.databinders.location.LocationDataSourceImpl
 import org.bidon.sdk.databinders.placement.PlacementBinder
@@ -161,11 +157,11 @@ internal object DI {
              * [SegmentSynchronizer] depends on it
              */
             singleton<Segment> { SegmentImpl() }
+            factory { get<Segment>() as SegmentSynchronizer }
 
             /**
              * Factories
              */
-            factory { get<Segment>() as SegmentSynchronizer }
             factory<InitAndRegisterAdaptersUseCase> {
                 InitAndRegisterAdaptersUseCaseImpl(
                     adaptersSource = get()
@@ -263,7 +259,6 @@ internal object DI {
                     segmentBinder = SegmentBinder(segmentSynchronizer = get()),
                 )
             }
-            factory<Extras> { ExtrasImpl() }
             factory<IabConsent> { IabConsentImpl(context = get()) }
             factory { VisibilityTracker() }
             factory<RegulationDataSource> {
@@ -290,7 +285,6 @@ internal object DI {
             factory<AdRenderer.RenderInspector> {
                 RenderInspectorImpl()
             }
-            factory<BannersCache> { BannersCacheImpl() }
             factory { CalculateAdContainerParamsUseCase() }
             factoryWithParams<AdCache> { (demandAd) ->
                 AdCacheImpl(

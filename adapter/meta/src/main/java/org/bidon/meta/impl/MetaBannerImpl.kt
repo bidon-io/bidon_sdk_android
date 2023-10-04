@@ -79,7 +79,7 @@ class MetaBannerImpl :
 
                         override fun onAdLoaded(ad: Ad?) {
                             logInfo(TAG, "onAdLoaded $ad: $bannerView, $this")
-                            val bidonAd = getAd(this)
+                            val bidonAd = getAd()
                             if (bannerView != null && bidonAd != null) {
                                 emitEvent(AdEvent.Fill(bidonAd))
                             } else {
@@ -89,13 +89,13 @@ class MetaBannerImpl :
 
                         override fun onAdClicked(ad: Ad?) {
                             logInfo(TAG, "onAdClicked: $this")
-                            val bidonAd = getAd(this@MetaBannerImpl) ?: return
+                            val bidonAd = getAd() ?: return
                             emitEvent(AdEvent.Clicked(bidonAd))
                         }
 
                         override fun onLoggingImpression(ad: Ad?) {
                             logInfo(TAG, "onLoggingImpression: $ad, $this")
-                            val bidonAd = getAd(this@MetaBannerImpl) ?: return
+                            val bidonAd = getAd() ?: return
                             emitEvent(
                                 AdEvent.PaidRevenue(
                                     ad = bidonAd,
