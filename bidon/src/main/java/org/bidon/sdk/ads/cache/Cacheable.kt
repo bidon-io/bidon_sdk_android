@@ -23,6 +23,12 @@ interface Cacheable {
 
         val useEfficientRound: Boolean = true,
         val useBiddingRound: Boolean = true,
+
+        /**
+         * Maximum number of polls per demand.
+         * If demand is not limited, then it is not included in the map.
+         */
+        val maximumPolls: Map<String, Int>
     )
 
     companion object {
@@ -40,6 +46,7 @@ interface Cacheable {
             skipCurrentDemand = true,
             useEfficientRound = true,
             useBiddingRound = true,
+            maximumPolls = emptyMap()
         )
     }
 }

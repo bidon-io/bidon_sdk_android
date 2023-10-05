@@ -32,7 +32,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
 import androidx.navigation.NavHostController
-import org.bidon.demoapp.BannerViewActivity
 import org.bidon.demoapp.BuildConfig
 import org.bidon.demoapp.component.AppButton
 import org.bidon.demoapp.component.AppTextButton
@@ -192,14 +191,14 @@ internal fun MainScreen(
                 AppButton(text = "Rewarded") {
                     navController.navigate(Screen.Rewarded.route)
                 }
-                AppButton(text = "Banner") {
-                    navController.navigate(Screen.Banners.route)
-                }
-                AppButton(text = "Banner in XML-Layout") {
-                    (context as Activity).startActivity(
-                        Intent(context, BannerViewActivity::class.java)
-                    )
-                }
+//                AppButton(text = "Banner") {
+//                    navController.navigate(Screen.Banners.route)
+//                }
+//                AppButton(text = "Banner in XML-Layout") {
+//                    (context as Activity).startActivity(
+//                        Intent(context, BannerViewActivity::class.java)
+//                    )
+//                }
                 AppButton(text = "Positioned Banner") {
                     navController.navigate(Screen.PositionedBanners.route)
                 }
