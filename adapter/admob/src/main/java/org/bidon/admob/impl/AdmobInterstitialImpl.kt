@@ -17,6 +17,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -42,7 +43,7 @@ internal class AdmobInterstitialImpl(
     override val isAdReadyToShow: Boolean
         get() = interstitialAd != null
 
-    override suspend fun getToken(context: Context): String? {
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
         isBiddingMode = true
         logInfo(TAG, "getToken: $demandAd")
         return obtainToken(context, demandAd.adType)

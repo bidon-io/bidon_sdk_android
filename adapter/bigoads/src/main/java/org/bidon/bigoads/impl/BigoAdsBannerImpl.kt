@@ -13,6 +13,7 @@ import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.getHeightDp
 import org.bidon.sdk.ads.banner.helper.getWidthDp
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
@@ -73,7 +74,7 @@ internal class BigoAdsBannerImpl :
         return AdViewHolder(bannerAd.adView(), width, height)
     }
 
-    override suspend fun getToken(context: Context): String? = BigoAdSdk.getBidderToken()
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = BigoAdSdk.getBidderToken()
 
     override fun load(adParams: BigoBannerAuctionParams) {
         val builder = BannerAdRequest.Builder()

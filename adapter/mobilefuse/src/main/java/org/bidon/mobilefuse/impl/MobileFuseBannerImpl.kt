@@ -16,6 +16,7 @@ import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.getHeightDp
 import org.bidon.sdk.ads.banner.helper.getWidthDp
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -42,7 +43,7 @@ class MobileFuseBannerImpl(private val isTestMode: Boolean) :
     override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val isAdReadyToShow: Boolean get() = fuseBannerAd?.isLoaded == true
 
-    override suspend fun getToken(context: Context): String? {
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
         return GetMobileFuseTokenUseCase(context, isTestMode)
     }
 

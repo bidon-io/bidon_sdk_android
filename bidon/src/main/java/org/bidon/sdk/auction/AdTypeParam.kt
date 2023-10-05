@@ -6,7 +6,7 @@ import org.bidon.sdk.ads.banner.BannerFormat
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-internal sealed interface AdTypeParam {
+sealed interface AdTypeParam {
     val activity: Activity
     val pricefloor: Double
 

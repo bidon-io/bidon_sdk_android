@@ -16,6 +16,7 @@ import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
@@ -48,7 +49,7 @@ internal class TestBiddingInterstitialImpl(
     override val isAdReadyToShow: Boolean
         get() = testParameters.fill == Process.Succeed
 
-    override suspend fun getToken(context: Context): String {
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String {
         return "token123"
     }
 

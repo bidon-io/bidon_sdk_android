@@ -13,6 +13,7 @@ import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.getHeightDp
 import org.bidon.sdk.ads.banner.helper.getWidthDp
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -43,7 +44,7 @@ internal class AdmobBannerImpl(
     private var adSize: AdSize? = null
     private var bannerFormat: BannerFormat? = null
 
-    override suspend fun getToken(context: Context): String? {
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
         isBiddingMode = true
         return obtainToken(context, demandAd.adType)
     }

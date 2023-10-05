@@ -8,6 +8,7 @@ import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.ResultsCollector
@@ -52,7 +53,7 @@ internal class ConductBiddingRoundUseCaseImpl(
                 /**
                  * Load bids
                  */
-                val tokens = participants.getTokens(context)
+                val tokens = participants.getTokens(context, adTypeParam)
                 logInfo(TAG, "${tokens.size} token(s):")
                 tokens.forEachIndexed { index, (demandId, token) ->
                     logInfo(TAG, "#$index ${demandId.demandId} {$token}")
@@ -74,10 +75,6 @@ internal class ConductBiddingRoundUseCaseImpl(
                     it.isNotEmpty() && bidResponse.status == BiddingResponse.BidStatus.Success
                 }
                 resultsCollector.serverBiddingFinished(bids)
-
-                /**
-                 * Finish bidding
-                 */
 
                 /**
                  * Finish bidding
@@ -200,9 +197,10 @@ internal class ConductBiddingRoundUseCaseImpl(
     }
 
     private suspend fun List<Mode.Bidding>.getTokens(
-        context: Context
-    ) = this.mapNotNull { adSource ->
-        adSource.getToken(context)?.let { token ->
+        context: Context,
+        adTypeParam: AdTypeParam
+    ): List<Pair<DemandId, String>> = this.mapNotNull { adSource ->
+        adSource.getToken(context, adTypeParam)?.let { token ->
             (adSource as AdSource<*>).demandId to token
         }
     }

@@ -152,6 +152,7 @@ fun BannerScreen(navController: NavHostController) {
             ItemSelector(
                 items = BannerFormat.values().toList(),
                 selectedItem = bannerFormat.value,
+                horizontalAlignment = Alignment.Start,
                 getItemTitle = {
                     when (it) {
                         BannerFormat.Banner -> "Banner 320x50"
