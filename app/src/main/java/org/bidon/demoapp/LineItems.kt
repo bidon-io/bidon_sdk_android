@@ -18,8 +18,15 @@ object LineItems {
 
     object Interstitial {
 
-        val dsp get() = emptyList<LineItem>() //unityAds + admob + applovin + yandex
-        val bidding get() = listOf("bigoads", "bidmachine", "vungle", "mintegral")
+        val dsp: List<LineItem> get() = inmobi + emptyList<LineItem>() // unityAds + admob + applovin + yandex
+        val bidding: List<String> get() = listOf("bigoads", "bidmachine", "vungle", "mintegral")
+
+        private val inmobi = listOf(
+            // matched
+            LineItem(demandId = "inmobi", pricefloor = 1.0, adUnitId = "1692335590896", uid = uuid()),
+            // watersort
+            LineItem(demandId = "inmobi", pricefloor = 1.0, adUnitId = "1696571725895", uid = uuid()),
+        )
 
         private val unityAds = listOf(
             LineItem(demandId = "unityads", pricefloor = 1.0, adUnitId = "unity_inter_1_", uid = uuid()),
@@ -88,8 +95,17 @@ object LineItems {
     }
 
     object Banners {
-        val dsp get() = emptyList<LineItem>() //bigoAds  + unityAds + admob + applovin + yandex
-        val bidding get() = listOf("bigoads", "bidmachine", "mintegral")
+        val dsp: List<LineItem> get() = inmobi + emptyList<LineItem>() // bigoAds  + unityAds + admob + applovin + yandex
+        val bidding: List<String> get() = emptyList<String>() + listOf("bigoads", "bidmachine", "mintegral")
+
+        private val inmobi = listOf(
+
+            // matched
+            LineItem(demandId = "inmobi", pricefloor = 1.0, adUnitId = "1695357979933", uid = uuid()),
+
+            // watersort
+            LineItem(demandId = "inmobi", pricefloor = 1.0, adUnitId = "1696647202422", uid = uuid()),
+        )
 
         private val vungle = listOf(
             LineItem(demandId = "vungle", pricefloor = 0.01, adUnitId = "PLACEMENT_BANNER-1714730", uid = uuid()),
