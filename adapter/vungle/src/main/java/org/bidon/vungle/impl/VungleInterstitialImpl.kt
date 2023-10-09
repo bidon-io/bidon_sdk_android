@@ -69,7 +69,7 @@ internal class VungleInterstitialImpl :
                     if (ad != null) {
                         emitEvent(AdEvent.Fill(ad))
                     } else {
-                        emitEvent(AdEvent.ShowFailed(BidonError.BannerAdNotReady))
+                        emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
                     }
                 }
 
@@ -84,7 +84,7 @@ internal class VungleInterstitialImpl :
     override fun show(activity: Activity) {
         val adParams = adParams ?: return
         if (!Vungle.canPlayAd(adParams.placementId, adParams.payload)) {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         } else {
             Vungle.playAd(
                 adParams.placementId, adParams.payload, AdConfig(),
@@ -126,7 +126,7 @@ internal class VungleInterstitialImpl :
                             AdEvent.PaidRevenue(
                                 ad = ad,
                                 adValue = AdValue(
-                                    adRevenue = adParams.price,
+                                    adRevenue = adParams.price / 1000.0,
                                     precision = Precision.Precise,
                                     currency = AdValue.USD,
                                 )

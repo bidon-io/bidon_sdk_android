@@ -37,9 +37,9 @@ internal class AdmobInterstitialImpl(
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var param: AdmobFullscreenAdAuctionParams? = null
     private var interstitialAd: InterstitialAd? = null
     private var isBiddingMode: Boolean = false
+    private var price: Double? = null
 
     override val isAdReadyToShow: Boolean
         get() = interstitialAd != null
@@ -57,7 +57,7 @@ internal class AdmobInterstitialImpl(
     override fun load(adParams: AdmobFullscreenAdAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
         val adRequest = getAdRequest(adParams)
-        param = adParams
+        price = adParams.price
         val requestListener = object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(TAG, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
@@ -67,34 +67,36 @@ internal class AdmobInterstitialImpl(
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
                 logInfo(TAG, "onAdLoaded: $this")
                 this@AdmobInterstitialImpl.interstitialAd = interstitialAd
-                interstitialAd.onPaidEventListener = OnPaidEventListener { adValue ->
-                    emitEvent(
-                        AdEvent.PaidRevenue(
-                            ad = interstitialAd.asAd(),
-                            adValue = adValue.asBidonAdValue()
+                adParams.activity.runOnUiThread {
+                    interstitialAd.onPaidEventListener = OnPaidEventListener { adValue ->
+                        emitEvent(
+                            AdEvent.PaidRevenue(
+                                ad = interstitialAd.asAd(),
+                                adValue = adValue.asBidonAdValue()
+                            )
                         )
+                    }
+                    interstitialAd.fullScreenContentCallback = getFullScreenContentCallback.createCallback(
+                        adEventFlow = this@AdmobInterstitialImpl,
+                        getAd = {
+                            interstitialAd.asAd()
+                        },
                     )
+                    emitEvent(AdEvent.Fill(requireNotNull(interstitialAd.asAd())))
                 }
-                interstitialAd.fullScreenContentCallback = getFullScreenContentCallback.createCallback(
-                    adEventFlow = this@AdmobInterstitialImpl,
-                    getAd = {
-                        interstitialAd.asAd()
-                    },
-                )
-                emitEvent(AdEvent.Fill(requireNotNull(interstitialAd.asAd())))
             }
         }
         val adUnitId = when (adParams) {
             is AdmobFullscreenAdAuctionParams.Bidding -> adParams.adUnitId
             is AdmobFullscreenAdAuctionParams.Network -> adParams.adUnitId
         }
-        InterstitialAd.load(adParams.context, adUnitId, adRequest, requestListener)
+        InterstitialAd.load(adParams.activity, adUnitId, adRequest, requestListener)
     }
 
     override fun show(activity: Activity) {
         logInfo(TAG, "Starting show: $this")
         if (interstitialAd == null) {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         } else {
             interstitialAd?.show(activity)
         }
@@ -105,20 +107,20 @@ internal class AdmobInterstitialImpl(
         interstitialAd?.onPaidEventListener = null
         interstitialAd?.fullScreenContentCallback = null
         interstitialAd = null
-        param = null
     }
 
     private fun InterstitialAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            ecpm = param?.price ?: 0.0,
+            ecpm = price ?: 0.0,
             demandAdObject = this,
             networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = AdValue.USD,
             auctionId = auctionId,
-            adUnitId = param?.adUnitId
+            adUnitId = adUnitId,
+            bidType = bidType
         )
     }
 }

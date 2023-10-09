@@ -94,7 +94,7 @@ internal class ApplovinRewardedImpl(
     }
 
     override val isAdReadyToShow: Boolean
-        get() = applovinAd != null
+        get() = rewardedAd?.isAdReadyToDisplay == true
 
     override fun destroy() {
         logInfo(TAG, "destroy $this")
@@ -136,11 +136,12 @@ internal class ApplovinRewardedImpl(
 
     override fun show(activity: Activity) {
         logInfo(TAG, "Starting show: $this")
-        val appLovinAd = applovinAd
-        if (rewardedAd?.isAdReadyToDisplay == true && appLovinAd != null) {
-            rewardedAd?.show(appLovinAd, activity, listener, listener, listener, listener)
+        val applovinAd = this.applovinAd
+        if (rewardedAd?.isAdReadyToDisplay == true && applovinAd != null) {
+            rewardedAd?.show(applovinAd, activity.applicationContext, listener, listener, listener, listener)
+            this.applovinAd = null
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 
@@ -154,7 +155,8 @@ internal class ApplovinRewardedImpl(
             roundId = roundId,
             currencyCode = AdValue.USD,
             auctionId = auctionId,
-            adUnitId = lineItem?.adUnitId
+            adUnitId = lineItem?.adUnitId,
+            bidType = bidType,
         )
     }
 }

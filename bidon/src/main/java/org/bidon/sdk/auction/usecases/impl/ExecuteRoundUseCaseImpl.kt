@@ -29,6 +29,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.regulation.Regulation
 import org.bidon.sdk.stats.StatisticsCollector
+import org.bidon.sdk.stats.models.BidType
 
 internal class ExecuteRoundUseCaseImpl(
     private val adaptersSource: AdaptersSource,
@@ -41,6 +42,7 @@ internal class ExecuteRoundUseCaseImpl(
         auctionResponse: AuctionResponse,
         adTypeParam: AdTypeParam,
         round: RoundRequest,
+        roundIndex: Int,
         pricefloor: Double,
         lineItems: List<LineItem>,
         resultsCollector: ResultsCollector,
@@ -61,7 +63,17 @@ internal class ExecuteRoundUseCaseImpl(
             logInfo(TAG, "$logText bidding adapters [${filteredBiddingAdapters.joinToString { it.demandId.demandId }}]")
             val biddingAdSources = filteredBiddingAdapters
                 .getAdSources(demandAd.adType)
-                .onEach { applyParams(it, adTypeParam, auctionResponse, demandAd, round) }
+                .onEach {
+                    applyParams(
+                        adSource = it,
+                        adTypeParam = adTypeParam,
+                        auctionResponse = auctionResponse,
+                        demandAd = demandAd,
+                        round = round,
+                        roundIndex = roundIndex,
+                        bidType = BidType.RTB
+                    )
+                }
                 .filterIsInstance<Mode.Bidding>()
             // Start Bidding demands auction
             val biddingDemands = biddingAdSources.map {
@@ -79,6 +91,7 @@ internal class ExecuteRoundUseCaseImpl(
                         auctionId = auctionResponse.auctionId,
                         round = round,
                         auctionConfigurationId = auctionResponse.auctionConfigurationId,
+                        auctionConfigurationUid = auctionResponse.auctionConfigurationUid,
                         resultsCollector = resultsCollector
                     )
                 }
@@ -94,7 +107,17 @@ internal class ExecuteRoundUseCaseImpl(
             }.onEach(::applyRegulation)
             logInfo(TAG, "$logText network adapters [${filteredAdNetworkAdapters.joinToString { it.demandId.demandId }}]")
             val networkAdSources = filteredAdNetworkAdapters.getAdSources(demandAd.adType)
-                .onEach { applyParams(it, adTypeParam, auctionResponse, demandAd, round) }
+                .onEach {
+                    applyParams(
+                        adSource = it,
+                        adTypeParam = adTypeParam,
+                        auctionResponse = auctionResponse,
+                        demandAd = demandAd,
+                        round = round,
+                        roundIndex = roundIndex,
+                        bidType = BidType.CPM
+                    )
+                }
                 .filterIsInstance<Mode.Network>()
 
             /**
@@ -154,15 +177,22 @@ internal class ExecuteRoundUseCaseImpl(
         adTypeParam: AdTypeParam,
         auctionResponse: AuctionResponse,
         demandAd: DemandAd,
-        round: RoundRequest
+        round: RoundRequest,
+        roundIndex: Int,
+        bidType: BidType
     ) {
         adSource.addRoundInfo(
             auctionId = auctionResponse.auctionId,
             roundId = round.id,
             demandAd = demandAd,
+            roundIndex = roundIndex,
+            bidType = bidType
         )
         adSource.setStatisticAdType(adTypeParam.asStatisticAdType())
-        adSource.addAuctionConfigurationId(auctionResponse.auctionConfigurationId ?: 0)
+        adSource.addAuctionConfigurationId(
+            auctionConfigurationId = auctionResponse.auctionConfigurationId ?: 0,
+            auctionConfigurationUid = auctionResponse.auctionConfigurationUid ?: ""
+        )
         adSource.addExternalWinNotificationsEnabled(auctionResponse.externalWinNotificationsEnabled)
     }
 
@@ -208,10 +238,10 @@ internal class ExecuteRoundUseCaseImpl(
             }
     }
 
-    private fun List<Adapter>.getAdSources(adType: AdType) = when (adType) {
+    private fun List<Adapter>.getAdSources(adType: AdType): List<AdSource<AdAuctionParams>> = when (adType) {
         AdType.Interstitial -> {
             this.filterIsInstance<AdProvider.Interstitial<AdAuctionParams>>().mapNotNull { adapter ->
-                kotlin.runCatching {
+                runCatching {
                     adapter.interstitial().apply { addDemandId((adapter as Adapter).demandId) }
                 }.onFailure {
                     logError(TAG, "Failed to create interstitial ad source", it)
@@ -221,7 +251,7 @@ internal class ExecuteRoundUseCaseImpl(
 
         AdType.Rewarded -> {
             this.filterIsInstance<AdProvider.Rewarded<AdAuctionParams>>().mapNotNull { adapter ->
-                kotlin.runCatching {
+                runCatching {
                     adapter.rewarded().apply { addDemandId((adapter as Adapter).demandId) }
                 }.onFailure {
                     logError(TAG, "Failed to create rewarded ad source", it)

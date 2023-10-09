@@ -1,21 +1,22 @@
 object Versions {
     private val major = 0
-    private val minor = 3
-    private val patch = 3
-    private val semantic: String? = null//"-alpha.1"
+    private val minor = 4
+    private val patch = 20
+    private val semantic: String = ""//""-alpha.2"
 
     val BidonVersionName = mainVersion + semanticVersion
 
     object Adapters {
-        val Admob = "$mainVersion.0"
-        val Applovin = "$mainVersion.0"
-        val BidMachine = "$mainVersion.0"
-        val DTExchange = "$mainVersion.0"
-        val UnityAds = "$mainVersion.0"
-        val BigoAds = "$mainVersion.0"
-        val Mintegral = "$mainVersion.0"
-        val Vungle = "$mainVersion.0"
-        val Meta = "$mainVersion.0"
+        val Admob = "$mainVersion.0" + semanticVersion
+        val Applovin = "$mainVersion.0" + semanticVersion
+        val BidMachine = "$mainVersion.0" + semanticVersion
+        val DTExchange = "$mainVersion.0" + semanticVersion
+        val UnityAds = "$mainVersion.0" + semanticVersion
+        val BigoAds = "$mainVersion.0" + semanticVersion
+        val Mintegral = "$mainVersion.0" + semanticVersion
+        val Vungle = "$mainVersion.0" + semanticVersion
+        val Meta = "$mainVersion.0" + semanticVersion
+        val Inmobi = "$mainVersion.0" + semanticVersion
 
         val IronSource = "$mainVersion.0"
         val Appsflyer = "$mainVersion.0"

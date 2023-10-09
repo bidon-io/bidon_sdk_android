@@ -99,7 +99,7 @@ class BannerView @JvmOverloads constructor(
     }
 
     override fun loadAd(activity: Activity, pricefloor: Double) {
-        logInfo(TAG, "LoadAd. $this")
+        logInfo(TAG, "LoadAd. $this. ${Thread.currentThread()}")
         if (!BidonSdk.isInitialized()) {
             logInfo(TAG, "Sdk is not initialized")
             listener.onAdLoadFailed(BidonError.SdkNotInitialized)
@@ -137,7 +137,7 @@ class BannerView @JvmOverloads constructor(
     }
 
     override fun showAd() {
-        logInfo(TAG, "ShowAd invoked")
+        logInfo(TAG, "ShowAd invoked. ${Thread.currentThread()}")
         if (!BidonSdk.isInitialized()) {
             logInfo(TAG, "Sdk is not initialized")
             listener.onAdShowFailed(BidonError.SdkNotInitialized)
@@ -159,13 +159,13 @@ class BannerView @JvmOverloads constructor(
                 if (!isLoaded) {
                     logInfo(TAG, "Not loaded. Current state: ${adLifecycleFlow.value}")
                     LogLifecycleAdStateUseCase.invoke(adLifecycle = adLifecycleFlow.value)
-                    userListener?.onAdShowFailed(loadingError ?: BidonError.BannerAdNotReady)
+                    userListener?.onAdShowFailed(loadingError ?: BidonError.AdNotReady)
                     return
                 }
                 val bannerSource = (winner?.adSource as? AdSource.Banner) ?: run {
                     logInfo(TAG, "AdSource(${winner?.adSource}: no ad view.")
                     LogLifecycleAdStateUseCase.invoke(adLifecycle = adLifecycleFlow.value)
-                    userListener?.onAdShowFailed(loadingError ?: BidonError.BannerAdNotReady)
+                    userListener?.onAdShowFailed(loadingError ?: BidonError.AdNotReady)
                     return
                 }
                 // Success
@@ -179,7 +179,7 @@ class BannerView @JvmOverloads constructor(
             AdLifecycle.LoadingFailed,
             AdLifecycle.DisplayingFailed,
             AdLifecycle.Destroyed -> {
-                userListener?.onAdShowFailed(loadingError ?: BidonError.BannerAdNotReady)
+                userListener?.onAdShowFailed(loadingError ?: BidonError.AdNotReady)
             }
         }
     }
