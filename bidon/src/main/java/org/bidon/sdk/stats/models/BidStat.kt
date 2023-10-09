@@ -7,6 +7,7 @@ import org.bidon.sdk.adapter.DemandId
 data class BidStat(
     val auctionId: String?,
     val roundId: String?,
+    val roundIndex: Int?,
     val demandId: DemandId,
     val roundStatus: RoundStatus?,
 
@@ -14,4 +15,7 @@ data class BidStat(
     val fillStartTs: Long?,
     val fillFinishTs: Long?,
     val adUnitId: String?,
+    val lineItemUid: String?,
+
+    val bidType: BidType?,
 )

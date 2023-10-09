@@ -13,10 +13,14 @@ internal data class ResultBody(
     val roundId: String?,
     @field:JsonName("winner_id")
     val demandId: String?,
+    @field:JsonName("bid_type")
+    val bidType: String?,
     @field:JsonName("ecpm")
     val ecpm: Double?,
     @field:JsonName("ad_unit_id")
     val adUnitId: String?,
+    @field:JsonName("line_item_uid")
+    val lineItemUid: String?,
     @field:JsonName("auction_start_ts")
     val auctionStartTs: Long,
     @field:JsonName("auction_finish_ts")

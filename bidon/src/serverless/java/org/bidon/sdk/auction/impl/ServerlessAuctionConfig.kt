@@ -30,7 +30,8 @@ object ServerlessAuctionConfig {
             lineItems = lineItems,
             token = token,
             rounds = rounds,
-            externalWinNotificationsEnabled = true
+            externalWinNotificationsEnabled = true,
+            auctionConfigurationUid = "a"
         )
     }
 }

@@ -32,7 +32,6 @@ class MetaRewardedAdImpl :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var adParams: MetaFullscreenAuctionParams? = null
     private var rewardedVideoAd: RewardedVideoAd? = null
 
     override val isAdReadyToShow: Boolean
@@ -60,7 +59,6 @@ class MetaRewardedAdImpl :
     }
 
     override fun load(adParams: MetaFullscreenAuctionParams) {
-        this.adParams = adParams
         val rewardedAd = RewardedVideoAd(adParams.context, adParams.placementId).also {
             rewardedVideoAd = it
         }
@@ -79,7 +77,7 @@ class MetaRewardedAdImpl :
                         if (rewardedVideoAd != null && bidonAd != null) {
                             emitEvent(AdEvent.Fill(bidonAd))
                         } else {
-                            emitEvent(AdEvent.ShowFailed(BidonError.BannerAdNotReady))
+                            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
                         }
                     }
 
@@ -96,7 +94,7 @@ class MetaRewardedAdImpl :
                             AdEvent.PaidRevenue(
                                 ad = bidonAd,
                                 adValue = AdValue(
-                                    adRevenue = adParams.price,
+                                    adRevenue = adParams.price / 1000.0,
                                     precision = Precision.Precise,
                                     currency = AdValue.USD,
                                 )
@@ -125,7 +123,6 @@ class MetaRewardedAdImpl :
     override fun destroy() {
         rewardedVideoAd?.destroy()
         rewardedVideoAd = null
-        adParams = null
     }
 
     override fun show(activity: Activity) {
@@ -133,7 +130,7 @@ class MetaRewardedAdImpl :
         if (rewardedAd != null && rewardedAd.isAdLoaded) {
             rewardedAd.show()
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 }
