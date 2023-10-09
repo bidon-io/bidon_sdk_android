@@ -142,12 +142,12 @@ internal fun MainScreen(
                         BidonSdk.setTestMode(isTestMode.value)
                         BidonSdk.regulation.gdpr = sharedPreferences.getInt("gdpr", Gdpr.Default.code).let { code ->
                             Gdpr.values().first { it.code == code }.also { gdpr ->
-                                BidonSdk.regulation.gdprConsentString = "Some Gdpr Consent String".takeIf { gdpr == Gdpr.Given }
+                                BidonSdk.regulation.gdprConsentString = "1YYY".takeIf { gdpr == Gdpr.Given }
                             }
                         }
                         BidonSdk.regulation.coppa = sharedPreferences.getInt("coppa", Coppa.Default.code).let { code ->
                             Coppa.values().first { it.code == code }.also { coppa ->
-                                BidonSdk.regulation.usPrivacyString = "Some US Privacy String".takeIf { coppa == Coppa.Yes }
+                                BidonSdk.regulation.usPrivacyString = "1YYY".takeIf { coppa == Coppa.Yes }
                             }
                         }
 
