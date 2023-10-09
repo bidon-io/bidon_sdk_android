@@ -108,10 +108,7 @@ internal class AmazonBannerImpl(
                 override fun onAdLeftApplication(view: View?) {}
                 override fun onAdOpen(view: View?) {}
 
-                override fun onAdClosed(view: View?) {
-                    logInfo(TAG, "onAdClosed")
-                    emitEvent(AdEvent.Closed(getAd() ?: return))
-                }
+                override fun onAdClosed(view: View?) {}
 
                 override fun onImpressionFired(view: View?) {
                     logInfo(TAG, "onImpressionFired")
