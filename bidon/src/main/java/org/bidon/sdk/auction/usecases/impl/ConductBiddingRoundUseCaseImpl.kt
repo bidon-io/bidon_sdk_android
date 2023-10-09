@@ -18,6 +18,7 @@ import org.bidon.sdk.auction.models.BiddingResponse
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.BidRequestUseCase
 import org.bidon.sdk.auction.usecases.ConductBiddingRoundUseCase
+import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.models.RoundStatus
@@ -59,6 +60,11 @@ internal class ConductBiddingRoundUseCaseImpl(
                     logInfo(TAG, "#$index ${demandId.demandId} {$token}")
                 }
                 resultsCollector.serverBiddingStarted()
+                if (tokens.isEmpty()) {
+                    logError(TAG, "No tokens found", BidonError.NoBid)
+                    resultsCollector.serverBiddingFinished(null)
+                    return@withTimeoutOrNull
+                }
                 val bidResponse = bidRequestUseCase.invoke(
                     adTypeParam = adTypeParam,
                     tokens = tokens,

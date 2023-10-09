@@ -63,7 +63,7 @@ internal fun MainScreen(
     val shared = LocalContext.current.getSharedPreferences("app_test", Context.MODE_PRIVATE)
 
     val adapters = remember {
-        mutableStateOf(DefaultAdapters.values().toList().sorted())
+        mutableStateOf(DefaultAdapters.values().sortedBy { it.name })
     }
     val isTestMode = TestModeInfo.isTesMode.collectAsState()
     val fullscreenModeState = remember {
@@ -97,7 +97,7 @@ internal fun MainScreen(
                 if (state == MainScreenState.NotInitialized) {
                     MultiSelector(
                         modifier = Modifier.padding(start = 60.dp, end = 60.dp, top = 16.dp),
-                        items = DefaultAdapters.values().toList().sorted(),
+                        items = DefaultAdapters.values().sortedBy { it.name },
                         selectedItems = adapters.value,
                         getItemTitle = {
                             it.name.substringBefore("Adapter")

@@ -49,7 +49,7 @@ internal class AmazonBannerImpl(
         } ?: return null
         return JSONArray().apply {
             amazonInfo.map {
-                it.adSizes.slotUUID to it.dtbAdResponse.getPricePoints(it.adSizes)
+                it.adSizes.slotUUID to SDKUtilities.getPricePoint(it.dtbAdResponse)
             }.forEach { (slotUuid, pricePoint) ->
                 this.put(
                     JSONObject().apply {
@@ -83,8 +83,8 @@ internal class AmazonBannerImpl(
         }
         val dtbAdResponse = amazonInfos.firstOrNull { adParams.slotUuid == it.adSizes.slotUUID }?.dtbAdResponse
         if (dtbAdResponse == null) {
-            logError(TAG, "DTBAdResponse is null", BidonError.NoBid(demandId))
-            emitEvent(AdEvent.LoadFailed(BidonError.NoBid(demandId)))
+            logError(TAG, "DTBAdResponse is null", BidonError.NoBid)
+            emitEvent(AdEvent.LoadFailed(BidonError.NoBid))
             return
         }
         val adView = DTBAdView(

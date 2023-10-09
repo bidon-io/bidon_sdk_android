@@ -27,6 +27,8 @@ import kotlin.coroutines.resume
 
 /**
  * Created by Aleksei Cherniaev on 27/09/2023.
+ *
+ * [Amazon documentation](https://ams.amazon.com/webpublisher/uam/docs/aps-mobile/android)
  */
 internal val AmazonDemandId = DemandId("amazon")
 
