@@ -114,13 +114,14 @@ internal class ApplovinInterstitialImpl(
         logInfo(TAG, "Starting show: $this")
         val applovinAd = applovinAd
         if (applovinAd != null) {
-            val adDialog = AppLovinInterstitialAd.create(applovinSdk, activity).apply {
+            val adDialog = AppLovinInterstitialAd.create(applovinSdk, activity.applicationContext).apply {
                 setAdDisplayListener(listener)
                 setAdClickListener(listener)
             }
             adDialog.showAndRender(applovinAd)
+            this.applovinAd = null
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 
@@ -134,7 +135,8 @@ internal class ApplovinInterstitialImpl(
             roundId = roundId,
             currencyCode = AdValue.USD,
             auctionId = auctionId,
-            adUnitId = lineItem?.adUnitId
+            adUnitId = lineItem?.adUnitId,
+            bidType = bidType,
         )
     }
 }

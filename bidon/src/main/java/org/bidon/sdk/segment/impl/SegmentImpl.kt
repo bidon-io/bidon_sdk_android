@@ -22,22 +22,57 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
     override val attributes: SegmentAttributes
         get() = attributesFlow.value
 
+    @Deprecated("Use segmentUid instead")
     override var segmentId: String? = null
         private set
 
-    override fun setAge(age: Int?) {
-        attributesFlow.value = attributesFlow.value.copy(
-            age = age
-        )
-        logInfo(TAG, "Updated age=$age")
-    }
+    override var segmentUid: String? = null
+        private set
 
-    override fun setGender(gender: Gender?) {
-        attributesFlow.value = attributesFlow.value.copy(
-            gender = gender
-        )
-        logInfo(TAG, "Updated gender=$gender")
-    }
+    override var age: Int?
+        get() = attributesFlow.value.age
+        set(value) {
+            attributesFlow.value = attributesFlow.value.copy(
+                age = value
+            )
+            logInfo(TAG, "Updated age=$value")
+        }
+
+    override var gender: Gender?
+        get() = attributesFlow.value.gender
+        set(value) {
+            attributesFlow.value = attributesFlow.value.copy(
+                gender = value
+            )
+            logInfo(TAG, "Updated gender=$value")
+        }
+
+    override var level: Int?
+        get() = attributesFlow.value.gameLevel
+        set(value) {
+            attributesFlow.value = attributesFlow.value.copy(
+                gameLevel = value
+            )
+            logInfo(TAG, "Updated level=$value")
+        }
+
+    override var totalInAppAmount: Double?
+        get() = attributesFlow.value.inAppAmount
+        set(value) {
+            attributesFlow.value = attributesFlow.value.copy(
+                inAppAmount = value
+            )
+            logInfo(TAG, "Updated inAppAmount=$value")
+        }
+
+    override var isPaying: Boolean
+        get() = attributesFlow.value.isPaying ?: false
+        set(value) {
+            attributesFlow.value = attributesFlow.value.copy(
+                isPaying = value
+            )
+            logInfo(TAG, "Updated isPaying=$value")
+        }
 
     override fun putCustomAttribute(attribute: String, value: Any?) {
         this.attributesFlow.update { current ->
@@ -63,27 +98,6 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
         logInfo(TAG, "Updated attributes=$attributes")
     }
 
-    override fun setLevel(level: Int) {
-        attributesFlow.value = attributesFlow.value.copy(
-            gameLevel = level
-        )
-        logInfo(TAG, "Updated level=$level")
-    }
-
-    override fun setTotalInAppAmount(inAppAmount: Double) {
-        attributesFlow.value = attributesFlow.value.copy(
-            inAppAmount = inAppAmount
-        )
-        logInfo(TAG, "Updated inAppAmount=$inAppAmount")
-    }
-
-    override fun setPaying(isPaying: Boolean) {
-        attributesFlow.value = attributesFlow.value.copy(
-            isPaying = isPaying
-        )
-        logInfo(TAG, "Updated isPaying=$isPaying")
-    }
-
     override fun parseSegmentId(rootJsonResponse: String) {
         runCatching {
             val newSegmentId = JSONObject(rootJsonResponse)
@@ -92,12 +106,24 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
                 ?.takeIf { it.isNotEmpty() }
             keyValueStorage.segmentId = newSegmentId
             setSegmentId(newSegmentId)
+            val newSegmentUid = JSONObject(rootJsonResponse)
+                .optJSONObject("segment")
+                ?.optString("uid", "")
+                ?.takeIf { it.isNotEmpty() }
+            keyValueStorage.segmentUid = newSegmentUid
+            setSegmentUid(newSegmentUid)
         }
     }
 
+    @Deprecated("Use segmentUid instead")
     override fun setSegmentId(segmentId: String?) {
         logInfo(TAG, "Updated SegmentId($segmentId)")
         this.segmentId = segmentId
+    }
+
+    override fun setSegmentUid(segmentUid: String?) {
+        logInfo(TAG, "Updated SegmentUid($segmentUid)")
+        this.segmentUid = segmentUid
     }
 }
 

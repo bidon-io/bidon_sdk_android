@@ -5,7 +5,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.WinLossNotifiable
@@ -79,10 +78,8 @@ internal class AuctionImpl(
                             it.demandId.demandId to it.adapterInfo
                         }
                     ).mapCatching { auctionData ->
-                        if (!BidonSdk.bidon.isTestMode) {
-                            check(auctionId == auctionData.auctionId) {
-                                "auction_id has been changed"
-                            }
+                        if (auctionId != auctionData.auctionId) {
+                            logError(TAG, "Auction ID has been changed", IllegalStateException())
                         }
                         conductAuction(
                             auctionData = auctionData,
@@ -90,14 +87,22 @@ internal class AuctionImpl(
                             adTypeParamData = adTypeParamData,
                         ).ifEmpty {
                             throw BidonError.NoAuctionResults
-                        }.also(onSuccess)
+                        }.also {
+                            adTypeParamData.activity.runOnUiThread {
+                                onSuccess(it)
+                            }
+                        }
                     }.onFailure {
                         logError(TAG, "Auction failed", it)
-                        onFailure(it)
+                        adTypeParamData.activity.runOnUiThread {
+                            onFailure(it)
+                        }
                     }
                 }.onFailure {
                     logError(TAG, "Auction failed", it)
-                    onFailure(it)
+                    adTypeParamData.activity.runOnUiThread {
+                        onFailure(it)
+                    }
                 }
             }
         }
@@ -141,6 +146,7 @@ internal class AuctionImpl(
             pricefloor = auctionData.pricefloor ?: 0.0,
             demandAd = demandAd,
             adTypeParamData = adTypeParamData,
+            roundIndex = 0,
         )
         logInfo(TAG, "Rounds completed")
 
@@ -207,6 +213,7 @@ internal class AuctionImpl(
 
     private suspend fun conductRounds(
         rounds: List<RoundRequest>,
+        roundIndex: Int,
         sourcePriceFloor: Double,
         pricefloor: Double,
         demandAd: DemandAd,
@@ -217,6 +224,7 @@ internal class AuctionImpl(
         // Execute round
         executeRound(
             round = round,
+            roundIndex = roundIndex,
             pricefloor = pricefloor,
             demandAd = demandAd,
             adTypeParam = adTypeParamData,
@@ -241,6 +249,7 @@ internal class AuctionImpl(
             pricefloor = nextPriceFloor,
             demandAd = demandAd,
             adTypeParamData = adTypeParamData,
+            roundIndex = roundIndex + 1,
         )
     }
 }

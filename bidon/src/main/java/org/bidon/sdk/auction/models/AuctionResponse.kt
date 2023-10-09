@@ -13,7 +13,9 @@ internal data class AuctionResponse(
     val pricefloor: Double?,
     val token: String?,
     val auctionId: String,
+    @Deprecated("Use auctionConfigurationUid instead")
     val auctionConfigurationId: Int?,
+    val auctionConfigurationUid: String?,
     val externalWinNotificationsEnabled: Boolean,
 )
 
@@ -25,9 +27,10 @@ internal class AuctionResponseParser : JsonParser<AuctionResponse> {
             auctionId = json.getString("auction_id"),
             pricefloor = json.optDouble("pricefloor"),
             auctionConfigurationId = json.optInt("auction_configuration_id"),
+            auctionConfigurationUid = json.optString("auction_configuration_uid"),
             lineItems = JsonParsers.parseList(json.optJSONArray("line_items")),
             token = json.optString("token"),
-            externalWinNotificationsEnabled = json.optBoolean("external_win_notifications", false)
+            externalWinNotificationsEnabled = json.optBoolean("external_win_notifications", false),
         )
     }.getOrNull()
 }

@@ -38,7 +38,7 @@ internal class DTExchangeBanner :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var param: DTExchangeBannerAuctionParams? = null
+    private var pricefloor: Double = 0.0
     private var adSpot: InneractiveAdSpot? = null
     private var adViewHolder: AdViewHolder? = null
 
@@ -50,14 +50,14 @@ internal class DTExchangeBanner :
             DTExchangeBannerAuctionParams(
                 lineItem = lineItem,
                 bannerFormat = bannerFormat,
-                context = activity.applicationContext,
+                activity = activity,
             )
         }
     }
 
     override fun load(adParams: DTExchangeBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
-        param = adParams
+        pricefloor = adParams.price
         val adSpot = InneractiveAdSpotManager.get().createSpot()
         val controller = InneractiveAdViewUnitController()
         adSpot.addUnitController(controller)
@@ -66,8 +66,11 @@ internal class DTExchangeBanner :
             override fun onInneractiveSuccessfulAdRequest(inneractiveAdSpot: InneractiveAdSpot?) {
                 logInfo(TAG, "onInneractiveSuccessfulAdRequest: $inneractiveAdSpot")
                 this@DTExchangeBanner.adSpot = inneractiveAdSpot
-                inneractiveAdSpot?.let {
-                    emitEvent(AdEvent.Fill(it.asAd()))
+                adParams.activity.runOnUiThread {
+                    createViewHolder(inneractiveAdSpot, adParams)
+                    inneractiveAdSpot?.let {
+                        emitEvent(AdEvent.Fill(it.asAd()))
+                    }
                 }
             }
 
@@ -83,9 +86,7 @@ internal class DTExchangeBanner :
     }
 
     override fun getAdView(): AdViewHolder? {
-        return adViewHolder ?: synchronized(this) {
-            adViewHolder ?: createViewHolder(adSpot)
-        }
+        return adViewHolder
     }
 
     override fun destroy() {
@@ -95,9 +96,9 @@ internal class DTExchangeBanner :
         adViewHolder = null
     }
 
-    private fun createViewHolder(adSpot: InneractiveAdSpot?): AdViewHolder? {
+    private fun createViewHolder(adSpot: InneractiveAdSpot?, adParams: DTExchangeBannerAuctionParams): AdViewHolder? {
         val controller = adSpot?.selectedUnitController as? InneractiveAdViewUnitController ?: return null
-        val context = param?.context ?: return null
+        val context = adParams.activity.applicationContext ?: return null
         val container = FrameLayout(context)
         controller.eventsListener = object : InneractiveAdViewEventsListenerWithImpressionData {
             override fun onAdImpression(
@@ -139,19 +140,17 @@ internal class DTExchangeBanner :
         controller.bindView(container)
         return AdViewHolder(
             networkAdview = container,
-            widthDp = when (param?.bannerFormat) {
+            widthDp = when (adParams.bannerFormat) {
                 BannerFormat.Banner -> 320
                 BannerFormat.LeaderBoard -> 728
                 BannerFormat.MRec -> 300
-                BannerFormat.Adaptive,
-                null -> controller.adContentWidth.pxToDp
+                BannerFormat.Adaptive -> controller.adContentWidth.pxToDp
             },
-            heightDp = when (param?.bannerFormat) {
+            heightDp = when (adParams.bannerFormat) {
                 BannerFormat.Banner -> 50
                 BannerFormat.LeaderBoard -> 90
                 BannerFormat.MRec -> 250
-                BannerFormat.Adaptive,
-                null -> controller.adContentHeight.pxToDp
+                BannerFormat.Adaptive -> controller.adContentHeight.pxToDp
             }
         ).also {
             this.adViewHolder = it
@@ -159,15 +158,16 @@ internal class DTExchangeBanner :
     }
 
     private fun InneractiveAdSpot.asAd() = Ad(
-        ecpm = param?.lineItem?.pricefloor ?: 0.0,
+        ecpm = pricefloor,
         auctionId = auctionId,
-        adUnitId = param?.spotId,
+        adUnitId = this.requestedSpotId,
         networkName = demandId.demandId,
         currencyCode = AdValue.USD,
         demandAd = demandAd,
         dsp = this.mediationNameString,
         roundId = roundId,
-        demandAdObject = this
+        demandAdObject = this,
+        bidType = bidType,
     )
 }
 

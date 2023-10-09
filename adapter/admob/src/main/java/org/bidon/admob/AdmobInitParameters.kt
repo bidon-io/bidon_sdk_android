@@ -1,6 +1,6 @@
 package org.bidon.admob
 
-import android.content.Context
+import android.app.Activity
 import com.google.android.gms.ads.AdSize
 import org.bidon.admob.ext.toAdmobAdSize
 import org.bidon.sdk.adapter.AdAuctionParams
@@ -14,18 +14,18 @@ data class AdmobInitParameters(
 ) : AdapterParameters
 
 sealed interface AdmobBannerAuctionParams : AdAuctionParams {
+    val activity: Activity
     val bannerFormat: BannerFormat
-    val context: Context
     val containerWidth: Float
-    val adSize: AdSize get() = bannerFormat.toAdmobAdSize(context, containerWidth)
+    val adSize: AdSize get() = bannerFormat.toAdmobAdSize(activity, containerWidth)
 
     class Network(
-        override val context: Context,
+        override val activity: Activity,
         override val bannerFormat: BannerFormat,
         override val containerWidth: Float,
-        val lineItem: LineItem,
+        override val lineItem: LineItem,
     ) : AdmobBannerAuctionParams {
-        override val adUnitId: String = requireNotNull(lineItem.adUnitId)
+        val adUnitId: String = requireNotNull(lineItem.adUnitId)
         override val price: Double get() = lineItem.pricefloor
 
         override fun toString(): String {
@@ -34,13 +34,14 @@ sealed interface AdmobBannerAuctionParams : AdAuctionParams {
     }
 
     class Bidding(
-        override val context: Context,
+        override val activity: Activity,
         override val bannerFormat: BannerFormat,
         override val containerWidth: Float,
         override val price: Double,
-        override val adUnitId: String,
+        val adUnitId: String,
         val payload: String,
     ) : AdmobBannerAuctionParams {
+        override val lineItem: LineItem? = null
 
         override fun toString(): String {
             return "AdmobBannerAuctionParams($adUnitId, bidPrice=$price, payload=${payload.take(20)})"
@@ -49,13 +50,13 @@ sealed interface AdmobBannerAuctionParams : AdAuctionParams {
 }
 
 sealed interface AdmobFullscreenAdAuctionParams : AdAuctionParams {
-    val context: Context
+    val activity: Activity
 
     class Network(
-        override val context: Context,
-        val lineItem: LineItem,
+        override val activity: Activity,
+        override val lineItem: LineItem,
     ) : AdmobFullscreenAdAuctionParams {
-        override val adUnitId: String = requireNotNull(lineItem.adUnitId)
+        val adUnitId: String = requireNotNull(lineItem.adUnitId)
         override val price: Double get() = lineItem.pricefloor
 
         override fun toString(): String {
@@ -64,11 +65,12 @@ sealed interface AdmobFullscreenAdAuctionParams : AdAuctionParams {
     }
 
     class Bidding(
-        override val context: Context,
+        override val activity: Activity,
         override val price: Double,
-        override val adUnitId: String,
+        val adUnitId: String,
         val payload: String,
     ) : AdmobFullscreenAdAuctionParams {
+        override val lineItem: LineItem? = null
 
         override fun toString(): String {
             return "AdmobFullscreenAdAuctionParams($adUnitId, bidPrice=$price, payload=${payload.take(20)})"

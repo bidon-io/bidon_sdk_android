@@ -1,9 +1,9 @@
 package org.bidon.mintegral
 
 import android.app.Activity
-import android.content.Context
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.auction.models.LineItem
 
 /**
  * Created by Aleksei Cherniaev on 20/06/2023.
@@ -11,24 +11,26 @@ import org.bidon.sdk.ads.banner.BannerFormat
 class MintegralAuctionParam(
     val activity: Activity,
     override val price: Double,
-    override val adUnitId: String?,
     val payload: String,
+    val unitId: String?,
     val placementId: String?,
 ) : AdAuctionParams {
+    override val lineItem: LineItem? = null
     override fun toString(): String {
-        return "MintegralAuctionParam(price=$price, adUnitId=$adUnitId, placementId=$placementId, payload='$payload')"
+        return "MintegralAuctionParam(price=$price, adUnitId=$lineItem, placementId=$placementId, payload='$payload')"
     }
 }
 
 class MintegralBannerAuctionParam(
-    val context: Context,
+    val activity: Activity,
     val bannerFormat: BannerFormat,
     override val price: Double,
-    override val adUnitId: String?,
     val payload: String,
+    val unitId: String?,
     val placementId: String?,
 ) : AdAuctionParams {
+    override val lineItem: LineItem? = null
     override fun toString(): String {
-        return "MintegralBannerAuctionParam($bannerFormat, price=$price, adUnitId=$adUnitId, placementId=$placementId, payload='$payload')"
+        return "MintegralBannerAuctionParam($bannerFormat, price=$price, adUnitId=$lineItem, placementId=$placementId, payload='$payload')"
     }
 }

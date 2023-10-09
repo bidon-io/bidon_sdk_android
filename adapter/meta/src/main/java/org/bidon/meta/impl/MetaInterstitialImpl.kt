@@ -32,7 +32,6 @@ class MetaInterstitialImpl :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var adParams: MetaFullscreenAuctionParams? = null
     private var interstitialAd: InterstitialAd? = null
 
     override val isAdReadyToShow: Boolean
@@ -60,7 +59,6 @@ class MetaInterstitialImpl :
     }
 
     override fun load(adParams: MetaFullscreenAuctionParams) {
-        this.adParams = adParams
         val interstitial = InterstitialAd(adParams.context, adParams.placementId).also {
             interstitialAd = it
         }
@@ -79,7 +77,7 @@ class MetaInterstitialImpl :
                         if (interstitialAd != null && bidonAd != null) {
                             emitEvent(AdEvent.Fill(bidonAd))
                         } else {
-                            emitEvent(AdEvent.ShowFailed(BidonError.BannerAdNotReady))
+                            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
                         }
                     }
 
@@ -96,7 +94,7 @@ class MetaInterstitialImpl :
                             AdEvent.PaidRevenue(
                                 ad = bidonAd,
                                 adValue = AdValue(
-                                    adRevenue = adParams.price,
+                                    adRevenue = adParams.price / 1000.0,
                                     precision = Precision.Precise,
                                     currency = AdValue.USD,
                                 )
@@ -124,7 +122,6 @@ class MetaInterstitialImpl :
     override fun destroy() {
         interstitialAd?.destroy()
         interstitialAd = null
-        adParams = null
     }
 
     override fun show(activity: Activity) {
@@ -132,7 +129,7 @@ class MetaInterstitialImpl :
         if (interstitialAd != null && interstitialAd.isAdLoaded) {
             interstitialAd.show()
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 }

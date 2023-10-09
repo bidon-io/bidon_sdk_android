@@ -22,6 +22,7 @@ internal class BidRequestBodyTest {
             roundId = "round123",
             auctionId = "auc123",
             auctionConfigurationId = 12,
+            auctionConfigurationUid = "123",
             rewarded = RewardedRequest(),
             interstitial = InterstitialRequest(),
         )
@@ -47,6 +48,7 @@ internal class BidRequestBodyTest {
                 "round_id" hasValue "round123"
                 "auction_id" hasValue "auc123"
                 "auction_configuration_id" hasValue 12
+                "auction_configuration_uid" hasValue "123"
             }
         )
     }
@@ -64,6 +66,7 @@ internal class BidRequestBodyTest {
             roundId = "round123",
             auctionId = "auc123",
             auctionConfigurationId = 12,
+            auctionConfigurationUid = "123",
             rewarded = RewardedRequest(),
             interstitial = InterstitialRequest(),
         )
