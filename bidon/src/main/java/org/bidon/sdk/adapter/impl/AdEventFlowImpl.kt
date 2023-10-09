@@ -9,7 +9,7 @@ import org.bidon.sdk.adapter.AdEvent
  */
 class AdEventFlowImpl : AdEventFlow {
     override val adEvent by lazy {
-        MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
+        MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 0)
     }
 }
 

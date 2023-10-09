@@ -39,6 +39,7 @@ import org.bidon.sdk.config.models.base.ConcurrentTest
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
 import org.bidon.sdk.mockkLog
 import org.bidon.sdk.regulation.Regulation
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.di.DI
 import org.bidon.sdk.utils.mainDispatcherOverridden
@@ -73,22 +74,26 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
             LineItem(
                 demandId = Applovin,
                 pricefloor = 0.25,
-                adUnitId = "AAAA2"
+                adUnitId = "AAAA2",
+                uid = "1",
             ),
             LineItem(
                 demandId = Admob,
                 pricefloor = 1.2235,
-                adUnitId = "admob1"
+                adUnitId = "admob1",
+                uid = "1",
             ),
             LineItem(
                 demandId = Admob,
                 pricefloor = 2.2235,
-                adUnitId = "admob2"
+                adUnitId = "admob2",
+                uid = "1",
             ),
         ),
         pricefloor = 0.01,
         token = null,
-        externalWinNotificationsEnabled = true
+        externalWinNotificationsEnabled = true,
+        auctionConfigurationUid = "10",
     )
 
     private val activity: Activity by lazy { mockk(relaxed = true) }
@@ -158,7 +163,9 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                                 demandAdObject = mockk(relaxed = true),
                                 dsp = null,
                                 ecpm = 1.3,
-                                auctionId = "a123"
+                                auctionId = "a123",
+                                bidType = BidType.CPM,
+
                             )
                         },
                         roundStatus = RoundStatus.Successful
@@ -179,13 +186,26 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                     demandAdObject = mockk(relaxed = true),
                     dsp = null,
                     ecpm = 2.3,
-                    auctionId = "a123"
+                    auctionId = "a123",
+                    bidType = BidType.CPM,
                 )
             },
             roundStatus = RoundStatus.Successful
         )
         coEvery {
-            conductBiddingAuction.invoke(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            conductBiddingAuction.invoke(
+                context = any(),
+                biddingSources = any(),
+                participantIds = any(),
+                adTypeParam = any(),
+                demandAd = any(),
+                bidfloor = any(),
+                auctionId = any(),
+                round = any(),
+                auctionConfigurationId = any(),
+                auctionConfigurationUid = any(),
+                resultsCollector = any()
+            )
         } returns Unit
 
         // it should conduct round with 2 results
@@ -199,6 +219,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                 demandIds = listOf("Unknown_network1", Admob, "Unknown_network2"),
                 biddingIds = listOf(BidMachine),
             ),
+            roundIndex = 1,
             pricefloor = 0.4,
             lineItems = emptyList(),
             resultsCollector = mockk(relaxed = true),

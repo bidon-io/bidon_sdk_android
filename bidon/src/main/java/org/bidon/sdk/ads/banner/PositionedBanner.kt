@@ -7,8 +7,25 @@ import org.bidon.sdk.BidonSdk
 
 /**
  * Created by Aleksei Cherniaev on 04/09/2023.
+ *
+ * [showAd], [hideAd], [destroyAd], [notifyLoss] need activity to be passed as parameter, mainly for Unity UI thread.
  */
 interface PositionedBanner {
+    /**
+     * Common interface for [BannerView]
+     */
+    val adSize: AdSize?
+
+    /**
+     * Shows if banner is displaying
+     */
+    val isDisplaying: Boolean
+
+    /**
+     * Predefined [BannerFormat].
+     */
+    val bannerFormat: BannerFormat
+
     /**
      * Predefined [BannerPosition].
      * Always uses safe area insets.
@@ -28,13 +45,6 @@ interface PositionedBanner {
         anchor: PointF
     )
 
-    fun hideAd()
-
-    /**
-     * Common interface for [BannerView]
-     */
-    val adSize: AdSize?
-
     fun setBannerFormat(bannerFormat: BannerFormat)
     fun loadAd(activity: Activity, pricefloor: Double = BidonSdk.DefaultPricefloor)
 
@@ -43,6 +53,10 @@ interface PositionedBanner {
      */
     fun isReady(): Boolean
     fun showAd(activity: Activity)
-    fun destroyAd()
+    fun hideAd(activity: Activity)
+    fun destroyAd(activity: Activity)
     fun setBannerListener(listener: BannerListener?)
+
+    fun notifyLoss(activity: Activity, winnerDemandId: String, winnerEcpm: Double)
+    fun notifyWin()
 }

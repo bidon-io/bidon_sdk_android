@@ -38,9 +38,9 @@ internal class AdmobRewardedImpl(
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var param: AdmobFullscreenAdAuctionParams? = null
     private var rewardedAd: RewardedAd? = null
     private var isBiddingMode: Boolean = false
+    private var price: Double? = null
 
     override val isAdReadyToShow: Boolean
         get() = rewardedAd != null
@@ -57,7 +57,7 @@ internal class AdmobRewardedImpl(
     override fun load(adParams: AdmobFullscreenAdAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
         val adRequest = getAdRequest(adParams)
-        param = adParams
+        price = adParams.price
         val requestListener = object : RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 logError(TAG, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
@@ -67,35 +67,37 @@ internal class AdmobRewardedImpl(
             override fun onAdLoaded(rewardedAd: RewardedAd) {
                 logInfo(TAG, "onAdLoaded. RewardedAd=$rewardedAd, $this")
                 this@AdmobRewardedImpl.rewardedAd = rewardedAd
-                rewardedAd.onPaidEventListener = OnPaidEventListener { adValue ->
-                    emitEvent(
-                        AdEvent.PaidRevenue(
-                            ad = rewardedAd.asAd(),
-                            adValue = adValue.asBidonAdValue()
+                adParams.activity.runOnUiThread {
+                    rewardedAd.onPaidEventListener = OnPaidEventListener { adValue ->
+                        emitEvent(
+                            AdEvent.PaidRevenue(
+                                ad = rewardedAd.asAd(),
+                                adValue = adValue.asBidonAdValue()
+                            )
                         )
+                    }
+                    rewardedAd.fullScreenContentCallback = getFullScreenContentCallback.createCallback(
+                        adEventFlow = this@AdmobRewardedImpl,
+                        getAd = {
+                            rewardedAd.asAd()
+                        },
                     )
+                    emitEvent(AdEvent.Fill(rewardedAd.asAd()))
                 }
-                rewardedAd.fullScreenContentCallback = getFullScreenContentCallback.createCallback(
-                    adEventFlow = this@AdmobRewardedImpl,
-                    getAd = {
-                        rewardedAd.asAd()
-                    },
-                )
-                emitEvent(AdEvent.Fill(rewardedAd.asAd()))
             }
         }
         val adUnitId = when (adParams) {
             is AdmobFullscreenAdAuctionParams.Bidding -> adParams.adUnitId
             is AdmobFullscreenAdAuctionParams.Network -> adParams.adUnitId
         }
-        RewardedAd.load(adParams.context, adUnitId, adRequest, requestListener)
+        RewardedAd.load(adParams.activity, adUnitId, adRequest, requestListener)
     }
 
     override fun show(activity: Activity) {
         logInfo(TAG, "Starting show: $this")
         val rewardedAd = rewardedAd
         if (rewardedAd == null) {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         } else {
             rewardedAd.show(activity) { rewardItem ->
                 logInfo(TAG, "onUserEarnedReward $rewardItem: $this")
@@ -114,20 +116,20 @@ internal class AdmobRewardedImpl(
         rewardedAd?.onPaidEventListener = null
         rewardedAd?.fullScreenContentCallback = null
         rewardedAd = null
-        param = null
     }
 
     private fun RewardedAd.asAd(): Ad {
         return Ad(
             demandAd = demandAd,
-            ecpm = param?.price ?: 0.0,
+            ecpm = price ?: 0.0,
             demandAdObject = this,
             networkName = demandId.demandId,
             dsp = null,
             roundId = roundId,
             currencyCode = AdValue.USD,
             auctionId = auctionId,
-            adUnitId = param?.adUnitId
+            adUnitId = this.adUnitId,
+            bidType = bidType
         )
     }
 }

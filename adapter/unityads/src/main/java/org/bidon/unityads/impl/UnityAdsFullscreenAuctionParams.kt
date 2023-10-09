@@ -9,18 +9,16 @@ import org.bidon.sdk.auction.models.LineItem
  * Created by Aleksei Cherniaev on 02/03/2023.
  */
 data class UnityAdsFullscreenAuctionParams(
-    val lineItem: LineItem,
+    override val lineItem: LineItem,
 ) : AdAuctionParams {
-    override val adUnitId: String? get() = lineItem.adUnitId
     override val price: Double get() = lineItem.pricefloor
 }
 
 class UnityAdsBannerAuctionParams(
-    val bannerFormat: BannerFormat,
-    val lineItem: LineItem,
     val activity: Activity,
+    val bannerFormat: BannerFormat,
+    override val lineItem: LineItem,
 ) : AdAuctionParams {
-    override val adUnitId: String? get() = lineItem.adUnitId
     override val price: Double get() = lineItem.pricefloor
 
     override fun toString(): String {

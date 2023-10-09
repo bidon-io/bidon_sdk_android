@@ -44,6 +44,7 @@ internal class BidRequestUseCaseImpl(
         auctionId: String,
         roundId: String,
         auctionConfigurationId: Int?,
+        auctionConfigurationUid: String?,
     ): Result<BiddingResponse> {
         return withContext(SdkDispatchers.IO) {
             val (banner, interstitial, rewarded) = adTypeParam.asAdRequestBody()
@@ -57,6 +58,7 @@ internal class BidRequestUseCaseImpl(
                 orientationCode = getOrientation().code,
                 roundId = roundId,
                 auctionConfigurationId = auctionConfigurationId,
+                auctionConfigurationUid = auctionConfigurationUid,
                 banner = banner,
                 interstitial = interstitial,
                 rewarded = rewarded,

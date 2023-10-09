@@ -25,27 +25,27 @@ internal object SegmentInfo {
     val customAttributes: StateFlow<Map<String, Any>> = customAttributesMutableStateFlow.asStateFlow()
 
     fun setGender(gender: Gender?) {
-        BidonSdk.segment.setGender(gender)
+        BidonSdk.segment.gender = gender
         this.genderMutableStateFlow.value = gender
     }
 
     fun setAge(age: Int) {
-        BidonSdk.segment.setAge(age)
+        BidonSdk.segment.age = age
         this.ageMutableStateFlow.value = age
     }
 
     fun setLevel(level: Int) {
-        BidonSdk.segment.setLevel(level)
+        BidonSdk.segment.level = level
         this.levelMutableStateFlow.value = level
     }
 
     fun setTotalInAppAmount(inAppAmount: Double) {
-        BidonSdk.segment.setTotalInAppAmount(inAppAmount)
+        BidonSdk.segment.totalInAppAmount = inAppAmount
         this.inAppAmountMutableStateFlow.value = inAppAmount
     }
 
     fun setPaying(isPaying: Boolean) {
-        BidonSdk.segment.setPaying(isPaying)
+        BidonSdk.segment.isPaying = isPaying
         this.isPayingMutableStateFlow.value = isPaying
     }
 

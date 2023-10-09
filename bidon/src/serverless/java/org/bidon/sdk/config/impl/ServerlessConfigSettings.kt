@@ -42,10 +42,7 @@ object ServerlessConfigSettings {
                         DefaultAdapters.ApplovinAdapter -> "applovin" to jsonObject { }
                         DefaultAdapters.DTExchangeAdapter -> "dtexchange" to dtexchangeOptions
                         DefaultAdapters.UnityAdsAdapter -> "unityads" to unityadsOptions
-                        DefaultAdapters.BigoAdsAdapter -> TODO()
-                        DefaultAdapters.MintegralAdapter -> TODO()
-                        DefaultAdapters.VungleAdapter -> TODO()
-                        DefaultAdapters.MetaAdapter -> TODO()
+                        else -> TODO()
                     }
                 } else {
                     null

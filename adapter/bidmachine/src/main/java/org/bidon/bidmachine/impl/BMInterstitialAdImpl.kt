@@ -96,7 +96,7 @@ internal class BMInterstitialAdImpl :
         if (interstitialAd?.canShow() == true) {
             interstitialAd?.show()
         } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.FullscreenAdNotReady))
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 
@@ -194,7 +194,8 @@ internal class BMInterstitialAdImpl :
             dsp = this.auctionResult?.demandSource,
             networkName = demandId.demandId,
             auctionId = auctionId,
-            adUnitId = null
+            adUnitId = null,
+            bidType = bidType
         )
     }
 }
