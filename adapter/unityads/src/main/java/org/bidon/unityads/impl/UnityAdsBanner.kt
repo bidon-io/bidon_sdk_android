@@ -13,7 +13,7 @@ import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.DeviceType
+import org.bidon.sdk.ads.banner.helper.DeviceInfo
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
@@ -63,7 +63,7 @@ internal class UnityAdsBanner :
             val unityBannerSize = when (adParams.bannerFormat) {
                 BannerFormat.LeaderBoard -> UnityBannerSize(728, 90)
                 BannerFormat.Banner -> UnityBannerSize(320, 50)
-                BannerFormat.Adaptive -> if (DeviceType.isTablet) {
+                BannerFormat.Adaptive -> if (DeviceInfo.isTablet) {
                     UnityBannerSize(728, 90)
                 } else {
                     UnityBannerSize(320, 50)

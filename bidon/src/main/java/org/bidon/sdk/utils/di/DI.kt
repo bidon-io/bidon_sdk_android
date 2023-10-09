@@ -7,7 +7,7 @@ import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.impl.AdaptersSourceImpl
 import org.bidon.sdk.ads.banner.helper.CountDownTimer
-import org.bidon.sdk.ads.banner.helper.DeviceType
+import org.bidon.sdk.ads.banner.helper.DeviceInfo
 import org.bidon.sdk.ads.banner.helper.GetOrientationUseCase
 import org.bidon.sdk.ads.banner.helper.PauseResumeObserver
 import org.bidon.sdk.ads.banner.helper.impl.ActivityLifecycleObserver
@@ -106,7 +106,7 @@ internal object DI {
         module {
             singleton<Context> { context.applicationContext }
         }
-        DeviceType.init(context)
+        DeviceInfo.init(context)
         FlavoredDI.init()
     }
 

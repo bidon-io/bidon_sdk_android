@@ -11,7 +11,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.amazon.AmazonDemandId
 import org.bidon.amazon.SlotType
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.DeviceType
+import org.bidon.sdk.ads.banner.helper.DeviceInfo
 import org.bidon.sdk.ads.banner.helper.getHeightDp
 import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.auction.AdTypeParam
@@ -27,8 +27,9 @@ internal class AmazonInfo(
 
 internal class ObtainTokenUseCase {
     suspend operator fun invoke(slots: Map<SlotType, List<String>>, adTypeParam: AdTypeParam): List<AmazonInfo> {
-        val adSizes = getAmazonSizes(slots, adTypeParam)
-        return obtainInfo(adSizes)
+        return obtainInfo(
+            adSizes = getAmazonSizes(slots, adTypeParam)
+        )
     }
 
     private suspend fun obtainInfo(adSizes: List<Pair<SlotType, DTBAdSize>>): List<AmazonInfo> = coroutineScope {
@@ -51,7 +52,7 @@ internal class ObtainTokenUseCase {
         loader.setSizes(adSize)
         loader.loadAd(object : DTBAdCallback {
             override fun onFailure(adError: AdError) {
-                logError(TAG, "Error while loading ad: ${adError.code} ${adError.message}", BidonError.NoBid(AmazonDemandId))
+                logError(TAG, "Error while loading ad: ${adError.code} ${adError.message}", BidonError.NoBid)
                 /**Please implement the logic to send ad request without our parameters if you want to
                  * show ads from other ad networks when Amazon ad request fails */
                 continuation.resume(null)
@@ -81,7 +82,7 @@ internal class ObtainTokenUseCase {
                         }
 
                         BannerFormat.Adaptive -> {
-                            if (DeviceType.isTablet) {
+                            if (DeviceInfo.isTablet) {
                                 slotUuids.map { uuid ->
                                     type to DTBAdSize(
                                         /* width = */ BannerFormat.Banner.getWidthDp(),
@@ -106,14 +107,19 @@ internal class ObtainTokenUseCase {
                     when (type) {
                         SlotType.VIDEO -> {
                             slotUuids.map { uuid ->
-                                type to DTBAdSize.DTBVideo(320, 480, uuid)
+                                val playerWidth = DeviceInfo.screenWidthDp.takeIf { it > 0 } ?: 320
+                                val playerHeight = DeviceInfo.screenHeightDp.takeIf { it > 0 } ?: 480
+                                logInfo(TAG, "Amazon video player size dp: $playerWidth x $playerHeight")
+                                type to DTBAdSize.DTBVideo(playerWidth, playerHeight, uuid)
                             }
                         }
+
                         SlotType.INTERSTITIAL -> {
                             slotUuids.map { uuid ->
                                 type to DTBAdSize.DTBInterstitialAdSize(uuid)
                             }
                         }
+
                         else -> {
                             null
                         }

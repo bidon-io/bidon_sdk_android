@@ -17,7 +17,7 @@ import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
-import org.bidon.sdk.ads.banner.helper.DeviceType
+import org.bidon.sdk.ads.banner.helper.DeviceInfo
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
@@ -113,8 +113,8 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
 
     @Before
     fun before() {
-        mockkObject(DeviceType)
-        every { DeviceType.init(any()) } returns Unit
+        mockkObject(DeviceInfo)
+        every { DeviceInfo.init(any()) } returns Unit
         DI.init(activity)
 //        DI.setFactories()
         mockkLog()
