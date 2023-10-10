@@ -111,16 +111,19 @@ internal class AmazonInterstitialImpl(
 
                 override fun onImpressionFired(view: View?) {
                     logInfo(TAG, "onImpressionFired")
-                    emitEvent(
-                        AdEvent.PaidRevenue(
-                            ad = getAd() ?: return,
-                            adValue = AdValue(
-                                adRevenue = adParams.price,
-                                currency = AdValue.USD,
-                                Precision.Precise
+                    getAd()?.let {
+                        emitEvent(AdEvent.Shown(it))
+                        emitEvent(
+                            AdEvent.PaidRevenue(
+                                ad = it,
+                                adValue = AdValue(
+                                    adRevenue = adParams.price,
+                                    currency = AdValue.USD,
+                                    Precision.Precise
+                                )
                             )
                         )
-                    )
+                    }
                 }
 
                 override fun onVideoCompleted(view: View?) {
