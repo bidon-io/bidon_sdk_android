@@ -124,6 +124,7 @@ class MobileFuseInterstitialImpl(private val isTestMode: Boolean) :
             override fun onAdClosed() {
                 logInfo(Tag, "onAdClosed: $this")
                 getAd()?.let { adEvent.tryEmit(AdEvent.Closed(it)) }
+                this@MobileFuseInterstitialImpl.interstitialAd = null
             }
         })
         interstitialAd.loadAdFromBiddingToken(adParams.signalData)

@@ -82,6 +82,9 @@ internal class AdmobRewardedImpl(
                         getAd = {
                             getAd()
                         },
+                        onClosed = {
+                            this@AdmobRewardedImpl.rewardedAd = null
+                        }
                     )
                     getAd()?.let { emitEvent(AdEvent.Fill(it)) }
                 }

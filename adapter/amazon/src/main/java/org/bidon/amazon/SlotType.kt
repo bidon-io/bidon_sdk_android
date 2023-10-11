@@ -10,6 +10,8 @@ enum class SlotType(val format: String) {
     BANNER("BANNER"),
     MREC("MREC"),
 
+    REWARDED_AD("REWARDED"),
+
     /**
      * Interstitial
      */

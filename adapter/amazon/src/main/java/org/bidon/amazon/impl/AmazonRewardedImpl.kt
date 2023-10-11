@@ -25,9 +25,9 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.json.JSONArray
 import org.json.JSONObject
 
-internal class AmazonInterstitialImpl(
+internal class AmazonRewardedImpl(
     private val slots: Map<SlotType, List<String>>
-) : AdSource.Interstitial<FullscreenAuctionParams>,
+) : AdSource.Rewarded<FullscreenAuctionParams>,
     Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
@@ -104,7 +104,10 @@ internal class AmazonInterstitialImpl(
 
                 override fun onAdClosed(view: View?) {
                     logInfo(TAG, "onAdClosed")
-                    emitEvent(AdEvent.Closed(getAd() ?: return))
+                    getAd()?.let {
+                        emitEvent(AdEvent.OnReward(it, null))
+                        emitEvent(AdEvent.Closed(it))
+                    }
                     interstitial = null
                 }
 
@@ -153,4 +156,4 @@ internal class AmazonInterstitialImpl(
     }
 }
 
-private const val TAG = "AmazonInterstitialImpl"
+private const val TAG = "AmazonRewardedImpl"

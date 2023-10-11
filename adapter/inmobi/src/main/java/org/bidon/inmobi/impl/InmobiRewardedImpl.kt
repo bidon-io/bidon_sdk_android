@@ -95,6 +95,7 @@ internal class InmobiRewardedImpl :
                 override fun onAdDismissed(interstitial: InMobiInterstitial) {
                     logInfo(TAG, "onAdClosed: $this")
                     emitEvent(AdEvent.Closed(getAd() ?: return))
+                    this@InmobiRewardedImpl.rewardedAd = null
                 }
 
                 override fun onRewardsUnlocked(interstitial: InMobiInterstitial, rewards: MutableMap<Any, Any>?) {

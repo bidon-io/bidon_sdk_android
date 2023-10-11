@@ -95,6 +95,7 @@ internal class InmobiInterstitialImpl :
                 override fun onAdDismissed(interstitial: InMobiInterstitial) {
                     logInfo(TAG, "onAdClosed: $this")
                     emitEvent(AdEvent.Closed(getAd() ?: return))
+                    this@InmobiInterstitialImpl.interstitial = null
                 }
             }
         )

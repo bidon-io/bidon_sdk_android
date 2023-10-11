@@ -104,6 +104,7 @@ internal class MintegralInterstitialImpl :
                 logInfo(TAG, "onAdClose $mBridgeIds, $rewardInfo")
                 val ad = getAd() ?: return
                 emitEvent(AdEvent.Closed(ad))
+                this@MintegralInterstitialImpl.interstitialAd = null
             }
 
             override fun onShowFail(mBridgeIds: MBridgeIds?, message: String?) {

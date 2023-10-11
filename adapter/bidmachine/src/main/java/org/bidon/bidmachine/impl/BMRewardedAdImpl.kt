@@ -198,6 +198,8 @@ internal class BMRewardedAdImpl :
                     getAd()?.let {
                         emitEvent(AdEvent.Closed(it))
                     }
+                    this@BMRewardedAdImpl.rewardedAd = null
+                    this@BMRewardedAdImpl.adRequest = null
                 }
             }
             rewardedAd

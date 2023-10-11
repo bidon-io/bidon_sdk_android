@@ -8,6 +8,7 @@ import org.bidon.amazon.ext.adapterVersion
 import org.bidon.amazon.ext.sdkVersion
 import org.bidon.amazon.impl.AmazonBannerImpl
 import org.bidon.amazon.impl.AmazonInterstitialImpl
+import org.bidon.amazon.impl.AmazonRewardedImpl
 import org.bidon.amazon.impl.BannerAuctionParams
 import org.bidon.amazon.impl.FullscreenAuctionParams
 import org.bidon.amazon.impl.ParseSlotsUseCase
@@ -37,7 +38,8 @@ class AmazonAdapter :
     Initializable<AmazonParameters>,
     SupportsTestMode by SupportsTestModeImpl(),
     AdProvider.Banner<BannerAuctionParams>,
-    AdProvider.Interstitial<FullscreenAuctionParams> {
+    AdProvider.Interstitial<FullscreenAuctionParams>,
+    AdProvider.Rewarded<FullscreenAuctionParams> {
     private var slots: Map<SlotType, List<String>> = emptyMap()
 
     override val demandId: DemandId = AmazonDemandId
@@ -76,5 +78,9 @@ class AmazonAdapter :
 
     override fun interstitial(): AdSource.Interstitial<FullscreenAuctionParams> {
         return AmazonInterstitialImpl(slots)
+    }
+
+    override fun rewarded(): AdSource.Rewarded<FullscreenAuctionParams> {
+        return AmazonRewardedImpl(slots)
     }
 }
