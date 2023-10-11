@@ -138,10 +138,11 @@ internal class ConductBiddingRoundUseCaseImpl(
                 )
                 resultsCollector.add(fillResult)
             } else {
-                val lose = AuctionResult.Bidding(
-                    roundStatus = RoundStatus.Lose,
-                    adSource = adSource,
+                val lose = AuctionResult.BiddingLose(
+                    adapterName = adSource.demandId.demandId,
+                    ecpm = bid.price
                 )
+                logInfo(TAG, "$lose")
                 resultsCollector.add(lose)
             }
         }

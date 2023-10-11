@@ -146,6 +146,7 @@ internal class AuctionStatImpl(
                 is AuctionResult.Network -> it.adSource.demandId.demandId
                 is AuctionResult.Bidding -> it.adSource.demandId.demandId
                 is AuctionResult.UnknownAdapter -> it.adapterName
+                is AuctionResult.BiddingLose -> it.adapterName
             }
         }.toSet()
         return cancelledDemandIds.map {
@@ -245,6 +246,7 @@ internal class AuctionStatImpl(
                 )
             }
 
+            is AuctionResult.BiddingLose,
             is AuctionResult.Bidding -> error("unexpected")
         }
     }
@@ -300,6 +302,15 @@ internal class AuctionStatImpl(
                                 )
                             }
 
+                            is AuctionResult.BiddingLose -> {
+                                DemandStat.Bidding.Bid(
+                                    roundStatusCode = RoundStatus.Lose.code,
+                                    demandId = auctionResult.adapterName,
+                                    ecpm = auctionResult.ecpm,
+                                    fillStartTs = null,
+                                    fillFinishTs = null,
+                                )
+                            }
                             is AuctionResult.Network -> error("unexpected")
                         }
                     }
