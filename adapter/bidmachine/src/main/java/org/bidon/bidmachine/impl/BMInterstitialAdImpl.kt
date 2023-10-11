@@ -192,6 +192,8 @@ internal class BMInterstitialAdImpl :
                     getAd()?.let {
                         emitEvent(AdEvent.Closed(it))
                     }
+                    this@BMInterstitialAdImpl.interstitialAd = null
+                    this@BMInterstitialAdImpl.adRequest = null
                 }
             }
             interstitialAd

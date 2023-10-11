@@ -113,6 +113,7 @@ class MetaInterstitialImpl :
                         logInfo(TAG, "onInterstitialDismissed $ad: $this")
                         val bidonAd = getAd() ?: return
                         emitEvent(AdEvent.Closed(bidonAd))
+                        this@MetaInterstitialImpl.interstitialAd = null
                     }
                 })
                 .withBid(adParams.payload)

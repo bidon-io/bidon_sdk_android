@@ -123,6 +123,7 @@ class MobileFuseRewardedAdImpl(private val isTestMode: Boolean) :
             override fun onAdClosed() {
                 logInfo(Tag, "onAdClosed: $this")
                 getAd()?.let { adEvent.tryEmit(AdEvent.Closed(it)) }
+                this@MobileFuseRewardedAdImpl.rewardedAd = null
             }
 
             override fun onUserEarnedReward() {

@@ -91,6 +91,7 @@ internal class DTExchangeRewarded :
                 getAd()?.let {
                     emitEvent(AdEvent.Closed(ad = it))
                 }
+                this@DTExchangeRewarded.inneractiveAdSpot = null
             }
         }
         controller.rewardedListener = InneractiveFullScreenAdRewardedListener {

@@ -40,10 +40,7 @@ internal class BigoAdsInterstitialImpl :
     override val isAdReadyToShow: Boolean
         get() = interstitialAd != null && interstitialAd?.isExpired != false
 
-    override fun destroy() {
-        interstitialAd?.destroy()
-        interstitialAd = null
-    }
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = BigoAdSdk.getBidderToken()
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
@@ -56,17 +53,6 @@ internal class BigoAdsInterstitialImpl :
                 },
                 bidPrice = pricefloor,
             )
-        }
-    }
-
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = BigoAdSdk.getBidderToken()
-
-    override fun show(activity: Activity) {
-        val interstitialAd = interstitialAd
-        if (interstitialAd == null) {
-            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-        } else {
-            interstitialAd.show()
         }
     }
 
@@ -91,6 +77,20 @@ internal class BigoAdsInterstitialImpl :
             })
         loader.build()
             .loadAd(builder.build())
+    }
+
+    override fun show(activity: Activity) {
+        val interstitialAd = interstitialAd
+        if (interstitialAd == null) {
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
+        } else {
+            interstitialAd.show()
+        }
+    }
+
+    override fun destroy() {
+        interstitialAd?.destroy()
+        interstitialAd = null
     }
 
     private fun fill(
@@ -139,6 +139,7 @@ internal class BigoAdsInterstitialImpl :
                 getAd()?.let { ad ->
                     emitEvent(AdEvent.Closed(ad))
                 }
+                this@BigoAdsInterstitialImpl.interstitialAd = null
             }
         })
         getAd()?.let { ad ->

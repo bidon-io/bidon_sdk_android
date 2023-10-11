@@ -56,6 +56,7 @@ internal class ApplovinInterstitialImpl(
                 getAd()?.let {
                     emitEvent(AdEvent.Closed(it))
                 }
+                destroy()
             }
 
             override fun adClicked(ad: AppLovinAd) {

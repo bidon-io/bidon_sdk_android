@@ -114,6 +114,7 @@ class MetaRewardedAdImpl :
                         logInfo(TAG, "onRewardedVideoClosed")
                         val bidonAd = getAd() ?: return
                         emitEvent(AdEvent.Closed(bidonAd))
+                        this@MetaRewardedAdImpl.rewardedVideoAd = null
                     }
                 })
                 .withBid(adParams.payload)

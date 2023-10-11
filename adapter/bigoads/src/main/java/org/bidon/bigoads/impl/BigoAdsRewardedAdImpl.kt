@@ -40,10 +40,7 @@ internal class BigoAdsRewardedAdImpl :
     override val isAdReadyToShow: Boolean
         get() = rewardVideoAd != null && rewardVideoAd?.isExpired != false
 
-    override fun destroy() {
-        rewardVideoAd?.destroy()
-        rewardVideoAd = null
-    }
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = BigoAdSdk.getBidderToken()
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
@@ -56,17 +53,6 @@ internal class BigoAdsRewardedAdImpl :
                 },
                 bidPrice = pricefloor,
             )
-        }
-    }
-
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = BigoAdSdk.getBidderToken()
-
-    override fun show(activity: Activity) {
-        val rewardVideoAd = rewardVideoAd
-        if (rewardVideoAd == null) {
-            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-        } else {
-            rewardVideoAd.show()
         }
     }
 
@@ -90,6 +76,20 @@ internal class BigoAdsRewardedAdImpl :
         })
         loader.build()
             .loadAd(builder.build())
+    }
+
+    override fun show(activity: Activity) {
+        val rewardVideoAd = rewardVideoAd
+        if (rewardVideoAd == null) {
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
+        } else {
+            rewardVideoAd.show()
+        }
+    }
+
+    override fun destroy() {
+        rewardVideoAd?.destroy()
+        rewardVideoAd = null
     }
 
     private fun fillAd(
@@ -138,6 +138,7 @@ internal class BigoAdsRewardedAdImpl :
                 getAd()?.let { ad ->
                     emitEvent(AdEvent.Closed(ad))
                 }
+                this@BigoAdsRewardedAdImpl.rewardVideoAd = null
             }
 
             override fun onAdRewarded() {

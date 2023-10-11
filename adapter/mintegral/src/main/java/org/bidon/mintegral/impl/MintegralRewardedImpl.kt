@@ -125,6 +125,7 @@ internal class MintegralRewardedImpl :
                         }
                     )
                 )
+                this@MintegralRewardedImpl.rewardedAd = null
             }
 
             override fun onShowFail(mBridgeIds: MBridgeIds?, message: String?) {

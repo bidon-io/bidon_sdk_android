@@ -77,6 +77,9 @@ internal class AdmobInterstitialImpl(
                         getAd = {
                             getAd()
                         },
+                        onClosed = {
+                            this@AdmobInterstitialImpl.interstitialAd = null
+                        }
                     )
                     getAd()?.let { emitEvent(AdEvent.Fill(it)) }
                 }

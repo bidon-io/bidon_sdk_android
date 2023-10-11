@@ -94,6 +94,7 @@ internal class DTExchangeInterstitial :
                 getAd()?.let {
                     emitEvent(AdEvent.Closed(ad = it))
                 }
+                this@DTExchangeInterstitial.inneractiveAdSpot = null
             }
         }
         spot.addUnitController(controller)

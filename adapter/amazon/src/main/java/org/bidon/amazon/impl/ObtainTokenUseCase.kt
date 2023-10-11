@@ -8,7 +8,6 @@ import com.amazon.device.ads.DTBAdSize
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.bidon.amazon.AmazonDemandId
 import org.bidon.amazon.SlotType
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo
@@ -106,12 +105,7 @@ internal class ObtainTokenUseCase {
                 is AdTypeParam.Interstitial -> {
                     when (type) {
                         SlotType.VIDEO -> {
-                            slotUuids.map { uuid ->
-                                val playerWidth = DeviceInfo.screenWidthDp.takeIf { it > 0 } ?: 320
-                                val playerHeight = DeviceInfo.screenHeightDp.takeIf { it > 0 } ?: 480
-                                logInfo(TAG, "Amazon video player size dp: $playerWidth x $playerHeight")
-                                type to DTBAdSize.DTBVideo(playerWidth, playerHeight, uuid)
-                            }
+                            getDtbVideoAdList(slotUuids, type)
                         }
 
                         SlotType.INTERSTITIAL -> {
@@ -120,18 +114,38 @@ internal class ObtainTokenUseCase {
                             }
                         }
 
-                        else -> {
+                        SlotType.REWARDED_AD,
+                        SlotType.BANNER,
+                        SlotType.MREC -> {
                             null
                         }
                     }
                 }
 
                 is AdTypeParam.Rewarded -> {
-                    logError(TAG, "Amazon Rewarded not supported", BidonError.Unspecified(AmazonDemandId))
-                    null
+                    when (type) {
+                        SlotType.REWARDED_AD -> {
+                            getDtbVideoAdList(slotUuids, type)
+                        }
+
+                        SlotType.VIDEO,
+                        SlotType.BANNER,
+                        SlotType.MREC,
+                        SlotType.INTERSTITIAL -> null
+                    }
                 }
             }
         }.flatten()
+    }
+
+    private fun getDtbVideoAdList(
+        slotUuids: List<String>,
+        type: SlotType
+    ): List<Pair<SlotType, DTBAdSize.DTBVideo>> = slotUuids.map { uuid ->
+        val playerWidth = DeviceInfo.screenWidthDp.takeIf { it > 0 } ?: 320
+        val playerHeight = DeviceInfo.screenHeightDp.takeIf { it > 0 } ?: 480
+        logInfo(TAG, "Amazon video player size dp: $playerWidth x $playerHeight")
+        type to DTBAdSize.DTBVideo(playerWidth, playerHeight, uuid)
     }
 }
 
