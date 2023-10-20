@@ -16,5 +16,5 @@ internal fun Regulation.asBundle() = Bundle().apply {
     this@asBundle.gdprConsentString?.let {
         putString("IABConsent_ConsentString", it)
     }
-    putBoolean("IABConsent_SubjectToGDPR", this@asBundle.gdprConsent)
+    putBoolean("IABConsent_SubjectToGDPR", this@asBundle.gdprApplies)
 }

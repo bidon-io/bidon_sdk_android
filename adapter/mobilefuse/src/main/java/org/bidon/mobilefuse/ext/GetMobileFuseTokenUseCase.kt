@@ -4,7 +4,6 @@ import android.content.Context
 import com.mobilefuse.sdk.internal.MobileFuseBiddingTokenProvider
 import com.mobilefuse.sdk.internal.MobileFuseBiddingTokenRequest
 import com.mobilefuse.sdk.internal.TokenGeneratorListener
-import com.mobilefuse.sdk.privacy.MobileFusePrivacyPreferences
 import org.bidon.sdk.BidonSdk
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -15,14 +14,8 @@ import kotlin.coroutines.suspendCoroutine
 internal object GetMobileFuseTokenUseCase {
     suspend operator fun invoke(context: Context, isTestMode: Boolean): String? {
         // Create our token request // Create our token request
-        val regulation = BidonSdk.regulation
         val tokenRequest = MobileFuseBiddingTokenRequest(
-            privacyPreferences = MobileFusePrivacyPreferences.Builder()
-                .setSubjectToCoppa(regulation.coppaApplies)
-                .setSubjectToGdpr(regulation.gdprConsent)
-                .setGppConsentString(regulation.gdprConsentString)
-                .setUsPrivacyConsentString(regulation.usPrivacyString)
-                .build(),
+            privacyPreferences = BidonSdk.regulation.toMobileFusePrivacyPreferences(),
             isTestMode = isTestMode
         )
         return suspendCoroutine {

@@ -9,6 +9,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.amazon.SlotType
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo
 import org.bidon.sdk.ads.banner.helper.getHeightDp
@@ -17,6 +18,7 @@ import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.regulation.Regulation
 import kotlin.coroutines.resume
 
 internal class AmazonInfo(
@@ -25,6 +27,10 @@ internal class AmazonInfo(
 )
 
 internal class ObtainTokenUseCase {
+
+    private val regulation: Regulation
+        get() = BidonSdk.regulation
+
     suspend operator fun invoke(slots: Map<SlotType, List<String>>, adTypeParam: AdTypeParam): List<AmazonInfo> {
         return obtainInfo(
             adSizes = getAmazonSizes(slots, adTypeParam)
@@ -48,6 +54,7 @@ internal class ObtainTokenUseCase {
 
     private suspend fun getDTBAdResponse(adSize: DTBAdSize): DTBAdResponse? = suspendCancellableCoroutine { continuation ->
         val loader = DTBAdRequest()
+        loader.applyRegulation(regulation)
         loader.setSizes(adSize)
         loader.loadAd(object : DTBAdCallback {
             override fun onFailure(adError: AdError) {
@@ -61,6 +68,12 @@ internal class ObtainTokenUseCase {
                 continuation.resume(dtbAdResponse)
             }
         })
+    }
+
+    private fun DTBAdRequest.applyRegulation(regulation: Regulation) {
+        regulation.usPrivacyString?.let {
+            this.putCustomTarget("us_privacy", it)
+        }
     }
 
     private fun getAmazonSizes(slots: Map<SlotType, List<String>>, adTypeParam: AdTypeParam): List<Pair<SlotType, DTBAdSize>> {
