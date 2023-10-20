@@ -83,8 +83,6 @@ internal class UnityAdsBanner :
                     }
                 }
 
-                override fun onBannerShown(bannerAdView: BannerView?) {}
-
                 override fun onBannerClick(bannerAdView: BannerView?) {
                     logInfo(TAG, "onAdClicked: $this")
                     bannerAdView?.let {

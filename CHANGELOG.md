@@ -1,6 +1,10 @@
 ## Bugfixes:
 [BDN-433](https://appodeal.atlassian.net/browse/BDN-433) Memory Leak
 
+# Release 0.4.20-next.1 (2023.10.20) Gamovation Special
+[BDN-468](https://appodeal.atlassian.net/browse/BDN-468) Downgrade UnityAds+InMobi for Gamovation
+
+
 # Release 0.4.8 (2023.09.21)
 ## New Features:
 [BDN-380](https://appodeal.atlassian.net/browse/BDN-380) Add Round Number To Bidon Analytics
