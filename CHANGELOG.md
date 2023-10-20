@@ -2,8 +2,8 @@
 [BDN-446](https://appodeal.atlassian.net/browse/BDN-446) Implement Amazon Rewarded
 [BDN-417](https://appodeal.atlassian.net/browse/BDN-417) Implement Amazon Adapters: Interstitial+Banner
 
-
 ## Bugfixes:
+[BDN-453](https://appodeal.atlassian.net/browse/BDN-453) Applying Regulations GDPR/CCPA/COPPA
 [BDN-443](https://appodeal.atlassian.net/browse/BDN-434) Improving Ad process
 [BDN-433](https://appodeal.atlassian.net/browse/BDN-433) Memory Leak
 

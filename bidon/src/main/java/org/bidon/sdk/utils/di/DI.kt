@@ -152,7 +152,11 @@ internal object DI {
 
             // [SegmentDataSource] should be singleton per session
             singleton<TokenDataSource> { TokenDataSourceImpl(keyValueStorage = get()) }
-            singleton<Regulation> { RegulationImpl() }
+            singleton<Regulation> {
+                RegulationImpl(
+                    iabConsent = get()
+                )
+            }
             /**
              * [SegmentSynchronizer] depends on it
              */

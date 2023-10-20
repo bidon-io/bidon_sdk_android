@@ -141,14 +141,14 @@ internal fun MainScreen(
                             sharedPreferences.getString("host", AppBaqendBaseUrl) ?: AppBaqendBaseUrl
                         BidonSdk.setTestMode(isTestMode.value)
                         BidonSdk.regulation.gdpr = sharedPreferences.getInt("gdpr", Gdpr.Default.code).let { code ->
-                            Gdpr.values().first { it.code == code }.also { gdpr ->
-                                BidonSdk.regulation.gdprConsentString = "1YYY".takeIf { gdpr == Gdpr.Given }
+                            Gdpr.values().first { it.code == code }.also {
+                                if (it == Gdpr.DoesNotApply) {
+                                    BidonSdk.regulation.usPrivacyString = "1--"
+                                }
                             }
                         }
                         BidonSdk.regulation.coppa = sharedPreferences.getInt("coppa", Coppa.Default.code).let { code ->
-                            Coppa.values().first { it.code == code }.also { coppa ->
-                                BidonSdk.regulation.usPrivacyString = "1YYY".takeIf { coppa == Coppa.Yes }
-                            }
+                            Coppa.values().first { it.code == code }
                         }
 
                         initState.value = MainScreenState.Initializing
