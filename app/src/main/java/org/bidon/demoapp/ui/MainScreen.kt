@@ -143,7 +143,7 @@ internal fun MainScreen(
                         BidonSdk.regulation.gdpr = sharedPreferences.getInt("gdpr", Gdpr.Default.code).let { code ->
                             Gdpr.values().first { it.code == code }.also {
                                 if (it == Gdpr.DoesNotApply) {
-                                    BidonSdk.regulation.usPrivacyString = "1--"
+                                    BidonSdk.regulation.usPrivacyString = "1---"
                                 }
                             }
                         }

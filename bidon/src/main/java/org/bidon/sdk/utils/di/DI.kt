@@ -263,7 +263,7 @@ internal object DI {
                     segmentBinder = SegmentBinder(segmentSynchronizer = get()),
                 )
             }
-            factory<IabConsent> { IabConsentImpl(context = get()) }
+            factory<IabConsent> { IabConsentImpl() }
             factory { VisibilityTracker() }
             factory<RegulationDataSource> {
                 RegulationDataSourceImpl(
