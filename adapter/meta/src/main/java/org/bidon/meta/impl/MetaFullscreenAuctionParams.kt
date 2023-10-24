@@ -14,7 +14,7 @@ class MetaFullscreenAuctionParams(
     val payload: String,
     override val price: Double
 ) : AdAuctionParams {
-    override val lineItem: LineItem? = null
+    override val adUnit: LineItem? = null
 }
 
 class MetaBannerAuctionParams(
@@ -25,7 +25,7 @@ class MetaBannerAuctionParams(
     override val price: Double
 ) : AdAuctionParams {
 
-    override val lineItem: LineItem? = null
+    override val adUnit: LineItem? = null
 
     val bannerSize: AdSize
         get() = when (bannerFormat) {

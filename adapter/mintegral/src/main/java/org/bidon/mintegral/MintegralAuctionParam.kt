@@ -15,9 +15,9 @@ class MintegralAuctionParam(
     val unitId: String?,
     val placementId: String?,
 ) : AdAuctionParams {
-    override val lineItem: LineItem? = null
+    override val adUnit: LineItem? = null
     override fun toString(): String {
-        return "MintegralAuctionParam(price=$price, adUnitId=$lineItem, placementId=$placementId, payload='$payload')"
+        return "MintegralAuctionParam(price=$price, adUnitId=$adUnit, placementId=$placementId, payload='$payload')"
     }
 }
 
@@ -29,8 +29,8 @@ class MintegralBannerAuctionParam(
     val unitId: String?,
     val placementId: String?,
 ) : AdAuctionParams {
-    override val lineItem: LineItem? = null
+    override val adUnit: LineItem? = null
     override fun toString(): String {
-        return "MintegralBannerAuctionParam($bannerFormat, price=$price, adUnitId=$lineItem, placementId=$placementId, payload='$payload')"
+        return "MintegralBannerAuctionParam($bannerFormat, price=$price, adUnitId=$adUnit, placementId=$placementId, payload='$payload')"
     }
 }

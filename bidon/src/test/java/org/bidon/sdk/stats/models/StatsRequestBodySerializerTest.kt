@@ -27,7 +27,7 @@ class StatsRequestBodySerializerTest {
                         DemandStat.Network(
                             demandId = "d345",
                             adUnitId = "asd223",
-                            ecpm = 1.2,
+                            price = 1.2,
                             fillFinishTs = 3,
                             fillStartTs = 4,
                             roundStatusCode = "code",
@@ -37,7 +37,7 @@ class StatsRequestBodySerializerTest {
                             demandId = "d6",
                             roundStatusCode = "code2",
                             adUnitId = null,
-                            ecpm = null,
+                            price = null,
                             fillFinishTs = null,
                             fillStartTs = null,
                             lineItemUid = "123",
@@ -61,7 +61,7 @@ class StatsRequestBodySerializerTest {
                             DemandStat.Bidding.Bid(
                                 demandId = "d011",
                                 roundStatusCode = "code3",
-                                ecpm = 1.0,
+                                price = 1.0,
                                 fillFinishTs = 6,
                                 fillStartTs = 5,
                             )
@@ -72,7 +72,7 @@ class StatsRequestBodySerializerTest {
             result = ResultBody(
                 status = "SUCCESS",
                 demandId = "admob",
-                ecpm = 0.123,
+                price = 0.123,
                 adUnitId = "id123",
                 auctionStartTs = 1000,
                 auctionFinishTs = 1300,
@@ -158,7 +158,7 @@ class StatsRequestBodySerializerTest {
                 DemandStat.Bidding.Bid(
                     demandId = "d011",
                     roundStatusCode = "code3",
-                    ecpm = 1.0,
+                    price = 1.0,
                     fillFinishTs = 6,
                     fillStartTs = 5,
                 )

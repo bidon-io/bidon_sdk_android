@@ -56,13 +56,8 @@ internal class BigoAdsBannerImpl :
             BigoBannerAuctionParams(
                 activity = activity,
                 bannerFormat = bannerFormat,
-                payload = requireNotNull(json?.optString("payload")) {
-                    "Payload is required for BigoAds banner ad"
-                },
-                slotId = requireNotNull(json?.optString("slot_id")) {
-                    "Slot id is required for BigoAds banner ad"
-                },
                 bidPrice = pricefloor,
+                adUnit = getAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
             )
         }
     }

@@ -9,9 +9,9 @@ class InmobiBannerAuctionParams(
     val activity: Activity,
     val bannerFormat: BannerFormat,
     override val price: Double,
-    override val lineItem: LineItem
+    override val adUnit: LineItem
 ) : AdAuctionParams {
-    val placementId: Long = requireNotNull(lineItem.adUnitId).toLong()
+    val placementId: Long = requireNotNull(adUnit.adUnitId).toLong()
 
     override fun toString(): String {
         return "InmobiBannerAuctionParams($bannerFormat, placementId=$placementId, price=$price)"

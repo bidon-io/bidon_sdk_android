@@ -18,7 +18,7 @@ internal class ResultBodySerializerTest {
             adUnitId = null,
             auctionFinishTs = 1020,
             auctionStartTs = 1000,
-            ecpm = null,
+            price = null,
             bidType = BidType.CPM.code,
             lineItemUid = "123",
         ).serialize()

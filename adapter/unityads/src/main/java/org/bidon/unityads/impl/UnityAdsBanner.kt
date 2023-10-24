@@ -40,7 +40,7 @@ internal class UnityAdsBanner :
         return auctionParamsScope {
             UnityAdsBannerAuctionParams(
                 activity = activity,
-                lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
                 bannerFormat = bannerFormat,
             )
         }
@@ -56,10 +56,10 @@ internal class UnityAdsBanner :
     }
 
     override fun load(adParams: UnityAdsBannerAuctionParams) {
-        lineItem = adParams.lineItem
+        lineItem = adParams.adUnit
         logInfo(TAG, "Starting with $adParams")
         adParams.activity.runOnUiThread {
-            val adUnitId = requireNotNull(adParams.lineItem.adUnitId)
+            val adUnitId = requireNotNull(adParams.adUnit.adUnitId)
             val unityBannerSize = when (adParams.bannerFormat) {
                 BannerFormat.LeaderBoard -> UnityBannerSize(728, 90)
                 BannerFormat.Banner -> UnityBannerSize(320, 50)

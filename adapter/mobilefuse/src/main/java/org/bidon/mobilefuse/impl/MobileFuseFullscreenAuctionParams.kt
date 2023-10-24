@@ -14,7 +14,7 @@ class MobileFuseFullscreenAuctionParams(
     val placementId: String,
     override val price: Double
 ) : AdAuctionParams {
-    override val lineItem: LineItem? = null
+    override val adUnit: LineItem? = null
 }
 
 class MobileFuseBannerAuctionParams(
@@ -24,5 +24,5 @@ class MobileFuseBannerAuctionParams(
     val placementId: String,
     override val price: Double,
 ) : AdAuctionParams {
-    override val lineItem: LineItem? = null
+    override val adUnit: LineItem? = null
 }
