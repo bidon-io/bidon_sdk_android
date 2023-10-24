@@ -2,6 +2,7 @@ package org.bidon.sdk.adapter
 
 import android.app.Activity
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.utils.ext.mapFailure
@@ -11,7 +12,8 @@ import org.json.JSONObject
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 interface AdAuctionParams {
-    val lineItem: LineItem?
+    val adUnit: AdUnit
+
     /**
      * DSP line item eCPM or Bidding bid price
      */
@@ -25,8 +27,8 @@ class AdAuctionParamSource(
      */
     val pricefloor: Double,
     val timeout: Long,
-    private val lineItems: List<LineItem> = emptyList(),
-    private val onLineItemConsumed: (LineItem) -> Unit = {},
+    private val adUnits: List<AdUnit> = emptyList(),
+    private val onAdUnitsConsumed: (AdUnit) -> Unit = {},
 
     /**
      * Bid specific params
@@ -51,15 +53,17 @@ class AdAuctionParamSource(
     /**
      * Search for a [LineItem] for the given demandId with the lowest pricefloor
      */
-    fun popLineItem(demandId: DemandId): LineItem? = lineItems
+    fun popAdUnit(demandId: DemandId): AdUnit? = adUnits
         .minByPricefloorOrNull(demandId, pricefloor)
-        ?.also(onLineItemConsumed)
+        ?.also(onAdUnitsConsumed)
 
-    private fun List<LineItem>.minByPricefloorOrNull(demandId: DemandId, pricefloor: Double): LineItem? {
+    fun getAdUnit(demandId: DemandId): AdUnit? = adUnits
+        .minByPricefloorOrNull(demandId, pricefloor)
+
+    private fun List<AdUnit>.minByPricefloorOrNull(demandId: DemandId, pricefloor: Double): AdUnit? {
         return this
             .filter { it.demandId == demandId.demandId }
-            .filterNot { it.adUnitId.isNullOrBlank() }
             .sortedBy { it.pricefloor }
-            .firstOrNull { it.pricefloor > pricefloor }
+            .firstOrNull { it.pricefloor?.let { it > pricefloor } ?: true }
     }
 }

@@ -45,9 +45,9 @@ internal class DTExchangeBanner :
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+            val lineItem = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             DTExchangeBannerAuctionParams(
-                lineItem = lineItem,
+                adUnit = lineItem,
                 bannerFormat = bannerFormat,
                 activity = activity,
             )

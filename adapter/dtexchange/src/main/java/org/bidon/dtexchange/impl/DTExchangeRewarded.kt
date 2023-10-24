@@ -45,14 +45,14 @@ internal class DTExchangeRewarded :
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+            val lineItem = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             DTExchangeAdAuctionParams(lineItem)
         }
     }
 
     override fun load(adParams: DTExchangeAdAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
-        lineItem = adParams.lineItem
+        lineItem = adParams.adUnit
         val spot = InneractiveAdSpotManager.get().createSpot()
         val controller = InneractiveFullscreenUnitController()
         val videoController = InneractiveFullscreenVideoContentController()

@@ -1,11 +1,12 @@
 package org.bidon.sdk.config.models.data.models.auction
 
 import com.google.common.truth.Truth.assertThat
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResponseParser
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.utils.json.JsonParsers
+import org.bidon.sdk.utils.json.jsonObject
 import org.junit.Test
 
 /**
@@ -41,23 +42,25 @@ internal class AuctionResponseParserTest {
         auctionConfigurationId = 10,
         auctionId = "49975154-b82a-444b-a7f0-30bd749e7fce",
         token = "asdsad",
-        lineItems = listOf(
-            LineItem(
-                demandId = "admob",
-                pricefloor = 0.25,
-                adUnitId = "AAAA2",
-                uid = "1",
-            ),
-            LineItem(
-                demandId = "bidmachine",
-                pricefloor = 1.2235,
-                adUnitId = "AAAA1",
-                uid = "1",
-            ),
-        ),
         pricefloor = 0.01,
         externalWinNotificationsEnabled = false,
         auctionConfigurationUid = "10",
+        adUnits = listOf(
+            AdUnit(
+                demandId = "admob",
+                label = "admob_banner",
+                pricefloor = 0.25,
+                uid = "12387837129819",
+                ext = jsonObject { "ad_unit_id" hasValue "ca-app-pub-3940256099942544/6300978111" }.toString(),
+            ),
+            AdUnit(
+                demandId = "bidmachine",
+                label = "bidmachine_banner",
+                uid = "32387837129819",
+                pricefloor = null,
+                ext = null,
+            )
+        )
     )
 
     private val responseJsonStr = """
@@ -82,18 +85,20 @@ internal class AuctionResponseParserTest {
               ],
             }
           ],
-          "line_items": [
+          "ad_units": [
             {
-              "id": "admob",
+              "demand_id": "admob",
+              "label": "admob_banner",
               "pricefloor": 0.25,
-              "ad_unit_id": "AAAA2",
-               "uid": "1"
+              "uid": "12387837129819",
+              "ext": {
+                "ad_unit_id": "ca-app-pub-3940256099942544/6300978111"
+              }
             },
-           {
-              "id": "bidmachine",
-              "pricefloor": 1.2235,
-              "ad_unit_id": "AAAA1",
-               "uid": "1"
+            {
+              "demand_id": "bidmachine",
+              "label": "bidmachine_banner",
+              "uid": "32387837129819"
             }
           ],
           "token": "asdsad",

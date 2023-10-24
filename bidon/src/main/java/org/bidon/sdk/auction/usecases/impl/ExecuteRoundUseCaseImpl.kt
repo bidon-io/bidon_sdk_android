@@ -15,10 +15,10 @@ import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.auction.models.BannerRequest
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.ConductBiddingRoundUseCase
 import org.bidon.sdk.auction.usecases.ConductNetworkRoundUseCase
@@ -44,14 +44,14 @@ internal class ExecuteRoundUseCaseImpl(
         round: RoundRequest,
         roundIndex: Int,
         pricefloor: Double,
-        lineItems: List<LineItem>,
+        adUnits: List<AdUnit>,
         resultsCollector: ResultsCollector,
-        onFinish: (remainingLineItems: List<LineItem>) -> Unit,
+        onFinish: (remainingLineItems: List<AdUnit>) -> Unit,
     ): Result<List<AuctionResult>> = coroutineScope {
-        val mutableLineItems = lineItems.toMutableList()
+        val mutableAdUnits = adUnits.toMutableList()
         runCatching {
             val logText = "Round '${round.id}' started with"
-            logInfo(TAG, "$logText line items: $mutableLineItems")
+            logInfo(TAG, "$logText adUnits: $mutableAdUnits")
             val roundDeferred = mutableListOf<Deferred<AuctionResult>>()
 
             /**
@@ -134,14 +134,14 @@ internal class ExecuteRoundUseCaseImpl(
                     participantIds = round.demandIds,
                     adTypeParam = adTypeParam,
                     demandAd = demandAd,
-                    lineItems = mutableLineItems,
+                    adUnits = mutableAdUnits,
                     round = round,
                     pricefloor = pricefloor,
                     scope = this@coroutineScope,
                     resultsCollector = resultsCollector
                 )
-                mutableLineItems.clear()
-                mutableLineItems.addAll(networkResults.remainingLineItems)
+                mutableAdUnits.clear()
+                mutableAdUnits.addAll(networkResults.remainingAdUnits)
                 roundDeferred.addAll(networkResults.results)
             }
 
@@ -165,7 +165,7 @@ internal class ExecuteRoundUseCaseImpl(
                     logInfo(TAG, "Round '${round.id}' result #$index. $details")
                     result
                 }.let {
-                    onFinish.invoke(mutableLineItems)
+                    onFinish.invoke(mutableAdUnits)
                     logInfo(TAG, "Round '${round.id}' finished with ${it.size} results: $it")
                     it
                 }

@@ -13,8 +13,8 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResult
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.ConductNetworkRoundUseCase
 import org.bidon.sdk.auction.usecases.models.NetworksResult
@@ -31,13 +31,13 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
         participantIds: List<String>,
         adTypeParam: AdTypeParam,
         demandAd: DemandAd,
-        lineItems: List<LineItem>,
+        adUnits: List<AdUnit>,
         round: RoundRequest,
         pricefloor: Double,
         scope: CoroutineScope,
         resultsCollector: ResultsCollector,
     ): NetworksResult {
-        val mutableLineItems = lineItems.toMutableList()
+        val mutableLineItems = adUnits.toMutableList()
         runCatching {
             val participants = networkSources.filter {
                 (it as AdSource<*>).demandId.demandId in participantIds
@@ -46,19 +46,19 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
             val deferredList = participants.map { adSource ->
                 scope.async {
                     adSource as AdSource<AdAuctionParams>
-                    val availableLineItemsForDemand = mutableLineItems.filter { it.demandId == adSource.demandId.demandId }
+                    val availableAdUnitsForDemand = mutableLineItems.filter { it.demandId == adSource.demandId.demandId }
                     logInfo(
                         tag = TAG,
                         message = "Round '${round.id}'. Adapter ${adSource.demandId.demandId} starts fill. " +
-                            "PriceFloor=$pricefloor. LineItems: $availableLineItemsForDemand."
+                            "PriceFloor=$pricefloor. LineItems: $availableAdUnitsForDemand."
                     )
                     val adEvent = loadAd(
                         adSource = adSource,
                         adTypeParam = adTypeParam,
                         pricefloor = pricefloor,
                         round = round,
-                        availableLineItemsForDemand = availableLineItemsForDemand,
-                        onLineItemConsumed = { lineItem ->
+                        availableAdUnitsForDemand = availableAdUnitsForDemand,
+                        onAdUnitsConsumed = { lineItem ->
                             mutableLineItems.remove(lineItem)
                         }
                     )
@@ -77,12 +77,12 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
             }
             return NetworksResult(
                 results = deferredList,
-                remainingLineItems = mutableLineItems.toList()
+                remainingAdUnits = mutableLineItems.toList()
             )
         }.getOrNull() ?: run {
             return NetworksResult(
                 results = emptyList(),
-                remainingLineItems = lineItems
+                remainingAdUnits = adUnits
             )
         }
     }
@@ -92,8 +92,8 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
         adTypeParam: AdTypeParam,
         pricefloor: Double,
         round: RoundRequest,
-        availableLineItemsForDemand: List<LineItem>,
-        onLineItemConsumed: (LineItem) -> Unit
+        availableAdUnitsForDemand: List<AdUnit>,
+        onAdUnitsConsumed: (AdUnit) -> Unit
     ): AdEvent {
         adSource as AdSource<AdAuctionParams>
         return withTimeoutOrNull(round.timeoutMs) {
@@ -104,15 +104,15 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
                     optBannerFormat = (adTypeParam as? AdTypeParam.Banner)?.bannerFormat,
                     optContainerWidth = (adTypeParam as? AdTypeParam.Banner)?.containerWidth,
                     pricefloor = pricefloor,
-                    lineItems = availableLineItemsForDemand,
-                    onLineItemConsumed = onLineItemConsumed
+                    adUnits = availableAdUnitsForDemand,
+                    onAdUnitsConsumed = onAdUnitsConsumed
                 )
             ).getOrNull() ?: run {
                 return@withTimeoutOrNull AdEvent.LoadFailed(BidonError.NoAppropriateAdUnitId)
             }
 
             // FILL
-            adSource.markFillStarted(adParam.lineItem, adParam.price)
+            adSource.markFillStarted(adParam.adUnit, adParam.price)
             adSource.load(adParam)
             val fillAdEvent = adSource.adEvent.first {
                 // wait for results

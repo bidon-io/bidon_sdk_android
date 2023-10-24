@@ -19,7 +19,7 @@ import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
@@ -38,7 +38,7 @@ internal class ApplovinBannerImpl(
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var adView: AppLovinAdView? = null
-    private var lineItem: LineItem? = null
+    private var lineItem: AdUnit? = null
     private var bannerFormat: BannerFormat? = null
 
     private val listener by lazy {
@@ -77,7 +77,7 @@ internal class ApplovinBannerImpl(
         return auctionParamsScope {
             ApplovinBannerAuctionParams(
                 activity = activity,
-                lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
                 bannerFormat = bannerFormat
             )
         }
@@ -85,7 +85,7 @@ internal class ApplovinBannerImpl(
 
     override fun load(adParams: ApplovinBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
-        lineItem = adParams.lineItem
+        lineItem = adParams.adUnit
         bannerFormat = adParams.bannerFormat
         val adSize = adParams.bannerFormat.asApplovinAdSize() ?: error(
             BidonError.AdFormatIsNotSupported(
@@ -109,7 +109,7 @@ internal class ApplovinBannerImpl(
         }
         adParams.activity.runOnUiThread {
             val bannerView =
-                AppLovinAdView(applovinSdk, adSize, adParams.lineItem.adUnitId, adParams.activity.applicationContext).also {
+                AppLovinAdView(applovinSdk, adSize, adParams.zoneId, adParams.activity.applicationContext).also {
                     it.setAdClickListener(listener)
                     it.setAdDisplayListener(listener)
                     adView = it

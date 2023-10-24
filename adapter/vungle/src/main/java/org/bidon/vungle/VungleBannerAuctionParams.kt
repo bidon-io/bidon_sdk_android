@@ -14,7 +14,7 @@ class VungleBannerAuctionParams(
     val payload: String,
     val bannerId: String,
 ) : AdAuctionParams {
-    override val lineItem: LineItem? = null
+    override val adUnit: LineItem? = null
     val bannerSize
         get() = when (bannerFormat) {
             BannerFormat.LeaderBoard -> AdConfig.AdSize.BANNER_LEADERBOARD
@@ -34,5 +34,5 @@ data class VungleFullscreenAuctionParams(
     val placementId: String,
     val payload: String
 ) : AdAuctionParams {
-    override val lineItem: LineItem? = null
+    override val adUnit: LineItem? = null
 }

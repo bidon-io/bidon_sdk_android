@@ -52,13 +52,13 @@ class AdAuctionParamSourceTest {
             activity = mockk(),
             pricefloor = 1.5,
             timeout = 1000,
-            lineItems = list,
-            onLineItemConsumed = {},
+            adUnits = list,
+            onAdUnitsConsumed = {},
             json = null,
             optBannerFormat = null,
             optContainerWidth = null
         )
-        val result = adAuctionParam.popLineItem(DemandId("demand id123"))
+        val result = adAuctionParam.popAdUnit(DemandId("demand id123"))
 
         assertThat(result).isEqualTo(
             LineItem(
@@ -114,13 +114,13 @@ class AdAuctionParamSourceTest {
             activity = mockk(),
             pricefloor = 2.9,
             timeout = 1000,
-            lineItems = list,
-            onLineItemConsumed = {},
+            adUnits = list,
+            onAdUnitsConsumed = {},
             json = null,
             optBannerFormat = null,
             optContainerWidth = null
         )
-        val result = adAuctionParam.popLineItem(DemandId("demand id123"))
+        val result = adAuctionParam.popAdUnit(DemandId("demand id123"))
         assertThat(result).isEqualTo(
             null
         )

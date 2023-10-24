@@ -58,7 +58,7 @@ internal class BMInterstitialAdImpl :
                 price = pricefloor,
                 timeout = timeout,
                 context = activity.applicationContext,
-                payload = json?.optString("payload")
+                adUnit = getAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             )
         }
     }
@@ -70,7 +70,6 @@ internal class BMInterstitialAdImpl :
             .setAdContentType(AdContentType.All)
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.price))
             .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
-            .setBidPayload(adParams.payload)
             .setLoadingTimeOut(adParams.timeout.toInt())
             .setListener(
                 object : AdRequest.AdRequestListener<InterstitialRequest> {

@@ -57,7 +57,7 @@ internal class BMRewardedAdImpl :
                 price = pricefloor,
                 timeout = timeout,
                 context = activity.applicationContext,
-                payload = json?.optString("payload")
+                adUnit = getAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
             )
         }
     }

@@ -210,7 +210,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                             demandId = "dem1",
                             adUnitId = "ad_unit_id_123",
                             roundStatusCode = RoundStatus.Successful.code,
-                            ecpm = 1.3,
+                            price = 1.3,
                             fillStartTs = 986,
                             fillFinishTs = 987,
                             lineItemUid = "123",
@@ -219,7 +219,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                             demandId = "dem2",
                             adUnitId = "ad_unit_id_123",
                             roundStatusCode = RoundStatus.NoFill.code,
-                            ecpm = 1.5,
+                            price = 1.5,
                             fillStartTs = 986,
                             fillFinishTs = 987,
                             lineItemUid = "123",
@@ -234,14 +234,14 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                             DemandStat.Bidding.Bid(
                                 roundStatusCode = RoundStatus.Successful.code,
                                 demandId = "bidmachine",
-                                ecpm = 1.2,
+                                price = 1.2,
                                 fillStartTs = 916,
                                 fillFinishTs = 917
                             ),
                             DemandStat.Bidding.Bid(
                                 roundStatusCode = RoundStatus.Successful.code,
                                 demandId = "meta",
-                                ecpm = 1.15,
+                                price = 1.15,
                                 fillStartTs = 916,
                                 fillFinishTs = 917
                             ),
@@ -372,7 +372,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                             DemandStat.Bidding.Bid(
                                 roundStatusCode = RoundStatus.Successful.code,
                                 demandId = "bidmachine",
-                                ecpm = 1.5,
+                                price = 1.5,
                                 fillStartTs = 916,
                                 fillFinishTs = 917
                             ),
@@ -383,7 +383,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                             demandId = "dem1",
                             adUnitId = "ad_unit_id_123",
                             roundStatusCode = RoundStatus.Successful.code,
-                            ecpm = 1.3,
+                            price = 1.3,
                             fillStartTs = 986,
                             fillFinishTs = 987,
                             lineItemUid = "123",
@@ -392,7 +392,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                             demandId = "dem2",
                             adUnitId = "ad_unit_id_123",
                             roundStatusCode = RoundStatus.NoFill.code,
-                            ecpm = 10.5,
+                            price = 10.5,
                             fillStartTs = 986,
                             fillFinishTs = 987,
                             lineItemUid = "123",
@@ -428,11 +428,11 @@ internal class AuctionStatImplTest : ConcurrentTest() {
             ),
             auctionConfigurationId = 10,
             auctionId = "auction_id_123",
-            lineItems = listOf(),
             pricefloor = 0.01,
             token = null,
             externalWinNotificationsEnabled = true,
             auctionConfigurationUid = "10",
+            adUnits = null,
         )
         testee.markAuctionStarted(auctionId = "auction_id_123")
         testee.addRoundResults(
@@ -550,7 +550,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 demandId = "dem1",
                                 adUnitId = "ad_unit_id_123",
                                 roundStatusCode = "LOSE",
-                                ecpm = 1.3,
+                                price = 1.3,
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
                                 lineItemUid = "123",
@@ -559,7 +559,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 demandId = "dem2",
                                 adUnitId = "ad_unit_id_123",
                                 roundStatusCode = "NO_FILL",
-                                ecpm = 10.5,
+                                price = 10.5,
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
                                 lineItemUid = "123",
@@ -572,7 +572,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 DemandStat.Bidding.Bid(
                                     roundStatusCode = RoundStatus.Win.code,
                                     demandId = "bidmachine",
-                                    ecpm = 1.5,
+                                    price = 1.5,
                                     fillStartTs = 916,
                                     fillFinishTs = 917
                                 ),
@@ -593,7 +593,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 DemandStat.Bidding.Bid(
                                     roundStatusCode = RoundStatus.AuctionCancelled.code,
                                     demandId = null,
-                                    ecpm = null,
+                                    price = null,
                                     fillStartTs = null,
                                     fillFinishTs = null
                                 ),
@@ -608,7 +608,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     status = "SUCCESS",
                     roundId = "ROUND_1",
                     demandId = "bidmachine",
-                    ecpm = 1.5,
+                    price = 1.5,
                     adUnitId = null,
                     auctionStartTs = systemTime,
                     auctionFinishTs = systemTime,
@@ -624,7 +624,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
         demandId = demandId,
         adUnitId = null,
         roundStatusCode = status.code,
-        ecpm = null,
+        price = null,
         fillStartTs = null,
         fillFinishTs = null,
         lineItemUid = null,
@@ -633,7 +633,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
     private fun getBiddingStatAdapter(demandId: String, status: RoundStatus) = DemandStat.Bidding.Bid(
         demandId = demandId,
         roundStatusCode = status.code,
-        ecpm = null,
+        price = null,
         fillStartTs = null,
         fillFinishTs = null
     )

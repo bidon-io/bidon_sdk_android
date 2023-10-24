@@ -45,12 +45,7 @@ internal class BigoAdsInterstitialImpl :
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             BigoFullscreenAuctionParams(
-                payload = requireNotNull(json?.optString("payload")) {
-                    "Payload is required for Bigo Ads"
-                },
-                slotId = requireNotNull(json?.optString("slot_id")) {
-                    "Slot id is required for Bigo Ads"
-                },
+                adUnit = getAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
                 bidPrice = pricefloor,
             )
         }

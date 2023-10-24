@@ -72,7 +72,7 @@ internal class TestBiddingInterstitialImpl(
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+            val lineItem = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             TestInterstitialParameters(lineItem)
         }
     }

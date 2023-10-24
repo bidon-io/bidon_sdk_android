@@ -9,16 +9,16 @@ import org.bidon.sdk.utils.serializer.Serializable
 internal sealed interface DemandStat {
 
     data class Network(
-        @field:JsonName("id")
+        @field:JsonName("demand_id")
         val demandId: String,
-        @field:JsonName("ad_unit_id")
-        val adUnitId: String?,
-        @field:JsonName("line_item_uid")
-        val lineItemUid: String?,
+        @field:JsonName("ad_unit_uid")
+        val adUnitUid: String?,
+        @field:JsonName("ad_unit_label")
+        val adUnitLabel: String?,
         @field:JsonName("status")
         val roundStatusCode: String,
-        @field:JsonName("ecpm")
-        val ecpm: Double?,
+        @field:JsonName("price")
+        val price: Double?,
         @field:JsonName("fill_start_ts")
         val fillStartTs: Long?,
         @field:JsonName("fill_finish_ts")
@@ -37,10 +37,14 @@ internal sealed interface DemandStat {
         data class Bid(
             @field:JsonName("status")
             val roundStatusCode: String,
-            @field:JsonName("id")
+            @field:JsonName("demand_id")
             val demandId: String?,
-            @field:JsonName("ecpm")
-            val ecpm: Double?,
+            @field:JsonName("ad_unit_uid")
+            val adUnitUid: String?,
+            @field:JsonName("ad_unit_label")
+            val adUnitLabel: String?,
+            @field:JsonName("price")
+            val price: Double?,
             @field:JsonName("fill_start_ts")
             val fillStartTs: Long?,
             @field:JsonName("fill_finish_ts")

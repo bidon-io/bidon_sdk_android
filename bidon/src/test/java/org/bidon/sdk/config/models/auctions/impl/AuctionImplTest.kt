@@ -156,6 +156,7 @@ internal class AuctionImplTest : ConcurrentTest() {
             token = null,
             externalWinNotificationsEnabled = true,
             auctionConfigurationUid = "10",
+            adUnits = null,
         )
         coEvery {
             getAuctionRequestUseCase.request(
@@ -191,17 +192,17 @@ internal class AuctionImplTest : ConcurrentTest() {
                 assertThat(actualRoundStat[0].roundId).isEqualTo("round_1")
                 assertThat(actualRoundStat[0].demands).hasSize(2)
                 assertThat(actualRoundStat[0].demands[0].roundStatusCode).isEqualTo(RoundStatus.Lose.code)
-                assertThat(actualRoundStat[0].demands[0].ecpm).isEqualTo(1.2235)
+                assertThat(actualRoundStat[0].demands[0].price).isEqualTo(1.2235)
                 assertThat(actualRoundStat[0].demands[0].fillStartTs).isNull()
                 assertThat(actualRoundStat[0].demands[1].roundStatusCode).isEqualTo(RoundStatus.Lose.code)
-                assertThat(actualRoundStat[0].demands[1].ecpm).isEqualTo(0.25)
+                assertThat(actualRoundStat[0].demands[1].price).isEqualTo(0.25)
                 assertThat(actualRoundStat[0].demands[1].fillStartTs).isNull()
                 // WINNER
                 assertThat(actualRoundStat[1].auctionId).isEqualTo("auctionId_123")
                 assertThat(actualRoundStat[1].roundId).isEqualTo("ROUND_2")
                 assertThat(actualRoundStat[1].demands).hasSize(1)
                 assertThat(actualRoundStat[1].demands[0].roundStatusCode).isEqualTo(RoundStatus.Win.code)
-                assertThat(actualRoundStat[1].demands[0].ecpm).isEqualTo(2.2235)
+                assertThat(actualRoundStat[1].demands[0].price).isEqualTo(2.2235)
                 assertThat(actualRoundStat[1].demands[0].adUnitId).isEqualTo("admob2")
                 assertThat(actualRoundStat[1].demands[0].fillStartTs).isNotNull()
                 assertThat(actualRoundStat[1].demands[0].fillFinishTs).isNotNull()
@@ -396,5 +397,6 @@ internal class AuctionImplTest : ConcurrentTest() {
         token = null,
         externalWinNotificationsEnabled = true,
         auctionConfigurationUid = "10",
+        adUnits = null,
     )
 }

@@ -31,7 +31,7 @@ internal class GetAdAuctionParamsUseCase {
                         )
                     } else {
                         AdmobBannerAuctionParams.Network(
-                            lineItem = popLineItem(AdmobDemandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                            adUnit = popAdUnit(AdmobDemandId) ?: error(BidonError.NoAppropriateAdUnitId),
                             bannerFormat = bannerFormat,
                             activity = activity,
                             containerWidth = containerWidth,
@@ -50,7 +50,7 @@ internal class GetAdAuctionParamsUseCase {
                         )
                     } else {
                         AdmobFullscreenAdAuctionParams.Network(
-                            lineItem = popLineItem(AdmobDemandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                            adUnit = popAdUnit(AdmobDemandId) ?: error(BidonError.NoAppropriateAdUnitId),
                             activity = activity,
                         )
                     }

@@ -9,5 +9,5 @@ data class FullscreenAuctionParams(
     val slotUuid: String,
     override val price: Double
 ) : AdAuctionParams {
-    override val lineItem: LineItem? = null
+    override val adUnit: LineItem? = null
 }

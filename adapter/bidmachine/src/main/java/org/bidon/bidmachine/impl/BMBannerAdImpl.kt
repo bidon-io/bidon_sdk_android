@@ -101,7 +101,7 @@ internal class BMBannerAdImpl :
                 timeout = timeout,
                 activity = activity,
                 bannerFormat = bannerFormat,
-                payload = json?.optString("payload")
+                adUnit = getAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             )
         }
     }

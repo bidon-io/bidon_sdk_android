@@ -6,9 +6,9 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.BannerRequest
 import org.bidon.sdk.auction.models.InterstitialRequest
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.RewardedRequest
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
@@ -62,14 +62,15 @@ class StatisticsCollectorImpl : StatisticsCollector {
         roundId = null,
         roundIndex = null,
         demandId = DemandId(""),
-        adUnitId = null,
-        lineItemUid = null,
+        adUnit = null,
         fillStartTs = null,
         fillFinishTs = null,
         roundStatus = null,
         ecpm = 0.0,
         bidType = null,
-        dspSource = null
+        dspSource = null,
+        roundPricefloor = 0.0,
+        auctionPricefloor = 0.0
     )
 
     override val demandAd: DemandAd
@@ -98,7 +99,6 @@ class StatisticsCollectorImpl : StatisticsCollector {
             demandAd = demandAd,
             ecpm = stat.ecpm,
             networkName = demandId.demandId,
-            adUnitId = stat.adUnitId,
             currencyCode = AdValue.USD,
             roundId = roundId,
             auctionId = auctionId,
@@ -223,12 +223,11 @@ class StatisticsCollectorImpl : StatisticsCollector {
         externalWinNotificationsEnabled = enabled
     }
 
-    override fun markFillStarted(lineItem: LineItem?, pricefloor: Double?) {
+    override fun markFillStarted(adUnit: AdUnit?, pricefloor: Double?) {
         stat = stat.copy(
             fillStartTs = SystemTimeNow,
-            adUnitId = lineItem?.adUnitId,
+            adUnit = adUnit,
             ecpm = pricefloor ?: stat.ecpm,
-            lineItemUid = lineItem?.uid
         )
     }
 
@@ -281,14 +280,16 @@ class StatisticsCollectorImpl : StatisticsCollector {
             auctionConfigurationUid = auctionConfigurationUid,
             impressionId = impressionId,
             demandId = demandId.demandId,
-            adUnitId = stat.adUnitId,
-            lineItemUid = stat.lineItemUid,
-            ecpm = stat.ecpm,
+            price = stat.ecpm,
             banner = banner,
             interstitial = interstitial,
             rewarded = rewarded,
             roundIndex = roundIndex,
             bidType = stat.bidType?.code,
+            adUnitLabel = stat.adUnit?.label,
+            adUnitUid = stat.adUnit?.uid,
+            auctionPricefloor = stat.auctionPricefloor,
+            roundPricefloor = stat.roundPricefloor
         )
     }
 

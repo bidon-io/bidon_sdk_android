@@ -38,14 +38,14 @@ internal class UnityAdsInterstitial :
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             UnityAdsFullscreenAuctionParams(
-                lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+                adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             )
         }
     }
 
     override fun load(adParams: UnityAdsFullscreenAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
-        lineItem = adParams.lineItem
+        lineItem = adParams.adUnit
 
         val loadListener = object : IUnityAdsLoadListener {
             override fun onUnityAdsAdLoaded(placementId: String?) {
@@ -69,7 +69,7 @@ internal class UnityAdsInterstitial :
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
-        UnityAds.load(adParams.lineItem.adUnitId, loadListener)
+        UnityAds.load(adParams.adUnit.adUnitId, loadListener)
     }
 
     override fun show(activity: Activity) {

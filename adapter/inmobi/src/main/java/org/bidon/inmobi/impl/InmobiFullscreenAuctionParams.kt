@@ -7,9 +7,9 @@ import org.bidon.sdk.auction.models.LineItem
 class InmobiFullscreenAuctionParams(
     val context: Context,
     override val price: Double,
-    override val lineItem: LineItem
+    override val adUnit: LineItem
 ) : AdAuctionParams {
-    val placementId: Long = requireNotNull(lineItem.adUnitId).toLong()
+    val placementId: Long = requireNotNull(adUnit.adUnitId).toLong()
 
     override fun toString(): String {
         return "InmobiFullscreenAuctionParams(placementId=$placementId, price=$price)"

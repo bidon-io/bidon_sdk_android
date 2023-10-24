@@ -43,12 +43,12 @@ internal class InmobiBannerImpl :
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+            val lineItem = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             InmobiBannerAuctionParams(
                 activity = activity,
                 bannerFormat = bannerFormat,
                 price = lineItem.pricefloor,
-                lineItem = lineItem
+                adUnit = lineItem
             )
         }
     }
