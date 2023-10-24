@@ -26,8 +26,7 @@ internal class GetAdAuctionParamsUseCase {
                             bannerFormat = bannerFormat,
                             containerWidth = containerWidth,
                             price = pricefloor,
-                            adUnitId = requireNotNull(json?.getString("ad_unit_id")),
-                            payload = requireNotNull(json?.getString("payload"))
+                            adUnit = popAdUnit(AdmobDemandId) ?: error(BidonError.NoAppropriateAdUnitId),
                         )
                     } else {
                         AdmobBannerAuctionParams.Network(
@@ -45,8 +44,7 @@ internal class GetAdAuctionParamsUseCase {
                         AdmobFullscreenAdAuctionParams.Bidding(
                             activity = activity,
                             price = pricefloor,
-                            adUnitId = requireNotNull(json?.getString("ad_unit_id")),
-                            payload = requireNotNull(json?.getString("payload"))
+                            adUnit = popAdUnit(AdmobDemandId) ?: error(BidonError.NoAppropriateAdUnitId),
                         )
                     } else {
                         AdmobFullscreenAdAuctionParams.Network(
