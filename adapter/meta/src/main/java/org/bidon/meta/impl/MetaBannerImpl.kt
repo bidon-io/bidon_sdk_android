@@ -17,6 +17,7 @@ import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.auction.AdTypeParam
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -40,7 +41,7 @@ class MetaBannerImpl :
     override val isAdReadyToShow: Boolean
         get() = bannerView != null
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? {
         return BidderTokenProvider.getBidderToken(context)
     }
 
