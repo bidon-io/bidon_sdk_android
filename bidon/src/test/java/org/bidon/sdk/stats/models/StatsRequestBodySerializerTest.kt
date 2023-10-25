@@ -18,7 +18,6 @@ class StatsRequestBodySerializerTest {
     fun `it should serialize stat request`() {
         val json = StatsRequestBody(
             auctionId = "id123",
-            auctionConfigurationId = 4,
             auctionConfigurationUid = "4",
             rounds = listOf(
                 Round(
@@ -26,21 +25,21 @@ class StatsRequestBodySerializerTest {
                     demands = listOf(
                         DemandStat.Network(
                             demandId = "d345",
-                            adUnitId = "asd223",
                             price = 1.2,
                             fillFinishTs = 3,
                             fillStartTs = 4,
                             roundStatusCode = "code",
-                            lineItemUid = "123",
+                            adUnitUid = "123",
+                            adUnitLabel = "label124",
                         ),
                         DemandStat.Network(
                             demandId = "d6",
                             roundStatusCode = "code2",
-                            adUnitId = null,
                             price = null,
                             fillFinishTs = null,
                             fillStartTs = null,
-                            lineItemUid = "123",
+                            adUnitLabel = "label123",
+                            adUnitUid = "123",
                         )
                     ),
                     pricefloor = 34.2,
@@ -64,6 +63,8 @@ class StatsRequestBodySerializerTest {
                                 price = 1.0,
                                 fillFinishTs = 6,
                                 fillStartTs = 5,
+                                adUnitUid = "123",
+                                adUnitLabel = "label123",
                             )
                         )
                     )
@@ -71,14 +72,14 @@ class StatsRequestBodySerializerTest {
             ),
             result = ResultBody(
                 status = "SUCCESS",
-                demandId = "admob",
                 price = 0.123,
-                adUnitId = "id123",
                 auctionStartTs = 1000,
                 auctionFinishTs = 1300,
                 roundId = "id13",
                 bidType = BidType.CPM.code,
-                lineItemUid = "123",
+                winnerAdUnitLabel = "label123",
+                winnerAdUnitUid = "123",
+                winnerDemandId = "admob",
             ),
         ).serialize()
         println(json)
@@ -160,6 +161,8 @@ class StatsRequestBodySerializerTest {
                     price = 1.0,
                     fillFinishTs = 6,
                     fillStartTs = 5,
+                    adUnitLabel = "label123",
+                    adUnitUid = "123",
                 )
             )
         ).serialize()

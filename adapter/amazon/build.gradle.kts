@@ -22,4 +22,6 @@ dependencies {
     compileOnly(project(":bidon"))
 
     implementation("com.amazon.android:aps-sdk:9.8.3")
+
+    testImplementation(project(":bidon"))
 }
