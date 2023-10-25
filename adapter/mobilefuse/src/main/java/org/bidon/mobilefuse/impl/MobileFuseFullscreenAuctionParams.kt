@@ -3,6 +3,8 @@ package org.bidon.mobilefuse.impl
 import android.app.Activity
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.auction.models.AdUnit
+import org.bidon.sdk.auction.models.BidResponse
 import org.bidon.sdk.auction.models.LineItem
 
 /**
@@ -10,19 +12,21 @@ import org.bidon.sdk.auction.models.LineItem
  */
 class MobileFuseFullscreenAuctionParams(
     val activity: Activity,
-    val signalData: String,
-    val placementId: String,
-    override val price: Double
+    bidResponse: BidResponse
 ) : AdAuctionParams {
-    override val adUnit: LineItem? = null
+    val signalData: String = requireNotNull(bidResponse.adUnit.extra?.getString("signaldata"))
+    val placementId: String = requireNotNull(bidResponse.adUnit.extra?.getString("placement_id"))
+    override val price: Double = bidResponse.price
+    override val adUnit: AdUnit = bidResponse.adUnit
 }
 
 class MobileFuseBannerAuctionParams(
     val activity: Activity,
     val bannerFormat: BannerFormat,
-    val signalData: String,
-    val placementId: String,
-    override val price: Double,
+    bidResponse: BidResponse
 ) : AdAuctionParams {
-    override val adUnit: LineItem? = null
+    val signalData: String = requireNotNull(bidResponse.adUnit.extra?.getString("signaldata"))
+    val placementId: String = requireNotNull(bidResponse.adUnit.extra?.getString("placement_id"))
+    override val price: Double = bidResponse.price
+    override val adUnit: AdUnit = bidResponse.adUnit
 }

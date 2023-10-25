@@ -13,6 +13,7 @@ import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.ads.banner.helper.getHeightDp
 import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.config.BidonError
@@ -58,7 +59,20 @@ internal class InmobiBannerImpl :
         val bannerView = InMobiBanner(adParams.activity.applicationContext, adParams.placementId).also {
             this.bannerView = it
         }
-        bannerView.setBannerSize(adParams.bannerFormat.getWidthDp(), adParams.bannerFormat.getHeightDp())
+        bannerView.setBannerSize(
+            when (adParams.bannerFormat) {
+                BannerFormat.Banner -> 320
+                BannerFormat.LeaderBoard -> 728
+                BannerFormat.MRec -> 300
+                BannerFormat.Adaptive -> if (isTablet) 728 else 320
+            },
+            when (adParams.bannerFormat) {
+                BannerFormat.Banner -> 50
+                BannerFormat.LeaderBoard -> 90
+                BannerFormat.MRec -> 250
+                BannerFormat.Adaptive -> if (isTablet) 90 else 50
+            }
+        )
         bannerView.setEnableAutoRefresh(false)
         bannerView.setAnimationType(InMobiBanner.AnimationType.ANIMATION_OFF)
         bannerView.setListener(object : BannerAdEventListener() {
