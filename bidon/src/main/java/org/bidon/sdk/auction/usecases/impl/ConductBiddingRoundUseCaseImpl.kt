@@ -91,7 +91,8 @@ internal class ConductBiddingRoundUseCaseImpl(
                         bids = it,
                         biddingSources = participants,
                         adTypeParam = adTypeParam,
-                        round = round
+                        round = round,
+                        roundPricefloor = bidfloor
                     )
                 }
                 Unit
@@ -108,16 +109,17 @@ internal class ConductBiddingRoundUseCaseImpl(
         bids: List<BidResponse>,
         biddingSources: List<Mode.Bidding>,
         adTypeParam: AdTypeParam,
-        round: RoundRequest
+        round: RoundRequest,
+        roundPricefloor: Double
     ) {
         var filled = false
         bids.forEach { bid ->
             val adSource = biddingSources.first {
-                (it as AdSource<*>).demandId.demandId == bid.demandId
+                (it as AdSource<*>).demandId.demandId == bid.adUnit.demandId
             } as AdSource<*>
             if (!filled) {
                 adSource.markFillStarted(
-                    adUnit = null,
+                    adUnit = bid.adUnit,
                     pricefloor = bid.price
                 )
                 val fillResult = loadAd(
@@ -125,6 +127,7 @@ internal class ConductBiddingRoundUseCaseImpl(
                     bid = bid,
                     adTypeParam = adTypeParam,
                     round = round,
+                    roundPricefloor = roundPricefloor
                 ).also {
                     logInfo(TAG, "fillResult: ${it.roundStatus}, ${(it as? AuctionResult.Bidding)?.adSource}")
                     if (it.roundStatus == RoundStatus.Successful) {
@@ -153,18 +156,19 @@ internal class ConductBiddingRoundUseCaseImpl(
         bid: BidResponse,
         adTypeParam: AdTypeParam,
         round: RoundRequest,
+        roundPricefloor: Double
     ): AuctionResult.Bidding {
         val adSource = biddingSources.first {
-            (it as AdSource<*>).demandId.demandId == bid.demandId
+            (it as AdSource<*>).demandId.demandId == bid.adUnit.demandId
         }
         val adParam = (adSource as AdSource<AdAuctionParams>).getAuctionParam(
             AdAuctionParamSource(
                 activity = adTypeParam.activity,
-                pricefloor = bid.price,
+                pricefloor = roundPricefloor,
                 timeout = round.timeoutMs,
                 optBannerFormat = (adTypeParam as? AdTypeParam.Banner)?.bannerFormat,
                 optContainerWidth = (adTypeParam as? AdTypeParam.Banner)?.containerWidth,
-                json = bid.json
+                bidResponse = bid
             )
         ).getOrNull() ?: return AuctionResult.Bidding(
             roundStatus = RoundStatus.NoAppropriateAdUnitId,

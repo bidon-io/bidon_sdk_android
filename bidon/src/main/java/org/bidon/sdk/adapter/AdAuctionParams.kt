@@ -3,6 +3,7 @@ package org.bidon.sdk.adapter
 import android.app.Activity
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.AdUnit
+import org.bidon.sdk.auction.models.BidResponse
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.utils.ext.mapFailure
@@ -34,6 +35,7 @@ class AdAuctionParamSource(
      * Bid specific params
      */
     val json: JSONObject? = null,
+    val bidResponse: BidResponse? = null,
 
     /**
      * Banner specific params
@@ -43,6 +45,7 @@ class AdAuctionParamSource(
 ) {
     val bannerFormat: BannerFormat get() = requireNotNull(optBannerFormat)
     val containerWidth: Float get() = requireNotNull(optContainerWidth)
+    val requiredBidResponse: BidResponse get() = requireNotNull(bidResponse)
 
     operator fun <T> invoke(data: AdAuctionParamSource.() -> T): Result<T> = runCatching {
         data.invoke(this)

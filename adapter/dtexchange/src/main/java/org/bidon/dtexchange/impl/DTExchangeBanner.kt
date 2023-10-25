@@ -36,7 +36,6 @@ internal class DTExchangeBanner :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var pricefloor: Double = 0.0
     private var adSpot: InneractiveAdSpot? = null
     private var adViewHolder: AdViewHolder? = null
     private var demandSource: String? = null
@@ -45,9 +44,9 @@ internal class DTExchangeBanner :
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+            val adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             DTExchangeBannerAuctionParams(
-                adUnit = lineItem,
+                adUnit = adUnit,
                 bannerFormat = bannerFormat,
                 activity = activity,
             )
@@ -56,7 +55,6 @@ internal class DTExchangeBanner :
 
     override fun load(adParams: DTExchangeBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
-        pricefloor = adParams.price
         val adSpot = InneractiveAdSpotManager.get().createSpot()
         val controller = InneractiveAdViewUnitController()
         adSpot.addUnitController(controller)

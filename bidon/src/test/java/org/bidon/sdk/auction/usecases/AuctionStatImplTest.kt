@@ -78,7 +78,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     serverBiddingFinishTs = 29,
                     bids = listOf(
                         BidResponse(
-                            id = "bidmachine",
+                            uid = "bidmachine",
                             impressionId = "imp1",
                             price = 1.2,
                             demands = listOf(
@@ -88,7 +88,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                             )
                         ),
                         BidResponse(
-                            id = "meta",
+                            uid = "meta",
                             impressionId = "imp1",
                             price = 1.15,
                             demands = listOf(
@@ -272,7 +272,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     serverBiddingFinishTs = 29,
                     bids = listOf(
                         BidResponse(
-                            id = "bidmachine",
+                            uid = "bidmachine",
                             impressionId = "imp1",
                             price = 1.5,
                             demands = listOf(
@@ -443,7 +443,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     serverBiddingFinishTs = 29,
                     bids = listOf(
                         BidResponse(
-                            id = "bidmachine",
+                            uid = "bidmachine",
                             impressionId = "imp1",
                             price = 1.5,
                             demands = listOf(
@@ -453,7 +453,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                             )
                         ),
                         BidResponse(
-                            id = "bid2",
+                            uid = "bid2",
                             impressionId = "imp1",
                             price = 1.5,
                             demands = listOf(

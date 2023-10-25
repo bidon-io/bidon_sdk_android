@@ -283,12 +283,12 @@ internal class AuctionStatImpl(
 
                         when (auctionResult) {
                             is AuctionResult.Bidding -> {
-                                val bid = br.bids.first { it.demandId == auctionResult.adSource.demandId.demandId }
+                                val bid = br.bids.first { it.adUnit.demandId == auctionResult.adSource.demandId.demandId }
                                 val stat = auctionResult.adSource.getStats()
                                 DemandStat.Bidding.Bid(
                                     roundStatusCode = auctionResult.roundStatus.code,
                                     price = bid.price,
-                                    demandId = bid.demandId ?: stat.demandId.demandId,
+                                    demandId = bid.adUnit.demandId,
                                     fillStartTs = stat.fillStartTs,
                                     fillFinishTs = stat.fillFinishTs,
                                     adUnitUid = stat.adUnit?.uid.orEmpty(),

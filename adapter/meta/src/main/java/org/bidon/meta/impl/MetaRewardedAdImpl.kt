@@ -46,15 +46,7 @@ class MetaRewardedAdImpl :
         return auctionParamsScope {
             MetaFullscreenAuctionParams(
                 context = activity.applicationContext,
-                placementId = requireNotNull(json?.optString("placement_id")) {
-                    "Placement id is required for Meta"
-                },
-                price = requireNotNull(json?.optDouble("price")) {
-                    "Bid price is required for Meta"
-                },
-                payload = requireNotNull(json?.optString("payload")) {
-                    "Payload is required for Meta"
-                },
+                bidResponse = requiredBidResponse,
             )
         }
     }
