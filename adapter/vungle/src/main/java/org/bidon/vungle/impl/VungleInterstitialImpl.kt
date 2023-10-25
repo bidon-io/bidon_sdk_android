@@ -49,13 +49,7 @@ internal class VungleInterstitialImpl :
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             VungleFullscreenAuctionParams(
-                placementId = requireNotNull(json?.getString("placement_id")) {
-                    "Bid price is required for Bigo Ads"
-                },
-                price = pricefloor,
-                payload = requireNotNull(json?.getString("payload")) {
-                    "Payload is required for Bigo Ads"
-                }
+                bidResponse = requiredBidResponse
             )
         }
     }

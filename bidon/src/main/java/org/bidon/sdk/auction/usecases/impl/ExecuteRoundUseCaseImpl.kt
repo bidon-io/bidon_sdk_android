@@ -90,7 +90,6 @@ internal class ExecuteRoundUseCaseImpl(
                         bidfloor = pricefloor,
                         auctionId = auctionResponse.auctionId,
                         round = round,
-                        auctionConfigurationId = auctionResponse.auctionConfigurationId,
                         auctionConfigurationUid = auctionResponse.auctionConfigurationUid,
                         resultsCollector = resultsCollector
                     )
@@ -190,7 +189,6 @@ internal class ExecuteRoundUseCaseImpl(
         )
         adSource.setStatisticAdType(adTypeParam.asStatisticAdType())
         adSource.addAuctionConfigurationId(
-            auctionConfigurationId = auctionResponse.auctionConfigurationId ?: 0,
             auctionConfigurationUid = auctionResponse.auctionConfigurationUid ?: ""
         )
         adSource.addExternalWinNotificationsEnabled(auctionResponse.externalWinNotificationsEnabled)

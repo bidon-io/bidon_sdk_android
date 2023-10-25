@@ -31,7 +31,7 @@ class AdUnitParserTest {
                     }
                 ]
             }
-        """.trimIndent()
+            """.trimIndent()
         )
 
         val actual = buildList {

@@ -40,8 +40,4 @@ internal data class ImpressionRequestBody(
     val interstitial: InterstitialRequest?,
     @field:JsonName("rewarded")
     val rewarded: RewardedRequest?,
-
-    @Deprecated("Use auctionConfigurationUid instead")
-    @field:JsonName("auction_configuration_id")
-    val auctionConfigurationId: Int,
 ) : Serializable

@@ -4,7 +4,6 @@ import android.app.Activity
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.AdUnit
-import org.bidon.sdk.auction.models.LineItem
 
 class InmobiBannerAuctionParams(
     val activity: Activity,
