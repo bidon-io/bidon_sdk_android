@@ -12,7 +12,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -31,7 +31,8 @@ internal class UnityAdsInterstitial :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var lineItem: LineItem? = null
+    private var adUnit: AdUnit? = null
+    private var adUnitId: String? = null
 
     override var isAdReadyToShow: Boolean = false
 
@@ -45,7 +46,8 @@ internal class UnityAdsInterstitial :
 
     override fun load(adParams: UnityAdsFullscreenAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
-        lineItem = adParams.adUnit
+        adUnit = adParams.adUnit
+        adUnitId = adParams.adUnitId
 
         val loadListener = object : IUnityAdsLoadListener {
             override fun onUnityAdsAdLoaded(placementId: String?) {
@@ -69,7 +71,7 @@ internal class UnityAdsInterstitial :
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
-        UnityAds.load(adParams.adUnit.adUnitId, loadListener)
+        UnityAds.load(adParams.adUnitId, loadListener)
     }
 
     override fun show(activity: Activity) {
@@ -95,7 +97,7 @@ internal class UnityAdsInterstitial :
                         AdEvent.PaidRevenue(
                             ad = it,
                             adValue = AdValue(
-                                adRevenue = (lineItem?.pricefloor ?: 0.0) / 1000.0,
+                                adRevenue = (adUnit?.pricefloor ?: 0.0) / 1000.0,
                                 currency = AdValue.USD,
                                 precision = Precision.Estimated
                             )
@@ -117,7 +119,7 @@ internal class UnityAdsInterstitial :
                 getAd()?.let { emitEvent(AdEvent.Closed(it)) }
             }
         }
-        UnityAds.show(activity, lineItem?.adUnitId, UnityAdsShowOptions(), showListener)
+        UnityAds.show(activity, adUnitId, UnityAdsShowOptions(), showListener)
         isAdReadyToShow = false
     }
 

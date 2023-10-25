@@ -14,7 +14,7 @@ import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
@@ -32,7 +32,7 @@ internal class UnityAdsBanner :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
     private var bannerAdView: BannerView? = null
-    private var lineItem: LineItem? = null
+    private var adUnit: AdUnit? = null
 
     override var isAdReadyToShow: Boolean = false
 
@@ -56,10 +56,9 @@ internal class UnityAdsBanner :
     }
 
     override fun load(adParams: UnityAdsBannerAuctionParams) {
-        lineItem = adParams.adUnit
+        adUnit = adParams.adUnit
         logInfo(TAG, "Starting with $adParams")
         adParams.activity.runOnUiThread {
-            val adUnitId = requireNotNull(adParams.adUnit.adUnitId)
             val unityBannerSize = when (adParams.bannerFormat) {
                 BannerFormat.LeaderBoard -> UnityBannerSize(728, 90)
                 BannerFormat.Banner -> UnityBannerSize(320, 50)
@@ -71,14 +70,14 @@ internal class UnityAdsBanner :
 
                 BannerFormat.MRec -> UnityBannerSize(300, 250)
             }
-            val adView = BannerView(adParams.activity, adUnitId, unityBannerSize).also {
+            val adView = BannerView(adParams.activity, adParams.adUnitId, unityBannerSize).also {
                 bannerAdView = it
             }
             adView.listener = object : BannerView.IListener {
                 override fun onBannerLoaded(bannerAdView: BannerView?) {
                     this@UnityAdsBanner.bannerAdView = bannerAdView
                     isAdReadyToShow = true
-                    bannerAdView?.asAd()?.let {
+                    getAd()?.let {
                         emitEvent(AdEvent.Fill(it))
                     }
                 }
@@ -87,8 +86,8 @@ internal class UnityAdsBanner :
 
                 override fun onBannerClick(bannerAdView: BannerView?) {
                     logInfo(TAG, "onAdClicked: $this")
-                    bannerAdView?.let {
-                        emitEvent(AdEvent.Clicked(it.asAd()))
+                    getAd()?.let {
+                        emitEvent(AdEvent.Clicked(it))
                     }
                 }
 
@@ -114,18 +113,6 @@ internal class UnityAdsBanner :
         bannerAdView?.destroy()
         bannerAdView = null
     }
-
-    private fun BannerView.asAd() = Ad(
-        demandAd = demandAd,
-        ecpm = lineItem?.pricefloor ?: 0.0,
-        networkName = demandId.demandId,
-        dsp = null,
-        roundId = roundId,
-        currencyCode = AdValue.USD,
-        auctionId = auctionId,
-        adUnitId = lineItem?.adUnitId,
-        bidType = bidType,
-    )
 }
 
 private const val TAG = "UnityAdsBanner"
