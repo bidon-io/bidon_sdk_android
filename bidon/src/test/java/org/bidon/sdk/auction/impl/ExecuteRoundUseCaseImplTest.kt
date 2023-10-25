@@ -69,7 +69,6 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                 biddingIds = listOf(),
             ),
         ),
-        auctionConfigurationId = 10,
         auctionId = "auctionId_123",
         adUnits = listOf(
             AdUnit(
@@ -154,13 +153,19 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                             every { it.ad } returns Ad(
                                 demandAd = DemandAd(AdType.Interstitial),
                                 networkName = "admob",
-                                adUnitId = null,
                                 roundId = "r123",
                                 currencyCode = USD,
                                 dsp = null,
                                 ecpm = 1.3,
                                 auctionId = "a123",
                                 bidType = BidType.CPM,
+                                adUnit = AdUnit(
+                                    demandId = "admob",
+                                    label = "admob_banner",
+                                    pricefloor = 0.25,
+                                    uid = "12387837129819",
+                                    ext = jsonObject { "ad_unit_id" hasValue "ca-app-pub-3940256099942544/6300978111" }.toString(),
+                                ),
 
                             )
                         },
@@ -180,7 +185,6 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                 bidfloor = any(),
                 auctionId = any(),
                 round = any(),
-                auctionConfigurationId = any(),
                 auctionConfigurationUid = any(),
                 resultsCollector = any()
             )

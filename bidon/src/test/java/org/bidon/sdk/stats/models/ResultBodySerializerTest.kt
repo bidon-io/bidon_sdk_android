@@ -14,13 +14,13 @@ internal class ResultBodySerializerTest {
         val actual = ResultBody(
             status = "FAIL",
             roundId = "id13",
-            demandId = null,
-            adUnitId = null,
             auctionFinishTs = 1020,
             auctionStartTs = 1000,
             price = null,
             bidType = BidType.CPM.code,
-            lineItemUid = "123",
+            winnerDemandId = null,
+            winnerAdUnitUid = null,
+            winnerAdUnitLabel = null,
         ).serialize()
 
         actual.assertEquals(

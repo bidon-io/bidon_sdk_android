@@ -34,7 +34,8 @@ internal class BidResponseParser : JsonParser<BiddingResponse> {
                         runCatching {
                             array.optJSONObject(index)
                                 ?.let { bidJson ->
-                                    val adUnit = requireNotNull(AdUnitParser().parseOrNull(bidJson.getString("ad_unit"))) {
+                                    val adUnitJson = bidJson.getJSONObject("ad_unit").toString()
+                                    val adUnit = requireNotNull(AdUnitParser().parseOrNull(adUnitJson)) {
                                         "AdUnit is null for bid $bidJson"
                                     }
                                     val bid = BidResponse(
@@ -46,6 +47,8 @@ internal class BidResponseParser : JsonParser<BiddingResponse> {
                                     )
                                     add(bid)
                                 }
+                        }.onFailure {
+                            println("Failed to parse bid $index: ${it.message}")
                         }
                     }
                 }

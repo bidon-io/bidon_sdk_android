@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.LineItem
 import org.junit.Test
 
@@ -11,41 +12,47 @@ class AdAuctionParamSourceTest {
     @Test
     fun `it should find min LineItem with greater given pricefloor`() {
         val list = listOf(
-            LineItem(
+            AdUnit(
+                uid = "1",
                 demandId = "demand id123",
                 pricefloor = 0.1,
-                adUnitId = "unit 0.1",
-                uid = "1",
+                label = "unit 0.1",
+                ext = null,
             ),
-            LineItem(
-                demandId = null,
+            AdUnit(
+                uid = "2",
+                demandId = "dem432",
                 pricefloor = 1.6,
-                adUnitId = "unit 1.6",
-                uid = "1",
+                label = "unit 1.6",
+                ext = null,
             ),
-            LineItem(
+            AdUnit(
+                uid = "3",
                 demandId = "demand id123",
                 pricefloor = 2.9,
-                adUnitId = "unit 2.9",
-                uid = "1",
+                label = "unit 2.9",
+                ext = null,
             ),
-            LineItem(
+            AdUnit(
+                uid = "4",
                 demandId = "demand id123",
                 pricefloor = 1.5,
-                adUnitId = "unit 1.5",
-                uid = "1",
+                label = "unit 1.5",
+                ext = null,
             ),
-            LineItem(
+            AdUnit(
+                uid = "5",
                 demandId = "demand id123",
                 pricefloor = 1.71,
-                adUnitId = "unit 1.71",
-                uid = "2",
+                label = "unit 1.71",
+                ext = null,
             ),
-            LineItem(
+            AdUnit(
+                uid = "6",
                 demandId = "demand id321",
                 pricefloor = 1.7,
-                adUnitId = "unit 1.7",
-                uid = "1",
+                label = "unit 1.7",
+                ext = null,
             ),
         )
         val adAuctionParam = AdAuctionParamSource(
@@ -73,41 +80,47 @@ class AdAuctionParamSourceTest {
     @Test
     fun `it should NOT find any LineItem with greater given pricefloor`() {
         val list = listOf(
-            LineItem(
+            AdUnit(
+                uid = "1",
                 demandId = "demand id123",
                 pricefloor = 0.1,
-                adUnitId = "unit 0.1",
-                uid = "1",
+                label = "unit 0.1",
+                ext = null,
             ),
-            LineItem(
-                demandId = null,
+            AdUnit(
+                uid = "2",
+                demandId = "dem432",
                 pricefloor = 1.6,
-                adUnitId = "unit 1.6",
-                uid = "1",
+                label = "unit 1.6",
+                ext = null,
             ),
-            LineItem(
+            AdUnit(
+                uid = "3",
                 demandId = "demand id123",
                 pricefloor = 2.9,
-                adUnitId = "unit 2.9",
-                uid = "1",
+                label = "unit 2.9",
+                ext = null,
             ),
-            LineItem(
+            AdUnit(
+                uid = "4",
                 demandId = "demand id123",
                 pricefloor = 1.5,
-                adUnitId = "unit 1.5",
-                uid = "1",
+                label = "unit 1.5",
+                ext = null,
             ),
-            LineItem(
+            AdUnit(
+                uid = "5",
                 demandId = "demand id123",
                 pricefloor = 1.71,
-                adUnitId = "unit 1.71",
-                uid = "1",
+                label = "unit 1.71",
+                ext = null,
             ),
-            LineItem(
+            AdUnit(
+                uid = "6",
                 demandId = "demand id321",
                 pricefloor = 1.7,
-                adUnitId = "unit 1.7",
-                uid = "1",
+                label = "unit 1.7",
+                ext = null,
             ),
         )
         val adAuctionParam = AdAuctionParamSource(
