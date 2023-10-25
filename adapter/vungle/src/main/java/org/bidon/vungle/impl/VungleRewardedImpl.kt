@@ -49,13 +49,7 @@ internal class VungleRewardedImpl :
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             VungleFullscreenAuctionParams(
-                placementId = requireNotNull(json?.getString("placement_id")) {
-                    "Bid price is required for Bigo Ads"
-                },
-                price = pricefloor,
-                payload = requireNotNull(json?.getString("payload")) {
-                    "Payload is required for Bigo Ads"
-                }
+                bidResponse = requiredBidResponse
             )
         }
     }
@@ -91,8 +85,11 @@ internal class VungleRewardedImpl :
                 adParams.placementId, adParams.payload, AdConfig(),
                 object : PlayAdCallback {
                     override fun creativeId(creativeId: String?) {}
+
                     @Deprecated("Deprecated in Java")
-                    override fun onAdEnd(placementId: String?, completed: Boolean, isCTAClicked: Boolean) {}
+                    override fun onAdEnd(placementId: String?, completed: Boolean, isCTAClicked: Boolean) {
+                    }
+
                     override fun onAdEnd(placementId: String?) {
                         logInfo(TAG, "onAdEnd: $this")
                         val ad = getAd() ?: return

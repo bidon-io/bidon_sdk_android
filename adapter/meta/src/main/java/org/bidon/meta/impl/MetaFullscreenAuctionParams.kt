@@ -8,7 +8,6 @@ import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.BidResponse
-import org.bidon.sdk.auction.models.LineItem
 
 class MetaFullscreenAuctionParams(
     val context: Context,

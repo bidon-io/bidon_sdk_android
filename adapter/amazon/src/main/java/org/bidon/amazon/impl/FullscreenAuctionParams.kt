@@ -3,7 +3,6 @@ package org.bidon.amazon.impl
 import android.app.Activity
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.auction.models.AdUnit
-import org.bidon.sdk.auction.models.LineItem
 
 data class FullscreenAuctionParams(
     val activity: Activity,

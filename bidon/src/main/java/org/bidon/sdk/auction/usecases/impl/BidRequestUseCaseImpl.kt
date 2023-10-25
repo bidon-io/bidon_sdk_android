@@ -43,7 +43,6 @@ internal class BidRequestUseCaseImpl(
         bidfloor: Double,
         auctionId: String,
         roundId: String,
-        auctionConfigurationId: Int?,
         auctionConfigurationUid: String?,
     ): Result<BiddingResponse> {
         return withContext(SdkDispatchers.IO) {
@@ -57,7 +56,6 @@ internal class BidRequestUseCaseImpl(
                 bidfloor = bidfloor,
                 orientationCode = getOrientation().code,
                 roundId = roundId,
-                auctionConfigurationId = auctionConfigurationId,
                 auctionConfigurationUid = auctionConfigurationUid,
                 banner = banner,
                 interstitial = interstitial,

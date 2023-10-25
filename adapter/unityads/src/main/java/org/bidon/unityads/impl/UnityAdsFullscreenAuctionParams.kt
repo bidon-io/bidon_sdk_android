@@ -13,7 +13,6 @@ data class UnityAdsFullscreenAuctionParams(
 ) : AdAuctionParams {
     override val price: Double = requireNotNull(adUnit.pricefloor)
     val adUnitId: String = requireNotNull(adUnit.extra?.getString("ad_unit_id"))
-
 }
 
 class UnityAdsBannerAuctionParams(

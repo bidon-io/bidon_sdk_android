@@ -37,7 +37,6 @@ internal class ConductBiddingRoundUseCaseImpl(
         bidfloor: Double,
         auctionId: String,
         round: RoundRequest,
-        auctionConfigurationId: Int?,
         auctionConfigurationUid: String?,
         resultsCollector: ResultsCollector,
     ) {
@@ -72,7 +71,6 @@ internal class ConductBiddingRoundUseCaseImpl(
                     bidfloor = bidfloor,
                     auctionId = auctionId,
                     roundId = round.id,
-                    auctionConfigurationId = auctionConfigurationId,
                     auctionConfigurationUid = auctionConfigurationUid
                 ).onFailure {
                     logError(TAG, "Error while server bidding", it)
@@ -211,7 +209,7 @@ internal class ConductBiddingRoundUseCaseImpl(
         context: Context,
         adTypeParam: AdTypeParam
     ): List<Pair<DemandId, String>> = this.mapNotNull { adSource ->
-        adSource.getToken(context, adTypeParam)?.let { token ->
+        adSource.getToken(context, adTypeParam, emptyList())?.let { token ->
             (adSource as AdSource<*>).demandId to token
         }
     }

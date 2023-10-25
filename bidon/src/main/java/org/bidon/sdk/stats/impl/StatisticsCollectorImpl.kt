@@ -32,7 +32,6 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class StatisticsCollectorImpl : StatisticsCollector {
 
-    private var auctionConfigurationId: Int = 0
     private var auctionConfigurationUid: String = ""
     private var externalWinNotificationsEnabled: Boolean = true
     private lateinit var adType: StatisticsCollector.AdType
@@ -217,8 +216,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
         this.adType = adType
     }
 
-    override fun addAuctionConfigurationId(auctionConfigurationId: Int, auctionConfigurationUid: String) {
-        this.auctionConfigurationId = auctionConfigurationId
+    override fun addAuctionConfigurationId(auctionConfigurationUid: String) {
         this.auctionConfigurationUid = auctionConfigurationUid
     }
 
@@ -279,7 +277,6 @@ class StatisticsCollectorImpl : StatisticsCollector {
         return ImpressionRequestBody(
             auctionId = auctionId,
             roundId = roundId,
-            auctionConfigurationId = auctionConfigurationId,
             auctionConfigurationUid = auctionConfigurationUid,
             impressionId = impressionId,
             demandId = demandId.demandId,

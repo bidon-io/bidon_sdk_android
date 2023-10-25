@@ -47,7 +47,6 @@ internal class BidRequestBodyTest {
                 "id" hasValue "imp123"
                 "round_id" hasValue "round123"
                 "auction_id" hasValue "auc123"
-                "auction_configuration_id" hasValue 12
                 "auction_configuration_uid" hasValue "123"
             }
         )

@@ -94,7 +94,6 @@ class StatsRequestBodySerializerTest {
                     "bid_type" hasValue "cpm"
                 }
                 "auction_id" hasValue "id123"
-                "auction_configuration_id" hasValue 4
                 "rounds" hasArray jsonArray {
                     val list = listOf(
                         jsonObject {

@@ -5,7 +5,6 @@ import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.BidResponse
-import org.bidon.sdk.auction.models.LineItem
 
 /**
  * Created by Aleksei Cherniaev on 21/09/2023.

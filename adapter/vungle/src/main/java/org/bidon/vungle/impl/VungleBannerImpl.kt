@@ -39,13 +39,13 @@ internal class VungleBannerImpl :
     private var banner: VungleBanner? = null
     private var bannerSize: AdConfig.AdSize? = null
     private var payload: String? = null
-    private var bannerId: String? = null
+    private var placementId: String? = null
 
     override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = Vungle.getAvailableBidTokens(context)
 
     override val isAdReadyToShow: Boolean
         get() {
-            val bannerId = bannerId ?: return false
+            val bannerId = placementId ?: return false
             val payload = payload ?: return false
             val bannerSize = bannerSize ?: return false
             return Banners.canPlayAd(
@@ -60,13 +60,7 @@ internal class VungleBannerImpl :
             VungleBannerAuctionParams(
                 activity = activity,
                 bannerFormat = bannerFormat,
-                bannerId = requireNotNull(json?.getString("placement_id")) {
-                    "Banner id is required"
-                },
-                price = pricefloor,
-                payload = requireNotNull(json?.getString("payload")) {
-                    "Payload is required"
-                }
+                bidResponse = requiredBidResponse
             )
         }
     }
@@ -74,10 +68,10 @@ internal class VungleBannerImpl :
     override fun load(adParams: VungleBannerAuctionParams) {
         this.bannerSize = adParams.bannerSize
         this.payload = adParams.payload
-        this.bannerId = adParams.bannerId
+        this.placementId = adParams.placementId
         adParams.activity.runOnUiThread {
             Banners.loadBanner(
-                adParams.bannerId, adParams.payload, adParams.config,
+                adParams.placementId, adParams.payload, adParams.config,
                 object : LoadAdCallback {
                     override fun onAdLoad(placementId: String?) {
                         logInfo(TAG, "onAdLoad =$placementId. $this")
@@ -99,7 +93,7 @@ internal class VungleBannerImpl :
         val bidonAd = getAd()
         if (bidonAd != null) {
             this.banner = Banners.getBanner(
-                /* placementId = */ adParam.bannerId,
+                /* placementId = */ adParam.placementId,
                 /* markup = */ adParam.payload,
                 /* bannerAdConfig = */ adParam.config,
                 /* playAdCallback = */ object : PlayAdCallback {

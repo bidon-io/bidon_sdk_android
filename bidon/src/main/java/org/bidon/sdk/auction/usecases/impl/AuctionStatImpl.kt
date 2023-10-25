@@ -89,7 +89,7 @@ internal class AuctionStatImpl(
                             it.code == demandStat.roundStatusCode
                         }.getFinalStatus(
                             isWinner = demandStat.adUnitUid == (winner as? AuctionResult.Network)?.adSource?.getStats()?.adUnit?.uid &&
-                                    demandStat.price == (winner as? AuctionResult.Network)?.adSource?.getStats()?.ecpm
+                                demandStat.price == (winner as? AuctionResult.Network)?.adSource?.getStats()?.ecpm
                         ).code
                     )
                 },
@@ -100,7 +100,7 @@ internal class AuctionStatImpl(
                                 it.code == bid.roundStatusCode
                             }.getFinalStatus(
                                 isWinner = bid.adUnitUid == (winner as? AuctionResult.Bidding)?.adSource?.getStats()?.adUnit?.uid &&
-                                        bid.price == (winner as? AuctionResult.Bidding)?.adSource?.getStats()?.ecpm
+                                    bid.price == (winner as? AuctionResult.Bidding)?.adSource?.getStats()?.ecpm
                             ).code
                         )
                     }
@@ -111,7 +111,6 @@ internal class AuctionStatImpl(
         // send data
         val statsRequestBody = roundResults.asStatsRequestBody(
             auctionId = auctionId,
-            auctionConfigurationId = auctionData.auctionConfigurationId ?: -1,
             auctionStartTs = auctionStartTs,
             auctionFinishTs = SystemTimeNow,
             auctionConfigurationUid = auctionData.auctionConfigurationUid ?: ""
@@ -368,14 +367,12 @@ internal class AuctionStatImpl(
 
     private fun List<RoundStat>.asStatsRequestBody(
         auctionId: String,
-        auctionConfigurationId: Int,
         auctionConfigurationUid: String,
         auctionStartTs: Long,
         auctionFinishTs: Long,
     ): StatsRequestBody {
         return StatsRequestBody(
             auctionId = auctionId,
-            auctionConfigurationId = auctionConfigurationId,
             result = getResultBody(auctionStartTs, auctionFinishTs),
             rounds = this.map { stat ->
                 StatRound(
