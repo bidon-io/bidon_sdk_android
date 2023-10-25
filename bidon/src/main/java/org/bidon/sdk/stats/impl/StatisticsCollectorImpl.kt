@@ -104,6 +104,9 @@ class StatisticsCollectorImpl : StatisticsCollector {
             auctionId = auctionId,
             dsp = stat.dspSource,
             bidType = bidType,
+            adUnit = requireNotNull(stat.adUnit) {
+                "AdUnit is not set"
+            }
         )
     }
 
@@ -223,7 +226,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
         externalWinNotificationsEnabled = enabled
     }
 
-    override fun markFillStarted(adUnit: AdUnit?, pricefloor: Double?) {
+    override fun markFillStarted(adUnit: AdUnit, pricefloor: Double?) {
         stat = stat.copy(
             fillStartTs = SystemTimeNow,
             adUnit = adUnit,

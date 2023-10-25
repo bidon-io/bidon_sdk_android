@@ -40,7 +40,7 @@ interface StatisticsCollector {
      * Need to be used before [AdEvent.Fill] is exposed
      */
     fun setDsp(dspSource: String?)
-    fun markFillStarted(adUnit: AdUnit?, pricefloor: Double?)
+    fun markFillStarted(adUnit: AdUnit, pricefloor: Double?)
     fun markFillFinished(roundStatus: RoundStatus, ecpm: Double?)
     fun markWin()
     fun markLoss()
