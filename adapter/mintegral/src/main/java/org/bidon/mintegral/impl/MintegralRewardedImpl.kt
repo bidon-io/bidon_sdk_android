@@ -49,12 +49,7 @@ internal class MintegralRewardedImpl :
         return auctionParamsScope {
             MintegralAuctionParam(
                 activity = activity,
-                price = pricefloor,
-                payload = requireNotNull(json?.getString("payload")) {
-                    "Payload is required for Mintegral"
-                },
-                unitId = json?.getString("unit_id"),
-                placementId = json?.getString("placement_id"),
+                bidResponse = requiredBidResponse
             )
         }
     }

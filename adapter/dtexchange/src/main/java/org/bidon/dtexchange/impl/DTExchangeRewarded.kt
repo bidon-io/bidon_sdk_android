@@ -20,7 +20,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -37,7 +37,7 @@ internal class DTExchangeRewarded :
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var inneractiveAdSpot: InneractiveAdSpot? = null
-    private var lineItem: LineItem? = null
+    private var adUnit: AdUnit? = null
     private var demandSource: String? = null
 
     override val isAdReadyToShow: Boolean
@@ -45,14 +45,14 @@ internal class DTExchangeRewarded :
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
-            DTExchangeAdAuctionParams(lineItem)
+            val adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+            DTExchangeAdAuctionParams(adUnit)
         }
     }
 
     override fun load(adParams: DTExchangeAdAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
-        lineItem = adParams.adUnit
+        adUnit = adParams.adUnit
         val spot = InneractiveAdSpotManager.get().createSpot()
         val controller = InneractiveFullscreenUnitController()
         val videoController = InneractiveFullscreenVideoContentController()

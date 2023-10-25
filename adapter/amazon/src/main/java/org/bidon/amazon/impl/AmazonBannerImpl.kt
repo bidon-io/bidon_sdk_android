@@ -66,10 +66,8 @@ internal class AmazonBannerImpl(
             BannerAuctionParams(
                 activity = activity,
                 bannerFormat = bannerFormat,
-                slotUuid = requireNotNull(json?.optString("slot_uuid")) {
-                    "SlotUid is required for Amazon banner ad"
-                },
-                price = pricefloor
+                price = pricefloor,
+                adUnit = requiredBidResponse.adUnit,
             )
         }
     }

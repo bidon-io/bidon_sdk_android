@@ -36,11 +36,10 @@ internal class InmobiInterstitialImpl :
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+            val adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             InmobiFullscreenAuctionParams(
                 context = activity.applicationContext,
-                adUnit = lineItem,
-                price = lineItem.pricefloor,
+                adUnit = adUnit,
             )
         }
     }
