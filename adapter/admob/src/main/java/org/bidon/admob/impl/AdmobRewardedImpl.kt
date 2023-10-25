@@ -19,6 +19,7 @@ import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.rewarded.Reward
 import org.bidon.sdk.auction.AdTypeParam
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -44,7 +45,7 @@ internal class AdmobRewardedImpl(
     override val isAdReadyToShow: Boolean
         get() = rewardedAd != null
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? {
         isBiddingMode = true
         return obtainToken(context, demandAd.adType)
     }

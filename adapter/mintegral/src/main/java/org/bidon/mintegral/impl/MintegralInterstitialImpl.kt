@@ -16,6 +16,7 @@ import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.auction.AdTypeParam
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
@@ -41,7 +42,7 @@ internal class MintegralInterstitialImpl :
     override val isAdReadyToShow: Boolean
         get() = interstitialAd?.isBidReady == true
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = BidManager.getBuyerUid(context)
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? = BidManager.getBuyerUid(context)
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
