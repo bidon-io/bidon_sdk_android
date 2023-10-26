@@ -17,7 +17,7 @@ internal class RegulationDataSourceImpl(
     override val regulationsRequestBody
         get() = RegulationsRequestBody(
             coppa = true.takeIf { publisherRegulations.coppa == Coppa.Yes } ?: false,
-            gdpr = true.takeIf { publisherRegulations.gdpr == Gdpr.Given } ?: false,
+            gdpr = true.takeIf { publisherRegulations.gdpr == Gdpr.Applies } ?: false,
             euPrivacy = publisherRegulations.gdprConsentString,
             usPrivacy = publisherRegulations.usPrivacyString,
             iab = iabConsent.iab.let {

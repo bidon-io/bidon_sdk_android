@@ -28,6 +28,17 @@ sealed interface AuctionResult {
         }
     }
 
+    data class BiddingLose(
+        val adapterName: String,
+        val ecpm: Double,
+    ) : AuctionResult {
+        override val roundStatus: RoundStatus = RoundStatus.Lose
+        override val adSource: AdSource<*> get() = error("unexpected")
+        override fun toString(): String {
+            return "AuctionResult.Bidding($adapterName)"
+        }
+    }
+
     data class UnknownAdapter(
         val adapterName: String,
         val type: Type,

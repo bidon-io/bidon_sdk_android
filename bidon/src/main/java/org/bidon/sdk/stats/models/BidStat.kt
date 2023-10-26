@@ -16,6 +16,7 @@ data class BidStat(
     val fillFinishTs: Long?,
     val adUnitId: String?,
     val lineItemUid: String?,
+    val dspSource: String?,
 
     val bidType: BidType?,
 )

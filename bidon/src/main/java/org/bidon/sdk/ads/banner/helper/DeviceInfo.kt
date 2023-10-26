@@ -1,6 +1,7 @@
 package org.bidon.sdk.ads.banner.helper
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Point
 import android.util.DisplayMetrics
 import android.view.Display
@@ -11,9 +12,33 @@ import kotlin.math.sqrt
 /**
  * Created by Aleksei Cherniaev on 07/05/2023.
  */
-object DeviceType {
+object DeviceInfo {
+
+    private var applicationContext: Context? = null
+
     var isTablet: Boolean = false
         private set
+
+    val isLandscapeConfiguration: Boolean
+        get() = applicationContext?.resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    val screenWidthDp: Int
+        get() {
+            return runCatching {
+                val displayMetrics = applicationContext?.resources?.displayMetrics ?: return 0
+                val px = displayMetrics.widthPixels
+                return (px / displayMetrics.density).toInt()
+            }.getOrNull() ?: 0
+        }
+
+    val screenHeightDp: Int
+        get() {
+            return runCatching {
+                val displayMetrics = applicationContext?.resources?.displayMetrics ?: return 0
+                val px = displayMetrics.heightPixels
+                return (px / displayMetrics.density).toInt()
+            }.getOrNull() ?: 0
+        }
 
     /**
      * Only visual Contexts (such as Activity or one created with Context#createWindowContext)
@@ -21,6 +46,7 @@ object DeviceType {
      */
     @Suppress("DEPRECATION")
     fun init(context: Context) {
+        applicationContext = context.applicationContext
         val display: Display = getDisplay(context) ?: return
         val metrics = DisplayMetrics()
         val realSize = Point()

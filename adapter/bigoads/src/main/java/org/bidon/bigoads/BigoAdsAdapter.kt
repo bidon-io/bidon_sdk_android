@@ -18,7 +18,6 @@ import org.bidon.sdk.adapter.Initializable
 import org.bidon.sdk.adapter.SupportsRegulation
 import org.bidon.sdk.adapter.SupportsTestMode
 import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
-import org.bidon.sdk.regulation.Gdpr
 import org.bidon.sdk.regulation.Regulation
 import org.json.JSONObject
 import sg.bigo.ads.BigoAdSdk
@@ -82,17 +81,13 @@ class BigoAdsAdapter :
     }
 
     override fun updateRegulation(regulation: Regulation) {
-        val (consentOptions, given) = if (regulation.gdpr in arrayOf(Gdpr.Given, Gdpr.Denied)) {
-            ConsentOptions.GDPR to regulation.gdprConsent
-        } else {
-            return
-        }
         context?.let { context ->
-            BigoAdSdk.setUserConsent(
-                context,
-                consentOptions,
-                given
-            )
+            if (regulation.gdprApplies) {
+                BigoAdSdk.setUserConsent(context, ConsentOptions.GDPR, regulation.hasGdprConsent)
+            }
+            if (regulation.ccpaApplies) {
+                BigoAdSdk.setUserConsent(context, ConsentOptions.CCPA, regulation.hasCcpaConsent)
+            }
         }
     }
 }

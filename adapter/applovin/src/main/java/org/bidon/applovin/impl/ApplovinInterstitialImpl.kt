@@ -19,10 +19,8 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.config.BidonError
-import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
@@ -47,23 +45,25 @@ internal class ApplovinInterstitialImpl(
 
             override fun adDisplayed(ad: AppLovinAd) {
                 logInfo(TAG, "adDisplayed: $this")
-                emitEvent(AdEvent.Shown(ad.asAd()))
-                emitEvent(
-                    AdEvent.PaidRevenue(
-                        ad = ad.asAd(),
-                        adValue = lineItem?.pricefloor.asBidonAdValue()
-                    )
-                )
+                getAd()?.let {
+                    emitEvent(AdEvent.Shown(it))
+                    emitEvent(AdEvent.PaidRevenue(it, lineItem?.pricefloor.asBidonAdValue()))
+                }
             }
 
             override fun adHidden(ad: AppLovinAd) {
                 logInfo(TAG, "adHidden: $this")
-                emitEvent(AdEvent.Closed(ad.asAd()))
+                getAd()?.let {
+                    emitEvent(AdEvent.Closed(it))
+                }
+                destroy()
             }
 
             override fun adClicked(ad: AppLovinAd) {
                 logInfo(TAG, "adClicked: $this")
-                emitEvent(AdEvent.Clicked(ad.asAd()))
+                getAd()?.let {
+                    emitEvent(AdEvent.Clicked(it))
+                }
             }
         }
     }
@@ -94,7 +94,9 @@ internal class ApplovinInterstitialImpl(
             override fun adReceived(ad: AppLovinAd) {
                 logInfo(TAG, "adReceived: $this")
                 applovinAd = ad
-                emitEvent(AdEvent.Fill(ad.asAd()))
+                getAd()?.let {
+                    emitEvent(AdEvent.Fill(it))
+                }
             }
 
             override fun failedToReceiveAd(errorCode: Int) {
@@ -123,21 +125,6 @@ internal class ApplovinInterstitialImpl(
         } else {
             emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
-    }
-
-    private fun AppLovinAd?.asAd(): Ad {
-        return Ad(
-            demandAd = demandAd,
-            ecpm = lineItem?.pricefloor ?: 0.0,
-            demandAdObject = this ?: demandAd,
-            networkName = demandId.demandId,
-            dsp = null,
-            roundId = roundId,
-            currencyCode = AdValue.USD,
-            auctionId = auctionId,
-            adUnitId = lineItem?.adUnitId,
-            bidType = bidType,
-        )
     }
 }
 

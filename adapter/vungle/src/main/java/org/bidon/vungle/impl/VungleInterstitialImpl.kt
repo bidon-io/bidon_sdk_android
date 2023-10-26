@@ -14,6 +14,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -35,7 +36,7 @@ internal class VungleInterstitialImpl :
 
     private var adParams: VungleFullscreenAuctionParams? = null
 
-    override suspend fun getToken(context: Context): String? = Vungle.getAvailableBidTokens(context)
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = Vungle.getAvailableBidTokens(context)
 
     override val isAdReadyToShow: Boolean
         get() = adParams?.let {
@@ -65,7 +66,7 @@ internal class VungleInterstitialImpl :
             adParams.placementId, adParams.payload, AdConfig(),
             object : LoadAdCallback {
                 override fun onAdLoad(placementId: String?) {
-                    val ad = getAd(this)
+                    val ad = getAd()
                     if (ad != null) {
                         emitEvent(AdEvent.Fill(ad))
                     } else {
@@ -94,13 +95,13 @@ internal class VungleInterstitialImpl :
                     override fun onAdEnd(placementId: String?, completed: Boolean, isCTAClicked: Boolean) {}
                     override fun onAdEnd(placementId: String?) {
                         logInfo(TAG, "onAdEnd: $this")
-                        val ad = getAd(this@VungleInterstitialImpl) ?: return
+                        val ad = getAd() ?: return
                         emitEvent(AdEvent.Closed(ad))
                     }
 
                     override fun onAdClick(placementId: String?) {
                         logInfo(TAG, "onAdClick: $this")
-                        val ad = getAd(this@VungleInterstitialImpl) ?: return
+                        val ad = getAd() ?: return
                         emitEvent(AdEvent.Clicked(ad))
                     }
 
@@ -115,13 +116,13 @@ internal class VungleInterstitialImpl :
 
                     override fun onAdStart(placementId: String?) {
                         logInfo(TAG, "onAdStart: $this")
-                        val ad = getAd(this@VungleInterstitialImpl) ?: return
+                        val ad = getAd() ?: return
                         emitEvent(AdEvent.Shown(ad))
                     }
 
                     override fun onAdViewed(placementId: String?) {
                         logInfo(TAG, "onAdViewed: $this")
-                        val ad = getAd(this@VungleInterstitialImpl) ?: return
+                        val ad = getAd() ?: return
                         emitEvent(
                             AdEvent.PaidRevenue(
                                 ad = ad,

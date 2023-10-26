@@ -17,12 +17,8 @@ class Ad(
     val adUnitId: String?,
     val dsp: String?,
     val currencyCode: String?,
-    /**
-     * Source demand's ad object (instance)
-     */
-    val demandAdObject: Any,
 ) {
     override fun toString(): String {
-        return "Ad($networkName, ${demandAd.adType}, $bidType, \$$ecpm, auctionId=$auctionId, round=$roundId, dsp=$dsp, currency=$currencyCode, adUnitId=$adUnitId, extras=${demandAd.getExtras()}, demandAdObject=${demandAdObject::class.java.simpleName})"
+        return "Ad(${demandAd.adType} $networkName/$bidType $ecpm $currencyCode, auctionId=$auctionId, roundId=$roundId, dsp=$dsp, adUnitId=$adUnitId, extras=${demandAd.getExtras()})"
     }
 }
