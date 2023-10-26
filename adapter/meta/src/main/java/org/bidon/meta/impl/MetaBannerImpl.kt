@@ -16,6 +16,7 @@ import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -39,7 +40,7 @@ class MetaBannerImpl :
     override val isAdReadyToShow: Boolean
         get() = bannerView != null
 
-    override suspend fun getToken(context: Context): String? {
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
         return BidderTokenProvider.getBidderToken(context)
     }
 
@@ -79,7 +80,7 @@ class MetaBannerImpl :
 
                         override fun onAdLoaded(ad: Ad?) {
                             logInfo(TAG, "onAdLoaded $ad: $bannerView, $this")
-                            val bidonAd = getAd(this)
+                            val bidonAd = getAd()
                             if (bannerView != null && bidonAd != null) {
                                 emitEvent(AdEvent.Fill(bidonAd))
                             } else {
@@ -89,13 +90,13 @@ class MetaBannerImpl :
 
                         override fun onAdClicked(ad: Ad?) {
                             logInfo(TAG, "onAdClicked: $this")
-                            val bidonAd = getAd(this@MetaBannerImpl) ?: return
+                            val bidonAd = getAd() ?: return
                             emitEvent(AdEvent.Clicked(bidonAd))
                         }
 
                         override fun onLoggingImpression(ad: Ad?) {
                             logInfo(TAG, "onLoggingImpression: $ad, $this")
-                            val bidonAd = getAd(this@MetaBannerImpl) ?: return
+                            val bidonAd = getAd() ?: return
                             emitEvent(
                                 AdEvent.PaidRevenue(
                                     ad = bidonAd,

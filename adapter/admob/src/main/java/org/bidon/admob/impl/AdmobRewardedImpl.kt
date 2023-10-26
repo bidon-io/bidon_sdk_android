@@ -17,10 +17,9 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.rewarded.Reward
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
-import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
@@ -45,7 +44,7 @@ internal class AdmobRewardedImpl(
     override val isAdReadyToShow: Boolean
         get() = rewardedAd != null
 
-    override suspend fun getToken(context: Context): String? {
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
         isBiddingMode = true
         return obtainToken(context, demandAd.adType)
     }
@@ -69,20 +68,25 @@ internal class AdmobRewardedImpl(
                 this@AdmobRewardedImpl.rewardedAd = rewardedAd
                 adParams.activity.runOnUiThread {
                     rewardedAd.onPaidEventListener = OnPaidEventListener { adValue ->
-                        emitEvent(
-                            AdEvent.PaidRevenue(
-                                ad = rewardedAd.asAd(),
-                                adValue = adValue.asBidonAdValue()
+                        getAd()?.let {
+                            emitEvent(
+                                AdEvent.PaidRevenue(
+                                    ad = it,
+                                    adValue = adValue.asBidonAdValue()
+                                )
                             )
-                        )
+                        }
                     }
                     rewardedAd.fullScreenContentCallback = getFullScreenContentCallback.createCallback(
                         adEventFlow = this@AdmobRewardedImpl,
                         getAd = {
-                            rewardedAd.asAd()
+                            getAd()
                         },
+                        onClosed = {
+                            this@AdmobRewardedImpl.rewardedAd = null
+                        }
                     )
-                    emitEvent(AdEvent.Fill(rewardedAd.asAd()))
+                    getAd()?.let { emitEvent(AdEvent.Fill(it)) }
                 }
             }
         }
@@ -101,12 +105,9 @@ internal class AdmobRewardedImpl(
         } else {
             rewardedAd.show(activity) { rewardItem ->
                 logInfo(TAG, "onUserEarnedReward $rewardItem: $this")
-                emitEvent(
-                    AdEvent.OnReward(
-                        ad = rewardedAd.asAd(),
-                        reward = Reward(rewardItem.type, rewardItem.amount)
-                    )
-                )
+                getAd()?.let {
+                    emitEvent(AdEvent.OnReward(it, Reward(rewardItem.type, rewardItem.amount)))
+                }
             }
         }
     }
@@ -116,21 +117,6 @@ internal class AdmobRewardedImpl(
         rewardedAd?.onPaidEventListener = null
         rewardedAd?.fullScreenContentCallback = null
         rewardedAd = null
-    }
-
-    private fun RewardedAd.asAd(): Ad {
-        return Ad(
-            demandAd = demandAd,
-            ecpm = price ?: 0.0,
-            demandAdObject = this,
-            networkName = demandId.demandId,
-            dsp = null,
-            roundId = roundId,
-            currencyCode = AdValue.USD,
-            auctionId = auctionId,
-            adUnitId = this.adUnitId,
-            bidType = bidType
-        )
     }
 }
 

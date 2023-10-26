@@ -63,9 +63,14 @@ class ApplovinAdapter :
     }
 
     override fun updateRegulation(regulation: Regulation) {
-        context?.let { context ->
-            AppLovinPrivacySettings.setHasUserConsent(regulation.gdprConsent, context)
-            AppLovinPrivacySettings.setIsAgeRestrictedUser(regulation.coppaApplies, context)
+        if (regulation.gdprApplies) {
+            AppLovinPrivacySettings.setHasUserConsent(regulation.hasGdprConsent, context)
+        }
+        if (regulation.ccpaApplies) {
+            AppLovinPrivacySettings.setDoNotSell(!regulation.hasCcpaConsent, context)
+        }
+        if (regulation.coppaApplies) {
+            AppLovinPrivacySettings.setIsAgeRestrictedUser(true, context)
         }
     }
 

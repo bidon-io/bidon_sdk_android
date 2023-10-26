@@ -27,6 +27,14 @@ import org.bidon.sdk.utils.networking.BidonEndpoints
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 internal class BidonInitializerImpl : BidonInitializer {
+
+    init {
+        /**
+         * Should be invoked before using all.
+         */
+        DI.setFactories()
+    }
+
     private val dispatcher by lazy { SdkDispatchers.Single }
     private val scope get() = CoroutineScope(dispatcher)
 
@@ -42,10 +50,6 @@ internal class BidonInitializerImpl : BidonInitializer {
     private val keyValueStorage: KeyValueStorage get() = get()
     private val bidOnEndpoints: BidonEndpoints get() = get()
     private val segmentSynchronizer: SegmentSynchronizer get() = get()
-
-    init {
-        DI.setFactories()
-    }
 
     override val isInitialized: Boolean
         get() = initializationState.value == SdkState.Initialized

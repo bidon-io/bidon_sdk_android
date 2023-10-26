@@ -7,15 +7,19 @@ import org.bidon.sdk.segment.Segment
 import org.bidon.sdk.segment.SegmentSynchronizer
 import org.bidon.sdk.segment.models.Gender
 import org.bidon.sdk.segment.models.SegmentAttributes
-import org.bidon.sdk.utils.di.get
+import org.bidon.sdk.utils.di.getOrNull
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
 import org.json.JSONObject
+import kotlin.collections.Map
+import kotlin.collections.set
+import kotlin.collections.toMutableMap
 
 /**
  * Created by Aleksei Cherniaev on 15/06/2023.
  */
 internal class SegmentImpl : Segment, SegmentSynchronizer {
-    private val keyValueStorage: KeyValueStorage get() = get()
+    private val keyValueStorage: KeyValueStorage?
+        get() = getOrNull()
 
     private var attributesFlow = MutableStateFlow(SegmentAttributes.Empty)
 
@@ -104,13 +108,13 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
                 .optJSONObject("segment")
                 ?.optString("id", "")
                 ?.takeIf { it.isNotEmpty() }
-            keyValueStorage.segmentId = newSegmentId
+            keyValueStorage?.segmentId = newSegmentId
             setSegmentId(newSegmentId)
             val newSegmentUid = JSONObject(rootJsonResponse)
                 .optJSONObject("segment")
                 ?.optString("uid", "")
                 ?.takeIf { it.isNotEmpty() }
-            keyValueStorage.segmentUid = newSegmentUid
+            keyValueStorage?.segmentUid = newSegmentUid
             setSegmentUid(newSegmentUid)
         }
     }

@@ -7,10 +7,12 @@ import androidx.core.view.children
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.refresh.BannersCache
+import org.bidon.sdk.ads.banner.refresh.BannersCacheImpl
 import org.bidon.sdk.ads.banner.render.AdRenderer
 import org.bidon.sdk.ads.banner.render.AdRenderer.PositionState
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.databinders.extras.Extras
+import org.bidon.sdk.databinders.extras.ExtrasImpl
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.di.get
@@ -28,8 +30,8 @@ class BannerManager private constructor(
     Extras {
 
     constructor() : this(
-        bannersCache = get(),
-        extras = get()
+        bannersCache = BannersCacheImpl(),
+        extras = ExtrasImpl()
     ) {
         logInfo(tag, "Created $this")
     }
@@ -58,6 +60,10 @@ class BannerManager private constructor(
     override fun setPosition(position: BannerPosition) {
         logInfo(tag, "Set position $position")
         positionState = PositionState.Place(position)
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return
+        }
         if (isDisplaying) {
             weakActivity.get()?.let { activity ->
                 showAd(activity)
@@ -70,6 +76,10 @@ class BannerManager private constructor(
         positionState = PositionState.Coordinate(
             AdRenderer.AdContainerParams(offset, rotation, anchor)
         )
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return
+        }
         if (isDisplaying) {
             weakActivity.get()?.let { activity ->
                 showAd(activity)
@@ -212,7 +222,11 @@ class BannerManager private constructor(
     }
 
     override fun hideAd(activity: Activity) {
-        logInfo(tag, "Hide ad. ${Thread.currentThread()}")
+        logInfo(tag, "Hide ad.")
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return
+        }
         activity.runOnUiThread {
             isDisplaying = false
             showAfterLoad.set(false)
@@ -221,7 +235,11 @@ class BannerManager private constructor(
     }
 
     override fun destroyAd(activity: Activity) {
-        logInfo(tag, "Destroy ad. ${Thread.currentThread()}")
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return
+        }
+        logInfo(tag, "Destroy ad.")
         activity.runOnUiThread {
             isDisplaying = false
             showAfterLoad.set(false)

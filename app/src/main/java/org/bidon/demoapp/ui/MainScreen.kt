@@ -63,7 +63,7 @@ internal fun MainScreen(
     val shared = LocalContext.current.getSharedPreferences("app_test", Context.MODE_PRIVATE)
 
     val adapters = remember {
-        mutableStateOf(DefaultAdapters.values().toList())
+        mutableStateOf(DefaultAdapters.values().sortedBy { it.name })
     }
     val isTestMode = TestModeInfo.isTesMode.collectAsState()
     val fullscreenModeState = remember {
@@ -97,21 +97,10 @@ internal fun MainScreen(
                 if (state == MainScreenState.NotInitialized) {
                     MultiSelector(
                         modifier = Modifier.padding(start = 60.dp, end = 60.dp, top = 16.dp),
-                        items = DefaultAdapters.values().toList(),
+                        items = DefaultAdapters.values().sortedBy { it.name },
                         selectedItems = adapters.value,
                         getItemTitle = {
-                            when (it) {
-                                DefaultAdapters.AdmobAdapter -> "Admob"
-                                DefaultAdapters.BidmachineAdapter -> "BidMachine"
-                                DefaultAdapters.ApplovinAdapter -> "Applovin"
-                                DefaultAdapters.DTExchangeAdapter -> "DT Exchange"
-                                DefaultAdapters.UnityAdsAdapter -> "Unity Ads"
-                                DefaultAdapters.VungleAdapter -> "Vungle"
-                                DefaultAdapters.BigoAdsAdapter -> "Bigo Ads"
-                                DefaultAdapters.MintegralAdapter -> "Mintegral"
-                                DefaultAdapters.MetaAdapter -> "Meta/Facebook"
-                                DefaultAdapters.InmobiAdapter -> "Inmobi"
-                            }
+                            it.name.substringBefore("Adapter")
                         },
                         onItemClicked = {
                             adapters.value = if (it in adapters.value) {
@@ -152,14 +141,14 @@ internal fun MainScreen(
                             sharedPreferences.getString("host", AppBaqendBaseUrl) ?: AppBaqendBaseUrl
                         BidonSdk.setTestMode(isTestMode.value)
                         BidonSdk.regulation.gdpr = sharedPreferences.getInt("gdpr", Gdpr.Default.code).let { code ->
-                            Gdpr.values().first { it.code == code }.also { gdpr ->
-                                BidonSdk.regulation.gdprConsentString = "Some Gdpr Consent String".takeIf { gdpr == Gdpr.Given }
+                            Gdpr.values().first { it.code == code }.also {
+                                if (it == Gdpr.DoesNotApply) {
+                                    BidonSdk.regulation.usPrivacyString = "1---"
+                                }
                             }
                         }
                         BidonSdk.regulation.coppa = sharedPreferences.getInt("coppa", Coppa.Default.code).let { code ->
-                            Coppa.values().first { it.code == code }.also { coppa ->
-                                BidonSdk.regulation.usPrivacyString = "Some US Privacy String".takeIf { coppa == Coppa.Yes }
-                            }
+                            Coppa.values().first { it.code == code }
                         }
 
                         initState.value = MainScreenState.Initializing

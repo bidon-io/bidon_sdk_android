@@ -109,6 +109,8 @@ dependencies {
     implementation(project(":adapter:meta"))
     implementation(project(":adapter:vungle"))
     implementation(project(":adapter:inmobi"))
+    implementation(project(":adapter:amazon"))
+    implementation(project(":adapter:mobilefuse"))
 
     implementation(Dependencies.Google.PlayServicesAdsIdentifier)
 
@@ -141,7 +143,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.33.1-alpha")
     implementation("com.google.accompanist:accompanist-flowlayout:0.23.1")
     // Tests
-    implementation("com.squareup.leakcanary:leakcanary-android:2.12")
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.12")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

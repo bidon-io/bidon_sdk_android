@@ -13,6 +13,7 @@ import org.bidon.inmobi.impl.InmobiBannerImpl
 import org.bidon.inmobi.impl.InmobiFullscreenAuctionParams
 import org.bidon.inmobi.impl.InmobiInterstitialImpl
 import org.bidon.inmobi.impl.InmobiRewardedImpl
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.AdProvider
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Adapter
@@ -24,9 +25,9 @@ import org.bidon.sdk.adapter.SupportsTestMode
 import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
+import org.bidon.sdk.regulation.Gdpr
 import org.bidon.sdk.regulation.Regulation
 import org.json.JSONObject
-import java.lang.Error
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -46,8 +47,6 @@ class InmobiAdapter :
     AdProvider.Interstitial<InmobiFullscreenAuctionParams>,
     AdProvider.Rewarded<InmobiFullscreenAuctionParams> {
 
-    private var regulation: Regulation? = null
-
     override val demandId: DemandId = InmobiDemandId
     override val adapterInfo: AdapterInfo
         get() = AdapterInfo(
@@ -57,17 +56,12 @@ class InmobiAdapter :
 
     override suspend fun init(context: Context, configParams: InmobiParams) = withContext(Dispatchers.Main.immediate) {
         suspendCancellableCoroutine {
-            val consentObject = JSONObject()
             if (isTestMode) {
                 InMobiSdk.setLogLevel(InMobiSdk.LogLevel.DEBUG)
             }
-            regulation?.let { reg ->
-                // Provide correct consent value to sdk which is obtained by User
-                consentObject.put(InMobiSdk.IM_GDPR_CONSENT_AVAILABLE, reg.gdprConsent)
-                // Provide 0 if GDPR is not applicable and 1 if applicable
-                consentObject.put("gdpr", "1".takeIf { reg.gdprConsent } ?: "0")
-                // Provide user consent in IAB format
-                consentObject.put(InMobiSdk.IM_GDPR_CONSENT_IAB, reg.gdprConsentString)
+            val consentObject = getConsentObject(BidonSdk.regulation)
+            if (BidonSdk.regulation.coppaApplies) {
+                InMobiSdk.setIsAgeRestricted(true)
             }
             InMobiSdk.init(
                 context, configParams.accountId, consentObject,
@@ -90,14 +84,11 @@ class InmobiAdapter :
     }
 
     override fun updateRegulation(regulation: Regulation) {
-        this.regulation = regulation
-        val consentObject = JSONObject().apply {
-            put(InMobiSdk.IM_GDPR_CONSENT_AVAILABLE, regulation.gdprConsent)
-            put("gdpr", "1".takeIf { regulation.gdprConsent } ?: "0")
-            put(InMobiSdk.IM_GDPR_CONSENT_IAB, regulation.gdprConsentString)
-        }
-        InMobiSdk.setIsAgeRestricted(regulation.coppaApplies)
+        val consentObject = getConsentObject(regulation)
         InMobiSdk.updateGDPRConsent(consentObject)
+        if (regulation.coppaApplies) {
+            InMobiSdk.setIsAgeRestricted(true)
+        }
     }
 
     override fun interstitial(): AdSource.Interstitial<InmobiFullscreenAuctionParams> {
@@ -110,6 +101,18 @@ class InmobiAdapter :
 
     override fun rewarded(): AdSource.Rewarded<InmobiFullscreenAuctionParams> {
         return InmobiRewardedImpl()
+    }
+
+    private fun getConsentObject(regulation: Regulation): JSONObject {
+        return JSONObject().apply {
+            if (regulation.gdpr != Gdpr.Unknown) {
+                this.put("gdpr", regulation.gdpr.code)
+            }
+            if (regulation.gdprApplies) {
+                this.put(InMobiSdk.IM_GDPR_CONSENT_AVAILABLE, regulation.hasGdprConsent)
+                this.put(InMobiSdk.IM_GDPR_CONSENT_IAB, regulation.gdprConsentString)
+            }
+        }
     }
 }
 

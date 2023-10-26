@@ -50,7 +50,7 @@ internal class UnityAdsRewarded :
             override fun onUnityAdsAdLoaded(placementId: String?) {
                 logInfo(TAG, "onUnityAdsAdLoaded: $this")
                 isAdReadyToShow = true
-                getAd(this@UnityAdsRewarded)?.let {
+                getAd()?.let {
                     emitEvent(AdEvent.Fill(it))
                 }
             }
@@ -80,7 +80,7 @@ internal class UnityAdsRewarded :
 
             override fun onUnityAdsShowStart(placementId: String?) {
                 logInfo(TAG, "onUnityAdsShowStart: placementId=$placementId")
-                getAd(this@UnityAdsRewarded)?.let {
+                getAd()?.let {
                     emitEvent(AdEvent.Shown(it))
                     emitEvent(
                         AdEvent.PaidRevenue(
@@ -97,12 +97,12 @@ internal class UnityAdsRewarded :
 
             override fun onUnityAdsShowClick(placementId: String?) {
                 logInfo(TAG, "onUnityAdsShowClick. placementId: $placementId")
-                getAd(this@UnityAdsRewarded)?.let { emitEvent(AdEvent.Clicked(it)) }
+                getAd()?.let { emitEvent(AdEvent.Clicked(it)) }
             }
 
             override fun onUnityAdsShowComplete(placementId: String?, state: UnityAds.UnityAdsShowCompletionState?) {
                 logInfo(TAG, "onUnityAdsShowComplete: placementId=$placementId, state=$state")
-                getAd(this@UnityAdsRewarded)?.let {
+                getAd()?.let {
                     when (state) {
                         UnityAds.UnityAdsShowCompletionState.COMPLETED -> {
                             emitEvent(AdEvent.OnReward(ad = it, reward = null))

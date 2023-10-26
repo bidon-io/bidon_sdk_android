@@ -16,6 +16,7 @@ import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -40,7 +41,7 @@ internal class MintegralBannerImpl :
 
     override var isAdReadyToShow: Boolean = false
 
-    override suspend fun getToken(context: Context): String? = BidManager.getBuyerUid(context)
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = BidManager.getBuyerUid(context)
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
@@ -81,7 +82,7 @@ internal class MintegralBannerImpl :
                 override fun onLoadSuccessed(mBridgeIds: MBridgeIds?) {
                     logInfo(TAG, "onLoadSuccessed $mBridgeIds")
                     isAdReadyToShow = true
-                    val ad = getAd(this)
+                    val ad = getAd()
                     if (mBridgeIds != null && ad != null) {
                         emitEvent(AdEvent.Fill(ad))
                     } else {
@@ -91,7 +92,7 @@ internal class MintegralBannerImpl :
 
                 override fun onLogImpression(mBridgeIds: MBridgeIds?) {
                     logInfo(TAG, "onLogImpression $mBridgeIds")
-                    val ad = getAd(this@MintegralBannerImpl) ?: return
+                    val ad = getAd() ?: return
                     emitEvent(
                         AdEvent.PaidRevenue(
                             ad = ad,
@@ -106,7 +107,7 @@ internal class MintegralBannerImpl :
 
                 override fun onClick(mBridgeIds: MBridgeIds?) {
                     logInfo(TAG, "onAdClicked $mBridgeIds")
-                    val ad = getAd(this@MintegralBannerImpl) ?: return
+                    val ad = getAd() ?: return
                     emitEvent(AdEvent.Clicked(ad))
                 }
 
@@ -122,17 +123,18 @@ internal class MintegralBannerImpl :
     override fun getAdView(): AdViewHolder? {
         logInfo(TAG, "Starting show: $this")
         val size = bannerSize ?: return null
-        if (isAdReadyToShow) {
+        return if (isAdReadyToShow) {
             bannerView?.let {
-                return AdViewHolder(
+                AdViewHolder(
                     networkAdview = it,
                     widthDp = size.width,
                     heightDp = size.height
                 )
             }
+        } else {
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
+            null
         }
-        emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-        return null
     }
 
     override fun destroy() {

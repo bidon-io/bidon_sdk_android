@@ -15,6 +15,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
@@ -40,7 +41,7 @@ internal class MintegralInterstitialImpl :
     override val isAdReadyToShow: Boolean
         get() = interstitialAd?.isBidReady == true
 
-    override suspend fun getToken(context: Context): String? = BidManager.getBuyerUid(context)
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = BidManager.getBuyerUid(context)
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
@@ -70,7 +71,7 @@ internal class MintegralInterstitialImpl :
             override fun onResourceLoadSuccess(mBridgeIds: MBridgeIds?) {
                 logInfo(TAG, "onResourceLoadSuccess $mBridgeIds")
                 logInfo(TAG, "Starting fill: $this")
-                val ad = getAd(this)
+                val ad = getAd()
                 if (mBridgeIds != null && ad != null) {
                     emitEvent(AdEvent.Fill(ad))
                 } else {
@@ -85,7 +86,7 @@ internal class MintegralInterstitialImpl :
 
             override fun onAdShow(mBridgeIds: MBridgeIds?) {
                 logInfo(TAG, "onAdShow $mBridgeIds")
-                val ad = getAd(this@MintegralInterstitialImpl) ?: return
+                val ad = getAd() ?: return
                 emitEvent(AdEvent.Shown(ad))
                 emitEvent(
                     AdEvent.PaidRevenue(
@@ -101,8 +102,9 @@ internal class MintegralInterstitialImpl :
 
             override fun onAdClose(mBridgeIds: MBridgeIds?, rewardInfo: RewardInfo?) {
                 logInfo(TAG, "onAdClose $mBridgeIds, $rewardInfo")
-                val ad = getAd(this@MintegralInterstitialImpl) ?: return
+                val ad = getAd() ?: return
                 emitEvent(AdEvent.Closed(ad))
+                this@MintegralInterstitialImpl.interstitialAd = null
             }
 
             override fun onShowFail(mBridgeIds: MBridgeIds?, message: String?) {
@@ -112,7 +114,7 @@ internal class MintegralInterstitialImpl :
 
             override fun onAdClicked(mBridgeIds: MBridgeIds?) {
                 logInfo(TAG, "onAdClicked $mBridgeIds")
-                val ad = getAd(this@MintegralInterstitialImpl) ?: return
+                val ad = getAd() ?: return
                 emitEvent(AdEvent.Clicked(ad))
             }
 

@@ -10,7 +10,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.AdType
-import org.bidon.sdk.ads.banner.helper.DeviceType
+import org.bidon.sdk.ads.banner.helper.DeviceInfo
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
@@ -48,8 +48,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
 
     @Before
     fun before() {
-        mockkObject(DeviceType)
-        every { DeviceType.init(any()) } returns Unit
+        mockkObject(DeviceInfo)
+        every { DeviceInfo.init(any()) } returns Unit
         DI.init(mockk())
 //        DI.setFactories()
         mockkLog()
@@ -114,6 +114,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     roundIndex = 2,
                                     bidType = BidType.RTB,
                                     lineItemUid = null,
+                                    dspSource = "liftoff",
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -133,6 +134,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     roundIndex = 2,
                                     bidType = BidType.RTB,
                                     lineItemUid = null,
+                                    dspSource = "liftoff",
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -158,6 +160,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 roundIndex = 2,
                                 bidType = BidType.CPM,
                                 lineItemUid = "123",
+                                dspSource = "liftoff",
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -177,6 +180,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 roundIndex = 2,
                                 bidType = BidType.CPM,
                                 lineItemUid = "123",
+                                dspSource = "liftoff",
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },
@@ -294,6 +298,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     roundIndex = 2,
                                     bidType = BidType.RTB,
                                     lineItemUid = "123",
+                                    dspSource = "liftoff",
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -315,6 +320,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 roundIndex = 2,
                                 bidType = BidType.CPM,
                                 lineItemUid = "123",
+                                dspSource = "liftoff",
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -334,6 +340,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 roundIndex = 2,
                                 bidType = BidType.CPM,
                                 lineItemUid = "123",
+                                dspSource = "liftoff",
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },
@@ -472,6 +479,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     roundIndex = 2,
                                     bidType = BidType.RTB,
                                     lineItemUid = null,
+                                    dspSource = "liftoff",
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -493,6 +501,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 roundIndex = 2,
                                 bidType = BidType.CPM,
                                 lineItemUid = "123",
+                                dspSource = "liftoff",
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -512,6 +521,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 roundIndex = 2,
                                 bidType = BidType.CPM,
                                 lineItemUid = "123",
+                                dspSource = "liftoff",
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },

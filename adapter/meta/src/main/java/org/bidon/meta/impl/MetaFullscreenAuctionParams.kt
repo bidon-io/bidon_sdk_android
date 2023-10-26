@@ -5,7 +5,7 @@ import android.content.Context
 import com.facebook.ads.AdSize
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.DeviceType.isTablet
+import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.auction.models.LineItem
 
 class MetaFullscreenAuctionParams(

@@ -2,12 +2,14 @@ package org.bidon.sdk.auction.usecases.impl
 
 import android.content.Context
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.ResultsCollector
@@ -17,9 +19,11 @@ import org.bidon.sdk.auction.models.BiddingResponse
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.BidRequestUseCase
 import org.bidon.sdk.auction.usecases.ConductBiddingRoundUseCase
+import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.models.RoundStatus
+import org.bidon.sdk.utils.SdkDispatchers
 
 @Suppress("UNCHECKED_CAST")
 internal class ConductBiddingRoundUseCaseImpl(
@@ -52,12 +56,17 @@ internal class ConductBiddingRoundUseCaseImpl(
                 /**
                  * Load bids
                  */
-                val tokens = participants.getTokens(context)
+                val tokens = participants.getTokens(context, adTypeParam)
                 logInfo(TAG, "${tokens.size} token(s):")
                 tokens.forEachIndexed { index, (demandId, token) ->
                     logInfo(TAG, "#$index ${demandId.demandId} {$token}")
                 }
                 resultsCollector.serverBiddingStarted()
+                if (tokens.isEmpty()) {
+                    logError(TAG, "No tokens found", BidonError.NoBid)
+                    resultsCollector.serverBiddingFinished(null)
+                    return@withTimeoutOrNull
+                }
                 val bidResponse = bidRequestUseCase.invoke(
                     adTypeParam = adTypeParam,
                     tokens = tokens,
@@ -74,10 +83,6 @@ internal class ConductBiddingRoundUseCaseImpl(
                     it.isNotEmpty() && bidResponse.status == BiddingResponse.BidStatus.Success
                 }
                 resultsCollector.serverBiddingFinished(bids)
-
-                /**
-                 * Finish bidding
-                 */
 
                 /**
                  * Finish bidding
@@ -135,10 +140,11 @@ internal class ConductBiddingRoundUseCaseImpl(
                 )
                 resultsCollector.add(fillResult)
             } else {
-                val lose = AuctionResult.Bidding(
-                    roundStatus = RoundStatus.Lose,
-                    adSource = adSource,
+                val lose = AuctionResult.BiddingLose(
+                    adapterName = adSource.demandId.demandId,
+                    ecpm = bid.price
                 )
+                logInfo(TAG, "$lose")
                 resultsCollector.add(lose)
             }
         }
@@ -200,10 +206,15 @@ internal class ConductBiddingRoundUseCaseImpl(
     }
 
     private suspend fun List<Mode.Bidding>.getTokens(
-        context: Context
-    ) = this.mapNotNull { adSource ->
-        adSource.getToken(context)?.let { token ->
-            (adSource as AdSource<*>).demandId to token
+        context: Context,
+        adTypeParam: AdTypeParam
+    ): List<Pair<DemandId, String>> = withContext(SdkDispatchers.Default) {
+        this@getTokens.mapNotNull { adSource ->
+            runCatching {
+                adSource.getToken(context, adTypeParam)?.let { token ->
+                    (adSource as AdSource<*>).demandId to token
+                }
+            }.getOrNull()
         }
     }
 }
