@@ -152,7 +152,6 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                             every { it.demandId } returns DemandId(Admob)
                             every { it.ad } returns Ad(
                                 demandAd = DemandAd(AdType.Interstitial),
-                                networkName = "admob",
                                 roundId = "r123",
                                 currencyCode = USD,
                                 dsp = null,

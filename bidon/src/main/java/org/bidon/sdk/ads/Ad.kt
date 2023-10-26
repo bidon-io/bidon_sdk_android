@@ -10,7 +10,6 @@ import java.util.*
  */
 class Ad(
     val demandAd: DemandAd,
-    val networkName: String?, // Monetization Network name
     val bidType: BidType,
     val ecpm: Double,
     val roundId: String,
@@ -19,6 +18,10 @@ class Ad(
     val currencyCode: String?,
     val adUnit: AdUnit
 ) {
+    // Monetization Network name
+    val networkName: String
+        get() = adUnit.demandId
+
     override fun toString(): String {
         return "Ad(${demandAd.adType} $networkName/$bidType $ecpm $currencyCode, auctionId=$auctionId, roundId=$roundId, dsp=$dsp, extras=${demandAd.getExtras()})"
     }
