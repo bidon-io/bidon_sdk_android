@@ -6,10 +6,10 @@ import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.BannerRequest
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.RoundStatus
+
 /**
  * Created by Bidon Team on 06/02/2023.
  */
@@ -30,7 +30,7 @@ interface StatisticsCollector {
     fun sendWin()
 
     /**
-     * Some adapters don't use [LineItem]s (BidMachine), so we need to set price manually after ad is loaded.
+     * Some adapters don't use [AdUnit]s (BidMachine), so we need to set price manually after ad is loaded.
      * Need to be used before [AdEvent.Fill] is exposed
      */
     fun setPrice(price: Double)
