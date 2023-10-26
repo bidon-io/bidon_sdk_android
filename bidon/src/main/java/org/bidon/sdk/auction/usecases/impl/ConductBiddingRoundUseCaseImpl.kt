@@ -2,6 +2,7 @@ package org.bidon.sdk.auction.usecases.impl
 
 import android.content.Context
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
@@ -22,6 +23,7 @@ import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.models.RoundStatus
+import org.bidon.sdk.utils.SdkDispatchers
 
 @Suppress("UNCHECKED_CAST")
 internal class ConductBiddingRoundUseCaseImpl(
@@ -206,9 +208,13 @@ internal class ConductBiddingRoundUseCaseImpl(
     private suspend fun List<Mode.Bidding>.getTokens(
         context: Context,
         adTypeParam: AdTypeParam
-    ): List<Pair<DemandId, String>> = this.mapNotNull { adSource ->
-        adSource.getToken(context, adTypeParam)?.let { token ->
-            (adSource as AdSource<*>).demandId to token
+    ): List<Pair<DemandId, String>> = withContext(SdkDispatchers.Default) {
+        this@getTokens.mapNotNull { adSource ->
+            runCatching {
+                adSource.getToken(context, adTypeParam)?.let { token ->
+                    (adSource as AdSource<*>).demandId to token
+                }
+            }.getOrNull()
         }
     }
 }
