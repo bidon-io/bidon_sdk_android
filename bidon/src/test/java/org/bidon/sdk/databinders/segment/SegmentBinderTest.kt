@@ -30,14 +30,7 @@ internal class SegmentBinderTest {
 
         override val segmentUid: String = "123456"
 
-        @Deprecated("not used")
-        override val segmentId: String = "0123456"
-
-        override fun parseSegmentId(rootJsonResponse: String) {}
-
-        @Deprecated("not used")
-        override fun setSegmentId(segmentId: String?) {
-        }
+        override fun parseSegmentUid(rootJsonResponse: String) {}
 
         override fun setSegmentUid(segmentUid: String?) {}
     }
@@ -55,7 +48,6 @@ internal class SegmentBinderTest {
         // check `id` is correct
         segment.assertEquals(
             expectedJsonStructure {
-                "id" hasValue "0123456"
                 "uid" hasValue "123456"
 
                 // check `ext` JSON Encoded String later

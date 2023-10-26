@@ -4,7 +4,6 @@ import android.app.Activity
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.BidResponse
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.utils.ext.mapFailure
 import org.json.JSONObject
@@ -54,7 +53,7 @@ class AdAuctionParamSource(
     }
 
     /**
-     * Search for a [LineItem] for the given demandId with the lowest pricefloor
+     * Search for a [AdUnit] for the given demandId with the lowest pricefloor
      */
     fun popAdUnit(demandId: DemandId): AdUnit? = adUnits
         .minByPricefloorOrNull(demandId, pricefloor)
