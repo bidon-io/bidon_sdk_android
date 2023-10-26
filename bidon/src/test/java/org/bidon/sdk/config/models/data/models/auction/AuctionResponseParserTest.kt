@@ -132,19 +132,7 @@ internal class AuctionResponseParserTest {
                 "asd"
               ],
             }
-          ],
-          "line_items": [
-            {
-              "id": "admob",
-              "pricefloor": 0.25,
-              "ad_unit_id": "AAAA2"
-            },
-           {
-              "id": "bidmachine",
-              "pricefloor": 1.2235,
-              "ad_unit_id": "AAAA1"
-            }
-          ],
+          ],          
           "token": "asdsad",
           "fill_timeout": 10000,
           "pricefloor": 0.01,
