@@ -36,9 +36,8 @@ class ImpressionRequestBodySerializerTest {
 
         json.assertEquals(
             expectedJsonStructure {
-                "ad_unit_id" hasValue "adUnitId43"
                 "demand_id" hasValue "demandId123"
-                "ecpm" hasValue 2.33
+                "price" hasValue 2.33
                 "interstitial" hasJson expectedJsonStructure {}
                 "auction_id" hasValue "id123"
                 "round_id" hasValue "round123"
@@ -48,8 +47,8 @@ class ImpressionRequestBodySerializerTest {
                 }
                 "bid_type" hasValue "rtb"
                 "auction_configuration_uid" hasValue 4UL
-                "ad_unit_uid" hasValue "1698961007059140608"
                 "imp_id" hasValue "impr123"
+                "ad_unit_uid" hasValue "1698961007059140608"
                 "ad_unit_label" hasValue "adUnitId43"
                 "round_pricefloor" hasValue 0.12
                 "auction_pricefloor" hasValue 0.01

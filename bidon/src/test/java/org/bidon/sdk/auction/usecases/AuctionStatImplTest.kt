@@ -317,7 +317,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         BidResponse(
                             id = "bid123",
                             impressionId = "imp1",
-                            price = 1.2,
+                            price = 1.5,
                             adUnit = AdUnit(
                                 demandId = "bidmachine",
                                 ext = null,
@@ -515,13 +515,13 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         BidResponse(
                             id = "bid123",
                             impressionId = "imp1",
-                            price = 1.2,
+                            price = 1.5,
                             adUnit = AdUnit(
                                 demandId = "bidmachine",
                                 ext = null,
                                 label = "bidmachine_label",
                                 pricefloor = null,
-                                uid = "123"
+                                uid = "1234"
                             ),
                             ext = jsonObject {
                                 "payload" hasValue "payload123"
@@ -536,7 +536,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 ext = null,
                                 label = "meta_label",
                                 pricefloor = null,
-                                uid = "123"
+                                uid = "1232"
                             ),
                             ext = jsonObject {
                                 "payload" hasValue "payload123"
@@ -565,7 +565,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                         ext = null,
                                         label = "bidmachine_label",
                                         pricefloor = null,
-                                        uid = "123"
+                                        uid = "1234"
                                     ),
                                 )
                             },
@@ -677,7 +677,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     fillStartTs = 916,
                                     fillFinishTs = 917,
                                     adUnitLabel = "bidmachine_label",
-                                    adUnitUid = "123",
+                                    adUnitUid = "1234",
                                 ),
                             ),
                         )
@@ -716,7 +716,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     auctionStartTs = systemTime,
                     auctionFinishTs = systemTime,
                     bidType = BidType.RTB.code,
-                    winnerAdUnitUid = "123",
+                    winnerAdUnitUid = "1234",
                     winnerAdUnitLabel = "bidmachine_label",
                     winnerDemandId = "bidmachine",
                 ),

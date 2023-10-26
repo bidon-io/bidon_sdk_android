@@ -396,7 +396,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 uid = "1",
             ),
 
-            ),
+        ),
         pricefloor = 0.01,
         token = null,
         externalWinNotificationsEnabled = true,
