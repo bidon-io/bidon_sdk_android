@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Created by Aleksei Cherniaev on 05/09/2023.
  */
+@Deprecated("")
 internal interface BannersCache {
     /**
      * Get and automatically load next banner
@@ -31,6 +32,7 @@ internal interface BannersCache {
     fun clear()
 }
 
+@Deprecated("")
 internal class BannersCacheImpl : BannersCache {
     private val Tag get() = TAG
     private val isLoading = AtomicBoolean(false)

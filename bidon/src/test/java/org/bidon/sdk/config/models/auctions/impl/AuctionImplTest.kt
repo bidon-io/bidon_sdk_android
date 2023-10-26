@@ -14,7 +14,7 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.ads.AdType
-import org.bidon.sdk.ads.banner.helper.DeviceType
+import org.bidon.sdk.ads.banner.helper.DeviceInfo
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.impl.AuctionImpl
@@ -77,8 +77,8 @@ internal class AuctionImplTest : ConcurrentTest() {
 
     @Before
     fun before() {
-        mockkObject(DeviceType)
-        every { DeviceType.init(any()) } returns Unit
+        mockkObject(DeviceInfo)
+        every { DeviceInfo.init(any()) } returns Unit
         DI.init(activity)
         mockkLog()
     }

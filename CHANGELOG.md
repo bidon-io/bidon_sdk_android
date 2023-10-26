@@ -1,7 +1,14 @@
+# Release 0.4.21 (2023.10.20)
+## Features:
+[BDN-446](https://appodeal.atlassian.net/browse/BDN-446) Implement Amazon Rewarded
+[BDN-417](https://appodeal.atlassian.net/browse/BDN-417) Implement Amazon Adapters: Interstitial+Banner
+
 ## Bugfixes:
+[BDN-453](https://appodeal.atlassian.net/browse/BDN-453) Applying Regulations GDPR/CCPA/COPPA
+[BDN-443](https://appodeal.atlassian.net/browse/BDN-434) Improving Ad process
 [BDN-433](https://appodeal.atlassian.net/browse/BDN-433) Memory Leak
 
-# Release 0.4.8 (2023.09.21)
+# Release 0.4.20 (2023.09.21)
 ## New Features:
 [BDN-380](https://appodeal.atlassian.net/browse/BDN-380) Add Round Number To Bidon Analytics
 [BDN-379](https://appodeal.atlassian.net/browse/BDN-379) Separate Bidding And Non-Bidding Data In Bidon Analytics

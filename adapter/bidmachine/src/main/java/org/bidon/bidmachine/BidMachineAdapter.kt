@@ -66,13 +66,23 @@ class BidMachineAdapter :
     }
 
     override fun updateRegulation(regulation: Regulation) {
-        BidMachine.setUSPrivacyString(regulation.usPrivacyString)
-        BidMachine.setCoppa(regulation.coppaApplies)
-        BidMachine.setSubjectToGDPR(regulation.gdprConsent)
-        BidMachine.setConsentConfig(
-            /* hasConsent = */ !regulation.gdprConsentString.isNullOrBlank(),
-            /* consentString = */ regulation.gdprConsentString
-        )
+        regulation.usPrivacyString?.let {
+            BidMachine.setUSPrivacyString(it)
+        }
+        if (regulation.coppaApplies) {
+            BidMachine.setCoppa(true)
+        }
+        if (regulation.gdprApplies) {
+            BidMachine.setSubjectToGDPR(true)
+            regulation.gdprConsentString
+                ?.takeIf { it.isNotBlank() }
+                ?.let {
+                    BidMachine.setConsentConfig(
+                        /* hasConsent = */ regulation.hasGdprConsent,
+                        /* consentString = */ it
+                    )
+                }
+        }
     }
 
     override fun interstitial(): AdSource.Interstitial<BMFullscreenAuctionParams> {
