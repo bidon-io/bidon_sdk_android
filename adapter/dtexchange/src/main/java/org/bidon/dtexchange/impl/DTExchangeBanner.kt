@@ -19,11 +19,9 @@ import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.impl.pxToDp
 import org.bidon.sdk.config.BidonError
-import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
@@ -41,6 +39,7 @@ internal class DTExchangeBanner :
     private var pricefloor: Double = 0.0
     private var adSpot: InneractiveAdSpot? = null
     private var adViewHolder: AdViewHolder? = null
+    private var demandSource: String? = null
 
     override val isAdReadyToShow: Boolean get() = adSpot?.isReady == true
 
@@ -68,8 +67,8 @@ internal class DTExchangeBanner :
                 this@DTExchangeBanner.adSpot = inneractiveAdSpot
                 adParams.activity.runOnUiThread {
                     createViewHolder(inneractiveAdSpot, adParams)
-                    inneractiveAdSpot?.let {
-                        emitEvent(AdEvent.Fill(it.asAd()))
+                    getAd()?.let {
+                        emitEvent(AdEvent.Fill(it))
                     }
                 }
             }
@@ -107,7 +106,9 @@ internal class DTExchangeBanner :
             ) {
                 logInfo(TAG, "onAdImpression: $adSpot, $impressionData")
                 val adValue = impressionData?.asAdValue() ?: return
-                val ad = adSpot?.asAd() ?: return
+                demandSource = impressionData.demandSource
+                setDsp(demandSource)
+                val ad = getAd() ?: return
                 emitEvent(AdEvent.PaidRevenue(ad, adValue))
                 // tracked impression/shown by [BannerView]
             }
@@ -117,7 +118,7 @@ internal class DTExchangeBanner :
 
             override fun onAdClicked(adSpot: InneractiveAdSpot?) {
                 logInfo(TAG, "onAdClicked: $adSpot")
-                adSpot?.asAd()?.let {
+                getAd()?.let {
                     emitEvent(AdEvent.Clicked(ad = it))
                 }
             }
@@ -156,19 +157,6 @@ internal class DTExchangeBanner :
             this.adViewHolder = it
         }
     }
-
-    private fun InneractiveAdSpot.asAd() = Ad(
-        ecpm = pricefloor,
-        auctionId = auctionId,
-        adUnitId = this.requestedSpotId,
-        networkName = demandId.demandId,
-        currencyCode = AdValue.USD,
-        demandAd = demandAd,
-        dsp = this.mediationNameString,
-        roundId = roundId,
-        demandAdObject = this,
-        bidType = bidType,
-    )
 }
 
 private const val TAG = "DTExchangeBanner"

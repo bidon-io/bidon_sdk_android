@@ -198,7 +198,14 @@ internal class ExecuteRoundUseCaseImpl(
 
     private fun applyRegulation(adapter: Adapter) {
         (adapter as? SupportsRegulation)?.let { supportsRegulation ->
-            logInfo(TAG, "Applying regulation to ${adapter.demandId.demandId}")
+            logInfo(
+                TAG,
+                "Applying regulation to ${adapter.demandId.demandId} <- " +
+                    "GDPR=${regulation.gdpr}, " +
+                    "COPPA=${regulation.coppa}, " +
+                    "usPrivacyString=${regulation.usPrivacyString}, " +
+                    "gdprConsentString=${regulation.gdprConsentString}"
+            )
             supportsRegulation.updateRegulation(regulation)
         }
     }

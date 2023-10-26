@@ -29,7 +29,7 @@ internal fun BMError.asBidonErrorOnBid(demandId: DemandId): BidonError = when (t
     BMError.Expired -> BidonError.Expired(demandId)
     else -> {
         if (this.code == BMError.NO_CONTENT) {
-            BidonError.NoBid(demandId)
+            BidonError.NoBid
         } else {
             BidonError.Unspecified(demandId)
         }

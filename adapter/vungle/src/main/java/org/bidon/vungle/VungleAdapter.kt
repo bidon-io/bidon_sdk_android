@@ -16,7 +16,6 @@ import org.bidon.sdk.adapter.SupportsTestMode
 import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
-import org.bidon.sdk.regulation.Gdpr
 import org.bidon.sdk.regulation.Regulation
 import org.bidon.vungle.ext.adapterVersion
 import org.bidon.vungle.ext.sdkVersion
@@ -73,15 +72,25 @@ class VungleAdapter :
     }
 
     override fun updateRegulation(regulation: Regulation) {
-        Vungle.updateConsentStatus(
-            when (regulation.gdpr) {
-                Gdpr.Unknown -> Vungle.Consent.OPTED_OUT
-                Gdpr.Denied -> Vungle.Consent.OPTED_OUT
-                Gdpr.Given -> Vungle.Consent.OPTED_IN
-            },
-            regulation.gdprConsentString
-        )
-        Vungle.updateUserCoppaStatus(regulation.coppaApplies)
+        if (regulation.ccpaApplies) {
+            val status = if (regulation.hasCcpaConsent) {
+                Vungle.Consent.OPTED_IN
+            } else {
+                Vungle.Consent.OPTED_OUT
+            }
+            Vungle.updateCCPAStatus(status)
+        }
+        if (regulation.gdprApplies) {
+            val status = if (regulation.hasGdprConsent) {
+                Vungle.Consent.OPTED_IN
+            } else {
+                Vungle.Consent.OPTED_OUT
+            }
+            Vungle.updateConsentStatus(status, null)
+        }
+        if (regulation.coppaApplies) {
+            Vungle.updateUserCoppaStatus(true)
+        }
     }
 
     override fun interstitial(): AdSource.Interstitial<VungleFullscreenAuctionParams> {

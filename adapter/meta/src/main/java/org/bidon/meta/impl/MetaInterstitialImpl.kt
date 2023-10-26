@@ -15,6 +15,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -37,7 +38,7 @@ class MetaInterstitialImpl :
     override val isAdReadyToShow: Boolean
         get() = interstitialAd?.isAdLoaded ?: false
 
-    override suspend fun getToken(context: Context): String? {
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
         return BidderTokenProvider.getBidderToken(context)
     }
 
@@ -73,7 +74,7 @@ class MetaInterstitialImpl :
 
                     override fun onAdLoaded(ad: Ad?) {
                         logInfo(TAG, "onAdLoaded $ad: $interstitialAd, $this")
-                        val bidonAd = getAd(this)
+                        val bidonAd = getAd()
                         if (interstitialAd != null && bidonAd != null) {
                             emitEvent(AdEvent.Fill(bidonAd))
                         } else {
@@ -83,13 +84,13 @@ class MetaInterstitialImpl :
 
                     override fun onAdClicked(ad: Ad?) {
                         logInfo(TAG, "onAdClicked: $this")
-                        val bidonAd = getAd(this@MetaInterstitialImpl) ?: return
+                        val bidonAd = getAd() ?: return
                         emitEvent(AdEvent.Clicked(bidonAd))
                     }
 
                     override fun onLoggingImpression(ad: Ad?) {
                         logInfo(TAG, "onAdImpression: $this")
-                        val bidonAd = getAd(this@MetaInterstitialImpl) ?: return
+                        val bidonAd = getAd() ?: return
                         emitEvent(
                             AdEvent.PaidRevenue(
                                 ad = bidonAd,
@@ -104,14 +105,15 @@ class MetaInterstitialImpl :
 
                     override fun onInterstitialDisplayed(ad: Ad?) {
                         logInfo(TAG, "onInterstitialDisplayed $ad: $this")
-                        val bidonAd = getAd(this@MetaInterstitialImpl) ?: return
+                        val bidonAd = getAd() ?: return
                         emitEvent(AdEvent.Shown(bidonAd))
                     }
 
                     override fun onInterstitialDismissed(ad: Ad?) {
                         logInfo(TAG, "onInterstitialDismissed $ad: $this")
-                        val bidonAd = getAd(this@MetaInterstitialImpl) ?: return
+                        val bidonAd = getAd() ?: return
                         emitEvent(AdEvent.Closed(bidonAd))
+                        this@MetaInterstitialImpl.interstitialAd = null
                     }
                 })
                 .withBid(adParams.payload)

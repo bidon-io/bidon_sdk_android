@@ -1,7 +1,10 @@
 package org.bidon.sdk.utils.di
 
+import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.utils.di.InstanceType.ParamFactory.Params
 import kotlin.reflect.KClass
+
 /**
  * Created by Bidon Team on 06/02/2023.
  *
@@ -21,6 +24,13 @@ internal inline fun <reified T : Any> get(noinline params: (Params.() -> Unit)? 
 
 internal fun module(scope: SimpleDiScope.() -> Unit) {
     scope.invoke(SimpleDiScope)
+}
+
+internal inline fun <reified T : Any> getOrNull() = try {
+    get<T>()
+} catch (e: Exception) {
+    logError("Dependency Injection", "BidonSdk is not initialized", BidonError.SdkNotInitialized)
+    null
 }
 
 internal object SimpleDiScope {

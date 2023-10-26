@@ -73,18 +73,20 @@ internal class ResultsCollectorImpl(
     }
 
     override fun add(result: AuctionResult) {
-        roundResult.update {
-            require(it is RoundResult.Results)
+        roundResult.update { current ->
+            require(current is RoundResult.Results)
             when {
-                result is AuctionResult.Bidding || (result as? AuctionResult.UnknownAdapter)?.type == Type.Bidding -> {
+                result is AuctionResult.BiddingLose ||
+                    result is AuctionResult.Bidding ||
+                    (result as? AuctionResult.UnknownAdapter)?.type == Type.Bidding -> {
                     RoundResult.Results(
-                        biddingResult = when (it.biddingResult) {
+                        biddingResult = when (current.biddingResult) {
                             is BiddingResult.FilledAd -> {
                                 BiddingResult.FilledAd(
-                                    serverBiddingStartTs = it.biddingResult.serverBiddingStartTs,
-                                    serverBiddingFinishTs = it.biddingResult.serverBiddingFinishTs,
-                                    bids = it.biddingResult.bids,
-                                    results = it.biddingResult.results + result
+                                    serverBiddingStartTs = current.biddingResult.serverBiddingStartTs,
+                                    serverBiddingFinishTs = current.biddingResult.serverBiddingFinishTs,
+                                    bids = current.biddingResult.bids,
+                                    results = current.biddingResult.results + result
                                 )
                             }
 
@@ -92,25 +94,25 @@ internal class ResultsCollectorImpl(
                             is BiddingResult.NoBid,
                             is BiddingResult.ServerBiddingStarted,
                             is BiddingResult.TimeoutReached -> {
-                                it.biddingResult
+                                current.biddingResult
                             }
                         },
-                        networkResults = it.networkResults,
-                        pricefloor = it.pricefloor,
-                        round = it.round
+                        networkResults = current.networkResults,
+                        pricefloor = current.pricefloor,
+                        round = current.round
                     )
                 }
 
                 result is AuctionResult.Network || (result as? AuctionResult.UnknownAdapter)?.type == Type.Network -> {
                     RoundResult.Results(
-                        biddingResult = it.biddingResult,
-                        networkResults = it.networkResults + result,
-                        pricefloor = it.pricefloor,
-                        round = it.round
+                        biddingResult = current.biddingResult,
+                        networkResults = current.networkResults + result,
+                        pricefloor = current.pricefloor,
+                        round = current.round
                     )
                 }
 
-                else -> it
+                else -> current
             }
         }
     }

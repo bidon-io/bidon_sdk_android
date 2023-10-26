@@ -24,11 +24,11 @@ import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.DeviceType.isTablet
+import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.ads.banner.helper.getHeightDp
 import org.bidon.sdk.ads.banner.helper.getWidthDp
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -46,11 +46,13 @@ internal class BMBannerAdImpl :
     private var adRequest: BannerRequest? = null
     private var bannerView: BannerView? = null
     private var bannerFormat: BannerFormat? = null
+    private var isBidding = false
 
     override val isAdReadyToShow: Boolean
         get() = bannerView?.canShow() == true
 
-    override suspend fun getToken(context: Context): String {
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String {
+        isBidding = true
         return BidMachine.getBidToken(context)
     }
 
@@ -141,7 +143,13 @@ internal class BMBannerAdImpl :
 
                     override fun onAdLoaded(bannerView: BannerView) {
                         logInfo(TAG, "onAdLoaded: $this")
-                        emitEvent(AdEvent.Fill(bannerView.asAd()))
+                        setDsp(bannerView.auctionResult?.demandSource)
+                        if (!isBidding) {
+                            setPrice(bannerView.auctionResult?.price ?: 0.0)
+                        }
+                        getAd()?.let {
+                            emitEvent(AdEvent.Fill(it))
+                        }
                     }
 
                     override fun onAdShowFailed(bannerView: BannerView, bmError: BMError) {
@@ -158,42 +166,33 @@ internal class BMBannerAdImpl :
                     override fun onAdImpression(bannerView: BannerView) {
                         logInfo(TAG, "onAdShown: $this")
                         // tracked impression/shown by [BannerView]
-                        emitEvent(
-                            AdEvent.PaidRevenue(
-                                ad = bannerView.asAd(),
-                                adValue = bannerView.auctionResult.asBidonAdValue()
+                        getAd()?.let {
+                            emitEvent(
+                                AdEvent.PaidRevenue(
+                                    ad = it,
+                                    adValue = bannerView.auctionResult.asBidonAdValue()
+                                )
                             )
-                        )
+                        }
                     }
 
                     override fun onAdClicked(bannerView: BannerView) {
                         logInfo(TAG, "onAdClicked: $this")
-                        emitEvent(AdEvent.Clicked(bannerView.asAd()))
+                        getAd()?.let {
+                            emitEvent(AdEvent.Clicked(it))
+                        }
                     }
 
                     override fun onAdExpired(bannerView: BannerView) {
                         logInfo(TAG, "onAdExpired: $this")
-                        emitEvent(AdEvent.Expired(bannerView.asAd()))
+                        getAd()?.let {
+                            emitEvent(AdEvent.Expired(it))
+                        }
                     }
                 }
             )
             bannerView.load(adRequest)
         }
-    }
-
-    private fun BannerView.asAd(): Ad {
-        return Ad(
-            demandAd = demandAd,
-            ecpm = this.auctionResult?.price ?: 0.0,
-            demandAdObject = this,
-            currencyCode = "USD",
-            roundId = roundId,
-            dsp = this.auctionResult?.demandSource,
-            networkName = demandId.demandId,
-            auctionId = auctionId,
-            adUnitId = null,
-            bidType = bidType,
-        )
     }
 
     private fun BannerFormat.asBidMachineBannerSize() = when (this) {

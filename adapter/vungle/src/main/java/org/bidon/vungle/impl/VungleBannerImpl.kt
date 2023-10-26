@@ -16,6 +16,7 @@ import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -40,7 +41,7 @@ internal class VungleBannerImpl :
     private var payload: String? = null
     private var bannerId: String? = null
 
-    override suspend fun getToken(context: Context): String? = Vungle.getAvailableBidTokens(context)
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = Vungle.getAvailableBidTokens(context)
 
     override val isAdReadyToShow: Boolean
         get() {
@@ -95,7 +96,7 @@ internal class VungleBannerImpl :
     }
 
     private fun fillAd(adParam: VungleBannerAuctionParams) {
-        val bidonAd = getAd(this)
+        val bidonAd = getAd()
         if (bidonAd != null) {
             this.banner = Banners.getBanner(
                 /* placementId = */ adParam.bannerId,
@@ -114,13 +115,13 @@ internal class VungleBannerImpl :
 
                     override fun onAdEnd(placementId: String?) {
                         logInfo(TAG, "onAdEnd: $this")
-                        val ad = getAd(this@VungleBannerImpl) ?: return
+                        val ad = getAd() ?: return
                         emitEvent(AdEvent.Closed(ad))
                     }
 
                     override fun onAdClick(placementId: String?) {
                         logInfo(TAG, "onAdClick: $this")
-                        val ad = getAd(this@VungleBannerImpl) ?: return
+                        val ad = getAd() ?: return
                         emitEvent(AdEvent.Clicked(ad))
                     }
 
@@ -131,7 +132,7 @@ internal class VungleBannerImpl :
 
                     override fun onAdViewed(placementId: String?) {
                         logInfo(TAG, "onAdViewed: $this")
-                        val ad = getAd(this@VungleBannerImpl) ?: return
+                        val ad = getAd() ?: return
                         emitEvent(
                             AdEvent.PaidRevenue(
                                 ad = ad,

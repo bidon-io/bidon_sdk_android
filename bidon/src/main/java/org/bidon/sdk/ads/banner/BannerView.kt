@@ -51,6 +51,7 @@ class BannerView @JvmOverloads constructor(
 
     var format: BannerFormat = BannerFormat.Banner
         private set
+
     private var pricefloor: Double = BidonSdk.DefaultPricefloor
     private var userListener: BannerListener? = null
     private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
@@ -65,7 +66,6 @@ class BannerView @JvmOverloads constructor(
             field = value
         }
     private val wasNotified = AtomicBoolean(false)
-
     private var winnerSubscriberJob: Job? = null
 
     init {
@@ -190,6 +190,10 @@ class BannerView @JvmOverloads constructor(
 
     override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {
         logInfo(TAG, "Notify Loss invoked with Winner($winnerDemandId, $winnerEcpm)")
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return
+        }
         when (adLifecycleFlow.value) {
             AdLifecycle.Loading -> {
                 destroyAd()
@@ -214,12 +218,20 @@ class BannerView @JvmOverloads constructor(
 
     override fun notifyWin() {
         logInfo(TAG, "Notify Win was invoked")
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return
+        }
         if (adLifecycleFlow.value == AdLifecycle.Loaded && !wasNotified.getAndSet(true)) {
             winner?.adSource?.sendWin()
         }
     }
 
     override fun destroyAd() {
+        if (!BidonSdk.isInitialized()) {
+            logInfo(TAG, "Sdk is not initialized")
+            return
+        }
         adLifecycleFlow.value = AdLifecycle.Destroyed
         visibilityTracker.stop()
         auction.cancel()

@@ -10,6 +10,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -39,10 +40,7 @@ internal class BigoAdsRewardedAdImpl :
     override val isAdReadyToShow: Boolean
         get() = rewardVideoAd != null && rewardVideoAd?.isExpired != false
 
-    override fun destroy() {
-        rewardVideoAd?.destroy()
-        rewardVideoAd = null
-    }
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = BigoAdSdk.getBidderToken()
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
@@ -55,17 +53,6 @@ internal class BigoAdsRewardedAdImpl :
                 },
                 bidPrice = pricefloor,
             )
-        }
-    }
-
-    override suspend fun getToken(context: Context): String? = BigoAdSdk.getBidderToken()
-
-    override fun show(activity: Activity) {
-        val rewardVideoAd = rewardVideoAd
-        if (rewardVideoAd == null) {
-            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-        } else {
-            rewardVideoAd.show()
         }
     }
 
@@ -91,23 +78,34 @@ internal class BigoAdsRewardedAdImpl :
             .loadAd(builder.build())
     }
 
+    override fun show(activity: Activity) {
+        val rewardVideoAd = rewardVideoAd
+        if (rewardVideoAd == null) {
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
+        } else {
+            rewardVideoAd.show()
+        }
+    }
+
+    override fun destroy() {
+        rewardVideoAd?.destroy()
+        rewardVideoAd = null
+    }
+
     private fun fillAd(
         rewardVideoAd: RewardVideoAd,
         adParams: BigoFullscreenAuctionParams
     ) {
-        val ad = getAd(this)
-        if (ad == null) {
-            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-        } else {
-            rewardVideoAd.setAdInteractionListener(object : RewardAdInteractionListener {
-                override fun onAdError(error: AdError) {
-                    val cause = error.asBidonError()
-                    logError(TAG, "onAdError: $this", cause)
-                    emitEvent(AdEvent.ShowFailed(cause))
-                }
+        rewardVideoAd.setAdInteractionListener(object : RewardAdInteractionListener {
+            override fun onAdError(error: AdError) {
+                val cause = error.asBidonError()
+                logError(TAG, "onAdError: $this", cause)
+                emitEvent(AdEvent.ShowFailed(cause))
+            }
 
-                override fun onAdImpression() {
-                    logInfo(TAG, "onAdImpression: $this")
+            override fun onAdImpression() {
+                logInfo(TAG, "onAdImpression: $this")
+                getAd()?.let { ad ->
                     emitEvent(
                         AdEvent.PaidRevenue(
                             ad = ad,
@@ -119,28 +117,38 @@ internal class BigoAdsRewardedAdImpl :
                         )
                     )
                 }
+            }
 
-                override fun onAdClicked() {
-                    logInfo(TAG, "onAdClicked: $this")
+            override fun onAdClicked() {
+                logInfo(TAG, "onAdClicked: $this")
+                getAd()?.let { ad ->
                     emitEvent(AdEvent.Clicked(ad))
                 }
+            }
 
-                override fun onAdOpened() {
-                    logInfo(TAG, "onAdOpened: $this")
+            override fun onAdOpened() {
+                logInfo(TAG, "onAdOpened: $this")
+                getAd()?.let { ad ->
                     emitEvent(AdEvent.Shown(ad))
                 }
+            }
 
-                override fun onAdClosed() {
-                    logInfo(TAG, "onAdClosed: $this")
+            override fun onAdClosed() {
+                logInfo(TAG, "onAdClosed: $this")
+                getAd()?.let { ad ->
                     emitEvent(AdEvent.Closed(ad))
                 }
+                this@BigoAdsRewardedAdImpl.rewardVideoAd = null
+            }
 
-                override fun onAdRewarded() {
-                    logInfo(TAG, "onAdRewarded: $this")
+            override fun onAdRewarded() {
+                logInfo(TAG, "onAdRewarded: $this")
+                getAd()?.let { ad ->
                     emitEvent(AdEvent.OnReward(ad, null))
                 }
-            })
-
+            }
+        })
+        getAd()?.let { ad ->
             emitEvent(AdEvent.Fill(ad))
         }
     }

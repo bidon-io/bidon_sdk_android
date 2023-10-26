@@ -25,7 +25,7 @@ sealed class BidonError : Throwable() {
     object NoRoundResults : BidonError()
 
     object NoContextFound : BidonError()
-    class NoBid(val demandId: DemandId) : BidonError()
+    object NoBid : BidonError()
     class NoFill(val demandId: DemandId) : BidonError()
     class BidTimedOut(val demandId: DemandId) : BidonError()
     class FillTimedOut(val demandId: DemandId) : BidonError()
