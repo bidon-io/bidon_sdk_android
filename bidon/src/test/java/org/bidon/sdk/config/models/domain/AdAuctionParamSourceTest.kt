@@ -5,7 +5,6 @@ import io.mockk.mockk
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.auction.models.AdUnit
-import org.bidon.sdk.auction.models.LineItem
 import org.junit.Test
 
 class AdAuctionParamSourceTest {
@@ -68,11 +67,12 @@ class AdAuctionParamSourceTest {
         val result = adAuctionParam.popAdUnit(DemandId("demand id123"))
 
         assertThat(result).isEqualTo(
-            LineItem(
+            AdUnit(
+                uid = "5",
                 demandId = "demand id123",
                 pricefloor = 1.71,
-                adUnitId = "unit 1.71",
-                uid = "2",
+                label = "unit 1.71",
+                ext = null,
             )
         )
     }
