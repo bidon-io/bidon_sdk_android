@@ -86,26 +86,23 @@ class StatisticsCollectorImpl : StatisticsCollector {
         get() = requireNotNull(stat.bidType) { "BidType is not set" }
 
     override fun getAd(): Ad? {
-        val demandId = stat.demandId
         val roundId = stat.roundId
         val auctionId = stat.auctionId
         val bidType = stat.bidType
-        if (roundId == null || auctionId == null || bidType == null) {
+        val adUnit = stat.adUnit
+        if (adUnit == null || roundId == null || auctionId == null || bidType == null) {
             logError(TAG, "Ad is null", NullPointerException())
             return null
         }
         return Ad(
             demandAd = demandAd,
             ecpm = stat.ecpm,
-            networkName = demandId.demandId,
             currencyCode = AdValue.USD,
             roundId = roundId,
             auctionId = auctionId,
             dsp = stat.dspSource,
             bidType = bidType,
-            adUnit = requireNotNull(stat.adUnit) {
-                "AdUnit is not set"
-            }
+            adUnit = adUnit
         )
     }
 
