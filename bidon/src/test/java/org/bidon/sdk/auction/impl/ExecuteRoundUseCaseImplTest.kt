@@ -185,7 +185,8 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                 auctionId = any(),
                 round = any(),
                 auctionConfigurationUid = any(),
-                resultsCollector = any()
+                resultsCollector = any(),
+                adUnits = any(),
             )
         } returns Unit
 

@@ -91,7 +91,8 @@ internal class ExecuteRoundUseCaseImpl(
                         auctionId = auctionResponse.auctionId,
                         round = round,
                         auctionConfigurationUid = auctionResponse.auctionConfigurationUid,
-                        resultsCollector = resultsCollector
+                        resultsCollector = resultsCollector,
+                        adUnits = adUnits
                     )
                 }
             } else {
