@@ -13,6 +13,7 @@ import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.auction.models.BidResponse
 import org.bidon.sdk.auction.models.BiddingResponse
@@ -40,6 +41,7 @@ internal class ConductBiddingRoundUseCaseImpl(
         auctionId: String,
         round: RoundRequest,
         auctionConfigurationUid: String?,
+        adUnits: List<AdUnit>,
         resultsCollector: ResultsCollector,
     ) {
         runCatching {
@@ -55,7 +57,11 @@ internal class ConductBiddingRoundUseCaseImpl(
                 /**
                  * Load bids
                  */
-                val tokens = participants.getTokens(context, adTypeParam)
+                val tokens = participants.getTokens(
+                    context = context,
+                    adTypeParam = adTypeParam,
+                    adUnits = adUnits
+                )
                 logInfo(TAG, "${tokens.size} token(s):")
                 tokens.forEachIndexed { index, (demandId, token) ->
                     logInfo(TAG, "#$index ${demandId.demandId} {$token}")
@@ -209,15 +215,21 @@ internal class ConductBiddingRoundUseCaseImpl(
 
     private suspend fun List<Mode.Bidding>.getTokens(
         context: Context,
-        adTypeParam: AdTypeParam
+        adTypeParam: AdTypeParam,
+        adUnits: List<AdUnit>
     ): List<Pair<DemandId, String>> = withContext(SdkDispatchers.Default) {
         this@getTokens.mapNotNull { adSource ->
             runCatching {
-                adSource.getToken(context, adTypeParam, emptyList())?.let { token ->
-                    (adSource as AdSource<*>).demandId to token
+                require(adSource is AdSource<*>)
+                adSource.getToken(context, adTypeParam, adUnits.filterBy(adSource.demandId))?.let { token ->
+                    adSource.demandId to token
                 }
             }.getOrNull()
         }
+    }
+
+    private fun List<AdUnit>.filterBy(demandId: DemandId): List<AdUnit> {
+        return this.filter { it.demandId == demandId.demandId }
     }
 }
 
