@@ -126,10 +126,12 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
                 )
                 return@withTimeoutOrNull AdEvent.LoadFailed(BidonError.NoFill(adSource.demandId))
             }
+            logInfo(TAG, "Waiting for fill event $adSource. Current: ${adSource.adEvent}")
             val fillAdEvent = adSource.adEvent.first {
                 // wait for results
                 it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
             }
+            logInfo(TAG, "Waiting for fill event $adSource, $fillAdEvent")
             when (fillAdEvent) {
                 is AdEvent.Fill -> {
                     adSource.markFillFinished(
