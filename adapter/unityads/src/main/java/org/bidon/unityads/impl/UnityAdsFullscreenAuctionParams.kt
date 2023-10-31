@@ -12,7 +12,7 @@ data class UnityAdsFullscreenAuctionParams(
     override val adUnit: AdUnit,
 ) : AdAuctionParams {
     override val price: Double = requireNotNull(adUnit.pricefloor)
-    val adUnitId: String = requireNotNull(adUnit.extra?.getString("ad_unit_id"))
+    val placementId: String = requireNotNull(adUnit.extra?.getString("placement_id"))
 }
 
 class UnityAdsBannerAuctionParams(
@@ -21,7 +21,7 @@ class UnityAdsBannerAuctionParams(
     override val adUnit: AdUnit,
 ) : AdAuctionParams {
     override val price: Double = requireNotNull(adUnit.pricefloor)
-    val adUnitId: String = requireNotNull(adUnit.extra?.getString("ad_unit_id"))
+    val placementId: String = requireNotNull(adUnit.extra?.getString("placement_id"))
 
     override fun toString(): String {
         return "UnityAdsBannerAuctionParams(bannerFormat=$bannerFormat, lineItem=$adUnit)"

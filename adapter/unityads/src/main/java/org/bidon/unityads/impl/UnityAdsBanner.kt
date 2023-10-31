@@ -68,7 +68,7 @@ internal class UnityAdsBanner :
 
                 BannerFormat.MRec -> UnityBannerSize(300, 250)
             }
-            val adView = BannerView(adParams.activity, adParams.adUnitId, unityBannerSize).also {
+            val adView = BannerView(adParams.activity, adParams.placementId, unityBannerSize).also {
                 bannerAdView = it
             }
             adView.listener = object : BannerView.IListener {

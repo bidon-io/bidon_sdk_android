@@ -47,7 +47,7 @@ internal class UnityAdsInterstitial :
     override fun load(adParams: UnityAdsFullscreenAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
         adUnit = adParams.adUnit
-        adUnitId = adParams.adUnitId
+        adUnitId = adParams.placementId
 
         val loadListener = object : IUnityAdsLoadListener {
             override fun onUnityAdsAdLoaded(placementId: String?) {
@@ -71,7 +71,7 @@ internal class UnityAdsInterstitial :
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
-        UnityAds.load(adParams.adUnitId, loadListener)
+        UnityAds.load(adParams.placementId, loadListener)
     }
 
     override fun show(activity: Activity) {
