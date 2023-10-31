@@ -1,5 +1,6 @@
 package org.bidon.sdk.adapter.impl
 
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
@@ -29,7 +30,11 @@ class AdEventFlowImpl : AdEventFlow {
     )
 
     override val adEvent by lazy {
-        MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 0)
+        MutableSharedFlow<AdEvent>(
+            extraBufferCapacity = Int.MAX_VALUE,
+            replay = 0,
+            onBufferOverflow = BufferOverflow.SUSPEND
+        )
     }
 
     override fun emitEvent(event: AdEvent) {

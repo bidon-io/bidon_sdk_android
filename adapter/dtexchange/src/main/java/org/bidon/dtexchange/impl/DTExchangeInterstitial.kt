@@ -21,6 +21,7 @@ import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
@@ -114,7 +115,7 @@ internal class DTExchangeInterstitial :
                     inneractiveAdSpot: InneractiveAdSpot?,
                     inneractiveErrorCode: InneractiveErrorCode?
                 ) {
-                    logInfo(TAG, "onInneractiveFailedAdRequest: $inneractiveErrorCode")
+                    logError(TAG, "onInneractiveFailedAdRequest: $inneractiveErrorCode", BidonError.NoFill(demandId))
                     emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                 }
             }
