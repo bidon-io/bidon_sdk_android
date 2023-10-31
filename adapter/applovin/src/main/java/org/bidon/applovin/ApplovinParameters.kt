@@ -16,7 +16,7 @@ class ApplovinBannerAuctionParams(
     override val adUnit: AdUnit,
 ) : AdAuctionParams {
     override val price: Double = requireNotNull(adUnit.pricefloor)
-    val zoneId: String? get() = adUnit.extra?.getString("zone_id")
+    val zoneId: String? = adUnit.extra?.getString("zone_id")
 
     override fun toString(): String {
         return "ApplovinBannerAuctionParams(bannerFormat=$bannerFormat, lineItem=$adUnit)"
@@ -28,7 +28,7 @@ class ApplovinFullscreenAdAuctionParams(
     val timeoutMs: Long
 ) : AdAuctionParams {
     override val price: Double = requireNotNull(adUnit.pricefloor)
-    val zoneId: String? get() = adUnit.extra?.getString("zone_id")
+    val zoneId: String? = adUnit.extra?.getString("zone_id")
 
     override fun toString(): String {
         return "ApplovinFullscreenAdAuctionParams(timeoutMs=$timeoutMs, lineItem=$adUnit)"
