@@ -72,7 +72,7 @@ internal class ConductBiddingRoundUseCaseImpl(
                     resultsCollector.serverBiddingFinished(null)
                     return@withTimeoutOrNull
                 }
-                val bidResponse = bidRequestUseCase.invoke(
+                bidRequestUseCase.invoke(
                     adTypeParam = adTypeParam,
                     tokens = tokens,
                     extras = demandAd.getExtras(),
@@ -80,28 +80,30 @@ internal class ConductBiddingRoundUseCaseImpl(
                     auctionId = auctionId,
                     roundId = round.id,
                     auctionConfigurationUid = auctionConfigurationUid
-                ).onFailure {
-                    logError(TAG, "Error while server bidding", it)
-                }.getOrNull()
-                val bids = bidResponse?.bids?.takeIf {
-                    it.isNotEmpty() && bidResponse.status == BiddingResponse.BidStatus.Success
-                }
-                resultsCollector.serverBiddingFinished(bids)
-
-                /**
-                 * Finish bidding
-                 */
-                bids?.let {
+                ).mapCatching { bidResponse ->
+                    val bids = bidResponse.bids?.takeIf {
+                        it.isNotEmpty() && bidResponse.status == BiddingResponse.BidStatus.Success
+                    }
+                    requireNotNull(bids) {
+                        "No bids found: $bidResponse"
+                    }
+                }.onSuccess { bids ->
+                    /**
+                     * Finish bidding
+                     */
+                    resultsCollector.serverBiddingFinished(bids)
                     fillBids(
                         resultsCollector = resultsCollector,
-                        bids = it,
+                        bids = bids,
                         biddingSources = participants,
                         adTypeParam = adTypeParam,
                         round = round,
                         roundPricefloor = bidfloor
                     )
+                }.onFailure {
+                    resultsCollector.serverBiddingFinished(null)
+                    logError(TAG, "Error while server bidding", it)
                 }
-                Unit
             } ?: run {
                 resultsCollector.biddingTimeoutReached()
             }
@@ -184,9 +186,20 @@ internal class ConductBiddingRoundUseCaseImpl(
         /**
          * Start loading ad
          */
-        // Load AdRequest
-        adSource.load(adParam)
-        logInfo(TAG, "adSource.load($adParam)")
+        runCatching {
+            adSource.markFillStarted(adParam.adUnit, adParam.price)
+            adSource.load(adParam)
+        }.onFailure {
+            logError(TAG, "Loading failed($adParam): $it", it)
+            adSource.markFillFinished(
+                roundStatus = RoundStatus.NoFill,
+                ecpm = adParam.price
+            )
+            return AuctionResult.Bidding(
+                roundStatus = RoundStatus.NoFill,
+                adSource = adSource,
+            )
+        }
         // Wait for ad-request result
         val bidAdEvent = adSource.adEvent.first {
             it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
