@@ -2,6 +2,7 @@ package org.bidon.sdk.auction.usecases.impl
 
 import android.content.Context
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.bidon.sdk.adapter.AdAuctionParamSource
@@ -186,24 +187,23 @@ internal class ConductBiddingRoundUseCaseImpl(
         /**
          * Start loading ad
          */
-        runCatching {
-            adSource.markFillStarted(adParam.adUnit, adParam.price)
-            adSource.load(adParam)
-        }.onFailure {
-            logError(TAG, "Loading failed($adParam): $it", it)
-            adSource.markFillFinished(
-                roundStatus = RoundStatus.NoFill,
-                ecpm = adParam.price
-            )
-            return AuctionResult.Bidding(
-                roundStatus = RoundStatus.NoFill,
-                adSource = adSource,
-            )
-        }
-        // Wait for ad-request result
-        val bidAdEvent = adSource.adEvent.first {
-            it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
-        }
+        val bidAdEvent = adSource.adEvent
+            .onSubscription {
+                runCatching {
+                    adSource.markFillStarted(adParam.adUnit, adParam.price)
+                    adSource.load(adParam)
+                }.onFailure {
+                    logError(TAG, "Loading failed($adParam): $it", it)
+                    adSource.emitEvent(
+                        event = AdEvent.LoadFailed(
+                            cause = BidonError.NoFill(adSource.demandId)
+                        )
+                    )
+                }
+            }.first {
+                // Wait for ad-request result
+                it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
+            }
         return when (bidAdEvent) {
             is AdEvent.LoadFailed,
             is AdEvent.Expired -> {
