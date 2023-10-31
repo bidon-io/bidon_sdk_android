@@ -350,7 +350,7 @@ internal class AuctionStatImpl(
 
     private fun RoundStatus.getFinalStatus(isWinner: Boolean): RoundStatus {
         return when {
-            isWinner -> RoundStatus.Win
+            this == RoundStatus.Successful && isWinner -> RoundStatus.Win
             this == RoundStatus.Successful -> RoundStatus.Lose
             else -> this
         }

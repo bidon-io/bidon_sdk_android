@@ -19,6 +19,7 @@ import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.ConductNetworkRoundUseCase
 import org.bidon.sdk.auction.usecases.models.NetworksResult
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.asRoundStatus
@@ -111,9 +112,20 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
                 return@withTimeoutOrNull AdEvent.LoadFailed(BidonError.NoAppropriateAdUnitId)
             }
 
-            // FILL
-            adSource.markFillStarted(adParam.adUnit, adParam.price)
-            adSource.load(adParam)
+            /**
+             * Start loading ad
+             */
+            runCatching {
+                adSource.markFillStarted(adParam.adUnit, adParam.price)
+                adSource.load(adParam)
+            }.onFailure {
+                logError(TAG, "Loading failed($adParam): $it", it)
+                adSource.markFillFinished(
+                    roundStatus = RoundStatus.NoFill,
+                    ecpm = adParam.price
+                )
+                return@withTimeoutOrNull AdEvent.LoadFailed(BidonError.NoFill(adSource.demandId))
+            }
             val fillAdEvent = adSource.adEvent.first {
                 // wait for results
                 it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
