@@ -25,7 +25,7 @@ internal class AdUnitParser : JsonParser<AdUnit> {
             uid = json.optString("uid", ""),
             demandId = json.optString("demand_id"),
             pricefloor = runCatching {
-                json.getDouble("price_floor")
+                json.getDouble("pricefloor")
             }.getOrNull(),
             label = json.optString("label"),
             ext = json.optJSONObject("ext")?.toString()

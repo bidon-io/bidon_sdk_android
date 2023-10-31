@@ -4,6 +4,7 @@ import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.withTimeoutOrNull
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
@@ -115,22 +116,24 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
             /**
              * Start loading ad
              */
-            runCatching {
-                adSource.markFillStarted(adParam.adUnit, adParam.price)
-                adSource.load(adParam)
-            }.onFailure {
-                logError(TAG, "Loading failed($adParam): $it", it)
-                adSource.markFillFinished(
-                    roundStatus = RoundStatus.NoFill,
-                    ecpm = adParam.price
-                )
-                return@withTimeoutOrNull AdEvent.LoadFailed(BidonError.NoFill(adSource.demandId))
-            }
             logInfo(TAG, "Waiting for fill event $adSource. Current: ${adSource.adEvent}")
-            val fillAdEvent = adSource.adEvent.first {
-                // wait for results
-                it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
-            }
+            val fillAdEvent = adSource.adEvent
+                .onSubscription {
+                    runCatching {
+                        adSource.markFillStarted(adParam.adUnit, adParam.price)
+                        adSource.load(adParam)
+                    }.onFailure {
+                        logError(TAG, "Loading failed($adParam): $it", it)
+                        adSource.emitEvent(
+                            event = AdEvent.LoadFailed(
+                                cause = BidonError.NoFill(adSource.demandId)
+                            )
+                        )
+                    }
+                }.first {
+                    // wait for results
+                    it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
+                }
             logInfo(TAG, "Waiting for fill event $adSource, $fillAdEvent")
             when (fillAdEvent) {
                 is AdEvent.Fill -> {
