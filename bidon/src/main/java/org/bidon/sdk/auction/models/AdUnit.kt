@@ -1,5 +1,6 @@
 package org.bidon.sdk.auction.models
 
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.utils.json.JsonParser
 import org.json.JSONObject
 
@@ -11,6 +12,7 @@ data class AdUnit(
     val label: String,
     val pricefloor: Double?,
     val uid: String,
+    val bidType: BidType,
     private val ext: String?,
 ) {
     val extra: JSONObject? = ext?.let {
@@ -28,6 +30,7 @@ internal class AdUnitParser : JsonParser<AdUnit> {
                 json.getDouble("pricefloor")
             }.getOrNull(),
             label = json.optString("label"),
+            bidType = BidType.valueOf(json.optString("bid_type")),
             ext = json.optJSONObject("ext")?.toString()
         )
     }.getOrNull()

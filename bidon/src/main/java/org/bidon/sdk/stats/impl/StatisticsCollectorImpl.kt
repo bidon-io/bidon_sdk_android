@@ -15,7 +15,6 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.models.BidStat
-import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.ImpressionRequestBody
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.usecases.SendImpressionRequestUseCase
@@ -66,7 +65,6 @@ class StatisticsCollectorImpl : StatisticsCollector {
         fillFinishTs = null,
         roundStatus = null,
         ecpm = 0.0,
-        bidType = null,
         dspSource = null,
         roundPricefloor = 0.0,
         auctionPricefloor = 0.0
@@ -82,8 +80,6 @@ class StatisticsCollectorImpl : StatisticsCollector {
         get() = requireNotNull(stat.roundId) { "RoundId is not set" }
     override val roundIndex: Int
         get() = requireNotNull(stat.roundIndex) { "RoundIndex is not set" }
-    override val bidType: BidType
-        get() = requireNotNull(stat.bidType) { "BidType is not set" }
 
     override fun getAd(): Ad? {
         val roundId = stat.roundId
@@ -117,14 +113,12 @@ class StatisticsCollectorImpl : StatisticsCollector {
         roundId: String,
         roundIndex: Int,
         demandAd: DemandAd,
-        bidType: BidType
     ) {
         this._demandAd = demandAd
         stat = stat.copy(
             auctionId = auctionId,
             roundId = roundId,
             roundIndex = roundIndex,
-            bidType = bidType
         )
     }
 

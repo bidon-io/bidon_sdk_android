@@ -87,6 +87,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 ext = null,
                                 label = "bidmachine_label",
                                 pricefloor = null,
+                                bidType = BidType.CPM,
                                 uid = "123"
                             ),
                             ext = jsonObject {
@@ -102,6 +103,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 ext = null,
                                 label = "meta_label",
                                 pricefloor = null,
+                                bidType = BidType.CPM,
                                 uid = "123"
                             ),
                             ext = jsonObject {
@@ -122,7 +124,6 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     fillFinishTs = 917,
                                     roundStatus = RoundStatus.Successful,
                                     roundIndex = 2,
-                                    bidType = BidType.RTB,
                                     dspSource = "liftoff",
                                     auctionPricefloor = 0.1,
                                     roundPricefloor = 0.11,
@@ -131,6 +132,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                         ext = null,
                                         label = "bidmachine_label",
                                         pricefloor = null,
+                                        bidType = BidType.RTB,
                                         uid = "123"
                                     ),
                                 )
@@ -147,6 +149,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                         ext = null,
                                         label = "meta_label",
                                         pricefloor = null,
+                                        bidType = BidType.RTB,
                                         uid = "123"
                                     ),
                                     roundId = "ROUND_1",
@@ -156,7 +159,6 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     fillFinishTs = 917,
                                     roundStatus = RoundStatus.Successful,
                                     roundIndex = 2,
-                                    bidType = BidType.RTB,
                                     dspSource = "liftoff",
                                     auctionPricefloor = 0.1,
                                     roundPricefloor = 0.11,
@@ -182,7 +184,6 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 fillFinishTs = 987,
                                 roundStatus = RoundStatus.Successful,
                                 roundIndex = 2,
-                                bidType = BidType.CPM,
                                 dspSource = "liftoff",
                                 roundPricefloor = 0.22,
                                 auctionPricefloor = 0.21,
@@ -191,6 +192,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     ext = null,
                                     label = "dem1_label",
                                     pricefloor = 0.3,
+                                    bidType = BidType.CPM,
                                     uid = "123"
                                 ),
                             )
@@ -209,7 +211,6 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 fillFinishTs = 987,
                                 roundStatus = RoundStatus.NoFill,
                                 roundIndex = 2,
-                                bidType = BidType.CPM,
                                 dspSource = "liftoff",
                                 auctionPricefloor = 0.21,
                                 roundPricefloor = 0.22,
@@ -218,6 +219,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     ext = null,
                                     label = "dem2_label",
                                     pricefloor = 0.3,
+                                    bidType = BidType.CPM,
                                     uid = "123"
                                 ),
                             )
@@ -323,6 +325,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 ext = null,
                                 label = "bidmachine_label",
                                 pricefloor = null,
+                                bidType = BidType.RTB,
                                 uid = "123"
                             ),
                             ext = jsonObject {
@@ -343,11 +346,11 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     fillFinishTs = 917,
                                     roundStatus = RoundStatus.Successful,
                                     roundIndex = 2,
-                                    bidType = BidType.RTB,
                                     dspSource = "liftoff",
                                     roundPricefloor = 0.1,
                                     auctionPricefloor = 0.11,
                                     adUnit = AdUnit(
+                                        bidType = BidType.RTB,
                                         demandId = "bidmachine",
                                         ext = null,
                                         label = "bidmachine_label",
@@ -372,11 +375,11 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 fillFinishTs = 987,
                                 roundStatus = RoundStatus.Successful,
                                 roundIndex = 2,
-                                bidType = BidType.CPM,
                                 dspSource = "liftoff",
                                 roundPricefloor = 0.22,
                                 auctionPricefloor = 0.21,
                                 adUnit = AdUnit(
+                                    bidType = BidType.CPM,
                                     demandId = "dem1",
                                     ext = null,
                                     label = "dem1_label",
@@ -399,11 +402,11 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 fillFinishTs = 987,
                                 roundStatus = RoundStatus.NoFill,
                                 roundIndex = 2,
-                                bidType = BidType.CPM,
                                 dspSource = "liftoff",
                                 auctionPricefloor = 0.21,
                                 roundPricefloor = 0.22,
                                 adUnit = AdUnit(
+                                    bidType = BidType.CPM,
                                     demandId = "dem2",
                                     ext = null,
                                     label = "dem2_label",
@@ -521,6 +524,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 ext = null,
                                 label = "bidmachine_label",
                                 pricefloor = null,
+                                bidType = BidType.RTB,
                                 uid = "1234"
                             ),
                             ext = jsonObject {
@@ -536,6 +540,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 ext = null,
                                 label = "meta_label",
                                 pricefloor = null,
+                                bidType = BidType.RTB,
                                 uid = "1232"
                             ),
                             ext = jsonObject {
@@ -556,12 +561,12 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     fillFinishTs = 917,
                                     roundStatus = RoundStatus.Successful,
                                     roundIndex = 2,
-                                    bidType = BidType.RTB,
                                     dspSource = "liftoff",
                                     roundPricefloor = 0.1,
                                     auctionPricefloor = 0.11,
                                     adUnit = AdUnit(
                                         demandId = "bidmachine",
+                                        bidType = BidType.RTB,
                                         ext = null,
                                         label = "bidmachine_label",
                                         pricefloor = null,
@@ -585,12 +590,12 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 fillFinishTs = 987,
                                 roundStatus = RoundStatus.Successful,
                                 roundIndex = 2,
-                                bidType = BidType.CPM,
                                 dspSource = "liftoff",
                                 roundPricefloor = 0.22,
                                 auctionPricefloor = 0.21,
                                 adUnit = AdUnit(
                                     demandId = "dem1",
+                                    bidType = BidType.CPM,
                                     ext = null,
                                     label = "dem1_label",
                                     pricefloor = 0.3,
@@ -612,11 +617,11 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 fillFinishTs = 987,
                                 roundStatus = RoundStatus.NoFill,
                                 roundIndex = 2,
-                                bidType = BidType.CPM,
                                 dspSource = "liftoff",
                                 auctionPricefloor = 0.21,
                                 roundPricefloor = 0.22,
                                 adUnit = AdUnit(
+                                    bidType = BidType.CPM,
                                     demandId = "dem2",
                                     ext = null,
                                     label = "dem2_label",

@@ -5,6 +5,7 @@ import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.BidResponse
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.utils.ext.mapFailure
 import org.json.JSONObject
 
@@ -56,7 +57,8 @@ class AdAuctionParamSource(
      * Search for a [AdUnit] for the given demandId with the lowest pricefloor.
      * If the pricefloor exists, it will be consumed.
      */
-    fun popAdUnit(demandId: DemandId): AdUnit? = adUnits
+    fun popAdUnit(demandId: DemandId, bidType: BidType): AdUnit? = adUnits
+        .filter { it.bidType == bidType }
         .minByPricefloorOrNull(demandId, pricefloor)
         ?.also {
             if (it.pricefloor != null) {

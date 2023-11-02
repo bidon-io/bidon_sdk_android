@@ -24,6 +24,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 internal class AdmobInterstitialImpl(
     configParams: AdmobInitParameters?,
@@ -38,20 +39,20 @@ internal class AdmobInterstitialImpl(
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var interstitialAd: InterstitialAd? = null
-    private var isBiddingMode: Boolean = false
     private var price: Double? = null
+    private var bidType: BidType = BidType.CPM
 
     override val isAdReadyToShow: Boolean
         get() = interstitialAd != null
 
     override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? {
-        isBiddingMode = true
+        bidType = BidType.RTB
         logInfo(TAG, "getToken: $demandAd")
         return obtainToken(context, demandAd.adType)
     }
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
-        return obtainAdAuctionParams(auctionParamsScope, demandAd.adType, isBiddingMode)
+        return obtainAdAuctionParams(auctionParamsScope, demandAd.adType, bidType)
     }
 
     override fun load(adParams: AdmobFullscreenAdAuctionParams) {

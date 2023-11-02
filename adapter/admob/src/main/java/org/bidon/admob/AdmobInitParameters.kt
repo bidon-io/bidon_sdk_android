@@ -26,7 +26,7 @@ sealed interface AdmobBannerAuctionParams : AdAuctionParams {
         override val adUnit: AdUnit,
     ) : AdmobBannerAuctionParams {
         val adUnitId: String = requireNotNull(adUnit.extra?.getString("ad_unit_id"))
-        override val price: Double get() = requireNotNull(adUnit.pricefloor)
+        override val price: Double = requireNotNull(adUnit.pricefloor)
 
         override fun toString(): String {
             return "AdmobBannerAuctionParams($adUnit)"
@@ -57,7 +57,7 @@ sealed interface AdmobFullscreenAdAuctionParams : AdAuctionParams {
         override val adUnit: AdUnit,
     ) : AdmobFullscreenAdAuctionParams {
         val adUnitId: String = requireNotNull(adUnit.extra?.getString("ad_unit_id"))
-        override val price: Double get() = requireNotNull(adUnit.pricefloor)
+        override val price: Double = requireNotNull(adUnit.pricefloor)
 
         override fun toString(): String {
             return "AdmobFullscreenAdAuctionParams($adUnit)"

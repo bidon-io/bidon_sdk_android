@@ -5,6 +5,7 @@ import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResponseParser
 import org.bidon.sdk.auction.models.RoundRequest
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.utils.json.JsonParsers
 import org.bidon.sdk.utils.json.jsonObject
 import org.junit.Test
@@ -50,6 +51,7 @@ internal class AuctionResponseParserTest {
                 label = "admob_banner",
                 pricefloor = 0.25,
                 uid = "12387837129819",
+                bidType = BidType.CPM,
                 ext = jsonObject { "ad_unit_id" hasValue "ca-app-pub-3940256099942544/6300978111" }.toString(),
             ),
             AdUnit(
@@ -57,6 +59,7 @@ internal class AuctionResponseParserTest {
                 label = "bidmachine_banner",
                 uid = "32387837129819",
                 pricefloor = null,
+                bidType = BidType.RTB,
                 ext = null,
             )
         )
@@ -90,6 +93,7 @@ internal class AuctionResponseParserTest {
               "label": "admob_banner",
               "pricefloor": 0.25,
               "uid": "12387837129819",
+              "bid_type": "CPM",
               "ext": {
                 "ad_unit_id": "ca-app-pub-3940256099942544/6300978111"
               }
@@ -97,6 +101,7 @@ internal class AuctionResponseParserTest {
             {
               "demand_id": "bidmachine",
               "label": "bidmachine_banner",
+              "bid_type": "RTB",
               "uid": "32387837129819"
             }
           ],

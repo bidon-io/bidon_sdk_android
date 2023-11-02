@@ -33,6 +33,7 @@ import org.bidon.sdk.config.models.adapters.TestAdapterParameters
 import org.bidon.sdk.config.models.adapters.TestBiddingAdapter
 import org.bidon.sdk.config.models.base.ConcurrentTest
 import org.bidon.sdk.mockkLog
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.RoundStat
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.usecases.StatsRequestUseCase
@@ -137,6 +138,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                     pricefloor = 3.2235,
                     ext = null,
                     demandId = "admob",
+                    bidType = BidType.CPM,
                     uid = "1",
                 ),
                 AdUnit(
@@ -144,6 +146,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                     pricefloor = 1.2235,
                     ext = null,
                     demandId = "admob",
+                    bidType = BidType.CPM,
                     uid = "1",
                 ),
                 AdUnit(
@@ -151,6 +154,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                     pricefloor = 2.25,
                     ext = null,
                     demandId = "applovin",
+                    bidType = BidType.CPM,
                     uid = "1",
                 ),
             ),
@@ -379,6 +383,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 pricefloor = 3.2235,
                 ext = null,
                 demandId = "admob",
+                bidType = BidType.CPM,
                 uid = "1",
             ),
             AdUnit(
@@ -386,6 +391,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 pricefloor = 1.2235,
                 ext = null,
                 demandId = "admob",
+                bidType = BidType.CPM,
                 uid = "1",
             ),
             AdUnit(
@@ -393,6 +399,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 pricefloor = 2.25,
                 ext = null,
                 demandId = "applovin",
+                bidType = BidType.CPM,
                 uid = "1",
             ),
 

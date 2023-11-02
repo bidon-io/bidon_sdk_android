@@ -7,10 +7,10 @@ enum class BidType(val code: String) {
     /**
      * Real time bidding
      */
-    RTB("rtb"),
+    RTB("RTB"),
 
     /**
      * Pseudo-bidding via eCPM
      */
-    CPM("cpm"),
+    CPM("CPM"),
 }

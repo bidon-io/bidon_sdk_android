@@ -7,7 +7,6 @@ import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.BannerRequest
 import org.bidon.sdk.stats.models.BidStat
-import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.RoundStatus
 
 /**
@@ -17,7 +16,6 @@ interface StatisticsCollector {
 
     val demandAd: DemandAd
     val demandId: DemandId
-    val bidType: BidType
     val auctionId: String
     val roundId: String
     val roundIndex: Int
@@ -55,7 +53,6 @@ interface StatisticsCollector {
         roundId: String,
         roundIndex: Int,
         demandAd: DemandAd,
-        bidType: BidType
     )
 
     fun getStats(): BidStat

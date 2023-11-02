@@ -5,6 +5,7 @@ import io.mockk.mockk
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.auction.models.AdUnit
+import org.bidon.sdk.stats.models.BidType
 import org.junit.Test
 
 class AdAuctionParamSourceTest {
@@ -16,6 +17,7 @@ class AdAuctionParamSourceTest {
                 demandId = "demand id123",
                 pricefloor = 0.1,
                 label = "unit 0.1",
+                bidType = BidType.CPM,
                 ext = null,
             ),
             AdUnit(
@@ -23,6 +25,7 @@ class AdAuctionParamSourceTest {
                 demandId = "dem432",
                 pricefloor = 1.6,
                 label = "unit 1.6",
+                bidType = BidType.CPM,
                 ext = null,
             ),
             AdUnit(
@@ -30,6 +33,7 @@ class AdAuctionParamSourceTest {
                 demandId = "demand id123",
                 pricefloor = 2.9,
                 label = "unit 2.9",
+                bidType = BidType.CPM,
                 ext = null,
             ),
             AdUnit(
@@ -37,6 +41,7 @@ class AdAuctionParamSourceTest {
                 demandId = "demand id123",
                 pricefloor = 1.5,
                 label = "unit 1.5",
+                bidType = BidType.CPM,
                 ext = null,
             ),
             AdUnit(
@@ -44,6 +49,7 @@ class AdAuctionParamSourceTest {
                 demandId = "demand id123",
                 pricefloor = 1.71,
                 label = "unit 1.71",
+                bidType = BidType.CPM,
                 ext = null,
             ),
             AdUnit(
@@ -51,6 +57,7 @@ class AdAuctionParamSourceTest {
                 demandId = "demand id321",
                 pricefloor = 1.7,
                 label = "unit 1.7",
+                bidType = BidType.CPM,
                 ext = null,
             ),
         )
@@ -64,7 +71,7 @@ class AdAuctionParamSourceTest {
             optBannerFormat = null,
             optContainerWidth = null
         )
-        val result = adAuctionParam.popAdUnit(DemandId("demand id123"))
+        val result = adAuctionParam.popAdUnit(DemandId("demand id123"), BidType.CPM)
 
         assertThat(result).isEqualTo(
             AdUnit(
@@ -72,6 +79,7 @@ class AdAuctionParamSourceTest {
                 demandId = "demand id123",
                 pricefloor = 1.71,
                 label = "unit 1.71",
+                bidType = BidType.CPM,
                 ext = null,
             )
         )
@@ -85,6 +93,7 @@ class AdAuctionParamSourceTest {
                 demandId = "demand id123",
                 pricefloor = 0.1,
                 label = "unit 0.1",
+                bidType = BidType.CPM,
                 ext = null,
             ),
             AdUnit(
@@ -92,6 +101,7 @@ class AdAuctionParamSourceTest {
                 demandId = "dem432",
                 pricefloor = 1.6,
                 label = "unit 1.6",
+                bidType = BidType.CPM,
                 ext = null,
             ),
             AdUnit(
@@ -99,6 +109,7 @@ class AdAuctionParamSourceTest {
                 demandId = "demand id123",
                 pricefloor = 2.9,
                 label = "unit 2.9",
+                bidType = BidType.CPM,
                 ext = null,
             ),
             AdUnit(
@@ -106,6 +117,7 @@ class AdAuctionParamSourceTest {
                 demandId = "demand id123",
                 pricefloor = 1.5,
                 label = "unit 1.5",
+                bidType = BidType.CPM,
                 ext = null,
             ),
             AdUnit(
@@ -113,6 +125,7 @@ class AdAuctionParamSourceTest {
                 demandId = "demand id123",
                 pricefloor = 1.71,
                 label = "unit 1.71",
+                bidType = BidType.CPM,
                 ext = null,
             ),
             AdUnit(
@@ -120,6 +133,7 @@ class AdAuctionParamSourceTest {
                 demandId = "demand id321",
                 pricefloor = 1.7,
                 label = "unit 1.7",
+                bidType = BidType.CPM,
                 ext = null,
             ),
         )
@@ -133,7 +147,7 @@ class AdAuctionParamSourceTest {
             optBannerFormat = null,
             optContainerWidth = null
         )
-        val result = adAuctionParam.popAdUnit(DemandId("demand id123"))
+        val result = adAuctionParam.popAdUnit(DemandId("demand id123"), BidType.CPM)
         assertThat(result).isEqualTo(
             null
         )
