@@ -102,7 +102,7 @@ internal class BMBannerAdImpl :
                 timeout = timeout,
                 activity = activity,
                 bannerFormat = bannerFormat,
-                adUnit = getAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+                adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             )
         }
     }

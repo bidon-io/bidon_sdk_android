@@ -58,7 +58,7 @@ internal class BigoAdsBannerImpl :
                 activity = activity,
                 bannerFormat = bannerFormat,
                 bidPrice = pricefloor,
-                adUnit = getAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
             )
         }
     }
