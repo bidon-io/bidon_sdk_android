@@ -47,7 +47,7 @@ internal class BigoAdsRewardedAdImpl :
         return auctionParamsScope {
             BigoFullscreenAuctionParams(
                 bidPrice = pricefloor,
-                adUnit = getAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
             )
         }
     }

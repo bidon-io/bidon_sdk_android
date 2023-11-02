@@ -53,14 +53,16 @@ class AdAuctionParamSource(
     }
 
     /**
-     * Search for a [AdUnit] for the given demandId with the lowest pricefloor
+     * Search for a [AdUnit] for the given demandId with the lowest pricefloor.
+     * If the pricefloor exists, it will be consumed.
      */
     fun popAdUnit(demandId: DemandId): AdUnit? = adUnits
         .minByPricefloorOrNull(demandId, pricefloor)
-        ?.also(onAdUnitsConsumed)
-
-    fun getAdUnit(demandId: DemandId): AdUnit? = adUnits
-        .minByPricefloorOrNull(demandId, pricefloor)
+        ?.also {
+            if (it.pricefloor != null) {
+                onAdUnitsConsumed(it)
+            }
+        }
 
     private fun List<AdUnit>.minByPricefloorOrNull(demandId: DemandId, pricefloor: Double): AdUnit? {
         return this

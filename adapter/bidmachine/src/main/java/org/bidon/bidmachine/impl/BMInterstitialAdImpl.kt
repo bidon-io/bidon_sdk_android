@@ -59,7 +59,7 @@ internal class BMInterstitialAdImpl :
                 price = pricefloor,
                 timeout = timeout,
                 context = activity.applicationContext,
-                adUnit = getAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+                adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
             )
         }
     }

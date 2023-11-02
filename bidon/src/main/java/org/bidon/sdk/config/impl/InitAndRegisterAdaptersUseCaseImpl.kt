@@ -45,10 +45,7 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                                     parseAdapterParameters(configResponse, adapter).getOrThrow()
                                 adapter.init(context, adapterParameters)
                             }
-                            logInfo(
-                                TAG,
-                                "Adapter ${demandId.demandId} initialized in $timeStart ms."
-                            )
+                            logInfo(TAG, "Adapter ${demandId.demandId} initialized in $timeStart ms.")
 
                             // adapter is ready
                             adapter
