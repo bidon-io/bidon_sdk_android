@@ -20,6 +20,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.unityads.ext.asBidonError
 
 /**
@@ -39,7 +40,7 @@ internal class UnityAdsInterstitial :
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             UnityAdsFullscreenAuctionParams(
-                adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+                adUnit = popAdUnit(demandId, BidType.CPM) ?: error(BidonError.NoAppropriateAdUnitId)
             )
         }
     }

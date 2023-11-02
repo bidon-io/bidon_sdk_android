@@ -24,6 +24,7 @@ import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 /**
  * I have no idea how it works. There is no documentation.
@@ -77,7 +78,7 @@ internal class ApplovinBannerImpl(
         return auctionParamsScope {
             ApplovinBannerAuctionParams(
                 activity = activity,
-                adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                adUnit = popAdUnit(demandId, BidType.CPM) ?: error(BidonError.NoAppropriateAdUnitId),
                 bannerFormat = bannerFormat
             )
         }

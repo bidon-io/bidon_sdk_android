@@ -20,6 +20,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 /**
  * [Test ad units](https://developers.google.com/admob/android/test-ads)
@@ -39,19 +40,19 @@ internal class AdmobBannerImpl(
 
     override var isAdReadyToShow: Boolean = false
 
-    private var isBiddingMode: Boolean = false
+    private var bidType: BidType = BidType.CPM
     private var adView: AdView? = null
     private var price: Double? = null
     private var adSize: AdSize? = null
     private var bannerFormat: BannerFormat? = null
 
     override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? {
-        isBiddingMode = true
+        bidType = BidType.RTB
         return obtainToken(context, demandAd.adType)
     }
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
-        return getAdAuctionParams(auctionParamsScope, demandAd.adType, isBiddingMode)
+        return getAdAuctionParams(auctionParamsScope, demandAd.adType, bidType)
     }
 
     @SuppressLint("MissingPermission")

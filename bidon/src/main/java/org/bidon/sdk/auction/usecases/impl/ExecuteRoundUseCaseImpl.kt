@@ -29,7 +29,6 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.regulation.Regulation
 import org.bidon.sdk.stats.StatisticsCollector
-import org.bidon.sdk.stats.models.BidType
 
 internal class ExecuteRoundUseCaseImpl(
     private val adaptersSource: AdaptersSource,
@@ -71,7 +70,6 @@ internal class ExecuteRoundUseCaseImpl(
                         demandAd = demandAd,
                         round = round,
                         roundIndex = roundIndex,
-                        bidType = BidType.RTB
                     )
                 }
                 .filterIsInstance<Mode.Bidding>()
@@ -115,7 +113,6 @@ internal class ExecuteRoundUseCaseImpl(
                         demandAd = demandAd,
                         round = round,
                         roundIndex = roundIndex,
-                        bidType = BidType.CPM
                     )
                 }
                 .filterIsInstance<Mode.Network>()
@@ -179,14 +176,12 @@ internal class ExecuteRoundUseCaseImpl(
         demandAd: DemandAd,
         round: RoundRequest,
         roundIndex: Int,
-        bidType: BidType
     ) {
         adSource.addRoundInfo(
             auctionId = auctionResponse.auctionId,
             roundId = round.id,
             demandAd = demandAd,
             roundIndex = roundIndex,
-            bidType = bidType
         )
         adSource.setStatisticAdType(adTypeParam.asStatisticAdType())
         adSource.addAuctionConfigurationId(

@@ -24,6 +24,7 @@ import org.bidon.sdk.auction.usecases.ConductBiddingRoundUseCase
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.SdkDispatchers
 
@@ -234,15 +235,21 @@ internal class ConductBiddingRoundUseCaseImpl(
         this@getTokens.mapNotNull { adSource ->
             runCatching {
                 require(adSource is AdSource<*>)
-                adSource.getToken(context, adTypeParam, adUnits.filterBy(adSource.demandId))?.let { token ->
-                    adSource.demandId to token
-                }
+                adUnits
+                    .filter { it.bidType == BidType.RTB }
+                    .filter { it.demandId == adSource.demandId.demandId }
+                    .takeIf {
+                        /**
+                         * Bidding AdUnit should exist
+                         */
+                        it.isNotEmpty()
+                    }?.let {
+                        adSource.getToken(context, adTypeParam, it)?.let { token ->
+                            adSource.demandId to token
+                        }
+                    }
             }.getOrNull()
         }
-    }
-
-    private fun List<AdUnit>.filterBy(demandId: DemandId): List<AdUnit> {
-        return this.filter { it.demandId == demandId.demandId }
     }
 }
 

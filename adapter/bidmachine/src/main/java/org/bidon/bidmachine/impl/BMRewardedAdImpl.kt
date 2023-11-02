@@ -30,6 +30,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 internal class BMRewardedAdImpl :
     AdSource.Rewarded<BMFullscreenAuctionParams>,
@@ -42,13 +43,13 @@ internal class BMRewardedAdImpl :
     private var context: Context? = null
     private var adRequest: RewardedRequest? = null
     private var rewardedAd: RewardedAd? = null
-    private var isBidding = false
+    private var bidType = BidType.CPM
 
     override val isAdReadyToShow: Boolean
         get() = rewardedAd?.canShow() == true
 
     override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String {
-        isBidding = true
+        bidType = BidType.RTB
         return BidMachine.getBidToken(context)
     }
 
@@ -58,7 +59,7 @@ internal class BMRewardedAdImpl :
                 price = pricefloor,
                 timeout = timeout,
                 context = activity.applicationContext,
-                adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                adUnit = popAdUnit(demandId, bidType) ?: error(BidonError.NoAppropriateAdUnitId),
             )
         }
     }
@@ -150,7 +151,7 @@ internal class BMRewardedAdImpl :
                 override fun onAdLoaded(rewardedAd: RewardedAd) {
                     logInfo(TAG, "onAdLoaded: $this")
                     setDsp(rewardedAd.auctionResult?.demandSource)
-                    if (!isBidding) {
+                    if (bidType == BidType.CPM) {
                         setPrice(rewardedAd.auctionResult?.price ?: 0.0)
                     }
                     getAd()?.let {

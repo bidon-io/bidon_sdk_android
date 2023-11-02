@@ -19,6 +19,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.unityads.ext.asBidonError
 
 /**
@@ -38,7 +39,7 @@ internal class UnityAdsBanner :
         return auctionParamsScope {
             UnityAdsBannerAuctionParams(
                 activity = activity,
-                adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                adUnit = popAdUnit(demandId, BidType.CPM) ?: error(BidonError.NoAppropriateAdUnitId),
                 bannerFormat = bannerFormat,
             )
         }

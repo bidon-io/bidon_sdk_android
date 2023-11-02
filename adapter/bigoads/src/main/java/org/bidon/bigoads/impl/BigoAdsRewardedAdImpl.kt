@@ -19,6 +19,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 import sg.bigo.ads.BigoAdSdk
 import sg.bigo.ads.api.AdError
 import sg.bigo.ads.api.AdLoadListener
@@ -47,7 +48,7 @@ internal class BigoAdsRewardedAdImpl :
         return auctionParamsScope {
             BigoFullscreenAuctionParams(
                 bidPrice = pricefloor,
-                adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                adUnit = popAdUnit(demandId, BidType.RTB) ?: error(BidonError.NoAppropriateAdUnitId),
             )
         }
     }

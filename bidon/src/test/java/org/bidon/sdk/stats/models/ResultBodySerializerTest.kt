@@ -29,7 +29,7 @@ internal class ResultBodySerializerTest {
                 "round_id" hasValue "id13"
                 "auction_start_ts" hasValue 1000
                 "auction_finish_ts" hasValue 1020
-                "bid_type" hasValue "cpm"
+                "bid_type" hasValue "CPM"
                 "winner_demand_id" hasValue "admob"
                 "winner_ad_unit_uid" hasValue "id123"
                 "winner_ad_unit_label" hasValue "label123"

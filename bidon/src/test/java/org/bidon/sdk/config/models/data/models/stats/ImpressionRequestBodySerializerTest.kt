@@ -45,7 +45,7 @@ class ImpressionRequestBodySerializerTest {
                 "banner" hasJson expectedJsonStructure {
                     "format" hasValue "1"
                 }
-                "bid_type" hasValue "rtb"
+                "bid_type" hasValue "RTB"
                 "auction_configuration_uid" hasValue 4UL
                 "imp_id" hasValue "impr123"
                 "ad_unit_uid" hasValue "1698961007059140608"

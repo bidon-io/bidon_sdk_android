@@ -3,6 +3,7 @@ package org.bidon.amazon.impl
 import com.google.common.truth.Truth.assertThat
 import org.bidon.amazon.SlotType
 import org.bidon.sdk.auction.models.AdUnit
+import org.bidon.sdk.stats.models.BidType
 import org.junit.Test
 
 /**
@@ -21,6 +22,7 @@ internal class ParseSlotsUseCaseTest {
                     demandId = "amazon",
                     label = "amazon_bidding_mergeblock_ios_inter1",
                     pricefloor = null,
+                    bidType = BidType.RTB,
                     uid = "1692462525087612452"
                 ),
                 AdUnit(
@@ -28,6 +30,7 @@ internal class ParseSlotsUseCaseTest {
                     demandId = "amazon",
                     label = "amazon_bidding_mergeblock_ios_inter2",
                     pricefloor = null,
+                    bidType = BidType.RTB,
                     uid = "2692462525087612452"
                 ),
                 AdUnit(
@@ -35,6 +38,7 @@ internal class ParseSlotsUseCaseTest {
                     demandId = "amazon",
                     label = "amazon_bidding_mergeblock_ios_inter3",
                     pricefloor = null,
+                    bidType = BidType.RTB,
                     uid = "3692462525087612452"
                 ),
                 AdUnit(
@@ -42,6 +46,7 @@ internal class ParseSlotsUseCaseTest {
                     demandId = "amazon",
                     label = "amazon_bidding_mergeblock_ios_inter10",
                     pricefloor = null,
+                    bidType = BidType.RTB,
                     uid = "3692462525087612452"
                 ),
             )

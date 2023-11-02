@@ -1,6 +1,7 @@
 package org.bidon.sdk.auction.models
 
 import com.google.common.truth.Truth.assertThat
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.utils.json.jsonObject
 import org.json.JSONObject
 import kotlin.test.Test
@@ -21,6 +22,7 @@ class BidResponseParserTest {
         "demand_id": "vungle",
         "uid": "1633824270331281408",
         "label": "vungle_bidding_inter_mergeblock_ios",
+        "bid_type": "RTB",
         "ext": {
           "placement_id": "INTER_TEST-5458572"
         }
@@ -35,6 +37,7 @@ class BidResponseParserTest {
     {
       "ad_unit": {
         "demand_id": "bidmachine",
+        "bid_type": "CPM",
         "uid": "1633824270531921423",
         "label": "bidmachine_bidding_inter_mergeblock_ios"
       },
@@ -62,6 +65,7 @@ class BidResponseParserTest {
                             ext = jsonObject {
                                 "placement_id" hasValue "INTER_TEST-5458572"
                             }.toString(),
+                            bidType = BidType.RTB,
                             pricefloor = null
                         ),
                         id = "652f976bfb91fd8aaa9c05ef",
@@ -77,6 +81,7 @@ class BidResponseParserTest {
                             uid = "1633824270531921423",
                             label = "bidmachine_bidding_inter_mergeblock_ios",
                             pricefloor = null,
+                            bidType = BidType.CPM,
                             ext = null
                         ),
                         id = "aa225c05-80dd-408d-ac8d-36b98b7bf86a",

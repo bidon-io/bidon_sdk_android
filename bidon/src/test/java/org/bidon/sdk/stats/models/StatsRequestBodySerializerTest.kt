@@ -92,7 +92,7 @@ class StatsRequestBodySerializerTest {
                     "ad_unit_id" hasValue "id123"
                     "auction_start_ts" hasValue 1000
                     "auction_finish_ts" hasValue 1300
-                    "bid_type" hasValue "cpm"
+                    "bid_type" hasValue "CPM"
                 }
                 "auction_id" hasValue "id123"
                 "rounds" hasArray jsonArray {

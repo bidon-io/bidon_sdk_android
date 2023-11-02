@@ -76,6 +76,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                 label = "admob_banner",
                 pricefloor = 0.25,
                 uid = "12387837129819",
+                bidType = BidType.CPM,
                 ext = jsonObject { "ad_unit_id" hasValue "ca-app-pub-3940256099942544/6300978111" }.toString(),
             ),
             AdUnit(
@@ -83,6 +84,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                 label = "bidmachine_banner",
                 uid = "32387837129819",
                 pricefloor = null,
+                bidType = BidType.CPM,
                 ext = null,
             )
         ),
@@ -163,6 +165,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                                     label = "admob_banner",
                                     pricefloor = 0.25,
                                     uid = "12387837129819",
+                                    bidType = BidType.CPM,
                                     ext = jsonObject { "ad_unit_id" hasValue "ca-app-pub-3940256099942544/6300978111" }.toString(),
                                 ),
 

@@ -31,6 +31,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 internal class BMInterstitialAdImpl :
     AdSource.Interstitial<BMFullscreenAuctionParams>,
@@ -43,13 +44,13 @@ internal class BMInterstitialAdImpl :
     private var context: Context? = null
     private var adRequest: InterstitialRequest? = null
     private var interstitialAd: InterstitialAd? = null
-    private var isBidding = false
+    private var bidType = BidType.CPM
 
     override val isAdReadyToShow: Boolean
         get() = interstitialAd?.canShow() == true
 
     override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String {
-        isBidding = true
+        bidType = BidType.RTB
         return BidMachine.getBidToken(context)
     }
 
@@ -59,7 +60,7 @@ internal class BMInterstitialAdImpl :
                 price = pricefloor,
                 timeout = timeout,
                 context = activity.applicationContext,
-                adUnit = popAdUnit(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+                adUnit = popAdUnit(demandId, bidType) ?: error(BidonError.NoAppropriateAdUnitId)
             )
         }
     }
@@ -140,7 +141,7 @@ internal class BMInterstitialAdImpl :
                 override fun onAdLoaded(interstitialAd: InterstitialAd) {
                     logInfo(TAG, "onAdLoaded: $this")
                     setDsp(interstitialAd.auctionResult?.demandSource)
-                    if (!isBidding) {
+                    if (bidType == BidType.CPM) {
                         setPrice(interstitialAd.auctionResult?.price ?: 0.0)
                     }
                     getAd()?.let {
