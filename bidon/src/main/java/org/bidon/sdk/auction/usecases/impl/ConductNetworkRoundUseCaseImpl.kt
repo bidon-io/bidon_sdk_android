@@ -116,7 +116,6 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
             /**
              * Start loading ad
              */
-            logInfo(TAG, "Waiting for fill event $adSource. Current: ${adSource.adEvent}")
             val fillAdEvent = adSource.adEvent
                 .onSubscription {
                     runCatching {
@@ -134,7 +133,6 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
                     // wait for results
                     it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
                 }
-            logInfo(TAG, "Waiting for fill event $adSource, $fillAdEvent")
             when (fillAdEvent) {
                 is AdEvent.Fill -> {
                     adSource.markFillFinished(
