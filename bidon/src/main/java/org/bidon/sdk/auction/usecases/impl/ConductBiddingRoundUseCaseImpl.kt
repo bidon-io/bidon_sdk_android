@@ -242,7 +242,11 @@ internal class ConductBiddingRoundUseCaseImpl(
                         /**
                          * Bidding AdUnit should exist
                          */
-                        it.isNotEmpty()
+                        val adUnitFound = it.isNotEmpty()
+                        if (!adUnitFound) {
+                            logError(TAG, "No bidding AdUnit found for ${adSource.demandId}", BidonError.NoAppropriateAdUnitId)
+                        }
+                        adUnitFound
                     }?.let {
                         adSource.getToken(context, adTypeParam, it)?.let { token ->
                             adSource.demandId to token
