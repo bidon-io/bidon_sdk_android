@@ -9,7 +9,7 @@ data class FullscreenAuctionParams(
     override val adUnit: AdUnit,
     override val price: Double
 ) : AdAuctionParams {
-    val slotUuid: String = requireNotNull(adUnit.extra?.getString("slotUuid")) {
+    val slotUuid: String = requireNotNull(adUnit.extra?.getString("slot_uuid")) {
         "slotUuid is null"
     }
 }

@@ -11,12 +11,12 @@ internal interface SegmentSynchronizer {
     val segmentUid: String?
 
     /**
-     * For parsing segmentId from responses /auction and /config-requests
+     * For parsing segmentUid from responses /auction and /config-requests
      */
     fun parseSegmentUid(rootJsonResponse: String)
 
     /**
-     * For reading previous segmentId from [KeyValueStorage]
+     * For reading previous segmentUid from [KeyValueStorage]
      */
     fun setSegmentUid(segmentUid: String?)
 }
