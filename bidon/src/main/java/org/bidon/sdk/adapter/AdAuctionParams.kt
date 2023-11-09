@@ -7,7 +7,6 @@ import org.bidon.sdk.auction.models.BidResponse
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.utils.ext.mapFailure
-import org.json.JSONObject
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -30,11 +29,6 @@ class AdAuctionParamSource(
     val timeout: Long,
     private val adUnits: List<AdUnit> = emptyList(),
     private val onAdUnitsConsumed: (AdUnit) -> Unit = {},
-
-    /**
-     * Bid specific params
-     */
-    val json: JSONObject? = null,
     val bidResponse: BidResponse? = null,
 
     /**

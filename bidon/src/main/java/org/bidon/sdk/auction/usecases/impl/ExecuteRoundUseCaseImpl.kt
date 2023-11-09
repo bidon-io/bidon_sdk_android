@@ -184,9 +184,7 @@ internal class ExecuteRoundUseCaseImpl(
             roundIndex = roundIndex,
         )
         adSource.setStatisticAdType(adTypeParam.asStatisticAdType())
-        adSource.addAuctionConfigurationId(
-            auctionConfigurationUid = auctionResponse.auctionConfigurationUid ?: ""
-        )
+        adSource.addAuctionConfigurationUid(auctionResponse.auctionConfigurationUid ?: "")
         adSource.addExternalWinNotificationsEnabled(auctionResponse.externalWinNotificationsEnabled)
     }
 

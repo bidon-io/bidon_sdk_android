@@ -13,7 +13,7 @@ data class BigoBannerAuctionParams(
 ) : AdAuctionParams {
     override val price: Double get() = bidPrice
     val payload: String = requireNotNull(adUnit.extra?.getString("payload"))
-    val slotId: String = requireNotNull(adUnit.extra?.getString("slotId"))
+    val slotId: String = requireNotNull(adUnit.extra?.getString("slot_id"))
 }
 
 data class BigoFullscreenAuctionParams(
@@ -22,5 +22,5 @@ data class BigoFullscreenAuctionParams(
 ) : AdAuctionParams {
     override val price: Double get() = bidPrice
     val payload: String = requireNotNull(adUnit.extra?.getString("payload"))
-    val slotId: String = requireNotNull(adUnit.extra?.getString("slotId"))
+    val slotId: String = requireNotNull(adUnit.extra?.getString("slot_id"))
 }

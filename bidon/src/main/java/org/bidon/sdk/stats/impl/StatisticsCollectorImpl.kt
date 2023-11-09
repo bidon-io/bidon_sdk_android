@@ -207,7 +207,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
         this.adType = adType
     }
 
-    override fun addAuctionConfigurationId(auctionConfigurationUid: String) {
+    override fun addAuctionConfigurationUid(auctionConfigurationUid: String) {
         this.auctionConfigurationUid = auctionConfigurationUid
     }
 

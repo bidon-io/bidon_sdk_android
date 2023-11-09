@@ -67,7 +67,6 @@ class AdAuctionParamSourceTest {
             timeout = 1000,
             adUnits = list,
             onAdUnitsConsumed = {},
-            json = null,
             optBannerFormat = null,
             optContainerWidth = null
         )
@@ -143,7 +142,6 @@ class AdAuctionParamSourceTest {
             timeout = 1000,
             adUnits = list,
             onAdUnitsConsumed = {},
-            json = null,
             optBannerFormat = null,
             optContainerWidth = null
         )
