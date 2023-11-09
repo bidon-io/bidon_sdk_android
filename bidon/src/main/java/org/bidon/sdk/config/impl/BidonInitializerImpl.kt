@@ -35,7 +35,7 @@ internal class BidonInitializerImpl : BidonInitializer {
         DI.setFactories()
     }
 
-    private val dispatcher by lazy { SdkDispatchers.Single }
+    private val dispatcher by lazy { SdkDispatchers.Bidon }
     private val scope get() = CoroutineScope(dispatcher)
 
     private var useDefaultAdapters = false
