@@ -52,7 +52,7 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
                     logInfo(
                         tag = TAG,
                         message = "Round '${round.id}'. Adapter ${adSource.demandId.demandId} starts fill. " +
-                            "PriceFloor=$pricefloor. LineItems: $availableAdUnitsForDemand."
+                                "PriceFloor=$pricefloor. LineItems: $availableAdUnitsForDemand."
                     )
                     val adEvent = loadAd(
                         adSource = adSource,
@@ -158,6 +158,7 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
                 else -> error("unexpected")
             }
             fillAdEvent
+            //TODO(" удалить BidTimedOut")
         } ?: AdEvent.LoadFailed(
             cause = when (adSource.getStats().roundStatus) {
                 RoundStatus.NoBid -> BidonError.FillTimedOut(adSource.demandId)
