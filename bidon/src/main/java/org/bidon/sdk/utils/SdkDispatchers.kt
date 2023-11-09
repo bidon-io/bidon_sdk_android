@@ -24,7 +24,7 @@ var mainDispatcherOverridden: CoroutineDispatcher? = null
 
 object SdkDispatchers {
     @OptIn(DelicateCoroutinesApi::class)
-    val Single: CoroutineDispatcher
+    val Bidon: CoroutineDispatcher
         get() = singleDispatcherOverridden ?: newSingleThreadContext("Bidon")
 
     val Main: CoroutineDispatcher
