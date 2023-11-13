@@ -34,10 +34,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
     private var auctionConfigurationUid: String = ""
     private var externalWinNotificationsEnabled: Boolean = true
     private lateinit var adType: StatisticsCollector.AdType
-
-    private val impressionId: String by lazy {
-        UUID.randomUUID().toString()
-    }
+    private var impressionId: String = UUID.randomUUID().toString()
 
     private val sendImpression by lazy {
         get<SendImpressionRequestUseCase>()
@@ -205,6 +202,10 @@ class StatisticsCollectorImpl : StatisticsCollector {
 
     override fun setStatisticAdType(adType: StatisticsCollector.AdType) {
         this.adType = adType
+    }
+
+    override fun addImpressionId(impId: String) {
+        impressionId = impId
     }
 
     override fun addAuctionConfigurationUid(auctionConfigurationUid: String) {

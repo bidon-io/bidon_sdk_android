@@ -12,7 +12,6 @@ internal class BidRequestBodyTest {
     @Test
     fun serialize() {
         val body = BidRequest(
-            impressionId = "imp123",
             demands = mapOf(
                 "bidmachine" to BidRequest.Token(token = "bm_token_123")
             ),
@@ -43,7 +42,6 @@ internal class BidRequestBodyTest {
                     "format" hasValue "ADAPTIVE"
                 }
                 "bidfloor" hasValue 1.24
-                "id" hasValue "imp123"
                 "round_id" hasValue "round123"
                 "auction_id" hasValue "auc123"
                 "auction_configuration_uid" hasValue "123"
@@ -54,7 +52,6 @@ internal class BidRequestBodyTest {
     @Test
     fun array() {
         val body = BidRequest(
-            impressionId = "imp123",
             demands = mapOf(
                 "bidmachine" to BidRequest.Token(token = "bm_token_123")
             ),

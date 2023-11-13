@@ -184,6 +184,7 @@ internal class ConductBiddingRoundUseCaseImpl(
             roundStatus = RoundStatus.NoAppropriateAdUnitId,
             adSource = adSource,
         )
+        adSource.addImpressionId(bid.impressionId)
 
         /**
          * Start loading ad

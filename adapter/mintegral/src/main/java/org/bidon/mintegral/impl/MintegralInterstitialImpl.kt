@@ -50,6 +50,8 @@ internal class MintegralInterstitialImpl :
                 activity = activity,
                 bidResponse = requiredBidResponse
             )
+        }.onFailure {
+            logError(TAG, "Failed to get auction param", it)
         }
     }
 
