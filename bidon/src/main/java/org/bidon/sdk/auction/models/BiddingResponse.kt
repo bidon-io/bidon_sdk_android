@@ -40,7 +40,7 @@ internal class BidResponseParser : JsonParser<BiddingResponse> {
                                     }
                                     val bid = BidResponse(
                                         id = bidJson.getString("id"),
-                                        impressionId = bidJson.optString("impid"),
+                                        impressionId = bidJson.optString("imp_id"),
                                         price = bidJson.getDouble("price"),
                                         adUnit = adUnit,
                                         ext = bidJson.optJSONObject("ext")?.toString()

@@ -16,7 +16,7 @@ class MintegralAuctionParam(
     override val adUnit: AdUnit = bidResponse.adUnit
     override val price: Double = bidResponse.price
     val payload: String = requireNotNull(bidResponse.extra?.getString("payload"))
-    val unitId: String = requireNotNull(bidResponse.adUnit.extra?.getString("unit_id"))
+    val unitId: String = requireNotNull(bidResponse.adUnit.extra?.getString("ad_unit_id"))
     val placementId: String = requireNotNull(bidResponse.adUnit.extra?.getString("placement_id"))
 
     override fun toString(): String {

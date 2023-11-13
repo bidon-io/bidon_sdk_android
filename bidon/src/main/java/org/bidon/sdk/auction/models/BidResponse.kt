@@ -11,7 +11,7 @@ data class BidResponse(
     val id: String,
     @field:JsonName("ad_unit")
     val adUnit: AdUnit,
-    @field:JsonName("impid")
+    @field:JsonName("imp_id")
     val impressionId: String,
     @field:JsonName("price")
     val price: Double,

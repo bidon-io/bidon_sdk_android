@@ -28,7 +28,7 @@ class BidResponseParserTest {
         }
       },
       "id": "652f976bfb91fd8aaa9c05ef",
-      "impid": "10a81d26-c9f7-4a64-99cb-acc62a2a9053",
+      "imp_id": "10a81d26-c9f7-4a64-99cb-acc62a2a9053",
       "price": 2.32421875,
       "ext": {
         "payload": "some vungle payload"
@@ -42,7 +42,7 @@ class BidResponseParserTest {
         "label": "bidmachine_bidding_inter_mergeblock_ios"
       },
       "id": "aa225c05-80dd-408d-ac8d-36b98b7bf86a",
-      "impid": "d3d846f9-001b-46e4-aed1-30f50c4e7e51",
+      "imp_id": "d3d846f9-001b-46e4-aed1-30f50c4e7e51",
       "price": 0.304724,
       "ext": {
         "payload": "some bidmachine payload"
