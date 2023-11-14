@@ -133,8 +133,10 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                         label = "bidmachine_label",
                                         pricefloor = null,
                                         bidType = BidType.RTB,
-                                        uid = "123"
+                                        uid = "123",
                                     ),
+                                    tokenStartTs = 678L,
+                                    tokenFinishTs = 679L,
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -162,6 +164,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     dspSource = "liftoff",
                                     auctionPricefloor = 0.1,
                                     roundPricefloor = 0.11,
+                                    tokenStartTs = 678L,
+                                    tokenFinishTs = 679L,
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -195,6 +199,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     bidType = BidType.CPM,
                                     uid = "123"
                                 ),
+                                tokenStartTs = 678L,
+                                tokenFinishTs = 679L,
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -222,6 +228,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     bidType = BidType.CPM,
                                     uid = "123"
                                 ),
+                                tokenStartTs = 678L,
+                                tokenFinishTs = 679L,
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },
@@ -280,6 +288,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 fillFinishTs = 917,
                                 adUnitLabel = "bidmachine_label",
                                 adUnitUid = "123",
+                                tokenStartTs = 678L,
+                                tokenFinishTs = 679L,
                             ),
                             DemandStat.Bidding.Bid(
                                 roundStatusCode = RoundStatus.Successful.code,
@@ -289,6 +299,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 fillFinishTs = 917,
                                 adUnitLabel = "meta_label",
                                 adUnitUid = "123",
+                                tokenStartTs = 678L,
+                                tokenFinishTs = 679L,
                             ),
                             getBiddingStatAdapter("bid3", RoundStatus.UnknownAdapter),
                         )
@@ -357,6 +369,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                         pricefloor = null,
                                         uid = "123"
                                     ),
+                                    tokenStartTs = 678L,
+                                    tokenFinishTs = 679L,
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -386,6 +400,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     pricefloor = 0.3,
                                     uid = "123"
                                 ),
+                                tokenStartTs = 678L,
+                                tokenFinishTs = 679L,
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -413,6 +429,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     pricefloor = 0.3,
                                     uid = "123"
                                 ),
+                                tokenStartTs = 678L,
+                                tokenFinishTs = 679L,
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },
@@ -449,6 +467,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 fillFinishTs = 917,
                                 adUnitLabel = "bidmachine_label",
                                 adUnitUid = "123",
+                                tokenStartTs = 678L,
+                                tokenFinishTs = 679L,
                             ),
                         )
                     ),
@@ -572,6 +592,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                         pricefloor = null,
                                         uid = "1234"
                                     ),
+                                    tokenStartTs = 678L,
+                                    tokenFinishTs = 679L,
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -601,6 +623,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     pricefloor = 0.3,
                                     uid = "123"
                                 ),
+                                tokenStartTs = 678L,
+                                tokenFinishTs = 679L,
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -628,6 +652,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     pricefloor = 0.3,
                                     uid = "123"
                                 ),
+                                tokenStartTs = 678L,
+                                tokenFinishTs = 679L,
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },
@@ -683,6 +709,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     fillFinishTs = 917,
                                     adUnitLabel = "bidmachine_label",
                                     adUnitUid = "1234",
+                                    tokenStartTs = 678L,
+                                    tokenFinishTs = 679L,
                                 ),
                             ),
                         )
@@ -706,6 +734,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     fillFinishTs = null,
                                     adUnitLabel = null,
                                     adUnitUid = null,
+                                    tokenStartTs = null,
+                                    tokenFinishTs = null,
                                 ),
                             ),
                         ),
@@ -748,5 +778,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
         fillFinishTs = null,
         adUnitUid = null,
         adUnitLabel = null,
+        tokenStartTs = null,
+        tokenFinishTs = null,
     )
 }

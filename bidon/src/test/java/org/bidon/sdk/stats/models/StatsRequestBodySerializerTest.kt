@@ -65,6 +65,8 @@ class StatsRequestBodySerializerTest {
                                 fillStartTs = 5,
                                 adUnitUid = "123",
                                 adUnitLabel = "label123",
+                                tokenStartTs = 678L,
+                                tokenFinishTs = 679L,
                             )
                         )
                     )
@@ -109,9 +111,11 @@ class StatsRequestBodySerializerTest {
                                         jsonObject {
                                             "ad_unit_id" hasValue "asd223"
                                             "bid_finish_ts" hasValue 1
-                                            "fill_start_ts" hasValue 4
                                             "ecpm" hasValue 1.2
+                                            "fill_start_ts" hasValue 4
                                             "fill_finish_ts" hasValue 3
+                                            "token_start_ts" hasValue 678L
+                                            "token_finish_ts" hasValue 679L
                                             "id" hasValue "d345"
                                             "bid_start_ts" hasValue 2
                                             "status" hasValue "code"
@@ -163,6 +167,8 @@ class StatsRequestBodySerializerTest {
                     fillStartTs = 5,
                     adUnitLabel = "label123",
                     adUnitUid = "123",
+                    tokenStartTs = 678L,
+                    tokenFinishTs = 679L,
                 )
             )
         ).serialize()
@@ -176,6 +182,8 @@ class StatsRequestBodySerializerTest {
                 "bid_finish_ts" hasValue 3
                 "fill_start_ts" hasValue 5
                 "fill_finish_ts" hasValue 6
+                "token_start_ts" hasValue 678L
+                "token_finish_ts" hasValue 679L
             }
         )
     }

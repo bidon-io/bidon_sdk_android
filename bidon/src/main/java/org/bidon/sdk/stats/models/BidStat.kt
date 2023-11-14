@@ -1,6 +1,7 @@
 package org.bidon.sdk.stats.models
 
 import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.auction.models.AdUnit
 
 /**
@@ -18,7 +19,13 @@ data class BidStat(
     val fillStartTs: Long?,
     val fillFinishTs: Long?,
     val dspSource: String?,
-    val adUnit: AdUnit?
+    val adUnit: AdUnit?,
+
+    /**
+     * [Mode.Bidding] only
+     */
+    val tokenStartTs: Long?,
+    val tokenFinishTs: Long?,
 ) {
     val bidType: BidType? get() = adUnit?.bidType
 }
