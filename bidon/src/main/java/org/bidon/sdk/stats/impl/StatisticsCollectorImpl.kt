@@ -64,7 +64,9 @@ class StatisticsCollectorImpl : StatisticsCollector {
         ecpm = 0.0,
         dspSource = null,
         roundPricefloor = 0.0,
-        auctionPricefloor = 0.0
+        auctionPricefloor = 0.0,
+        tokenFinishTs = null,
+        tokenStartTs = null,
     )
 
     override val demandAd: DemandAd
@@ -229,6 +231,18 @@ class StatisticsCollectorImpl : StatisticsCollector {
             fillFinishTs = SystemTimeNow,
             roundStatus = roundStatus,
             ecpm = ecpm ?: 0.0
+        )
+    }
+
+    override fun markTokenStarted() {
+        stat = stat.copy(
+            tokenStartTs = SystemTimeNow
+        )
+    }
+
+    override fun markTokenFinished() {
+        stat = stat.copy(
+            tokenFinishTs = SystemTimeNow
         )
     }
 

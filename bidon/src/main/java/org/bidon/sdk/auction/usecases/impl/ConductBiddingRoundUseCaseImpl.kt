@@ -1,6 +1,7 @@
 package org.bidon.sdk.auction.usecases.impl
 
 import android.content.Context
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.withContext
@@ -232,29 +233,36 @@ internal class ConductBiddingRoundUseCaseImpl(
         context: Context,
         adTypeParam: AdTypeParam,
         adUnits: List<AdUnit>
-    ): List<Pair<DemandId, String>> = withContext(SdkDispatchers.Default) {
-        this@getTokens.mapNotNull { adSource ->
-            runCatching {
-                require(adSource is AdSource<*>)
-                adUnits
-                    .filter { it.bidType == BidType.RTB }
-                    .filter { it.demandId == adSource.demandId.demandId }
-                    .takeIf {
-                        /**
-                         * Bidding AdUnit should exist
-                         */
-                        val adUnitFound = it.isNotEmpty()
-                        if (!adUnitFound) {
-                            logError(TAG, "No bidding AdUnit found for ${adSource.demandId}", BidonError.NoAppropriateAdUnitId)
-                        }
-                        adUnitFound
-                    }?.let {
-                        adSource.getToken(context, adTypeParam, it)?.let { token ->
+    ): List<Pair<DemandId, String>> = this@getTokens.mapNotNull { adSource ->
+        if (adSource !is AdSource<*>) return@mapNotNull null
+        adUnits
+            .filter { it.bidType == BidType.RTB }
+            .filter { it.demandId == adSource.demandId.demandId }
+            .takeIf {
+                /**
+                 * Bidding AdUnit should exist
+                 */
+                val adUnitFound = it.isNotEmpty()
+                if (!adUnitFound) {
+                    logError(TAG, "No bidding AdUnit found for ${adSource.demandId}", BidonError.NoAppropriateAdUnitId)
+                }
+                adUnitFound
+            }?.let {
+                withContext(SdkDispatchers.Default) {
+                    async {
+                        runCatching {
+                            adSource.markTokenStarted()
+                            adSource.getToken(context, adTypeParam, it).also {
+                                adSource.markTokenFinished()
+                            }
+                        }.getOrNull()?.let { token ->
                             adSource.demandId to token
                         }
                     }
-            }.getOrNull()
-        }
+                }
+            }
+    }.mapNotNull {
+        it.await()
     }
 }
 
