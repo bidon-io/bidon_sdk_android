@@ -75,7 +75,7 @@ internal class VungleInterstitialImpl :
                 }
 
                 override fun onError(placementId: String?, exception: VungleException?) {
-                    logError(TAG, "onError placementId=$placementId. $this", exception)
+                    logInfo(TAG, "onError placementId=$placementId. $this")
                     emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                 }
             }

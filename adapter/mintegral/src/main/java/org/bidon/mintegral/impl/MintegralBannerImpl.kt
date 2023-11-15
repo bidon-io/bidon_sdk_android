@@ -16,11 +16,11 @@ import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
-import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
@@ -65,17 +65,21 @@ internal class MintegralBannerImpl :
                 bannerView = it
             }
             val size = when (adParams.bannerFormat) {
-                BannerFormat.Banner -> BannerSize(BannerSize.STANDARD_TYPE, 0, 0)
-                BannerFormat.LeaderBoard -> BannerSize(BannerSize.LARGE_TYPE, 0, 0)
-                BannerFormat.MRec -> BannerSize(BannerSize.MEDIUM_TYPE, 0, 0)
-                BannerFormat.Adaptive -> BannerSize(BannerSize.SMART_TYPE, 0, 0)
+                BannerFormat.Banner -> BannerSize(BannerSize.STANDARD_TYPE, 320, 50)
+                BannerFormat.LeaderBoard -> BannerSize(BannerSize.DEV_SET_TYPE, 728, 90)
+                BannerFormat.MRec -> BannerSize(BannerSize.MEDIUM_TYPE, 300, 250)
+                BannerFormat.Adaptive -> if (isTablet) {
+                    BannerSize(BannerSize.DEV_SET_TYPE, 728, 90)
+                } else {
+                    BannerSize(BannerSize.STANDARD_TYPE, 320, 50)
+                }
             }.also {
                 bannerSize = it
             }
             mbBannerView.init(size, adParams.placementId, adParams.unitId)
             mbBannerView.setBannerAdListener(object : BannerAdListener {
                 override fun onLoadFailed(mBridgeIds: MBridgeIds?, message: String?) {
-                    logError(TAG, "onLoadFailed $mBridgeIds", Throwable(message))
+                    logInfo(TAG, "onLoadFailed $mBridgeIds")
                     emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                 }
 

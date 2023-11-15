@@ -4,10 +4,8 @@ import android.content.Context
 import com.facebook.ads.Ad
 import com.facebook.ads.AdError
 import com.facebook.ads.AdListener
-import com.facebook.ads.AdSize
 import com.facebook.ads.AdView
 import com.facebook.ads.BidderTokenProvider
-import org.bidon.meta.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
@@ -16,11 +14,13 @@ import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
+import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.AdTypeParam
+import org.bidon.sdk.auction.ext.height
+import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
-import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
@@ -35,7 +35,7 @@ class MetaBannerImpl :
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var bannerView: AdView? = null
-    private var bannerSize: AdSize? = null
+    private var bannerFormat: BannerFormat? = null
 
     override val isAdReadyToShow: Boolean
         get() = bannerView != null
@@ -64,7 +64,7 @@ class MetaBannerImpl :
 
     override fun load(adParams: MetaBannerAuctionParams) {
         logInfo(TAG, "load: $adParams")
-        bannerSize = adParams.bannerSize
+        bannerFormat = adParams.bannerFormat
         adParams.activity.runOnUiThread {
             val banner = AdView(adParams.activity.applicationContext, adParams.placementId, adParams.bannerSize).also {
                 bannerView = it
@@ -73,8 +73,7 @@ class MetaBannerImpl :
                 banner.buildLoadAdConfig()
                     .withAdListener(object : AdListener {
                         override fun onError(ad: Ad?, adError: AdError?) {
-                            val error = adError.asBidonError()
-                            logError(TAG, "Error while loading ad(${adError?.errorCode}: ${adError?.errorMessage}). $this", error)
+                            logInfo(TAG, "Error while loading ad(${adError?.errorCode}: ${adError?.errorMessage}). $this")
                             emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                         }
 
@@ -121,12 +120,12 @@ class MetaBannerImpl :
     }
 
     override fun getAdView(): AdViewHolder? {
-        val bannerSize = bannerSize ?: return null
+        val bannerFormat = bannerFormat ?: return null
         return bannerView?.let { adView ->
             AdViewHolder(
                 networkAdview = adView,
-                widthDp = bannerSize.width,
-                heightDp = bannerSize.height
+                widthDp = bannerFormat.width,
+                heightDp = bannerFormat.height
             )
         }
     }

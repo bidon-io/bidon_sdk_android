@@ -5,6 +5,7 @@ import com.vungle.warren.AdConfig
 import com.vungle.warren.BannerAdConfig
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.auction.models.LineItem
 
 class VungleBannerAuctionParams(
@@ -17,10 +18,10 @@ class VungleBannerAuctionParams(
     override val lineItem: LineItem? = null
     val bannerSize
         get() = when (bannerFormat) {
-            BannerFormat.LeaderBoard -> AdConfig.AdSize.BANNER_LEADERBOARD
             BannerFormat.MRec -> AdConfig.AdSize.VUNGLE_MREC
-            BannerFormat.Adaptive -> AdConfig.AdSize.BANNER
+            BannerFormat.LeaderBoard -> AdConfig.AdSize.BANNER_LEADERBOARD
             BannerFormat.Banner -> AdConfig.AdSize.BANNER
+            BannerFormat.Adaptive -> if (isTablet) AdConfig.AdSize.BANNER_LEADERBOARD else AdConfig.AdSize.BANNER
         }
     val config by lazy {
         BannerAdConfig().apply {

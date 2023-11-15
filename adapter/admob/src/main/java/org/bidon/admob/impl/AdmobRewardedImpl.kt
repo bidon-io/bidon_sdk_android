@@ -8,7 +8,6 @@ import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import org.bidon.admob.AdmobFullscreenAdAuctionParams
 import org.bidon.admob.AdmobInitParameters
-import org.bidon.admob.asBidonError
 import org.bidon.admob.ext.asBidonAdValue
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
@@ -20,7 +19,6 @@ import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.rewarded.Reward
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
-import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
@@ -59,7 +57,7 @@ internal class AdmobRewardedImpl(
         price = adParams.price
         val requestListener = object : RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                logError(TAG, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
+                logInfo(TAG, "onAdFailedToLoad: $loadAdError. $this")
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
 

@@ -143,12 +143,7 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
                 else -> error("unexpected")
             }
             fillAdEvent
-        } ?: AdEvent.LoadFailed(
-            cause = when (adSource.getStats().roundStatus) {
-                RoundStatus.NoBid -> BidonError.FillTimedOut(adSource.demandId)
-                else -> BidonError.BidTimedOut(adSource.demandId)
-            }
-        )
+        } ?: AdEvent.LoadFailed(BidonError.FillTimedOut(adSource.demandId))
     }
 }
 
