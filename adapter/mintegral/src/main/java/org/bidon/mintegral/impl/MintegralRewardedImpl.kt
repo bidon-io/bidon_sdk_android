@@ -84,7 +84,7 @@ internal class MintegralRewardedImpl :
             }
 
             override fun onVideoLoadFail(mBridgeIds: MBridgeIds?, message: String?) {
-                logError(TAG, "onVideoLoadFail $mBridgeIds", Throwable(message))
+                logInfo(TAG, "onVideoLoadFail $mBridgeIds")
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
 

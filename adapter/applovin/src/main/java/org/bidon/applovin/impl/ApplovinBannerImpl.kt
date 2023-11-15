@@ -19,6 +19,8 @@ import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
+import org.bidon.sdk.auction.ext.height
+import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -121,16 +123,11 @@ internal class ApplovinBannerImpl(
 
     override fun getAdView(): AdViewHolder? {
         val adView = adView ?: return null
+        val bannerFormat = bannerFormat ?: return null
         return AdViewHolder(
             networkAdview = adView,
-            widthDp = adView.size.width.takeIf { it > 0 } ?: when (bannerFormat) {
-                BannerFormat.Banner -> 320
-                BannerFormat.LeaderBoard -> 728
-                BannerFormat.MRec -> 300
-                BannerFormat.Adaptive -> if (isTablet) 728 else 320
-                null -> error("unexpected")
-            },
-            heightDp = adView.size.height
+            widthDp = adView.size.width.takeIf { it > 0 } ?: bannerFormat.width,
+            heightDp = adView.size.height.takeIf { it > 0 } ?: bannerFormat.height
         )
     }
 

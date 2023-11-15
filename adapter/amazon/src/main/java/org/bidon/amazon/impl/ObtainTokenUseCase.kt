@@ -12,9 +12,9 @@ import org.bidon.amazon.SlotType
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo
-import org.bidon.sdk.ads.banner.helper.getHeightDp
-import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.auction.AdTypeParam
+import org.bidon.sdk.auction.ext.height
+import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -32,15 +32,17 @@ internal class ObtainTokenUseCase {
         get() = BidonSdk.regulation
 
     suspend operator fun invoke(slots: Map<SlotType, List<String>>, adTypeParam: AdTypeParam): List<AmazonInfo> {
+        val filteredSlots = slots.filterBy(adTypeParam)
         return obtainInfo(
-            adSizes = getAmazonSizes(slots, adTypeParam)
+            adSizes = getAmazonSizes(filteredSlots, adTypeParam)
         )
     }
 
     private suspend fun obtainInfo(adSizes: List<Pair<SlotType, DTBAdSize>>): List<AmazonInfo> = coroutineScope {
         val results = mutableListOf<AmazonInfo>()
         adSizes
-            .map { (_, dtbAdSize) ->
+            .map { (slotType, dtbAdSize) ->
+                logInfo(TAG, "AmazonInfo request->  $slotType: ${dtbAdSize.slotUUID}")
                 dtbAdSize to async { getDTBAdResponse(dtbAdSize) }
             }.forEach { (dtbAdSize, deferred) ->
                 val dtbAdResponse = deferred.await()
@@ -70,6 +72,37 @@ internal class ObtainTokenUseCase {
         })
     }
 
+    private fun Map<SlotType, List<String>>.filterBy(adTypeParam: AdTypeParam): Map<SlotType, List<String>> {
+        return this.mapNotNull { (type, slotUuids) ->
+            when (adTypeParam) {
+                is AdTypeParam.Banner -> {
+                    slotUuids.takeIf {
+                        when (adTypeParam.bannerFormat) {
+                            BannerFormat.Banner -> type == SlotType.BANNER
+                            BannerFormat.LeaderBoard -> type == SlotType.BANNER
+                            BannerFormat.Adaptive -> type == SlotType.BANNER
+                            BannerFormat.MRec -> type == SlotType.MREC
+                        }
+                    }?.let {
+                        type to it
+                    }
+                }
+
+                is AdTypeParam.Interstitial -> {
+                    slotUuids.takeIf { type == SlotType.INTERSTITIAL || type == SlotType.VIDEO }?.let {
+                        type to it
+                    }
+                }
+
+                is AdTypeParam.Rewarded -> {
+                    slotUuids.takeIf { type == SlotType.REWARDED_AD }?.let {
+                        type to it
+                    }
+                }
+            }
+        }.toMap()
+    }
+
     private fun DTBAdRequest.applyRegulation(regulation: Regulation) {
         regulation.usPrivacyString?.let {
             this.putCustomTarget("us_privacy", it)
@@ -80,46 +113,18 @@ internal class ObtainTokenUseCase {
         return slots.mapNotNull { (type, slotUuids) ->
             when (adTypeParam) {
                 is AdTypeParam.Banner -> {
-                    when (adTypeParam.bannerFormat) {
-                        BannerFormat.Banner,
-                        BannerFormat.LeaderBoard,
-                        BannerFormat.MRec -> {
-                            slotUuids.map { uuid ->
-                                type to DTBAdSize(
-                                    /* width = */ adTypeParam.bannerFormat.getWidthDp(),
-                                    /* height = */ adTypeParam.bannerFormat.getHeightDp(),
-                                    /* slotUUID = */ uuid
-                                )
-                            }
-                        }
-
-                        BannerFormat.Adaptive -> {
-                            if (DeviceInfo.isTablet) {
-                                slotUuids.map { uuid ->
-                                    type to DTBAdSize(
-                                        /* width = */ BannerFormat.Banner.getWidthDp(),
-                                        /* height = */ BannerFormat.Banner.getHeightDp(),
-                                        /* slotUUID = */ uuid
-                                    )
-                                }
-                            } else {
-                                slotUuids.map { uuid ->
-                                    type to DTBAdSize(
-                                        /* width = */ BannerFormat.LeaderBoard.getWidthDp(),
-                                        /* height = */ BannerFormat.LeaderBoard.getHeightDp(),
-                                        /* slotUUID = */ uuid
-                                    )
-                                }
-                            }
-                        }
+                    slotUuids.map { uuid ->
+                        type to DTBAdSize(
+                            /* width = */ adTypeParam.bannerFormat.width,
+                            /* height = */ adTypeParam.bannerFormat.height,
+                            /* slotUUID = */ uuid
+                        )
                     }
                 }
 
                 is AdTypeParam.Interstitial -> {
                     when (type) {
-                        SlotType.VIDEO -> {
-                            getDtbVideoAdList(slotUuids, type)
-                        }
+                        SlotType.VIDEO -> getDtbVideoAdList(slotUuids, type)
 
                         SlotType.INTERSTITIAL -> {
                             slotUuids.map { uuid ->
@@ -127,28 +132,15 @@ internal class ObtainTokenUseCase {
                             }
                         }
 
-                        SlotType.REWARDED_AD,
-                        SlotType.BANNER,
-                        SlotType.MREC -> {
-                            null
-                        }
+                        else -> null
                     }
                 }
 
-                is AdTypeParam.Rewarded -> {
-                    when (type) {
-                        SlotType.REWARDED_AD -> {
-                            getDtbVideoAdList(slotUuids, type)
-                        }
-
-                        SlotType.VIDEO,
-                        SlotType.BANNER,
-                        SlotType.MREC,
-                        SlotType.INTERSTITIAL -> null
-                    }
-                }
+                is AdTypeParam.Rewarded -> getDtbVideoAdList(slotUuids, type)
             }
-        }.flatten()
+        }.flatten().onEach {
+            logInfo(TAG, "AmazonInfo suitable slots ->  ${it.first}: ${it.second.slotUUID}")
+        }
     }
 
     private fun getDtbVideoAdList(
