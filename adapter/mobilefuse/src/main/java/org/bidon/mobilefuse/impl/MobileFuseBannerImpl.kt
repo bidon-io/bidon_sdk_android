@@ -73,7 +73,7 @@ class MobileFuseBannerImpl(private val isTestMode: Boolean) :
             override fun onAdLoaded() {
                 if (!isLoaded.getAndSet(true)) {
                     logInfo(TAG, "onAdLoaded")
-                    getAd()?.let { adEvent.emitEvent(AdEvent.Fill(it)) }
+                    getAd()?.let { emitEvent(AdEvent.Fill(it)) }
                 }
             }
 
