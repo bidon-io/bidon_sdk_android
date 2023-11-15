@@ -5,17 +5,13 @@ import android.content.Context
 import com.google.android.gms.ads.*
 import org.bidon.admob.AdmobBannerAuctionParams
 import org.bidon.admob.AdmobInitParameters
-import org.bidon.admob.asBidonError
 import org.bidon.admob.ext.asBidonAdValue
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.getHeightDp
-import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
-import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
@@ -66,7 +62,7 @@ internal class AdmobBannerImpl(
             }
             val requestListener = object : AdListener() {
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                    logError(TAG, "onAdFailedToLoad: $loadAdError. $this", loadAdError.asBidonError())
+                    logInfo(TAG, "onAdFailedToLoad: $loadAdError. $this")
                     emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                 }
 
@@ -113,10 +109,11 @@ internal class AdmobBannerImpl(
     }
 
     override fun getAdView(): AdViewHolder? = adView?.let {
+        val adSize = adSize ?: return null
         AdViewHolder(
             networkAdview = it,
-            widthDp = adSize?.width ?: bannerFormat.getWidthDp(),
-            heightDp = adSize?.height ?: bannerFormat.getHeightDp()
+            widthDp = adSize.width,
+            heightDp = adSize.height
         )
     }
 

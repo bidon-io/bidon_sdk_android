@@ -14,9 +14,9 @@ import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.banner.helper.getHeightDp
-import org.bidon.sdk.ads.banner.helper.getWidthDp
 import org.bidon.sdk.auction.AdTypeParam
+import org.bidon.sdk.auction.ext.height
+import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
@@ -96,7 +96,7 @@ internal class AmazonBannerImpl(
                 }
 
                 override fun onAdFailed(view: View?) {
-                    logError(TAG, "onAdFailed", BidonError.NoFill(demandId))
+                    logInfo(TAG, "onAdFailed")
                     emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                 }
 
@@ -139,7 +139,7 @@ internal class AmazonBannerImpl(
             emitEvent(AdEvent.LoadFailed(BidonError.AdNotReady))
             null
         } else {
-            AdViewHolder(adView, adParams.bannerFormat.getWidthDp(), adParams.bannerFormat.getHeightDp())
+            AdViewHolder(adView, adParams.bannerFormat.width, adParams.bannerFormat.height)
         }
     }
 

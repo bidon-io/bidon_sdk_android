@@ -1,3 +1,7 @@
+# Release 0.4.22 (2023.11.09)
+## Features:
+[BDN-510](https://appodeal.atlassian.net/browse/BDN-510) Upgrade adapter versions: Mintegral SDK - 16.5.41, Inmobi SDK - 10.6.1, UnityAds SDK - 4.9.2.
+
 # Release 0.4.21 (2023.10.20)
 ## Features:
 [BDN-446](https://appodeal.atlassian.net/browse/BDN-446) Implement Amazon Rewarded
