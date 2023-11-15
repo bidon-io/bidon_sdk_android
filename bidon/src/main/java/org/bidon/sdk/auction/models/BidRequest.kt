@@ -20,7 +20,7 @@ internal data class BidRequest(
     @field:JsonName("bidfloor")
     val bidfloor: Double,
     @field:JsonName("demands")
-    val demands: Map<String, Token>,
+    val demands: Map<String, TokenInfo>,
     @field:JsonName("banner")
     val banner: BannerRequest?,
     @field:JsonName("interstitial")
@@ -28,10 +28,4 @@ internal data class BidRequest(
     @field:JsonName("rewarded")
     val rewarded: RewardedRequest?,
 
-) : Serializable {
-
-    data class Token(
-        @field:JsonName("token")
-        val token: String
-    ) : Serializable
-}
+) : Serializable

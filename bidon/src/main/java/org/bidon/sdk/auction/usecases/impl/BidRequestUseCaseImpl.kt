@@ -2,13 +2,13 @@ package org.bidon.sdk.auction.usecases.impl
 
 import kotlinx.coroutines.withContext
 import org.bidon.sdk.BidonSdk
-import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.banner.helper.GetOrientationUseCase
 import org.bidon.sdk.ads.ext.asAdRequestBody
 import org.bidon.sdk.ads.ext.asAdType
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.models.BidRequest
 import org.bidon.sdk.auction.models.BiddingResponse
+import org.bidon.sdk.auction.models.TokenInfo
 import org.bidon.sdk.auction.usecases.BidRequestUseCase
 import org.bidon.sdk.databinders.DataBinderType
 import org.bidon.sdk.logs.logging.impl.logError
@@ -37,7 +37,7 @@ internal class BidRequestUseCaseImpl(
 
     override suspend fun invoke(
         adTypeParam: AdTypeParam,
-        tokens: List<Pair<DemandId, String>>,
+        tokens: List<Pair<String, TokenInfo>>,
         extras: Map<String, Any>,
         bidfloor: Double,
         auctionId: String,
@@ -49,7 +49,7 @@ internal class BidRequestUseCaseImpl(
             val bidRequestBody = BidRequest(
                 auctionId = auctionId,
                 demands = tokens.associate { (demandId, token) ->
-                    demandId.demandId to BidRequest.Token(token)
+                    demandId to token
                 },
                 bidfloor = bidfloor,
                 orientationCode = getOrientation().code,

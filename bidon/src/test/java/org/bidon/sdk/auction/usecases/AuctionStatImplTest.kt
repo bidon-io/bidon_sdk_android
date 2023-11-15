@@ -17,6 +17,7 @@ import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.auction.models.BidResponse
 import org.bidon.sdk.auction.models.RoundRequest
+import org.bidon.sdk.auction.models.TokenInfo
 import org.bidon.sdk.auction.usecases.impl.AuctionStatImpl
 import org.bidon.sdk.auction.usecases.models.BiddingResult
 import org.bidon.sdk.auction.usecases.models.RoundResult
@@ -135,8 +136,12 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                         bidType = BidType.RTB,
                                         uid = "123",
                                     ),
-                                    tokenStartTs = 678L,
-                                    tokenFinishTs = 679L,
+                                    tokenInfo = TokenInfo(
+                                        token = "token123",
+                                        tokenStartTs = 678L,
+                                        tokenFinishTs = 679L,
+                                        status = TokenInfo.Status.SUCCESS.code,
+                                    ),
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -164,8 +169,12 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     dspSource = "liftoff",
                                     auctionPricefloor = 0.1,
                                     roundPricefloor = 0.11,
-                                    tokenStartTs = 678L,
-                                    tokenFinishTs = 679L,
+                                    tokenInfo = TokenInfo(
+                                        token = "token123",
+                                        tokenStartTs = 678L,
+                                        tokenFinishTs = 679L,
+                                        status = TokenInfo.Status.SUCCESS.code,
+                                    ),
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -199,8 +208,12 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     bidType = BidType.CPM,
                                     uid = "123"
                                 ),
-                                tokenStartTs = 678L,
-                                tokenFinishTs = 679L,
+                                tokenInfo = TokenInfo(
+                                    token = "token123",
+                                    tokenStartTs = 678L,
+                                    tokenFinishTs = 679L,
+                                    status = TokenInfo.Status.SUCCESS.code,
+                                ),
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -228,8 +241,12 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     bidType = BidType.CPM,
                                     uid = "123"
                                 ),
-                                tokenStartTs = 678L,
-                                tokenFinishTs = 679L,
+                                tokenInfo = TokenInfo(
+                                    token = "token123",
+                                    tokenStartTs = 678L,
+                                    tokenFinishTs = 679L,
+                                    status = TokenInfo.Status.SUCCESS.code,
+                                ),
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },
@@ -369,8 +386,12 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                         pricefloor = null,
                                         uid = "123"
                                     ),
-                                    tokenStartTs = 678L,
-                                    tokenFinishTs = 679L,
+                                    tokenInfo = TokenInfo(
+                                        token = "token123",
+                                        tokenStartTs = 678L,
+                                        tokenFinishTs = 679L,
+                                        status = TokenInfo.Status.SUCCESS.code,
+                                    ),
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -400,8 +421,12 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     pricefloor = 0.3,
                                     uid = "123"
                                 ),
-                                tokenStartTs = 678L,
-                                tokenFinishTs = 679L,
+                                tokenInfo = TokenInfo(
+                                    token = "token123",
+                                    tokenStartTs = 678L,
+                                    tokenFinishTs = 679L,
+                                    status = TokenInfo.Status.SUCCESS.code,
+                                ),
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -429,8 +454,12 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     pricefloor = 0.3,
                                     uid = "123"
                                 ),
-                                tokenStartTs = 678L,
-                                tokenFinishTs = 679L,
+                                tokenInfo = TokenInfo(
+                                    token = "token123",
+                                    tokenStartTs = 678L,
+                                    tokenFinishTs = 679L,
+                                    status = TokenInfo.Status.SUCCESS.code,
+                                ),
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },
@@ -592,8 +621,12 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                         pricefloor = null,
                                         uid = "1234"
                                     ),
-                                    tokenStartTs = 678L,
-                                    tokenFinishTs = 679L,
+                                    tokenInfo = TokenInfo(
+                                        token = "token123",
+                                        tokenStartTs = 678L,
+                                        tokenFinishTs = 679L,
+                                        status = TokenInfo.Status.SUCCESS.code,
+                                    ),
                                 )
                             },
                             roundStatus = RoundStatus.Successful
@@ -623,8 +656,12 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     pricefloor = 0.3,
                                     uid = "123"
                                 ),
-                                tokenStartTs = 678L,
-                                tokenFinishTs = 679L,
+                                tokenInfo = TokenInfo(
+                                    token = "token123",
+                                    tokenStartTs = 678L,
+                                    tokenFinishTs = 679L,
+                                    status = TokenInfo.Status.SUCCESS.code,
+                                ),
                             )
                             every { it.demandId } returns DemandId("dem1")
                         },
@@ -652,8 +689,12 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                     pricefloor = 0.3,
                                     uid = "123"
                                 ),
-                                tokenStartTs = 678L,
-                                tokenFinishTs = 679L,
+                                tokenInfo = TokenInfo(
+                                    token = "token123",
+                                    tokenStartTs = 678L,
+                                    tokenFinishTs = 679L,
+                                    status = TokenInfo.Status.SUCCESS.code,
+                                ),
                             )
                             every { it.demandId } returns DemandId("dem2")
                         },

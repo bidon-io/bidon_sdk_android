@@ -10,6 +10,7 @@ import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.BannerRequest
 import org.bidon.sdk.auction.models.InterstitialRequest
 import org.bidon.sdk.auction.models.RewardedRequest
+import org.bidon.sdk.auction.models.TokenInfo
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -65,8 +66,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
         dspSource = null,
         roundPricefloor = 0.0,
         auctionPricefloor = 0.0,
-        tokenFinishTs = null,
-        tokenStartTs = null,
+        tokenInfo = null,
     )
 
     override val demandAd: DemandAd
@@ -234,15 +234,31 @@ class StatisticsCollectorImpl : StatisticsCollector {
         )
     }
 
-    override fun markTokenStarted() {
+    override fun markTokenStarted(): Long {
+        val time = SystemTimeNow
         stat = stat.copy(
-            tokenStartTs = SystemTimeNow
+            tokenInfo = stat.tokenInfo?.copy(
+                tokenStartTs = time
+            ) ?: TokenInfo(
+                token = null,
+                tokenStartTs = time,
+                tokenFinishTs = null,
+                status = TokenInfo.Status.NO_TOKEN.code
+            )
         )
+        return time
     }
 
-    override fun markTokenFinished() {
+    override fun markTokenFinished(status: TokenInfo.Status, token: String?) {
         stat = stat.copy(
-            tokenFinishTs = SystemTimeNow
+            tokenInfo = stat.tokenInfo?.copy(
+                token = token,
+                tokenFinishTs = SystemTimeNow,
+                status = status.code
+            ) ?: run {
+                logError(TAG, "TokenInfo is null", NullPointerException())
+                return
+            }
         )
     }
 

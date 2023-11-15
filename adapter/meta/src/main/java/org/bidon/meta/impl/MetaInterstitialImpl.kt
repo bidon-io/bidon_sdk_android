@@ -7,6 +7,7 @@ import com.facebook.ads.AdError
 import com.facebook.ads.BidderTokenProvider
 import com.facebook.ads.InterstitialAd
 import com.facebook.ads.InterstitialAdListener
+import kotlinx.coroutines.delay
 import org.bidon.meta.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
@@ -40,6 +41,7 @@ class MetaInterstitialImpl :
         get() = interstitialAd?.isAdLoaded ?: false
 
     override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? {
+        delay(20000)
         return BidderTokenProvider.getBidderToken(context)
     }
 

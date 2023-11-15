@@ -3,6 +3,7 @@ package org.bidon.sdk.stats.models
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.auction.models.AdUnit
+import org.bidon.sdk.auction.models.TokenInfo
 
 /**
  * Created by Bidon Team on 06/02/2023.
@@ -24,8 +25,7 @@ data class BidStat(
     /**
      * [Mode.Bidding] only
      */
-    val tokenStartTs: Long?,
-    val tokenFinishTs: Long?,
+    val tokenInfo: TokenInfo?,
 ) {
     val bidType: BidType? get() = adUnit?.bidType
 }
