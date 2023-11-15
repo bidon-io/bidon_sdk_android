@@ -46,7 +46,7 @@ internal class ObtainTokenUseCase {
                 val dtbAdResponse = deferred.await()
                 if (dtbAdResponse != null) {
                     results.add(AmazonInfo(dtbAdResponse, dtbAdSize))
-                    logInfo(TAG, "AmazonInfo added-> ${dtbAdSize.slotUUID}: ${dtbAdResponse.getPricePoints(dtbAdSize)}")
+                    logInfo(TAG, "AmazonInfo added -> ${dtbAdSize.slotUUID}: ${dtbAdResponse.getPricePoints(dtbAdSize)}")
                 }
             }
         results
