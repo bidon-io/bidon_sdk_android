@@ -94,7 +94,6 @@ class StatisticsCollectorImpl : StatisticsCollector {
             roundId = roundId,
             auctionId = auctionId,
             dsp = stat.dspSource,
-            bidType = bidType,
             adUnit = adUnit
         )
     }
