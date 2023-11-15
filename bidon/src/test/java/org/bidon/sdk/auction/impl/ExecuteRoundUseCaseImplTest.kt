@@ -159,7 +159,6 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                                 dsp = null,
                                 ecpm = 1.3,
                                 auctionId = "a123",
-                                bidType = BidType.CPM,
                                 adUnit = AdUnit(
                                     demandId = "admob",
                                     label = "admob_banner",
