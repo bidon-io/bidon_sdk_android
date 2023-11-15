@@ -78,7 +78,7 @@ internal class MintegralInterstitialImpl :
             }
 
             override fun onResourceLoadFail(mBridgeIds: MBridgeIds?, message: String?) {
-                logError(TAG, "onResourceLoadFail $mBridgeIds", Throwable(message))
+                logInfo(TAG, "onResourceLoadFail $mBridgeIds")
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
 

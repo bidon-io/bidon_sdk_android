@@ -13,13 +13,11 @@ import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
-import org.bidon.sdk.ads.banner.helper.getHeightDp
-import org.bidon.sdk.ads.banner.helper.getWidthDp
+import org.bidon.sdk.auction.ext.height
+import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
-import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
@@ -60,20 +58,7 @@ internal class InmobiBannerImpl :
         val bannerView = InMobiBanner(adParams.activity.applicationContext, adParams.placementId).also {
             this.bannerView = it
         }
-        bannerView.setBannerSize(
-            when (adParams.bannerFormat) {
-                BannerFormat.Banner -> 320
-                BannerFormat.LeaderBoard -> 728
-                BannerFormat.MRec -> 300
-                BannerFormat.Adaptive -> if (isTablet) 728 else 320
-            },
-            when (adParams.bannerFormat) {
-                BannerFormat.Banner -> 50
-                BannerFormat.LeaderBoard -> 90
-                BannerFormat.MRec -> 250
-                BannerFormat.Adaptive -> if (isTablet) 90 else 50
-            }
-        )
+        bannerView.setBannerSize(adParams.bannerFormat.width, adParams.bannerFormat.height)
         bannerView.setEnableAutoRefresh(false)
         bannerView.setAnimationType(InMobiBanner.AnimationType.ANIMATION_OFF)
         bannerView.setListener(object : BannerAdEventListener() {
@@ -85,11 +70,7 @@ internal class InmobiBannerImpl :
             }
 
             override fun onAdLoadFailed(inMobiBanner: InMobiBanner, status: InMobiAdRequestStatus) {
-                logError(
-                    tag = TAG,
-                    message = "Error while loading ad: ${status.statusCode} ${status.message}. $this",
-                    error = BidonError.Unspecified(demandId)
-                )
+                logInfo(TAG, "Error while loading ad: ${status.statusCode} ${status.message}. $this")
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                 this@InmobiBannerImpl.bannerView = null
             }
@@ -124,9 +105,7 @@ internal class InmobiBannerImpl :
     override fun getAdView(): AdViewHolder? {
         val bannerFormat = bannerFormat ?: return null
         val bannerAd = bannerView ?: return null
-        val width = bannerFormat.getWidthDp()
-        val height = bannerFormat.getHeightDp()
-        return AdViewHolder(bannerAd, width, height)
+        return AdViewHolder(bannerAd, bannerFormat.width, bannerFormat.height)
     }
 
     override fun destroy() {

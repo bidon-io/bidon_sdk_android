@@ -60,9 +60,6 @@ class InmobiAdapter :
                 InMobiSdk.setLogLevel(InMobiSdk.LogLevel.DEBUG)
             }
             val consentObject = getConsentObject(BidonSdk.regulation)
-            if (BidonSdk.regulation.coppaApplies) {
-                InMobiSdk.setIsAgeRestricted(true)
-            }
             InMobiSdk.init(
                 context, configParams.accountId, consentObject,
                 object : SdkInitializationListener {
