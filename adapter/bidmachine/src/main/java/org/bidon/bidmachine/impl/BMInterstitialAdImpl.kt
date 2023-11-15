@@ -13,7 +13,6 @@ import io.bidmachine.interstitial.InterstitialRequest
 import io.bidmachine.utils.BMError
 import org.bidon.bidmachine.BMAuctionResult
 import org.bidon.bidmachine.BMFullscreenAuctionParams
-import org.bidon.bidmachine.asBidonErrorOnBid
 import org.bidon.bidmachine.asBidonErrorOnFill
 import org.bidon.bidmachine.ext.asBidonAdValue
 import org.bidon.sdk.adapter.AdAuctionParamSource
@@ -84,8 +83,7 @@ internal class BMInterstitialAdImpl :
                     }
 
                     override fun onRequestFailed(request: InterstitialRequest, bmError: BMError) {
-                        val error = bmError.asBidonErrorOnBid(demandId)
-                        logError(TAG, "onRequestFailed $bmError. $this", error)
+                        logInfo(TAG, "onRequestFailed $bmError. $this")
                         emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                     }
 

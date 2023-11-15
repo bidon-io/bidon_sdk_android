@@ -13,9 +13,10 @@ import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.getHeightDp
-import org.bidon.sdk.ads.banner.helper.getWidthDp
+import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.auction.AdTypeParam
+import org.bidon.sdk.auction.ext.height
+import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
@@ -58,7 +59,11 @@ class MobileFuseBannerImpl(private val isTestMode: Boolean) :
             BannerFormat.Banner -> MobileFuseBannerAd.AdSize.BANNER_320x50
             BannerFormat.LeaderBoard -> MobileFuseBannerAd.AdSize.BANNER_728x90
             BannerFormat.MRec -> MobileFuseBannerAd.AdSize.BANNER_300x250
-            BannerFormat.Adaptive -> MobileFuseBannerAd.AdSize.BANNER_ADAPTIVE
+            BannerFormat.Adaptive -> if (isTablet) {
+                MobileFuseBannerAd.AdSize.BANNER_728x90
+            } else {
+                MobileFuseBannerAd.AdSize.BANNER_320x50
+            }
         }
         val bannerAd = MobileFuseBannerAd(adParams.activity, adParams.placementId, adSize).also {
             fuseBannerAd = it
@@ -68,13 +73,13 @@ class MobileFuseBannerImpl(private val isTestMode: Boolean) :
             override fun onAdLoaded() {
                 if (!isLoaded.getAndSet(true)) {
                     logInfo(TAG, "onAdLoaded")
-                    getAd()?.let { emitEvent(AdEvent.Fill(it)) }
+                    getAd()?.let { adEvent.emitEvent(AdEvent.Fill(it)) }
                 }
             }
 
             override fun onAdNotFilled() {
                 val cause = BidonError.NoFill(demandId)
-                logError(TAG, "onAdNotFilled", cause)
+                logError(TAG, "onAdNotFilled", null)
                 emitEvent(AdEvent.LoadFailed(cause))
             }
 
@@ -139,11 +144,12 @@ class MobileFuseBannerImpl(private val isTestMode: Boolean) :
 
     override fun getAdView(): AdViewHolder? {
         logInfo(TAG, "getAdView: $this")
+        val bannerFormat = bannerFormat ?: return null
         return fuseBannerAd?.let {
             AdViewHolder(
                 networkAdview = it,
-                widthDp = bannerFormat.getWidthDp(),
-                heightDp = bannerFormat.getHeightDp(),
+                widthDp = bannerFormat.width,
+                heightDp = bannerFormat.height
             )
         }
     }

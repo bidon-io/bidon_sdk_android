@@ -30,6 +30,9 @@ import kotlin.coroutines.resume
  */
 internal val BigoAdsDemandId = DemandId("bigoads")
 
+/**
+ * [BigoAds](https://www.bigossp.com/guide/sdk/android/document)
+ */
 class BigoAdsAdapter :
     Adapter,
     Initializable<BigoParameters>,
