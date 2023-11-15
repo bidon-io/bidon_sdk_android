@@ -296,8 +296,8 @@ internal class AuctionStatImpl(
                                     fillFinishTs = stat.fillFinishTs,
                                     adUnitUid = stat.adUnit?.uid.orEmpty(),
                                     adUnitLabel = stat.adUnit?.label.orEmpty(),
-                                    tokenStartTs = stat.tokenStartTs,
-                                    tokenFinishTs = stat.tokenFinishTs,
+                                    tokenStartTs = stat.tokenInfo?.tokenStartTs,
+                                    tokenFinishTs = stat.tokenInfo?.tokenFinishTs,
                                 )
                             }
 
