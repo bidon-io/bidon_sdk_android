@@ -59,7 +59,7 @@ fun BannerScreen(navController: NavHostController) {
         mutableStateOf(listOf("Log"))
     }
     val bannerFormat = remember {
-        mutableStateOf(BannerFormat.Banner)
+        mutableStateOf(BannerFormat.Adaptive)
     }
     val showOnLoad = remember {
         mutableStateOf(false)

@@ -61,11 +61,7 @@ internal class UnityAdsInterstitial :
                 error: UnityAds.UnityAdsLoadError?,
                 message: String?
             ) {
-                logError(
-                    tag = TAG,
-                    message = "onUnityAdsFailedToLoad: placementId=$placementId, error=$error, message=$message",
-                    error = error?.asBidonError()
-                )
+                logInfo(TAG, "onUnityAdsFailedToLoad: placementId=$placementId, error=$error, message=$message")
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         }

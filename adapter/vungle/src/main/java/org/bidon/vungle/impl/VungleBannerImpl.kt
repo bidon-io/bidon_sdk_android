@@ -87,7 +87,7 @@ internal class VungleBannerImpl :
                     }
 
                     override fun onError(placementId: String?, exception: VungleException?) {
-                        logError(TAG, "onError placementId=$placementId. $this", exception)
+                        logInfo(TAG, "onError placementId=$placementId. $this")
                         emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                     }
                 }
@@ -156,12 +156,10 @@ internal class VungleBannerImpl :
 
     override fun getAdView(): AdViewHolder? {
         val bannerSize = bannerSize ?: run {
-            AdEvent.ShowFailed(BidonError.AdNotReady)
             return null
         }
         val banner = banner
         if (!isAdReadyToShow || banner == null) {
-            AdEvent.ShowFailed(BidonError.AdNotReady)
             return null
         }
         return AdViewHolder(

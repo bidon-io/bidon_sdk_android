@@ -64,7 +64,7 @@ class MobileFuseInterstitialImpl(private val isTestMode: Boolean) :
 
             override fun onAdNotFilled() {
                 val cause = BidonError.NoFill(demandId)
-                logError(Tag, "onAdNotFilled", cause)
+                logInfo(Tag, "onAdNotFilled $this")
                 adEvent.tryEmit(AdEvent.LoadFailed(cause))
             }
 

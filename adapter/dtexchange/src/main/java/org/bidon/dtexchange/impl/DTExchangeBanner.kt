@@ -19,8 +19,8 @@ import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.impl.pxToDp
+import org.bidon.sdk.auction.ext.height
+import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -141,18 +141,8 @@ internal class DTExchangeBanner :
         controller.bindView(container)
         return AdViewHolder(
             networkAdview = container,
-            widthDp = when (adParams.bannerFormat) {
-                BannerFormat.Banner -> 320
-                BannerFormat.LeaderBoard -> 728
-                BannerFormat.MRec -> 300
-                BannerFormat.Adaptive -> controller.adContentWidth.pxToDp
-            },
-            heightDp = when (adParams.bannerFormat) {
-                BannerFormat.Banner -> 50
-                BannerFormat.LeaderBoard -> 90
-                BannerFormat.MRec -> 250
-                BannerFormat.Adaptive -> controller.adContentHeight.pxToDp
-            }
+            widthDp = adParams.bannerFormat.width,
+            heightDp = adParams.bannerFormat.height
         ).also {
             this.adViewHolder = it
         }
