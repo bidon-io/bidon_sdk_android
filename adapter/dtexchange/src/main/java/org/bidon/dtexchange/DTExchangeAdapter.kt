@@ -50,16 +50,13 @@ class DTExchangeAdapter :
 
     override suspend fun init(context: Context, configParams: DTExchangeParameters) =
         suspendCancellableCoroutine { continuation ->
-            if (BuildConfig.DEBUG) {
-                when (BidonSdk.loggerLevel) {
-                    Logger.Level.Verbose -> InneractiveAdManager.setLogLevel(Log.VERBOSE)
-                    Logger.Level.Error -> InneractiveAdManager.setLogLevel(Log.ERROR)
-                    Logger.Level.Off -> {
-                        // do nothing
-                    }
+            when (BidonSdk.loggerLevel) {
+                Logger.Level.Verbose -> InneractiveAdManager.setLogLevel(Log.VERBOSE)
+                Logger.Level.Error -> InneractiveAdManager.setLogLevel(Log.ERROR)
+                Logger.Level.Off -> {
+                    // do nothing
                 }
             }
-
             InneractiveAdManager.initialize(context, configParams.appId) { initStatus ->
                 when (initStatus) {
                     FyberInitStatus.SUCCESSFULLY -> {
@@ -78,11 +75,9 @@ class DTExchangeAdapter :
         }
 
     override fun parseConfigParam(json: String): DTExchangeParameters {
-        return JSONObject(json).let {
-            DTExchangeParameters(
-                appId = requireNotNull(it.optString("app_id")),
-            )
-        }
+        return DTExchangeParameters(
+            appId = requireNotNull(JSONObject(json).optString("app_id")),
+        )
     }
 
     override fun updateRegulation(regulation: Regulation) {
