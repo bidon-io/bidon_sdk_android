@@ -31,7 +31,7 @@ import kotlin.coroutines.resumeWithException
 /**
  * Created by Aleksei Cherniaev on 20/06/2023.
  *
- * [Mintegral](https://dev.mintegral.com/doc/index.html?file=sdk-m_sdk-in_app_header_bidding&lang=en)
+ * [Mintegral](https://dev.mintegral.com/doc/)
  */
 internal val MintegralDemandId = DemandId("mintegral")
 

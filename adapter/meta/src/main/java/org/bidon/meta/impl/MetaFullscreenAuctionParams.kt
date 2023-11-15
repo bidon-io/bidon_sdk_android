@@ -32,6 +32,6 @@ class MetaBannerAuctionParams(
             BannerFormat.Banner -> AdSize.BANNER_320_50
             BannerFormat.LeaderBoard -> AdSize.BANNER_HEIGHT_90
             BannerFormat.MRec -> AdSize.RECTANGLE_HEIGHT_250
-            BannerFormat.Adaptive -> if (!isTablet) AdSize.BANNER_HEIGHT_50 else AdSize.BANNER_HEIGHT_90
+            BannerFormat.Adaptive -> if (isTablet) AdSize.BANNER_HEIGHT_90 else AdSize.BANNER_HEIGHT_50
         }
 }
