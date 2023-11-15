@@ -57,11 +57,7 @@ internal class InmobiRewardedImpl :
                 }
 
                 override fun onAdLoadFailed(interstitial: InMobiInterstitial, status: InMobiAdRequestStatus) {
-                    logError(
-                        tag = TAG,
-                        message = "Error while loading ad: ${status.statusCode} ${status.message}. $this",
-                        error = BidonError.Unspecified(demandId)
-                    )
+                    logInfo(TAG, "Error while loading ad: ${status.statusCode} ${status.message}. $this")
                     emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                 }
 

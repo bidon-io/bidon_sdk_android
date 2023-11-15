@@ -11,16 +11,14 @@ import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.DeviceInfo
+import org.bidon.sdk.auction.ext.height
+import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
-import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.BidType
-import org.bidon.unityads.ext.asBidonError
 
 /**
  * Created by Aleksei Cherniaev on 12/04/2023.
@@ -45,30 +43,11 @@ internal class UnityAdsBanner :
         }
     }
 
-    override fun getAdView(): AdViewHolder? {
-        val bannerAdView = bannerAdView ?: return null
-        return AdViewHolder(
-            networkAdview = bannerAdView,
-            widthDp = bannerAdView.size.width,
-            heightDp = bannerAdView.size.height
-        )
-    }
-
     override fun load(adParams: UnityAdsBannerAuctionParams) {
         adUnit = adParams.adUnit
         logInfo(TAG, "Starting with $adParams")
         adParams.activity.runOnUiThread {
-            val unityBannerSize = when (adParams.bannerFormat) {
-                BannerFormat.LeaderBoard -> UnityBannerSize(728, 90)
-                BannerFormat.Banner -> UnityBannerSize(320, 50)
-                BannerFormat.Adaptive -> if (DeviceInfo.isTablet) {
-                    UnityBannerSize(728, 90)
-                } else {
-                    UnityBannerSize(320, 50)
-                }
-
-                BannerFormat.MRec -> UnityBannerSize(300, 250)
-            }
+            val unityBannerSize = UnityBannerSize(adParams.bannerFormat.width, adParams.bannerFormat.height)
             val adView = BannerView(adParams.activity, adParams.placementId, unityBannerSize).also {
                 bannerAdView = it
             }
@@ -94,8 +73,7 @@ internal class UnityAdsBanner :
                     bannerAdView: BannerView?,
                     errorInfo: BannerErrorInfo?
                 ) {
-                    val cause = errorInfo.asBidonError()
-                    logError(TAG, "Error while loading ad: $errorInfo. $this", cause)
+                    logInfo(TAG, "Error while loading ad: $errorInfo. $this")
                     isAdReadyToShow = false
                     emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                 }
@@ -105,6 +83,15 @@ internal class UnityAdsBanner :
             }
             adView.load()
         }
+    }
+
+    override fun getAdView(): AdViewHolder? {
+        val bannerAdView = bannerAdView ?: return null
+        return AdViewHolder(
+            networkAdview = bannerAdView,
+            widthDp = bannerAdView.size.width,
+            heightDp = bannerAdView.size.height
+        )
     }
 
     override fun destroy() {

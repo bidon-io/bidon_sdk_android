@@ -1,3 +1,9 @@
+# Release 0.4.23 (2023.11.09)
+## Features:
+[BDN-510](https://appodeal.atlassian.net/browse/BDN-510) Upgrade adapter versions: Mintegral SDK - 16.5.41, Inmobi SDK - 10.6.1, UnityAds SDK - 4.9.2.
+[BDN-513](https://appodeal.atlassian.net/browse/BDN-513) Remove tracker on Detach. Fixed Adaptive banner logic.
+
+# Release 0.4.21 (2023.10.20)
 ## Features:
 [BDN-492](https://appodeal.atlassian.net/browse/BDN-492) Continue awaiting adapter after timed out
 [BDN-473](https://appodeal.atlassian.net/browse/BDN-473) Line Items Rework In Bidon SDK Server API
