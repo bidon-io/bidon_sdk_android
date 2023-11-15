@@ -5,9 +5,9 @@ import com.vungle.warren.AdConfig
 import com.vungle.warren.BannerAdConfig
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.BidResponse
-import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 
 class VungleBannerAuctionParams(
     val activity: Activity,
