@@ -90,7 +90,7 @@ internal class AmazonRewardedImpl(
                 }
 
                 override fun onAdFailed(view: View?) {
-                    logError(TAG, "onAdFailed", BidonError.NoFill(demandId))
+                    logInfo(TAG, "onAdFailed")
                     emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
                 }
 

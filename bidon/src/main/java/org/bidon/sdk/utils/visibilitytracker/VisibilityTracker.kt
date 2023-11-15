@@ -20,6 +20,7 @@ internal class VisibilityTracker(
     private val pauseResumeObserver: PauseResumeObserver = get()
 ) {
     private val isStarted = AtomicBoolean(false)
+    private val isShown = AtomicBoolean(false)
     private val showTracked = AtomicBoolean(false)
     private val preDrawListener = ViewTreeObserver.OnPreDrawListener {
         checkVisible()
@@ -29,15 +30,28 @@ internal class VisibilityTracker(
     private var shownObserverJob: Job? = null
     private var view: View? = null
     private var onViewShown: (() -> Unit)? = null
+    private val attachStateChangeListener by lazy {
+        object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {}
+
+            override fun onViewDetachedFromWindow(v: View) {
+                stop()
+            }
+        }
+    }
 
     fun start(
         view: View,
         onViewShown: () -> Unit,
     ) {
+        if (isShown.get()) {
+            return
+        }
         if (isStarted.compareAndSet(/* expectedValue = */ false, /* newValue = */ true)) {
             this.onViewShown = onViewShown
             this.view = view
             logInfo(TAG, "Start tracking - $view")
+            view.addOnAttachStateChangeListener(attachStateChangeListener)
             view.viewTreeObserver.addOnPreDrawListener(preDrawListener)
             checkVisible()
         }
@@ -46,10 +60,12 @@ internal class VisibilityTracker(
     fun stop() {
         logInfo(TAG, "Stop tracking - $view")
         view?.viewTreeObserver?.removeOnPreDrawListener(preDrawListener)
+        view?.removeOnAttachStateChangeListener(attachStateChangeListener)
         shownObserverJob?.cancel()
         shownObserverJob = null
         view = null
         onViewShown = null
+        isStarted.set(false)
     }
 
     private fun checkVisible() {
@@ -69,6 +85,7 @@ internal class VisibilityTracker(
                 if (view.isOnTop(visibilityParams)) {
                     if (showTracked.compareAndSet(false, true)) {
                         logInfo(TAG, "Tracked - $view")
+                        isShown.set(true)
                         onViewShown?.invoke()
                     }
                     stop()
