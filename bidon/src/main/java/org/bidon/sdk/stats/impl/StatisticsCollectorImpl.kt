@@ -111,12 +111,16 @@ class StatisticsCollectorImpl : StatisticsCollector {
         roundId: String,
         roundIndex: Int,
         demandAd: DemandAd,
+        roundPricefloor: Double,
+        auctionPricefloor: Double
     ) {
         this._demandAd = demandAd
         stat = stat.copy(
             auctionId = auctionId,
             roundId = roundId,
             roundIndex = roundIndex,
+            roundPricefloor = roundPricefloor,
+            auctionPricefloor = auctionPricefloor
         )
     }
 
