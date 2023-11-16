@@ -57,6 +57,8 @@ interface StatisticsCollector {
         roundId: String,
         roundIndex: Int,
         demandAd: DemandAd,
+        roundPricefloor: Double,
+        auctionPricefloor: Double,
     )
 
     fun getStats(): BidStat
