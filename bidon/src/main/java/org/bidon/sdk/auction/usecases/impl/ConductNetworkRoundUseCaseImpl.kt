@@ -4,6 +4,7 @@ import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.withTimeoutOrNull
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
@@ -19,6 +20,7 @@ import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.ConductNetworkRoundUseCase
 import org.bidon.sdk.auction.usecases.models.NetworksResult
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.asRoundStatus
@@ -50,7 +52,7 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
                     logInfo(
                         tag = TAG,
                         message = "Round '${round.id}'. Adapter ${adSource.demandId.demandId} starts fill. " +
-                            "PriceFloor=$pricefloor. LineItems: $availableLineItemsForDemand."
+                                "PriceFloor=$pricefloor. LineItems: $availableLineItemsForDemand."
                     )
                     val adEvent = loadAd(
                         adSource = adSource,
@@ -79,6 +81,8 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
                 results = deferredList,
                 remainingLineItems = mutableLineItems.toList()
             )
+        }.onFailure {
+            logError(TAG, "Round '${round.id}' failed", it)
         }.getOrNull() ?: run {
             return NetworksResult(
                 results = emptyList(),
@@ -112,12 +116,24 @@ internal class ConductNetworkRoundUseCaseImpl : ConductNetworkRoundUseCase {
             }
 
             // FILL
-            adSource.markFillStarted(adParam.lineItem, adParam.price)
             adSource.load(adParam)
-            val fillAdEvent = adSource.adEvent.first {
-                // wait for results
-                it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
-            }
+            val fillAdEvent = adSource.adEvent
+                .onSubscription {
+                    runCatching {
+                        adSource.markFillStarted(adParam.lineItem, adParam.price)
+                        adSource.load(adParam)
+                    }.onFailure {
+                        logError(TAG, "Loading failed($adParam): $it", it)
+                        adSource.emitEvent(
+                            event = AdEvent.LoadFailed(
+                                cause = BidonError.NoFill(adSource.demandId)
+                            )
+                        )
+                    }
+                }.first {
+                    // wait for results
+                    it is AdEvent.Fill || it is AdEvent.LoadFailed || it is AdEvent.Expired
+                }
             when (fillAdEvent) {
                 is AdEvent.Fill -> {
                     adSource.markFillFinished(

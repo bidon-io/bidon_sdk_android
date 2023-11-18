@@ -14,8 +14,10 @@ import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.utils.ext.TAG
 
 internal class TestInterstitialImpl(
     private val testParameters: TestAdapterParameters,
@@ -43,7 +45,9 @@ internal class TestInterstitialImpl(
         get() = testParameters.fill == Process.Succeed
 
     override fun load(adParams: TestInterstitialParameters) {
+        logInfo(TAG, "Starting with $adParams: $this")
         this.adParams = adParams
+        testParameters.resultPricefloor?.let { setPrice(it) }
         when (testParameters.fill) {
             Process.Succeed -> emitEvent(AdEvent.Fill(ad!!))
             Process.Failed -> emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
