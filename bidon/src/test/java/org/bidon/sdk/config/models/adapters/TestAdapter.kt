@@ -7,6 +7,7 @@ import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.adapter.AdapterInfo
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Initializable
+import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.SupportsRegulation
 import org.bidon.sdk.regulation.Regulation
 

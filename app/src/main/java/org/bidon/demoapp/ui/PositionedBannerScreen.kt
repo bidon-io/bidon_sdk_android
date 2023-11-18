@@ -165,7 +165,7 @@ fun PositionedBannerScreen(
                         modifier = Modifier.padding(end = 12.dp),
                         text = "Load",
                     ) {
-                        banner.loadAd(activity, pricefloor = 0.001)
+                        banner.loadAd(activity, pricefloor = 0.27002444863319397)
                     }
                     AppButton(
                         modifier = Modifier.padding(end = 12.dp),
