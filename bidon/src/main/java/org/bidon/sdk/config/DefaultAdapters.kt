@@ -8,6 +8,7 @@ package org.bidon.sdk.config
 @Suppress("unused")
 enum class DefaultAdapters(val classPath: String) {
     AdmobAdapter(classPath = "org.bidon.admob.AdmobAdapter"),
+    GoogleAdManagerAdapter(classPath = "org.bidon.gam.GamAdapter"),
     BidmachineAdapter(classPath = "org.bidon.bidmachine.BidMachineAdapter"),
     ApplovinAdapter(classPath = "org.bidon.applovin.ApplovinAdapter"),
     DTExchangeAdapter(classPath = "org.bidon.dtexchange.DTExchangeAdapter"),
