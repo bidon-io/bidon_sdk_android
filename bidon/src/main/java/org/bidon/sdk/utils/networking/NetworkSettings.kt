@@ -5,4 +5,5 @@ package org.bidon.sdk.utils.networking
  */
 object NetworkSettings {
     const val BidonBaseUrl = "https://api.bidon.org"
+    var basicAuthHeader: String? = null
 }
