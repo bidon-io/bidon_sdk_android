@@ -9,12 +9,8 @@ import org.bidon.sdk.utils.serializer.Serializable
  * @param orientationCode is [AdObjectRequest.Orientation.code]
  */
 internal data class BidRequest(
-    @field:JsonName("auction_configuration_id")
-    val auctionConfigurationId: Int?,
     @field:JsonName("auction_configuration_uid")
     val auctionConfigurationUid: String?,
-    @field:JsonName("id")
-    val impressionId: String,
     @field:JsonName("auction_id")
     val auctionId: String,
     @field:JsonName("round_id")

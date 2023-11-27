@@ -20,6 +20,7 @@ android {
 
 dependencies {
     compileOnly(project(":bidon"))
+    testImplementation(project(":bidon"))
 
     implementation("com.mobilefuse.sdk:mobilefuse-sdk-core:1.6.2")
 }

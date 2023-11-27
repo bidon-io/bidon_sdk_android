@@ -24,6 +24,7 @@ internal class ResultsCollectorImpl(
     private val auctionResults = MutableStateFlow(listOf<AuctionResult>())
 
     private val roundResult = MutableStateFlow<RoundResult>(RoundResult.Idle)
+
     override fun serverBiddingStarted() {
         roundResult.update {
             require(it is RoundResult.Results)
@@ -42,7 +43,7 @@ internal class ResultsCollectorImpl(
             RoundResult.Results(
                 biddingResult = run {
                     require(curRoundResult.biddingResult is BiddingResult.ServerBiddingStarted)
-                    if (bids == null) {
+                    if (bids.isNullOrEmpty()) {
                         BiddingResult.NoBid(
                             serverBiddingStartTs = curRoundResult.biddingResult.serverBiddingStartTs,
                             serverBiddingFinishTs = SystemTimeNow,

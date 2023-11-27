@@ -19,6 +19,6 @@ enum class SlotType(val format: String) {
     INTERSTITIAL("INTERSTITIAL");
 
     companion object {
-        fun get(format: String): SlotType? = values().firstOrNull { it.format == format }
+        fun getOrNull(format: String): SlotType? = values().firstOrNull { it.format == format }
     }
 }

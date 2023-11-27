@@ -9,12 +9,10 @@ import org.json.JSONObject
  */
 internal data class AuctionResponse(
     val rounds: List<RoundRequest>?,
-    val lineItems: List<LineItem>?,
+    val adUnits: List<AdUnit>?,
     val pricefloor: Double?,
     val token: String?,
     val auctionId: String,
-    @Deprecated("Use auctionConfigurationUid instead")
-    val auctionConfigurationId: Int?,
     val auctionConfigurationUid: String?,
     val externalWinNotificationsEnabled: Boolean,
 )
@@ -26,9 +24,8 @@ internal class AuctionResponseParser : JsonParser<AuctionResponse> {
             rounds = JsonParsers.parseList(json.optJSONArray("rounds")),
             auctionId = json.getString("auction_id"),
             pricefloor = json.optDouble("pricefloor"),
-            auctionConfigurationId = json.optInt("auction_configuration_id"),
             auctionConfigurationUid = json.optString("auction_configuration_uid"),
-            lineItems = JsonParsers.parseList(json.optJSONArray("line_items")),
+            adUnits = JsonParsers.parseList(json.optJSONArray("ad_units")),
             token = json.optString("token"),
             externalWinNotificationsEnabled = json.optBoolean("external_win_notifications", false),
         )

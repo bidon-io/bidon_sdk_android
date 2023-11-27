@@ -6,7 +6,6 @@ import android.view.View
 import com.amazon.device.ads.DTBAdInterstitial
 import com.amazon.device.ads.DTBAdInterstitialListener
 import com.amazon.device.ads.SDKUtilities
-import org.bidon.amazon.SlotType
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
@@ -15,6 +14,7 @@ import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.auction.AdTypeParam
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -25,9 +25,8 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.json.JSONArray
 import org.json.JSONObject
 
-internal class AmazonRewardedImpl(
-    private val slots: Map<SlotType, List<String>>
-) : AdSource.Rewarded<FullscreenAuctionParams>,
+internal class AmazonRewardedImpl :
+    AdSource.Rewarded<FullscreenAuctionParams>,
     Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
@@ -39,7 +38,10 @@ internal class AmazonRewardedImpl(
     override val isAdReadyToShow: Boolean
         get() = interstitial != null
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? {
+        val slots = ParseSlotsUseCase()(adUnits).also {
+            logInfo("AmazonAdapter", "Parsed slots: $it")
+        }
         val amazonInfo = obtainToken(slots, adTypeParam).takeIf { it.isNotEmpty() }?.also {
             this.amazonInfos.addAll(it)
         } ?: return null
@@ -61,10 +63,8 @@ internal class AmazonRewardedImpl(
         return auctionParamsScope {
             FullscreenAuctionParams(
                 activity = activity,
-                slotUuid = requireNotNull(json?.optString("slot_uuid")) {
-                    "SlotUid is required for Amazon banner ad"
-                },
-                price = pricefloor
+                price = requiredBidResponse.price,
+                adUnit = requiredBidResponse.adUnit
             )
         }
     }

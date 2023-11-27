@@ -1,6 +1,5 @@
 package org.bidon.sdk.auction.models
 
-import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.utils.json.JsonParser
 import org.bidon.sdk.utils.serializer.JsonName
 import org.bidon.sdk.utils.serializer.Serializable
@@ -32,28 +31,25 @@ internal class BidResponseParser : JsonParser<BiddingResponse> {
             bids = json.optJSONArray("bids")?.let { array ->
                 buildList {
                     repeat(array.length()) { index ->
-                        array.optJSONObject(index)
-                            ?.let { bidJson ->
-                                val bid = BidResponse(
-                                    id = bidJson.getString("id"),
-                                    impressionId = bidJson.optString("impid"),
-                                    price = bidJson.getDouble("price"),
-                                    demands = bidJson.optJSONObject("demands")?.let { jsonObject ->
-                                        jsonObject.keys().asSequence().mapNotNull { demandId ->
-                                            jsonObject.optJSONObject(demandId)?.let { demandId to it }.also {
-                                                if (it == null) {
-                                                    logError(
-                                                        TAG,
-                                                        "DemandId($demandId) does not have JSONObject",
-                                                        NullPointerException()
-                                                    )
-                                                }
-                                            }
-                                        }.toList()
-                                    } ?: emptyList()
-                                )
-                                add(bid)
-                            }
+                        runCatching {
+                            array.optJSONObject(index)
+                                ?.let { bidJson ->
+                                    val adUnitJson = bidJson.getJSONObject("ad_unit").toString()
+                                    val adUnit = requireNotNull(AdUnitParser().parseOrNull(adUnitJson)) {
+                                        "AdUnit is null for bid $bidJson"
+                                    }
+                                    val bid = BidResponse(
+                                        id = bidJson.getString("id"),
+                                        impressionId = bidJson.optString("imp_id"),
+                                        price = bidJson.getDouble("price"),
+                                        adUnit = adUnit,
+                                        ext = bidJson.optJSONObject("ext")?.toString()
+                                    )
+                                    add(bid)
+                                }
+                        }.onFailure {
+                            println("Failed to parse bid $index: ${it.message}")
+                        }
                     }
                 }
             },

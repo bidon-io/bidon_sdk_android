@@ -15,10 +15,10 @@ import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.auction.models.BannerRequest
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.ConductBiddingRoundUseCase
 import org.bidon.sdk.auction.usecases.ConductNetworkRoundUseCase
@@ -29,7 +29,6 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.regulation.Regulation
 import org.bidon.sdk.stats.StatisticsCollector
-import org.bidon.sdk.stats.models.BidType
 
 internal class ExecuteRoundUseCaseImpl(
     private val adaptersSource: AdaptersSource,
@@ -44,14 +43,14 @@ internal class ExecuteRoundUseCaseImpl(
         round: RoundRequest,
         roundIndex: Int,
         pricefloor: Double,
-        lineItems: List<LineItem>,
+        adUnits: List<AdUnit>,
         resultsCollector: ResultsCollector,
-        onFinish: (remainingLineItems: List<LineItem>) -> Unit,
+        onFinish: (remainingLineItems: List<AdUnit>) -> Unit,
     ): Result<List<AuctionResult>> = coroutineScope {
-        val mutableLineItems = lineItems.toMutableList()
+        val mutableAdUnits = adUnits.toMutableList()
         runCatching {
             val logText = "Round '${round.id}' started with"
-            logInfo(TAG, "$logText line items: $mutableLineItems")
+            logInfo(TAG, "$logText adUnits: $mutableAdUnits")
             val roundDeferred = mutableListOf<Deferred<AuctionResult>>()
 
             /**
@@ -71,7 +70,6 @@ internal class ExecuteRoundUseCaseImpl(
                         demandAd = demandAd,
                         round = round,
                         roundIndex = roundIndex,
-                        bidType = BidType.RTB
                     )
                 }
                 .filterIsInstance<Mode.Bidding>()
@@ -90,9 +88,9 @@ internal class ExecuteRoundUseCaseImpl(
                         bidfloor = pricefloor,
                         auctionId = auctionResponse.auctionId,
                         round = round,
-                        auctionConfigurationId = auctionResponse.auctionConfigurationId,
                         auctionConfigurationUid = auctionResponse.auctionConfigurationUid,
-                        resultsCollector = resultsCollector
+                        resultsCollector = resultsCollector,
+                        adUnits = adUnits
                     )
                 }
             } else {
@@ -115,7 +113,6 @@ internal class ExecuteRoundUseCaseImpl(
                         demandAd = demandAd,
                         round = round,
                         roundIndex = roundIndex,
-                        bidType = BidType.CPM
                     )
                 }
                 .filterIsInstance<Mode.Network>()
@@ -134,14 +131,14 @@ internal class ExecuteRoundUseCaseImpl(
                     participantIds = round.demandIds,
                     adTypeParam = adTypeParam,
                     demandAd = demandAd,
-                    lineItems = mutableLineItems,
+                    adUnits = mutableAdUnits,
                     round = round,
                     pricefloor = pricefloor,
                     scope = this@coroutineScope,
                     resultsCollector = resultsCollector
                 )
-                mutableLineItems.clear()
-                mutableLineItems.addAll(networkResults.remainingLineItems)
+                mutableAdUnits.clear()
+                mutableAdUnits.addAll(networkResults.remainingAdUnits)
                 roundDeferred.addAll(networkResults.results)
             }
 
@@ -165,7 +162,7 @@ internal class ExecuteRoundUseCaseImpl(
                     logInfo(TAG, "Round '${round.id}' result #$index. $details")
                     result
                 }.let {
-                    onFinish.invoke(mutableLineItems)
+                    onFinish.invoke(mutableAdUnits)
                     logInfo(TAG, "Round '${round.id}' finished with ${it.size} results: $it")
                     it
                 }
@@ -179,20 +176,15 @@ internal class ExecuteRoundUseCaseImpl(
         demandAd: DemandAd,
         round: RoundRequest,
         roundIndex: Int,
-        bidType: BidType
     ) {
         adSource.addRoundInfo(
             auctionId = auctionResponse.auctionId,
             roundId = round.id,
             demandAd = demandAd,
             roundIndex = roundIndex,
-            bidType = bidType
         )
         adSource.setStatisticAdType(adTypeParam.asStatisticAdType())
-        adSource.addAuctionConfigurationId(
-            auctionConfigurationId = auctionResponse.auctionConfigurationId ?: 0,
-            auctionConfigurationUid = auctionResponse.auctionConfigurationUid ?: ""
-        )
+        adSource.addAuctionConfigurationUid(auctionResponse.auctionConfigurationUid ?: "")
         adSource.addExternalWinNotificationsEnabled(auctionResponse.externalWinNotificationsEnabled)
     }
 

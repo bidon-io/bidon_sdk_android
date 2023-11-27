@@ -1,7 +1,7 @@
 package org.bidon.sdk.logs.analytic
 
 import org.bidon.sdk.adapter.Adapter
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
 
 /**
  * Created by Bidon Team on 21/02/2023.
@@ -17,7 +17,7 @@ enum class Precision {
     Precise,
 
     /**
-     * Based on eCPM ad revenue [LineItem.pricefloor].
+     * Based on eCPM ad revenue [AdUnit.pricefloor].
      *
      * Available if the [Adapter] doesn't provide precise value
      */

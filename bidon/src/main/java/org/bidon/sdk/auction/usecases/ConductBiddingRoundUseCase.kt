@@ -5,6 +5,7 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.RoundRequest
 
 /**
@@ -23,8 +24,8 @@ internal interface ConductBiddingRoundUseCase {
         bidfloor: Double,
         auctionId: String,
         round: RoundRequest,
-        auctionConfigurationId: Int?,
         auctionConfigurationUid: String?,
+        adUnits: List<AdUnit>,
         resultsCollector: ResultsCollector,
     )
 }

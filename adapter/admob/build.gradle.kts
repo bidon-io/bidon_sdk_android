@@ -20,4 +20,5 @@ android {
 dependencies {
     compileOnly(project(":bidon"))
     implementation(Dependencies.Google.PlayServicesAds)
+    testImplementation(project(":bidon"))
 }

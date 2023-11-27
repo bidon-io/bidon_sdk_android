@@ -12,9 +12,9 @@ import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.Auction.AuctionState
 import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.AuctionStat
 import org.bidon.sdk.auction.usecases.ExecuteRoundUseCase
@@ -39,7 +39,7 @@ internal class AuctionImpl(
 ) : Auction {
     private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
     private val state = MutableStateFlow(AuctionState.Initialized)
-    private val mutableLineItems = mutableListOf<LineItem>()
+    private val mutableAdUnits = mutableListOf<AdUnit>()
     private var _auctionDataResponse: AuctionResponse? = null
     private var _demandAd: DemandAd? = null
     private var job: Job? = null
@@ -137,7 +137,7 @@ internal class AuctionImpl(
     ): List<AuctionResult> {
         _auctionDataResponse = auctionData
         _demandAd = demandAd
-        mutableLineItems.addAll(auctionData.lineItems ?: emptyList())
+        mutableAdUnits.addAll(auctionData.adUnits ?: emptyList())
 
         // Start auction
         conductRounds(
@@ -186,7 +186,7 @@ internal class AuctionImpl(
 
     private fun clearData() {
         resultsCollector.clear()
-        mutableLineItems.clear()
+        mutableAdUnits.clear()
         _auctionDataResponse = null
     }
 
@@ -229,11 +229,11 @@ internal class AuctionImpl(
             demandAd = demandAd,
             adTypeParam = adTypeParamData,
             auctionResponse = auctionDataResponse,
-            lineItems = mutableLineItems,
+            adUnits = mutableAdUnits,
             resultsCollector = resultsCollector,
             onFinish = { remainingLineItems ->
-                mutableLineItems.clear()
-                mutableLineItems.addAll(remainingLineItems)
+                mutableAdUnits.clear()
+                mutableAdUnits.addAll(remainingLineItems)
             }
         )
 

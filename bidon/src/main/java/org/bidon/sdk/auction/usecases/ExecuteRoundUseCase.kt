@@ -3,9 +3,9 @@ package org.bidon.sdk.auction.usecases
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.RoundRequest
 
 /**
@@ -19,8 +19,8 @@ internal interface ExecuteRoundUseCase {
         round: RoundRequest,
         roundIndex: Int,
         pricefloor: Double,
-        lineItems: List<LineItem>,
+        adUnits: List<AdUnit>,
         resultsCollector: ResultsCollector,
-        onFinish: (remainingLineItems: List<LineItem>) -> Unit,
+        onFinish: (remainingLineItems: List<AdUnit>) -> Unit,
     ): Result<List<AuctionResult>>
 }

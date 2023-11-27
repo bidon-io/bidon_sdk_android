@@ -11,6 +11,7 @@ import org.bidon.sdk.config.models.ConfigResponse
 import org.bidon.sdk.config.usecases.InitAndRegisterAdaptersUseCase
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.utils.SdkDispatchers
 import kotlin.system.measureTimeMillis
 
 /**
@@ -21,52 +22,46 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
     private val adaptersSource: AdaptersSource
 ) : InitAndRegisterAdaptersUseCase {
 
+    private val scope get() = CoroutineScope(SdkDispatchers.Bidon)
+
     override suspend operator fun invoke(
         context: Context,
         adapters: List<Adapter>,
         configResponse: ConfigResponse,
         isTestMode: Boolean
-    ) = coroutineScope {
-        val deferredList = adapters.associate { adapter ->
+    ) {
+        val deferredList = adapters.map { adapter ->
             val demandId = adapter.demandId
-            demandId to async {
+            scope.async {
                 runCatching {
-                    withTimeout(configResponse.initializationTimeout) {
-                        // set test mode param
-                        (adapter as? SupportsTestMode)?.isTestMode = isTestMode
+                    // set test mode param
+                    (adapter as? SupportsTestMode)?.isTestMode = isTestMode
 
-                        // initialize if needed
-                        val initializable = adapter as? Initializable<AdapterParameters>
-                        if (initializable == null) {
-                            adapter
-                        } else {
-                            val timeStart = measureTimeMillis {
-                                val adapterParameters =
-                                    parseAdapterParameters(configResponse, adapter).getOrThrow()
-                                adapter.init(context, adapterParameters)
-                            }
-                            logInfo(
-                                TAG,
-                                "Adapter ${demandId.demandId} initialized in $timeStart ms."
-                            )
-
-                            // adapter is ready
-                            adapter
+                    // initialize if needed
+                    val initializable = adapter as? Initializable<AdapterParameters>
+                    if (initializable == null) {
+                        adapter
+                    } else {
+                        val timeStart = measureTimeMillis {
+                            val adapterParameters =
+                                parseAdapterParameters(configResponse, adapter).getOrThrow()
+                            adapter.init(context, adapterParameters)
                         }
+                        logInfo(TAG, "Adapter ${demandId.demandId} initialized in $timeStart ms.")
                     }
-                }
+                }.onSuccess {
+                    /**
+                     * Add adapter to [AdaptersSource] only if it was initialized successfully.
+                     */
+                    adaptersSource.add(adapter)
+                }.onFailure { cause ->
+                    logError(TAG, "Adapter not initialized: ${demandId.demandId}", cause)
+                }.getOrNull()
             }
         }
-        val readyAdapters = deferredList.mapNotNull { (demandId, deferred) ->
-            deferred.await().onFailure { cause ->
-                logError(TAG, "Adapter not initialized: ${demandId.demandId}", cause)
-            }.getOrNull()
+        withTimeoutOrNull(configResponse.initializationTimeout) {
+            deferredList.forEach { it.await() }
         }
-        logInfo(
-            TAG,
-            "Registered adapters: ${readyAdapters.joinToString { it::class.java.simpleName }}"
-        )
-        adaptersSource.add(readyAdapters)
     }
 
     private fun parseAdapterParameters(

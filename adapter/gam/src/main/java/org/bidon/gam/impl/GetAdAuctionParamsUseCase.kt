@@ -7,28 +7,28 @@ import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.stats.models.BidType
 
 internal class GetAdAuctionParamsUseCase {
     operator fun invoke(
         auctionParamsScope: AdAuctionParamSource,
         adType: AdType,
-        isBiddingMode: Boolean
+        bidType: BidType
     ): Result<AdAuctionParams> {
         return auctionParamsScope {
             when (adType) {
                 AdType.Banner -> {
-                    if (isBiddingMode) {
+                    if (bidType == BidType.RTB) {
                         GamBannerAuctionParams.Bidding(
                             activity = activity,
                             bannerFormat = bannerFormat,
                             containerWidth = containerWidth,
                             price = pricefloor,
-                            adUnitId = requireNotNull(json?.getString("ad_unit_id")),
-                            payload = requireNotNull(json?.getString("payload"))
+                            bidResponse = requiredBidResponse,
                         )
                     } else {
                         GamBannerAuctionParams.Network(
-                            lineItem = popLineItem(GamDemandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                            adUnit = popAdUnit(GamDemandId, bidType) ?: error(BidonError.NoAppropriateAdUnitId),
                             bannerFormat = bannerFormat,
                             activity = activity,
                             containerWidth = containerWidth,
@@ -38,16 +38,15 @@ internal class GetAdAuctionParamsUseCase {
 
                 AdType.Interstitial,
                 AdType.Rewarded -> {
-                    if (isBiddingMode) {
+                    if (bidType == BidType.RTB) {
                         GamFullscreenAdAuctionParams.Bidding(
                             activity = activity,
                             price = pricefloor,
-                            adUnitId = requireNotNull(json?.getString("ad_unit_id")),
-                            payload = requireNotNull(json?.getString("payload"))
+                            bidResponse = requiredBidResponse,
                         )
                     } else {
                         GamFullscreenAdAuctionParams.Network(
-                            lineItem = popLineItem(GamDemandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                            adUnit = popAdUnit(GamDemandId, bidType) ?: error(BidonError.NoAppropriateAdUnitId),
                             activity = activity,
                         )
                     }

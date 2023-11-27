@@ -18,6 +18,7 @@ import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.auction.AdTypeParam
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -41,19 +42,14 @@ internal class MintegralBannerImpl :
 
     override var isAdReadyToShow: Boolean = false
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = BidManager.getBuyerUid(context)
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? = BidManager.getBuyerUid(context)
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             MintegralBannerAuctionParam(
                 activity = activity,
-                price = pricefloor,
-                payload = requireNotNull(json?.getString("payload")) {
-                    "Payload is required for Mintegral"
-                },
-                unitId = json?.getString("unit_id"),
-                placementId = json?.getString("placement_id"),
                 bannerFormat = bannerFormat,
+                bidResponse = requiredBidResponse
             )
         }
     }

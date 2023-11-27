@@ -20,6 +20,7 @@ android {
 
 dependencies {
     compileOnly(project(":bidon"))
+    testImplementation(project(":bidon"))
 
     implementation("com.vungle:publisher-sdk-android:6.12.1")
 }
