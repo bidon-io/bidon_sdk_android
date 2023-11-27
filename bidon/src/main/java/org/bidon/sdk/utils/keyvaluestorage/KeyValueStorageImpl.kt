@@ -17,10 +17,6 @@ internal class KeyValueStorageImpl(private val context: Context) : KeyValueStora
         get() = Key.Host.getString()
         set(value) = Key.Host.saveString(value)
 
-    override var segmentId: String?
-        get() = Key.SegmentId.getString()
-        set(value) = Key.SegmentId.saveString(value)
-
     override var segmentUid: String?
         get() = Key.SegmentUid.getString()
         set(value) = Key.SegmentUid.saveString(value)

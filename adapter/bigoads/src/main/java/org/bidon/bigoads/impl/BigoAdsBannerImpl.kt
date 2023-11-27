@@ -15,6 +15,7 @@ import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.ext.height
 import org.bidon.sdk.auction.ext.width
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
@@ -60,18 +61,12 @@ internal class BigoAdsBannerImpl :
             BigoBannerAuctionParams(
                 activity = activity,
                 bannerFormat = bannerFormat,
-                payload = requireNotNull(json?.optString("payload")) {
-                    "Payload is required for BigoAds banner ad"
-                },
-                slotId = requireNotNull(json?.optString("slot_id")) {
-                    "Slot id is required for BigoAds banner ad"
-                },
-                bidPrice = pricefloor,
+                bidResponse = requiredBidResponse
             )
         }
     }
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = BigoAdSdk.getBidderToken()
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? = BigoAdSdk.getBidderToken()
 
     override fun load(adParams: BigoBannerAuctionParams) {
         val builder = BannerAdRequest.Builder()
@@ -112,7 +107,7 @@ internal class BigoAdsBannerImpl :
                                 AdEvent.PaidRevenue(
                                     ad = ad,
                                     adValue = AdValue(
-                                        adRevenue = adParams.bidPrice / 1000.0,
+                                        adRevenue = adParams.price / 1000.0,
                                         precision = Precision.Precise,
                                         currency = USD,
                                     )

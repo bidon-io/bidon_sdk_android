@@ -20,12 +20,13 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 /**
  * Created by Aleksei Cherniaev on 28/02/2023.
@@ -37,7 +38,7 @@ internal class DTExchangeRewarded :
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var inneractiveAdSpot: InneractiveAdSpot? = null
-    private var lineItem: LineItem? = null
+    private var adUnit: AdUnit? = null
     private var demandSource: String? = null
 
     override val isAdReadyToShow: Boolean
@@ -45,14 +46,14 @@ internal class DTExchangeRewarded :
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
-            DTExchangeAdAuctionParams(lineItem)
+            val adUnit = popAdUnit(demandId, BidType.CPM) ?: error(BidonError.NoAppropriateAdUnitId)
+            DTExchangeAdAuctionParams(adUnit)
         }
     }
 
     override fun load(adParams: DTExchangeAdAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
-        lineItem = adParams.lineItem
+        adUnit = adParams.adUnit
         val spot = InneractiveAdSpotManager.get().createSpot()
         val controller = InneractiveFullscreenUnitController()
         val videoController = InneractiveFullscreenVideoContentController()
@@ -127,7 +128,15 @@ internal class DTExchangeRewarded :
                         "Error while bidding: $inneractiveErrorCode",
                         inneractiveErrorCode.asBidonError()
                     )
-                    emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                    emitEvent(
+                        AdEvent.LoadFailed(
+                            if (inneractiveErrorCode == InneractiveErrorCode.ERROR_CONFIGURATION_NO_SUCH_SPOT) {
+                                BidonError.NoAppropriateAdUnitId
+                            } else {
+                                BidonError.NoFill(demandId)
+                            }
+                        )
+                    )
                 }
             }
         )

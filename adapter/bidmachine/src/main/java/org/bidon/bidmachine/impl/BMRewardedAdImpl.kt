@@ -23,11 +23,13 @@ import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.auction.AdTypeParam
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 internal class BMRewardedAdImpl :
     AdSource.Rewarded<BMFullscreenAuctionParams>,
@@ -40,25 +42,18 @@ internal class BMRewardedAdImpl :
     private var context: Context? = null
     private var adRequest: RewardedRequest? = null
     private var rewardedAd: RewardedAd? = null
-    private var isBidding = false
+    private var bidType = BidType.CPM
 
     override val isAdReadyToShow: Boolean
         get() = rewardedAd?.canShow() == true
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String {
-        isBidding = true
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String {
+        bidType = BidType.RTB
         return BidMachine.getBidToken(context)
     }
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
-        return auctionParamsScope {
-            BMFullscreenAuctionParams(
-                price = pricefloor,
-                timeout = timeout,
-                context = activity.applicationContext,
-                payload = json?.optString("payload")
-            )
-        }
+        return GetAdAuctionParamUseCase().getBMFullscreenAuctionParams(auctionParamsScope, bidType)
     }
 
     override fun load(adParams: BMFullscreenAuctionParams) {
@@ -147,7 +142,7 @@ internal class BMRewardedAdImpl :
                 override fun onAdLoaded(rewardedAd: RewardedAd) {
                     logInfo(TAG, "onAdLoaded: $this")
                     setDsp(rewardedAd.auctionResult?.demandSource)
-                    if (!isBidding) {
+                    if (bidType == BidType.CPM) {
                         setPrice(rewardedAd.auctionResult?.price ?: 0.0)
                     }
                     getAd()?.let {

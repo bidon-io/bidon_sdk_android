@@ -19,8 +19,8 @@ import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.impl.AuctionImpl
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResponse
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.AuctionStat
 import org.bidon.sdk.auction.usecases.ExecuteRoundUseCase
@@ -33,6 +33,7 @@ import org.bidon.sdk.config.models.adapters.TestAdapterParameters
 import org.bidon.sdk.config.models.adapters.TestBiddingAdapter
 import org.bidon.sdk.config.models.base.ConcurrentTest
 import org.bidon.sdk.mockkLog
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.RoundStat
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.usecases.StatsRequestUseCase
@@ -130,25 +131,30 @@ internal class AuctionImplTest : ConcurrentTest() {
                     biddingIds = listOf(),
                 ),
             ),
-            auctionConfigurationId = 10,
             auctionId = "auctionId_123",
-            lineItems = listOf(
-                LineItem(
-                    demandId = Applovin,
-                    pricefloor = 0.25,
-                    adUnitId = "AAAA2",
+            adUnits = listOf(
+                AdUnit(
+                    label = "admob2",
+                    pricefloor = 3.2235,
+                    ext = null,
+                    demandId = "admob",
+                    bidType = BidType.CPM,
                     uid = "1",
                 ),
-                LineItem(
-                    demandId = Admob,
+                AdUnit(
+                    label = "admob1",
                     pricefloor = 1.2235,
-                    adUnitId = "admob1",
+                    ext = null,
+                    demandId = "admob",
+                    bidType = BidType.CPM,
                     uid = "1",
                 ),
-                LineItem(
-                    demandId = Admob,
-                    pricefloor = 2.2235,
-                    adUnitId = "admob2",
+                AdUnit(
+                    label = "AAAA2",
+                    pricefloor = 2.25,
+                    ext = null,
+                    demandId = "applovin",
+                    bidType = BidType.CPM,
                     uid = "1",
                 ),
             ),
@@ -177,7 +183,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 val winner = auctionResults.first()
                 val winnerAd = winner.adSource.ad
                 requireNotNull(winnerAd)
-                assertThat(winnerAd.adUnitId).isEqualTo("admob2")
+                assertThat(winnerAd.adUnit.label).isEqualTo("admob2")
                 assertThat(winnerAd.ecpm).isEqualTo(2.2235)
                 assertThat(winnerAd.roundId).isEqualTo("ROUND_2")
                 assertThat(winner.adSource.getStats().ecpm).isEqualTo(2.2235)
@@ -191,21 +197,21 @@ internal class AuctionImplTest : ConcurrentTest() {
                 assertThat(actualRoundStat[0].roundId).isEqualTo("round_1")
                 assertThat(actualRoundStat[0].demands).hasSize(2)
                 assertThat(actualRoundStat[0].demands[0].roundStatusCode).isEqualTo(RoundStatus.Lose.code)
-                assertThat(actualRoundStat[0].demands[0].ecpm).isEqualTo(1.2235)
+                assertThat(actualRoundStat[0].demands[0].price).isEqualTo(1.2235)
                 assertThat(actualRoundStat[0].demands[0].fillStartTs).isNull()
                 assertThat(actualRoundStat[0].demands[1].roundStatusCode).isEqualTo(RoundStatus.Lose.code)
-                assertThat(actualRoundStat[0].demands[1].ecpm).isEqualTo(0.25)
+                assertThat(actualRoundStat[0].demands[1].price).isEqualTo(0.25)
                 assertThat(actualRoundStat[0].demands[1].fillStartTs).isNull()
                 // WINNER
                 assertThat(actualRoundStat[1].auctionId).isEqualTo("auctionId_123")
                 assertThat(actualRoundStat[1].roundId).isEqualTo("ROUND_2")
                 assertThat(actualRoundStat[1].demands).hasSize(1)
                 assertThat(actualRoundStat[1].demands[0].roundStatusCode).isEqualTo(RoundStatus.Win.code)
-                assertThat(actualRoundStat[1].demands[0].ecpm).isEqualTo(2.2235)
-                assertThat(actualRoundStat[1].demands[0].adUnitId).isEqualTo("admob2")
+                assertThat(actualRoundStat[1].demands[0].price).isEqualTo(2.2235)
+                assertThat(actualRoundStat[1].demands[0].adUnitLabel).isEqualTo("admob2")
                 assertThat(actualRoundStat[1].demands[0].fillStartTs).isNotNull()
                 assertThat(actualRoundStat[1].demands[0].fillFinishTs).isNotNull()
-                assertThat(actualRoundStat[1].demands[0].lineItemUid).isEqualTo("1")
+                assertThat(actualRoundStat[1].demands[0].adUnitUid).isEqualTo("1")
             },
             onFailure = {
                 error("unexpected: $it")
@@ -258,7 +264,7 @@ internal class AuctionImplTest : ConcurrentTest() {
                 val winner = auctionResults.first()
                 val winnerAd = winner.adSource.ad
                 requireNotNull(winnerAd)
-                assertThat(winnerAd.adUnitId).isEqualTo("AAAA2")
+                assertThat(winnerAd.adUnit.label).isEqualTo("AAAA2")
                 assertThat(winnerAd.ecpm).isEqualTo(2.25)
                 assertThat(winnerAd.roundId).isEqualTo("round_1")
                 assertThat(winner.adSource.getStats().ecpm).isEqualTo(2.25)
@@ -370,27 +376,33 @@ internal class AuctionImplTest : ConcurrentTest() {
                 biddingIds = listOf(),
             ),
         ),
-        auctionConfigurationId = 10,
         auctionId = "auctionId_123",
-        lineItems = listOf(
-            LineItem(
-                demandId = Applovin,
-                pricefloor = 2.25,
-                adUnitId = "AAAA2",
-                uid = "1",
-            ),
-            LineItem(
-                demandId = Admob,
-                pricefloor = 1.2235,
-                adUnitId = "admob1",
-                uid = "1",
-            ),
-            LineItem(
-                demandId = Admob,
+        adUnits = listOf(
+            AdUnit(
+                label = "admob2",
                 pricefloor = 3.2235,
-                adUnitId = "admob2",
+                ext = null,
+                demandId = "admob",
+                bidType = BidType.CPM,
                 uid = "1",
             ),
+            AdUnit(
+                label = "admob1",
+                pricefloor = 1.2235,
+                ext = null,
+                demandId = "admob",
+                bidType = BidType.CPM,
+                uid = "1",
+            ),
+            AdUnit(
+                label = "AAAA2",
+                pricefloor = 2.25,
+                ext = null,
+                demandId = "applovin",
+                bidType = BidType.CPM,
+                uid = "1",
+            ),
+
         ),
         pricefloor = 0.01,
         token = null,

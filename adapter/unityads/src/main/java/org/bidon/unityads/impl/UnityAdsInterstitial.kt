@@ -12,7 +12,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -20,6 +20,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.unityads.ext.asBidonError
 
 /**
@@ -31,21 +32,23 @@ internal class UnityAdsInterstitial :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var lineItem: LineItem? = null
+    private var adUnit: AdUnit? = null
+    private var adUnitId: String? = null
 
     override var isAdReadyToShow: Boolean = false
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             UnityAdsFullscreenAuctionParams(
-                lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+                adUnit = popAdUnit(demandId, BidType.CPM) ?: error(BidonError.NoAppropriateAdUnitId)
             )
         }
     }
 
     override fun load(adParams: UnityAdsFullscreenAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
-        lineItem = adParams.lineItem
+        adUnit = adParams.adUnit
+        adUnitId = adParams.placementId
 
         val loadListener = object : IUnityAdsLoadListener {
             override fun onUnityAdsAdLoaded(placementId: String?) {
@@ -65,7 +68,7 @@ internal class UnityAdsInterstitial :
                 emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
             }
         }
-        UnityAds.load(adParams.lineItem.adUnitId, loadListener)
+        UnityAds.load(adParams.placementId, loadListener)
     }
 
     override fun show(activity: Activity) {
@@ -91,7 +94,7 @@ internal class UnityAdsInterstitial :
                         AdEvent.PaidRevenue(
                             ad = it,
                             adValue = AdValue(
-                                adRevenue = (lineItem?.pricefloor ?: 0.0) / 1000.0,
+                                adRevenue = (adUnit?.pricefloor ?: 0.0) / 1000.0,
                                 currency = AdValue.USD,
                                 precision = Precision.Estimated
                             )
@@ -113,7 +116,7 @@ internal class UnityAdsInterstitial :
                 getAd()?.let { emitEvent(AdEvent.Closed(it)) }
             }
         }
-        UnityAds.show(activity, lineItem?.adUnitId, UnityAdsShowOptions(), showListener)
+        UnityAds.show(activity, adUnitId, UnityAdsShowOptions(), showListener)
         isAdReadyToShow = false
     }
 

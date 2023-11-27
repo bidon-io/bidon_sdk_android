@@ -16,6 +16,7 @@ import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 internal class TestInterstitialImpl(
     private val testParameters: TestAdapterParameters,
@@ -62,7 +63,7 @@ internal class TestInterstitialImpl(
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+            val lineItem = popAdUnit(demandId, BidType.CPM) ?: error(BidonError.NoAppropriateAdUnitId)
             TestInterstitialParameters(lineItem)
         }
     }

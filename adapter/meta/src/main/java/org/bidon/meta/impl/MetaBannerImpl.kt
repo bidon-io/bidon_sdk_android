@@ -18,6 +18,7 @@ import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.ext.height
 import org.bidon.sdk.auction.ext.width
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -40,7 +41,7 @@ class MetaBannerImpl :
     override val isAdReadyToShow: Boolean
         get() = bannerView != null
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? {
         return BidderTokenProvider.getBidderToken(context)
     }
 
@@ -48,16 +49,8 @@ class MetaBannerImpl :
         return auctionParamsScope {
             MetaBannerAuctionParams(
                 activity = activity,
-                placementId = requireNotNull(json?.optString("placement_id")) {
-                    "Placement id is required for Meta"
-                },
-                price = requireNotNull(json?.optDouble("price")) {
-                    "Bid price is required for Meta"
-                },
-                payload = requireNotNull(json?.optString("payload")) {
-                    "Payload is required for Meta"
-                },
-                bannerFormat = bannerFormat
+                bannerFormat = bannerFormat,
+                bidResponse = requiredBidResponse
             )
         }
     }

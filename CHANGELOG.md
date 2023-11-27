@@ -9,6 +9,13 @@
 
 # Release 0.4.21 (2023.10.20)
 ## Features:
+[BDN-492](https://appodeal.atlassian.net/browse/BDN-492) Continue awaiting adapter after timed out
+[BDN-473](https://appodeal.atlassian.net/browse/BDN-473) Line Items Rework In Bidon SDK Server API
+[BDN-474](https://appodeal.atlassian.net/browse/BDN-474) Remove obsolete _id-fields
+[BDN-475](https://appodeal.atlassian.net/browse/BDN-475) Update Ad object
+
+# Release 0.4.21 (2023.09.21)
+## Features:
 [BDN-446](https://appodeal.atlassian.net/browse/BDN-446) Implement Amazon Rewarded
 [BDN-417](https://appodeal.atlassian.net/browse/BDN-417) Implement Amazon Adapters: Interstitial+Banner
 

@@ -6,16 +6,17 @@ import org.json.JSONObject
 /**
  * Created by Aleksei Cherniaev on 31/05/2023.
  */
-internal data class BidResponse(
+data class BidResponse(
     @field:JsonName("id")
     val id: String,
-    @field:JsonName("impid")
+    @field:JsonName("ad_unit")
+    val adUnit: AdUnit,
+    @field:JsonName("imp_id")
     val impressionId: String,
     @field:JsonName("price")
     val price: Double,
-    @field:JsonName("demands")
-    val demands: List<Pair<String, JSONObject>>
+    @field:JsonName("ext")
+    private val ext: String?
 ) {
-    val demandId get() = demands.firstOrNull()?.first
-    val json get() = demands.firstOrNull()?.second
+    val extra get() = ext?.let { JSONObject(it) }
 }

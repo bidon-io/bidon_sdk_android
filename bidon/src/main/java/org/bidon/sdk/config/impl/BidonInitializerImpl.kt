@@ -35,7 +35,7 @@ internal class BidonInitializerImpl : BidonInitializer {
         DI.setFactories()
     }
 
-    private val dispatcher by lazy { SdkDispatchers.Single }
+    private val dispatcher by lazy { SdkDispatchers.Bidon }
     private val scope get() = CoroutineScope(dispatcher)
 
     private var useDefaultAdapters = false
@@ -96,7 +96,7 @@ internal class BidonInitializerImpl : BidonInitializer {
              */
             DI.init(context)
             scope.launch {
-                obtainSegmentId()
+                obtainSegmentUid()
                 runCatching {
                     init(context, appKey, timeStart)
                 }.onFailure {
@@ -111,10 +111,10 @@ internal class BidonInitializerImpl : BidonInitializer {
         }
     }
 
-    private suspend fun obtainSegmentId() {
+    private suspend fun obtainSegmentUid() {
         withContext(SdkDispatchers.IO) {
-            keyValueStorage.segmentId?.let {
-                segmentSynchronizer.setSegmentId(segmentId = it)
+            keyValueStorage.segmentUid?.let {
+                segmentSynchronizer.setSegmentUid(segmentUid = it)
             }
         }
     }

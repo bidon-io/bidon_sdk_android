@@ -11,15 +11,14 @@ import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.ext.height
 import org.bidon.sdk.auction.ext.width
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
-import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 /**
  * Created by Aleksei Cherniaev on 12/04/2023.
@@ -30,7 +29,7 @@ internal class UnityAdsBanner :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
     private var bannerAdView: BannerView? = null
-    private var lineItem: LineItem? = null
+    private var adUnit: AdUnit? = null
 
     override var isAdReadyToShow: Boolean = false
 
@@ -38,26 +37,25 @@ internal class UnityAdsBanner :
         return auctionParamsScope {
             UnityAdsBannerAuctionParams(
                 activity = activity,
-                lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                adUnit = popAdUnit(demandId, BidType.CPM) ?: error(BidonError.NoAppropriateAdUnitId),
                 bannerFormat = bannerFormat,
             )
         }
     }
 
     override fun load(adParams: UnityAdsBannerAuctionParams) {
-        lineItem = adParams.lineItem
+        adUnit = adParams.adUnit
         logInfo(TAG, "Starting with $adParams")
         adParams.activity.runOnUiThread {
-            val adUnitId = requireNotNull(adParams.lineItem.adUnitId)
             val unityBannerSize = UnityBannerSize(adParams.bannerFormat.width, adParams.bannerFormat.height)
-            val adView = BannerView(adParams.activity, adUnitId, unityBannerSize).also {
+            val adView = BannerView(adParams.activity, adParams.placementId, unityBannerSize).also {
                 bannerAdView = it
             }
             adView.listener = object : BannerView.IListener {
                 override fun onBannerLoaded(bannerAdView: BannerView?) {
                     this@UnityAdsBanner.bannerAdView = bannerAdView
                     isAdReadyToShow = true
-                    bannerAdView?.asAd()?.let {
+                    getAd()?.let {
                         emitEvent(AdEvent.Fill(it))
                     }
                 }
@@ -66,8 +64,8 @@ internal class UnityAdsBanner :
 
                 override fun onBannerClick(bannerAdView: BannerView?) {
                     logInfo(TAG, "onAdClicked: $this")
-                    bannerAdView?.let {
-                        emitEvent(AdEvent.Clicked(it.asAd()))
+                    getAd()?.let {
+                        emitEvent(AdEvent.Clicked(it))
                     }
                 }
 
@@ -101,18 +99,6 @@ internal class UnityAdsBanner :
         bannerAdView?.destroy()
         bannerAdView = null
     }
-
-    private fun BannerView.asAd() = Ad(
-        demandAd = demandAd,
-        ecpm = lineItem?.pricefloor ?: 0.0,
-        networkName = demandId.demandId,
-        dsp = null,
-        roundId = roundId,
-        currencyCode = AdValue.USD,
-        auctionId = auctionId,
-        adUnitId = lineItem?.adUnitId,
-        bidType = bidType,
-    )
 }
 
 private const val TAG = "UnityAdsBanner"

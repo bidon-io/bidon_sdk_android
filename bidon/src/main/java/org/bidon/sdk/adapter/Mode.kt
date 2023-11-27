@@ -3,6 +3,7 @@ package org.bidon.sdk.adapter
 import android.content.Context
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
+import org.bidon.sdk.auction.models.AdUnit
 
 /**
  * Created by Aleksei Cherniaev on 30/05/2023.
@@ -13,6 +14,6 @@ import org.bidon.sdk.auction.Auction
 sealed interface Mode {
     interface Network : Mode
     interface Bidding : Mode {
-        suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String?
+        suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String?
     }
 }

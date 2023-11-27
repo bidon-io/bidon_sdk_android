@@ -10,18 +10,13 @@ internal interface SegmentSynchronizer {
     val attributes: SegmentAttributes
     val segmentUid: String?
 
-    @Deprecated("Use segmentUid instead")
-    val segmentId: String?
+    /**
+     * For parsing segmentUid from responses /auction and /config-requests
+     */
+    fun parseSegmentUid(rootJsonResponse: String)
 
     /**
-     * For parsing segmentId from responses /auction and /config-requests
+     * For reading previous segmentUid from [KeyValueStorage]
      */
-    fun parseSegmentId(rootJsonResponse: String)
-
-    /**
-     * For reading previous segmentId from [KeyValueStorage]
-     */
-    @Deprecated("Use setSegmentUid instead")
-    fun setSegmentId(segmentId: String?)
     fun setSegmentUid(segmentUid: String?)
 }

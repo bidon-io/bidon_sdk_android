@@ -68,7 +68,7 @@ internal class GetAuctionRequestUseCaseImpl(
                 path = "$AuctionRequestPath/${additionalData.asAdType().code}",
                 body = requestBody,
             ).mapCatching { jsonResponse ->
-                segmentSynchronizer.parseSegmentId(jsonResponse)
+                segmentSynchronizer.parseSegmentUid(jsonResponse)
                 requireNotNull(JsonParsers.parseOrNull<AuctionResponse>(jsonResponse))
             }.onFailure {
                 logError(TAG, "Error while loading auction data", it)

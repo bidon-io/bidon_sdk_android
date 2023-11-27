@@ -18,7 +18,6 @@ import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.json.JsonParsers
 import org.bidon.sdk.utils.networking.JsonHttpRequest
 import org.bidon.sdk.utils.networking.requests.CreateRequestBodyUseCase
-import java.util.UUID
 
 internal class BidRequestUseCaseImpl(
     private val createRequestBody: CreateRequestBodyUseCase,
@@ -43,21 +42,18 @@ internal class BidRequestUseCaseImpl(
         bidfloor: Double,
         auctionId: String,
         roundId: String,
-        auctionConfigurationId: Int?,
         auctionConfigurationUid: String?,
     ): Result<BiddingResponse> {
         return withContext(SdkDispatchers.IO) {
             val (banner, interstitial, rewarded) = adTypeParam.asAdRequestBody()
             val bidRequestBody = BidRequest(
                 auctionId = auctionId,
-                impressionId = UUID.randomUUID().toString(),
                 demands = tokens.associate { (demandId, token) ->
                     demandId.demandId to BidRequest.Token(token)
                 },
                 bidfloor = bidfloor,
                 orientationCode = getOrientation().code,
                 roundId = roundId,
-                auctionConfigurationId = auctionConfigurationId,
                 auctionConfigurationUid = auctionConfigurationUid,
                 banner = banner,
                 interstitial = interstitial,

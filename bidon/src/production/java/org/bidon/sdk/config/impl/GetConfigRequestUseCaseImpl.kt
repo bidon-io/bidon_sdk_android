@@ -57,7 +57,7 @@ internal class GetConfigRequestUseCaseImpl(
                  * Save "segment_id"
                  */
                 val jsonResponse = JSONObject(jsonString)
-                segmentSynchronizer.parseSegmentId(jsonString)
+                segmentSynchronizer.parseSegmentUid(jsonString)
                 val config = jsonResponse.getString("init")
                 requireNotNull(JsonParsers.parseOrNull<ConfigResponse>(config))
             }
