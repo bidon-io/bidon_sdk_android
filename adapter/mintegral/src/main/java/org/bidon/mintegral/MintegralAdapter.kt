@@ -5,7 +5,6 @@ import android.content.Context
 import com.mbridge.msdk.MBridgeConstans
 import com.mbridge.msdk.out.MBridgeSDKFactory
 import com.mbridge.msdk.out.SDKInitStatusListener
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.bidon.mintegral.ext.adapterVersion
 import org.bidon.mintegral.ext.sdkVersion
@@ -27,6 +26,7 @@ import org.bidon.sdk.utils.SdkDispatchers
 import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Created by Aleksei Cherniaev on 20/06/2023.
@@ -52,7 +52,7 @@ class MintegralAdapter :
 
     override suspend fun init(context: Context, configParams: MintegralInitParam) =
         withContext(SdkDispatchers.Main) {
-            suspendCancellableCoroutine { continuation ->
+            suspendCoroutine { continuation ->
                 this@MintegralAdapter.context = context
                 val sdk = MBridgeSDKFactory.getMBridgeSDK()
                 val configurationMap = sdk.getMBConfigurationMap(configParams.appId, configParams.appKey)

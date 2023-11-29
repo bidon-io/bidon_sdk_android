@@ -1,5 +1,6 @@
 # Release Next
 ## Features:
+[BDN-555](https://appodeal.atlassian.net/browse/BDN-555) Concurrent ad network initalization optimisation Android
 [BDN-511](https://appodeal.atlassian.net/browse/BDN-511) Upgrade Vungle adapter
 [BDN-481](https://appodeal.atlassian.net/browse/BDN-481) Integrate Google Ad Manager
 

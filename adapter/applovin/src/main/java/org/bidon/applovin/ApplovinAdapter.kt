@@ -4,7 +4,6 @@ import android.content.Context
 import com.applovin.sdk.AppLovinPrivacySettings
 import com.applovin.sdk.AppLovinSdk
 import com.applovin.sdk.AppLovinSdkSettings
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.applovin.ext.adapterVersion
 import org.bidon.applovin.ext.sdkVersion
 import org.bidon.applovin.impl.ApplovinBannerImpl
@@ -16,6 +15,7 @@ import org.bidon.sdk.logs.logging.Logger
 import org.bidon.sdk.regulation.Regulation
 import org.json.JSONObject
 import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 val ApplovinDemandId = DemandId("applovin")
 
@@ -38,7 +38,7 @@ class ApplovinAdapter :
     )
 
     override suspend fun init(context: Context, configParams: ApplovinParameters): Unit =
-        suspendCancellableCoroutine { continuation ->
+        suspendCoroutine { continuation ->
             this.context = context
             val instance =
                 AppLovinSdk.getInstance(configParams.key, AppLovinSdkSettings(context), context)
