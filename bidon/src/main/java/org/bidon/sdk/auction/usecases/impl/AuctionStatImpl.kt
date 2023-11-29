@@ -3,9 +3,14 @@ package org.bidon.sdk.auction.usecases.impl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.ads.ext.asAdRequestBody
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
+import org.bidon.sdk.auction.models.BannerRequest
+import org.bidon.sdk.auction.models.InterstitialRequest
+import org.bidon.sdk.auction.models.RewardedRequest
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.AuctionStat
 import org.bidon.sdk.auction.usecases.models.BiddingResult
@@ -30,6 +35,9 @@ internal class AuctionStatImpl(
     private val scope: CoroutineScope get() = CoroutineScope(SdkDispatchers.IO)
 
     private var auctionId: String = ""
+    private var bannerRequestBody: BannerRequest? = null
+    private var interstitialRequestBody: InterstitialRequest? = null
+    private var rewardedRequestBody: RewardedRequest? = null
 
     private var winner: AuctionResult? = null
         get() {
@@ -40,9 +48,13 @@ internal class AuctionStatImpl(
     private val statsRounds = mutableListOf<RoundStat>()
     private var isAuctionCanceled = false
 
-    override fun markAuctionStarted(auctionId: String) {
+    override fun markAuctionStarted(auctionId: String, adTypeParam: AdTypeParam) {
         this.auctionId = auctionId
         this.auctionStartTs = SystemTimeNow
+        val (banner, interstitial, rewarded) = adTypeParam.asAdRequestBody()
+        this.bannerRequestBody = banner
+        this.interstitialRequestBody = interstitial
+        this.rewardedRequestBody = rewarded
     }
 
     override fun markAuctionCanceled() {
@@ -311,6 +323,7 @@ internal class AuctionStatImpl(
                                     fillFinishTs = null,
                                 )
                             }
+
                             is AuctionResult.Network -> error("unexpected")
                         }
                     }
@@ -403,6 +416,9 @@ internal class AuctionStatImpl(
             roundId = stat?.roundId,
             bidType = stat?.bidType?.code,
             lineItemUid = stat?.lineItemUid,
+            banner = bannerRequestBody,
+            interstitial = interstitialRequestBody,
+            rewarded = rewardedRequestBody,
         )
     }
 }
