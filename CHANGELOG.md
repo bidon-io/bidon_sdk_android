@@ -1,3 +1,7 @@
+# Release Next
+## Features:
+[BDN-481](https://appodeal.atlassian.net/browse/BDN-481) Integrate Google Ad Manager
+
 # Release 0.4.24 (2023.11.23)
 ## Features:
 [BDN-550](https://appodeal.atlassian.net/browse/BDN-550) Skip some checks from VisibilityTracker
