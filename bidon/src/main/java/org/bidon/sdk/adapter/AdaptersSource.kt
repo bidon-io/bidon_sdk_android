@@ -4,5 +4,5 @@ package org.bidon.sdk.adapter
  */
 internal interface AdaptersSource {
     val adapters: Set<Adapter>
-    fun add(adapters: Collection<Adapter>)
+    fun add(adapter: Adapter)
 }

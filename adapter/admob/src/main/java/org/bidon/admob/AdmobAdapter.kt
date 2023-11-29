@@ -36,8 +36,7 @@ class AdmobAdapter :
         // MobileAds.disableMediationAdapterInitialization(context)
         this.configParams = configParams
         /**
-         * Don't forget set Automatic refresh is Disabled for each AdUnit.
-         * Manage refresh rate with [BannerView.startAutoRefresh].
+         * Don't forget to disable automatic refresh for each AdUnit on the AdMob website.
          */
         MobileAds.initialize(context) {
             continuation.resume(Unit)

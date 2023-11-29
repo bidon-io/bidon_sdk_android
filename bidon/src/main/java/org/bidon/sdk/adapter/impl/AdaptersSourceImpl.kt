@@ -9,7 +9,7 @@ import org.bidon.sdk.adapter.AdaptersSource
 internal class AdaptersSourceImpl : AdaptersSource {
     override val adapters = mutableSetOf<Adapter>()
 
-    override fun add(adapters: Collection<Adapter>) {
-        this.adapters.addAll(adapters)
+    override fun add(adapter: Adapter) {
+        this.adapters.add(adapter)
     }
 }
