@@ -32,6 +32,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 internal class BMBannerAdImpl :
     AdSource.Banner<BMBannerAuctionParams>,
@@ -60,6 +61,11 @@ internal class BMBannerAdImpl :
             bannerView = BannerView(adParams.activity.applicationContext)
             bannerFormat = adParams.bannerFormat
             val requestBuilder = BannerRequest.Builder()
+                .apply {
+                    if (bidType == BidType.CPM) {
+                        this.setNetworks("")
+                    }
+                }
                 .setSize(adParams.bannerFormat.asBidMachineBannerSize())
                 .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.price))
                 .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
