@@ -16,9 +16,9 @@ internal class AdObjectRequestBodySerializerTest {
             pricefloor = 1.23,
             auctionId = "aId",
             orientationCode = AdObjectRequest.Orientation.Portrait.code,
-            banner = BannerRequest(BannerRequest.StatFormat.LeaderBoard728x90.code),
-            interstitial = InterstitialRequest(),
-            rewarded = RewardedRequest(),
+            banner = BannerRequest(BannerRequest.StatFormat.LEADERBOARD_728x90.code),
+            interstitial = InterstitialRequest,
+            rewarded = RewardedRequest,
         )
         val actual = data.serialize()
 
@@ -42,7 +42,7 @@ internal class AdObjectRequestBodySerializerTest {
             pricefloor = 1.23,
             auctionId = "aId",
             orientationCode = AdObjectRequest.Orientation.Portrait.code,
-            banner = BannerRequest(BannerRequest.StatFormat.LeaderBoard728x90.code),
+            banner = BannerRequest(BannerRequest.StatFormat.LEADERBOARD_728x90.code),
             interstitial = null,
             rewarded = null,
         )
@@ -67,7 +67,7 @@ internal class AdObjectRequestBodySerializerTest {
             auctionId = "aId",
             orientationCode = AdObjectRequest.Orientation.Portrait.code,
             banner = null,
-            interstitial = InterstitialRequest(),
+            interstitial = InterstitialRequest,
             rewarded = null,
         )
         val actual = data.serialize()
@@ -90,7 +90,7 @@ internal class AdObjectRequestBodySerializerTest {
             orientationCode = AdObjectRequest.Orientation.Portrait.code,
             banner = null,
             interstitial = null,
-            rewarded = RewardedRequest(),
+            rewarded = RewardedRequest,
         )
         val actual = data.serialize()
 

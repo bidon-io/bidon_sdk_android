@@ -1,5 +1,8 @@
 package org.bidon.sdk.stats.models
 
+import org.bidon.sdk.auction.models.BannerRequest
+import org.bidon.sdk.auction.models.InterstitialRequest
+import org.bidon.sdk.auction.models.RewardedRequest
 import org.bidon.sdk.config.models.json_scheme_utils.assertEquals
 import org.bidon.sdk.config.models.json_scheme_utils.expectedJsonStructure
 import org.bidon.sdk.utils.json.jsonArray
@@ -79,6 +82,9 @@ class StatsRequestBodySerializerTest {
                 roundId = "id13",
                 bidType = BidType.CPM.code,
                 lineItemUid = "123",
+                banner = BannerRequest(BannerRequest.StatFormat.ADAPTIVE_BANNER.code),
+                interstitial = InterstitialRequest,
+                rewarded = RewardedRequest,
             ),
         ).serialize()
         println(json)
@@ -92,6 +98,11 @@ class StatsRequestBodySerializerTest {
                     "auction_start_ts" hasValue 1000
                     "auction_finish_ts" hasValue 1300
                     "bid_type" hasValue "cpm"
+                    "banner" hasJson expectedJsonStructure {
+                        "format" hasValue "ADAPTIVE"
+                    }
+                    "interstitial" hasJson expectedJsonStructure {}
+                    "rewarded" hasJson expectedJsonStructure {}
                 }
                 "auction_id" hasValue "id123"
                 "auction_configuration_id" hasValue 4

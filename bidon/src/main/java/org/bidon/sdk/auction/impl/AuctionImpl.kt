@@ -50,7 +50,7 @@ internal class AuctionImpl(
 
     override fun start(
         demandAd: DemandAd,
-        adTypeParamData: AdTypeParam,
+        adTypeParam: AdTypeParam,
         onSuccess: (results: List<AuctionResult>) -> Unit,
         onFailure: (Throwable) -> Unit
     ) {
@@ -63,15 +63,15 @@ internal class AuctionImpl(
                 logInfo(TAG, "Action in progress $this")
                 return
             }
-            this.adTypeParam = adTypeParamData
+            this.adTypeParam = adTypeParam
             job = scope.launch {
                 runCatching {
                     val auctionId = UUID.randomUUID().toString()
                     logInfo(TAG, "Action started $this")
                     // Request for Auction-data at /auction
-                    auctionStat.markAuctionStarted(auctionId)
+                    auctionStat.markAuctionStarted(auctionId, adTypeParam)
                     getAuctionRequest.request(
-                        additionalData = adTypeParamData,
+                        adTypeParam = adTypeParam,
                         auctionId = auctionId,
                         demandAd = demandAd,
                         adapters = adaptersSource.adapters.associate {
@@ -84,23 +84,23 @@ internal class AuctionImpl(
                         conductAuction(
                             auctionData = auctionData,
                             demandAd = demandAd,
-                            adTypeParamData = adTypeParamData,
+                            adTypeParamData = adTypeParam,
                         ).ifEmpty {
                             throw BidonError.NoAuctionResults
                         }.also {
-                            adTypeParamData.activity.runOnUiThread {
+                            adTypeParam.activity.runOnUiThread {
                                 onSuccess(it)
                             }
                         }
                     }.onFailure {
                         logError(TAG, "Auction failed", it)
-                        adTypeParamData.activity.runOnUiThread {
+                        adTypeParam.activity.runOnUiThread {
                             onFailure(it)
                         }
                     }
                 }.onFailure {
                     logError(TAG, "Auction failed", it)
-                    adTypeParamData.activity.runOnUiThread {
+                    adTypeParam.activity.runOnUiThread {
                         onFailure(it)
                     }
                 }
