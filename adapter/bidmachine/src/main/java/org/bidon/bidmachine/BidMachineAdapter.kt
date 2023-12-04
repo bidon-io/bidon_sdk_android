@@ -2,7 +2,6 @@ package org.bidon.bidmachine
 
 import android.content.Context
 import io.bidmachine.BidMachine
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.bidmachine.ext.adapterVersion
 import org.bidon.bidmachine.ext.sdkVersion
 import org.bidon.bidmachine.impl.BMBannerAdImpl
@@ -15,6 +14,7 @@ import org.bidon.sdk.logs.logging.Logger
 import org.bidon.sdk.regulation.Regulation
 import org.json.JSONObject
 import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 val BidMachineDemandId = DemandId("bidmachine")
 
@@ -40,7 +40,7 @@ class BidMachineAdapter :
     )
 
     override suspend fun init(context: Context, configParams: BidMachineParameters): Unit =
-        suspendCancellableCoroutine { continuation ->
+        suspendCoroutine { continuation ->
             this.context = context
             val sourceId = configParams.sellerId
             BidMachine.setTestMode(isTestMode)

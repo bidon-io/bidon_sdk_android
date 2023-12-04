@@ -14,6 +14,9 @@ import kotlin.coroutines.suspendCoroutine
 
 val GamDemandId = DemandId("gam")
 
+/**
+ * [Google Ad Manager](https://developers.google.com/ad-manager/mobile-ads-sdk/android/quick-start)
+ */
 @Suppress("unused")
 class GamAdapter :
     Adapter,

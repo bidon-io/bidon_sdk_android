@@ -274,10 +274,10 @@ internal class ExecuteRoundUseCaseImpl(
             is AdTypeParam.Banner -> {
                 StatisticsCollector.AdType.Banner(
                     format = when (bannerFormat) {
-                        BannerFormat.Banner -> BannerRequest.StatFormat.Banner320x50
-                        BannerFormat.LeaderBoard -> BannerRequest.StatFormat.LeaderBoard728x90
-                        BannerFormat.MRec -> BannerRequest.StatFormat.MRec300x250
-                        BannerFormat.Adaptive -> BannerRequest.StatFormat.AdaptiveBanner320x50
+                        BannerFormat.Banner -> BannerRequest.StatFormat.BANNER_320x50
+                        BannerFormat.LeaderBoard -> BannerRequest.StatFormat.LEADERBOARD_728x90
+                        BannerFormat.MRec -> BannerRequest.StatFormat.MREC_300x250
+                        BannerFormat.Adaptive -> BannerRequest.StatFormat.ADAPTIVE_BANNER
                     }
                 )
             }
