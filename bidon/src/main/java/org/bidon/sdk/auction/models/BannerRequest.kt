@@ -13,9 +13,9 @@ data class BannerRequest(
     val formatCode: String,
 ) : Serializable {
     enum class StatFormat(val code: String) {
-        Banner320x50("BANNER"),
-        LeaderBoard728x90("LEADERBOARD"),
-        MRec300x250("MREC"),
-        AdaptiveBanner320x50("ADAPTIVE"),
+        BANNER_320x50("BANNER"),
+        LEADERBOARD_728x90("LEADERBOARD"),
+        MREC_300x250("MREC"),
+        ADAPTIVE_BANNER("ADAPTIVE"),
     }
 }

@@ -22,7 +22,7 @@ class ImpressionRequestBodySerializerTest {
             price = 2.33,
             demandId = "demandId123",
             rewarded = null,
-            interstitial = InterstitialRequest(),
+            interstitial = InterstitialRequest,
             banner = BannerRequest(formatCode = "1"),
             adUnitLabel = "adUnitId43",
             roundId = "round123",

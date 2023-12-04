@@ -60,6 +60,11 @@ internal class BMRewardedAdImpl :
         logInfo(TAG, "Starting with $adParams: $this")
         context = adParams.context
         val requestBuilder = RewardedRequest.Builder()
+            .apply {
+                if (bidType == BidType.CPM) {
+                    this.setNetworks("")
+                }
+            }
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.price))
             .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
             .setLoadingTimeOut(adParams.timeout.toInt())

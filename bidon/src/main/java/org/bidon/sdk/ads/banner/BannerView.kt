@@ -269,7 +269,7 @@ class BannerView @JvmOverloads constructor(
         logInfo(TAG, "Load (pricefloor=$pricefloor)")
         auction.start(
             demandAd = demandAd,
-            adTypeParamData = AdTypeParam.Banner(
+            adTypeParam = AdTypeParam.Banner(
                 activity = activity,
                 pricefloor = pricefloor,
                 bannerFormat = format,

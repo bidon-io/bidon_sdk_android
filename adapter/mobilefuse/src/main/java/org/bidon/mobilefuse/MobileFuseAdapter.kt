@@ -4,7 +4,6 @@ import android.content.Context
 import com.mobilefuse.sdk.MobileFuse
 import com.mobilefuse.sdk.MobileFuseSettings
 import com.mobilefuse.sdk.SdkInitListener
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.mobilefuse.ext.adapterVersion
 import org.bidon.mobilefuse.ext.sdkVersion
 import org.bidon.mobilefuse.ext.toMobileFusePrivacyPreferences
@@ -26,6 +25,7 @@ import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.regulation.Regulation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Created by Aleksei Cherniaev on 06/07/2023.
@@ -49,7 +49,7 @@ class MobileFuseAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun init(context: Context, configParams: MobileFuseParams) = suspendCancellableCoroutine { continuation ->
+    override suspend fun init(context: Context, configParams: MobileFuseParams) = suspendCoroutine { continuation ->
         MobileFuseSettings.setTestMode(isTestMode)
         MobileFuse.init(
             object : SdkInitListener {
