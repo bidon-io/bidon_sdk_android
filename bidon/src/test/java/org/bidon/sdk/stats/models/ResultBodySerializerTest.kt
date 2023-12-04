@@ -39,8 +39,6 @@ internal class ResultBodySerializerTest {
                 "winner_demand_id" hasValue "admob"
                 "winner_ad_unit_uid" hasValue "id123"
                 "winner_ad_unit_label" hasValue "label123"
-                "bid_type" hasValue "cpm"
-                "line_item_uid" hasValue "123"
                 "banner" hasJson expectedJsonStructure {
                     "format" hasValue "BANNER"
                 }

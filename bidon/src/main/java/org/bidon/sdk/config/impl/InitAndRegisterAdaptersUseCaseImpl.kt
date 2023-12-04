@@ -27,7 +27,7 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
     private val adaptersSource: AdaptersSource
 ) : InitAndRegisterAdaptersUseCase {
 
-    private val scope get() = CoroutineScope(SdkDispatchers.Single)
+    private val scope get() = CoroutineScope(SdkDispatchers.Bidon)
     private val canContinueFlow = MutableStateFlow(false)
 
     override suspend operator fun invoke(

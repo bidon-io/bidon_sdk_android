@@ -5,16 +5,23 @@ import com.vungle.ads.BannerAdSize
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
+import org.bidon.sdk.auction.models.BidResponse
 
 class VungleBannerAuctionParams(
     val activity: Activity,
-    override val price: Double,
     val bannerFormat: BannerFormat,
-    val payload: String,
-    val bannerId: String,
+    bidResponse: BidResponse,
 ) : AdAuctionParams {
-    override val lineItem: LineItem? = null
+    override val adUnit: AdUnit = bidResponse.adUnit
+    override val price: Double = bidResponse.price
+    val payload: String = requireNotNull(bidResponse.extra?.getString("payload")) {
+        "No payload found in bid response"
+    }
+    val placementId: String = requireNotNull(bidResponse.adUnit.extra?.getString("placement_id")) {
+        "placement_id is required"
+    }
+
     val bannerSize
         get() = when (bannerFormat) {
             BannerFormat.MRec -> BannerAdSize.VUNGLE_MREC
@@ -26,9 +33,14 @@ class VungleBannerAuctionParams(
 
 class VungleFullscreenAuctionParams(
     val activity: Activity,
-    override val price: Double,
-    val placementId: String,
-    val payload: String
+    bidResponse: BidResponse,
 ) : AdAuctionParams {
-    override val lineItem: LineItem? = null
+    override val adUnit: AdUnit = bidResponse.adUnit
+    override val price: Double = bidResponse.price
+    val payload: String = requireNotNull(bidResponse.extra?.getString("payload")) {
+        "No payload found in bid response"
+    }
+    val placementId: String = requireNotNull(bidResponse.adUnit.extra?.getString("placement_id")) {
+        "placement_id is required"
+    }
 }
