@@ -2,11 +2,12 @@ package org.bidon.vungle.impl
 
 import android.app.Activity
 import android.content.Context
-import com.vungle.warren.AdConfig
-import com.vungle.warren.LoadAdCallback
-import com.vungle.warren.PlayAdCallback
-import com.vungle.warren.Vungle
-import com.vungle.warren.error.VungleException
+import com.vungle.ads.AdConfig
+import com.vungle.ads.BaseAd
+import com.vungle.ads.BaseAdListener
+import com.vungle.ads.InterstitialAd
+import com.vungle.ads.VungleAds
+import com.vungle.ads.VungleError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
@@ -35,107 +36,96 @@ internal class VungleInterstitialImpl :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var adParams: VungleFullscreenAuctionParams? = null
-
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? = Vungle.getAvailableBidTokens(context)
+    private var interstitialAd: InterstitialAd? = null
 
     override val isAdReadyToShow: Boolean
-        get() = adParams?.let {
-            Vungle.canPlayAd(
-                it.placementId,
-                it.payload
-            )
-        } ?: false
+        get() = interstitialAd?.canPlayAd() == true
+
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? =
+        VungleAds.getBiddingToken(context)
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             VungleFullscreenAuctionParams(
+                activity = auctionParamsScope.activity,
                 bidResponse = requiredBidResponse
             )
         }
     }
 
     override fun load(adParams: VungleFullscreenAuctionParams) {
-        this.adParams = adParams
-        Vungle.loadAd(
-            adParams.placementId, adParams.payload, AdConfig(),
-            object : LoadAdCallback {
-                override fun onAdLoad(placementId: String?) {
-                    val ad = getAd()
-                    if (ad != null) {
-                        emitEvent(AdEvent.Fill(ad))
-                    } else {
-                        emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-                    }
-                }
-
-                override fun onError(placementId: String?, exception: VungleException?) {
-                    logInfo(TAG, "onError placementId=$placementId. $this")
-                    emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+        val interstitialAd = InterstitialAd(adParams.activity, adParams.placementId, AdConfig()).also {
+            this.interstitialAd = it
+        }
+        interstitialAd.adListener = object : BaseAdListener {
+            override fun onAdLoaded(baseAd: BaseAd) {
+                val ad = getAd()
+                if (ad != null) {
+                    emitEvent(AdEvent.Fill(ad))
+                } else {
+                    emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
                 }
             }
-        )
+
+            override fun onAdFailedToLoad(baseAd: BaseAd, adError: VungleError) {
+                logError(TAG, "onError placementId=${baseAd.placementId}. $this", null)
+                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+            }
+
+            override fun onAdImpression(baseAd: BaseAd) {
+                logInfo(TAG, "onAdViewed: $this")
+                val ad = getAd() ?: return
+                emitEvent(
+                    AdEvent.PaidRevenue(
+                        ad = ad,
+                        adValue = AdValue(
+                            adRevenue = adParams.price / 1000.0,
+                            precision = Precision.Precise,
+                            currency = AdValue.USD,
+                        )
+                    )
+                )
+            }
+
+            override fun onAdFailedToPlay(baseAd: BaseAd, adError: VungleError) {
+                logError(TAG, "onAdError: $this", adError)
+                emitEvent(AdEvent.ShowFailed(adError.asBidonError()))
+            }
+
+            override fun onAdStart(baseAd: BaseAd) {
+                logInfo(TAG, "onAdStart: $this")
+                val ad = getAd() ?: return
+                emitEvent(AdEvent.Shown(ad))
+            }
+
+            override fun onAdClicked(baseAd: BaseAd) {
+                logInfo(TAG, "onAdClick: $this")
+                val ad = getAd() ?: return
+                emitEvent(AdEvent.Clicked(ad))
+            }
+
+            override fun onAdEnd(baseAd: BaseAd) {
+                logInfo(TAG, "onAdEnd: $this")
+                val ad = getAd() ?: return
+                emitEvent(AdEvent.Closed(ad))
+            }
+
+            override fun onAdLeftApplication(baseAd: BaseAd) {}
+        }
+        interstitialAd.load(adParams.payload)
     }
 
     override fun show(activity: Activity) {
-        val adParams = adParams ?: return
-        if (!Vungle.canPlayAd(adParams.placementId, adParams.payload)) {
-            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
+        if (isAdReadyToShow) {
+            interstitialAd?.play()
         } else {
-            Vungle.playAd(
-                adParams.placementId, adParams.payload, AdConfig(),
-                object : PlayAdCallback {
-                    override fun creativeId(creativeId: String?) {}
-                    @Deprecated("Deprecated in Java")
-                    override fun onAdEnd(placementId: String?, completed: Boolean, isCTAClicked: Boolean) {}
-                    override fun onAdEnd(placementId: String?) {
-                        logInfo(TAG, "onAdEnd: $this")
-                        val ad = getAd() ?: return
-                        emitEvent(AdEvent.Closed(ad))
-                    }
-
-                    override fun onAdClick(placementId: String?) {
-                        logInfo(TAG, "onAdClick: $this")
-                        val ad = getAd() ?: return
-                        emitEvent(AdEvent.Clicked(ad))
-                    }
-
-                    override fun onAdRewarded(placementId: String?) {}
-
-                    override fun onAdLeftApplication(placementId: String?) {}
-
-                    override fun onError(placementId: String?, exception: VungleException?) {
-                        logError(TAG, "onAdError: $this", exception)
-                        emitEvent(AdEvent.ShowFailed(exception.asBidonError()))
-                    }
-
-                    override fun onAdStart(placementId: String?) {
-                        logInfo(TAG, "onAdStart: $this")
-                        val ad = getAd() ?: return
-                        emitEvent(AdEvent.Shown(ad))
-                    }
-
-                    override fun onAdViewed(placementId: String?) {
-                        logInfo(TAG, "onAdViewed: $this")
-                        val ad = getAd() ?: return
-                        emitEvent(
-                            AdEvent.PaidRevenue(
-                                ad = ad,
-                                adValue = AdValue(
-                                    adRevenue = adParams.price / 1000.0,
-                                    precision = Precision.Precise,
-                                    currency = AdValue.USD,
-                                )
-                            )
-                        )
-                    }
-                }
-            )
+            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
 
     override fun destroy() {
-        adParams = null
+        interstitialAd?.adListener = null
+        interstitialAd = null
     }
 }
 

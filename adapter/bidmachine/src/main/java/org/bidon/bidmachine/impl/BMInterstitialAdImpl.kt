@@ -61,6 +61,11 @@ internal class BMInterstitialAdImpl :
         logInfo(TAG, "Starting with $adParams: $this")
         context = adParams.context
         val requestBuilder = InterstitialRequest.Builder()
+            .apply {
+                if (bidType == BidType.CPM) {
+                    this.setNetworks("")
+                }
+            }
             .setAdContentType(AdContentType.All)
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.price))
             .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))

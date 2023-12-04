@@ -1,9 +1,10 @@
 package org.bidon.vungle
 
 import android.content.Context
-import com.vungle.warren.InitCallback
-import com.vungle.warren.Vungle
-import com.vungle.warren.error.VungleException
+import com.vungle.ads.InitializationListener
+import com.vungle.ads.VungleAds
+import com.vungle.ads.VungleError
+import com.vungle.ads.VunglePrivacySettings
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.sdk.adapter.AdProvider
 import org.bidon.sdk.adapter.AdSource
@@ -14,7 +15,6 @@ import org.bidon.sdk.adapter.Initializable
 import org.bidon.sdk.adapter.SupportsRegulation
 import org.bidon.sdk.adapter.SupportsTestMode
 import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
-import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.regulation.Regulation
 import org.bidon.vungle.ext.adapterVersion
@@ -31,6 +31,9 @@ import kotlin.coroutines.resumeWithException
  */
 internal val VungleDemandId = DemandId("vungle")
 
+/**
+ * [Vungle Documentation](https://support.vungle.com/hc/en-us/articles/360002922871-Integrate-Vungle-SDK-for-Android-or-Amazon)
+ */
 class VungleAdapter :
     Adapter,
     Initializable<VungleParameters>,
@@ -46,20 +49,17 @@ class VungleAdapter :
     )
 
     override suspend fun init(context: Context, configParams: VungleParameters) = suspendCancellableCoroutine { continuation ->
-        Vungle.init(
-            configParams.appId,
+        VungleAds.init(
             context,
-            object : InitCallback {
+            configParams.appId,
+            object : InitializationListener {
                 override fun onSuccess() {
                     continuation.resume(Unit)
                 }
 
-                override fun onError(exception: VungleException?) {
-                    logError(TAG, "Error while initialization", exception)
-                    continuation.resumeWithException(exception ?: BidonError.SdkNotInitialized)
-                }
-
-                override fun onAutoCacheAdAvailable(placementId: String?) {
+                override fun onError(vungleError: VungleError) {
+                    logError(TAG, "Error while initialization", vungleError)
+                    continuation.resumeWithException(vungleError)
                 }
             }
         )
@@ -73,23 +73,13 @@ class VungleAdapter :
 
     override fun updateRegulation(regulation: Regulation) {
         if (regulation.ccpaApplies) {
-            val status = if (regulation.hasCcpaConsent) {
-                Vungle.Consent.OPTED_IN
-            } else {
-                Vungle.Consent.OPTED_OUT
-            }
-            Vungle.updateCCPAStatus(status)
+            VunglePrivacySettings.setCCPAStatus(regulation.hasCcpaConsent)
         }
         if (regulation.gdprApplies) {
-            val status = if (regulation.hasGdprConsent) {
-                Vungle.Consent.OPTED_IN
-            } else {
-                Vungle.Consent.OPTED_OUT
-            }
-            Vungle.updateConsentStatus(status, null)
+            VunglePrivacySettings.setGDPRStatus(regulation.hasGdprConsent, null)
         }
         if (regulation.coppaApplies) {
-            Vungle.updateUserCoppaStatus(true)
+            VunglePrivacySettings.setCOPPAStatus(true)
         }
     }
 

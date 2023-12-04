@@ -9,7 +9,7 @@ import org.bidon.sdk.auction.models.AuctionResponse
  */
 internal interface GetAuctionRequestUseCase {
     suspend fun request(
-        additionalData: AdTypeParam,
+        adTypeParam: AdTypeParam,
         auctionId: String,
         demandAd: DemandAd,
         adapters: Map<String, AdapterInfo>,

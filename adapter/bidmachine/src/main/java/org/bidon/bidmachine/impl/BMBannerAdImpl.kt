@@ -62,6 +62,11 @@ internal class BMBannerAdImpl :
             bannerView = BannerView(adParams.activity.applicationContext)
             bannerFormat = adParams.bannerFormat
             val requestBuilder = BannerRequest.Builder()
+                .apply {
+                    if (bidType == BidType.CPM) {
+                        this.setNetworks("")
+                    }
+                }
                 .setSize(adParams.bannerFormat.asBidMachineBannerSize())
                 .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.price))
                 .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
