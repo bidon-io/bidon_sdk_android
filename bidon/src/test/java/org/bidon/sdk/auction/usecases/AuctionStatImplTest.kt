@@ -11,11 +11,13 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.helper.DeviceInfo
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.auction.models.BidResponse
+import org.bidon.sdk.auction.models.InterstitialRequest
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.impl.AuctionStatImpl
 import org.bidon.sdk.auction.usecases.models.BiddingResult
@@ -25,7 +27,6 @@ import org.bidon.sdk.mockkLog
 import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.DemandStat
-import org.bidon.sdk.stats.models.ResultBody
 import org.bidon.sdk.stats.models.RoundStat
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.StatsRequestBody
@@ -65,7 +66,10 @@ internal class AuctionStatImplTest : ConcurrentTest() {
     @Test
     fun `it should save results, DSP winner`() = runTest {
         // create mock data for Bid
-        testee.markAuctionStarted(auctionId = "auction_id_123")
+        testee.markAuctionStarted(
+            auctionId = "auction_id_123",
+            adTypeParam = AdTypeParam.Interstitial(activity = mockk(), pricefloor = 1.1)
+        )
         val actual = testee.addRoundResults(
             RoundResult.Results(
                 round = RoundRequest(
@@ -303,7 +307,10 @@ internal class AuctionStatImplTest : ConcurrentTest() {
     @Test
     fun `it should save results, Bidding winner`() = runTest {
         // create mock data for Bid
-        testee.markAuctionStarted(auctionId = "auction_id_123")
+        testee.markAuctionStarted(
+            auctionId = "auction_id_123",
+            adTypeParam = AdTypeParam.Interstitial(activity = mockk(), pricefloor = 1.1)
+        )
         val actual = testee.addRoundResults(
             RoundResult.Results(
                 round = RoundRequest(
@@ -507,7 +514,10 @@ internal class AuctionStatImplTest : ConcurrentTest() {
             auctionConfigurationUid = "10",
             adUnits = null,
         )
-        testee.markAuctionStarted(auctionId = "auction_id_123")
+        testee.markAuctionStarted(
+            auctionId = "auction_id_123",
+            adTypeParam = AdTypeParam.Interstitial(activity = mockk(), pricefloor = 1.1)
+        )
         testee.addRoundResults(
             RoundResult.Results(
                 round = auctionData.rounds!!.first(),

@@ -15,14 +15,14 @@ internal class BidRequestBodyTest {
             demands = mapOf(
                 "bidmachine" to BidRequest.Token(token = "bm_token_123")
             ),
-            banner = BannerRequest(formatCode = BannerRequest.StatFormat.AdaptiveBanner320x50.code),
+            banner = BannerRequest(formatCode = BannerRequest.StatFormat.ADAPTIVE_BANNER.code),
             bidfloor = 1.24,
             orientationCode = AdObjectRequest.Orientation.Landscape.code,
             roundId = "round123",
             auctionId = "auc123",
             auctionConfigurationUid = "123",
-            rewarded = RewardedRequest(),
-            interstitial = InterstitialRequest(),
+            rewarded = RewardedRequest,
+            interstitial = InterstitialRequest,
         )
         val actual = body.serialize()
         println(actual)
@@ -55,14 +55,14 @@ internal class BidRequestBodyTest {
             demands = mapOf(
                 "bidmachine" to BidRequest.Token(token = "bm_token_123")
             ),
-            banner = BannerRequest(formatCode = BannerRequest.StatFormat.AdaptiveBanner320x50.code),
+            banner = BannerRequest(formatCode = BannerRequest.StatFormat.ADAPTIVE_BANNER.code),
             bidfloor = 1.24,
             orientationCode = AdObjectRequest.Orientation.Landscape.code,
             roundId = "round123",
             auctionId = "auc123",
             auctionConfigurationUid = "123",
-            rewarded = RewardedRequest(),
-            interstitial = InterstitialRequest(),
+            rewarded = RewardedRequest,
+            interstitial = InterstitialRequest,
         )
         val actual = listOf(body).serialize()
         println(actual)

@@ -165,7 +165,7 @@ internal class AuctionImplTest : ConcurrentTest() {
         )
         coEvery {
             getAuctionRequestUseCase.request(
-                additionalData = any(),
+                adTypeParam = any(),
                 auctionId = any(),
                 adapters = any(),
                 demandAd = any()
@@ -175,7 +175,7 @@ internal class AuctionImplTest : ConcurrentTest() {
         // WHEN 2 rounds are completed
         testee.start(
             demandAd = DemandAd(AdType.Interstitial),
-            adTypeParamData = AdTypeParam.Interstitial(activity, 1.0),
+            adTypeParam = AdTypeParam.Interstitial(activity, 1.0),
             onSuccess = { auctionResults ->
 
                 // THEN it should detect winner in round_2
@@ -241,7 +241,7 @@ internal class AuctionImplTest : ConcurrentTest() {
         val auctionConfig = getAuctionResponse()
         coEvery {
             getAuctionRequestUseCase.request(
-                additionalData = any(),
+                adTypeParam = any(),
                 auctionId = any(),
                 adapters = any(),
                 demandAd = any()
@@ -251,7 +251,7 @@ internal class AuctionImplTest : ConcurrentTest() {
         // WHEN 2 rounds are completed
         testee.start(
             demandAd = DemandAd(AdType.Interstitial),
-            adTypeParamData = AdTypeParam.Interstitial(activity, 1.0),
+            adTypeParam = AdTypeParam.Interstitial(activity, 1.0),
             onSuccess = { auctionResults ->
 
                 // THEN it should detect winner in round_1. "admob2" can not fill.
@@ -297,7 +297,7 @@ internal class AuctionImplTest : ConcurrentTest() {
         val auctionConfig = getAuctionResponse()
         coEvery {
             getAuctionRequestUseCase.request(
-                additionalData = any(),
+                adTypeParam = any(),
                 auctionId = any(),
                 adapters = any(),
                 demandAd = any()
@@ -307,7 +307,7 @@ internal class AuctionImplTest : ConcurrentTest() {
         // WHEN all bids failed
         testee.start(
             demandAd = DemandAd(AdType.Interstitial),
-            adTypeParamData = AdTypeParam.Interstitial(activity, 1.0),
+            adTypeParam = AdTypeParam.Interstitial(activity, 1.0),
             onSuccess = {
                 error("unexpected")
             },
@@ -340,7 +340,7 @@ internal class AuctionImplTest : ConcurrentTest() {
         val auctionConfig = getAuctionResponse()
         coEvery {
             getAuctionRequestUseCase.request(
-                additionalData = any(),
+                adTypeParam = any(),
                 auctionId = any(),
                 adapters = any(),
                 demandAd = any()
@@ -350,7 +350,7 @@ internal class AuctionImplTest : ConcurrentTest() {
         // WHEN all fills failed
         testee.start(
             demandAd = DemandAd(AdType.Interstitial),
-            adTypeParamData = AdTypeParam.Interstitial(activity, 1.0),
+            adTypeParam = AdTypeParam.Interstitial(activity, 1.0),
             onSuccess = {
                 error("unexpected")
             },

@@ -1,7 +1,6 @@
 package org.bidon.bigoads
 
 import android.content.Context
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.bigoads.ext.adapterVersion
 import org.bidon.bigoads.ext.sdkVersion
 import org.bidon.bigoads.impl.BigoAdsBannerImpl
@@ -24,6 +23,7 @@ import sg.bigo.ads.BigoAdSdk
 import sg.bigo.ads.ConsentOptions
 import sg.bigo.ads.api.AdConfig
 import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Created by Aleksei Cherniaev on 25/07/2023.
@@ -50,7 +50,7 @@ class BigoAdsAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun init(context: Context, configParams: BigoParameters) = suspendCancellableCoroutine { continuation ->
+    override suspend fun init(context: Context, configParams: BigoParameters) = suspendCoroutine { continuation ->
         this.context = context
         val config = AdConfig.Builder()
             .setAppId(configParams.appId)
