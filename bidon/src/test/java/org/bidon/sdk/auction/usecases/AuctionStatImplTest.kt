@@ -27,6 +27,7 @@ import org.bidon.sdk.mockkLog
 import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.DemandStat
+import org.bidon.sdk.stats.models.ResultBody
 import org.bidon.sdk.stats.models.RoundStat
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.StatsRequestBody
