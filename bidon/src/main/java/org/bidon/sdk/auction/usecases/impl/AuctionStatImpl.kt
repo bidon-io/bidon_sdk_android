@@ -349,12 +349,7 @@ internal class AuctionStatImpl(
                 DemandStat.Bidding(
                     bidStartTs = br.serverBiddingStartTs,
                     bidFinishTs = br.serverBiddingFinishTs,
-                    bids = listOf(
-                        demandError(
-                            RoundStatus.BidTimeoutReached.takeIf { br.serverBiddingFinishTs == null }
-                                ?: RoundStatus.FillTimeoutReached
-                        )
-                    )
+                    bids = listOf(demandError(RoundStatus.BidTimeoutReached))
                 )
             }
         }
