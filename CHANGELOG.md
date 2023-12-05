@@ -1,4 +1,10 @@
-# Release Next
+# Release 0.5.0-Next
+## Features:
+[BDN-596](https://appodeal.atlassian.net/browse/BDN-596) Add bid_finish_ts for BID_TIMEOUT_REACHED
+[BDN-473](https://appodeal.atlassian.net/browse/BDN-473) Line Items Rework In Bidon SDK Server API (Added AdUnits)
+[BDN-505](https://appodeal.atlassian.net/browse/BDN-505) Sync imp_id in requets
+
+# Release 0.4.26 (2023.12.04)
 ## Features:
 [BDN-555](https://appodeal.atlassian.net/browse/BDN-555) Concurrent ad network initalization optimisation Android
 [BDN-511](https://appodeal.atlassian.net/browse/BDN-511) Upgrade Vungle adapter
