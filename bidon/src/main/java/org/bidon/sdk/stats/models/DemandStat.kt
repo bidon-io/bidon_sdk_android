@@ -45,6 +45,10 @@ internal sealed interface DemandStat {
             val adUnitLabel: String?,
             @field:JsonName("price")
             val price: Double?,
+            @field:JsonName("token_start_ts")
+            val tokenStartTs: Long?,
+            @field:JsonName("token_finish_ts")
+            val tokenFinishTs: Long?,
             @field:JsonName("fill_start_ts")
             val fillStartTs: Long?,
             @field:JsonName("fill_finish_ts")

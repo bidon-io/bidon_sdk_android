@@ -70,6 +70,8 @@ internal class ExecuteRoundUseCaseImpl(
                         demandAd = demandAd,
                         round = round,
                         roundIndex = roundIndex,
+                        roundPricefloor = pricefloor,
+                        auctionPricefloor = auctionResponse.pricefloor ?: 0.0,
                     )
                 }
                 .filterIsInstance<Mode.Bidding>()
@@ -113,6 +115,8 @@ internal class ExecuteRoundUseCaseImpl(
                         demandAd = demandAd,
                         round = round,
                         roundIndex = roundIndex,
+                        roundPricefloor = pricefloor,
+                        auctionPricefloor = auctionResponse.pricefloor ?: 0.0,
                     )
                 }
                 .filterIsInstance<Mode.Network>()
@@ -176,12 +180,16 @@ internal class ExecuteRoundUseCaseImpl(
         demandAd: DemandAd,
         round: RoundRequest,
         roundIndex: Int,
+        roundPricefloor: Double,
+        auctionPricefloor: Double,
     ) {
         adSource.addRoundInfo(
             auctionId = auctionResponse.auctionId,
             roundId = round.id,
             demandAd = demandAd,
             roundIndex = roundIndex,
+            roundPricefloor = roundPricefloor,
+            auctionPricefloor = auctionPricefloor,
         )
         adSource.setStatisticAdType(adTypeParam.asStatisticAdType())
         adSource.addAuctionConfigurationUid(auctionResponse.auctionConfigurationUid ?: "")

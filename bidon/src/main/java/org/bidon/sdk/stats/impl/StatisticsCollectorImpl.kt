@@ -10,6 +10,7 @@ import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.BannerRequest
 import org.bidon.sdk.auction.models.InterstitialRequest
 import org.bidon.sdk.auction.models.RewardedRequest
+import org.bidon.sdk.auction.models.TokenInfo
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -64,7 +65,8 @@ class StatisticsCollectorImpl : StatisticsCollector {
         ecpm = 0.0,
         dspSource = null,
         roundPricefloor = 0.0,
-        auctionPricefloor = 0.0
+        auctionPricefloor = 0.0,
+        tokenInfo = null,
     )
 
     override val demandAd: DemandAd
@@ -109,12 +111,16 @@ class StatisticsCollectorImpl : StatisticsCollector {
         roundId: String,
         roundIndex: Int,
         demandAd: DemandAd,
+        roundPricefloor: Double,
+        auctionPricefloor: Double
     ) {
         this._demandAd = demandAd
         stat = stat.copy(
             auctionId = auctionId,
             roundId = roundId,
             roundIndex = roundIndex,
+            roundPricefloor = roundPricefloor,
+            auctionPricefloor = auctionPricefloor
         )
     }
 
@@ -228,6 +234,34 @@ class StatisticsCollectorImpl : StatisticsCollector {
             fillFinishTs = SystemTimeNow,
             roundStatus = roundStatus,
             ecpm = ecpm ?: 0.0
+        )
+    }
+
+    override fun markTokenStarted(): Long {
+        val time = SystemTimeNow
+        stat = stat.copy(
+            tokenInfo = stat.tokenInfo?.copy(
+                tokenStartTs = time
+            ) ?: TokenInfo(
+                token = null,
+                tokenStartTs = time,
+                tokenFinishTs = null,
+                status = TokenInfo.Status.NO_TOKEN.code
+            )
+        )
+        return time
+    }
+
+    override fun markTokenFinished(status: TokenInfo.Status, token: String?) {
+        stat = stat.copy(
+            tokenInfo = stat.tokenInfo?.copy(
+                token = token,
+                tokenFinishTs = SystemTimeNow,
+                status = status.code
+            ) ?: run {
+                logError(TAG, "TokenInfo is null", NullPointerException())
+                return
+            }
         )
     }
 

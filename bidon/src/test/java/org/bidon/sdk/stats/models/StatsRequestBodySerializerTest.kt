@@ -1,8 +1,5 @@
 package org.bidon.sdk.stats.models
 
-import org.bidon.sdk.auction.models.BannerRequest
-import org.bidon.sdk.auction.models.InterstitialRequest
-import org.bidon.sdk.auction.models.RewardedRequest
 import org.bidon.sdk.config.models.json_scheme_utils.assertEquals
 import org.bidon.sdk.config.models.json_scheme_utils.expectedJsonStructure
 import org.bidon.sdk.utils.json.jsonArray
@@ -68,6 +65,8 @@ class StatsRequestBodySerializerTest {
                                 fillStartTs = 5,
                                 adUnitUid = "123",
                                 adUnitLabel = "label123",
+                                tokenStartTs = 678L,
+                                tokenFinishTs = 679L,
                             )
                         )
                     )
@@ -83,9 +82,9 @@ class StatsRequestBodySerializerTest {
                 winnerAdUnitLabel = "label123",
                 winnerAdUnitUid = "123",
                 winnerDemandId = "admob",
-                banner = BannerRequest(BannerRequest.StatFormat.ADAPTIVE_BANNER.code),
-                interstitial = InterstitialRequest,
-                rewarded = RewardedRequest,
+                rewarded = null,
+                interstitial = null,
+                banner = null
             ),
         ).serialize()
         println(json)
@@ -99,11 +98,6 @@ class StatsRequestBodySerializerTest {
                     "auction_start_ts" hasValue 1000
                     "auction_finish_ts" hasValue 1300
                     "bid_type" hasValue "CPM"
-                    "banner" hasJson expectedJsonStructure {
-                        "format" hasValue "ADAPTIVE"
-                    }
-                    "interstitial" hasJson expectedJsonStructure {}
-                    "rewarded" hasJson expectedJsonStructure {}
                 }
                 "auction_id" hasValue "id123"
                 "rounds" hasArray jsonArray {
@@ -120,9 +114,11 @@ class StatsRequestBodySerializerTest {
                                         jsonObject {
                                             "ad_unit_id" hasValue "asd223"
                                             "bid_finish_ts" hasValue 1
-                                            "fill_start_ts" hasValue 4
                                             "ecpm" hasValue 1.2
+                                            "fill_start_ts" hasValue 4
                                             "fill_finish_ts" hasValue 3
+                                            "token_start_ts" hasValue 678L
+                                            "token_finish_ts" hasValue 679L
                                             "id" hasValue "d345"
                                             "bid_start_ts" hasValue 2
                                             "status" hasValue "code"
@@ -174,6 +170,8 @@ class StatsRequestBodySerializerTest {
                     fillStartTs = 5,
                     adUnitLabel = "label123",
                     adUnitUid = "123",
+                    tokenStartTs = 678L,
+                    tokenFinishTs = 679L,
                 )
             )
         ).serialize()
@@ -187,6 +185,8 @@ class StatsRequestBodySerializerTest {
                 "bid_finish_ts" hasValue 3
                 "fill_start_ts" hasValue 5
                 "fill_finish_ts" hasValue 6
+                "token_start_ts" hasValue 678L
+                "token_finish_ts" hasValue 679L
             }
         )
     }

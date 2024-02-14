@@ -207,6 +207,8 @@ internal class AuctionStatImpl(
                                             fillFinishTs = null,
                                             adUnitUid = null,
                                             adUnitLabel = null,
+                                            tokenStartTs = null,
+                                            tokenFinishTs = null,
                                         )
                                     )
                                 )
@@ -272,6 +274,8 @@ internal class AuctionStatImpl(
                 fillFinishTs = null,
                 adUnitUid = null,
                 adUnitLabel = null,
+                tokenStartTs = null,
+                tokenFinishTs = null,
             )
         }
 
@@ -304,6 +308,8 @@ internal class AuctionStatImpl(
                                     fillFinishTs = stat.fillFinishTs,
                                     adUnitUid = stat.adUnit?.uid.orEmpty(),
                                     adUnitLabel = stat.adUnit?.label.orEmpty(),
+                                    tokenStartTs = stat.tokenInfo?.tokenStartTs,
+                                    tokenFinishTs = stat.tokenInfo?.tokenFinishTs,
                                 )
                             }
 
@@ -316,6 +322,8 @@ internal class AuctionStatImpl(
                                     price = null,
                                     adUnitUid = null,
                                     adUnitLabel = null,
+                                    tokenStartTs = null,
+                                    tokenFinishTs = null,
                                 )
                             }
 
@@ -328,6 +336,8 @@ internal class AuctionStatImpl(
                                     fillFinishTs = null,
                                     adUnitUid = null,
                                     adUnitLabel = null,
+                                    tokenStartTs = null,
+                                    tokenFinishTs = null,
                                 )
                             }
 

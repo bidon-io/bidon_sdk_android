@@ -13,7 +13,12 @@ internal class BidRequestBodyTest {
     fun serialize() {
         val body = BidRequest(
             demands = mapOf(
-                "bidmachine" to BidRequest.Token(token = "bm_token_123")
+                "bidmachine" to TokenInfo(
+                    token = "bm_token_123",
+                    tokenStartTs = 100L,
+                    tokenFinishTs = 123L,
+                    status = TokenInfo.Status.SUCCESS.code,
+                )
             ),
             banner = BannerRequest(formatCode = BannerRequest.StatFormat.ADAPTIVE_BANNER.code),
             bidfloor = 1.24,
@@ -32,6 +37,9 @@ internal class BidRequestBodyTest {
                 "demands" hasJson expectedJsonStructure {
                     "bidmachine" hasJson expectedJsonStructure {
                         "token" hasValue "bm_token_123"
+                        "token_start_ts" hasValue 100L
+                        "token_finish_ts" hasValue 123L
+                        "status" hasValue "SUCCESS"
                     }
                 }
 
@@ -53,7 +61,12 @@ internal class BidRequestBodyTest {
     fun array() {
         val body = BidRequest(
             demands = mapOf(
-                "bidmachine" to BidRequest.Token(token = "bm_token_123")
+                "bidmachine" to TokenInfo(
+                    token = "bm_token_123",
+                    tokenStartTs = 100L,
+                    tokenFinishTs = 123L,
+                    status = TokenInfo.Status.SUCCESS.code,
+                )
             ),
             banner = BannerRequest(formatCode = BannerRequest.StatFormat.ADAPTIVE_BANNER.code),
             bidfloor = 1.24,

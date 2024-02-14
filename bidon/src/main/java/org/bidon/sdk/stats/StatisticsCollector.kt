@@ -6,6 +6,7 @@ import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.BannerRequest
+import org.bidon.sdk.auction.models.TokenInfo
 import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.stats.models.RoundStatus
 
@@ -38,6 +39,8 @@ interface StatisticsCollector {
      * Need to be used before [AdEvent.Fill] is exposed
      */
     fun setDsp(dspSource: String?)
+    fun markTokenStarted(): Long
+    fun markTokenFinished(status: TokenInfo.Status, token: String?)
     fun markFillStarted(adUnit: AdUnit, pricefloor: Double?)
     fun markFillFinished(roundStatus: RoundStatus, ecpm: Double?)
     fun markWin()
@@ -54,6 +57,8 @@ interface StatisticsCollector {
         roundId: String,
         roundIndex: Int,
         demandAd: DemandAd,
+        roundPricefloor: Double,
+        auctionPricefloor: Double,
     )
 
     fun getStats(): BidStat
