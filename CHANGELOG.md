@@ -1,3 +1,10 @@
+# Next 0.5
+## Features:
+[BDN-492](https://appodeal.atlassian.net/browse/BDN-492) Continue awaiting adapter after timed out
+[BDN-473](https://appodeal.atlassian.net/browse/BDN-473) Line Items Rework In Bidon SDK Server API
+[BDN-474](https://appodeal.atlassian.net/browse/BDN-474) Remove obsolete _id-fields
+[BDN-475](https://appodeal.atlassian.net/browse/BDN-475) Update Ad object
+
 # Release 0.4.29 (2024.02.14)
 ## Features:
 - [BDN-615](https://appodeal.atlassian.net/browse/BDN-615) Update BigoAds to 4.5.1
@@ -29,13 +36,6 @@
 ## Features:
 - [BDN-510](https://appodeal.atlassian.net/browse/BDN-510) Upgrade adapter versions: Mintegral SDK - 16.5.41, Inmobi SDK - 10.6.1, UnityAds SDK - 4.9.2.
 - [BDN-513](https://appodeal.atlassian.net/browse/BDN-513) Remove tracker on Detach. Fixed Adaptive banner logic.
-
-# Release 0.4.21 (2023.10.20)
-## Features:
-[BDN-492](https://appodeal.atlassian.net/browse/BDN-492) Continue awaiting adapter after timed out
-[BDN-473](https://appodeal.atlassian.net/browse/BDN-473) Line Items Rework In Bidon SDK Server API
-[BDN-474](https://appodeal.atlassian.net/browse/BDN-474) Remove obsolete _id-fields
-[BDN-475](https://appodeal.atlassian.net/browse/BDN-475) Update Ad object
 
 # Release 0.4.21 (2023.09.21)
 ## Features:
