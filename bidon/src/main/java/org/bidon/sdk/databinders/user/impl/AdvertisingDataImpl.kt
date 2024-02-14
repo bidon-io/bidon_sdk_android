@@ -3,11 +3,11 @@ package org.bidon.sdk.databinders.user.impl
 import android.content.Context
 import android.os.Build
 import android.provider.Settings
-import com.google.android.gms.ads.identifier.AdvertisingIdClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.bidon.sdk.databinders.user.AdvertisingData
 import org.bidon.sdk.databinders.user.AdvertisingProfile
-import java.util.*
+import java.util.Locale
+
 /**
  * Created by Bidon Team on 06/02/2023.
  */
@@ -25,14 +25,19 @@ internal class AdvertisingDataImpl(
 
     private fun getGoogleAdId(): AdvertisingProfile? {
         return try {
-            AdvertisingIdClient.getAdvertisingIdInfo(context).let { info ->
-                info.id?.let { adId ->
-                    AdvertisingProfile.Google(
-                        advertisingId = adId,
-                        isLimitAdTrackingEnabled = info.isLimitAdTrackingEnabled
-                    )
-                }
-            }
+            val info = Class.forName("com.google.android.gms.ads.identifier.AdvertisingIdClient")
+                .getDeclaredMethod("getAdvertisingIdInfo", Context::class.java)
+                .invoke(null, context)
+            val infoClass =
+                Class.forName("com.google.android.gms.ads.identifier.AdvertisingIdClient\$Info")
+            val adId = infoClass.getDeclaredMethod("getId").invoke(info) as String
+            val isLimitAdTrackingEnabled = infoClass
+                .getDeclaredMethod("isLimitAdTrackingEnabled")
+                .invoke(info) as Boolean
+            AdvertisingProfile.Google(
+                advertisingId = adId,
+                isLimitAdTrackingEnabled = isLimitAdTrackingEnabled
+            )
         } catch (e: Exception) {
             null
         }

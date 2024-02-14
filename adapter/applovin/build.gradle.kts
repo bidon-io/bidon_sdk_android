@@ -19,6 +19,5 @@ android {
 
 dependencies {
     compileOnly(project(":bidon"))
-    implementation("com.applovin:applovin-sdk:11.11.3")
-    testImplementation(project(":bidon"))
+    implementation("com.applovin:applovin-sdk:12.1.0")
 }

@@ -104,10 +104,12 @@ internal class BMBannerAdImpl :
     }
 
     override fun notifyLoss(winnerNetworkName: String, winnerNetworkPrice: Double) {
+        logInfo(TAG, "notifyLoss: $this")
         adRequest?.notifyMediationLoss(winnerNetworkName, winnerNetworkPrice)
     }
 
     override fun notifyWin() {
+        logInfo(TAG, "notifyWin: $this")
         adRequest?.notifyMediationWin()
     }
 

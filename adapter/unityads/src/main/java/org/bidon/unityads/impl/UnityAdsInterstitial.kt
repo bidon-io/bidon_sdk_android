@@ -89,7 +89,6 @@ internal class UnityAdsInterstitial :
             override fun onUnityAdsShowStart(placementId: String?) {
                 logInfo(TAG, "onUnityAdsShowStart: placementId=$placementId")
                 getAd()?.let {
-                    emitEvent(AdEvent.Shown(it))
                     emitEvent(
                         AdEvent.PaidRevenue(
                             ad = it,
@@ -113,7 +112,10 @@ internal class UnityAdsInterstitial :
                 state: UnityAds.UnityAdsShowCompletionState?
             ) {
                 logInfo(TAG, "onUnityAdsShowComplete: placementId=$placementId, state=$state")
-                getAd()?.let { emitEvent(AdEvent.Closed(it)) }
+                getAd()?.let {
+                    emitEvent(AdEvent.Shown(it))
+                    emitEvent(AdEvent.Closed(it))
+                }
             }
         }
         UnityAds.show(activity, adUnitId, UnityAdsShowOptions(), showListener)

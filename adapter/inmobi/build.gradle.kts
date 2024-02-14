@@ -22,5 +22,5 @@ dependencies {
     compileOnly(project(":bidon"))
     testImplementation(project(":bidon"))
 
-    implementation("com.inmobi.monetization:inmobi-ads-kotlin:10.6.1")
+    implementation("com.inmobi.monetization:inmobi-ads-kotlin:10.6.2")
 }
