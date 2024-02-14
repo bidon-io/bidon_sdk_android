@@ -20,6 +20,6 @@ android {
 dependencies {
     compileOnly(project(":bidon"))
     testImplementation(project(":bidon"))
-    implementation("com.bigossp:bigo-ads:4.1.2")
-    implementation(Dependencies.Google.PlayServicesAds)
+
+    implementation("com.bigossp:bigo-ads:4.5.1")
 }
