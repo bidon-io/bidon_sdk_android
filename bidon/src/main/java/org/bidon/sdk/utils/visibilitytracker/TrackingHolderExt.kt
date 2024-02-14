@@ -62,8 +62,7 @@ internal fun View?.isOnTop(visibilityParams: VisibilityParams): Boolean {
         return false
     }
     if (!ignoreOverlap && view.hasOverlap(viewRect, visibilityPercent, maxCountOverlappedViews)) {
-        logInfo(TAG, "Show wasn't tracked: view overlap verification failed - $view")
-        return false
+        // TODO Implement the task https://appodeal.atlassian.net/browse/BDN-551
     }
     return true
 }

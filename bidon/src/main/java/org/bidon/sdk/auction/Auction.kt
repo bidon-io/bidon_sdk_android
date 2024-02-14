@@ -9,7 +9,7 @@ import org.bidon.sdk.auction.models.AuctionResult
 internal interface Auction {
     fun start(
         demandAd: DemandAd,
-        adTypeParamData: AdTypeParam,
+        adTypeParam: AdTypeParam,
         onSuccess: (results: List<AuctionResult>) -> Unit,
         onFailure: (Throwable) -> Unit
     )

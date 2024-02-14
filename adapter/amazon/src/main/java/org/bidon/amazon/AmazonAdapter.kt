@@ -3,7 +3,6 @@ package org.bidon.amazon
 import android.content.Context
 import com.amazon.device.ads.AdRegistration
 import com.amazon.device.ads.MRAIDPolicy
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.amazon.ext.adapterVersion
 import org.bidon.amazon.ext.sdkVersion
 import org.bidon.amazon.impl.AmazonBannerImpl
@@ -25,6 +24,7 @@ import org.bidon.sdk.logs.logging.Logger
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.json.JSONObject
 import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Created by Aleksei Cherniaev on 27/09/2023.
@@ -59,7 +59,7 @@ class AmazonAdapter :
         )
     }
 
-    override suspend fun init(context: Context, configParams: AmazonParameters) = suspendCancellableCoroutine { continuation ->
+    override suspend fun init(context: Context, configParams: AmazonParameters) = suspendCoroutine { continuation ->
         if (isTestMode) {
             AdRegistration.enableTesting(true)
         }

@@ -9,7 +9,7 @@ import androidx.core.view.WindowInsetsCompat
  * Created by Aleksei Cherniaev on 07/09/2023.
  */
 internal object ApplyInsetUseCase {
-    fun FrameLayout.applyWindowInsets(): FrameLayout {
+    fun RootAdContainer.applyWindowInsets(): RootAdContainer {
         ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
             if (view == null || insets == null) return@setOnApplyWindowInsetsListener insets
             val systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())

@@ -3,7 +3,6 @@ package org.bidon.meta
 import android.content.Context
 import com.facebook.ads.AdSettings
 import com.facebook.ads.AudienceNetworkAds
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.meta.ext.adapterVersion
 import org.bidon.meta.ext.sdkVersion
 import org.bidon.meta.impl.MetaBannerAuctionParams
@@ -27,6 +26,7 @@ import org.bidon.sdk.regulation.Regulation
 import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Created by Aleksei Cherniaev on 08/08/2023.
@@ -47,7 +47,7 @@ class MetaAudienceAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun init(context: Context, configParams: MetaParams) = suspendCancellableCoroutine {
+    override suspend fun init(context: Context, configParams: MetaParams) = suspendCoroutine {
         if (isTestMode) {
             AdSettings.setIntegrationErrorMode(AdSettings.IntegrationErrorMode.INTEGRATION_ERROR_CRASH_DEBUG_MODE)
             AdSettings.setDebugBuild(true)

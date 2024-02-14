@@ -9,14 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import android.widget.FrameLayout.LayoutParams
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.BannerPosition
 import org.bidon.sdk.ads.banner.BannerView
 import org.bidon.sdk.ads.banner.render.AdRenderer.PositionState
-import org.bidon.sdk.ads.banner.render.ApplyInsetUseCase.applyWindowInsets
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.ext.TAG
 import org.bidon.sdk.utils.ext.dp
@@ -40,7 +38,7 @@ internal class AdRendererImpl(
      * RootContainer is the only one view for every [activity].
      * Implements insets and contains [adContainer] and [BannerView].
      */
-    private var rootContainer: FrameLayout? = null
+    private var rootContainer: RootAdContainer? = null
 
     /**
      * AdContainer changes with [positionState]
@@ -110,10 +108,7 @@ internal class AdRendererImpl(
 
     override fun destroy(activity: Activity) {
         hide(activity)
-        rootContainer?.let {
-            it.removeAllViews()
-            (it.parent as? ViewGroup)?.removeView(it)
-        }
+        rootContainer?.clearRootContainer()
         rootContainer = null
         this.activity = WeakReference(null)
     }
@@ -149,23 +144,14 @@ internal class AdRendererImpl(
 
     private fun createRootContainer(activity: Activity, onFinished: () -> Unit) {
         adContainer?.removeAllViews()
-        rootContainer?.removeAllViews()
+        rootContainer?.clearRootContainer()
         val layoutParam = LayoutParams(MATCH_PARENT, MATCH_PARENT)
-        rootContainer = FrameLayout(activity).applyWindowInsets().apply {
-            this.clipChildren = false
-            this.clipToPadding = false
-        }
+        rootContainer = RootAdContainer(activity)
         activity.addContentView(rootContainer, layoutParam)
-        rootContainer?.viewTreeObserver?.addOnGlobalLayoutListener(
-            object : ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    safeAreaScreenSize =
-                        Point(rootContainer?.width ?: safeAreaScreenSize.x, rootContainer?.height ?: safeAreaScreenSize.y)
-                    rootContainer?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
-                    onFinished()
-                }
-            }
-        )
+        rootContainer?.obtainSize { safeAreaScreenSize ->
+            this.safeAreaScreenSize = safeAreaScreenSize
+            onFinished()
+        }
     }
 
     private fun createAdContainer(

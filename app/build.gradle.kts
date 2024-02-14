@@ -1,4 +1,6 @@
 import ext.BIDON_API_KEY
+import ext.STAGING_BASIC_AUTH_PASSWORD
+import ext.STAGING_BASIC_AUTH_USERNAME
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -31,6 +33,8 @@ android {
 
         manifestPlaceholders["MOBILE_ADS_APPLICATION_ID"] = keystoreProperties["MOBILE_ADS_APPLICATION_ID"] as? String ?: ""
         BIDON_API_KEY = keystoreProperties["BIDON_API_KEY"] as? String ?: ""
+        STAGING_BASIC_AUTH_USERNAME = keystoreProperties["STAGING_BASIC_AUTH_USERNAME"] as? String ?: "username"
+        STAGING_BASIC_AUTH_PASSWORD = keystoreProperties["STAGING_BASIC_AUTH_PASSWORD"] as? String ?: "password"
     }
     signingConfigs {
         create("myConfig") {
@@ -96,21 +100,22 @@ dependencies {
 //    implementation("org.bidon:vungle-adapter:0.3.1.0")
 
     implementation("com.chartboost:chartboost-mediation-sdk:4.0.0")
-    implementation("com.google.android.gms:play-services-ads:22.1.0")
+    implementation("com.google.android.gms:play-services-ads:22.5.0")
 
     implementation(project(":bidon"))
-    implementation(project(":adapter:bidmachine"))
     implementation(project(":adapter:admob"))
-    implementation(project(":adapter:applovin"))
-    implementation(project(":adapter:dtexchange"))
-    implementation(project(":adapter:unityads"))
-    implementation(project(":adapter:bigoads"))
-    implementation(project(":adapter:mintegral"))
-    implementation(project(":adapter:meta"))
-    implementation(project(":adapter:vungle"))
-    implementation(project(":adapter:inmobi"))
     implementation(project(":adapter:amazon"))
+    implementation(project(":adapter:applovin"))
+    implementation(project(":adapter:bidmachine"))
+    implementation(project(":adapter:bigoads"))
+    implementation(project(":adapter:dtexchange"))
+    implementation(project(":adapter:inmobi"))
+    implementation(project(":adapter:gam"))
+    implementation(project(":adapter:meta"))
+    implementation(project(":adapter:mintegral"))
     implementation(project(":adapter:mobilefuse"))
+    implementation(project(":adapter:unityads"))
+    implementation(project(":adapter:vungle"))
 
     implementation(Dependencies.Google.PlayServicesAdsIdentifier)
 
