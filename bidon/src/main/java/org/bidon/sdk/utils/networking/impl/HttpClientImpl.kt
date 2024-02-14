@@ -7,6 +7,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.networking.HttpClient
 import org.bidon.sdk.utils.networking.Method
+import org.bidon.sdk.utils.networking.NetworkSettings
 import org.bidon.sdk.utils.networking.encoders.RequestDataDecoder
 import org.bidon.sdk.utils.networking.encoders.RequestDataEncoder
 import org.bidon.sdk.utils.networking.encoders.ext.decodeWith
@@ -14,10 +15,13 @@ import org.bidon.sdk.utils.networking.encoders.ext.encodeWith
 
 internal val jsonZipHttpClient by lazy {
     HttpClientImpl(
-        headers = mapOf(
-            "Content-Type" to listOf("application/json; charset=UTF-8"),
-            "X-Bidon-Version" to listOf(BidonSdkVersion),
-        ),
+        headers = buildMap {
+            this["Content-Type"] = listOf("application/json; charset=UTF-8")
+            this["X-Bidon-Version"] = listOf(BidonSdkVersion)
+            NetworkSettings.basicAuthHeader?.let {
+                this["Authorization"] = listOf("Basic $it")
+            }
+        },
         encoders = listOf(),
         decoders = listOf(),
     )
@@ -71,6 +75,7 @@ internal class HttpClientImpl(
                         }
                         rawResponse
                     }
+
                     is RawResponse.Success -> {
                         // decoding data
                         val data = rawResponse.requestBody?.decodeWith(

@@ -42,20 +42,20 @@ internal class GetAuctionRequestUseCaseImpl(
     )
 
     override suspend fun request(
-        additionalData: AdTypeParam,
+        adTypeParam: AdTypeParam,
         auctionId: String,
         demandAd: DemandAd,
         adapters: Map<String, AdapterInfo>,
     ): Result<AuctionResponse> {
         return withContext(SdkDispatchers.IO) {
-            val (banner, interstitial, rewarded) = additionalData.asAdRequestBody()
+            val (banner, interstitial, rewarded) = adTypeParam.asAdRequestBody()
             val adObject = AdObjectRequest(
                 auctionId = auctionId,
                 banner = banner,
                 interstitial = interstitial,
                 rewarded = rewarded,
                 orientationCode = getOrientation().code,
-                pricefloor = additionalData.pricefloor
+                pricefloor = adTypeParam.pricefloor
             )
             val requestBody = createRequestBody(
                 binders = binders,
@@ -65,7 +65,7 @@ internal class GetAuctionRequestUseCaseImpl(
             )
             logInfo(TAG, "Request body: $requestBody")
             get<JsonHttpRequest>().invoke(
-                path = "$AuctionRequestPath/${additionalData.asAdType().code}",
+                path = "$AuctionRequestPath/${adTypeParam.asAdType().code}",
                 body = requestBody,
             ).mapCatching { jsonResponse ->
                 segmentSynchronizer.parseSegmentId(jsonResponse)

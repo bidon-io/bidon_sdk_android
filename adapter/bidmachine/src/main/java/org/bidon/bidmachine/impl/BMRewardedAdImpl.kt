@@ -28,6 +28,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 internal class BMRewardedAdImpl :
     AdSource.Rewarded<BMFullscreenAuctionParams>,
@@ -65,6 +66,11 @@ internal class BMRewardedAdImpl :
         logInfo(TAG, "Starting with $adParams: $this")
         context = adParams.context
         val requestBuilder = RewardedRequest.Builder()
+            .apply {
+                if (bidType == BidType.CPM) {
+                    this.setNetworks("")
+                }
+            }
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.price))
             .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
             .setLoadingTimeOut(adParams.timeout.toInt())
@@ -109,10 +115,12 @@ internal class BMRewardedAdImpl :
     }
 
     override fun notifyLoss(winnerNetworkName: String, winnerNetworkPrice: Double) {
+        logInfo(TAG, "notifyLoss: $this")
         adRequest?.notifyMediationLoss(winnerNetworkName, winnerNetworkPrice)
     }
 
     override fun notifyWin() {
+        logInfo(TAG, "notifyWin: $this")
         adRequest?.notifyMediationWin()
     }
 

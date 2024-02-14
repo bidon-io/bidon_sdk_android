@@ -4,7 +4,6 @@ import android.content.Context
 import com.inmobi.sdk.InMobiSdk
 import com.inmobi.sdk.SdkInitializationListener
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.bidon.inmobi.ext.adapterVersion
 import org.bidon.inmobi.ext.sdkVersion
@@ -30,6 +29,7 @@ import org.bidon.sdk.regulation.Regulation
 import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Created by Aleksei Cherniaev on 11/09/2023.
@@ -55,7 +55,7 @@ class InmobiAdapter :
         )
 
     override suspend fun init(context: Context, configParams: InmobiParams) = withContext(Dispatchers.Main.immediate) {
-        suspendCancellableCoroutine {
+        suspendCoroutine {
             if (isTestMode) {
                 InMobiSdk.setLogLevel(InMobiSdk.LogLevel.DEBUG)
             }

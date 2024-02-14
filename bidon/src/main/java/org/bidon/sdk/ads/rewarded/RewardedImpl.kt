@@ -150,7 +150,12 @@ internal class RewardedImpl(
                     adSource.sendClickImpression()
                 }
 
-                is AdEvent.Closed -> listener.onAdClosed(adEvent.ad)
+                is AdEvent.Closed -> {
+                    listener.onAdClosed(adEvent.ad)
+                    observeCallbacksJob?.cancel()
+                    observeCallbacksJob = null
+                }
+
                 is AdEvent.Shown -> {
                     listener.onAdShown(adEvent.ad)
                     adSource.sendShowImpression()

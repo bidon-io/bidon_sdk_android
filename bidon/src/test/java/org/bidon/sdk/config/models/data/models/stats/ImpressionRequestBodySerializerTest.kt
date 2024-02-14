@@ -23,7 +23,7 @@ class ImpressionRequestBodySerializerTest {
             ecpm = 2.33,
             demandId = "demandId123",
             rewarded = null,
-            interstitial = InterstitialRequest(),
+            interstitial = InterstitialRequest,
             banner = BannerRequest(formatCode = "1"),
             adUnitId = "adUnitId43",
             roundId = "round123",
