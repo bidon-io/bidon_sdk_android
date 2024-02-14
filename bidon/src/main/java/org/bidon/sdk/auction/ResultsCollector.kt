@@ -12,6 +12,7 @@ internal interface ResultsCollector {
     fun startRound(round: RoundRequest, pricefloor: Double)
     fun serverBiddingStarted()
     fun serverBiddingFinished(bids: List<BidResponse>?)
+    fun biddingTimeoutReached()
     fun add(result: AuctionResult)
     fun getRoundResults(): RoundResult
 
@@ -19,7 +20,6 @@ internal interface ResultsCollector {
     fun clear()
     suspend fun saveWinners(sourcePriceFloor: Double)
     fun clearRoundResults()
-    fun biddingTimeoutReached()
 
     companion object {
         /**
