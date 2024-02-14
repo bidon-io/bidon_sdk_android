@@ -192,7 +192,17 @@ internal class AuctionImpl(
 
     private fun notifyWinLoss(finalResults: List<AuctionResult>) {
         val winner = finalResults.getOrNull(0) ?: return
+
+        /**
+         *  For internal statistics
+         */
         winner.adSource.markWin()
+
+        /**
+         * For AdNetworks
+         */
+        (winner.adSource as? WinLossNotifiable)?.notifyWin()
+
         finalResults.drop(1)
             .forEach { auctionResult ->
                 val adSource = auctionResult.adSource

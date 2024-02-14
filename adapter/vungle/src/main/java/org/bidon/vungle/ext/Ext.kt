@@ -14,7 +14,7 @@ internal var sdkVersion = VungleAds.getSdkVersion()
 
 internal fun VungleError?.asBidonError() = when (this?.code) {
     VungleError.AD_EXPIRED -> BidonError.Expired(VungleDemandId)
-    VungleError.VUNGLE_NOT_INITIALIZED -> BidonError.SdkNotInitialized
+    VungleError.SDK_NOT_INITIALIZED -> BidonError.SdkNotInitialized
     VungleError.ALREADY_PLAYING_ANOTHER_AD -> BidonError.AdNotReady
     else -> BidonError.Unspecified(VungleDemandId)
 }
