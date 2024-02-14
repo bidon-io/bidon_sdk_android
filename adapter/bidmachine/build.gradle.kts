@@ -21,6 +21,5 @@ dependencies {
     compileOnly(project(":bidon"))
     testImplementation(project(":bidon"))
 
-    implementation("io.bidmachine:ads:2.3.3")
-    implementation(Dependencies.Google.PlayServicesAds)
+    implementation("io.bidmachine:ads:2.4.0")
 }

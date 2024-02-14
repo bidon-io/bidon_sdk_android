@@ -90,7 +90,7 @@ internal class AdCacheImpl(
             auction = get()
             auction?.start(
                 demandAd = demandAd,
-                adTypeParamData = adTypeParam.copy(
+                adTypeParam = adTypeParam.copy(
                     pricefloor = maxOf(adTypeParam.pricefloor, results.value.firstOrNull()?.adSource?.getStats()?.ecpm ?: 0.0)
                 ),
                 onSuccess = { auctionResults ->
