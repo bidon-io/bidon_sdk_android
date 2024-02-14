@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import com.fyber.inneractive.sdk.external.InneractiveAdManager
 import com.fyber.inneractive.sdk.external.OnFyberMarketplaceInitializedListener.FyberInitStatus
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.dtexchange.ext.adapterVersion
 import org.bidon.dtexchange.ext.sdkVersion
 import org.bidon.dtexchange.impl.DTExchangeAdAuctionParams
@@ -26,6 +25,7 @@ import org.bidon.sdk.regulation.Regulation
 import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Created by Aleksei Cherniaev on 28/02/2023.
@@ -49,7 +49,7 @@ class DTExchangeAdapter :
     )
 
     override suspend fun init(context: Context, configParams: DTExchangeParameters) =
-        suspendCancellableCoroutine { continuation ->
+        suspendCoroutine { continuation ->
             when (BidonSdk.loggerLevel) {
                 Logger.Level.Verbose -> InneractiveAdManager.setLogLevel(Log.VERBOSE)
                 Logger.Level.Error -> InneractiveAdManager.setLogLevel(Log.ERROR)

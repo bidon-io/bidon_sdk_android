@@ -299,11 +299,11 @@ class StatisticsCollectorImpl : StatisticsCollector {
             }
 
             StatisticsCollector.AdType.Interstitial -> {
-                Triple(null, InterstitialRequest(), null)
+                Triple(null, InterstitialRequest, null)
             }
 
             StatisticsCollector.AdType.Rewarded -> {
-                Triple(null, null, RewardedRequest())
+                Triple(null, null, RewardedRequest)
             }
         }
     }

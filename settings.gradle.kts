@@ -52,6 +52,7 @@ include(
     ":adapter:inmobi",
     ":adapter:amazon",
     ":adapter:mobilefuse",
+    ":adapter:gam",
 //    ":adapter:fyber",
 //    ":adapter:ironsource",
 //    ":adapter:appsflyer"

@@ -81,3 +81,26 @@ var ApplicationDefaultConfig.BIDON_API_KEY: String
             value = value
         )
     }
+
+/**
+ * Bidon Basic Auth property only for staging
+ */
+var ApplicationDefaultConfig.STAGING_BASIC_AUTH_USERNAME: String?
+    get() = error("Property STAGING_BASIC_AUTH_USERNAME couldn't be get")
+    set(value) {
+        addBuildConfigField(
+            type = BuildConfigFieldType.String,
+            name = "STAGING_BASIC_AUTH_USERNAME",
+            value = value ?: return
+        )
+    }
+
+var ApplicationDefaultConfig.STAGING_BASIC_AUTH_PASSWORD: String?
+    get() = error("Property STAGING_BASIC_AUTH_PASSWORD couldn't be get")
+    set(value) {
+        addBuildConfigField(
+            type = BuildConfigFieldType.String,
+            name = "STAGING_BASIC_AUTH_PASSWORD",
+            value = value ?: return
+        )
+    }
