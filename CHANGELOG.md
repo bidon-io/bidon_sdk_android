@@ -1,5 +1,6 @@
 # Next 0.5
 ## Features:
+[BDN-596](https://appodeal.atlassian.net/browse/BDN-596) Add bid_finish_ts for BID_TIMEOUT_REACHED
 [BDN-492](https://appodeal.atlassian.net/browse/BDN-492) Continue awaiting adapter after timed out
 [BDN-473](https://appodeal.atlassian.net/browse/BDN-473) Line Items Rework In Bidon SDK Server API
 [BDN-474](https://appodeal.atlassian.net/browse/BDN-474) Remove obsolete _id-fields
