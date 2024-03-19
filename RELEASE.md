@@ -3,13 +3,13 @@
 Bidon versions are described in the [Versions.kt](./buildSrc/src/main/kotlin/Versions.kt).
 Publication settings are described in the [publish-adapter.gradle.kts](./buildSrc/src/main/kotlin/publish-adapter.gradle.kts).
 
-## Publication to the private maven repository is done using the following command:
+## Publication to the `bidon-private` repository is done using the following command:
 
 ```shell
 ./gradlew publishAllPublicationsToBidonRepository -Prepo='bidon-private' -Puname='USER' -Pupassword='PASSWORD'
 ```
 
-## Publication to the public maven repository is done using the following command:
+## Publication to the public `bidon` repository is done using the following command:
 
 ```shell
 ./gradlew publishAllPublicationsToBidonRepository -Prepo='bidon' -Puname='USER' -Pupassword='PASSWORD'
@@ -17,7 +17,7 @@ Publication settings are described in the [publish-adapter.gradle.kts](./buildSr
 
 # Release process
 
-1. Update the version in the [Versions.kt] file 
+1. Update the version in the [Versions.kt](./buildSrc/src/main/kotlin/Versions.kt) file 
 2. Commit and push the changes to `release` branch
 3. Run the publication command
 4. Create a tag with the version number
