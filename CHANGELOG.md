@@ -1,5 +1,6 @@
 # Release 0.4.29.1 (****.**.**)
 ## Features:
+- [BDN-620](https://appodeal.atlassian.net/browse/BDN-620) Update Inmobi to 10.6.7
 - [BDN-621](https://appodeal.atlassian.net/browse/BDN-621) Update UnityAds to 4.9.3
 
 # Release 0.4.29 (2024.02.14)
