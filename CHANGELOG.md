@@ -1,5 +1,6 @@
 # Release 0.4.29.1 (****.**.**)
 ## Features:
+- [BDN-617](https://appodeal.atlassian.net/browse/BDN-617) Update Admob to 23.0.0
 - [BDN-618](https://appodeal.atlassian.net/browse/BDN-618) Update Bidmachine to 2.5.2
 - [BDN-619](https://appodeal.atlassian.net/browse/BDN-619) Update DTExchange to 8.2.6
 - [BDN-620](https://appodeal.atlassian.net/browse/BDN-620) Update Inmobi to 10.6.7
