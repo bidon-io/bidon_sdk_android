@@ -21,5 +21,5 @@ dependencies {
     compileOnly(project(":bidon"))
     testImplementation(project(":bidon"))
 
-    implementation("io.bidmachine:ads:2.5.2")
+    implementation("io.bidmachine:ads:2.6.0")
 }
