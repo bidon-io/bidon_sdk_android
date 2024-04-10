@@ -21,5 +21,5 @@ android {
 dependencies {
     compileOnly(project(":bidon"))
 
-    implementation("com.vungle:vungle-ads:7.0.0")
+    implementation("com.vungle:vungle-ads:7.3.1")
 }
