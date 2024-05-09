@@ -22,5 +22,5 @@ dependencies {
     compileOnly(project(":bidon"))
     testImplementation(project(":bidon"))
 
-    implementation("com.facebook.android:audience-network-sdk:6.16.0")
+    implementation("com.facebook.android:audience-network-sdk:6.17.0")
 }

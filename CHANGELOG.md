@@ -1,10 +1,31 @@
 # Next 0.5
 ## Features:
-[BDN-596](https://appodeal.atlassian.net/browse/BDN-596) Add bid_finish_ts for BID_TIMEOUT_REACHED
-[BDN-492](https://appodeal.atlassian.net/browse/BDN-492) Continue awaiting adapter after timed out
-[BDN-473](https://appodeal.atlassian.net/browse/BDN-473) Line Items Rework In Bidon SDK Server API
-[BDN-474](https://appodeal.atlassian.net/browse/BDN-474) Remove obsolete _id-fields
-[BDN-475](https://appodeal.atlassian.net/browse/BDN-475) Update Ad object
+- [BDN-596](https://appodeal.atlassian.net/browse/BDN-596) Add bid_finish_ts for BID_TIMEOUT_REACHED
+- [BDN-492](https://appodeal.atlassian.net/browse/BDN-492) Continue awaiting adapter after timed out
+- [BDN-473](https://appodeal.atlassian.net/browse/BDN-473) Line Items Rework In Bidon SDK Server API
+- [BDN-474](https://appodeal.atlassian.net/browse/BDN-474) Remove obsolete _id-fields
+- [BDN-475](https://appodeal.atlassian.net/browse/BDN-475) Update Ad object
+
+# Release 0.4.29.2 (2024.04.10)
+## Features:
+- [APDM-195](https://appodeal.atlassian.net/browse/APDM-195) Update Amazon to 9.9.3
+- [APDM-195](https://appodeal.atlassian.net/browse/APDM-195) Update Applovin to 12.4.2
+- [APDM-195](https://appodeal.atlassian.net/browse/APDM-195) Update Bidmachine to 2.6.0
+- [APDM-195](https://appodeal.atlassian.net/browse/APDM-195) Update BigoAds to 4.6.1
+- [APDM-195](https://appodeal.atlassian.net/browse/APDM-195) Update Meta to 6.17.0
+- [APDM-195](https://appodeal.atlassian.net/browse/APDM-195) Update Mintegral to 16.6.71
+- [APDM-195](https://appodeal.atlassian.net/browse/APDM-195) Update Inmobi to 7.3.1
+- [APDM-195](https://appodeal.atlassian.net/browse/APDM-195) Update UnityAds to 4.10.0
+- [APDM-195](https://appodeal.atlassian.net/browse/APDM-195) Update DTExchange to 8.2.7
+
+# Release 0.4.29.1 (2024.03.27)
+## Features:
+- [BDN-616](https://appodeal.atlassian.net/browse/BDN-616) Update Applovin to 12.3.1
+- [BDN-617](https://appodeal.atlassian.net/browse/BDN-617) Update Admob to 23.0.0
+- [BDN-618](https://appodeal.atlassian.net/browse/BDN-618) Update Bidmachine to 2.5.2
+- [BDN-619](https://appodeal.atlassian.net/browse/BDN-619) Update DTExchange to 8.2.6
+- [BDN-620](https://appodeal.atlassian.net/browse/BDN-620) Update Inmobi to 10.6.7
+- [BDN-621](https://appodeal.atlassian.net/browse/BDN-621) Update UnityAds to 4.9.3
 
 # Release 0.4.29 (2024.02.14)
 ## Features:
@@ -38,7 +59,7 @@
 - [BDN-510](https://appodeal.atlassian.net/browse/BDN-510) Upgrade adapter versions: Mintegral SDK - 16.5.41, Inmobi SDK - 10.6.1, UnityAds SDK - 4.9.2.
 - [BDN-513](https://appodeal.atlassian.net/browse/BDN-513) Remove tracker on Detach. Fixed Adaptive banner logic.
 
-# Release 0.4.21 (2023.09.21)
+# Release 0.4.21 (2023.10.20)
 ## Features:
 - [BDN-446](https://appodeal.atlassian.net/browse/BDN-446) Implement Amazon Rewarded
 - [BDN-417](https://appodeal.atlassian.net/browse/BDN-417) Implement Amazon Adapters: Interstitial+Banner

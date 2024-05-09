@@ -22,5 +22,5 @@ dependencies {
     compileOnly(project(":bidon"))
     testImplementation(project(":bidon"))
 
-    implementation("com.unity3d.ads:unity-ads:4.9.2")
+    implementation("com.unity3d.ads:unity-ads:4.10.0")
 }
