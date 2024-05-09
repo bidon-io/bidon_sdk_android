@@ -3,12 +3,7 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        maven("https://plugins.gradle.org/m2/")
-        maven("https://artifacts.applovin.com/android")
-        maven {
-            name = "BidMachine Ads maven repository"
-            url = uri("https://artifactory.bidmachine.io/bidmachine")
-        }
+        gradlePluginPortal()
     }
     dependencies {
         classpath(Dependencies.Android.gradlePlugin)
@@ -25,11 +20,6 @@ plugins {
 subprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint") // Version should be inherited from parent
     apply(plugin = "org.jetbrains.dokka")
-
-    repositories {
-        // Required to download KtLint
-        mavenCentral()
-    }
 
     // Optionally configure plugin
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {

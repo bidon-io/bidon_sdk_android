@@ -19,8 +19,8 @@ android {
 }
 
 dependencies {
-    compileOnly(project(":bidon"))
-    testImplementation(project(":bidon"))
+    compileOnly(projects.bidon)
+    testImplementation(projects.bidon)
 
     implementation("com.inmobi.monetization:inmobi-ads-kotlin:10.6.7")
 }
