@@ -19,8 +19,8 @@ android {
 }
 
 dependencies {
-    compileOnly(project(":bidon"))
-    testImplementation(project(":bidon"))
+    compileOnly(projects.bidon)
+    testImplementation(projects.bidon)
 
     val version = "16.6.71"
     implementation("com.mbridge.msdk.oversea:reward:$version")
