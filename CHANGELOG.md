@@ -1,3 +1,7 @@
+# Release 0.4.29.2 (****.**.**)
+## Features:
+- [APDM-637](https://appodeal.atlassian.net/browse/APDM-637) Update Admob SDK to 23.1.0
+
 # Release 0.4.29.2 (2024.04.10)
 ## Features:
 - [APDM-195](https://appodeal.atlassian.net/browse/APDM-195) Update Amazon to 9.9.3
