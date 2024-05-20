@@ -11,7 +11,7 @@ object Versions {
         val Applovin = "$mainVersion.2" + semanticVersion
         val BidMachine = "$mainVersion.3" + semanticVersion
         val DTExchange = "$mainVersion.2" + semanticVersion
-        val UnityAds = "$mainVersion.2" + semanticVersion
+        val UnityAds = "$mainVersion.3" + semanticVersion
         val BigoAds = "$mainVersion.2" + semanticVersion
         val Mintegral = "$mainVersion.1" + semanticVersion
         val Vungle = "$mainVersion.1" + semanticVersion
