@@ -12,6 +12,12 @@ internal class BidRequestBodyTest {
     @Test
     fun serialize() {
         val body = BidRequest(
+            auctionConfigurationId = 123,
+            auctionConfigurationUid = "123",
+            auctionId = "auc123",
+            roundId = "round123",
+            orientationCode = AdObjectRequest.Orientation.Landscape.code,
+            bidfloor = 1.24,
             demands = mapOf(
                 "bidmachine" to TokenInfo(
                     token = "bm_token_123",
@@ -21,13 +27,8 @@ internal class BidRequestBodyTest {
                 )
             ),
             banner = BannerRequest(formatCode = BannerRequest.StatFormat.ADAPTIVE_BANNER.code),
-            bidfloor = 1.24,
-            orientationCode = AdObjectRequest.Orientation.Landscape.code,
-            roundId = "round123",
-            auctionId = "auc123",
-            auctionConfigurationUid = "123",
-            rewarded = RewardedRequest,
             interstitial = InterstitialRequest,
+            rewarded = RewardedRequest,
         )
         val actual = body.serialize()
         println(actual)
@@ -52,6 +53,7 @@ internal class BidRequestBodyTest {
                 "bidfloor" hasValue 1.24
                 "round_id" hasValue "round123"
                 "auction_id" hasValue "auc123"
+                "auction_configuration_id" hasValue 123
                 "auction_configuration_uid" hasValue "123"
             }
         )
@@ -60,6 +62,12 @@ internal class BidRequestBodyTest {
     @Test
     fun array() {
         val body = BidRequest(
+            auctionConfigurationId = 123,
+            auctionConfigurationUid = "123",
+            auctionId = "auc123",
+            roundId = "round123",
+            orientationCode = AdObjectRequest.Orientation.Landscape.code,
+            bidfloor = 1.24,
             demands = mapOf(
                 "bidmachine" to TokenInfo(
                     token = "bm_token_123",
@@ -69,13 +77,8 @@ internal class BidRequestBodyTest {
                 )
             ),
             banner = BannerRequest(formatCode = BannerRequest.StatFormat.ADAPTIVE_BANNER.code),
-            bidfloor = 1.24,
-            orientationCode = AdObjectRequest.Orientation.Landscape.code,
-            roundId = "round123",
-            auctionId = "auc123",
-            auctionConfigurationUid = "123",
-            rewarded = RewardedRequest,
             interstitial = InterstitialRequest,
+            rewarded = RewardedRequest,
         )
         val actual = listOf(body).serialize()
         println(actual)

@@ -9,6 +9,8 @@ import org.bidon.sdk.utils.serializer.Serializable
 internal data class StatsRequestBody(
     @field:JsonName("auction_id")
     val auctionId: String,
+    @field:JsonName("auction_configuration_id")
+    val auctionConfigurationId: Long,
     @field:JsonName("auction_configuration_uid")
     val auctionConfigurationUid: String,
     @field:JsonName("rounds")

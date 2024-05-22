@@ -9,6 +9,8 @@ import org.bidon.sdk.utils.serializer.Serializable
  * @param orientationCode is [AdObjectRequest.Orientation.code]
  */
 internal data class BidRequest(
+    @field:JsonName("auction_configuration_id")
+    val auctionConfigurationId: Long?,
     @field:JsonName("auction_configuration_uid")
     val auctionConfigurationUid: String?,
     @field:JsonName("auction_id")
@@ -26,6 +28,5 @@ internal data class BidRequest(
     @field:JsonName("interstitial")
     val interstitial: InterstitialRequest?,
     @field:JsonName("rewarded")
-    val rewarded: RewardedRequest?,
-
+    val rewarded: RewardedRequest?
 ) : Serializable
