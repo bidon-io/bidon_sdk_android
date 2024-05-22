@@ -18,6 +18,7 @@ class StatsRequestBodySerializerTest {
     fun `it should serialize stat request`() {
         val json = StatsRequestBody(
             auctionId = "id123",
+            auctionConfigurationId = 4,
             auctionConfigurationUid = "4",
             rounds = listOf(
                 Round(

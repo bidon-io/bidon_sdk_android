@@ -40,11 +40,6 @@ internal class AuctionResponseParserTest {
                 biddingIds = listOf("asd"),
             ),
         ),
-        auctionId = "49975154-b82a-444b-a7f0-30bd749e7fce",
-        token = "asdsad",
-        pricefloor = 0.01,
-        externalWinNotificationsEnabled = false,
-        auctionConfigurationUid = "10",
         adUnits = listOf(
             AdUnit(
                 demandId = "admob",
@@ -62,7 +57,13 @@ internal class AuctionResponseParserTest {
                 bidType = BidType.RTB,
                 ext = null,
             )
-        )
+        ),
+        pricefloor = 0.01,
+        token = "asdsad",
+        auctionId = "49975154-b82a-444b-a7f0-30bd749e7fce",
+        auctionConfigurationId = 10,
+        auctionConfigurationUid = "10",
+        externalWinNotificationsEnabled = false
     )
 
     private val responseJsonStr = """
@@ -109,6 +110,7 @@ internal class AuctionResponseParserTest {
           "fill_timeout": 10000,
           "pricefloor": 0.01,
           "auction_id":"49975154-b82a-444b-a7f0-30bd749e7fce",
+          "auction_configuration_id":10,
           "auction_configuration_uid":"10",
           "external_win_notifications":false
         }
@@ -148,5 +150,42 @@ internal class AuctionResponseParserTest {
         """.trimIndent()
         val res = AuctionResponseParser().parseOrNull(responseJsonStr)
         assertThat(res?.auctionConfigurationUid).isEqualTo("10923190123")
+    }
+
+    @Test
+    fun `it should parse auction_configuration_id as Long`() {
+        val responseJsonStr = """
+        {
+          "rounds": [
+            {
+              "id": "postbid",
+              "timeout": 15,
+              "demands": [
+                "admob",
+                "bidmachine"
+              ]
+            },
+            {
+              "id": "prebid",
+              "timeout": 25,
+              "demands": [
+                "bidmachine"
+              ],
+              "bidding": [
+                "asd"
+              ],
+            }
+          ],          
+          "token": "asdsad",
+          "fill_timeout": 10000,
+          "pricefloor": 0.01,
+          "auction_id":"49975154-b82a-444b-a7f0-30bd749e7fce",
+          "auction_configuration_id":10923190123,
+          "auction_configuration_uid":"10923190123",
+          "external_win_notifications":false
+        }
+        """.trimIndent()
+        val res = AuctionResponseParser().parseOrNull(responseJsonStr)
+        assertThat(res?.auctionConfigurationId).isEqualTo(10923190123L)
     }
 }

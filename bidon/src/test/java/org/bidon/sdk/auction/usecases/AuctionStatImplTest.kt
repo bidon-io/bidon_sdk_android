@@ -563,12 +563,13 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     biddingIds = listOf("bid2", "bid3"),
                 ),
             ),
-            auctionId = "auction_id_123",
+            adUnits = null,
             pricefloor = 0.01,
             token = null,
-            externalWinNotificationsEnabled = true,
+            auctionId = "auction_id_123",
+            auctionConfigurationId = 10,
             auctionConfigurationUid = "10",
-            adUnits = null,
+            externalWinNotificationsEnabled = true,
         )
         testee.markAuctionStarted(
             auctionId = "auction_id_123",
@@ -732,6 +733,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
         assertThat(actual).isEqualTo(
             StatsRequestBody(
                 auctionId = "auction_id_123",
+                auctionConfigurationId = 10,
+                auctionConfigurationUid = "10",
                 rounds = listOf(
                     org.bidon.sdk.stats.models.Round(
                         id = "ROUND_1",
@@ -819,7 +822,6 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     interstitial = InterstitialRequest,
                     rewarded = null,
                 ),
-                auctionConfigurationUid = "10",
             )
         )
     }

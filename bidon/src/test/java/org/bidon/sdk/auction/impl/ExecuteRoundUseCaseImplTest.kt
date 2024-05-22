@@ -69,7 +69,6 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                 biddingIds = listOf(),
             ),
         ),
-        auctionId = "auctionId_123",
         adUnits = listOf(
             AdUnit(
                 demandId = "admob",
@@ -90,8 +89,10 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
         ),
         pricefloor = 0.01,
         token = null,
-        externalWinNotificationsEnabled = true,
+        auctionId = "auctionId_123",
+        auctionConfigurationId = 10,
         auctionConfigurationUid = "10",
+        externalWinNotificationsEnabled = true,
     )
 
     private val activity: Activity by lazy { mockk(relaxed = true) }
@@ -145,7 +146,18 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
     fun `it should conduct round`() = runTest {
         // mockk results
         coEvery {
-            conductNetworkAuction.invoke(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            conductNetworkAuction.invoke(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
         } returns NetworksResult(
             results = listOf(
                 CoroutineScope(mainDispatcherOverridden!!).async {
@@ -166,8 +178,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                                     uid = "12387837129819",
                                     bidType = BidType.CPM,
                                     ext = jsonObject { "ad_unit_id" hasValue "ca-app-pub-3940256099942544/6300978111" }.toString(),
-                                ),
-
+                                )
                             )
                         },
                         roundStatus = RoundStatus.Successful
@@ -186,9 +197,10 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                 bidfloor = any(),
                 auctionId = any(),
                 round = any(),
+                auctionConfigurationId = any(),
                 auctionConfigurationUid = any(),
-                resultsCollector = any(),
                 adUnits = any(),
+                resultsCollector = any(),
             )
         } returns Unit
 

@@ -24,6 +24,7 @@ internal interface ConductBiddingRoundUseCase {
         bidfloor: Double,
         auctionId: String,
         round: RoundRequest,
+        auctionConfigurationId: Long?,
         auctionConfigurationUid: String?,
         adUnits: List<AdUnit>,
         resultsCollector: ResultsCollector,

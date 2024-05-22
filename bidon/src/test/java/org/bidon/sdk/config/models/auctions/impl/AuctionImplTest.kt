@@ -131,7 +131,6 @@ internal class AuctionImplTest : ConcurrentTest() {
                     biddingIds = listOf(),
                 ),
             ),
-            auctionId = "auctionId_123",
             adUnits = listOf(
                 AdUnit(
                     label = "admob2",
@@ -160,8 +159,10 @@ internal class AuctionImplTest : ConcurrentTest() {
             ),
             pricefloor = 0.01,
             token = null,
-            externalWinNotificationsEnabled = true,
+            auctionId = "auctionId_123",
+            auctionConfigurationId = 10,
             auctionConfigurationUid = "10",
+            externalWinNotificationsEnabled = true,
         )
         coEvery {
             getAuctionRequestUseCase.request(
@@ -376,7 +377,6 @@ internal class AuctionImplTest : ConcurrentTest() {
                 biddingIds = listOf(),
             ),
         ),
-        auctionId = "auctionId_123",
         adUnits = listOf(
             AdUnit(
                 label = "admob2",
@@ -406,7 +406,9 @@ internal class AuctionImplTest : ConcurrentTest() {
         ),
         pricefloor = 0.01,
         token = null,
-        externalWinNotificationsEnabled = true,
+        auctionId = "auctionId_123",
+        auctionConfigurationId = 10,
         auctionConfigurationUid = "10",
+        externalWinNotificationsEnabled = true,
     )
 }

@@ -43,6 +43,7 @@ internal class ConductBiddingRoundUseCaseImpl(
         bidfloor: Double,
         auctionId: String,
         round: RoundRequest,
+        auctionConfigurationId: Long?,
         auctionConfigurationUid: String?,
         adUnits: List<AdUnit>,
         resultsCollector: ResultsCollector,
@@ -84,6 +85,7 @@ internal class ConductBiddingRoundUseCaseImpl(
                     bidfloor = bidfloor,
                     auctionId = auctionId,
                     roundId = round.id,
+                    auctionConfigurationId = auctionConfigurationId,
                     auctionConfigurationUid = auctionConfigurationUid
                 ).mapCatching { bidResponse ->
                     val bids = bidResponse.bids?.takeIf {

@@ -17,21 +17,22 @@ class ImpressionRequestBodySerializerTest {
     @Test
     fun `it should serialize impression request`() {
         val json = ImpressionRequestBody(
-            auctionId = "id123",
             impressionId = "impr123",
-            price = 2.33,
-            demandId = "demandId123",
-            rewarded = null,
-            interstitial = InterstitialRequest,
-            banner = BannerRequest(formatCode = "1"),
-            adUnitLabel = "adUnitId43",
             roundId = "round123",
-            roundIndex = 2,
-            bidType = BidType.RTB.code,
-            auctionConfigurationUid = "4",
-            adUnitUid = "1698961007059140608",
             roundPricefloor = 0.12,
-            auctionPricefloor = 0.01
+            auctionPricefloor = 0.01,
+            auctionId = "id123",
+            bidType = BidType.RTB.code,
+            roundIndex = 2,
+            auctionConfigurationId = 4,
+            auctionConfigurationUid = "4",
+            demandId = "demandId123",
+            adUnitUid = "1698961007059140608",
+            adUnitLabel = "adUnitId43",
+            price = 2.33,
+            banner = BannerRequest(formatCode = "1"),
+            interstitial = InterstitialRequest,
+            rewarded = null
         ).serialize()
 
         json.assertEquals(
@@ -46,6 +47,7 @@ class ImpressionRequestBodySerializerTest {
                     "format" hasValue "1"
                 }
                 "bid_type" hasValue "RTB"
+                "auction_configuration_id" hasValue 4
                 "auction_configuration_uid" hasValue 4UL
                 "imp_id" hasValue "impr123"
                 "ad_unit_uid" hasValue "1698961007059140608"

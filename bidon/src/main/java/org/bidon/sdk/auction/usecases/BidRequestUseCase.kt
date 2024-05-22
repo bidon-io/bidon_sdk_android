@@ -15,6 +15,7 @@ internal interface BidRequestUseCase {
         bidfloor: Double,
         auctionId: String,
         roundId: String,
+        auctionConfigurationId: Long?,
         auctionConfigurationUid: String?,
     ): Result<BiddingResponse>
 }
