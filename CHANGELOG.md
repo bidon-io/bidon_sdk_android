@@ -1,9 +1,11 @@
-# Release 0.4.29.3 (****.**.**)
+# Release 0.4.29.3 (2024.05.22)
 ## Features:
 - [APDM-638](https://appodeal.atlassian.net/browse/APDM-638) Update Applovin SDK to 12.5.0
 - [APDM-639](https://appodeal.atlassian.net/browse/APDM-639) Update Bidmachine SDK to 2.7.0
 - [APDM-640](https://appodeal.atlassian.net/browse/APDM-640) Update BigoAds SDK to 4.7.3
 - [APDM-641](https://appodeal.atlassian.net/browse/APDM-641) Update Mintegral SDK to 16.7.31
+- [BDN-625](https://appodeal.atlassian.net/browse/BDN-625) Fixed OnReward event emitting order for Mintegral Rewarded
+
 
 # Release 0.4.29.2 (2024.04.10)
 ## Features:
