@@ -109,7 +109,6 @@ internal class MintegralRewardedImpl :
             override fun onAdClose(mBridgeIds: MBridgeIds?, rewardInfo: RewardInfo?) {
                 logInfo(TAG, "onAdClose $mBridgeIds, $rewardInfo")
                 val ad = getAd() ?: return
-                emitEvent(AdEvent.Closed(ad))
                 emitEvent(
                     AdEvent.OnReward(
                         ad = ad,
@@ -121,6 +120,7 @@ internal class MintegralRewardedImpl :
                         }
                     )
                 )
+                emitEvent(AdEvent.Closed(ad))
                 this@MintegralRewardedImpl.rewardedAd = null
             }
 
