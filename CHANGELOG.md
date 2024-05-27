@@ -6,6 +6,7 @@
 - [BDN-474](https://appodeal.atlassian.net/browse/BDN-474) Remove obsolete _id-fields
 - [BDN-475](https://appodeal.atlassian.net/browse/BDN-475) Update Ad object
 - [BDN-631](https://appodeal.atlassian.net/browse/BDN-631) Gradle maintenance
+- [BDN-625](https://appodeal.atlassian.net/browse/BDN-625) Fixed OnReward event emitting order for Mintegral Rewarded
 
 # Release 0.4.29.2 (2024.04.10)
 ## Features:
