@@ -8,7 +8,6 @@ import org.bidon.amazon.SlotType
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.AdUnit
-import org.bidon.sdk.auction.models.BidResponse
 import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.utils.json.jsonObject
 import org.junit.Test
@@ -19,7 +18,7 @@ import org.junit.Test
 class AmazonBannerImplTest {
     private val activity = mockk<Activity>()
     private val testee by lazy {
-        AmazonBannerImpl().apply {
+        AmazonBannerImpl(listOf()).apply {
             addDemandId(AmazonDemandId)
         }
     }
@@ -30,51 +29,20 @@ class AmazonBannerImplTest {
             AdAuctionParamSource(
                 activity = activity,
                 pricefloor = 2.5,
-                timeout = 1000,
-                adUnits = listOf(
-                    AdUnit(
-                        demandId = "admob",
-                        pricefloor = 3.5,
-                        label = "label888",
-                        bidType = BidType.CPM,
-                        ext = jsonObject {
-                            "ad_unit_id" hasValue "ad_unit_id888"
-                        }.toString(),
-                        uid = "uid123"
-                    ),
-                    AdUnit(
-                        demandId = "demand888",
-                        pricefloor = 4.0,
-                        label = "label111",
-                        bidType = BidType.CPM,
-                        ext = jsonObject {
-                            "ad_unit_id" hasValue "ad_unit_id111"
-                        }.toString(),
-                        uid = "uid111"
-                    ),
-                ),
-                onAdUnitsConsumed = {},
-                optBannerFormat = BannerFormat.MRec,
-                optContainerWidth = 140f,
-                bidResponse = BidResponse(
-                    id = "id",
-                    price = 2.7,
+                adUnit = AdUnit(
+                    demandId = "amazon",
+                    pricefloor = 2.7,
+                    label = "label123",
+                    bidType = BidType.RTB,
                     ext = jsonObject {
-                        "payload" hasValue "payload123"
+                        "slot_uuid" hasValue "slot_uuid4"
+                        "format" hasValue "BANNER"
                     }.toString(),
-                    adUnit = AdUnit(
-                        demandId = "amazon",
-                        pricefloor = 2.7,
-                        label = "label123",
-                        bidType = BidType.RTB,
-                        ext = jsonObject {
-                            "slot_uuid" hasValue "slot_uuid4"
-                            "format" hasValue "BANNER"
-                        }.toString(),
-                        uid = "uid123"
-                    ),
-                    impressionId = "impressionId123",
-                )
+                    timeout = 5000,
+                    uid = "uid123"
+                ),
+                optBannerFormat = BannerFormat.Banner,
+                optContainerWidth = 140f,
             )
         }
         val actual = testee.getAuctionParam(auctionParamsScope).getOrThrow()
@@ -90,6 +58,7 @@ class AmazonBannerImplTest {
                     "slot_uuid" hasValue "slot_uuid4"
                     "format" hasValue "BANNER"
                 }.toString(),
+                timeout = 5000,
                 uid = "uid123"
             )
         )

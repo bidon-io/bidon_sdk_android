@@ -11,7 +11,7 @@ internal class ObtainAuctionParamUseCase {
         return auctionParamsScope {
             MobileFuseFullscreenAuctionParams(
                 activity = activity,
-                bidResponse = requiredBidResponse
+                adUnit = adUnit
             )
         }
     }
@@ -21,7 +21,7 @@ internal class ObtainAuctionParamUseCase {
             MobileFuseBannerAuctionParams(
                 activity = activity,
                 bannerFormat = bannerFormat,
-                bidResponse = requiredBidResponse
+                adUnit = adUnit
             )
         }
     }

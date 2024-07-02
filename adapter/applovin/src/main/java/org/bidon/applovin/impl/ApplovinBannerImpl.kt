@@ -9,12 +9,12 @@ import com.applovin.sdk.AppLovinAdSize
 import com.applovin.sdk.AppLovinSdk
 import org.bidon.applovin.ApplovinBannerAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
+import org.bidon.applovin.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
@@ -26,7 +26,6 @@ import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.BidType
 
 /**
  * I have no idea how it works. There is no documentation.
@@ -36,12 +35,11 @@ import org.bidon.sdk.stats.models.BidType
 internal class ApplovinBannerImpl(
     private val applovinSdk: AppLovinSdk,
 ) : AdSource.Banner<ApplovinBannerAuctionParams>,
-    Mode.Network,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var adView: AppLovinAdView? = null
-    private var lineItem: AdUnit? = null
+    private var adUnit: AdUnit? = null
     private var bannerFormat: BannerFormat? = null
 
     private val listener by lazy {
@@ -49,7 +47,7 @@ internal class ApplovinBannerImpl(
             override fun adDisplayed(ad: AppLovinAd) {
                 logInfo(TAG, "adDisplayed: $ad")
                 getAd()?.let {
-                    emitEvent(AdEvent.PaidRevenue(it, lineItem?.pricefloor.asBidonAdValue()))
+                    emitEvent(AdEvent.PaidRevenue(it, adUnit?.pricefloor.asBidonAdValue()))
                 }
                 // tracked impression/shown by [BannerView]
             }
@@ -80,7 +78,7 @@ internal class ApplovinBannerImpl(
         return auctionParamsScope {
             ApplovinBannerAuctionParams(
                 activity = activity,
-                adUnit = popAdUnit(demandId, BidType.CPM) ?: error(BidonError.NoAppropriateAdUnitId),
+                adUnit = adUnit,
                 bannerFormat = bannerFormat
             )
         }
@@ -88,8 +86,14 @@ internal class ApplovinBannerImpl(
 
     override fun load(adParams: ApplovinBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
-        lineItem = adParams.adUnit
+        adUnit = adParams.adUnit
         bannerFormat = adParams.bannerFormat
+        val zoneId = adParams.zoneId ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, "zoneId"))
+            )
+            return
+        }
         val adSize = adParams.bannerFormat.asApplovinAdSize() ?: error(
             BidonError.AdFormatIsNotSupported(
                 demandId.demandId,
@@ -107,12 +111,17 @@ internal class ApplovinBannerImpl(
 
             override fun failedToReceiveAd(errorCode: Int) {
                 logInfo(TAG, "failedToReceiveAd: errorCode=$errorCode. $this")
-                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                emitEvent(AdEvent.LoadFailed(errorCode.asBidonError()))
             }
         }
         adParams.activity.runOnUiThread {
             val bannerView =
-                AppLovinAdView(applovinSdk, adSize, adParams.zoneId, adParams.activity.applicationContext).also {
+                AppLovinAdView(
+                    applovinSdk,
+                    adSize,
+                    zoneId,
+                    adParams.activity.applicationContext
+                ).also {
                     it.setAdClickListener(listener)
                     it.setAdDisplayListener(listener)
                     adView = it

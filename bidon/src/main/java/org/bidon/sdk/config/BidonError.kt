@@ -29,6 +29,7 @@ sealed class BidonError : Throwable() {
     class NoFill(val demandId: DemandId) : BidonError()
     class BidTimedOut(val demandId: DemandId) : BidonError()
     class FillTimedOut(val demandId: DemandId) : BidonError()
+    class IncorrectAdUnit(val demandId: DemandId, override val message: String) : BidonError()
     class AdFormatIsNotSupported(val demandId: String, val bannerFormat: BannerFormat) : BidonError()
     class Unspecified(val demandId: DemandId?, val sourceError: Throwable? = null) : BidonError()
 

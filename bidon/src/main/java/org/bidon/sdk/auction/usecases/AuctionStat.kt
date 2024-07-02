@@ -13,7 +13,7 @@ import org.bidon.sdk.stats.models.StatsRequestBody
 internal interface AuctionStat {
     fun markAuctionStarted(auctionId: String, adTypeParam: AdTypeParam)
 
-    suspend fun addRoundResults(result: RoundResult.Results): List<RoundStat>
-    fun sendAuctionStats(auctionData: AuctionResponse, demandAd: DemandAd): StatsRequestBody
+    suspend fun addRoundResults(result: RoundResult.Results): RoundStat
+    fun sendAuctionStats(auctionData: AuctionResponse, demandAd: DemandAd): StatsRequestBody?
     fun markAuctionCanceled()
 }

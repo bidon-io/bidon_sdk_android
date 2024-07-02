@@ -12,14 +12,16 @@ import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.Auction.AuctionState
 import org.bidon.sdk.auction.ResultsCollector
-import org.bidon.sdk.auction.models.AdUnit
+import org.bidon.sdk.auction.ext.printWaterfall
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
-import org.bidon.sdk.auction.models.RoundRequest
+import org.bidon.sdk.auction.models.TokenInfo
 import org.bidon.sdk.auction.usecases.AuctionStat
-import org.bidon.sdk.auction.usecases.ExecuteRoundUseCase
+import org.bidon.sdk.auction.usecases.ExecuteAuctionUseCase
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
+import org.bidon.sdk.auction.usecases.GetTokensUseCase
 import org.bidon.sdk.auction.usecases.models.RoundResult
+import org.bidon.sdk.bidding.BiddingConfig
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -34,17 +36,17 @@ import java.util.UUID
 internal class AuctionImpl(
     private val adaptersSource: AdaptersSource,
     private val getAuctionRequest: GetAuctionRequestUseCase,
-    private val executeRound: ExecuteRoundUseCase,
+    private val executeAuction: ExecuteAuctionUseCase,
     private val auctionStat: AuctionStat,
+    private val tokenGetter: GetTokensUseCase,
+    private val biddingConfig: BiddingConfig,
 ) : Auction {
     private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
     private val state = MutableStateFlow(AuctionState.Initialized)
-    private val mutableAdUnits = mutableListOf<AdUnit>()
+
     private var _auctionDataResponse: AuctionResponse? = null
     private var _demandAd: DemandAd? = null
     private var job: Job? = null
-    private val auctionDataResponse: AuctionResponse
-        get() = requireNotNull(_auctionDataResponse)
     private var adTypeParam: AdTypeParam? = null
     private val resultsCollector: ResultsCollector by lazy { get() }
 
@@ -66,9 +68,20 @@ internal class AuctionImpl(
             this.adTypeParam = adTypeParam
             job = scope.launch {
                 runCatching {
-                    val auctionId = UUID.randomUUID().toString()
-                    logInfo(TAG, "Action started $this")
+                    logInfo(TAG, "Auction started $this")
+                    resultsCollector.startRound(adTypeParam.pricefloor)
+
+                    resultsCollector.serverBiddingStarted()
+
+                    val tokens = tokenGetter.invoke(
+                        adType = demandAd.adType,
+                        adTypeParam = adTypeParam,
+                        adaptersSource = adaptersSource,
+                        tokenTimeout = biddingConfig.tokenTimeout
+                    )
+
                     // Request for Auction-data at /auction
+                    val auctionId = UUID.randomUUID().toString()
                     auctionStat.markAuctionStarted(auctionId, adTypeParam)
                     getAuctionRequest.request(
                         adTypeParam = adTypeParam,
@@ -76,15 +89,18 @@ internal class AuctionImpl(
                         demandAd = demandAd,
                         adapters = adaptersSource.adapters.associate {
                             it.demandId.demandId to it.adapterInfo
-                        }
+                        },
+                        tokens = tokens,
                     ).mapCatching { auctionData ->
                         if (auctionId != auctionData.auctionId) {
                             logError(TAG, "Auction ID has been changed", IllegalStateException())
                         }
+                        auctionData.printWaterfall(demandAd.adType)
                         conductAuction(
                             auctionData = auctionData,
                             demandAd = demandAd,
                             adTypeParamData = adTypeParam,
+                            tokens = tokens,
                         ).ifEmpty {
                             throw BidonError.NoAuctionResults
                         }.also {
@@ -134,20 +150,30 @@ internal class AuctionImpl(
         auctionData: AuctionResponse,
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
+        tokens: Map<String, TokenInfo>,
     ): List<AuctionResult> {
         _auctionDataResponse = auctionData
         _demandAd = demandAd
-        mutableAdUnits.addAll(auctionData.adUnits ?: emptyList())
-
+        val auctionPriceFloor = auctionData.pricefloor
         // Start auction
-        conductRounds(
-            rounds = auctionData.rounds ?: listOf(),
-            sourcePriceFloor = auctionData.pricefloor ?: 0.0,
-            pricefloor = auctionData.pricefloor ?: 0.0,
+        executeAuction(
+            auctionId = auctionData.auctionId,
+            auctionConfigurationId = auctionData.auctionConfigurationId ?: 0L,
+            auctionConfigurationUid = auctionData.auctionConfigurationUid ?: "",
+            externalWinNotificationsEnabled = auctionData.externalWinNotificationsEnabled,
+            auctionTimeout = auctionData.auctionTimeout,
+            pricefloor = auctionPriceFloor,
             demandAd = demandAd,
-            adTypeParamData = adTypeParamData,
-            roundIndex = 0,
+            adTypeParam = adTypeParamData,
+            adUnits = auctionData.adUnits ?: emptyList(),
+            resultsCollector = resultsCollector,
+            tokens = tokens,
         )
+
+        // Save round results
+        resultsCollector.saveWinners(auctionPriceFloor)
+        proceedRoundResults()
+
         logInfo(TAG, "Rounds completed")
 
         // Finding winner / notifying losers
@@ -186,7 +212,6 @@ internal class AuctionImpl(
 
     private fun clearData() {
         resultsCollector.clear()
-        mutableAdUnits.clear()
         _auctionDataResponse = null
     }
 
@@ -211,7 +236,10 @@ internal class AuctionImpl(
                  */
                 if (auctionResult !is AuctionResult.Bidding && adSource is WinLossNotifiable) {
                     logInfo(TAG, "Notified loss: ${adSource.demandId}")
-                    adSource.notifyLoss(winner.adSource.demandId.demandId, winner.adSource.getStats().ecpm)
+                    adSource.notifyLoss(
+                        winner.adSource.demandId.demandId,
+                        winner.adSource.getStats().ecpm
+                    )
                 }
                 if (auctionResult.roundStatus == RoundStatus.Successful) {
                     adSource.markLoss()
@@ -219,48 +247,6 @@ internal class AuctionImpl(
                 logInfo(TAG, "Destroying loser: ${adSource.demandId}")
                 adSource.destroy()
             }
-    }
-
-    private suspend fun conductRounds(
-        rounds: List<RoundRequest>,
-        roundIndex: Int,
-        sourcePriceFloor: Double,
-        pricefloor: Double,
-        demandAd: DemandAd,
-        adTypeParamData: AdTypeParam,
-    ) {
-        val round = rounds.firstOrNull() ?: return
-        resultsCollector.startRound(round, pricefloor)
-        // Execute round
-        executeRound(
-            round = round,
-            roundIndex = roundIndex,
-            pricefloor = pricefloor,
-            demandAd = demandAd,
-            adTypeParam = adTypeParamData,
-            auctionResponse = auctionDataResponse,
-            adUnits = mutableAdUnits,
-            resultsCollector = resultsCollector,
-            onFinish = { remainingLineItems ->
-                mutableAdUnits.clear()
-                mutableAdUnits.addAll(remainingLineItems)
-            }
-        )
-
-        // Save round results
-        resultsCollector.saveWinners(sourcePriceFloor)
-        proceedRoundResults()
-
-        // Start next round
-        val nextPriceFloor = resultsCollector.getAll().firstOrNull()?.adSource?.getStats()?.ecpm ?: pricefloor
-        conductRounds(
-            rounds = rounds.drop(1),
-            sourcePriceFloor = sourcePriceFloor,
-            pricefloor = nextPriceFloor,
-            demandAd = demandAd,
-            adTypeParamData = adTypeParamData,
-            roundIndex = roundIndex + 1,
-        )
     }
 }
 

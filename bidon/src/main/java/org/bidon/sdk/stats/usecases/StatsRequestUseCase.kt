@@ -9,7 +9,7 @@ import org.bidon.sdk.utils.networking.BaseResponse
  */
 internal interface StatsRequestUseCase {
     suspend operator fun invoke(
-        statsRequestBody: StatsRequestBody,
+        statsRequestBody: StatsRequestBody?,
         demandAd: DemandAd,
     ): Result<BaseResponse>
 }

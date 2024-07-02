@@ -1,21 +1,19 @@
 package org.bidon.gam.impl
 
 import org.bidon.gam.GamBannerAuctionParams
-import org.bidon.gam.GamDemandId
 import org.bidon.gam.GamFullscreenAdAuctionParams
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.AdType
-import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.stats.models.BidType
 
 internal class GetAdAuctionParamsUseCase {
     operator fun invoke(
         auctionParamsScope: AdAuctionParamSource,
-        adType: AdType,
-        bidType: BidType
+        adType: AdType
     ): Result<AdAuctionParams> {
         return auctionParamsScope {
+            val bidType = auctionParamsScope.adUnit.bidType
             when (adType) {
                 AdType.Banner -> {
                     if (bidType == BidType.RTB) {
@@ -23,12 +21,11 @@ internal class GetAdAuctionParamsUseCase {
                             activity = activity,
                             bannerFormat = bannerFormat,
                             containerWidth = containerWidth,
-                            price = pricefloor,
-                            bidResponse = requiredBidResponse,
+                            adUnit = adUnit,
                         )
                     } else {
                         GamBannerAuctionParams.Network(
-                            adUnit = popAdUnit(GamDemandId, bidType) ?: error(BidonError.NoAppropriateAdUnitId),
+                            adUnit = adUnit,
                             bannerFormat = bannerFormat,
                             activity = activity,
                             containerWidth = containerWidth,
@@ -41,12 +38,11 @@ internal class GetAdAuctionParamsUseCase {
                     if (bidType == BidType.RTB) {
                         GamFullscreenAdAuctionParams.Bidding(
                             activity = activity,
-                            price = pricefloor,
-                            bidResponse = requiredBidResponse,
+                            adUnit = adUnit,
                         )
                     } else {
                         GamFullscreenAdAuctionParams.Network(
-                            adUnit = popAdUnit(GamDemandId, bidType) ?: error(BidonError.NoAppropriateAdUnitId),
+                            adUnit = adUnit,
                             activity = activity,
                         )
                     }

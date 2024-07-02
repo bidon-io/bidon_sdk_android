@@ -36,7 +36,7 @@ val DTExchangeDemandId = DemandId("dtexchange")
  * [Documentation](https://developer.digitalturbine.com/hc/en-us/articles/360019744297-Android-Ad-Formats)
  */
 class DTExchangeAdapter :
-    Adapter,
+    Adapter.Network,
     SupportsRegulation,
     Initializable<DTExchangeParameters>,
     AdProvider.Rewarded<DTExchangeAdAuctionParams>,
@@ -50,6 +50,10 @@ class DTExchangeAdapter :
 
     override suspend fun init(context: Context, configParams: DTExchangeParameters) =
         suspendCoroutine { continuation ->
+            if (configParams.appId.isNullOrEmpty()) {
+                val cause = Throwable("Adapter(${DTExchangeDemandId.demandId}) appId is null or empty")
+                continuation.resumeWithException(cause)
+            }
             when (BidonSdk.loggerLevel) {
                 Logger.Level.Verbose -> InneractiveAdManager.setLogLevel(Log.VERBOSE)
                 Logger.Level.Error -> InneractiveAdManager.setLogLevel(Log.ERROR)
@@ -76,7 +80,7 @@ class DTExchangeAdapter :
 
     override fun parseConfigParam(json: String): DTExchangeParameters {
         return DTExchangeParameters(
-            appId = requireNotNull(JSONObject(json).optString("app_id")),
+            appId = JSONObject(json).optString("app_id"),
         )
     }
 

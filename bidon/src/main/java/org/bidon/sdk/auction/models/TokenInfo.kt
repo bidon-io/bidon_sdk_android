@@ -20,7 +20,11 @@ data class TokenInfo(
         SUCCESS("SUCCESS"),
         TIMEOUT_REACHED("TIMEOUT_REACHED"),
         NO_TOKEN("NO_TOKEN"),
-        NO_APPROPRIATE_AD_UNIT_ID("NO_APPROPRIATE_AD_UNIT_ID"),
-        UNKNOWN_ADAPTER("UNKNOWN_ADAPTER");
     }
+}
+
+sealed class TokenResult {
+    data class Success(val token: String) : TokenResult()
+    object NoToken : TokenResult()
+    object TimeoutReached : TokenResult()
 }

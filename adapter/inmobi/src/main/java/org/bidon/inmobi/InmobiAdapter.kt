@@ -39,7 +39,7 @@ import kotlin.coroutines.suspendCoroutine
 internal val InmobiDemandId = DemandId("inmobi")
 
 class InmobiAdapter :
-    Adapter,
+    Adapter.Network,
     Initializable<InmobiParams>,
     SupportsRegulation,
     SupportsTestMode by SupportsTestModeImpl(),
