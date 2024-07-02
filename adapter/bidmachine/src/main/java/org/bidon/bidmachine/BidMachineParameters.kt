@@ -14,11 +14,11 @@ data class BidMachineParameters(
 ) : AdapterParameters
 
 class BMBannerAuctionParams(
+    override val price: Double,
+    override val adUnit: AdUnit,
     val activity: Activity,
     val bannerFormat: BannerFormat,
-    override val price: Double,
     val timeout: Long,
-    override val adUnit: AdUnit,
     val payload: String?
 ) : AdAuctionParams {
 
@@ -28,10 +28,10 @@ class BMBannerAuctionParams(
 }
 
 class BMFullscreenAuctionParams(
-    val context: Context,
     override val price: Double,
-    val timeout: Long,
     override val adUnit: AdUnit,
+    val context: Context,
+    val timeout: Long,
     val payload: String?
 ) : AdAuctionParams {
 

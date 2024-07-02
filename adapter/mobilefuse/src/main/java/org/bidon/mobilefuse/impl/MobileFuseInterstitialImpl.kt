@@ -1,19 +1,14 @@
 package org.bidon.mobilefuse.impl
 
 import android.app.Activity
-import android.content.Context
 import com.mobilefuse.sdk.AdError
 import com.mobilefuse.sdk.MobileFuseInterstitialAd
-import org.bidon.mobilefuse.ext.GetMobileFuseTokenUseCase
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
@@ -22,11 +17,11 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 import java.util.concurrent.atomic.AtomicBoolean
 
-class MobileFuseInterstitialImpl(private val isTestMode: Boolean) :
+class MobileFuseInterstitialImpl :
     AdSource.Interstitial<MobileFuseFullscreenAuctionParams>,
-    Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -39,16 +34,30 @@ class MobileFuseInterstitialImpl(private val isTestMode: Boolean) :
 
     override val isAdReadyToShow: Boolean get() = interstitialAd?.isLoaded == true
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? {
-        return GetMobileFuseTokenUseCase(context, isTestMode)
-    }
-
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return ObtainAuctionParamUseCase().getFullscreenParam(auctionParamsScope)
     }
 
     override fun load(adParams: MobileFuseFullscreenAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
+        adParams.placementId ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, message = "placementId")
+                )
+            )
+            return
+        }
+        if (adParams.adUnit.bidType == BidType.RTB) {
+            adParams.signalData ?: run {
+                emitEvent(
+                    AdEvent.LoadFailed(
+                        BidonError.IncorrectAdUnit(demandId = demandId, message = "signalData")
+                    )
+                )
+                return
+            }
+        }
         // placementId should be configured in the mediation platform UI and passed back to this method:
         val interstitialAd = MobileFuseInterstitialAd(adParams.activity, adParams.placementId).also {
             interstitialAd = it
@@ -103,8 +112,7 @@ class MobileFuseInterstitialImpl(private val isTestMode: Boolean) :
                         emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
                     }
 
-                    AdError.AD_ALREADY_LOADED,
-                    AdError.AD_RUNTIME_ERROR -> {
+                    AdError.AD_ALREADY_LOADED -> {
                         // do nothing
                     }
 
@@ -115,7 +123,11 @@ class MobileFuseInterstitialImpl(private val isTestMode: Boolean) :
                     }
 
                     else -> {
-                        // do nothing
+                        emitEvent(
+                            AdEvent.LoadFailed(
+                                BidonError.Unspecified(demandId, Throwable(adError?.errorMessage))
+                            )
+                        )
                     }
                 }
             }

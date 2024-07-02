@@ -1,6 +1,6 @@
 object Versions {
     private val major = 0
-    private val minor = 5
+    private val minor = 6
     private val patch = 0
     private val semantic: String = "-next.1"
 

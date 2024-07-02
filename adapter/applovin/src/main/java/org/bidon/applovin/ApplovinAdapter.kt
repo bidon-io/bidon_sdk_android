@@ -21,7 +21,7 @@ val ApplovinDemandId = DemandId("applovin")
 
 @Suppress("unused")
 class ApplovinAdapter :
-    Adapter,
+    Adapter.Network,
     SupportsRegulation,
     Initializable<ApplovinParameters>,
     AdProvider.Banner<ApplovinBannerAuctionParams>,

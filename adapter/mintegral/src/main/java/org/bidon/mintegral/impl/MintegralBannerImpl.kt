@@ -1,30 +1,27 @@
 package org.bidon.mintegral.impl
 
-import android.content.Context
-import com.mbridge.msdk.mbbid.out.BidManager
 import com.mbridge.msdk.out.BannerAdListener
 import com.mbridge.msdk.out.BannerSize
 import com.mbridge.msdk.out.MBBannerView
 import com.mbridge.msdk.out.MBridgeIds
 import org.bidon.mintegral.MintegralBannerAuctionParam
+import org.bidon.mintegral.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
-import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 /**
  * Created by Aleksei Cherniaev on 20/06/2023.
@@ -33,7 +30,6 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
  */
 internal class MintegralBannerImpl :
     AdSource.Banner<MintegralBannerAuctionParam>,
-    Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -42,20 +38,44 @@ internal class MintegralBannerImpl :
 
     override var isAdReadyToShow: Boolean = false
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? = BidManager.getBuyerUid(context)
-
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             MintegralBannerAuctionParam(
                 activity = activity,
                 bannerFormat = bannerFormat,
-                bidResponse = requiredBidResponse
+                adUnit = adUnit
             )
         }
     }
 
     override fun load(adParams: MintegralBannerAuctionParam) {
         logInfo(TAG, "Starting with $adParams: $this")
+        adParams.placementId ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, message = "placementId")
+                )
+            )
+            return
+        }
+        adParams.unitId ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, message = "unitId")
+                )
+            )
+            return
+        }
+        if (adParams.adUnit.bidType == BidType.RTB) {
+            adParams.payload ?: run {
+                emitEvent(
+                    AdEvent.LoadFailed(
+                        BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
+                    )
+                )
+                return
+            }
+        }
         adParams.activity.runOnUiThread {
             val mbBannerView = MBBannerView(adParams.activity.applicationContext).also {
                 bannerView = it
@@ -76,7 +96,12 @@ internal class MintegralBannerImpl :
             mbBannerView.setBannerAdListener(object : BannerAdListener {
                 override fun onLoadFailed(mBridgeIds: MBridgeIds?, message: String?) {
                     logInfo(TAG, "onLoadFailed $mBridgeIds")
-                    emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                    emitEvent(
+                        AdEvent.LoadFailed(
+                            message?.asBidonError()
+                                ?: BidonError.NoFill(demandId)
+                        )
+                    )
                 }
 
                 override fun onLoadSuccessed(mBridgeIds: MBridgeIds?) {

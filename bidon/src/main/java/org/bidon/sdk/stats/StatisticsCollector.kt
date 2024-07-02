@@ -18,8 +18,6 @@ interface StatisticsCollector {
     val demandAd: DemandAd
     val demandId: DemandId
     val auctionId: String
-    val roundId: String
-    val roundIndex: Int
     fun getAd(): Ad?
 
     fun sendShowImpression()
@@ -39,8 +37,7 @@ interface StatisticsCollector {
      * Need to be used before [AdEvent.Fill] is exposed
      */
     fun setDsp(dspSource: String?)
-    fun markTokenStarted(): Long
-    fun markTokenFinished(status: TokenInfo.Status, token: String?)
+    fun setTokenInfo(tokenInfo: TokenInfo)
     fun markFillStarted(adUnit: AdUnit, pricefloor: Double?)
     fun markFillFinished(roundStatus: RoundStatus, ecpm: Double?)
     fun markWin()
@@ -48,17 +45,13 @@ interface StatisticsCollector {
     fun markBelowPricefloor()
 
     fun setStatisticAdType(adType: AdType)
-    fun addImpressionId(impId: String)
     fun addAuctionConfigurationId(auctionConfigurationId: Long)
     fun addAuctionConfigurationUid(auctionConfigurationUid: String)
     fun addExternalWinNotificationsEnabled(enabled: Boolean)
     fun addDemandId(demandId: DemandId)
     fun addRoundInfo(
         auctionId: String,
-        roundId: String,
-        roundIndex: Int,
         demandAd: DemandAd,
-        roundPricefloor: Double,
         auctionPricefloor: Double,
     )
 

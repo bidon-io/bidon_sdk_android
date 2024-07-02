@@ -10,7 +10,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.bidon.admob.AdmobInitParameters
 import org.bidon.admob.ext.asBundle
 import org.bidon.sdk.BidonSdk
-import org.bidon.sdk.ads.AdType
+import org.bidon.sdk.auction.AdTypeParam
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -19,7 +19,7 @@ import kotlin.coroutines.suspendCoroutine
  * Created by Aleksei Cherniaev on 18/08/2023.
  */
 internal class GetTokenUseCase(private val configParams: AdmobInitParameters?) {
-    suspend operator fun invoke(context: Context, adType: AdType): String? {
+    suspend operator fun invoke(context: Context, adTypeParam: AdTypeParam): String? {
         val adRequest = AdRequest.Builder()
             .apply {
                 val networkExtras = BidonSdk.regulation.asBundle().apply {
@@ -33,11 +33,7 @@ internal class GetTokenUseCase(private val configParams: AdmobInitParameters?) {
                 addNetworkExtrasBundle(AdMobAdapter::class.java, networkExtras)
             }
             .build()
-        val adFormat = when (adType) {
-            AdType.Banner -> AdFormat.BANNER
-            AdType.Interstitial -> AdFormat.INTERSTITIAL
-            AdType.Rewarded -> AdFormat.REWARDED
-        }
+        val adFormat = adTypeParam.getAdFormat()
         return withTimeoutOrNull(DefaultTokenTimeoutMs) {
             suspendCoroutine { continuation ->
                 QueryInfo.generate(
@@ -57,6 +53,13 @@ internal class GetTokenUseCase(private val configParams: AdmobInitParameters?) {
             }
         }
     }
+
+    private fun AdTypeParam.getAdFormat() =
+        when (this) {
+            is AdTypeParam.Banner -> AdFormat.BANNER
+            is AdTypeParam.Interstitial -> AdFormat.INTERSTITIAL
+            is AdTypeParam.Rewarded -> AdFormat.REWARDED
+        }
 
     companion object {
         private const val DefaultTokenTimeoutMs = 1000L

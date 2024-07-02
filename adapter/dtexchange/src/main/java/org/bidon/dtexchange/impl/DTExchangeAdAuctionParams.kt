@@ -11,8 +11,8 @@ import org.bidon.sdk.auction.models.AdUnit
 data class DTExchangeAdAuctionParams(
     override val adUnit: AdUnit
 ) : AdAuctionParams {
-    val spotId: String = requireNotNull(adUnit.extra?.optString("spot_id"))
-    override val price: Double = requireNotNull(adUnit.pricefloor)
+    val spotId: String? = adUnit.extra?.optString("spot_id")
+    override val price: Double = adUnit.pricefloor
 }
 
 class DTExchangeBannerAuctionParams(
@@ -20,10 +20,10 @@ class DTExchangeBannerAuctionParams(
     val bannerFormat: BannerFormat,
     override val adUnit: AdUnit
 ) : AdAuctionParams {
-    val spotId: String = requireNotNull(adUnit.extra?.optString("spot_id"))
-    override val price: Double = requireNotNull(adUnit.pricefloor)
+    val spotId: String? = adUnit.extra?.optString("spot_id")
+    override val price: Double = adUnit.pricefloor
 
     override fun toString(): String {
-        return "DTExchangeBannerAuctionParams(bannerFormat=$bannerFormat, lineItem=$adUnit)"
+        return "DTExchangeBannerAuctionParams(bannerFormat=$bannerFormat, adUnit=$adUnit)"
     }
 }

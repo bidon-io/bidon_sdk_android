@@ -1,7 +1,7 @@
 package org.bidon.sdk.stats.models
 
+import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.adapter.DemandId
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.TokenInfo
 
@@ -10,12 +10,9 @@ import org.bidon.sdk.auction.models.TokenInfo
  */
 data class BidStat(
     val auctionId: String?,
-    val roundId: String?,
-    val roundIndex: Int?,
     val demandId: DemandId,
     val roundStatus: RoundStatus?,
     val ecpm: Double,
-    val roundPricefloor: Double,
     val auctionPricefloor: Double,
     val fillStartTs: Long?,
     val fillFinishTs: Long?,
@@ -23,7 +20,7 @@ data class BidStat(
     val adUnit: AdUnit?,
 
     /**
-     * [Mode.Bidding] only
+     * [Adapter.Bidding] only
      */
     val tokenInfo: TokenInfo?,
 ) {

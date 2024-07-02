@@ -12,20 +12,25 @@ internal data class ServerSettingsState(
 internal sealed interface Host {
     val name: String
     val baseUrl: String
+    val apiVersion: String
 
     object Production : Host {
-        override val baseUrl: String = "https://b.appbaqend.com"
+        override val apiVersion: String = "v2"
+        override val baseUrl: String = "https://b.appbaqend.com/$apiVersion"
         override val name: String = "Production"
     }
 
     object MockServer : Host {
-        override val baseUrl: String = "https://ef5347ef-7389-4095-8a57-cc78c827f8b2.mock.pstmn.io"
+        override val apiVersion: String = "v2"
+        override val baseUrl: String = "https://ef5347ef-7389-4095-8a57-cc78c827f8b2.mock.pstmn.io/$apiVersion"
         override val name: String = "Mock"
     }
 
     class Staging(val prefix: String) : Host {
+        override val apiVersion: String = "v2"
+        override val baseUrl: String = "$SCHEME$prefix$SUFFIX/$apiVersion"
         override val name: String = "Staging"
-        override val baseUrl: String = "$SCHEME$prefix$SUFFIX"
+
         fun getBasicAuth(): String {
             val username = STAGING_BASIC_AUTH_USERNAME
             val password = STAGING_BASIC_AUTH_PASSWORD

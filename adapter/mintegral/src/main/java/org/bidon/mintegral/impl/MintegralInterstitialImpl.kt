@@ -1,22 +1,18 @@
 package org.bidon.mintegral.impl
 
 import android.app.Activity
-import android.content.Context
-import com.mbridge.msdk.mbbid.out.BidManager
 import com.mbridge.msdk.newinterstitial.out.MBBidNewInterstitialHandler
 import com.mbridge.msdk.newinterstitial.out.NewInterstitialListener
 import com.mbridge.msdk.out.MBridgeIds
 import com.mbridge.msdk.out.RewardInfo
 import org.bidon.mintegral.MintegralAuctionParam
+import org.bidon.mintegral.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
@@ -25,6 +21,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 /**
  * Created by Aleksei Cherniaev on 20/06/2023.
@@ -33,7 +30,6 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
  */
 internal class MintegralInterstitialImpl :
     AdSource.Interstitial<MintegralAuctionParam>,
-    Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -42,13 +38,11 @@ internal class MintegralInterstitialImpl :
     override val isAdReadyToShow: Boolean
         get() = interstitialAd?.isBidReady == true
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? = BidManager.getBuyerUid(context)
-
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             MintegralAuctionParam(
                 activity = activity,
-                bidResponse = requiredBidResponse
+                adUnit = adUnit
             )
         }.onFailure {
             logError(TAG, "Failed to get auction param", it)
@@ -57,6 +51,32 @@ internal class MintegralInterstitialImpl :
 
     override fun load(adParams: MintegralAuctionParam) {
         logInfo(TAG, "Starting with $adParams: $this")
+        adParams.placementId ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, message = "placementId")
+                )
+            )
+            return
+        }
+        adParams.unitId ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, message = "unitId")
+                )
+            )
+            return
+        }
+        if (adParams.adUnit.bidType == BidType.RTB) {
+            adParams.payload ?: run {
+                emitEvent(
+                    AdEvent.LoadFailed(
+                        BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
+                    )
+                )
+                return
+            }
+        }
         val handler = MBBidNewInterstitialHandler(
             adParams.activity.applicationContext,
             adParams.placementId,
@@ -79,7 +99,12 @@ internal class MintegralInterstitialImpl :
 
             override fun onResourceLoadFail(mBridgeIds: MBridgeIds?, message: String?) {
                 logInfo(TAG, "onResourceLoadFail $mBridgeIds")
-                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                emitEvent(
+                    AdEvent.LoadFailed(
+                        message?.asBidonError()
+                            ?: BidonError.NoFill(demandId)
+                    )
+                )
             }
 
             override fun onAdShow(mBridgeIds: MBridgeIds?) {

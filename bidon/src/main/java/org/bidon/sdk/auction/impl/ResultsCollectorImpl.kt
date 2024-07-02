@@ -5,10 +5,9 @@ import kotlinx.coroutines.flow.update
 import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResult
 import org.bidon.sdk.auction.models.AuctionResult.UnknownAdapter.Type
-import org.bidon.sdk.auction.models.BidResponse
-import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.models.BiddingResult
 import org.bidon.sdk.auction.usecases.models.RoundResult
 import org.bidon.sdk.logs.logging.impl.logError
@@ -26,6 +25,7 @@ internal class ResultsCollectorImpl(
 
     private val roundResult = MutableStateFlow<RoundResult>(RoundResult.Idle)
 
+    @Deprecated("")
     override fun serverBiddingStarted() {
         roundResult.update {
             require(it is RoundResult.Results)
@@ -33,12 +33,12 @@ internal class ResultsCollectorImpl(
                 biddingResult = BiddingResult.ServerBiddingStarted(serverBiddingStartTs = SystemTimeNow),
                 networkResults = it.networkResults,
                 pricefloor = it.pricefloor,
-                round = it.round
             )
         }
     }
 
-    override fun serverBiddingFinished(bids: List<BidResponse>?) {
+    @Deprecated("")
+    override fun serverBiddingFinished(adUnits: List<AdUnit>?) {
         roundResult.update { curRoundResult ->
             when (curRoundResult) {
                 RoundResult.Idle -> curRoundResult
@@ -46,7 +46,7 @@ internal class ResultsCollectorImpl(
                     RoundResult.Results(
                         biddingResult = run {
                             if (curRoundResult.biddingResult is BiddingResult.ServerBiddingStarted) {
-                                if (bids.isNullOrEmpty()) {
+                                if (adUnits.isNullOrEmpty()) {
                                     BiddingResult.NoBid(
                                         serverBiddingStartTs = curRoundResult.biddingResult.serverBiddingStartTs,
                                         serverBiddingFinishTs = SystemTimeNow,
@@ -55,7 +55,7 @@ internal class ResultsCollectorImpl(
                                     BiddingResult.FilledAd(
                                         serverBiddingStartTs = curRoundResult.biddingResult.serverBiddingStartTs,
                                         serverBiddingFinishTs = SystemTimeNow,
-                                        bids = bids,
+                                        adUnits = adUnits,
                                         results = emptyList()
                                     )
                                 }
@@ -66,19 +66,17 @@ internal class ResultsCollectorImpl(
                         },
                         networkResults = curRoundResult.networkResults,
                         pricefloor = curRoundResult.pricefloor,
-                        round = curRoundResult.round
                     )
                 }
             }
         }
     }
 
-    override fun startRound(round: RoundRequest, pricefloor: Double) {
+    override fun startRound(pricefloor: Double) {
         roundResult.value = RoundResult.Results(
             biddingResult = BiddingResult.Idle,
             networkResults = emptyList(),
             pricefloor = pricefloor,
-            round = round
         )
     }
 
@@ -95,7 +93,7 @@ internal class ResultsCollectorImpl(
                                 BiddingResult.FilledAd(
                                     serverBiddingStartTs = current.biddingResult.serverBiddingStartTs,
                                     serverBiddingFinishTs = current.biddingResult.serverBiddingFinishTs,
-                                    bids = current.biddingResult.bids,
+                                    adUnits = current.biddingResult.adUnits,
                                     results = current.biddingResult.results + result
                                 )
                             }
@@ -109,7 +107,6 @@ internal class ResultsCollectorImpl(
                         },
                         networkResults = current.networkResults,
                         pricefloor = current.pricefloor,
-                        round = current.round
                     )
                 }
 
@@ -118,7 +115,6 @@ internal class ResultsCollectorImpl(
                         biddingResult = current.biddingResult,
                         networkResults = current.networkResults + result,
                         pricefloor = current.pricefloor,
-                        round = current.round
                     )
                 }
 
@@ -136,6 +132,7 @@ internal class ResultsCollectorImpl(
         clearRoundResults()
     }
 
+    @Deprecated("")
     override suspend fun saveWinners(sourcePriceFloor: Double) {
         val roundResults = when (val r = roundResult.value) {
             RoundResult.Idle -> emptyList()
@@ -196,7 +193,6 @@ internal class ResultsCollectorImpl(
                 ),
                 networkResults = it.networkResults,
                 pricefloor = it.pricefloor,
-                round = it.round
             )
         }
     }
