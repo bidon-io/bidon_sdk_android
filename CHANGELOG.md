@@ -1,3 +1,8 @@
+# Next 0.6.0-next.1
+## Features:
+- [BDN-643](https://appodeal.atlassian.net/browse/BDN-643) Merge Bidding And Classic Demands Into One Auction 
+- [BDN-643](https://appodeal.atlassian.net/browse/BDN-643) Added auction key field to public ad api 
+
 # Next 0.5
 ## Features:
 - [BDN-596](https://appodeal.atlassian.net/browse/BDN-596) Add bid_finish_ts for BID_TIMEOUT_REACHED
