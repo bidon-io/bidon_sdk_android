@@ -153,7 +153,7 @@ internal class AuctionStatImpl(
             is AuctionResult.BiddingLose -> {
                 StatsAdUnit(
                     demandId = this.adapterName,
-                    status = roundStatus.code.takeIf { !isAuctionCanceled }
+                    status = RoundStatus.Lose.code.takeIf { !isAuctionCanceled }
                         ?: RoundStatus.AuctionCancelled.code,
                     price = this.ecpm,
                     tokenStartTs = null,
@@ -170,7 +170,7 @@ internal class AuctionStatImpl(
             is AuctionResult.UnknownAdapter -> {
                 StatsAdUnit(
                     demandId = this.adapterName,
-                    status = this.roundStatus.code,
+                    status = RoundStatus.UnknownAdapter.code,
                     price = null,
                     tokenStartTs = null,
                     tokenFinishTs = null,
