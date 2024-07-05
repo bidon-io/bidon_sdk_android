@@ -49,12 +49,12 @@ class RequestAdUnitUseCaseImpl : RequestAdUnitUseCase {
                     }.onFailure { ex ->
                         logError(TAG, "Loading failed($it): $ex", ex)
                         adSource.emitEvent(
-                            AdEvent.LoadFailed(BidonError.NoFill(adSource.demandId))
+                            AdEvent.LoadFailed(BidonError.Unspecified(adSource.demandId, ex))
                         )
                     }
                 }
                 .first { event -> event is AdEvent.Fill || event is AdEvent.LoadFailed || event is AdEvent.Expired }
-        } ?: AdEvent.LoadFailed(BidonError.FillTimedOut(adSource.demandId))
+        } ?: AdEvent.LoadFailed(BidonError.NoAppropriateAdUnitId)
 
         val requestStatus = when (adEvent) {
             is AdEvent.Fill -> RoundStatus.Successful
