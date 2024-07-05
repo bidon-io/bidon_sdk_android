@@ -15,7 +15,7 @@ class GetAdAuctionParamUseCase {
                 timeout = adUnit.timeout,
                 context = activity.applicationContext,
                 adUnit = adUnit,
-                payload = adUnit.extra?.getString("payload")
+                payload = adUnit.extra?.optString("payload")
             )
         }
     }
@@ -28,7 +28,7 @@ class GetAdAuctionParamUseCase {
                 activity = activity,
                 bannerFormat = bannerFormat,
                 adUnit = adUnit,
-                payload = adUnit.extra?.getString("payload")
+                payload = adUnit.extra?.optString("payload")
             )
         }
     }
