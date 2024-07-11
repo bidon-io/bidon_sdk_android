@@ -55,6 +55,7 @@
 -keep public interface org.bidon.sdk.adapter.WinLossNotifiable {*;}
 -keep public class org.bidon.sdk.adapter.AdapterInfo { *; }
 -keep public class org.bidon.sdk.auction.models.AuctionResult { *; }
+-keep public class org.bidon.sdk.auction.models.AdUnit { *; }
 -keep public class org.bidon.sdk.logs.logging.impl.LogExtKt {
     void logError(java.lang.String, java.lang.String, java.lang.Throwable);
     void logInfo(java.lang.String, java.lang.String);
