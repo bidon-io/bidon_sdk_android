@@ -7,6 +7,7 @@
 - [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update Mintegral to 16.7.71
 - [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update Unity Ads to 4.12.1
 - [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update Vungle to 7.4.0
+- [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update Meta dependencies (disabled Jetifier)
 
 # 0.6.0-next.1
 ## Features:
