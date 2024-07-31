@@ -4,6 +4,7 @@ import android.app.Activity
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.utils.ext.mapFailure
 
 /**
@@ -38,6 +39,7 @@ class AdAuctionParamSource(
     operator fun <T> invoke(data: AdAuctionParamSource.() -> T): Result<T> = runCatching {
         data.invoke(this)
     }.mapFailure {
+        logError("AdAuctionParamSource", "${it?.message}", it)
         BidonError.NoAppropriateAdUnitId
     }
 }

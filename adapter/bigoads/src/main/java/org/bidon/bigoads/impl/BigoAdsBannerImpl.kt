@@ -150,9 +150,9 @@ internal class BigoAdsBannerImpl :
     }
 
     override fun getAdView(): AdViewHolder? {
-        val bannerAd = bannerAd ?: return null
+        val adView = bannerAd?.adView() ?: return null
         val bannerFormat = bannerFormat ?: return null
-        return AdViewHolder(bannerAd.adView(), bannerFormat.width, bannerFormat.height)
+        return AdViewHolder(adView, bannerFormat.width, bannerFormat.height)
     }
 }
 

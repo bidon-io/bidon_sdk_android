@@ -25,6 +25,7 @@ internal typealias BMAuctionResult = io.bidmachine.models.AuctionResult
 @Suppress("unused")
 class BidMachineAdapter :
     Adapter.Bidding,
+    Adapter.Network,
     SupportsRegulation,
     SupportsTestMode by SupportsTestModeImpl(),
     Initializable<BidMachineParameters>,
