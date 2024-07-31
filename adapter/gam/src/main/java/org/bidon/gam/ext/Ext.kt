@@ -5,11 +5,13 @@ import android.graphics.Point
 import android.os.Build
 import android.view.Display
 import android.view.WindowManager
+import com.google.android.gms.ads.AdFormat
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.MobileAds
 import org.bidon.gam.BuildConfig
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
+import org.bidon.sdk.auction.AdTypeParam
 import kotlin.math.roundToInt
 
 internal var adapterVersion = BuildConfig.ADAPTER_VERSION
@@ -46,3 +48,10 @@ private fun getScreenWidth(context: Context): Int {
     display?.getSize(size)
     return (size.x / displayMetrics.density).roundToInt()
 }
+
+internal fun AdTypeParam.getAdFormat() =
+    when (this) {
+        is AdTypeParam.Banner -> AdFormat.BANNER
+        is AdTypeParam.Interstitial -> AdFormat.INTERSTITIAL
+        is AdTypeParam.Rewarded -> AdFormat.REWARDED
+    }

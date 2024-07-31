@@ -4,6 +4,7 @@ import org.bidon.sdk.adapter.AdapterInfo
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.models.AuctionResponse
+import org.bidon.sdk.auction.models.TokenInfo
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.ext.asSuccess
@@ -13,10 +14,11 @@ import org.bidon.sdk.utils.ext.asSuccess
  */
 internal class GetAuctionRequestUseCaseImpl : GetAuctionRequestUseCase {
     override suspend fun request(
-        additionalData: AdTypeParam,
+        adTypeParam: AdTypeParam,
         auctionId: String,
         demandAd: DemandAd,
-        adapters: Map<String, AdapterInfo>
+        adapters: Map<String, AdapterInfo>,
+        tokens: Map<String, TokenInfo>
     ): Result<AuctionResponse> {
         logInfo(TAG, "----------------------------- SERVERLESS DATA / USE ONLY FOR TEST ----------------------------- ")
         return ServerlessAuctionConfig.getAuctionResponse()!!.asSuccess()

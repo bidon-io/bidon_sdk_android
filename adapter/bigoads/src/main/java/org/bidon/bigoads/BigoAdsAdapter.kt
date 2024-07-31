@@ -17,6 +17,7 @@ import org.bidon.sdk.adapter.Initializable
 import org.bidon.sdk.adapter.SupportsRegulation
 import org.bidon.sdk.adapter.SupportsTestMode
 import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.regulation.Regulation
 import org.json.JSONObject
 import sg.bigo.ads.BigoAdSdk
@@ -34,7 +35,7 @@ internal val BigoAdsDemandId = DemandId("bigoads")
  * [BigoAds](https://www.bigossp.com/guide/sdk/android/document)
  */
 class BigoAdsAdapter :
-    Adapter,
+    Adapter.Bidding,
     Initializable<BigoParameters>,
     SupportsTestMode by SupportsTestModeImpl(),
     AdProvider.Banner<BigoBannerAuctionParams>,
@@ -49,6 +50,9 @@ class BigoAdsAdapter :
         adapterVersion = adapterVersion,
         sdkVersion = sdkVersion
     )
+
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam) =
+        BigoAdSdk.getBidderToken()
 
     override suspend fun init(context: Context, configParams: BigoParameters) = suspendCoroutine { continuation ->
         this.context = context

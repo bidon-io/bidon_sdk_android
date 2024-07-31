@@ -3,6 +3,7 @@ package org.bidon.mintegral
 import android.app.Application
 import android.content.Context
 import com.mbridge.msdk.MBridgeConstans
+import com.mbridge.msdk.mbbid.out.BidManager
 import com.mbridge.msdk.out.MBridgeSDKFactory
 import com.mbridge.msdk.out.SDKInitStatusListener
 import kotlinx.coroutines.withContext
@@ -19,6 +20,7 @@ import org.bidon.sdk.adapter.AdapterInfo
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Initializable
 import org.bidon.sdk.adapter.SupportsRegulation
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.regulation.Regulation
@@ -36,7 +38,7 @@ import kotlin.coroutines.suspendCoroutine
 internal val MintegralDemandId = DemandId("mintegral")
 
 class MintegralAdapter :
-    Adapter,
+    Adapter.Bidding,
     SupportsRegulation,
     Initializable<MintegralInitParam>,
     AdProvider.Banner<MintegralBannerAuctionParam>,
@@ -49,6 +51,9 @@ class MintegralAdapter :
         adapterVersion = adapterVersion,
         sdkVersion = sdkVersion
     )
+
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam) =
+        BidManager.getBuyerUid(context)
 
     override suspend fun init(context: Context, configParams: MintegralInitParam) =
         withContext(SdkDispatchers.Main) {

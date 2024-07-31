@@ -9,7 +9,6 @@ import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.auction.models.AdUnit
@@ -20,7 +19,6 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.BidType
 import org.bidon.unityads.ext.asBidonError
 
 /**
@@ -28,27 +26,33 @@ import org.bidon.unityads.ext.asBidonError
  */
 internal class UnityAdsInterstitial :
     AdSource.Interstitial<UnityAdsFullscreenAuctionParams>,
-    Mode.Network,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var adUnit: AdUnit? = null
-    private var adUnitId: String? = null
+    private var placementId: String? = null
 
     override var isAdReadyToShow: Boolean = false
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             UnityAdsFullscreenAuctionParams(
-                adUnit = popAdUnit(demandId, BidType.CPM) ?: error(BidonError.NoAppropriateAdUnitId)
+                adUnit = adUnit
             )
         }
     }
 
     override fun load(adParams: UnityAdsFullscreenAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
+        placementId = adParams.placementId ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, message = "placementId")
+                )
+            )
+            return
+        }
         adUnit = adParams.adUnit
-        adUnitId = adParams.placementId
 
         val loadListener = object : IUnityAdsLoadListener {
             override fun onUnityAdsAdLoaded(placementId: String?) {
@@ -65,7 +69,7 @@ internal class UnityAdsInterstitial :
                 message: String?
             ) {
                 logInfo(TAG, "onUnityAdsFailedToLoad: placementId=$placementId, error=$error, message=$message")
-                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                emitEvent(AdEvent.LoadFailed(error.asBidonError()))
             }
         }
         UnityAds.load(adParams.placementId, loadListener)
@@ -89,6 +93,7 @@ internal class UnityAdsInterstitial :
             override fun onUnityAdsShowStart(placementId: String?) {
                 logInfo(TAG, "onUnityAdsShowStart: placementId=$placementId")
                 getAd()?.let {
+                    emitEvent(AdEvent.Shown(it))
                     emitEvent(
                         AdEvent.PaidRevenue(
                             ad = it,
@@ -113,12 +118,11 @@ internal class UnityAdsInterstitial :
             ) {
                 logInfo(TAG, "onUnityAdsShowComplete: placementId=$placementId, state=$state")
                 getAd()?.let {
-                    emitEvent(AdEvent.Shown(it))
                     emitEvent(AdEvent.Closed(it))
                 }
             }
         }
-        UnityAds.show(activity, adUnitId, UnityAdsShowOptions(), showListener)
+        UnityAds.show(activity, placementId, UnityAdsShowOptions(), showListener)
         isAdReadyToShow = false
     }
 

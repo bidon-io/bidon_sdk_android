@@ -1,7 +1,10 @@
 package org.bidon.sdk.auction.ext
 
+import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo
+import org.bidon.sdk.auction.models.AuctionResponse
+import org.bidon.sdk.logs.logging.impl.logInfo
 
 /**
  * Created by Aleksei Cherniaev on 10/11/2023.
@@ -20,3 +23,12 @@ val BannerFormat.height
         BannerFormat.MRec -> 250
         BannerFormat.Adaptive -> if (DeviceInfo.isTablet) 90 else 50
     }
+
+internal fun AuctionResponse.printWaterfall(adType: AdType) {
+    adUnits?.joinToString(separator = "\n") { adUnit ->
+        adUnit.toString()
+    }?.let {
+
+        logInfo("$adType Auction Waterfall", "\n$it")
+    }
+}

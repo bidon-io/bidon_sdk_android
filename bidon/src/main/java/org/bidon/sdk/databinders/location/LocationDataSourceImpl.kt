@@ -10,7 +10,6 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Process
 import org.bidon.sdk.logs.logging.impl.logError
-import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.ext.SystemTimeNow
 import java.lang.ref.WeakReference
 import java.util.*
@@ -68,9 +67,7 @@ internal class LocationDataSourceImpl(
         val locationManager: LocationManager = getLocationManager(context)
         return locationManager.getBestProvider(Criteria(), false)?.let {
             try {
-                locationManager.getLastKnownLocation(it).also {
-                    logInfo(TAG, "Location $it")
-                }
+                locationManager.getLastKnownLocation(it)
             } catch (e: SecurityException) {
                 logError(TAG, "failed to retrieve GPS location: permission not granted", e)
                 null

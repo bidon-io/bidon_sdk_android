@@ -1,6 +1,5 @@
 package org.bidon.amazon.impl
 
-import android.content.Context
 import android.view.View
 import com.amazon.device.ads.DTBAdBannerListener
 import com.amazon.device.ads.DTBAdView
@@ -10,13 +9,10 @@ import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.ext.height
 import org.bidon.sdk.auction.ext.width
-import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
@@ -25,51 +21,24 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.json.JSONArray
-import org.json.JSONObject
 
-internal class AmazonBannerImpl :
+internal class AmazonBannerImpl(private val amazonInfos: List<AmazonInfo>) :
     AdSource.Banner<BannerAuctionParams>,
-    Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var adView: DTBAdView? = null
-    private val obtainToken: ObtainTokenUseCase get() = ObtainTokenUseCase()
-    private var amazonInfos = mutableListOf<AmazonInfo>()
     private var adParams: BannerAuctionParams? = null
 
     override val isAdReadyToShow: Boolean
         get() = adView != null
-
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? {
-        val slots = ParseSlotsUseCase()(adUnits).also {
-            logInfo("AmazonAdapter", "Parsed slots: $it")
-        }
-        val amazonInfo = obtainToken(slots, adTypeParam).takeIf { it.isNotEmpty() }?.also {
-            this.amazonInfos.addAll(it)
-        } ?: return null
-        return JSONArray().apply {
-            amazonInfo.map {
-                it.adSizes.slotUUID to SDKUtilities.getPricePoint(it.dtbAdResponse)
-            }.forEach { (slotUuid, pricePoint) ->
-                this.put(
-                    JSONObject().apply {
-                        this.put("slot_uuid", slotUuid)
-                        this.put("price_point", pricePoint)
-                    }
-                )
-            }
-        }.toString()
-    }
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             BannerAuctionParams(
                 activity = activity,
                 bannerFormat = bannerFormat,
-                price = requiredBidResponse.price,
-                adUnit = requiredBidResponse.adUnit,
+                adUnit = adUnit,
             )
         }
     }
@@ -79,6 +48,14 @@ internal class AmazonBannerImpl :
         if (amazonInfos.isEmpty()) {
             logError(TAG, "No Amazon slot found", BidonError.NoAppropriateAdUnitId)
             emitEvent(AdEvent.LoadFailed(BidonError.NoAppropriateAdUnitId))
+            return
+        }
+        adParams.slotUuid ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, "slotUuid")
+                )
+            )
             return
         }
         val dtbAdResponse = amazonInfos.firstOrNull { adParams.slotUuid == it.adSizes.slotUUID }?.dtbAdResponse
@@ -147,7 +124,6 @@ internal class AmazonBannerImpl :
         adView?.destroy()
         adView = null
         adParams = null
-        amazonInfos.clear()
     }
 }
 

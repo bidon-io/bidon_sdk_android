@@ -21,5 +21,5 @@ dependencies {
     compileOnly(projects.bidon)
     testImplementation(projects.bidon)
 
-    implementation("com.bigossp:bigo-ads:4.7.3")
+    implementation("com.bigossp:bigo-ads:4.8.2")
 }

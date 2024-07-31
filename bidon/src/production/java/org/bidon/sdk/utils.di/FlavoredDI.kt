@@ -21,7 +21,8 @@ object FlavoredDI {
             factory<GetConfigRequestUseCase> {
                 GetConfigRequestUseCaseImpl(
                     createRequestBody = get(),
-                    segmentSynchronizer = get()
+                    segmentSynchronizer = get(),
+                    biddingConfigSynchronizer = get()
                 )
             }
         }

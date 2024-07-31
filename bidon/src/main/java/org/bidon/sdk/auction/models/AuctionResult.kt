@@ -30,7 +30,7 @@ sealed interface AuctionResult {
 
     data class BiddingLose(
         val adapterName: String,
-        val ecpm: Double,
+        val ecpm: Double?,
     ) : AuctionResult {
         override val roundStatus: RoundStatus = RoundStatus.Lose
         override val adSource: AdSource<*> get() = error("unexpected")

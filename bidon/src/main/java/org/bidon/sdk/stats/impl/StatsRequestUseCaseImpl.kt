@@ -33,7 +33,7 @@ internal class StatsRequestUseCaseImpl(
     )
 
     override suspend operator fun invoke(
-        statsRequestBody: StatsRequestBody,
+        statsRequestBody: StatsRequestBody?,
         demandAd: DemandAd,
     ): Result<BaseResponse> = runCatching {
         return withContext(SdkDispatchers.IO) {

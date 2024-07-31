@@ -1,7 +1,7 @@
 package org.bidon.sdk.auction.usecases.models
 
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResult
-import org.bidon.sdk.auction.models.BidResponse
 
 /**
  * Created by Aleksei Cherniaev on 26/07/2023.
@@ -22,7 +22,7 @@ internal sealed interface BiddingResult {
     class FilledAd(
         val serverBiddingStartTs: Long,
         val serverBiddingFinishTs: Long,
-        val bids: List<BidResponse>,
+        val adUnits: List<AdUnit>,
         val results: List<AuctionResult>
     ) : BiddingResult
 

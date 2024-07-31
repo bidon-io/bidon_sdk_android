@@ -15,6 +15,7 @@ import org.bidon.sdk.adapter.Initializable
 import org.bidon.sdk.adapter.SupportsRegulation
 import org.bidon.sdk.adapter.SupportsTestMode
 import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.regulation.Regulation
 import org.bidon.vungle.ext.adapterVersion
@@ -35,7 +36,7 @@ internal val VungleDemandId = DemandId("vungle")
  * [Vungle Documentation](https://support.vungle.com/hc/en-us/articles/360002922871-Integrate-Vungle-SDK-for-Android-or-Amazon)
  */
 class VungleAdapter :
-    Adapter,
+    Adapter.Bidding,
     Initializable<VungleParameters>,
     SupportsTestMode by SupportsTestModeImpl(),
     AdProvider.Banner<VungleBannerAuctionParams>,
@@ -47,6 +48,9 @@ class VungleAdapter :
         adapterVersion = adapterVersion,
         sdkVersion = sdkVersion
     )
+
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam) =
+        VungleAds.getBiddingToken(context)
 
     override suspend fun init(context: Context, configParams: VungleParameters) = suspendCancellableCoroutine { continuation ->
         VungleAds.init(

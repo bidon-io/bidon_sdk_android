@@ -21,5 +21,5 @@ dependencies {
     compileOnly(projects.bidon)
     testImplementation(projects.bidon)
 
-    implementation("com.applovin:applovin-sdk:12.5.0")
+    implementation("com.applovin:applovin-sdk:12.6.0")
 }

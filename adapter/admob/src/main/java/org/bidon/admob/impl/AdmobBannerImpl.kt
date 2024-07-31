@@ -1,22 +1,27 @@
 package org.bidon.admob.impl
 
 import android.annotation.SuppressLint
-import android.content.Context
-import com.google.android.gms.ads.*
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.OnPaidEventListener
 import org.bidon.admob.AdmobBannerAuctionParams
 import org.bidon.admob.AdmobInitParameters
+import org.bidon.admob.asBidonError
 import org.bidon.admob.ext.asBidonAdValue
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdAuctionParamSource
+import org.bidon.sdk.adapter.AdAuctionParams
+import org.bidon.sdk.adapter.AdEvent
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.BidType
 
 /**
  * [Test ad units](https://developers.google.com/admob/android/test-ads)
@@ -26,46 +31,55 @@ import org.bidon.sdk.stats.models.BidType
 internal class AdmobBannerImpl(
     configParams: AdmobInitParameters?,
     private val getAdRequest: GetAdRequestUseCase = GetAdRequestUseCase(configParams),
-    private val obtainToken: GetTokenUseCase = GetTokenUseCase(configParams),
     private val getAdAuctionParams: GetAdAuctionParamsUseCase = GetAdAuctionParamsUseCase(),
 ) : AdSource.Banner<AdmobBannerAuctionParams>,
-    Mode.Bidding,
-    Mode.Network,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
     override var isAdReadyToShow: Boolean = false
 
-    private var bidType: BidType = BidType.CPM
     private var adView: AdView? = null
     private var price: Double? = null
     private var adSize: AdSize? = null
     private var bannerFormat: BannerFormat? = null
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? {
-        bidType = BidType.RTB
-        return obtainToken(context, demandAd.adType)
-    }
-
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
-        return getAdAuctionParams(auctionParamsScope, demandAd.adType, bidType)
+        return getAdAuctionParams(auctionParamsScope, demandAd.adType)
     }
 
     @SuppressLint("MissingPermission")
     override fun load(adParams: AdmobBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
+        val adUnitId: String = when (adParams) {
+            is AdmobBannerAuctionParams.Bidding -> adParams.adUnitId
+            is AdmobBannerAuctionParams.Network -> adParams.adUnitId
+        } ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, message = "adUnitId")
+                )
+            )
+            return
+        }
         price = adParams.price
         adSize = adParams.adSize
         bannerFormat = adParams.bannerFormat
         adParams.activity.runOnUiThread {
-            val adRequest = getAdRequest(adParams)
+            val adRequest = getAdRequest(adParams) ?: run {
+                emitEvent(
+                    AdEvent.LoadFailed(
+                        BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
+                    )
+                )
+                return@runOnUiThread
+            }
             val adView = AdView(adParams.activity.applicationContext).also {
                 adView = it
             }
             val requestListener = object : AdListener() {
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     logInfo(TAG, "onAdFailedToLoad: $loadAdError. $this")
-                    emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                    emitEvent(AdEvent.LoadFailed(loadAdError.asBidonError()))
                 }
 
                 override fun onAdLoaded() {
@@ -90,10 +104,6 @@ internal class AdmobBannerImpl(
                 }
 
                 override fun onAdOpened() {}
-            }
-            val adUnitId = when (adParams) {
-                is AdmobBannerAuctionParams.Bidding -> adParams.adUnitId
-                is AdmobBannerAuctionParams.Network -> adParams.adUnitId
             }
             adView.apply {
                 this.setAdSize(adParams.adSize)

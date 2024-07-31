@@ -22,6 +22,7 @@ class AdUnitParserTest {
                         "pricefloor": 1.0,
                         "label": "label123",
                         "bid_type": "CPM",
+                        "timeout": 5000,
                         "ext": {"a":1,"b":"c"}
                     },
                     {
@@ -30,6 +31,7 @@ class AdUnitParserTest {
                         "label": "label234",
                         "pricefloor": null,
                         "bid_type": "RTB",
+                        "timeout": 5000,
                         "ext": {"b":1.44}
                     }
                 ]
@@ -66,7 +68,7 @@ class AdUnitParserTest {
 
         assertThat(actual[1].uid).isEqualTo("uid234")
         assertThat(actual[1].demandId).isEqualTo("applovin")
-        assertThat(actual[1].pricefloor).isNull()
+        assertThat(actual[1].pricefloor).isEqualTo(0.0)
         assertThat(actual[1].bidType).isEqualTo(BidType.RTB)
         assertThat(actual[1].label).isEqualTo("label234")
         assertThat(actual[1].extra.toString()).isEqualTo(JSONObject("""{"b":1.44}""").toString())

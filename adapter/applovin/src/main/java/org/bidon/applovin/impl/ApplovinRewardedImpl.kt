@@ -11,11 +11,11 @@ import com.applovin.sdk.AppLovinAdVideoPlaybackListener
 import com.applovin.sdk.AppLovinSdk
 import org.bidon.applovin.ApplovinFullscreenAdAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
+import org.bidon.applovin.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.auction.models.AdUnit
@@ -23,7 +23,6 @@ import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.BidType
 
 /**
  * I have no idea how it works. There is no documentation.
@@ -33,7 +32,6 @@ import org.bidon.sdk.stats.models.BidType
 internal class ApplovinRewardedImpl(
     private val applovinSdk: AppLovinSdk,
 ) : AdSource.Rewarded<ApplovinFullscreenAdAuctionParams>,
-    Mode.Network,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -108,8 +106,7 @@ internal class ApplovinRewardedImpl(
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             ApplovinFullscreenAdAuctionParams(
-                adUnit = popAdUnit(demandId, BidType.CPM) ?: error(BidonError.NoAppropriateAdUnitId),
-                timeoutMs = timeout,
+                adUnit = adUnit
             )
         }
     }
@@ -117,8 +114,16 @@ internal class ApplovinRewardedImpl(
     override fun load(adParams: ApplovinFullscreenAdAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
         adUnit = adParams.adUnit
+        val zoneId = adParams.zoneId ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, message = "zoneId")
+                )
+            )
+            return
+        }
         val incentivizedInterstitial =
-            AppLovinIncentivizedInterstitial.create(adParams.zoneId, applovinSdk).also {
+            AppLovinIncentivizedInterstitial.create(zoneId, applovinSdk).also {
                 rewardedAd = it
             }
         val requestListener = object : AppLovinAdLoadListener {
@@ -132,7 +137,7 @@ internal class ApplovinRewardedImpl(
 
             override fun failedToReceiveAd(errorCode: Int) {
                 logInfo(TAG, "failedToReceiveAd: errorCode=$errorCode. $this")
-                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                emitEvent(AdEvent.LoadFailed(errorCode.asBidonError()))
             }
         }
         logInfo(TAG, "Starting fill: $this")
