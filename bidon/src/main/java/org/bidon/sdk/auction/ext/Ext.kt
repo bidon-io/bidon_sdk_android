@@ -26,9 +26,8 @@ val BannerFormat.height
 
 internal fun AuctionResponse.printWaterfall(adType: AdType) {
     adUnits?.joinToString(separator = "\n") { adUnit ->
-        adUnit.toString()
+        "#${adUnits.indexOf(adUnit)} $adUnit"
     }?.let {
-
-        logInfo("$adType Auction Waterfall", "\n$it")
+        logInfo("$adType auction waterfall", "\n$it")
     }
 }

@@ -15,6 +15,7 @@ object ServerlessAuctionConfig {
 
     fun setLocalAuctionResponse(
         adUnits: List<AdUnit>,
+        noBids: List<AdUnit>?,
         pricefloor: Double,
         auctionId: String = UUID.randomUUID().toString(),
         auctionTimeout: Long = 30_000L,
@@ -23,6 +24,7 @@ object ServerlessAuctionConfig {
     ) {
         auctionResponse = AuctionResponse(
             adUnits = adUnits,
+            noBids = noBids,
             pricefloor = pricefloor,
             auctionId = auctionId,
             auctionTimeout = auctionTimeout,

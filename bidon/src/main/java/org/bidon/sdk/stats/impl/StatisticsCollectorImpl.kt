@@ -16,6 +16,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.models.BidStat
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.ImpressionRequestBody
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.usecases.SendImpressionRequestUseCase
@@ -253,7 +254,8 @@ class StatisticsCollectorImpl : StatisticsCollector {
 
     override fun markBelowPricefloor() {
         stat = stat.copy(
-            roundStatus = RoundStatus.BelowPricefloor
+            roundStatus = if (stat.adUnit?.bidType == BidType.RTB) RoundStatus.Lose
+            else RoundStatus.BelowPricefloor
         )
     }
 

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.ads.AuctionInfo
 import org.bidon.sdk.ads.cache.AdCache
 import org.bidon.sdk.ads.cache.Cacheable
 import org.bidon.sdk.auction.AdTypeParam
@@ -44,8 +45,8 @@ internal class AdCacheImpl(
 
     override fun cache(
         adTypeParam: AdTypeParam,
-        onSuccess: (AuctionResult) -> Unit,
-        onFailure: (Throwable) -> Unit,
+        onSuccess: (AuctionResult, AuctionInfo) -> Unit,
+        onFailure: (AuctionInfo?, Throwable) -> Unit,
     ) {
         load(adTypeParam, onSuccess, onFailure)
     }
@@ -66,19 +67,19 @@ internal class AdCacheImpl(
         return next
     }
 
-    override fun clear() {
+    override fun clear(onFailure: (AuctionInfo?, Throwable) -> Unit) {
         results.value = emptyList()
         if (isLoading.getAndUpdate { false }) {
             logInfo(tag, "Ad is loading, cancel auction")
-            auction?.cancel()
+            auction?.cancel(onFailure)
             auction = null
         }
     }
 
     private fun load(
         adTypeParam: AdTypeParam,
-        onSuccess: (AuctionResult) -> Unit,
-        onFailure: (Throwable) -> Unit,
+        onSuccess: (AuctionResult, AuctionInfo) -> Unit,
+        onFailure: (AuctionInfo?, Throwable) -> Unit,
     ) {
         logInfo(tag, "Cache started: ${results.value.asString()}")
         if (results.value.size >= settings.minCacheSize) {
@@ -96,20 +97,20 @@ internal class AdCacheImpl(
                         results.value.firstOrNull()?.adSource?.getStats()?.ecpm ?: 0.0
                     )
                 ),
-                onSuccess = { auctionResults ->
+                onSuccess = { winners, auctionInfo ->
                     scope.launch {
                         results.update {
-                            resolver.sortWinners(it + auctionResults).take(settings.cacheCapacity)
+                            resolver.sortWinners(winners).take(settings.cacheCapacity)
                         }
-                        auctionResults.intersect(results.value.toSet()).forEach { trackExpired(it) }
+                        winners.intersect(results.value.toSet()).forEach { trackExpired(it) }
                         logInfo(tag, "Auction completed: ${results.value.asString()}")
                         isLoading.value = false
-                        results.value.firstOrNull()?.let { onSuccess.invoke(it) }
+                        results.value.firstOrNull()?.let { onSuccess.invoke(it, auctionInfo) }
                     }
                 },
-                onFailure = {
+                onFailure = { auctionInfo, cause ->
                     logInfo(tag, "Auction failed: ${results.value.asString()}")
-                    onFailure.invoke(it)
+                    onFailure.invoke(auctionInfo, cause)
                     isLoading.value = false
                 },
             )

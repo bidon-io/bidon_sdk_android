@@ -5,6 +5,7 @@ import org.bidon.sdk.config.models.json_scheme_utils.expectedJsonStructure
 import org.bidon.sdk.utils.json.jsonArray
 import org.bidon.sdk.utils.json.jsonObject
 import org.bidon.sdk.utils.serializer.serialize
+import org.json.JSONObject
 import org.junit.Test
 
 /**
@@ -31,6 +32,7 @@ class StatsRequestBodySerializerTest {
                     fillStartTs = 4,
                     adUnitUid = "123",
                     adUnitLabel = "label124",
+                    ext = JSONObject(),
                 ),
                 StatsAdUnit(
                     demandId = "d6",
@@ -43,6 +45,7 @@ class StatsRequestBodySerializerTest {
                     bidType = BidType.CPM.code,
                     adUnitLabel = "label123",
                     adUnitUid = "123",
+                    ext = JSONObject(),
                 ),
                 StatsAdUnit(
                     demandId = "d011",
@@ -55,6 +58,7 @@ class StatsRequestBodySerializerTest {
                     adUnitLabel = "label123",
                     tokenStartTs = 678L,
                     tokenFinishTs = 679L,
+                    ext = JSONObject(),
                 )
             ),
             result = ResultBody(
@@ -141,6 +145,7 @@ class StatsRequestBodySerializerTest {
             adUnitUid = "123",
             tokenStartTs = 678L,
             tokenFinishTs = 679L,
+            ext = JSONObject(),
         ).serialize()
 
         actual.assertEquals(
