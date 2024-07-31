@@ -22,7 +22,7 @@ dependencies {
     compileOnly(projects.bidon)
     testImplementation(projects.bidon)
 
-    val version = "16.7.31"
+    val version = "16.7.71"
     implementation("com.mbridge.msdk.oversea:reward:$version")
     // If you need to use auction ads, please add this dependency statement.(mbbid)
     implementation("com.mbridge.msdk.oversea:mbbid:$version")

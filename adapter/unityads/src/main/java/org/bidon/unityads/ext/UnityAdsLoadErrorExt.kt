@@ -16,21 +16,19 @@ internal fun UnityAds.UnityAdsLoadError?.asBidonError() = when (this) {
     UnityAds.UnityAdsLoadError.INITIALIZE_FAILED -> {
         BidonError.Unspecified(UnityAdsDemandId, Throwable("UnityAdsLoadError.INITIALIZE_FAILED"))
     }
-    UnityAds.UnityAdsLoadError.INVALID_ARGUMENT -> {
-        BidonError.Unspecified(UnityAdsDemandId, Throwable("UnityAdsLoadError.INVALID_ARGUMENT"))
-    }
+    UnityAds.UnityAdsLoadError.INVALID_ARGUMENT -> BidonError.NoAppropriateAdUnitId
     null -> BidonError.Unspecified(UnityAdsDemandId)
 }
 
 internal fun UnityAds.UnityAdsShowError?.asBidonError() = when (this) {
     UnityAds.UnityAdsShowError.NOT_READY -> BidonError.AdNotReady
     UnityAds.UnityAdsShowError.NO_CONNECTION -> BidonError.NetworkError(UnityAdsDemandId)
-    UnityAds.UnityAdsShowError.INVALID_ARGUMENT,
+    UnityAds.UnityAdsShowError.INVALID_ARGUMENT -> BidonError.NoAppropriateAdUnitId
+    UnityAds.UnityAdsShowError.TIMEOUT -> BidonError.FillTimedOut(UnityAdsDemandId)
     UnityAds.UnityAdsShowError.VIDEO_PLAYER_ERROR,
     UnityAds.UnityAdsShowError.NOT_INITIALIZED,
     UnityAds.UnityAdsShowError.ALREADY_SHOWING,
     UnityAds.UnityAdsShowError.INTERNAL_ERROR,
-    UnityAds.UnityAdsShowError.TIMEOUT,
     null -> {
         BidonError.Unspecified(UnityAdsDemandId, Throwable("$this"))
     }

@@ -8,7 +8,6 @@ import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.auction.ext.height
@@ -18,14 +17,13 @@ import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.bidon.sdk.stats.models.BidType
+import org.bidon.unityads.ext.asBidonError
 
 /**
  * Created by Aleksei Cherniaev on 12/04/2023.
  */
 internal class UnityAdsBanner :
     AdSource.Banner<UnityAdsBannerAuctionParams>,
-    Mode.Network,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
     private var bannerAdView: BannerView? = null
@@ -37,15 +35,23 @@ internal class UnityAdsBanner :
         return auctionParamsScope {
             UnityAdsBannerAuctionParams(
                 activity = activity,
-                adUnit = popAdUnit(demandId, BidType.CPM) ?: error(BidonError.NoAppropriateAdUnitId),
+                adUnit = adUnit,
                 bannerFormat = bannerFormat,
             )
         }
     }
 
     override fun load(adParams: UnityAdsBannerAuctionParams) {
-        adUnit = adParams.adUnit
         logInfo(TAG, "Starting with $adParams")
+        val placementId = adParams.placementId ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, message = "placementId")
+                )
+            )
+            return
+        }
+        adUnit = adParams.adUnit
         adParams.activity.runOnUiThread {
             val unityBannerSize = UnityBannerSize(adParams.bannerFormat.width, adParams.bannerFormat.height)
             val adView = BannerView(adParams.activity, adParams.placementId, unityBannerSize).also {
@@ -75,7 +81,7 @@ internal class UnityAdsBanner :
                 ) {
                     logInfo(TAG, "Error while loading ad: $errorInfo. $this")
                     isAdReadyToShow = false
-                    emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                    emitEvent(AdEvent.LoadFailed(errorInfo.asBidonError()))
                 }
 
                 override fun onBannerLeftApplication(bannerView: BannerView?) {

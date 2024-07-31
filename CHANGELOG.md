@@ -1,3 +1,19 @@
+# 0.6.0
+## Features:
+- [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update Bidmachine to 2.7.0
+- [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update AppLovin to 12.6.0
+- [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update BigoAds to 4.8.2
+- [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update Inmobi to 10.7.4
+- [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update Mintegral to 16.7.71
+- [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update Unity Ads to 4.12.1
+- [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update Vungle to 7.4.0
+- [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update Meta dependencies (disabled Jetifier)
+
+# 0.6.0-next.1
+## Features:
+- [BDN-643](https://appodeal.atlassian.net/browse/BDN-643) Merge Bidding And Classic Demands Into One Auction
+- [BDN-643](https://appodeal.atlassian.net/browse/BDN-643) Added auction key field to public ad api
+
 # Skip Release 0.5
 ## Features:
 - [BDN-596](https://appodeal.atlassian.net/browse/BDN-596) Add bid_finish_ts for BID_TIMEOUT_REACHED

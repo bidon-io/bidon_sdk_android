@@ -27,6 +27,7 @@ import org.bidon.sdk.utils.di.get
 
 internal class InterstitialImpl(
     dispatcher: CoroutineDispatcher = SdkDispatchers.Main,
+    private val auctionKey: String? = null,
     private val demandAd: DemandAd = DemandAd(AdType.Interstitial)
 ) : Interstitial, Extras by demandAd {
     private var userListener: InterstitialListener? = null
@@ -63,6 +64,7 @@ internal class InterstitialImpl(
             adTypeParam = AdTypeParam.Interstitial(
                 activity = activity,
                 pricefloor = pricefloor,
+                auctionKey = auctionKey,
             ),
             onSuccess = { auctionResult ->
                 subscribeToWinner(auctionResult.adSource)

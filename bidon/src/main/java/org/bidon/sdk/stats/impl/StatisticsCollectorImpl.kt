@@ -24,7 +24,6 @@ import org.bidon.sdk.stats.usecases.WinLossRequestData
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.ext.SystemTimeNow
-import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -36,7 +35,6 @@ class StatisticsCollectorImpl : StatisticsCollector {
     private var auctionConfigurationUid: String = ""
     private var externalWinNotificationsEnabled: Boolean = true
     private lateinit var adType: StatisticsCollector.AdType
-    private var impressionId: String = UUID.randomUUID().toString()
 
     private val sendImpression by lazy {
         get<SendImpressionRequestUseCase>()
@@ -56,8 +54,6 @@ class StatisticsCollectorImpl : StatisticsCollector {
     private var _demandAd: DemandAd? = null
     private var stat: BidStat = BidStat(
         auctionId = null,
-        roundId = null,
-        roundIndex = null,
         demandId = DemandId(""),
         adUnit = null,
         fillStartTs = null,
@@ -65,7 +61,6 @@ class StatisticsCollectorImpl : StatisticsCollector {
         roundStatus = null,
         ecpm = 0.0,
         dspSource = null,
-        roundPricefloor = 0.0,
         auctionPricefloor = 0.0,
         tokenInfo = null,
     )
@@ -76,17 +71,12 @@ class StatisticsCollectorImpl : StatisticsCollector {
         get() = requireNotNull(stat.demandId) { "DemandId is not set" }
     override val auctionId: String
         get() = requireNotNull(stat.auctionId) { "AuctionId is not set" }
-    override val roundId: String
-        get() = requireNotNull(stat.roundId) { "RoundId is not set" }
-    override val roundIndex: Int
-        get() = requireNotNull(stat.roundIndex) { "RoundIndex is not set" }
 
     override fun getAd(): Ad? {
-        val roundId = stat.roundId
         val auctionId = stat.auctionId
         val bidType = stat.bidType
         val adUnit = stat.adUnit
-        if (adUnit == null || roundId == null || auctionId == null || bidType == null) {
+        if (adUnit == null || auctionId == null || bidType == null) {
             logError(TAG, "Ad is null", NullPointerException())
             return null
         }
@@ -94,7 +84,6 @@ class StatisticsCollectorImpl : StatisticsCollector {
             demandAd = demandAd,
             ecpm = stat.ecpm,
             currencyCode = AdValue.USD,
-            roundId = roundId,
             auctionId = auctionId,
             dsp = stat.dspSource,
             adUnit = adUnit
@@ -109,18 +98,12 @@ class StatisticsCollectorImpl : StatisticsCollector {
 
     override fun addRoundInfo(
         auctionId: String,
-        roundId: String,
-        roundIndex: Int,
         demandAd: DemandAd,
-        roundPricefloor: Double,
         auctionPricefloor: Double
     ) {
         this._demandAd = demandAd
         stat = stat.copy(
             auctionId = auctionId,
-            roundId = roundId,
-            roundIndex = roundIndex,
-            roundPricefloor = roundPricefloor,
             auctionPricefloor = auctionPricefloor
         )
     }
@@ -210,10 +193,6 @@ class StatisticsCollectorImpl : StatisticsCollector {
         this.adType = adType
     }
 
-    override fun addImpressionId(impId: String) {
-        impressionId = impId
-    }
-
     override fun addAuctionConfigurationId(auctionConfigurationId: Long) {
         this.auctionConfigurationId = auctionConfigurationId
     }
@@ -242,34 +221,6 @@ class StatisticsCollectorImpl : StatisticsCollector {
         )
     }
 
-    override fun markTokenStarted(): Long {
-        val time = SystemTimeNow
-        stat = stat.copy(
-            tokenInfo = stat.tokenInfo?.copy(
-                tokenStartTs = time
-            ) ?: TokenInfo(
-                token = null,
-                tokenStartTs = time,
-                tokenFinishTs = null,
-                status = TokenInfo.Status.NO_TOKEN.code
-            )
-        )
-        return time
-    }
-
-    override fun markTokenFinished(status: TokenInfo.Status, token: String?) {
-        stat = stat.copy(
-            tokenInfo = stat.tokenInfo?.copy(
-                token = token,
-                tokenFinishTs = SystemTimeNow,
-                status = status.code
-            ) ?: run {
-                logError(TAG, "TokenInfo is null", NullPointerException())
-                return
-            }
-        )
-    }
-
     override fun setPrice(price: Double) {
         stat = stat.copy(
             ecpm = price
@@ -279,6 +230,12 @@ class StatisticsCollectorImpl : StatisticsCollector {
     override fun setDsp(dspSource: String?) {
         stat = stat.copy(
             dspSource = dspSource
+        )
+    }
+
+    override fun setTokenInfo(tokenInfo: TokenInfo) {
+        stat = stat.copy(
+            tokenInfo = tokenInfo
         )
     }
 
@@ -306,21 +263,17 @@ class StatisticsCollectorImpl : StatisticsCollector {
         val (banner, interstitial, rewarded) = getData(adType)
         return ImpressionRequestBody(
             auctionId = auctionId,
-            roundId = roundId,
             auctionConfigurationId = auctionConfigurationId,
             auctionConfigurationUid = auctionConfigurationUid,
-            impressionId = impressionId,
             demandId = demandId.demandId,
             price = stat.ecpm,
             banner = banner,
             interstitial = interstitial,
             rewarded = rewarded,
-            roundIndex = roundIndex,
             bidType = stat.bidType?.code,
             adUnitLabel = stat.adUnit?.label,
             adUnitUid = stat.adUnit?.uid,
             auctionPricefloor = stat.auctionPricefloor,
-            roundPricefloor = stat.roundPricefloor
         )
     }
 

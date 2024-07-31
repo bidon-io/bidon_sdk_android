@@ -12,8 +12,6 @@ import org.bidon.sdk.utils.serializer.Serializable
 internal data class ResultBody(
     @field:JsonName("status")
     val status: String,
-    @field:JsonName("round_id")
-    val roundId: String?,
     @field:JsonName("winner_demand_id")
     val winnerDemandId: String?,
     @field:JsonName("bid_type")

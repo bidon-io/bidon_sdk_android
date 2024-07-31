@@ -19,6 +19,7 @@ internal fun InneractiveErrorCode?.asBidonError() = when (this) {
     InneractiveErrorCode.CONNECTION_TIMEOUT,
     InneractiveErrorCode.LOAD_TIMEOUT -> BidonError.BidTimedOut(DTExchangeDemandId)
 
+    InneractiveErrorCode.ERROR_CONFIGURATION_NO_SUCH_SPOT,
     InneractiveErrorCode.SPOT_DISABLED,
     InneractiveErrorCode.UNSUPPORTED_SPOT -> BidonError.NoAppropriateAdUnitId
 
@@ -30,7 +31,6 @@ internal fun InneractiveErrorCode?.asBidonError() = when (this) {
     InneractiveErrorCode.ERROR_CODE_NATIVE_VIDEO_NOT_SUPPORTED,
     InneractiveErrorCode.NATIVE_ADS_NOT_SUPPORTED_FOR_OS,
     InneractiveErrorCode.ERROR_CONFIGURATION_MISMATCH,
-    InneractiveErrorCode.ERROR_CONFIGURATION_NO_SUCH_SPOT,
     InneractiveErrorCode.NON_SECURE_CONTENT_DETECTED,
     InneractiveErrorCode.UNSPECIFIED,
     InneractiveErrorCode.SDK_NOT_INITIALIZED,

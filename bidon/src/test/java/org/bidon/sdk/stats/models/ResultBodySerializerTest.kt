@@ -16,7 +16,6 @@ internal class ResultBodySerializerTest {
     fun `it should serialize FAILURE`() {
         val actual = ResultBody(
             status = "FAIL",
-            roundId = "id13",
             auctionFinishTs = 1020,
             auctionStartTs = 1000,
             price = null,
@@ -32,7 +31,6 @@ internal class ResultBodySerializerTest {
         actual.assertEquals(
             expectedJsonStructure {
                 "status" hasValue "FAIL"
-                "round_id" hasValue "id13"
                 "auction_start_ts" hasValue 1000
                 "auction_finish_ts" hasValue 1020
                 "bid_type" hasValue "CPM"
