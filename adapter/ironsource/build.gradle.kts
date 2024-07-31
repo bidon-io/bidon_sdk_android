@@ -17,6 +17,8 @@ android {
 }
 
 dependencies {
-    compileOnly(project(":bidon"))
+    compileOnly(projects.bidon)
+    testImplementation(projects.bidon)
+
     implementation("com.ironsource.sdk:mediationsdk:7.2.7")
 }

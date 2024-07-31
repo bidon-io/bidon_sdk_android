@@ -17,7 +17,8 @@ android {
 }
 
 dependencies {
-    compileOnly(project(":bidon"))
+    compileOnly(projects.bidon)
+    testImplementation(projects.bidon)
 
     val fyberMarketplaceVersion = "8.2.1"
 

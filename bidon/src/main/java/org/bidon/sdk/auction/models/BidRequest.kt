@@ -10,11 +10,9 @@ import org.bidon.sdk.utils.serializer.Serializable
  */
 internal data class BidRequest(
     @field:JsonName("auction_configuration_id")
-    val auctionConfigurationId: Int?,
+    val auctionConfigurationId: Long?,
     @field:JsonName("auction_configuration_uid")
     val auctionConfigurationUid: String?,
-    @field:JsonName("id")
-    val impressionId: String,
     @field:JsonName("auction_id")
     val auctionId: String,
     @field:JsonName("round_id")
@@ -24,18 +22,11 @@ internal data class BidRequest(
     @field:JsonName("bidfloor")
     val bidfloor: Double,
     @field:JsonName("demands")
-    val demands: Map<String, Token>,
+    val demands: Map<String, TokenInfo>,
     @field:JsonName("banner")
     val banner: BannerRequest?,
     @field:JsonName("interstitial")
     val interstitial: InterstitialRequest?,
     @field:JsonName("rewarded")
-    val rewarded: RewardedRequest?,
-
-) : Serializable {
-
-    data class Token(
-        @field:JsonName("token")
-        val token: String
-    ) : Serializable
-}
+    val rewarded: RewardedRequest?
+) : Serializable

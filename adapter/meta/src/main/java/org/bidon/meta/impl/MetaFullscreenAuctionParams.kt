@@ -6,26 +6,36 @@ import com.facebook.ads.AdSize
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
+import org.bidon.sdk.auction.models.BidResponse
 
 class MetaFullscreenAuctionParams(
     val context: Context,
-    val placementId: String,
-    val payload: String,
-    override val price: Double
+    bidResponse: BidResponse,
 ) : AdAuctionParams {
-    override val lineItem: LineItem? = null
+    override val adUnit: AdUnit = bidResponse.adUnit
+    override val price = bidResponse.price
+    val placementId = requireNotNull(bidResponse.adUnit.extra?.optString("placement_id")) {
+        "Placement id is required for Meta"
+    }
+    val payload = requireNotNull(bidResponse.extra?.optString("payload")) {
+        "Payload is required for Meta"
+    }
 }
 
 class MetaBannerAuctionParams(
     val activity: Activity,
     val bannerFormat: BannerFormat,
-    val placementId: String,
-    val payload: String,
-    override val price: Double
+    bidResponse: BidResponse,
 ) : AdAuctionParams {
-
-    override val lineItem: LineItem? = null
+    override val adUnit: AdUnit = bidResponse.adUnit
+    override val price = bidResponse.price
+    val placementId = requireNotNull(bidResponse.adUnit.extra?.optString("placement_id")) {
+        "Placement id is required for Meta"
+    }
+    val payload = requireNotNull(bidResponse.extra?.optString("payload")) {
+        "Payload is required for Meta"
+    }
 
     val bannerSize: AdSize
         get() = when (bannerFormat) {

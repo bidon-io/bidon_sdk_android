@@ -21,6 +21,7 @@ import org.bidon.sdk.logs.analytic.Precision
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -42,12 +43,11 @@ internal class InmobiBannerImpl :
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+            val adUnit = popAdUnit(demandId, BidType.CPM) ?: error(BidonError.NoAppropriateAdUnitId)
             InmobiBannerAuctionParams(
                 activity = activity,
                 bannerFormat = bannerFormat,
-                price = lineItem.pricefloor,
-                lineItem = lineItem
+                adUnit = adUnit
             )
         }
     }

@@ -1,8 +1,5 @@
 package org.bidon.sdk.stats.models
 
-import org.bidon.sdk.auction.models.BannerRequest
-import org.bidon.sdk.auction.models.InterstitialRequest
-import org.bidon.sdk.auction.models.RewardedRequest
 import org.bidon.sdk.config.models.json_scheme_utils.assertEquals
 import org.bidon.sdk.config.models.json_scheme_utils.expectedJsonStructure
 import org.bidon.sdk.utils.json.jsonArray
@@ -29,21 +26,21 @@ class StatsRequestBodySerializerTest {
                     demands = listOf(
                         DemandStat.Network(
                             demandId = "d345",
-                            adUnitId = "asd223",
-                            ecpm = 1.2,
+                            price = 1.2,
                             fillFinishTs = 3,
                             fillStartTs = 4,
                             roundStatusCode = "code",
-                            lineItemUid = "123",
+                            adUnitUid = "123",
+                            adUnitLabel = "label124",
                         ),
                         DemandStat.Network(
                             demandId = "d6",
                             roundStatusCode = "code2",
-                            adUnitId = null,
-                            ecpm = null,
+                            price = null,
                             fillFinishTs = null,
                             fillStartTs = null,
-                            lineItemUid = "123",
+                            adUnitLabel = "label123",
+                            adUnitUid = "123",
                         )
                     ),
                     pricefloor = 34.2,
@@ -64,9 +61,13 @@ class StatsRequestBodySerializerTest {
                             DemandStat.Bidding.Bid(
                                 demandId = "d011",
                                 roundStatusCode = "code3",
-                                ecpm = 1.0,
+                                price = 1.0,
                                 fillFinishTs = 6,
                                 fillStartTs = 5,
+                                adUnitUid = "123",
+                                adUnitLabel = "label123",
+                                tokenStartTs = 678L,
+                                tokenFinishTs = 679L,
                             )
                         )
                     )
@@ -74,17 +75,17 @@ class StatsRequestBodySerializerTest {
             ),
             result = ResultBody(
                 status = "SUCCESS",
-                demandId = "admob",
-                ecpm = 0.123,
-                adUnitId = "id123",
+                price = 0.123,
                 auctionStartTs = 1000,
                 auctionFinishTs = 1300,
                 roundId = "id13",
                 bidType = BidType.CPM.code,
-                lineItemUid = "123",
-                banner = BannerRequest(BannerRequest.StatFormat.ADAPTIVE_BANNER.code),
-                interstitial = InterstitialRequest,
-                rewarded = RewardedRequest,
+                winnerAdUnitLabel = "label123",
+                winnerAdUnitUid = "123",
+                winnerDemandId = "admob",
+                rewarded = null,
+                interstitial = null,
+                banner = null
             ),
         ).serialize()
         println(json)
@@ -97,15 +98,9 @@ class StatsRequestBodySerializerTest {
                     "ad_unit_id" hasValue "id123"
                     "auction_start_ts" hasValue 1000
                     "auction_finish_ts" hasValue 1300
-                    "bid_type" hasValue "cpm"
-                    "banner" hasJson expectedJsonStructure {
-                        "format" hasValue "ADAPTIVE"
-                    }
-                    "interstitial" hasJson expectedJsonStructure {}
-                    "rewarded" hasJson expectedJsonStructure {}
+                    "bid_type" hasValue "CPM"
                 }
                 "auction_id" hasValue "id123"
-                "auction_configuration_id" hasValue 4
                 "rounds" hasArray jsonArray {
                     val list = listOf(
                         jsonObject {
@@ -120,9 +115,11 @@ class StatsRequestBodySerializerTest {
                                         jsonObject {
                                             "ad_unit_id" hasValue "asd223"
                                             "bid_finish_ts" hasValue 1
-                                            "fill_start_ts" hasValue 4
                                             "ecpm" hasValue 1.2
+                                            "fill_start_ts" hasValue 4
                                             "fill_finish_ts" hasValue 3
+                                            "token_start_ts" hasValue 678L
+                                            "token_finish_ts" hasValue 679L
                                             "id" hasValue "d345"
                                             "bid_start_ts" hasValue 2
                                             "status" hasValue "code"
@@ -169,9 +166,13 @@ class StatsRequestBodySerializerTest {
                 DemandStat.Bidding.Bid(
                     demandId = "d011",
                     roundStatusCode = "code3",
-                    ecpm = 1.0,
+                    price = 1.0,
                     fillFinishTs = 6,
                     fillStartTs = 5,
+                    adUnitLabel = "label123",
+                    adUnitUid = "123",
+                    tokenStartTs = 678L,
+                    tokenFinishTs = 679L,
                 )
             )
         ).serialize()
@@ -185,6 +186,8 @@ class StatsRequestBodySerializerTest {
                 "bid_finish_ts" hasValue 3
                 "fill_start_ts" hasValue 5
                 "fill_finish_ts" hasValue 6
+                "token_start_ts" hasValue 678L
+                "token_finish_ts" hasValue 679L
             }
         )
     }

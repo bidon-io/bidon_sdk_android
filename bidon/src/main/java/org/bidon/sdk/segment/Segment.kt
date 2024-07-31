@@ -6,13 +6,6 @@ import org.bidon.sdk.segment.models.Gender
  * Created by Aleksei Cherniaev on 14/06/2023.
  */
 interface Segment {
-
-    /**
-     * Current user's Segment ID
-     */
-    @Deprecated("Use segmentUid instead")
-    val segmentId: String?
-
     /**
      * Snowflake ID
      */

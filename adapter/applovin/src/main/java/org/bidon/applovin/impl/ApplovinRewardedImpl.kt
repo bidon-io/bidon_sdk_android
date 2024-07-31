@@ -18,11 +18,12 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 /**
  * I have no idea how it works. There is no documentation.
@@ -38,7 +39,7 @@ internal class ApplovinRewardedImpl(
 
     private var rewardedAd: AppLovinIncentivizedInterstitial? = null
     private var applovinAd: AppLovinAd? = null
-    private var lineItem: LineItem? = null
+    private var adUnit: AdUnit? = null
 
     private val listener by lazy {
         object :
@@ -58,7 +59,7 @@ internal class ApplovinRewardedImpl(
                 logInfo(TAG, "adDisplayed: $this")
                 getAd()?.let {
                     emitEvent(AdEvent.Shown(it))
-                    emitEvent(AdEvent.PaidRevenue(it, lineItem?.pricefloor.asBidonAdValue()))
+                    emitEvent(AdEvent.PaidRevenue(it, adUnit?.pricefloor.asBidonAdValue()))
                 }
             }
 
@@ -107,7 +108,7 @@ internal class ApplovinRewardedImpl(
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             ApplovinFullscreenAdAuctionParams(
-                lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId),
+                adUnit = popAdUnit(demandId, BidType.CPM) ?: error(BidonError.NoAppropriateAdUnitId),
                 timeoutMs = timeout,
             )
         }
@@ -115,9 +116,9 @@ internal class ApplovinRewardedImpl(
 
     override fun load(adParams: ApplovinFullscreenAdAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
-        lineItem = adParams.lineItem
+        adUnit = adParams.adUnit
         val incentivizedInterstitial =
-            AppLovinIncentivizedInterstitial.create(adParams.lineItem.adUnitId, applovinSdk).also {
+            AppLovinIncentivizedInterstitial.create(adParams.zoneId, applovinSdk).also {
                 rewardedAd = it
             }
         val requestListener = object : AppLovinAdLoadListener {
