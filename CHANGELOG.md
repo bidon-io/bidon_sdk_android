@@ -3,7 +3,7 @@
 - [BDN-688](https://appodeal.atlassian.net/browse/BDN-688) Added impression info to Ad object
 - [BDN-687](https://appodeal.atlassian.net/browse/BDN-687) Provided AuctionInfo to public callback
 
-# 0.6.0
+# Release 0.6.0
 ## Features:
 - [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update Bidmachine to 2.7.0
 - [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update AppLovin to 12.6.0
@@ -14,7 +14,7 @@
 - [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update Vungle to 7.4.0
 - [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update Meta dependencies (disabled Jetifier)
 
-# 0.6.0-next.1
+# Release 0.6.0-next.1
 ## Features:
 - [BDN-643](https://appodeal.atlassian.net/browse/BDN-643) Merge Bidding And Classic Demands Into One Auction
 - [BDN-643](https://appodeal.atlassian.net/browse/BDN-643) Added auction key field to public ad api
