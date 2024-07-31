@@ -13,6 +13,7 @@ internal interface ResultsCollector {
     fun serverBiddingStarted()
     @Deprecated("")
     fun serverBiddingFinished(adUnits: List<AdUnit>?)
+    fun setNoBidInfo(noBidsInfo: List<AdUnit>?)
     fun biddingTimeoutReached()
     fun add(result: AuctionResult)
     fun getRoundResults(): RoundResult

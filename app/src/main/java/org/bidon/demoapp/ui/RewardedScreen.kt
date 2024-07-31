@@ -23,8 +23,10 @@ import kotlinx.coroutines.launch
 import org.bidon.demoapp.component.*
 import org.bidon.demoapp.component.AppToolbar
 import org.bidon.demoapp.ui.ext.getImpressionInfo
+import org.bidon.demoapp.ui.ext.toJson
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.ads.Ad
+import org.bidon.sdk.ads.AuctionInfo
 import org.bidon.sdk.ads.rewarded.Reward
 import org.bidon.sdk.ads.rewarded.RewardedAd
 import org.bidon.sdk.ads.rewarded.RewardedListener
@@ -51,13 +53,13 @@ fun RewardedScreen(
         RewardedAd().apply {
             setRewardedListener(
                 object : RewardedListener {
-                    override fun onAdLoaded(ad: Ad) {
-                        logFlow.log("onAdLoaded WINNER:\n$ad")
+                    override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {
+                        logFlow.log("onAdLoaded WINNER:\n$ad. AuctionInfo: \n${auctionInfo.toJson()}")
                         logFlow.log("onAdLoaded ImpressionInfo: \n${ad.getImpressionInfo()}")
                     }
 
-                    override fun onAdLoadFailed(cause: BidonError) {
-                        logFlow.log("onAdLoadFailed: $cause")
+                    override fun onAdLoadFailed(auctionInfo: AuctionInfo?, cause: BidonError) {
+                        logFlow.log("onAdLoadFailed: $cause. AuctionInfo: \n${auctionInfo?.toJson()}")
                     }
 
                     override fun onAdShowFailed(cause: BidonError) {

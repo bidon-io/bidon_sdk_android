@@ -33,6 +33,7 @@ import org.bidon.demoapp.component.Body2Text
 import org.bidon.demoapp.component.ItemSelector
 import org.bidon.demoapp.ui.domain.BannerManagerViewModel
 import org.bidon.sdk.ads.Ad
+import org.bidon.sdk.ads.AuctionInfo
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.BannerListener
 import org.bidon.sdk.ads.banner.BannerPosition
@@ -58,12 +59,12 @@ fun PositionedBannerScreen(
         setBannerFormat(bannerFormat.value)
         setBannerListener(
             object : BannerListener {
-                override fun onAdLoaded(ad: Ad) {
-                    logFlow.log("onAdLoaded WINNER:\n$ad")
+                override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {
+                    logFlow.log("onAdLoaded WINNER:\n$ad. AuctionInfo: $auctionInfo")
                 }
 
-                override fun onAdLoadFailed(cause: BidonError) {
-                    logFlow.log("onAdLoadFailed: $cause")
+                override fun onAdLoadFailed(auctionInfo: AuctionInfo?, cause: BidonError) {
+                    logFlow.log("onAdLoadFailed: $cause. AuctionInfo: $auctionInfo")
                 }
 
                 override fun onAdShown(ad: Ad) {
