@@ -62,6 +62,17 @@ internal class ExecuteAuctionUseCaseImplTest : ConcurrentTest() {
         auctionConfigurationUid = "10",
         externalWinNotificationsEnabled = true,
         auctionTimeout = 10000L,
+        noBids = listOf(
+            AdUnit(
+                bidType = BidType.RTB,
+                demandId = "dem7",
+                label = "dem7_label",
+                pricefloor = 0.021,
+                uid = "123567",
+                timeout = 5000L,
+                ext = ""
+            )
+        )
     )
 
     private val activity: Activity by lazy { mockk(relaxed = true) }

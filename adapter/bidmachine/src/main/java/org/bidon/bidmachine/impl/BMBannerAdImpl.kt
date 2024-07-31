@@ -69,7 +69,11 @@ internal class BMBannerAdImpl(
                         }
 
                         override fun onRequestFailed(request: BannerRequest, bmError: BMError) {
-                            val error = bmError.asBidonErrorOnBid(demandId)
+                            val error = if (bidType == BidType.RTB) {
+                                bmError.asBidonErrorOnBid(demandId)
+                            } else {
+                                bmError.asBidonErrorOnFill(demandId)
+                            }
                             logError(TAG, "onRequestFailed $bmError. $this", error)
                             emitEvent(AdEvent.LoadFailed(error))
                         }

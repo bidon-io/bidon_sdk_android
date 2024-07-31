@@ -11,6 +11,7 @@ import io.bidmachine.rewarded.RewardedRequest
 import io.bidmachine.utils.BMError
 import org.bidon.bidmachine.BMAuctionResult
 import org.bidon.bidmachine.BMFullscreenAuctionParams
+import org.bidon.bidmachine.asBidonErrorOnBid
 import org.bidon.bidmachine.asBidonErrorOnFill
 import org.bidon.bidmachine.ext.asBidonAdValue
 import org.bidon.sdk.adapter.AdAuctionParamSource
@@ -70,8 +71,13 @@ internal class BMRewardedAdImpl(
                     }
 
                     override fun onRequestFailed(request: RewardedRequest, bmError: BMError) {
-                        logInfo(TAG, "onRequestFailed $bmError. $this")
-                        emitEvent(AdEvent.LoadFailed(bmError.asBidonErrorOnFill(demandId)))
+                        val error = if (bidType == BidType.RTB) {
+                            bmError.asBidonErrorOnBid(demandId)
+                        } else {
+                            bmError.asBidonErrorOnFill(demandId)
+                        }
+                        logError(TAG, "onRequestFailed $bmError. $this", error)
+                        emitEvent(AdEvent.LoadFailed(error))
                     }
 
                     override fun onRequestExpired(request: RewardedRequest) {

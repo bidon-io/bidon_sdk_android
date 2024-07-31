@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.bidon.sdk.BidonSdk;
 import org.bidon.sdk.ads.Ad;
+import org.bidon.sdk.ads.AuctionInfo;
 import org.bidon.sdk.ads.interstitial.InterstitialListener;
 import org.bidon.sdk.config.BidonError;
 import org.bidon.sdk.config.InitializationCallback;
@@ -26,12 +27,12 @@ public class JavaMainActivity extends AppCompatActivity {
 
         InterstitialListener listener = new InterstitialListener() {
             @Override
-            public void onAdLoaded(@NonNull Ad ad) {
+            public void onAdLoaded(@NonNull Ad ad, @NonNull AuctionInfo auctionInfo) {
 
             }
 
             @Override
-            public void onAdLoadFailed(@NonNull BidonError bidonError) {
+            public void onAdLoadFailed(@Nullable AuctionInfo auctionInfo, @NonNull BidonError bidonError) {
 
             }
 

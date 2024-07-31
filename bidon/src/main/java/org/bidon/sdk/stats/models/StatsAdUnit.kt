@@ -2,6 +2,7 @@ package org.bidon.sdk.stats.models
 
 import org.bidon.sdk.utils.serializer.JsonName
 import org.bidon.sdk.utils.serializer.Serializable
+import org.json.JSONObject
 
 internal data class StatsAdUnit(
     @field:JsonName("demand_id")
@@ -25,5 +26,7 @@ internal data class StatsAdUnit(
     @field:JsonName("ad_unit_label")
     val adUnitLabel: String?,
     @field:JsonName("error_message")
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val timeout: Long?,
+    val ext: JSONObject?
 ) : Serializable
