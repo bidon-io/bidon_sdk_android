@@ -19,9 +19,9 @@ import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.helper.DeviceInfo
 import org.bidon.sdk.auction.AdTypeParam
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
-import org.bidon.sdk.auction.models.LineItem
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.ConductBiddingRoundUseCase
 import org.bidon.sdk.auction.usecases.ConductNetworkRoundUseCase
@@ -42,6 +42,7 @@ import org.bidon.sdk.regulation.Regulation
 import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.di.DI
+import org.bidon.sdk.utils.json.jsonObject
 import org.bidon.sdk.utils.mainDispatcherOverridden
 import org.junit.After
 import org.junit.Before
@@ -68,32 +69,30 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                 biddingIds = listOf(),
             ),
         ),
-        auctionConfigurationId = 10,
-        auctionId = "auctionId_123",
-        lineItems = listOf(
-            LineItem(
-                demandId = Applovin,
+        adUnits = listOf(
+            AdUnit(
+                demandId = "admob",
+                label = "admob_banner",
                 pricefloor = 0.25,
-                adUnitId = "AAAA2",
-                uid = "1",
+                uid = "12387837129819",
+                bidType = BidType.CPM,
+                ext = jsonObject { "ad_unit_id" hasValue "ca-app-pub-3940256099942544/6300978111" }.toString(),
             ),
-            LineItem(
-                demandId = Admob,
-                pricefloor = 1.2235,
-                adUnitId = "admob1",
-                uid = "1",
-            ),
-            LineItem(
-                demandId = Admob,
-                pricefloor = 2.2235,
-                adUnitId = "admob2",
-                uid = "1",
-            ),
+            AdUnit(
+                demandId = "bidmachine",
+                label = "bidmachine_banner",
+                uid = "32387837129819",
+                pricefloor = null,
+                bidType = BidType.CPM,
+                ext = null,
+            )
         ),
         pricefloor = 0.01,
         token = null,
-        externalWinNotificationsEnabled = true,
+        auctionId = "auctionId_123",
+        auctionConfigurationId = 10,
         auctionConfigurationUid = "10",
+        externalWinNotificationsEnabled = true,
     )
 
     private val activity: Activity by lazy { mockk(relaxed = true) }
@@ -147,7 +146,18 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
     fun `it should conduct round`() = runTest {
         // mockk results
         coEvery {
-            conductNetworkAuction.invoke(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            conductNetworkAuction.invoke(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
         } returns NetworksResult(
             results = listOf(
                 CoroutineScope(mainDispatcherOverridden!!).async {
@@ -156,39 +166,26 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                             every { it.demandId } returns DemandId(Admob)
                             every { it.ad } returns Ad(
                                 demandAd = DemandAd(AdType.Interstitial),
-                                networkName = "admob",
-                                adUnitId = null,
                                 roundId = "r123",
                                 currencyCode = USD,
                                 dsp = null,
                                 ecpm = 1.3,
                                 auctionId = "a123",
-                                bidType = BidType.CPM,
-
+                                adUnit = AdUnit(
+                                    demandId = "admob",
+                                    label = "admob_banner",
+                                    pricefloor = 0.25,
+                                    uid = "12387837129819",
+                                    bidType = BidType.CPM,
+                                    ext = jsonObject { "ad_unit_id" hasValue "ca-app-pub-3940256099942544/6300978111" }.toString(),
+                                )
                             )
                         },
                         roundStatus = RoundStatus.Successful
                     )
                 }
             ),
-            remainingLineItems = emptyList()
-        )
-        val auctionResult = AuctionResult.Bidding(
-            adSource = mockk<AdSource<*>>(relaxed = true).also {
-                every { it.demandId } returns DemandId(BidMachine)
-                every { it.ad } returns Ad(
-                    demandAd = DemandAd(AdType.Interstitial),
-                    networkName = "bidmachine_network",
-                    adUnitId = null,
-                    roundId = "r123",
-                    currencyCode = USD,
-                    dsp = null,
-                    ecpm = 2.3,
-                    auctionId = "a123",
-                    bidType = BidType.CPM,
-                )
-            },
-            roundStatus = RoundStatus.Successful
+            remainingAdUnits = emptyList()
         )
         coEvery {
             conductBiddingAuction.invoke(
@@ -202,7 +199,8 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
                 round = any(),
                 auctionConfigurationId = any(),
                 auctionConfigurationUid = any(),
-                resultsCollector = any()
+                adUnits = any(),
+                resultsCollector = any(),
             )
         } returns Unit
 
@@ -219,7 +217,7 @@ internal class ExecuteRoundUseCaseImplTest : ConcurrentTest() {
             ),
             roundIndex = 1,
             pricefloor = 0.4,
-            lineItems = emptyList(),
+            adUnits = emptyList(),
             resultsCollector = mockk(relaxed = true),
             onFinish = { remainingLineItems ->
             }

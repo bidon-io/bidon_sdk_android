@@ -26,6 +26,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 /**
  * Created by Aleksei Cherniaev on 17/04/2023.
@@ -36,7 +37,6 @@ internal class DTExchangeBanner :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var pricefloor: Double = 0.0
     private var adSpot: InneractiveAdSpot? = null
     private var adViewHolder: AdViewHolder? = null
     private var demandSource: String? = null
@@ -45,9 +45,9 @@ internal class DTExchangeBanner :
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+            val adUnit = popAdUnit(demandId, BidType.CPM) ?: error(BidonError.NoAppropriateAdUnitId)
             DTExchangeBannerAuctionParams(
-                lineItem = lineItem,
+                adUnit = adUnit,
                 bannerFormat = bannerFormat,
                 activity = activity,
             )
@@ -56,7 +56,6 @@ internal class DTExchangeBanner :
 
     override fun load(adParams: DTExchangeBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
-        pricefloor = adParams.price
         val adSpot = InneractiveAdSpotManager.get().createSpot()
         val controller = InneractiveAdViewUnitController()
         adSpot.addUnitController(controller)
@@ -78,7 +77,15 @@ internal class DTExchangeBanner :
                 inneractiveErrorCode: InneractiveErrorCode?
             ) {
                 logInfo(TAG, "onInneractiveFailedAdRequest: $inneractiveErrorCode")
-                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                emitEvent(
+                    AdEvent.LoadFailed(
+                        if (inneractiveErrorCode == InneractiveErrorCode.ERROR_CONFIGURATION_NO_SUCH_SPOT) {
+                            BidonError.NoAppropriateAdUnitId
+                        } else {
+                            BidonError.NoFill(demandId)
+                        }
+                    )
+                )
             }
         })
         adSpot.requestAd(adRequest)

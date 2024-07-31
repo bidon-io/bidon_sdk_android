@@ -19,7 +19,8 @@ android {
 }
 
 dependencies {
-    compileOnly(project(":bidon"))
+    compileOnly(projects.bidon)
+    testImplementation(projects.bidon)
 
     implementation("com.amazon.android:aps-sdk:9.9.3")
     implementation("com.iabtcf:iabtcf-decoder:2.0.10")

@@ -16,6 +16,7 @@ import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.auction.AdTypeParam
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -41,7 +42,11 @@ internal class VungleBannerImpl :
     override val isAdReadyToShow: Boolean
         get() = banner?.getBannerView() != null
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? =
+    override suspend fun getToken(
+        context: Context,
+        adTypeParam: AdTypeParam,
+        adUnits: List<AdUnit>
+    ): String? =
         VungleAds.getBiddingToken(context)
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
@@ -49,13 +54,7 @@ internal class VungleBannerImpl :
             VungleBannerAuctionParams(
                 activity = activity,
                 bannerFormat = bannerFormat,
-                bannerId = requireNotNull(json?.getString("placement_id")) {
-                    "Banner id is required"
-                },
-                price = pricefloor,
-                payload = requireNotNull(json?.getString("payload")) {
-                    "Payload is required"
-                }
+                bidResponse = requiredBidResponse,
             )
         }
     }
@@ -65,7 +64,7 @@ internal class VungleBannerImpl :
         adParams.activity.runOnUiThread {
             val banner = BannerAd(
                 context = adParams.activity,
-                placementId = adParams.bannerId,
+                placementId = adParams.placementId,
                 adSize = adParams.bannerSize
             ).also {
                 this.banner = it

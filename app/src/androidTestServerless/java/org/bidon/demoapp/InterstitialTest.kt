@@ -32,7 +32,7 @@ class InterstitialTest {
                     timeoutMs = 10000
                 )
             ),
-            lineItems = listOf(
+            adUnits = listOf(
                 LineItem(
                     demandId = "admob",
                     pricefloor = 0.01,
@@ -75,7 +75,7 @@ class InterstitialTest {
                     timeoutMs = 10000
                 )
             ),
-            lineItems = listOf(
+            adUnits = listOf(
                 LineItem(
                     demandId = "admob",
                     pricefloor = 0.01,
@@ -114,7 +114,7 @@ class InterstitialTest {
                     timeoutMs = 10000
                 )
             ),
-            lineItems = listOf(
+            adUnits = listOf(
                 LineItem(
                     demandId = "unityads",
                     pricefloor = 0.01,

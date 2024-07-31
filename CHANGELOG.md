@@ -1,3 +1,13 @@
+# Skip Release 0.5
+## Features:
+- [BDN-596](https://appodeal.atlassian.net/browse/BDN-596) Add bid_finish_ts for BID_TIMEOUT_REACHED
+- [BDN-492](https://appodeal.atlassian.net/browse/BDN-492) Continue awaiting adapter after timed out
+- [BDN-473](https://appodeal.atlassian.net/browse/BDN-473) Line Items Rework In Bidon SDK Server API
+- [BDN-474](https://appodeal.atlassian.net/browse/BDN-474) Remove obsolete _id-fields
+- [BDN-475](https://appodeal.atlassian.net/browse/BDN-475) Update Ad object
+- [BDN-631](https://appodeal.atlassian.net/browse/BDN-631) Gradle maintenance
+- [BDN-625](https://appodeal.atlassian.net/browse/BDN-625) Fixed OnReward event emitting order for Mintegral Rewarded
+
 # Release 0.4.29.3 (2024.05.22)
 ## Features:
 - [APDM-638](https://appodeal.atlassian.net/browse/APDM-638) Update Applovin SDK to 12.5.0
@@ -5,7 +15,6 @@
 - [APDM-640](https://appodeal.atlassian.net/browse/APDM-640) Update BigoAds SDK to 4.7.3
 - [APDM-641](https://appodeal.atlassian.net/browse/APDM-641) Update Mintegral SDK to 16.7.31
 - [BDN-625](https://appodeal.atlassian.net/browse/BDN-625) Fixed OnReward event emitting order for Mintegral Rewarded
-
 
 # Release 0.4.29.2 (2024.04.10)
 ## Features:

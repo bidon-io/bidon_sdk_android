@@ -6,7 +6,8 @@ import org.bidon.admob.ext.toAdmobAdSize
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdapterParameters
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
+import org.bidon.sdk.auction.models.BidResponse
 
 data class AdmobInitParameters(
     val requestAgent: String?,
@@ -23,13 +24,13 @@ sealed interface AdmobBannerAuctionParams : AdAuctionParams {
         override val activity: Activity,
         override val bannerFormat: BannerFormat,
         override val containerWidth: Float,
-        override val lineItem: LineItem,
+        override val adUnit: AdUnit,
     ) : AdmobBannerAuctionParams {
-        val adUnitId: String = requireNotNull(lineItem.adUnitId)
-        override val price: Double get() = lineItem.pricefloor
+        val adUnitId: String = requireNotNull(adUnit.extra?.getString("ad_unit_id"))
+        override val price: Double = requireNotNull(adUnit.pricefloor)
 
         override fun toString(): String {
-            return "AdmobBannerAuctionParams($lineItem)"
+            return "AdmobBannerAuctionParams($adUnit)"
         }
     }
 
@@ -38,13 +39,14 @@ sealed interface AdmobBannerAuctionParams : AdAuctionParams {
         override val bannerFormat: BannerFormat,
         override val containerWidth: Float,
         override val price: Double,
-        val adUnitId: String,
-        val payload: String,
+        bidResponse: BidResponse
     ) : AdmobBannerAuctionParams {
-        override val lineItem: LineItem? = null
+        override val adUnit: AdUnit = bidResponse.adUnit
+        val adUnitId: String = requireNotNull(adUnit.extra?.getString("ad_unit_id"))
+        val payload: String = requireNotNull(bidResponse.extra?.getString("payload"))
 
         override fun toString(): String {
-            return "AdmobBannerAuctionParams($adUnitId, bidPrice=$price, payload=${payload.take(20)})"
+            return "AdmobBannerAuctionParams($adUnit, bidPrice=$price, payload=${payload.take(20)})"
         }
     }
 }
@@ -54,26 +56,27 @@ sealed interface AdmobFullscreenAdAuctionParams : AdAuctionParams {
 
     class Network(
         override val activity: Activity,
-        override val lineItem: LineItem,
+        override val adUnit: AdUnit,
     ) : AdmobFullscreenAdAuctionParams {
-        val adUnitId: String = requireNotNull(lineItem.adUnitId)
-        override val price: Double get() = lineItem.pricefloor
+        val adUnitId: String = requireNotNull(adUnit.extra?.getString("ad_unit_id"))
+        override val price: Double = requireNotNull(adUnit.pricefloor)
 
         override fun toString(): String {
-            return "AdmobFullscreenAdAuctionParams($lineItem)"
+            return "AdmobFullscreenAdAuctionParams($adUnit)"
         }
     }
 
     class Bidding(
         override val activity: Activity,
         override val price: Double,
-        val adUnitId: String,
-        val payload: String,
+        bidResponse: BidResponse
     ) : AdmobFullscreenAdAuctionParams {
-        override val lineItem: LineItem? = null
+        override val adUnit: AdUnit = bidResponse.adUnit
+        val adUnitId: String = requireNotNull(adUnit.extra?.getString("ad_unit_id"))
+        val payload: String = requireNotNull(bidResponse.extra?.getString("payload"))
 
         override fun toString(): String {
-            return "AdmobFullscreenAdAuctionParams($adUnitId, bidPrice=$price, payload=${payload.take(20)})"
+            return "AdmobFullscreenAdAuctionParams($adUnit, bidPrice=$price, payload=${payload.take(20)})"
         }
     }
 }

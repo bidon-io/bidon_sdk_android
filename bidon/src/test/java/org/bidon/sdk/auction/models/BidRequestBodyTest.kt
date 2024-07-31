@@ -12,19 +12,23 @@ internal class BidRequestBodyTest {
     @Test
     fun serialize() {
         val body = BidRequest(
-            impressionId = "imp123",
+            auctionConfigurationId = 123,
+            auctionConfigurationUid = "123",
+            auctionId = "auc123",
+            roundId = "round123",
+            orientationCode = AdObjectRequest.Orientation.Landscape.code,
+            bidfloor = 1.24,
             demands = mapOf(
-                "bidmachine" to BidRequest.Token(token = "bm_token_123")
+                "bidmachine" to TokenInfo(
+                    token = "bm_token_123",
+                    tokenStartTs = 100L,
+                    tokenFinishTs = 123L,
+                    status = TokenInfo.Status.SUCCESS.code,
+                )
             ),
             banner = BannerRequest(formatCode = BannerRequest.StatFormat.ADAPTIVE_BANNER.code),
-            bidfloor = 1.24,
-            orientationCode = AdObjectRequest.Orientation.Landscape.code,
-            roundId = "round123",
-            auctionId = "auc123",
-            auctionConfigurationId = 12,
-            auctionConfigurationUid = "123",
-            rewarded = RewardedRequest,
             interstitial = InterstitialRequest,
+            rewarded = RewardedRequest,
         )
         val actual = body.serialize()
         println(actual)
@@ -34,6 +38,9 @@ internal class BidRequestBodyTest {
                 "demands" hasJson expectedJsonStructure {
                     "bidmachine" hasJson expectedJsonStructure {
                         "token" hasValue "bm_token_123"
+                        "token_start_ts" hasValue 100L
+                        "token_finish_ts" hasValue 123L
+                        "status" hasValue "SUCCESS"
                     }
                 }
 
@@ -44,10 +51,9 @@ internal class BidRequestBodyTest {
                     "format" hasValue "ADAPTIVE"
                 }
                 "bidfloor" hasValue 1.24
-                "id" hasValue "imp123"
                 "round_id" hasValue "round123"
                 "auction_id" hasValue "auc123"
-                "auction_configuration_id" hasValue 12
+                "auction_configuration_id" hasValue 123
                 "auction_configuration_uid" hasValue "123"
             }
         )
@@ -56,19 +62,23 @@ internal class BidRequestBodyTest {
     @Test
     fun array() {
         val body = BidRequest(
-            impressionId = "imp123",
+            auctionConfigurationId = 123,
+            auctionConfigurationUid = "123",
+            auctionId = "auc123",
+            roundId = "round123",
+            orientationCode = AdObjectRequest.Orientation.Landscape.code,
+            bidfloor = 1.24,
             demands = mapOf(
-                "bidmachine" to BidRequest.Token(token = "bm_token_123")
+                "bidmachine" to TokenInfo(
+                    token = "bm_token_123",
+                    tokenStartTs = 100L,
+                    tokenFinishTs = 123L,
+                    status = TokenInfo.Status.SUCCESS.code,
+                )
             ),
             banner = BannerRequest(formatCode = BannerRequest.StatFormat.ADAPTIVE_BANNER.code),
-            bidfloor = 1.24,
-            orientationCode = AdObjectRequest.Orientation.Landscape.code,
-            roundId = "round123",
-            auctionId = "auc123",
-            auctionConfigurationId = 12,
-            auctionConfigurationUid = "123",
-            rewarded = RewardedRequest,
             interstitial = InterstitialRequest,
+            rewarded = RewardedRequest,
         )
         val actual = listOf(body).serialize()
         println(actual)

@@ -11,6 +11,7 @@ import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.auction.AdTypeParam
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -40,18 +41,13 @@ internal class BigoAdsRewardedAdImpl :
     override val isAdReadyToShow: Boolean
         get() = rewardVideoAd != null && rewardVideoAd?.isExpired != false
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = BigoAdSdk.getBidderToken()
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam, adUnits: List<AdUnit>): String? =
+        BigoAdSdk.getBidderToken()
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             BigoFullscreenAuctionParams(
-                payload = requireNotNull(json?.optString("payload")) {
-                    "Payload is required for BigoAds"
-                },
-                slotId = requireNotNull(json?.optString("slot_id")) {
-                    "Slot id is required for BigoAds"
-                },
-                bidPrice = pricefloor,
+                bidResponse = requiredBidResponse
             )
         }
     }
@@ -110,7 +106,7 @@ internal class BigoAdsRewardedAdImpl :
                         AdEvent.PaidRevenue(
                             ad = ad,
                             adValue = AdValue(
-                                adRevenue = adParams.bidPrice / 1000.0,
+                                adRevenue = adParams.price / 1000.0,
                                 precision = Precision.Precise,
                                 currency = AdValue.USD,
                             )

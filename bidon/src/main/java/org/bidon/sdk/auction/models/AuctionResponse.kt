@@ -9,12 +9,11 @@ import org.json.JSONObject
  */
 internal data class AuctionResponse(
     val rounds: List<RoundRequest>?,
-    val lineItems: List<LineItem>?,
+    val adUnits: List<AdUnit>?,
     val pricefloor: Double?,
     val token: String?,
     val auctionId: String,
-    @Deprecated("Use auctionConfigurationUid instead")
-    val auctionConfigurationId: Int?,
+    val auctionConfigurationId: Long?,
     val auctionConfigurationUid: String?,
     val externalWinNotificationsEnabled: Boolean,
 )
@@ -24,12 +23,12 @@ internal class AuctionResponseParser : JsonParser<AuctionResponse> {
         val json = JSONObject(jsonString)
         AuctionResponse(
             rounds = JsonParsers.parseList(json.optJSONArray("rounds")),
-            auctionId = json.getString("auction_id"),
+            adUnits = JsonParsers.parseList(json.optJSONArray("ad_units")),
             pricefloor = json.optDouble("pricefloor"),
-            auctionConfigurationId = json.optInt("auction_configuration_id"),
-            auctionConfigurationUid = json.optString("auction_configuration_uid"),
-            lineItems = JsonParsers.parseList(json.optJSONArray("line_items")),
             token = json.optString("token"),
+            auctionId = json.getString("auction_id"),
+            auctionConfigurationId = json.optLong("auction_configuration_id"),
+            auctionConfigurationUid = json.optString("auction_configuration_uid"),
             externalWinNotificationsEnabled = json.optBoolean("external_win_notifications", false),
         )
     }.getOrNull()

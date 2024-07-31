@@ -11,6 +11,7 @@ import org.bidon.sdk.auction.models.BidResponse
 import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.models.BiddingResult
 import org.bidon.sdk.auction.usecases.models.RoundResult
+import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.ext.SystemTimeNow
@@ -24,6 +25,7 @@ internal class ResultsCollectorImpl(
     private val auctionResults = MutableStateFlow(listOf<AuctionResult>())
 
     private val roundResult = MutableStateFlow<RoundResult>(RoundResult.Idle)
+
     override fun serverBiddingStarted() {
         roundResult.update {
             require(it is RoundResult.Results)
@@ -38,28 +40,36 @@ internal class ResultsCollectorImpl(
 
     override fun serverBiddingFinished(bids: List<BidResponse>?) {
         roundResult.update { curRoundResult ->
-            require(curRoundResult is RoundResult.Results)
-            RoundResult.Results(
-                biddingResult = run {
-                    require(curRoundResult.biddingResult is BiddingResult.ServerBiddingStarted)
-                    if (bids == null) {
-                        BiddingResult.NoBid(
-                            serverBiddingStartTs = curRoundResult.biddingResult.serverBiddingStartTs,
-                            serverBiddingFinishTs = SystemTimeNow,
-                        )
-                    } else {
-                        BiddingResult.FilledAd(
-                            serverBiddingStartTs = curRoundResult.biddingResult.serverBiddingStartTs,
-                            serverBiddingFinishTs = SystemTimeNow,
-                            bids = bids,
-                            results = emptyList()
-                        )
-                    }
-                },
-                networkResults = curRoundResult.networkResults,
-                pricefloor = curRoundResult.pricefloor,
-                round = curRoundResult.round
-            )
+            when (curRoundResult) {
+                RoundResult.Idle -> curRoundResult
+                is RoundResult.Results -> {
+                    RoundResult.Results(
+                        biddingResult = run {
+                            if (curRoundResult.biddingResult is BiddingResult.ServerBiddingStarted) {
+                                if (bids.isNullOrEmpty()) {
+                                    BiddingResult.NoBid(
+                                        serverBiddingStartTs = curRoundResult.biddingResult.serverBiddingStartTs,
+                                        serverBiddingFinishTs = SystemTimeNow,
+                                    )
+                                } else {
+                                    BiddingResult.FilledAd(
+                                        serverBiddingStartTs = curRoundResult.biddingResult.serverBiddingStartTs,
+                                        serverBiddingFinishTs = SystemTimeNow,
+                                        bids = bids,
+                                        results = emptyList()
+                                    )
+                                }
+                            } else {
+                                logError(TAG, "Unexpected bidding result: ${curRoundResult.biddingResult}", null)
+                                curRoundResult.biddingResult
+                            }
+                        },
+                        networkResults = curRoundResult.networkResults,
+                        pricefloor = curRoundResult.pricefloor,
+                        round = curRoundResult.round
+                    )
+                }
+            }
         }
     }
 
@@ -173,7 +183,7 @@ internal class ResultsCollectorImpl(
         roundResult.update {
             require(it is RoundResult.Results)
             val (startTs, finishTs) = when (it.biddingResult) {
-                is BiddingResult.ServerBiddingStarted -> it.biddingResult.serverBiddingStartTs to null
+                is BiddingResult.ServerBiddingStarted -> it.biddingResult.serverBiddingStartTs to SystemTimeNow
                 is BiddingResult.FilledAd -> it.biddingResult.serverBiddingStartTs to it.biddingResult.serverBiddingFinishTs
                 BiddingResult.Idle -> null to null
                 is BiddingResult.NoBid -> it.biddingResult.serverBiddingStartTs to it.biddingResult.serverBiddingFinishTs
