@@ -38,6 +38,7 @@
 
 -keep public enum org.bidon.sdk.ads.AdType { *; }
 -keep public class org.bidon.sdk.ads.Ad { *; }
+-keep public class org.bidon.sdk.ads.AuctionInfo { *; }
 -keep public class org.bidon.sdk.adapter.DemandAd { *; }
 -keep public class org.bidon.sdk.adapter.DemandId { *; }
 

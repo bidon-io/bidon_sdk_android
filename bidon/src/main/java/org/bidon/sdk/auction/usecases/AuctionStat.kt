@@ -14,6 +14,12 @@ internal interface AuctionStat {
     fun markAuctionStarted(auctionId: String, adTypeParam: AdTypeParam)
 
     suspend fun addRoundResults(result: RoundResult.Results): RoundStat
-    fun sendAuctionStats(auctionData: AuctionResponse, demandAd: DemandAd): StatsRequestBody?
+
+    fun sendAuctionStats(
+        auctionData: AuctionResponse,
+        roundStat: RoundStat?,
+        demandAd: DemandAd
+    ): StatsRequestBody?
+
     fun markAuctionCanceled()
 }

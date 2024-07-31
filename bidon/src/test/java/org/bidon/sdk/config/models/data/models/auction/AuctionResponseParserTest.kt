@@ -50,7 +50,18 @@ internal class AuctionResponseParserTest {
         auctionConfigurationId = 83,
         auctionConfigurationUid = "1801267324553007104",
         externalWinNotificationsEnabled = false,
-        auctionTimeout = 15000
+        auctionTimeout = 15000,
+        noBids = listOf(
+            AdUnit(
+                bidType = BidType.RTB,
+                demandId = "dem7",
+                label = "dem7_label",
+                pricefloor = 0.021,
+                uid = "123567",
+                timeout = 5000L,
+                ext = ""
+            )
+        )
     )
 
     private val responseJsonStr = """

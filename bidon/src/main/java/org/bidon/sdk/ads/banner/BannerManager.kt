@@ -6,6 +6,7 @@ import android.graphics.PointF
 import androidx.core.view.children
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.ads.Ad
+import org.bidon.sdk.ads.AuctionInfo
 import org.bidon.sdk.ads.banner.refresh.BannersCache
 import org.bidon.sdk.ads.banner.refresh.BannersCacheImpl
 import org.bidon.sdk.ads.banner.render.AdRenderer
@@ -40,6 +41,7 @@ class BannerManager private constructor(
     private var weakActivity = WeakReference<Activity>(null)
     private var nextBannerView: BannerView? = null
     private var nextAd: Ad? = null
+    private var nextAuctionInfo: AuctionInfo? = null
 
     private var currentBannerView: BannerView? = null
     private val showAfterLoad = AtomicBoolean(false)
@@ -72,7 +74,10 @@ class BannerManager private constructor(
     }
 
     override fun setCustomPosition(offset: Point, rotation: Int, anchor: PointF) {
-        logInfo(tag, "Set position by coordinates Offset($offset), Rotation($rotation), Anchor($anchor)")
+        logInfo(
+            tag,
+            "Set position by coordinates Offset($offset), Rotation($rotation), Anchor($anchor)"
+        )
         positionState = PositionState.Coordinate(
             AdRenderer.AdContainerParams(offset, rotation, anchor)
         )
@@ -98,13 +103,20 @@ class BannerManager private constructor(
         activity.runOnUiThread {
             weakActivity = WeakReference(activity)
             if (!BidonSdk.isInitialized()) {
-                publisherListener?.onAdLoadFailed(BidonError.SdkNotInitialized)
+                publisherListener?.onAdLoadFailed(null, BidonError.SdkNotInitialized)
                 return@runOnUiThread
             }
             val nextBannerView = nextBannerView
             if (nextBannerView != null) {
                 logInfo(tag, "Ad is already loaded")
-                nextAd?.let { publisherListener?.onAdLoaded(it) }
+                nextAd?.let {
+                    publisherListener?.onAdLoaded(
+                        ad = it,
+                        auctionInfo = requireNotNull(nextAuctionInfo) {
+                            "Could not receive nextAuctionInfo"
+                        }
+                    )
+                }
                 return@runOnUiThread
             }
             bannersCache.get(
@@ -112,18 +124,19 @@ class BannerManager private constructor(
                 format = bannerFormat,
                 pricefloor = pricefloor,
                 extras = extras,
-                onLoaded = { ad, bannerView ->
+                onLoaded = { ad, auctionInfo, bannerView ->
                     this.nextBannerView = bannerView
                     this.nextAd = ad
-                    publisherListener?.onAdLoaded(ad)
+                    nextAuctionInfo = auctionInfo
+                    publisherListener?.onAdLoaded(ad, auctionInfo)
                     if (showAfterLoad.getAndSet(false) || isDisplaying) {
                         weakActivity.get()?.let { activity ->
                             showAd(activity)
                         }
                     }
                 },
-                onFailed = { cause ->
-                    publisherListener?.onAdLoadFailed(cause)
+                onFailed = { auctionInfo, cause ->
+                    publisherListener?.onAdLoadFailed(auctionInfo, cause)
                 }
             )
         }
@@ -136,7 +149,7 @@ class BannerManager private constructor(
         activity.runOnUiThread {
             weakActivity = WeakReference(activity)
             if (!BidonSdk.isInitialized()) {
-                publisherListener?.onAdLoadFailed(BidonError.SdkNotInitialized)
+                publisherListener?.onAdLoadFailed(null, BidonError.SdkNotInitialized)
                 return@runOnUiThread
             }
             val bannerView = nextBannerView ?: currentBannerView
@@ -147,7 +160,10 @@ class BannerManager private constructor(
                 return@runOnUiThread
             }
             if (!bannerView.isReady()) {
-                logInfo(tag, "Source network banner is not ready ${bannerView.children.firstOrNull()}")
+                logInfo(
+                    tag,
+                    "Source network banner is not ready ${bannerView.children.firstOrNull()}"
+                )
             }
             nextBannerView = null
             nextAd = null
@@ -159,8 +175,8 @@ class BannerManager private constructor(
             logInfo(tag, "RenderAd at $activity")
             bannerView.setBannerListener(
                 object : BannerListener {
-                    override fun onAdLoaded(ad: Ad) {}
-                    override fun onAdLoadFailed(cause: BidonError) {}
+                    override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {}
+                    override fun onAdLoadFailed(auctionInfo: AuctionInfo?, cause: BidonError) {}
 
                     override fun onAdShown(ad: Ad) {
                         activity.runOnUiThread {

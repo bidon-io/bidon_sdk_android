@@ -1,13 +1,18 @@
 package org.bidon.sdk.auction.impl
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.WinLossNotifiable
+import org.bidon.sdk.ads.AuctionInfo
+import org.bidon.sdk.ads.ext.toAuctionInfo
+import org.bidon.sdk.ads.ext.toAuctionNoBidInfo
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.Auction.AuctionState
@@ -23,8 +28,11 @@ import org.bidon.sdk.auction.usecases.GetTokensUseCase
 import org.bidon.sdk.auction.usecases.models.RoundResult
 import org.bidon.sdk.bidding.BiddingConfig
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.config.impl.asBidonErrorOrUnspecified
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.stats.models.BidType
+import org.bidon.sdk.stats.models.RoundStat
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
@@ -36,7 +44,7 @@ import java.util.UUID
 internal class AuctionImpl(
     private val adaptersSource: AdaptersSource,
     private val getAuctionRequest: GetAuctionRequestUseCase,
-    private val executeAuction: ExecuteAuctionUseCase,
+    private val auctionExecutable: ExecuteAuctionUseCase,
     private val auctionStat: AuctionStat,
     private val tokenGetter: GetTokensUseCase,
     private val biddingConfig: BiddingConfig,
@@ -53,8 +61,8 @@ internal class AuctionImpl(
     override fun start(
         demandAd: DemandAd,
         adTypeParam: AdTypeParam,
-        onSuccess: (results: List<AuctionResult>) -> Unit,
-        onFailure: (Throwable) -> Unit
+        onSuccess: (results: List<AuctionResult>, auctionInfo: AuctionInfo) -> Unit,
+        onFailure: (AuctionInfo?, Throwable) -> Unit
     ) {
         if (state.compareAndSet(
                 expect = AuctionState.Initialized,
@@ -70,7 +78,6 @@ internal class AuctionImpl(
                 runCatching {
                     logInfo(TAG, "Auction started $this")
                     resultsCollector.startRound(adTypeParam.pricefloor)
-
                     resultsCollector.serverBiddingStarted()
 
                     val tokens = tokenGetter.invoke(
@@ -95,68 +102,101 @@ internal class AuctionImpl(
                         if (auctionId != auctionData.auctionId) {
                             logError(TAG, "Auction ID has been changed", IllegalStateException())
                         }
+                        resultsCollector.serverBiddingFinished(
+                            auctionData.adUnits?.filter { it.bidType == BidType.RTB }
+                        )
+                        resultsCollector.setNoBidInfo(auctionData.noBids)
                         auctionData.printWaterfall(demandAd.adType)
-                        conductAuction(
+                        val (results, auctionInfo) = conductAuction(
                             auctionData = auctionData,
                             demandAd = demandAd,
                             adTypeParamData = adTypeParam,
                             tokens = tokens,
-                        ).ifEmpty {
-                            throw BidonError.NoAuctionResults
-                        }.also {
+                        )
+                        if (results.isEmpty()) {
+                            onFailure(auctionInfo, BidonError.NoAuctionResults)
+                        } else {
                             adTypeParam.activity.runOnUiThread {
-                                onSuccess(it)
+                                onSuccess(results, auctionInfo)
                             }
                         }
-                    }.onFailure {
-                        logError(TAG, "Auction failed", it)
-                        adTypeParam.activity.runOnUiThread {
-                            onFailure(it)
+                    }.onFailure { cause ->
+                        logError(TAG, "Auction failed during AuctionRequest", cause)
+                        if (cause.asBidonErrorOrUnspecified() != BidonError.AuctionCancelled) {
+                            adTypeParam.activity.runOnUiThread {
+                                onFailure(null, cause)
+                            }
                         }
                     }
-                }.onFailure {
-                    logError(TAG, "Auction failed", it)
+                }.onFailure { cause ->
+                    logError(TAG, "Auction failed", cause)
                     adTypeParam.activity.runOnUiThread {
-                        onFailure(it)
+                        onFailure(null, cause)
                     }
                 }
             }
         }
     }
 
-    override fun cancel() {
+    override fun cancel(onFailure: (AuctionInfo?, Throwable) -> Unit) {
         if (job?.isActive == true) {
             job?.cancel()
             scope.launch {
                 auctionStat.markAuctionCanceled()
-                proceedRoundResults()
+                auctionExecutable.cancel(resultsCollector)
+                val statResult = proceedRoundResults()
                 val auctionData = _auctionDataResponse
                 if (auctionData == null) {
                     logInfo(TAG, "No AuctionResponse info. There is nothing to send.")
+                    withContext(Dispatchers.Main) {
+                        onFailure.invoke(null, BidonError.AuctionCancelled)
+                    }
                 } else {
                     auctionStat.sendAuctionStats(
                         auctionData = auctionData,
+                        roundStat = statResult,
                         demandAd = requireNotNull(_demandAd),
                     )
+                    val auctionInfo = getAuctionInfo(
+                        auctionData = auctionData,
+                        statResult = statResult
+                    )
+                    logInfo(TAG, "Auction canceled")
+                    withContext(Dispatchers.Main) {
+                        onFailure.invoke(auctionInfo, BidonError.AuctionCancelled)
+                    }
                 }
-                logInfo(TAG, "Auction canceled")
+                resultsCollector.clearRoundResults()
                 clearData()
             }
         }
         job = null
     }
 
+    private fun getAuctionInfo(
+        auctionData: AuctionResponse,
+        statResult: RoundStat?
+    ) = AuctionInfo(
+        auctionId = auctionData.auctionId,
+        auctionConfigurationId = auctionData.auctionConfigurationId,
+        auctionConfigurationUid = auctionData.auctionConfigurationUid,
+        auctionPricefloor = auctionData.pricefloor,
+        auctionTimeout = auctionData.auctionTimeout,
+        noBids = statResult?.noBids?.map { it.toAuctionNoBidInfo() },
+        adUnits = statResult?.demands?.map { it.toAuctionInfo() },
+    )
+
     private suspend fun conductAuction(
         auctionData: AuctionResponse,
         demandAd: DemandAd,
         adTypeParamData: AdTypeParam,
         tokens: Map<String, TokenInfo>,
-    ): List<AuctionResult> {
+    ): Pair<List<AuctionResult>, AuctionInfo> {
         _auctionDataResponse = auctionData
         _demandAd = demandAd
         val auctionPriceFloor = auctionData.pricefloor
         // Start auction
-        executeAuction(
+        auctionExecutable.execute(
             auctionId = auctionData.auctionId,
             auctionConfigurationId = auctionData.auctionConfigurationId ?: 0L,
             auctionConfigurationUid = auctionData.auctionConfigurationUid ?: "",
@@ -170,9 +210,18 @@ internal class AuctionImpl(
             tokens = tokens,
         )
 
-        // Save round results
         resultsCollector.saveWinners(auctionPriceFloor)
-        proceedRoundResults()
+        // Save round results
+        val statResult = proceedRoundResults()
+
+        val auctionInfo = getAuctionInfo(auctionData = auctionData, statResult = statResult)
+        logInfo(
+            TAG,
+            "Was received: \nAdUnits: ${auctionData.adUnits?.size} \nNoBids: ${auctionData.noBids?.size}" +
+                "\nWas sent:\nStats: ${statResult?.demands?.size} \nAuctionInfo AdUnits: ${auctionInfo.adUnits?.size} \n" +
+                "AuctionInfo NoBids: ${auctionInfo.noBids?.size}"
+        )
+        resultsCollector.clearRoundResults()
 
         logInfo(TAG, "Rounds completed")
 
@@ -189,6 +238,7 @@ internal class AuctionImpl(
         // Sending auction statistics
         auctionStat.sendAuctionStats(
             auctionData = auctionData,
+            roundStat = statResult,
             demandAd = demandAd,
         )
 
@@ -200,14 +250,14 @@ internal class AuctionImpl(
         state.first { it == AuctionState.Finished }
         val results = resultsCollector.getAll()
         clearData()
-        return results
+        return Pair(results, auctionInfo)
     }
 
-    private suspend fun proceedRoundResults() {
+    private suspend fun proceedRoundResults(): RoundStat? {
         (resultsCollector.getRoundResults() as? RoundResult.Results)?.let {
-            auctionStat.addRoundResults(it)
+            return auctionStat.addRoundResults(it)
         }
-        resultsCollector.clearRoundResults()
+        return null
     }
 
     private fun clearData() {

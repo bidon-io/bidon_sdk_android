@@ -20,5 +20,5 @@ data class AdUnit(
     }
 
     override fun toString() =
-        "Demand: $demandId, Pricefloor: $pricefloor, UID: $uid, BidType: $bidType"
+        "Demand: $demandId, Label: $label Pricefloor: $pricefloor, UID: $uid, BidType: $bidType, timeout: $timeout"
 }

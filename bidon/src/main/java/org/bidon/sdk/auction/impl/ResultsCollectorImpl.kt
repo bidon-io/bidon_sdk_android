@@ -7,11 +7,11 @@ import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResult
-import org.bidon.sdk.auction.models.AuctionResult.UnknownAdapter.Type
 import org.bidon.sdk.auction.usecases.models.BiddingResult
 import org.bidon.sdk.auction.usecases.models.RoundResult
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.ext.SystemTimeNow
 
@@ -22,7 +22,6 @@ internal class ResultsCollectorImpl(
      * Keeps all succeeded auction results
      */
     private val auctionResults = MutableStateFlow(listOf<AuctionResult>())
-
     private val roundResult = MutableStateFlow<RoundResult>(RoundResult.Idle)
 
     @Deprecated("")
@@ -33,6 +32,7 @@ internal class ResultsCollectorImpl(
                 biddingResult = BiddingResult.ServerBiddingStarted(serverBiddingStartTs = SystemTimeNow),
                 networkResults = it.networkResults,
                 pricefloor = it.pricefloor,
+                noBidsInfo = it.noBidsInfo
             )
         }
     }
@@ -45,6 +45,8 @@ internal class ResultsCollectorImpl(
                 is RoundResult.Results -> {
                     RoundResult.Results(
                         biddingResult = run {
+                            // TODO We should we process no_bids adUnits from AuctionResponse?
+                            // I think no, since we don`t send NO_BIDS adUnits to /stats
                             if (curRoundResult.biddingResult is BiddingResult.ServerBiddingStarted) {
                                 if (adUnits.isNullOrEmpty()) {
                                     BiddingResult.NoBid(
@@ -60,15 +62,32 @@ internal class ResultsCollectorImpl(
                                     )
                                 }
                             } else {
-                                logError(TAG, "Unexpected bidding result: ${curRoundResult.biddingResult}", null)
+                                logError(
+                                    TAG,
+                                    "Unexpected bidding result: ${curRoundResult.biddingResult}",
+                                    null
+                                )
                                 curRoundResult.biddingResult
                             }
                         },
                         networkResults = curRoundResult.networkResults,
                         pricefloor = curRoundResult.pricefloor,
+                        noBidsInfo = curRoundResult.noBidsInfo,
                     )
                 }
             }
+        }
+    }
+
+    override fun setNoBidInfo(noBidsInfo: List<AdUnit>?) {
+        roundResult.update { current ->
+            require(current is RoundResult.Results)
+            RoundResult.Results(
+                pricefloor = current.pricefloor,
+                biddingResult = current.biddingResult,
+                networkResults = current.networkResults,
+                noBidsInfo = noBidsInfo
+            )
         }
     }
 
@@ -77,6 +96,7 @@ internal class ResultsCollectorImpl(
             biddingResult = BiddingResult.Idle,
             networkResults = emptyList(),
             pricefloor = pricefloor,
+            noBidsInfo = listOf()
         )
     }
 
@@ -84,9 +104,8 @@ internal class ResultsCollectorImpl(
         roundResult.update { current ->
             require(current is RoundResult.Results)
             when {
-                result is AuctionResult.BiddingLose ||
-                    result is AuctionResult.Bidding ||
-                    (result as? AuctionResult.UnknownAdapter)?.type == Type.Bidding -> {
+                result is AuctionResult.Bidding ||
+                    (result as? AuctionResult.AuctionFailed)?.adUnit?.bidType == BidType.RTB -> {
                     RoundResult.Results(
                         biddingResult = when (current.biddingResult) {
                             is BiddingResult.FilledAd -> {
@@ -107,14 +126,17 @@ internal class ResultsCollectorImpl(
                         },
                         networkResults = current.networkResults,
                         pricefloor = current.pricefloor,
+                        noBidsInfo = current.noBidsInfo,
                     )
                 }
 
-                result is AuctionResult.Network || (result as? AuctionResult.UnknownAdapter)?.type == Type.Network -> {
+                result is AuctionResult.Network ||
+                    (result as? AuctionResult.AuctionFailed)?.adUnit?.bidType == BidType.CPM -> {
                     RoundResult.Results(
                         biddingResult = current.biddingResult,
                         networkResults = current.networkResults + result,
                         pricefloor = current.pricefloor,
+                        noBidsInfo = current.noBidsInfo,
                     )
                 }
 
@@ -163,7 +185,10 @@ internal class ResultsCollectorImpl(
                              */
                             if (auctionResult !is AuctionResult.Bidding && adSource is WinLossNotifiable) {
                                 logInfo(TAG, "Notified loss: ${adSource.demandId}")
-                                adSource.notifyLoss(winner.adSource.demandId.demandId, winner.adSource.getStats().ecpm)
+                                adSource.notifyLoss(
+                                    winner.adSource.demandId.demandId,
+                                    winner.adSource.getStats().ecpm
+                                )
                             }
                             if (auctionResult.roundStatus == RoundStatus.Successful) {
                                 adSource.markLoss()
@@ -193,6 +218,7 @@ internal class ResultsCollectorImpl(
                 ),
                 networkResults = it.networkResults,
                 pricefloor = it.pricefloor,
+                noBidsInfo = it.noBidsInfo,
             )
         }
     }

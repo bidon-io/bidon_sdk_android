@@ -26,61 +26,69 @@ class RequestAdUnitUseCaseImpl : RequestAdUnitUseCase {
         adUnit: AdUnit,
         adTypeParam: AdTypeParam,
         priceFloor: Double,
-    ): AuctionResult = withTimeoutOrNull(adUnit.timeout) {
-        adSource.markFillStarted(adUnit, adUnit.pricefloor)
-        logInfo(TAG, "FillStarted: $adUnit")
+    ): AuctionResult {
+        val result = withTimeoutOrNull(adUnit.timeout) {
+            adSource.markFillStarted(adUnit, adUnit.pricefloor)
+            logInfo(TAG, "FillStarted: \n$adUnit")
 
-        val adParam = adSource.getAuctionParam(
-            AdAuctionParamSource(
-                activity = adTypeParam.activity,
-                pricefloor = priceFloor,
-                optBannerFormat = (adTypeParam as? AdTypeParam.Banner)?.bannerFormat,
-                optContainerWidth = (adTypeParam as? AdTypeParam.Banner)?.containerWidth,
-                adUnit = adUnit,
-            )
-        ).getOrNull()
+            val adParam = adSource.getAuctionParam(
+                AdAuctionParamSource(
+                    activity = adTypeParam.activity,
+                    pricefloor = priceFloor,
+                    optBannerFormat = (adTypeParam as? AdTypeParam.Banner)?.bannerFormat,
+                    optContainerWidth = (adTypeParam as? AdTypeParam.Banner)?.containerWidth,
+                    adUnit = adUnit,
+                )
+            ).getOrNull()
 
-        val adEvent = adParam?.let {
-            adSource.adEvent
-                .onSubscription {
-                    runCatching {
-                        adSource.markFillStarted(it.adUnit, it.price)
-                        adSource.load(it)
-                    }.onFailure { ex ->
-                        logError(TAG, "Loading failed($it): $ex", ex)
-                        adSource.emitEvent(
-                            AdEvent.LoadFailed(BidonError.Unspecified(adSource.demandId, ex))
-                        )
+            val adEvent = adParam?.let {
+                adSource.adEvent
+                    .onSubscription {
+                        runCatching {
+                            adSource.markFillStarted(it.adUnit, it.price)
+                            adSource.load(it)
+                        }.onFailure { ex ->
+                            logError(TAG, "Loading failed($it): $ex", ex)
+                            adSource.emitEvent(
+                                AdEvent.LoadFailed(BidonError.NoFill(adSource.demandId))
+                            )
+                        }
                     }
-                }
-                .first { event -> event is AdEvent.Fill || event is AdEvent.LoadFailed || event is AdEvent.Expired }
-        } ?: AdEvent.LoadFailed(BidonError.NoAppropriateAdUnitId)
+                    .first { event -> event is AdEvent.Fill || event is AdEvent.LoadFailed || event is AdEvent.Expired }
+            } ?: AdEvent.LoadFailed(BidonError.FillTimedOut(adSource.demandId))
 
-        val requestStatus = when (adEvent) {
-            is AdEvent.Fill -> RoundStatus.Successful
-            is AdEvent.Expired -> RoundStatus.NoFill
-            is AdEvent.LoadFailed -> adEvent.cause.asRoundStatus()
-            else -> error("unexpected: $adEvent")
+            val requestStatus = when (adEvent) {
+                is AdEvent.Fill -> RoundStatus.Successful
+                is AdEvent.Expired -> RoundStatus.NoFill
+                is AdEvent.LoadFailed -> adEvent.cause.asRoundStatus()
+                else -> error("unexpected: $adEvent")
+            }
+
+            val auctionResult = getAuctionResult(
+                bidType = adUnit.bidType,
+                adSource = adSource,
+                requestStatus = requestStatus
+            )
+
+            logInfo(TAG, "FillFinished: $adUnit. \nResult: ${auctionResult.roundStatus}")
+
+            adSource.markFillFinished(requestStatus, adSource.ad?.ecpm)
+
+            auctionResult
         }
-
-        val auctionResult = getAuctionResult(
-            bidType = adUnit.bidType,
-            adSource = adSource,
-            requestStatus = requestStatus
-        )
-
-        logInfo(TAG, "FillFinished: $adUnit. \nResult: ${auctionResult.roundStatus}")
-
-        adSource.markFillFinished(requestStatus, adSource.ad?.ecpm)
-
-        auctionResult
-    } ?: run {
-        logInfo(TAG, "FillFinished: $adUnit. \nResult: FillTimeoutReached. Timeout: ${adUnit.timeout} ")
-        return getAuctionResult(
-            bidType = adUnit.bidType,
-            adSource = adSource,
-            requestStatus = RoundStatus.FillTimeoutReached
-        )
+        return if (result == null) {
+            logInfo(
+                TAG,
+                "FillFinished: $adUnit. \nResult: FillTimeoutReached. Timeout: ${adUnit.timeout} "
+            )
+            getAuctionResult(
+                bidType = adUnit.bidType,
+                adSource = adSource,
+                requestStatus = RoundStatus.FillTimeoutReached
+            )
+        } else {
+            result
+        }
     }
 
     private fun getAuctionResult(
