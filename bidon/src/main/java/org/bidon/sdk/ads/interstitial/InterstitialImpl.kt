@@ -77,7 +77,10 @@ internal class InterstitialImpl(
                 )
             },
             onFailure = { auctionResult, cause ->
-                listener.onAdLoadFailed(auctionInfo = auctionResult, cause = cause.asBidonErrorOrUnspecified())
+                listener.onAdLoadFailed(
+                    auctionInfo = auctionResult,
+                    cause = cause.asBidonErrorOrUnspecified()
+                )
             }
         )
     }

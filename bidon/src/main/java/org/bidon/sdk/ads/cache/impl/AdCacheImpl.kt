@@ -92,10 +92,7 @@ internal class AdCacheImpl(
             auction?.start(
                 demandAd = demandAd,
                 adTypeParam = adTypeParam.copy(
-                    pricefloor = maxOf(
-                        adTypeParam.pricefloor,
-                        results.value.firstOrNull()?.adSource?.getStats()?.ecpm ?: 0.0
-                    )
+                    pricefloor = maxOf(adTypeParam.pricefloor, results.value.firstOrNull()?.adSource?.getStats()?.ecpm ?: 0.0)
                 ),
                 onSuccess = { winners, auctionInfo ->
                     scope.launch {
