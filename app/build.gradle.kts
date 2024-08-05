@@ -97,6 +97,7 @@ dependencies {
 //    implementation("org.bidon:bigoads-adapter:0.3.1.0")
 //    implementation("org.bidon:mintegral-adapter:0.3.1.0")
 //    implementation("org.bidon:meta-adapter:0.3.1.0")
+//    implementation("org.bidon:vkads-adapter:0.3.1.0")
 //    implementation("org.bidon:vungle-adapter:0.3.1.0")
 
     implementation("com.chartboost:chartboost-mediation-sdk:4.0.0")
@@ -115,6 +116,7 @@ dependencies {
     implementation(projects.adapter.mintegral)
     implementation(projects.adapter.mobilefuse)
     implementation(projects.adapter.unityads)
+    implementation(projects.adapter.vkads)
     implementation(projects.adapter.vungle)
 
     implementation(Dependencies.Google.PlayServicesAdsIdentifier)

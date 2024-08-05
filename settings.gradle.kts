@@ -49,6 +49,7 @@ include(
     ":adapter:amazon",
     ":adapter:mobilefuse",
     ":adapter:gam",
+    ":adapter:vkads"
 //    ":adapter:fyber",
 //    ":adapter:ironsource",
 //    ":adapter:appsflyer"
