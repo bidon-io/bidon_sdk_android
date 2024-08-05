@@ -27,7 +27,7 @@ import sg.bigo.ads.api.RewardVideoAdRequest
  * Created by Aleksei Cherniaev on 25/07/2023.
  */
 internal class BigoAdsRewardedAdImpl :
-    AdSource.Rewarded<BigoFullscreenAuctionParams>,
+    AdSource.Rewarded<BigoAdsFullscreenAuctionParams>,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -38,50 +38,38 @@ internal class BigoAdsRewardedAdImpl :
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            BigoFullscreenAuctionParams(
-                adUnit = adUnit
-            )
+            BigoAdsFullscreenAuctionParams(adUnit = adUnit)
         }
     }
 
-    override fun load(adParams: BigoFullscreenAuctionParams) {
-        adParams.slotId ?: run {
-            emitEvent(
-                AdEvent.LoadFailed(
-                    BidonError.IncorrectAdUnit(demandId = demandId, message = "slotId")
-                )
-            )
-            return
-        }
-        if (adParams.adUnit.bidType == BidType.RTB) {
-            adParams.payload ?: run {
-                emitEvent(
-                    AdEvent.LoadFailed(
-                        BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
-                    )
-                )
-                return
-            }
-        }
-        val builder = RewardVideoAdRequest.Builder()
-        builder
-            .withBid(adParams.payload)
-            .withSlotId(adParams.slotId)
-        val loader = RewardVideoAdLoader.Builder().withAdLoadListener(object : AdLoadListener<RewardVideoAd> {
-            override fun onError(adError: AdError) {
-                val error = adError.asBidonError()
-                logError(TAG, "Error while loading ad: $adError. $this", error)
-                emitEvent(AdEvent.LoadFailed(error))
-            }
+    override fun load(adParams: BigoAdsFullscreenAuctionParams) {
+        val slotId = adParams.slotId
+            ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "slotId")))
 
-            override fun onAdLoaded(rewardVideoAd: RewardVideoAd) {
-                logInfo(TAG, "onAdLoaded: $rewardVideoAd, $this")
-                this@BigoAdsRewardedAdImpl.rewardVideoAd = rewardVideoAd
-                fillAd(rewardVideoAd, adParams)
-            }
-        })
-        loader.build()
-            .loadAd(builder.build())
+        val loader = RewardVideoAdLoader.Builder()
+            .withAdLoadListener(object : AdLoadListener<RewardVideoAd> {
+                override fun onError(adError: AdError) {
+                    val error = adError.asBidonError()
+                    logError(TAG, "Error while loading ad: $adError. $this", error)
+                    emitEvent(AdEvent.LoadFailed(error))
+                }
+
+                override fun onAdLoaded(rewardVideoAd: RewardVideoAd) {
+                    logInfo(TAG, "onAdLoaded: $rewardVideoAd, $this")
+                    this@BigoAdsRewardedAdImpl.rewardVideoAd = rewardVideoAd
+                    fillAd(rewardVideoAd, adParams)
+                }
+            })
+            .build()
+
+        val adRequestBuilder = RewardVideoAdRequest.Builder()
+        if (adParams.adUnit.bidType == BidType.RTB) {
+            val payload = adParams.payload
+                ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")))
+            adRequestBuilder.withBid(payload)
+        }
+        adRequestBuilder.withSlotId(slotId)
+        loader.loadAd(adRequestBuilder.build())
     }
 
     override fun show(activity: Activity) {
@@ -100,7 +88,7 @@ internal class BigoAdsRewardedAdImpl :
 
     private fun fillAd(
         rewardVideoAd: RewardVideoAd,
-        adParams: BigoFullscreenAuctionParams
+        adParams: BigoAdsFullscreenAuctionParams
     ) {
         rewardVideoAd.setAdInteractionListener(object : RewardAdInteractionListener {
             override fun onAdError(error: AdError) {

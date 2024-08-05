@@ -27,7 +27,7 @@ import sg.bigo.ads.api.InterstitialAdRequest
  * Created by Aleksei Cherniaev on 25/07/2023.
  */
 internal class BigoAdsInterstitialImpl :
-    AdSource.Interstitial<BigoFullscreenAuctionParams>,
+    AdSource.Interstitial<BigoAdsFullscreenAuctionParams>,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -38,35 +38,14 @@ internal class BigoAdsInterstitialImpl :
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            BigoFullscreenAuctionParams(
-                adUnit = adUnit
-            )
+            BigoAdsFullscreenAuctionParams(adUnit = adUnit)
         }
     }
 
-    override fun load(adParams: BigoFullscreenAuctionParams) {
-        adParams.slotId ?: run {
-            emitEvent(
-                AdEvent.LoadFailed(
-                    BidonError.IncorrectAdUnit(demandId = demandId, message = "slotId")
-                )
-            )
-            return
-        }
-        if (adParams.adUnit.bidType == BidType.RTB) {
-            adParams.payload ?: run {
-                emitEvent(
-                    AdEvent.LoadFailed(
-                        BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
-                    )
-                )
-                return
-            }
-        }
-        val builder = InterstitialAdRequest.Builder()
-        builder
-            .withBid(adParams.payload)
-            .withSlotId(adParams.slotId)
+    override fun load(adParams: BigoAdsFullscreenAuctionParams) {
+        val slotId = adParams.slotId
+            ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "slotId")))
+
         val loader = InterstitialAdLoader.Builder()
             .withAdLoadListener(object : AdLoadListener<InterstitialAd> {
                 override fun onError(adError: AdError) {
@@ -81,8 +60,16 @@ internal class BigoAdsInterstitialImpl :
                     fill(interstitialAd, adParams)
                 }
             })
-        loader.build()
-            .loadAd(builder.build())
+            .build()
+
+        val adRequestBuilder = InterstitialAdRequest.Builder()
+        if (adParams.adUnit.bidType == BidType.RTB) {
+            val payload = adParams.payload
+                ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")))
+            adRequestBuilder.withBid(payload)
+        }
+        adRequestBuilder.withSlotId(slotId)
+        loader.loadAd(adRequestBuilder.build())
     }
 
     override fun show(activity: Activity) {
@@ -101,7 +88,7 @@ internal class BigoAdsInterstitialImpl :
 
     private fun fill(
         interstitialAd: InterstitialAd,
-        adParams: BigoFullscreenAuctionParams
+        adParams: BigoAdsFullscreenAuctionParams
     ) {
         interstitialAd.setAdInteractionListener(object : AdInteractionListener {
             override fun onAdError(error: AdError) {

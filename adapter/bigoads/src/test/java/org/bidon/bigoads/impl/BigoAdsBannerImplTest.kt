@@ -46,7 +46,7 @@ class BigoAdsBannerImplTest {
         }
         val actual = testee.getAuctionParam(auctionParamsScope).getOrThrow()
 
-        require(actual is BigoBannerAuctionParams)
+        require(actual is BigoAdsBannerAuctionParams)
         Truth.assertThat(actual.adUnit).isEqualTo(
             AdUnit(
                 demandId = "bigoads",

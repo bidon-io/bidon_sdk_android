@@ -45,7 +45,7 @@ class BigoAdsRewardedAdImplTest {
         }
         val actual = testee.getAuctionParam(auctionParamsScope).getOrThrow()
 
-        require(actual is BigoFullscreenAuctionParams)
+        require(actual is BigoAdsFullscreenAuctionParams)
         assertThat(actual.adUnit).isEqualTo(
             AdUnit(
                 demandId = "bigoads",
