@@ -8,7 +8,6 @@ import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.utils.json.jsonObject
-import org.bidon.vungle.VungleBannerAuctionParams
 import org.bidon.vungle.VungleDemandId
 import org.junit.Test
 

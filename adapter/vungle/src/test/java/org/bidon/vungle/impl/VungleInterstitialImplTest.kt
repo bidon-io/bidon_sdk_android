@@ -9,7 +9,6 @@ import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.utils.json.jsonObject
 import org.bidon.vungle.VungleDemandId
-import org.bidon.vungle.VungleFullscreenAuctionParams
 import org.junit.Test
 
 /**
