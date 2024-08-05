@@ -3,11 +3,11 @@ package org.bidon.bigoads
 import android.content.Context
 import org.bidon.bigoads.ext.adapterVersion
 import org.bidon.bigoads.ext.sdkVersion
+import org.bidon.bigoads.impl.BigoAdsBannerAuctionParams
 import org.bidon.bigoads.impl.BigoAdsBannerImpl
+import org.bidon.bigoads.impl.BigoAdsFullscreenAuctionParams
 import org.bidon.bigoads.impl.BigoAdsInterstitialImpl
 import org.bidon.bigoads.impl.BigoAdsRewardedAdImpl
-import org.bidon.bigoads.impl.BigoBannerAuctionParams
-import org.bidon.bigoads.impl.BigoFullscreenAuctionParams
 import org.bidon.sdk.adapter.AdProvider
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Adapter
@@ -34,14 +34,16 @@ internal val BigoAdsDemandId = DemandId("bigoads")
 /**
  * [BigoAds](https://www.bigossp.com/guide/sdk/android/document)
  */
-class BigoAdsAdapter :
+@Suppress("unused")
+internal class BigoAdsAdapter :
     Adapter.Bidding,
-    Initializable<BigoParameters>,
+    Adapter.Network,
+    Initializable<BigoAdsParameters>,
     SupportsTestMode by SupportsTestModeImpl(),
-    AdProvider.Banner<BigoBannerAuctionParams>,
+    AdProvider.Banner<BigoAdsBannerAuctionParams>,
     SupportsRegulation,
-    AdProvider.Interstitial<BigoFullscreenAuctionParams>,
-    AdProvider.Rewarded<BigoFullscreenAuctionParams> {
+    AdProvider.Interstitial<BigoAdsFullscreenAuctionParams>,
+    AdProvider.Rewarded<BigoAdsFullscreenAuctionParams> {
 
     private var context: Context? = null
 
@@ -54,7 +56,7 @@ class BigoAdsAdapter :
     override suspend fun getToken(context: Context, adTypeParam: AdTypeParam) =
         BigoAdSdk.getBidderToken()
 
-    override suspend fun init(context: Context, configParams: BigoParameters) = suspendCoroutine { continuation ->
+    override suspend fun init(context: Context, configParams: BigoAdsParameters) = suspendCoroutine { continuation ->
         this.context = context
         val config = AdConfig.Builder()
             .setAppId(configParams.appId)
@@ -68,22 +70,22 @@ class BigoAdsAdapter :
         }
     }
 
-    override fun parseConfigParam(json: String): BigoParameters {
-        return BigoParameters(
+    override fun parseConfigParam(json: String): BigoAdsParameters {
+        return BigoAdsParameters(
             appId = JSONObject(json).getString("app_id"),
             channel = JSONObject(json).optString("channel"),
         )
     }
 
-    override fun banner(): AdSource.Banner<BigoBannerAuctionParams> {
+    override fun banner(): AdSource.Banner<BigoAdsBannerAuctionParams> {
         return BigoAdsBannerImpl()
     }
 
-    override fun interstitial(): AdSource.Interstitial<BigoFullscreenAuctionParams> {
+    override fun interstitial(): AdSource.Interstitial<BigoAdsFullscreenAuctionParams> {
         return BigoAdsInterstitialImpl()
     }
 
-    override fun rewarded(): AdSource.Rewarded<BigoFullscreenAuctionParams> {
+    override fun rewarded(): AdSource.Rewarded<BigoAdsFullscreenAuctionParams> {
         return BigoAdsRewardedAdImpl()
     }
 
