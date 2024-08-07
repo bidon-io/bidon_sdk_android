@@ -21,6 +21,7 @@ object Versions {
         val UnityAds = "$mainVersion.0" + semanticVersion
         val VkAds = "$mainVersion.0" + semanticVersion
         val Vungle = "$mainVersion.0" + semanticVersion
+        val Yandex = "$mainVersion.0" + semanticVersion
 
         val IronSource = "$mainVersion.0"
         val Appsflyer = "$mainVersion.0"
