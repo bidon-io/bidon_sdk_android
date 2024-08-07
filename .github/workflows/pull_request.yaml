@@ -1,6 +1,6 @@
 name: Android CI
 
-on: [push,workflow_dispatch]
+on: [ push,workflow_dispatch ]
 
 jobs:
   lint_check:
@@ -16,9 +16,27 @@ jobs:
         with:
           java-version: 11
 
-      # Execute unit tests
+      # Execute KtLint check
       - name: KtLint check
         run: ./gradlew ktLintCheck
+
+  changelog_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 2
+
+      # Check if the changelog has been updated
+      - name: Check Changelog Changes
+        id: changelog-check
+        run: |
+          files_changed=$(git diff --name-only --diff-filter=ACMRT HEAD^ HEAD | xargs)
+          if echo "$files_changed" | tr ' ' '\n' | grep -q "CHANGELOG.md"; then
+            echo "Changelog has been updated."
+          else
+            echo "Error: Changelog has not been updated." && exit 1
+          fi
 
   run_tests:
     runs-on: ubuntu-latest

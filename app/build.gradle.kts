@@ -99,6 +99,7 @@ dependencies {
 //    implementation("org.bidon:meta-adapter:0.3.1.0")
 //    implementation("org.bidon:vkads-adapter:0.3.1.0")
 //    implementation("org.bidon:vungle-adapter:0.3.1.0")
+//    implementation("org.bidon:yandex-adapter:0.3.1.0")
 
     implementation("com.chartboost:chartboost-mediation-sdk:4.0.0")
     implementation("com.google.android.gms:play-services-ads:22.5.0")
@@ -110,14 +111,15 @@ dependencies {
     implementation(projects.adapter.bidmachine)
     implementation(projects.adapter.bigoads)
     implementation(projects.adapter.dtexchange)
-    implementation(projects.adapter.inmobi)
     implementation(projects.adapter.gam)
+    implementation(projects.adapter.inmobi)
     implementation(projects.adapter.meta)
     implementation(projects.adapter.mintegral)
     implementation(projects.adapter.mobilefuse)
     implementation(projects.adapter.unityads)
     implementation(projects.adapter.vkads)
     implementation(projects.adapter.vungle)
+    implementation(projects.adapter.yandex)
 
     implementation(Dependencies.Google.PlayServicesAdsIdentifier)
 
