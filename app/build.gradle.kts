@@ -113,6 +113,7 @@ dependencies {
     implementation(projects.adapter.dtexchange)
     implementation(projects.adapter.gam)
     implementation(projects.adapter.inmobi)
+    implementation(projects.adapter.ironsource)
     implementation(projects.adapter.meta)
     implementation(projects.adapter.mintegral)
     implementation(projects.adapter.mobilefuse)
