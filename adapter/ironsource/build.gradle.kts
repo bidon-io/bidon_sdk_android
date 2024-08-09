@@ -6,11 +6,13 @@ plugins {
 }
 
 project.extra.apply {
-    this.set("AdapterArtifactId", "ironsource-decorator")
+    this.set("AdapterArtifactId", "ironsource-adapter")
     this.set("AdapterVersionName", Versions.Adapters.IronSource)
 }
 
 android {
+    namespace = "org.bidon.ironsource"
+
     defaultConfig {
         ADAPTER_VERSION = Versions.Adapters.IronSource
     }
@@ -20,5 +22,5 @@ dependencies {
     compileOnly(projects.bidon)
     testImplementation(projects.bidon)
 
-    implementation("com.ironsource.sdk:mediationsdk:7.2.7")
+    implementation("com.ironsource.sdk:mediationsdk:8.2.1")
 }

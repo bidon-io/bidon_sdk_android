@@ -1,6 +1,11 @@
 name: Android CI
 
-on: [ push,workflow_dispatch ]
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+  workflow_dispatch:
 
 jobs:
   lint_check:

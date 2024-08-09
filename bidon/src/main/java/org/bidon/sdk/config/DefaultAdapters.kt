@@ -15,6 +15,7 @@ enum class DefaultAdapters(val classPath: String) {
     DTExchangeAdapter(classPath = "org.bidon.dtexchange.DTExchangeAdapter"),
     GoogleAdManagerAdapter(classPath = "org.bidon.gam.GamAdapter"),
     InmobiAdapter(classPath = "org.bidon.inmobi.InmobiAdapter"),
+    IronSourceAdapter(classPath = "org.bidon.ironsource.IronSourceAdapter"),
     MetaAdapter(classPath = "org.bidon.meta.MetaAudienceAdapter"),
     MintegralAdapter(classPath = "org.bidon.mintegral.MintegralAdapter"),
     MobilefuseAdapter(classPath = "org.bidon.mobilefuse.MobileFuseAdapter"),
