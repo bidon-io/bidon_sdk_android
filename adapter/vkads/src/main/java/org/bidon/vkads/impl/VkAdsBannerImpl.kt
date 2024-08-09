@@ -67,7 +67,7 @@ internal class VkAdsBannerImpl :
                         AdEvent.PaidRevenue(
                             ad = ad,
                             adValue = AdValue(
-                                adRevenue = adParams.price,
+                                adRevenue = adParams.price / 1000.0,
                                 currency = AdValue.USD,
                                 precision = Precision.Precise,
                             )

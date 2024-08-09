@@ -81,7 +81,7 @@ internal class VkAdsRewardedAdImpl :
                         AdEvent.PaidRevenue(
                             ad = it,
                             adValue = AdValue(
-                                adRevenue = adParams.price,
+                                adRevenue = adParams.price / 1000.0,
                                 currency = AdValue.USD,
                                 precision = Precision.Precise
                             )
