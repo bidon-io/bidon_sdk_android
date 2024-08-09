@@ -89,6 +89,7 @@ internal class IronSourceRouterImpl : IronSourceRouter {
 
     override fun onRewardedVideoAdRewarded(instanceId: String?) {
         logInfo(TAG, "onRewardedVideoAdRewarded: $instanceId")
+        adEventFlow.tryEmit(IronSourceEvent.AdRewarded(instanceId))
     }
 
     override fun onRewardedVideoAdClosed(instanceId: String?) {
