@@ -101,7 +101,7 @@ internal class IronSourceBannerImpl :
 
 // IronSourceError doesn't support multi-load with same instanceId for Banners/MRECs
 private val loadedAdViewInstanceIds: MutableList<String> by lazy {
-    Collections.synchronizedList(emptyList<String>())
+    Collections.synchronizedList(mutableListOf<String>())
 }
 
 private const val TAG = "IronSourceBannerImpl"
