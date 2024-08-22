@@ -5,6 +5,7 @@
 - [BDN-716](https://appodeal.atlassian.net/browse/BDN-716) Integrated CPM mode for BigoAds adapter;
 - [BDN-719](https://appodeal.atlassian.net/browse/BDN-719) Integrated Yandex (cpm) as Ad Adapter
 - [BDN-482](https://appodeal.atlassian.net/browse/BDN-482) Integrated IronSource (cpm) as Ad Adapter
+- [BDN-725](https://appodeal.atlassian.net/browse/BDN-725) Integrated Chartboost (cpm) as Ad Adapter
 
 # Next 0.7.0-next.1
 ## Features:

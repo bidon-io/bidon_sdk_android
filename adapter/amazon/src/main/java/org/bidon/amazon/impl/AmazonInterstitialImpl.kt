@@ -93,7 +93,7 @@ internal class AmazonInterstitialImpl(private val amazonInfos: List<AmazonInfo>)
                             AdEvent.PaidRevenue(
                                 ad = it,
                                 adValue = AdValue(
-                                    adRevenue = adParams.price,
+                                    adRevenue = adParams.price / 1000.0,
                                     currency = AdValue.USD,
                                     Precision.Precise
                                 )

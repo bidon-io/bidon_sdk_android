@@ -41,6 +41,7 @@ include(
     ":adapter:applovin",
     ":adapter:bidmachine",
     ":adapter:bigoads",
+    ":adapter:chartboost",
     ":adapter:dtexchange",
     ":adapter:gam",
     ":adapter:inmobi",

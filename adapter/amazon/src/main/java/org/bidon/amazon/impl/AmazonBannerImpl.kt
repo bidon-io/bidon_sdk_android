@@ -93,7 +93,7 @@ internal class AmazonBannerImpl(private val amazonInfos: List<AmazonInfo>) :
                         AdEvent.PaidRevenue(
                             ad = getAd() ?: return,
                             adValue = AdValue(
-                                adRevenue = adParams.price,
+                                adRevenue = adParams.price / 1000.0,
                                 currency = USD,
                                 Precision.Precise
                             )
