@@ -50,7 +50,7 @@ internal class BigoAdsInterstitialImpl :
             .withAdLoadListener(object : AdLoadListener<InterstitialAd> {
                 override fun onError(adError: AdError) {
                     val error = adError.asBidonError()
-                    logError(TAG, "Error while loading ad: $adError. $this", error)
+                    logError(TAG, "Error while loading ad: ${adError.code} ${adError.message}. $this", error)
                     emitEvent(AdEvent.LoadFailed(error))
                 }
 

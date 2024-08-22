@@ -12,6 +12,8 @@ import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.logs.analytic.AdValue
+import org.bidon.sdk.logs.analytic.Precision
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
@@ -64,6 +66,17 @@ internal class IronSourceBannerImpl :
             override fun onBannerAdShown(instanceId: String?) {
                 logInfo(TAG, "onBannerAdShown: $instanceId, $this")
                 loadedAdViewInstanceIds.add(instanceId ?: return)
+                val ad = getAd() ?: return
+                emitEvent(
+                    AdEvent.PaidRevenue(
+                        ad = ad,
+                        adValue = AdValue(
+                            adRevenue = adParams.price / 1000.0,
+                            precision = Precision.Precise,
+                            currency = AdValue.USD,
+                        )
+                    )
+                )
             }
 
             override fun onBannerAdClicked(instanceId: String?) {

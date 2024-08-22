@@ -38,7 +38,7 @@ internal class BigoAdsBannerImpl :
     private var bannerSize: AdSize? = null
 
     override val isAdReadyToShow: Boolean
-        get() = bannerAd != null && bannerAd?.isExpired != false && bannerAd?.adView() != null
+        get() = bannerAd != null && bannerAd?.isExpired == false && bannerAd?.adView() != null
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
@@ -74,7 +74,7 @@ internal class BigoAdsBannerImpl :
             .withAdLoadListener(object : AdLoadListener<BannerAd> {
                 override fun onError(adError: AdError) {
                     val error = adError.asBidonError()
-                    logError(TAG, "Error while loading ad: $adError. $this", error)
+                    logError(TAG, "Error while loading ad: ${adError.code} ${adError.message}. $this", error)
                     emitEvent(AdEvent.LoadFailed(error))
                 }
 

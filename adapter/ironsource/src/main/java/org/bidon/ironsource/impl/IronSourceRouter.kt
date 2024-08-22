@@ -2,15 +2,11 @@ package org.bidon.ironsource.impl
 
 import com.ironsource.mediationsdk.demandOnly.ISDemandOnlyInterstitialListener
 import com.ironsource.mediationsdk.demandOnly.ISDemandOnlyRewardedVideoListener
-import com.ironsource.mediationsdk.impressionData.ImpressionData
-import com.ironsource.mediationsdk.impressionData.ImpressionDataListener
 import com.ironsource.mediationsdk.logger.IronSourceError
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import org.bidon.sdk.config.BidonError
-import org.bidon.sdk.logs.analytic.AdValue
-import org.bidon.sdk.logs.analytic.Precision
 import org.bidon.sdk.logs.logging.impl.logInfo
 
 internal val ironSourceRouter: IronSourceRouter by lazy { IronSourceRouterImpl() }
@@ -96,24 +92,11 @@ internal class IronSourceRouterImpl : IronSourceRouter {
         logInfo(TAG, "onRewardedVideoAdClosed: $instanceId")
         adEventFlow.tryEmit(IronSourceEvent.AdClosed(instanceId))
     }
-
-    override fun onImpressionSuccess(impressionData: ImpressionData?) {
-        logInfo(TAG, "onImpressionSuccess: ${impressionData?.instanceId}")
-        val adValue = impressionData?.asAdValue() ?: return
-        adEventFlow.tryEmit(IronSourceEvent.AdRevenuePaid(impressionData.instanceId, adValue))
-    }
-
-    private fun ImpressionData.asAdValue(): AdValue = AdValue(
-        adRevenue = revenue ?: 0.0,
-        precision = Precision.Precise,
-        currency = AdValue.USD
-    )
 }
 
 internal interface IronSourceRouter :
     ISDemandOnlyInterstitialListener,
-    ISDemandOnlyRewardedVideoListener,
-    ImpressionDataListener {
+    ISDemandOnlyRewardedVideoListener {
     val adEventFlow: SharedFlow<IronSourceEvent>
 }
 
@@ -129,9 +112,6 @@ internal sealed interface IronSourceEvent {
 
     // Rewarded video
     class AdRewarded(override val instanceId: String?) : IronSourceEvent
-
-    // Impression data
-    class AdRevenuePaid(override val instanceId: String?, val adValue: AdValue) : IronSourceEvent
 }
 
 private const val TAG = "IronSourceRouterImpl"

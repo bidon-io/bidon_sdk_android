@@ -15,6 +15,8 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.logs.analytic.AdValue
+import org.bidon.sdk.logs.analytic.Precision
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
@@ -72,6 +74,16 @@ internal class IronSourceInterstitialImpl :
                         is IronSourceEvent.AdOpened -> {
                             logInfo(TAG, "onAdOpened: $instanceId, $this")
                             emitEvent(AdEvent.Shown(ad))
+                            emitEvent(
+                                AdEvent.PaidRevenue(
+                                    ad = ad,
+                                    adValue = AdValue(
+                                        adRevenue = adParams.price / 1000.0,
+                                        precision = Precision.Precise,
+                                        currency = AdValue.USD,
+                                    )
+                                )
+                            )
                         }
 
                         is IronSourceEvent.AdShowFailed -> {
@@ -92,11 +104,6 @@ internal class IronSourceInterstitialImpl :
                         }
 
                         is IronSourceEvent.AdRewarded -> {}
-
-                        is IronSourceEvent.AdRevenuePaid -> {
-                            logInfo(TAG, "onAdRevenuePaid: $instanceId, $this")
-                            emitEvent(AdEvent.PaidRevenue(ad, adEvent.adValue))
-                        }
                     }
                 }
                 .launchIn(scope)
