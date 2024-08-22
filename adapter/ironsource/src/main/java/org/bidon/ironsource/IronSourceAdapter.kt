@@ -66,9 +66,6 @@ internal class IronSourceAdapter :
             IronSource.setISDemandOnlyInterstitialListener(ironSourceRouter)
             IronSource.setISDemandOnlyRewardedVideoListener(ironSourceRouter)
 
-            // Add the IronSource impression data listener
-            IronSource.addImpressionDataListener(ironSourceRouter)
-
             val initRequest: InitRequest = InitRequest.Builder(configParams.appKey)
                 .withLogLevel(LogLevel.VERBOSE)
                 .withLegacyAdFormats(

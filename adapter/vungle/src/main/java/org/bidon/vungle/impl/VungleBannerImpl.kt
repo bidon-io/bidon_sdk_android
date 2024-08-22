@@ -54,22 +54,43 @@ internal class VungleBannerImpl :
                 .also { banner = it }
             banner.adListener = object : BaseAdListener {
                 override fun onAdLoaded(baseAd: BaseAd) {
-                    val ad = getAd()
-                    if (ad != null) {
-                        emitEvent(AdEvent.Fill(ad))
-                        logInfo(TAG, "onAdLoad =${baseAd.placementId}. $this")
-                    } else {
-                        emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-                    }
+                    logInfo(TAG, "onAdLoaded placementId=${baseAd.placementId}. $this")
+                    val ad = getAd() ?: return
+                    emitEvent(AdEvent.Fill(ad))
                 }
 
                 override fun onAdFailedToLoad(baseAd: BaseAd, adError: VungleError) {
-                    logError(TAG, "onError placementId=${baseAd.placementId}. $this", null)
+                    logError(TAG, "onAdFailedToLoad placementId=${baseAd.placementId}. $this", adError)
                     emitEvent(AdEvent.LoadFailed(adError.asBidonError()))
                 }
 
+                override fun onAdFailedToPlay(baseAd: BaseAd, adError: VungleError) {
+                    logError(TAG, "onAdFailedToPlay: $this", adError)
+                    emitEvent(AdEvent.ShowFailed(adError.asBidonError()))
+                }
+
+                override fun onAdClicked(baseAd: BaseAd) {
+                    logInfo(TAG, "onAdClicked: $this")
+                    val ad = getAd() ?: return
+                    emitEvent(AdEvent.Clicked(ad))
+                }
+
+                override fun onAdEnd(baseAd: BaseAd) {
+                    logInfo(TAG, "onAdEnd: $this")
+                    val ad = getAd() ?: return
+                    emitEvent(AdEvent.Closed(ad))
+                }
+
+                override fun onAdLeftApplication(baseAd: BaseAd) {
+                    logInfo(TAG, "onAdLeftApplication: $this")
+                }
+
+                override fun onAdStart(baseAd: BaseAd) {
+                    logInfo(TAG, "onAdStart: $this")
+                }
+
                 override fun onAdImpression(baseAd: BaseAd) {
-                    logInfo(TAG, "onAdViewed: $this")
+                    logInfo(TAG, "onAdImpression: $this")
                     val ad = getAd() ?: return
                     emitEvent(
                         AdEvent.PaidRevenue(
@@ -82,27 +103,6 @@ internal class VungleBannerImpl :
                         )
                     )
                 }
-
-                override fun onAdFailedToPlay(baseAd: BaseAd, adError: VungleError) {
-                    logError(TAG, "onAdError: $this", adError)
-                    emitEvent(AdEvent.ShowFailed(adError.asBidonError()))
-                }
-
-                override fun onAdClicked(baseAd: BaseAd) {
-                    logInfo(TAG, "onAdClick: $this")
-                    val ad = getAd() ?: return
-                    emitEvent(AdEvent.Clicked(ad))
-                }
-
-                override fun onAdEnd(baseAd: BaseAd) {
-                    logInfo(TAG, "onAdEnd: $this")
-                    val ad = getAd() ?: return
-                    emitEvent(AdEvent.Closed(ad))
-                }
-
-                override fun onAdLeftApplication(baseAd: BaseAd) {}
-
-                override fun onAdStart(baseAd: BaseAd) {}
             }
             if (adParams.adUnit.bidType == BidType.RTB) {
                 val payload = adParams.payload

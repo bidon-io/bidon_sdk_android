@@ -19,5 +19,7 @@ internal fun VungleError?.asBidonError() = when (this?.code) {
     VungleError.AD_UNABLE_TO_PLAY,
     VungleError.AD_IS_LOADING,
     VungleError.AD_IS_PLAYING -> BidonError.AdNotReady
+    // Request failed with error: 10001, impression auctioned but unsold
+    10001 -> BidonError.NoFill(VungleDemandId)
     else -> BidonError.Unspecified(VungleDemandId)
 }

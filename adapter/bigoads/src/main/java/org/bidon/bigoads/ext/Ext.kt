@@ -15,7 +15,10 @@ internal var sdkVersion = BigoAdSdk.getSDKVersion()
 internal fun AdError.asBidonError() = when (this.code) {
     AdError.ERROR_CODE_UNINITIALIZED -> BidonError.SdkNotInitialized
 
-    AdError.ERROR_CODE_AD_DISABLE -> BidonError.NoAppropriateAdUnitId
+    AdError.ERROR_CODE_AD_DISABLE,
+    // 1014 - The slot id is inactive or invalid, please make sure the id is aligned with app id.
+    // If ids are correct, please wait for at least 30 minutes then try again.
+    1014 -> BidonError.NoAppropriateAdUnitId
 
     AdError.ERROR_CODE_NETWORK_ERROR,
     AdError.ERROR_CODE_INVALID_REQUEST -> BidonError.NetworkError(BigoAdsDemandId, message)

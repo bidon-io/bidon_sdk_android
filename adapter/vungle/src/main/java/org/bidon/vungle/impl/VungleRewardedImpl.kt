@@ -53,21 +53,18 @@ internal class VungleRewardedImpl :
             .also { rewardedAd = it }
         rewardedAd.adListener = object : RewardedAdListener {
             override fun onAdLoaded(baseAd: BaseAd) {
-                val ad = getAd()
-                if (ad != null) {
-                    emitEvent(AdEvent.Fill(ad))
-                } else {
-                    emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-                }
+                logInfo(TAG, "onAdLoaded placementId=${baseAd.placementId}. $this")
+                val ad = getAd() ?: return
+                emitEvent(AdEvent.Fill(ad))
             }
 
             override fun onAdFailedToLoad(baseAd: BaseAd, adError: VungleError) {
-                logError(TAG, "onError placementId=${baseAd.placementId}. $this", null)
+                logError(TAG, "onAdFailedToLoad placementId=${baseAd.placementId}. $this", adError)
                 emitEvent(AdEvent.LoadFailed(adError.asBidonError()))
             }
 
             override fun onAdClicked(baseAd: BaseAd) {
-                logInfo(TAG, "onAdClick: $this")
+                logInfo(TAG, "onAdClicked: $this")
                 val ad = getAd() ?: return
                 emitEvent(AdEvent.Clicked(ad))
             }
@@ -79,7 +76,7 @@ internal class VungleRewardedImpl :
             }
 
             override fun onAdFailedToPlay(baseAd: BaseAd, adError: VungleError) {
-                logError(TAG, "onAdError: $this", adError)
+                logError(TAG, "onAdFailedToPlay: $this", adError)
                 emitEvent(AdEvent.ShowFailed(adError.asBidonError()))
             }
 
@@ -96,7 +93,11 @@ internal class VungleRewardedImpl :
             }
 
             override fun onAdLeftApplication(baseAd: BaseAd) {
-                logInfo(TAG, "onAdViewed: $this")
+                logInfo(TAG, "onAdLeftApplication: $this")
+            }
+
+            override fun onAdImpression(baseAd: BaseAd) {
+                logInfo(TAG, "onAdImpression: $this")
                 val ad = getAd() ?: return
                 emitEvent(
                     AdEvent.PaidRevenue(
@@ -109,8 +110,6 @@ internal class VungleRewardedImpl :
                     )
                 )
             }
-
-            override fun onAdImpression(baseAd: BaseAd) {}
         }
         if (adParams.adUnit.bidType == BidType.RTB) {
             val payload = adParams.payload
