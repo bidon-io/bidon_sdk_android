@@ -12,6 +12,7 @@ enum class DefaultAdapters(val classPath: String) {
     ApplovinAdapter(classPath = "org.bidon.applovin.ApplovinAdapter"),
     BidmachineAdapter(classPath = "org.bidon.bidmachine.BidMachineAdapter"),
     BigoAdsAdapter(classPath = "org.bidon.bigoads.BigoAdsAdapter"),
+    Chartboost(classPath = "org.bidon.chartboost.ChartboostAdapter"),
     DTExchangeAdapter(classPath = "org.bidon.dtexchange.DTExchangeAdapter"),
     GoogleAdManagerAdapter(classPath = "org.bidon.gam.GamAdapter"),
     InmobiAdapter(classPath = "org.bidon.inmobi.InmobiAdapter"),
