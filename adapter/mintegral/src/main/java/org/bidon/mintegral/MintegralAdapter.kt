@@ -12,7 +12,6 @@ import org.bidon.mintegral.ext.sdkVersion
 import org.bidon.mintegral.impl.MintegralBannerImpl
 import org.bidon.mintegral.impl.MintegralInterstitialImpl
 import org.bidon.mintegral.impl.MintegralRewardedImpl
-import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.AdProvider
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Adapter
@@ -37,8 +36,10 @@ import kotlin.coroutines.suspendCoroutine
  */
 internal val MintegralDemandId = DemandId("mintegral")
 
-class MintegralAdapter :
+@Suppress("unused")
+internal class MintegralAdapter :
     Adapter.Bidding,
+    Adapter.Network,
     SupportsRegulation,
     Initializable<MintegralInitParam>,
     AdProvider.Banner<MintegralBannerAuctionParam>,
@@ -52,18 +53,18 @@ class MintegralAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam) =
+    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String =
         BidManager.getBuyerUid(context)
 
-    override suspend fun init(context: Context, configParams: MintegralInitParam) =
+    override suspend fun init(context: Context, configParams: MintegralInitParam) {
         withContext(SdkDispatchers.Main) {
             suspendCoroutine { continuation ->
                 this@MintegralAdapter.context = context
                 val sdk = MBridgeSDKFactory.getMBridgeSDK()
                 val configurationMap = sdk.getMBConfigurationMap(configParams.appId, configParams.appKey)
-                updateRegulation(BidonSdk.regulation)
                 sdk.init(
-                    configurationMap, context.applicationContext as Application,
+                    configurationMap,
+                    context.applicationContext as Application,
                     object : SDKInitStatusListener {
                         override fun onInitSuccess() {
                             continuation.resume(Unit)
@@ -77,6 +78,7 @@ class MintegralAdapter :
                 )
             }
         }
+    }
 
     override fun parseConfigParam(json: String): MintegralInitParam {
         val jsonObject = JSONObject(json)

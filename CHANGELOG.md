@@ -1,8 +1,9 @@
 # Next 0.7.0-next.2
 ## Features:
+- [BDN-483](https://appodeal.atlassian.net/browse/BDN-483) Integrated CPM mode for Vungle adapter
+- [BDN-716](https://appodeal.atlassian.net/browse/BDN-716) Integrated CPM mode for BigoAds adapter
+- [BDN-727](https://appodeal.atlassian.net/browse/BDN-727) Integrated CPM mode for Mintegral
 - [BDN-626](https://appodeal.atlassian.net/browse/BDN-626) Integrated VkAds (myTarget) as Ad Adapter
-- [BDN-483](https://appodeal.atlassian.net/browse/BDN-483) Integrated CPM mode for Vungle adapter;
-- [BDN-716](https://appodeal.atlassian.net/browse/BDN-716) Integrated CPM mode for BigoAds adapter;
 - [BDN-719](https://appodeal.atlassian.net/browse/BDN-719) Integrated Yandex (cpm) as Ad Adapter
 - [BDN-482](https://appodeal.atlassian.net/browse/BDN-482) Integrated IronSource (cpm) as Ad Adapter
 - [BDN-725](https://appodeal.atlassian.net/browse/BDN-725) Integrated Chartboost (cpm) as Ad Adapter

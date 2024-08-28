@@ -13,8 +13,6 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -50,69 +48,29 @@ internal class MintegralBannerImpl :
 
     override fun load(adParams: MintegralBannerAuctionParam) {
         logInfo(TAG, "Starting with $adParams: $this")
-        adParams.placementId ?: run {
-            emitEvent(
-                AdEvent.LoadFailed(
-                    BidonError.IncorrectAdUnit(demandId = demandId, message = "placementId")
-                )
-            )
-            return
-        }
-        adParams.unitId ?: run {
-            emitEvent(
-                AdEvent.LoadFailed(
-                    BidonError.IncorrectAdUnit(demandId = demandId, message = "unitId")
-                )
-            )
-            return
-        }
-        if (adParams.adUnit.bidType == BidType.RTB) {
-            adParams.payload ?: run {
-                emitEvent(
-                    AdEvent.LoadFailed(
-                        BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
-                    )
-                )
-                return
-            }
-        }
+        val placementId = adParams.placementId
+            ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "placementId")))
+        val unitId = adParams.unitId
+            ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "unitId")))
+
         adParams.activity.runOnUiThread {
-            val mbBannerView = MBBannerView(adParams.activity.applicationContext).also {
-                bannerView = it
-            }
-            val size = when (adParams.bannerFormat) {
-                BannerFormat.Banner -> BannerSize(BannerSize.STANDARD_TYPE, 320, 50)
-                BannerFormat.LeaderBoard -> BannerSize(BannerSize.DEV_SET_TYPE, 728, 90)
-                BannerFormat.MRec -> BannerSize(BannerSize.MEDIUM_TYPE, 300, 250)
-                BannerFormat.Adaptive -> if (isTablet) {
-                    BannerSize(BannerSize.DEV_SET_TYPE, 728, 90)
-                } else {
-                    BannerSize(BannerSize.STANDARD_TYPE, 320, 50)
-                }
-            }.also {
-                bannerSize = it
-            }
-            mbBannerView.init(size, adParams.placementId, adParams.unitId)
+            val mbBannerView = MBBannerView(adParams.activity.applicationContext)
+                .also { bannerView = it }
+            bannerSize = adParams.bannerSize
+            mbBannerView.init(bannerSize, placementId, unitId)
+            mbBannerView.setAllowShowCloseBtn(false)
+            mbBannerView.setRefreshTime(0)
             mbBannerView.setBannerAdListener(object : BannerAdListener {
                 override fun onLoadFailed(mBridgeIds: MBridgeIds?, message: String?) {
                     logInfo(TAG, "onLoadFailed $mBridgeIds")
-                    emitEvent(
-                        AdEvent.LoadFailed(
-                            message?.asBidonError()
-                                ?: BidonError.NoFill(demandId)
-                        )
-                    )
+                    emitEvent(AdEvent.LoadFailed(message.asBidonError()))
                 }
 
                 override fun onLoadSuccessed(mBridgeIds: MBridgeIds?) {
                     logInfo(TAG, "onLoadSuccessed $mBridgeIds")
+                    val ad = getAd() ?: return
+                    emitEvent(AdEvent.Fill(ad))
                     isAdReadyToShow = true
-                    val ad = getAd()
-                    if (mBridgeIds != null && ad != null) {
-                        emitEvent(AdEvent.Fill(ad))
-                    } else {
-                        emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-                    }
                 }
 
                 override fun onLogImpression(mBridgeIds: MBridgeIds?) {
@@ -136,12 +94,30 @@ internal class MintegralBannerImpl :
                     emitEvent(AdEvent.Clicked(ad))
                 }
 
-                override fun onLeaveApp(mBridgeIds: MBridgeIds?) {}
-                override fun showFullScreen(mBridgeIds: MBridgeIds?) {}
-                override fun closeFullScreen(mBridgeIds: MBridgeIds?) {}
-                override fun onCloseBanner(mBridgeIds: MBridgeIds?) {}
+                override fun onLeaveApp(mBridgeIds: MBridgeIds?) {
+                    logInfo(TAG, "onLeaveApp $mBridgeIds")
+                }
+
+                override fun showFullScreen(mBridgeIds: MBridgeIds?) {
+                    logInfo(TAG, "showFullScreen $mBridgeIds")
+                }
+
+                override fun closeFullScreen(mBridgeIds: MBridgeIds?) {
+                    logInfo(TAG, "closeFullScreen $mBridgeIds")
+                }
+
+                override fun onCloseBanner(mBridgeIds: MBridgeIds?) {
+                    logInfo(TAG, "onCloseBanner $mBridgeIds")
+                }
             })
-            mbBannerView.loadFromBid(adParams.payload)
+
+            if (adParams.adUnit.bidType == BidType.CPM) {
+                mbBannerView.load()
+            } else {
+                val payload = adParams.payload
+                    ?: return@runOnUiThread emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")))
+                mbBannerView.loadFromBid(payload)
+            }
         }
     }
 
@@ -164,6 +140,7 @@ internal class MintegralBannerImpl :
 
     override fun destroy() {
         logInfo(TAG, "destroy $this")
+        bannerView?.release()
         bannerView = null
         bannerSize = null
     }
