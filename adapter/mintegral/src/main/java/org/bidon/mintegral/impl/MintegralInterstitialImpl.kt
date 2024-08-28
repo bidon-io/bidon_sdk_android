@@ -2,6 +2,7 @@ package org.bidon.mintegral.impl
 
 import android.app.Activity
 import com.mbridge.msdk.newinterstitial.out.MBBidNewInterstitialHandler
+import com.mbridge.msdk.newinterstitial.out.MBNewInterstitialHandler
 import com.mbridge.msdk.newinterstitial.out.NewInterstitialListener
 import com.mbridge.msdk.out.MBridgeIds
 import com.mbridge.msdk.out.RewardInfo
@@ -33,10 +34,11 @@ internal class MintegralInterstitialImpl :
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var interstitialAd: MBBidNewInterstitialHandler? = null
+    private var interstitialAd: MBNewInterstitialHandler? = null
+    private var interstitialBidAd: MBBidNewInterstitialHandler? = null
 
     override val isAdReadyToShow: Boolean
-        get() = interstitialAd?.isBidReady == true
+        get() = (interstitialAd?.isReady == true) or (interstitialBidAd?.isBidReady == true)
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
@@ -51,60 +53,21 @@ internal class MintegralInterstitialImpl :
 
     override fun load(adParams: MintegralAuctionParam) {
         logInfo(TAG, "Starting with $adParams: $this")
-        adParams.placementId ?: run {
-            emitEvent(
-                AdEvent.LoadFailed(
-                    BidonError.IncorrectAdUnit(demandId = demandId, message = "placementId")
-                )
-            )
-            return
-        }
-        adParams.unitId ?: run {
-            emitEvent(
-                AdEvent.LoadFailed(
-                    BidonError.IncorrectAdUnit(demandId = demandId, message = "unitId")
-                )
-            )
-            return
-        }
-        if (adParams.adUnit.bidType == BidType.RTB) {
-            adParams.payload ?: run {
-                emitEvent(
-                    AdEvent.LoadFailed(
-                        BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
-                    )
-                )
-                return
-            }
-        }
-        val handler = MBBidNewInterstitialHandler(
-            adParams.activity.applicationContext,
-            adParams.placementId,
-            adParams.unitId
-        ).also {
-            interstitialAd = it
-        }
-        handler.setInterstitialVideoListener(object : NewInterstitialListener {
+        val placementId = adParams.placementId
+            ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "placementId")))
+        val unitId = adParams.unitId
+            ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "unitId")))
 
+        val listener = object : NewInterstitialListener {
             override fun onResourceLoadSuccess(mBridgeIds: MBridgeIds?) {
                 logInfo(TAG, "onResourceLoadSuccess $mBridgeIds")
-                logInfo(TAG, "Starting fill: $this")
-                val ad = getAd()
-                if (mBridgeIds != null && ad != null) {
-                    emitEvent(AdEvent.Fill(ad))
-                } else {
-                    emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-                }
+                val ad = getAd() ?: return
+                emitEvent(AdEvent.Fill(ad))
             }
 
             override fun onResourceLoadFail(mBridgeIds: MBridgeIds?, message: String?) {
                 logInfo(TAG, "onResourceLoadFail $mBridgeIds")
-                emitEvent(
-                    AdEvent.LoadFailed(
-                        message?.asBidonError()
-                            ?: BidonError.NoFill(demandId)
-                    )
-                )
+                emitEvent(AdEvent.LoadFailed(message.asBidonError()))
             }
 
             override fun onAdShow(mBridgeIds: MBridgeIds?) {
@@ -127,7 +90,6 @@ internal class MintegralInterstitialImpl :
                 logInfo(TAG, "onAdClose $mBridgeIds, $rewardInfo")
                 val ad = getAd() ?: return
                 emitEvent(AdEvent.Closed(ad))
-                this@MintegralInterstitialImpl.interstitialAd = null
             }
 
             override fun onShowFail(mBridgeIds: MBridgeIds?, message: String?) {
@@ -145,16 +107,42 @@ internal class MintegralInterstitialImpl :
                 logInfo(TAG, "onVideoComplete $mBridgeIds")
             }
 
-            override fun onLoadCampaignSuccess(mBridgeIds: MBridgeIds?) {}
-            override fun onAdCloseWithNIReward(mBridgeIds: MBridgeIds?, rewardInfo: RewardInfo?) {}
-            override fun onEndcardShow(mBridgeIds: MBridgeIds?) {}
-        })
-        handler.loadFromBid(adParams.payload)
+            override fun onLoadCampaignSuccess(mBridgeIds: MBridgeIds?) {
+                logInfo(TAG, "onLoadCampaignSuccess $mBridgeIds")
+            }
+
+            override fun onAdCloseWithNIReward(mBridgeIds: MBridgeIds?, rewardInfo: RewardInfo?) {
+                logInfo(TAG, "onAdCloseWithNIReward $mBridgeIds, $rewardInfo")
+            }
+
+            override fun onEndcardShow(mBridgeIds: MBridgeIds?) {
+                logInfo(TAG, "onEndcardShow $mBridgeIds")
+            }
+        }
+
+        if (adParams.adUnit.bidType == BidType.CPM) {
+            val handler = MBNewInterstitialHandler(adParams.activity, placementId, unitId)
+            handler.setInterstitialVideoListener(listener)
+            handler.load()
+            interstitialAd = handler
+        } else {
+            val payload = adParams.payload
+                ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")))
+
+            val handler = MBBidNewInterstitialHandler(adParams.activity, placementId, unitId)
+            handler.setInterstitialVideoListener(listener)
+            handler.loadFromBid(payload)
+            interstitialBidAd = handler
+        }
     }
 
     override fun show(activity: Activity) {
         logInfo(TAG, "Starting show: $this")
-        interstitialAd?.showFromBid() ?: run {
+        if (interstitialAd?.isReady == true) {
+            interstitialAd?.show()
+        } else if (interstitialBidAd?.isBidReady == true) {
+            interstitialBidAd?.showFromBid()
+        } else {
             emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
         }
     }
@@ -162,7 +150,12 @@ internal class MintegralInterstitialImpl :
     override fun destroy() {
         logInfo(TAG, "destroy $this")
         interstitialAd?.clearVideoCache()
+        interstitialAd?.setInterstitialVideoListener(null)
         interstitialAd = null
+
+        interstitialBidAd?.clearVideoCache()
+        interstitialBidAd?.setInterstitialVideoListener(null)
+        interstitialBidAd = null
     }
 }
 
