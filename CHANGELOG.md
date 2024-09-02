@@ -1,12 +1,20 @@
 # Next 0.7.0-next.2
 ## Features:
+- [BDN-725](https://appodeal.atlassian.net/browse/BDN-725) Updated compileSdkVersion to 34
 - [BDN-483](https://appodeal.atlassian.net/browse/BDN-483) Integrated CPM mode for Vungle adapter
 - [BDN-716](https://appodeal.atlassian.net/browse/BDN-716) Integrated CPM mode for BigoAds adapter
 - [BDN-727](https://appodeal.atlassian.net/browse/BDN-727) Integrated CPM mode for Mintegral
-- [BDN-626](https://appodeal.atlassian.net/browse/BDN-626) Integrated VkAds (myTarget) as Ad Adapter
-- [BDN-719](https://appodeal.atlassian.net/browse/BDN-719) Integrated Yandex (cpm) as Ad Adapter
-- [BDN-482](https://appodeal.atlassian.net/browse/BDN-482) Integrated IronSource (cpm) as Ad Adapter
-- [BDN-725](https://appodeal.atlassian.net/browse/BDN-725) Integrated Chartboost (cpm) as Ad Adapter
+- [BDN-626](https://appodeal.atlassian.net/browse/BDN-626) Integrated VkAds SDK 5.22.1 (myTarget) as Ad Adapter
+- [BDN-719](https://appodeal.atlassian.net/browse/BDN-719) Integrated Yandex SDK 7.3.0 (cpm) as Ad Adapter
+- [BDN-482](https://appodeal.atlassian.net/browse/BDN-482) Integrated IronSource SDK 8.2.1 (cpm) as Ad Adapter
+- [BDN-725](https://appodeal.atlassian.net/browse/BDN-725) Integrated Chartboost SDK 9.7.0 (cpm) as Ad Adapter
+- [BDN-744](https://appodeal.atlassian.net/browse/BDN-744) Updated Admob/Gam SDK to 23.3.0
+- [BDN-744](https://appodeal.atlassian.net/browse/BDN-744) Updated Applovin SDK to 12.6.1
+- [BDN-744](https://appodeal.atlassian.net/browse/BDN-744) Updated Bidmachine SDK to 3.3.0
+- [BDN-744](https://appodeal.atlassian.net/browse/BDN-744) Updated BigoAds SDK to 4.9.1
+- [BDN-744](https://appodeal.atlassian.net/browse/BDN-744) Updated DTExchange SDK to 8.3.0
+- [BDN-744](https://appodeal.atlassian.net/browse/BDN-744) Updated Inmobi SDK to 10.7.5
+- [BDN-744](https://appodeal.atlassian.net/browse/BDN-744) Updated UnityAds SDK to 4.12.2
 
 # Next 0.7.0-next.1
 ## Features:
