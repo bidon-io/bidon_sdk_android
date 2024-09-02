@@ -34,7 +34,8 @@ internal fun InneractiveErrorCode?.asBidonError() = when (this) {
     InneractiveErrorCode.NON_SECURE_CONTENT_DETECTED,
     InneractiveErrorCode.UNSPECIFIED,
     InneractiveErrorCode.SDK_NOT_INITIALIZED,
-    InneractiveErrorCode.SDK_NOT_INITIALIZED_OR_CONFIG_ERROR, null -> {
+    InneractiveErrorCode.SDK_NOT_INITIALIZED_OR_CONFIG_ERROR -> {
         BidonError.Unspecified(DTExchangeDemandId, Throwable("InneractiveErrorCode: $this"))
     }
+    else -> BidonError.Unspecified(DTExchangeDemandId, Throwable("InneractiveErrorCode: $this"))
 }

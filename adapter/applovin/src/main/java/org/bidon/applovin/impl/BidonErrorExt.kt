@@ -14,6 +14,5 @@ internal fun MaxError.asBidonError(): BidonError = when (this.code) {
     MaxErrorCode.NETWORK_TIMEOUT -> BidonError.NetworkError(ApplovinDemandId)
     MaxErrorCode.FULLSCREEN_AD_ALREADY_SHOWING -> BidonError.AdNotReady
     MaxErrorCode.FULLSCREEN_AD_NOT_READY -> BidonError.AdNotReady
-    MaxErrorCode.NO_ACTIVITY -> BidonError.NoContextFound
     else -> BidonError.Unspecified(ApplovinDemandId)
 }
