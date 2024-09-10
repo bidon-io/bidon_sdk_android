@@ -153,6 +153,7 @@ fun SdkSettings() {
                 }
                 gdprState.value = gdpr
                 BidonSdk.regulation.gdpr = gdpr
+                BidonSdk.regulation.gdprConsentString = "CQEu3gAQEu3gABGACAENBGFMAP_gAEPgAAAAKaNV_G__bWlr8X73aftkeY1P9_h77sQxBhfJE-4FzLvW_JwXx2ExNA36tqIKmRIAu3bBIQNlGJDUTVCgaogVryDMak2coTNKJ6BkiFMRO2dYCF5vm4tj-QKY5vr991dx2B-t7dr83dzyz4VHn3a5_2a0WJCdA5-tDfv9bROb-9IOd_x8v4v8_F_rE2_eT1l_tevp7D9-cts7_XW-9_fff_9Ln_-uB_-_wU1AJMNCogDLIkJCDQMIIEAKgrCAigQAAAAkDRAQAmDAp2BgEusJEAIAUAAwQAgABRkACAAASABCIAIACgQAAQCBQABgAQDAQAMDAAGACwEAgABAdAxTAggUCwASMyIhTAhCASCAlsqEEgCBBXCEIs8CiAREwUAAAJABWAAICwWBxJICViQQJcQbQAAEACAQQAVCKTswBBAGbLUXiybRlaYFo-YLntMAyQAA.IKatV_G__bXlv-X736ftkeY1f9_h77sQxBhfJs-4FzLvW_JwX32EzNE36tqYKmRIAu3bBIQNtGJjUTVChaogVrzDsak2coTtKJ-BkiHMRe2dYCF5vm4tj-QKZ5vr_91d52R_t7dr-3dzyz5Vnv3a9_-b1WJidK5-tH_v_bROb-_I-9_x-_4v8_N_rE2_eT1t_tevt739-8tv___f_9___________3_-_4AA"
             }
         )
     }
