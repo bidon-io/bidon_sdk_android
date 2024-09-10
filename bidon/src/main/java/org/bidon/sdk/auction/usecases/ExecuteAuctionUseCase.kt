@@ -10,7 +10,7 @@ import org.bidon.sdk.auction.models.TokenInfo
  * Created by Aleksei Cherniaev on 02/06/2023.
  */
 internal interface ExecuteAuctionUseCase {
-    suspend fun execute(
+    suspend operator fun invoke(
         auctionId: String,
         auctionConfigurationId: Long,
         auctionConfigurationUid: String,
@@ -23,6 +23,4 @@ internal interface ExecuteAuctionUseCase {
         resultsCollector: ResultsCollector,
         tokens: Map<String, TokenInfo>
     )
-
-    suspend fun cancel(resultsCollector: ResultsCollector)
 }

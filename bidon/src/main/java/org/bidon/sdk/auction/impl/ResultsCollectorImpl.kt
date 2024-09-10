@@ -151,7 +151,7 @@ internal class ResultsCollectorImpl(
 
     override fun clear() {
         auctionResults.value = emptyList()
-        clearRoundResults()
+        roundResult.value = RoundResult.Idle
     }
 
     @Deprecated("")
@@ -224,10 +224,6 @@ internal class ResultsCollectorImpl(
     }
 
     override fun getRoundResults(): RoundResult = roundResult.value
-
-    override fun clearRoundResults() {
-        roundResult.value = RoundResult.Idle
-    }
 }
 
 private const val TAG = "ResultsCollector"
