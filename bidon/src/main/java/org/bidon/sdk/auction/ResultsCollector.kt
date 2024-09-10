@@ -22,7 +22,6 @@ internal interface ResultsCollector {
     fun clear()
     @Deprecated("")
     suspend fun saveWinners(sourcePriceFloor: Double)
-    fun clearRoundResults()
 
     companion object {
         /**

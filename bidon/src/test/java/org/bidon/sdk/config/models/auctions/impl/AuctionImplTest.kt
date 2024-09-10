@@ -74,7 +74,7 @@ internal class AuctionImplTest : ConcurrentTest() {
             adaptersSource = adaptersSource,
             getAuctionRequest = getAuctionRequestUseCase,
             auctionStat = auctionStat,
-            auctionExecutable = executeAuctionUseCase,
+            executeAuction = executeAuctionUseCase,
             tokenGetter = tokenGetter,
             biddingConfig = biddingConfig,
         )

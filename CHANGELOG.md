@@ -1,3 +1,7 @@
+# Next 0.7.0-next.3
+## Features:
+- [BDN-687](https://appodeal.atlassian.net/browse/BDN-687) Improved auction cancellation handling
+
 # Next 0.7.0-next.2
 ## Features:
 - [BDN-725](https://appodeal.atlassian.net/browse/BDN-725) Updated compileSdkVersion to 34

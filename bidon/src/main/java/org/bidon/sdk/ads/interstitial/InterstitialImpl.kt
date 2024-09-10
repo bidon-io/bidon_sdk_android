@@ -131,12 +131,7 @@ internal class InterstitialImpl(
             return
         }
         scope.launch(Dispatchers.Main.immediate) {
-            adCache.clear { auctionResult, cause ->
-                listener.onAdLoadFailed(
-                    auctionInfo = auctionResult,
-                    cause = cause.asBidonErrorOrUnspecified()
-                )
-            }
+            adCache.clear()
             observeCallbacksJob?.cancel()
             observeCallbacksJob = null
         }

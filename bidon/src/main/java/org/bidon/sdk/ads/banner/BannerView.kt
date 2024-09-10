@@ -242,12 +242,7 @@ class BannerView @JvmOverloads constructor(
         }
         adLifecycleFlow.value = AdLifecycle.Destroyed
         visibilityTracker.stop()
-        auction.cancel { auctionInfo, cause ->
-            listener.onAdLoadFailed(
-                auctionInfo = auctionInfo,
-                cause = cause.asBidonErrorOrUnspecified()
-            )
-        }
+        auction.cancel()
         winner?.adSource?.destroy()
         winner = null
         winnerSubscriberJob?.cancel()
