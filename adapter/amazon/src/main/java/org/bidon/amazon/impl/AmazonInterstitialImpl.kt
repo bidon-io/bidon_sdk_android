@@ -2,6 +2,7 @@ package org.bidon.amazon.impl
 
 import android.app.Activity
 import android.view.View
+import com.amazon.device.ads.DTBActivityMonitor
 import com.amazon.device.ads.DTBAdInterstitial
 import com.amazon.device.ads.DTBAdInterstitialListener
 import com.amazon.device.ads.SDKUtilities
@@ -58,6 +59,7 @@ internal class AmazonInterstitialImpl(private val amazonInfos: List<AmazonInfo>)
             emitEvent(AdEvent.LoadFailed(BidonError.NoBid))
             return
         }
+        DTBActivityMonitor.setActivity(adParams.activity)
         val interstitialAd = DTBAdInterstitial(
             adParams.activity,
             object : DTBAdInterstitialListener {

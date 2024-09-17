@@ -1,6 +1,7 @@
 package org.bidon.amazon.impl
 
 import android.view.View
+import com.amazon.device.ads.DTBActivityMonitor
 import com.amazon.device.ads.DTBAdBannerListener
 import com.amazon.device.ads.DTBAdView
 import com.amazon.device.ads.SDKUtilities
@@ -64,6 +65,7 @@ internal class AmazonBannerImpl(private val amazonInfos: List<AmazonInfo>) :
             emitEvent(AdEvent.LoadFailed(BidonError.NoBid))
             return
         }
+        DTBActivityMonitor.setActivity(adParams.activity)
         val adView = DTBAdView(
             adParams.activity.applicationContext,
             object : DTBAdBannerListener {
