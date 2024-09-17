@@ -17,13 +17,13 @@ import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-val BidMachineDemandId = DemandId("bidmachine")
+internal val BidMachineDemandId = DemandId("bidmachine")
 
 internal typealias BidMachineBannerSize = io.bidmachine.banner.BannerSize
 internal typealias BMAuctionResult = io.bidmachine.models.AuctionResult
 
 @Suppress("unused")
-class BidMachineAdapter :
+internal class BidMachineAdapter :
     Adapter.Bidding,
     Adapter.Network,
     SupportsRegulation,
@@ -33,20 +33,17 @@ class BidMachineAdapter :
     AdProvider.Rewarded<BMFullscreenAuctionParams>,
     AdProvider.Interstitial<BMFullscreenAuctionParams> {
 
-    private var context: Context? = null
-
     override val demandId = BidMachineDemandId
     override val adapterInfo = AdapterInfo(
         adapterVersion = adapterVersion,
         sdkVersion = sdkVersion
     )
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam) =
-        BidMachine.getBidToken(context)
+    override suspend fun getToken(adTypeParam: AdTypeParam): String? =
+        BidMachine.getBidToken(adTypeParam.activity.applicationContext)
 
     override suspend fun init(context: Context, configParams: BidMachineParameters): Unit =
         suspendCoroutine { continuation ->
-            this.context = context
             val sourceId = configParams.sellerId
             BidMachine.setTestMode(isTestMode)
             BidMachine.setLoggingEnabled(BidonSdk.loggerLevel != Logger.Level.Off)

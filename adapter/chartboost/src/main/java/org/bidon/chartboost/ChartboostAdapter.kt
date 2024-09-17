@@ -85,25 +85,23 @@ internal class ChartboostAdapter :
         }
 
     override fun updateRegulation(regulation: Regulation) {
-        val context = context ?: return
-        if (regulation.gdprApplies) {
-            Chartboost.addDataUseConsent(
-                context = context,
-                dataUseConsent = GDPR(if (regulation.hasGdprConsent) GDPR_CONSENT.BEHAVIORAL else GDPR_CONSENT.NON_BEHAVIORAL)
-            )
-        }
+        context?.let { context ->
+            if (regulation.gdprApplies) {
+                val gdprConsent =
+                    if (regulation.hasGdprConsent) GDPR_CONSENT.BEHAVIORAL else GDPR_CONSENT.NON_BEHAVIORAL
+                Chartboost.addDataUseConsent(context, GDPR(gdprConsent))
+            }
 
-        if (regulation.ccpaApplies) {
-            Chartboost.addDataUseConsent(
-                context = context,
-                dataUseConsent = CCPA(if (regulation.hasCcpaConsent) CCPA_CONSENT.OPT_IN_SALE else CCPA_CONSENT.OPT_OUT_SALE)
-            )
-        }
+            if (regulation.ccpaApplies) {
+                val ccpaConsent =
+                    if (regulation.hasCcpaConsent) CCPA_CONSENT.OPT_IN_SALE else CCPA_CONSENT.OPT_OUT_SALE
+                Chartboost.addDataUseConsent(context, CCPA(ccpaConsent))
+            }
 
-        Chartboost.addDataUseConsent(
-            context = context,
-            dataUseConsent = COPPA(regulation.coppaApplies)
-        )
+            if (regulation.coppaApplies) {
+                Chartboost.addDataUseConsent(context, COPPA(regulation.coppaApplies))
+            }
+        }
     }
 
     override fun banner(): AdSource.Banner<ChartboostBannerAuctionParams> {

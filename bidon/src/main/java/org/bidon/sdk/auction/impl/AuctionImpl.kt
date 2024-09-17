@@ -41,10 +41,10 @@ import java.util.UUID
  */
 internal class AuctionImpl(
     private val adaptersSource: AdaptersSource,
+    private val getTokens: GetTokensUseCase,
     private val getAuctionRequest: GetAuctionRequestUseCase,
     private val executeAuction: ExecuteAuctionUseCase,
     private val auctionStat: AuctionStat,
-    private val tokenGetter: GetTokensUseCase,
     private val biddingConfig: BiddingConfig,
 ) : Auction {
     private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Main) }
@@ -53,7 +53,6 @@ internal class AuctionImpl(
     private var _auctionDataResponse: AuctionResponse? = null
     private var _demandAd: DemandAd? = null
     private var job: Job? = null
-    private var adTypeParam: AdTypeParam? = null
     private val resultsCollector: ResultsCollector by lazy { get() }
 
     override fun start(
@@ -71,15 +70,13 @@ internal class AuctionImpl(
                 logInfo(TAG, "Action in progress $this")
                 return
             }
-            this.adTypeParam = adTypeParam
             job = scope.launch {
                 runCatching {
                     logInfo(TAG, "Auction started $this")
                     resultsCollector.startRound(adTypeParam.pricefloor)
                     resultsCollector.serverBiddingStarted()
 
-                    val tokens = tokenGetter.invoke(
-                        adType = demandAd.adType,
+                    val tokens = getTokens(
                         adTypeParam = adTypeParam,
                         adaptersSource = adaptersSource,
                         tokenTimeout = biddingConfig.tokenTimeout

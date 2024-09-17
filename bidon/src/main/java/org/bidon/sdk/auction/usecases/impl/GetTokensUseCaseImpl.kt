@@ -1,6 +1,5 @@
 package org.bidon.sdk.auction.usecases.impl
 
-import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -10,7 +9,6 @@ import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.SupportsRegulation
-import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.models.TokenInfo
 import org.bidon.sdk.auction.models.TokenResult
@@ -24,7 +22,6 @@ internal class GetTokensUseCaseImpl : GetTokensUseCase {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     override suspend fun invoke(
-        adType: AdType,
         adTypeParam: AdTypeParam,
         adaptersSource: AdaptersSource,
         tokenTimeout: Long,
@@ -39,7 +36,6 @@ internal class GetTokensUseCaseImpl : GetTokensUseCase {
          * Tokens Obtaining
          */
         val tokens = filteredBiddingAdapters.getTokens(
-            context = adTypeParam.activity.applicationContext,
             adTypeParam = adTypeParam,
             tokenTimeout = tokenTimeout
         ).mapNotNull { (key, value) -> value?.let { key to it } }
@@ -69,7 +65,6 @@ internal class GetTokensUseCaseImpl : GetTokensUseCase {
     }
 
     private suspend fun List<Adapter.Bidding>.getTokens(
-        context: Context,
         adTypeParam: AdTypeParam,
         tokenTimeout: Long,
     ): Map<String, TokenInfo?> =
@@ -77,10 +72,7 @@ internal class GetTokensUseCaseImpl : GetTokensUseCase {
             adapter.demandId.demandId to scope.async {
                 val tokenStartTs = SystemTimeNow
                 val tokenResult = withTimeoutOrNull(tokenTimeout) {
-                    val token = adapter.getToken(
-                        context = context,
-                        adTypeParam = adTypeParam,
-                    )
+                    val token = adapter.getToken(adTypeParam)
                     if (token.isNullOrEmpty()) {
                         TokenResult.NoToken
                     } else {

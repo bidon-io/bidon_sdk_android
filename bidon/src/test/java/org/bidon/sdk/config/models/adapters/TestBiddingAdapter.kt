@@ -19,7 +19,7 @@ internal class TestBiddingAdapter(
     Initializable<TestAdapterParameters>,
     AdProvider.Interstitial<TestInterstitialParameters> {
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = "token"
+    override suspend fun getToken(adTypeParam: AdTypeParam): String? = "token"
 
     override val adapterInfo = AdapterInfo(adapterVersion = "adapterVersion1", sdkVersion = "sdkVersion1")
 

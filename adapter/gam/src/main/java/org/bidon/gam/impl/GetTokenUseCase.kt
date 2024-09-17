@@ -1,6 +1,5 @@
 package org.bidon.gam.impl
 
-import android.content.Context
 import com.google.ads.mediation.admob.AdMobAdapter
 import com.google.android.gms.ads.admanager.AdManagerAdRequest
 import com.google.android.gms.ads.query.QueryInfo
@@ -15,16 +14,19 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-internal class GetTokenUseCase(private val configParams: GamInitParameters?) {
-    suspend operator fun invoke(context: Context, adTypeParam: AdTypeParam): String? {
+internal object GetTokenUseCase {
+    suspend operator fun invoke(
+        configParams: GamInitParameters,
+        adTypeParam: AdTypeParam
+    ): String? {
         val adRequest = AdManagerAdRequest.Builder()
             .apply {
                 val networkExtras = BidonSdk.regulation.asBundle().apply {
-                    configParams?.queryInfoType?.let {
+                    configParams.queryInfoType?.let {
                         putString("query_info_type", it)
                     }
                 }
-                configParams?.requestAgent?.let { agent ->
+                configParams.requestAgent?.let { agent ->
                     setRequestAgent(agent)
                 }
                 addNetworkExtrasBundle(AdMobAdapter::class.java, networkExtras)
@@ -34,7 +36,7 @@ internal class GetTokenUseCase(private val configParams: GamInitParameters?) {
         return withTimeoutOrNull(DefaultTokenTimeoutMs) {
             suspendCoroutine { continuation ->
                 QueryInfo.generate(
-                    context,
+                    adTypeParam.activity.applicationContext,
                     adFormat,
                     adRequest,
                     object : QueryInfoGenerationCallback() {
@@ -50,8 +52,6 @@ internal class GetTokenUseCase(private val configParams: GamInitParameters?) {
             }
         }
     }
-
-    companion object {
-        private const val DefaultTokenTimeoutMs = 1000L
-    }
 }
+
+private const val DefaultTokenTimeoutMs = 1000L

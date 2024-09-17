@@ -20,9 +20,10 @@ import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.utils.SdkDispatchers
 import org.json.JSONObject
 
-val FairBidDemandId = DemandId("fair_bid")
+internal val FairBidDemandId = DemandId("fair_bid")
 
-class FairBidAdapter :
+@Suppress("unused")
+internal class FairBidAdapter :
     Adapter,
     Initializable<FairBidParameters> {
     override val demandId: DemandId = FairBidDemandId

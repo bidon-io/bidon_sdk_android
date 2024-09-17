@@ -1,33 +1,32 @@
 package org.bidon.admob.impl
 
-import android.content.Context
 import com.google.ads.mediation.admob.AdMobAdapter
-import com.google.android.gms.ads.AdFormat
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.query.QueryInfo
 import com.google.android.gms.ads.query.QueryInfoGenerationCallback
 import kotlinx.coroutines.withTimeoutOrNull
 import org.bidon.admob.AdmobInitParameters
 import org.bidon.admob.ext.asBundle
+import org.bidon.admob.ext.getAdFormat
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.auction.AdTypeParam
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-/**
- * Created by Aleksei Cherniaev on 18/08/2023.
- */
-internal class GetTokenUseCase(private val configParams: AdmobInitParameters?) {
-    suspend operator fun invoke(context: Context, adTypeParam: AdTypeParam): String? {
+internal object GetTokenUseCase {
+    suspend operator fun invoke(
+        configParams: AdmobInitParameters,
+        adTypeParam: AdTypeParam
+    ): String? {
         val adRequest = AdRequest.Builder()
             .apply {
                 val networkExtras = BidonSdk.regulation.asBundle().apply {
-                    configParams?.queryInfoType?.let {
+                    configParams.queryInfoType?.let {
                         putString("query_info_type", it)
                     }
                 }
-                configParams?.requestAgent?.let { agent ->
+                configParams.requestAgent?.let { agent ->
                     setRequestAgent(agent)
                 }
                 addNetworkExtrasBundle(AdMobAdapter::class.java, networkExtras)
@@ -37,7 +36,7 @@ internal class GetTokenUseCase(private val configParams: AdmobInitParameters?) {
         return withTimeoutOrNull(DefaultTokenTimeoutMs) {
             suspendCoroutine { continuation ->
                 QueryInfo.generate(
-                    context,
+                    adTypeParam.activity.applicationContext,
                     adFormat,
                     adRequest,
                     object : QueryInfoGenerationCallback() {
@@ -53,15 +52,6 @@ internal class GetTokenUseCase(private val configParams: AdmobInitParameters?) {
             }
         }
     }
-
-    private fun AdTypeParam.getAdFormat() =
-        when (this) {
-            is AdTypeParam.Banner -> AdFormat.BANNER
-            is AdTypeParam.Interstitial -> AdFormat.INTERSTITIAL
-            is AdTypeParam.Rewarded -> AdFormat.REWARDED
-        }
-
-    companion object {
-        private const val DefaultTokenTimeoutMs = 1000L
-    }
 }
+
+private const val DefaultTokenTimeoutMs = 1000L

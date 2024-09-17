@@ -6,7 +6,7 @@ import org.bidon.sdk.adapter.AdapterParameters
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.AdUnit
 
-data class ApplovinParameters(
+internal class ApplovinParameters(
     val key: String,
 ) : AdapterParameters
 

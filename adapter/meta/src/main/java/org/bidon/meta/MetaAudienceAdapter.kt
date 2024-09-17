@@ -33,9 +33,10 @@ import kotlin.coroutines.suspendCoroutine
 /**
  * Created by Aleksei Cherniaev on 08/08/2023.
  */
-val MetaDemandId = DemandId("meta")
+internal val MetaDemandId = DemandId("meta")
 
-class MetaAudienceAdapter :
+@Suppress("unused")
+internal class MetaAudienceAdapter :
     Adapter.Bidding,
     SupportsRegulation,
     SupportsTestMode by SupportsTestModeImpl(),
@@ -49,8 +50,8 @@ class MetaAudienceAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam) =
-        BidderTokenProvider.getBidderToken(context)
+    override suspend fun getToken(adTypeParam: AdTypeParam): String? =
+        BidderTokenProvider.getBidderToken(adTypeParam.activity.applicationContext)
 
     override suspend fun init(context: Context, configParams: MetaParams) = suspendCoroutine {
         if (isTestMode) {
