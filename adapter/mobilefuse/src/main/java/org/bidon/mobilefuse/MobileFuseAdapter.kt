@@ -32,12 +32,13 @@ import kotlin.coroutines.suspendCoroutine
 /**
  * Created by Aleksei Cherniaev on 06/07/2023.
  */
-val MobileFuseDemandId = DemandId("mobilefuse")
+internal val MobileFuseDemandId = DemandId("mobilefuse")
 
 /**
  * [MobileFuse Documentation](https://docs.mobilefuse.com/docs/android-interstitial-ads)
  */
-class MobileFuseAdapter :
+@Suppress("unused")
+internal class MobileFuseAdapter :
     Adapter.Bidding,
     Initializable<MobileFuseParams>,
     SupportsRegulation,
@@ -51,8 +52,8 @@ class MobileFuseAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam) =
-        GetMobileFuseTokenUseCase(context, isTestMode)
+    override suspend fun getToken(adTypeParam: AdTypeParam): String? =
+        GetMobileFuseTokenUseCase(adTypeParam.activity.applicationContext, isTestMode)
 
     override suspend fun init(context: Context, configParams: MobileFuseParams) = suspendCoroutine { continuation ->
         MobileFuseSettings.setTestMode(isTestMode)
@@ -71,7 +72,7 @@ class MobileFuseAdapter :
         )
     }
 
-    override fun parseConfigParam(json: String): MobileFuseParams = MobileFuseParams
+    override fun parseConfigParam(json: String): MobileFuseParams = MobileFuseParams()
 
     override fun updateRegulation(regulation: Regulation) {
         MobileFuse.setPrivacyPreferences(regulation.toMobileFusePrivacyPreferences())

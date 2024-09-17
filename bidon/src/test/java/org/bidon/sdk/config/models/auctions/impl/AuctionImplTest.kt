@@ -72,10 +72,10 @@ internal class AuctionImplTest : ConcurrentTest() {
     private val testee: Auction by lazy {
         AuctionImpl(
             adaptersSource = adaptersSource,
+            getTokens = tokenGetter,
             getAuctionRequest = getAuctionRequestUseCase,
-            auctionStat = auctionStat,
             executeAuction = executeAuctionUseCase,
-            tokenGetter = tokenGetter,
+            auctionStat = auctionStat,
             biddingConfig = biddingConfig,
         )
     }

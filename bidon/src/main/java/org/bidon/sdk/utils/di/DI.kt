@@ -182,10 +182,10 @@ internal object DI {
             factory<Auction> {
                 AuctionImpl(
                     adaptersSource = get(),
+                    getTokens = get(),
                     getAuctionRequest = get(),
                     executeAuction = get(),
                     auctionStat = get(),
-                    tokenGetter = get(),
                     biddingConfig = get()
                 )
             }

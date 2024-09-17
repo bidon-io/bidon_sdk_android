@@ -37,7 +37,8 @@ internal val UnityAdsDemandId = DemandId("unityads")
 /**
  * [Documentation](https://docs.unity.com/ads/en/manual/InitializingTheAndroidSDK)
  */
-class UnityAdsAdapter :
+@Suppress("unused")
+internal class UnityAdsAdapter :
     Adapter.Network,
     SupportsRegulation,
     SupportsTestMode by SupportsTestModeImpl(),

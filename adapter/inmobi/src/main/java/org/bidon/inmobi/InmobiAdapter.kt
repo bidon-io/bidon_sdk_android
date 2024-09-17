@@ -38,7 +38,8 @@ import kotlin.coroutines.suspendCoroutine
  */
 internal val InmobiDemandId = DemandId("inmobi")
 
-class InmobiAdapter :
+@Suppress("unused")
+internal class InmobiAdapter :
     Adapter.Network,
     Initializable<InmobiParams>,
     SupportsRegulation,

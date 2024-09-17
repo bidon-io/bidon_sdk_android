@@ -38,7 +38,8 @@ import kotlin.coroutines.suspendCoroutine
  */
 internal val AmazonDemandId = DemandId("amazon")
 
-class AmazonAdapter :
+@Suppress("unused")
+internal class AmazonAdapter :
     Adapter.Bidding,
     Initializable<AmazonParameters>,
     SupportsTestMode by SupportsTestModeImpl(),
@@ -55,7 +56,7 @@ class AmazonAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
+    override suspend fun getToken(adTypeParam: AdTypeParam): String? {
         val amazonInfo = obtainToken(slots, adTypeParam).takeIf { it.isNotEmpty() }?.also {
             this.amazonInfos.addAll(it)
         } ?: return null

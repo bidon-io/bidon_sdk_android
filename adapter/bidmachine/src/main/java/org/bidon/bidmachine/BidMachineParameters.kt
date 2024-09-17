@@ -7,7 +7,7 @@ import org.bidon.sdk.adapter.AdapterParameters
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.AdUnit
 
-data class BidMachineParameters(
+internal class BidMachineParameters(
     val sellerId: String,
     val endpoint: String?,
     val mediationConfig: List<String>?,

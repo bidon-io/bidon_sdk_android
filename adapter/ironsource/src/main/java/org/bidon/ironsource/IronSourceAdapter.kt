@@ -2,7 +2,6 @@ package org.bidon.ironsource
 
 import android.content.Context
 import com.ironsource.mediationsdk.IronSource
-import com.ironsource.mediationsdk.integration.IntegrationHelper
 import com.ironsource.mediationsdk.logger.IronSourceError
 import com.unity3d.ironsourceads.InitListener
 import com.unity3d.ironsourceads.InitRequest
@@ -57,10 +56,6 @@ internal class IronSourceAdapter :
     override suspend fun init(context: Context, configParams: IronSourceParameters) =
         suspendCancellableCoroutine { continuation ->
             IronSource.setAdaptersDebug(isTestMode)
-
-            // Verify the integration
-            // TODO: 08/08/2024 [glavatskikh] remove this check in production
-            IntegrationHelper.validateIntegration(context)
 
             // Set the IronSource callbacks router
             IronSource.setISDemandOnlyInterstitialListener(ironSourceRouter)

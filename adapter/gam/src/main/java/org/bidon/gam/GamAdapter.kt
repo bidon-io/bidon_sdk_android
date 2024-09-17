@@ -14,13 +14,13 @@ import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-val GamDemandId = DemandId("gam")
+internal val GamDemandId = DemandId("gam")
 
 /**
  * [Google Ad Manager](https://developers.google.com/ad-manager/mobile-ads-sdk/android/quick-start)
  */
 @Suppress("unused")
-class GamAdapter :
+internal class GamAdapter :
     Adapter.Bidding,
     Initializable<GamInitParameters>,
     AdProvider.Banner<GamBannerAuctionParams>,
@@ -28,7 +28,6 @@ class GamAdapter :
     AdProvider.Interstitial<GamFullscreenAdAuctionParams> {
 
     private var configParams: GamInitParameters? = null
-    private val obtainToken: GetTokenUseCase = GetTokenUseCase(configParams)
 
     override val demandId = GamDemandId
     override val adapterInfo = AdapterInfo(
@@ -36,8 +35,8 @@ class GamAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam) =
-        obtainToken(context, adTypeParam)
+    override suspend fun getToken(adTypeParam: AdTypeParam): String? =
+        configParams?.let { configParams -> GetTokenUseCase(configParams, adTypeParam) }
 
     override suspend fun init(context: Context, configParams: GamInitParameters): Unit = suspendCoroutine { continuation ->
         // Since Bidon is the mediator, no need to initialize Google Bidding's partner SDKs.

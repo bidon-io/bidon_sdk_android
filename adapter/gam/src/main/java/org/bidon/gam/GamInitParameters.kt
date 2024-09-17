@@ -8,7 +8,7 @@ import org.bidon.sdk.adapter.AdapterParameters
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.AdUnit
 
-data class GamInitParameters(
+internal class GamInitParameters(
     val requestAgent: String?,
     val queryInfoType: String?
 ) : AdapterParameters

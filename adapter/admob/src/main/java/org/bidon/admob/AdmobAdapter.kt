@@ -8,16 +8,21 @@ import org.bidon.admob.impl.AdmobBannerImpl
 import org.bidon.admob.impl.AdmobInterstitialImpl
 import org.bidon.admob.impl.AdmobRewardedImpl
 import org.bidon.admob.impl.GetTokenUseCase
-import org.bidon.sdk.adapter.*
+import org.bidon.sdk.adapter.AdProvider
+import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.adapter.Adapter
+import org.bidon.sdk.adapter.AdapterInfo
+import org.bidon.sdk.adapter.DemandId
+import org.bidon.sdk.adapter.Initializable
 import org.bidon.sdk.auction.AdTypeParam
 import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-val AdmobDemandId = DemandId("admob")
+internal val AdmobDemandId = DemandId("admob")
 
 @Suppress("unused")
-class AdmobAdapter :
+internal class AdmobAdapter :
     Adapter.Bidding,
     Initializable<AdmobInitParameters>,
     AdProvider.Banner<AdmobBannerAuctionParams>,
@@ -25,7 +30,6 @@ class AdmobAdapter :
     AdProvider.Interstitial<AdmobFullscreenAdAuctionParams> {
 
     private var configParams: AdmobInitParameters? = null
-    private var obtainToken: GetTokenUseCase? = null
 
     override val demandId = AdmobDemandId
     override val adapterInfo = AdapterInfo(
@@ -33,15 +37,14 @@ class AdmobAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam) =
-        obtainToken?.let { it(context, adTypeParam) }
+    override suspend fun getToken(adTypeParam: AdTypeParam): String? =
+        configParams?.let { configParams -> GetTokenUseCase(configParams, adTypeParam) }
 
     override suspend fun init(context: Context, configParams: AdmobInitParameters): Unit = suspendCoroutine { continuation ->
         // Since Bidon is the mediator, no need to initialize Google Bidding's partner SDKs.
         // https://developers.google.com/android/reference/com/google/android/gms/ads/MobileAds?hl=en#disableMediationAdapterInitialization(android.content.Context)
         // MobileAds.disableMediationAdapterInitialization(context)
         this.configParams = configParams
-        this.obtainToken = GetTokenUseCase(configParams)
         /**
          * Don't forget to disable automatic refresh for each AdUnit on the AdMob website.
          */
