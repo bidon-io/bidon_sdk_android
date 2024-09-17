@@ -1,3 +1,7 @@
+# Next 0.7.0-next.4
+## Features:
+- [BDN-755](https://appodeal.atlassian.net/browse/BDN-755) Changed Amazon Ads initialize logic
+
 # Next 0.7.0-next.3
 ## Features:
 - [BDN-687](https://appodeal.atlassian.net/browse/BDN-687) Improved auction cancellation handling
