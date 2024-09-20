@@ -19,7 +19,7 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.BidType
 import java.util.concurrent.atomic.AtomicBoolean
 
-class MobileFuseRewardedAdImpl :
+internal class MobileFuseRewardedAdImpl :
     AdSource.Rewarded<MobileFuseFullscreenAuctionParams>,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
