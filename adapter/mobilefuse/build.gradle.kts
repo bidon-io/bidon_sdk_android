@@ -22,5 +22,5 @@ dependencies {
     compileOnly(projects.bidon)
     testImplementation(projects.bidon)
 
-    implementation("com.mobilefuse.sdk:mobilefuse-sdk-core:1.6.2")
+    implementation("com.mobilefuse.sdk:mobilefuse-sdk-core:1.7.6")
 }

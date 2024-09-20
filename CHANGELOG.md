@@ -1,6 +1,7 @@
 # Next 0.7.0-next.4
 ## Features:
 - [BDN-755](https://appodeal.atlassian.net/browse/BDN-755) Changed Amazon Ads initialize logic
+- [BDN-762](https://appodeal.atlassian.net/browse/BDN-762) Updated MobileFuse SDK to 1.7.6
 
 # Next 0.7.0-next.3
 ## Features:

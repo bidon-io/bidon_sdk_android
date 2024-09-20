@@ -23,7 +23,7 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 import org.bidon.sdk.stats.models.BidType
 import java.util.concurrent.atomic.AtomicBoolean
 
-class MobileFuseBannerImpl :
+internal class MobileFuseBannerImpl :
     AdSource.Banner<MobileFuseBannerAuctionParams>,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {

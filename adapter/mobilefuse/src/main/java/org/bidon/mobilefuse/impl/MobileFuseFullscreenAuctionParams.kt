@@ -8,7 +8,7 @@ import org.bidon.sdk.auction.models.AdUnit
 /**
  * Created by Aleksei Cherniaev on 21/09/2023.
  */
-class MobileFuseFullscreenAuctionParams(
+internal class MobileFuseFullscreenAuctionParams(
     val activity: Activity,
     override val adUnit: AdUnit
 ) : AdAuctionParams {
@@ -17,7 +17,7 @@ class MobileFuseFullscreenAuctionParams(
     val placementId: String? = adUnit.extra?.getString("placement_id")
 }
 
-class MobileFuseBannerAuctionParams(
+internal class MobileFuseBannerAuctionParams(
     val activity: Activity,
     val bannerFormat: BannerFormat,
     override val adUnit: AdUnit
