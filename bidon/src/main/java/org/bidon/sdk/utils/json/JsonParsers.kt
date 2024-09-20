@@ -2,7 +2,6 @@ package org.bidon.sdk.utils.json
 
 import org.bidon.sdk.auction.models.AdUnitParser
 import org.bidon.sdk.auction.models.AuctionResponseParser
-import org.bidon.sdk.auction.models.RoundParser
 import org.bidon.sdk.config.models.ConfigResponseParser
 import org.bidon.sdk.utils.networking.BaseResponseErrorParser
 import org.bidon.sdk.utils.networking.BaseResponseParser
@@ -12,7 +11,6 @@ import kotlin.reflect.KClass
 /**
  * Created by Bidon Team on 08/02/2023.
  */
-@Suppress("RemoveRedundantQualifierName", "UNCHECKED_CAST")
 internal object JsonParsers {
 
     private val parsersFactories = mutableMapOf<KClass<*>, ParserFactory<*>>()
@@ -22,14 +20,15 @@ internal object JsonParsers {
         addParser { BaseResponseErrorParser() }
         addParser { ConfigResponseParser() }
         addParser { AuctionResponseParser() }
-        addParser { RoundParser() }
         addParser { AdUnitParser() }
     }
 
+    @Suppress("UNCHECKED_CAST")
     inline fun <reified T : Any> parseOrNull(jsonString: String): T? {
         return (parsersFactories[T::class] as ParserFactory<T>).instance.parseOrNull(jsonString)
     }
 
+    @Suppress("UNCHECKED_CAST")
     inline fun <reified T : Any> parseList(jsonArray: JSONArray?): List<T>? {
         if (jsonArray == null) return null
         val parser = (parsersFactories[T::class] as ParserFactory<T>).instance

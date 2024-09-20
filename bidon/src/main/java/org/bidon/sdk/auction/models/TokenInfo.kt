@@ -22,9 +22,3 @@ data class TokenInfo(
         NO_TOKEN("NO_TOKEN"),
     }
 }
-
-sealed class TokenResult {
-    data class Success(val token: String) : TokenResult()
-    object NoToken : TokenResult()
-    object TimeoutReached : TokenResult()
-}

@@ -7,7 +7,7 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.adapter.AdaptersSource
 import org.bidon.sdk.adapter.DemandAd
-import org.bidon.sdk.adapter.SupportsRegulation
+import org.bidon.sdk.adapter.ext.applyRegulation
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.AdTypeParam
@@ -240,20 +240,6 @@ internal class ExecuteAuctionUseCaseImpl(
         adSource.addAuctionConfigurationId(auctionConfigurationId)
         adSource.addAuctionConfigurationUid(auctionConfigurationUid)
         adSource.addExternalWinNotificationsEnabled(externalWinNotificationsEnabled)
-    }
-
-    private fun Adapter?.applyRegulation() {
-        (this as? SupportsRegulation)?.let { supportsRegulation ->
-            logInfo(
-                TAG,
-                "Applying regulation to ${demandId.demandId} <- " +
-                    "GDPR=${regulation.gdpr}, " +
-                    "COPPA=${regulation.coppa}, " +
-                    "usPrivacyString=${regulation.usPrivacyString}, " +
-                    "gdprConsentString=${regulation.gdprConsentString}"
-            )
-            supportsRegulation.updateRegulation(regulation)
-        }
     }
 
     private fun Adapter.getAdSources(adType: AdType): AdSource<AdAuctionParams>? {
