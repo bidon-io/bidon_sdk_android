@@ -19,7 +19,7 @@ import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.stats.models.asRoundStatus
 
-class RequestAdUnitUseCaseImpl : RequestAdUnitUseCase {
+internal class RequestAdUnitUseCaseImpl : RequestAdUnitUseCase {
 
     override suspend fun invoke(
         adSource: AdSource<AdAuctionParams>,
