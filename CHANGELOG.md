@@ -1,3 +1,7 @@
+# Next 0.7.0-next.5
+## Features:
+- [BDN-768](https://appodeal.atlassian.net/browse/BDN-768) Change Amazon Ads fetch token logic
+
 # Next 0.7.0-next.4
 ## Features:
 - [BDN-755](https://appodeal.atlassian.net/browse/BDN-755) Changed Amazon Ads initialize logic
