@@ -22,8 +22,8 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.regulation.Regulation
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.LinkedList
-import java.util.Queue
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.coroutines.resume
 
 /**
@@ -43,7 +43,7 @@ internal class AmazonBidManager {
      * - `Queue` implements FIFO (First In, First Out), ideal for processing multiple `DTBAdResponse` objects in the order they are received.
      * - `LinkedList` is used as the `Queue` implementation for efficient handling of adding and removing elements.
      */
-    private val dtbAdResponses = mutableMapOf<String, Queue<DTBAdResponse>>()
+    private val dtbAdResponses = ConcurrentHashMap<String, ConcurrentLinkedQueue<DTBAdResponse>>()
 
     /**
      * Retrieves the current regulation settings from BidonSdk.
@@ -65,8 +65,10 @@ internal class AmazonBidManager {
         if (amazonInfo.isEmpty()) return null
 
         amazonInfo.forEach { (slotUuid, dtbAdResponse) ->
-            dtbAdResponses.getOrPut(slotUuid) { LinkedList() }.add(dtbAdResponse)
+            dtbAdResponses.getOrPut(slotUuid) { ConcurrentLinkedQueue() }.add(dtbAdResponse)
         }
+
+        logInfo(TAG, "AmazonInfo dtbAdResponses -> $dtbAdResponses")
 
         return JSONArray().apply {
             amazonInfo.forEach { (slotUuid, dtbAdResponse) ->
