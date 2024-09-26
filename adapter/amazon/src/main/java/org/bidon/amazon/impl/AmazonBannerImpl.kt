@@ -5,6 +5,7 @@ import com.amazon.device.ads.DTBActivityMonitor
 import com.amazon.device.ads.DTBAdBannerListener
 import com.amazon.device.ads.DTBAdView
 import com.amazon.device.ads.SDKUtilities
+import org.bidon.amazon.AmazonBidManager
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
@@ -23,7 +24,7 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 
-internal class AmazonBannerImpl(private val amazonInfos: List<AmazonInfo>) :
+internal class AmazonBannerImpl(private val bidManager: AmazonBidManager) :
     AdSource.Banner<BannerAuctionParams>,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
@@ -46,20 +47,13 @@ internal class AmazonBannerImpl(private val amazonInfos: List<AmazonInfo>) :
 
     override fun load(adParams: BannerAuctionParams) {
         this.adParams = adParams
-        if (amazonInfos.isEmpty()) {
-            logError(TAG, "No Amazon slot found", BidonError.NoAppropriateAdUnitId)
-            emitEvent(AdEvent.LoadFailed(BidonError.NoAppropriateAdUnitId))
+        val slotUuid = adParams.slotUuid
+        if (slotUuid == null) {
+            emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, "slotUuid")))
             return
         }
-        adParams.slotUuid ?: run {
-            emitEvent(
-                AdEvent.LoadFailed(
-                    BidonError.IncorrectAdUnit(demandId = demandId, "slotUuid")
-                )
-            )
-            return
-        }
-        val dtbAdResponse = amazonInfos.firstOrNull { adParams.slotUuid == it.adSizes.slotUUID }?.dtbAdResponse
+
+        val dtbAdResponse = bidManager.getResponse(slotUuid)
         if (dtbAdResponse == null) {
             logError(TAG, "DTBAdResponse is null", BidonError.NoBid)
             emitEvent(AdEvent.LoadFailed(BidonError.NoBid))
