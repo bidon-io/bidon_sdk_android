@@ -101,7 +101,7 @@ internal class MobileFuseBannerImpl :
                             ad = it,
                             adValue = bannerAd.winningBidInfo.let { bidInfo ->
                                 AdValue(
-                                    adRevenue = bidInfo?.cpmPrice?.toDouble() ?: 0.0,
+                                    adRevenue = bidInfo?.cpmPrice?.div(1000.0) ?: 0.0,
                                     currency = bidInfo?.currency ?: AdValue.USD,
                                     precision = Precision.Precise
                                 )
