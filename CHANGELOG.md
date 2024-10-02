@@ -1,6 +1,7 @@
 # Next 0.7.0-beta.1
 ## Features:
 - [BDN-769](https://appodeal.atlassian.net/browse/BDN-769) Fixed MobileFuse SDK ad revenue calculation
+- [BDN-770](https://appodeal.atlassian.net/browse/BDN-770) BannerView destroy on UI thread
 
 # Next 0.7.0-next.5
 ## Features:

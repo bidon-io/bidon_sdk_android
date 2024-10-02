@@ -8,10 +8,12 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.R
 import org.bidon.sdk.adapter.AdEvent
@@ -43,9 +45,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class BannerView @JvmOverloads constructor(
     context: Context,
-    val auctionKey: String? = null,
     attrs: AttributeSet? = null,
     @AttrRes defStyleAtt: Int = 0,
+    val auctionKey: String? = null,
     private val demandAd: DemandAd = DemandAd(AdType.Banner),
 ) : FrameLayout(context, attrs, defStyleAtt),
     BannerAd,
@@ -240,14 +242,16 @@ class BannerView @JvmOverloads constructor(
             logInfo(TAG, "Sdk is not initialized")
             return
         }
-        adLifecycleFlow.value = AdLifecycle.Destroyed
-        visibilityTracker.stop()
-        auction.cancel()
-        winner?.adSource?.destroy()
-        winner = null
-        winnerSubscriberJob?.cancel()
-        winnerSubscriberJob = null
-        removeAllViews()
+        scope.launch(Dispatchers.Main.immediate) {
+            adLifecycleFlow.value = AdLifecycle.Destroyed
+            visibilityTracker.stop()
+            auction.cancel()
+            winner?.adSource?.destroy()
+            winner = null
+            winnerSubscriberJob?.cancel()
+            winnerSubscriberJob = null
+            removeAllViews()
+        }
     }
 
     private fun FrameLayout.addViewOnScreen(adSource: AdSource.Banner<*>) {
