@@ -11,7 +11,6 @@ import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
-import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
 import org.bidon.sdk.logs.analytic.Precision
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -85,8 +84,8 @@ internal class MobileFuseInterstitialImpl :
                             ad = it,
                             adValue = interstitialAd.winningBidInfo.let { bidInfo ->
                                 AdValue(
-                                    adRevenue = bidInfo?.cpmPrice?.toDouble() ?: 0.0,
-                                    currency = bidInfo?.currency ?: USD,
+                                    adRevenue = bidInfo?.cpmPrice?.div(1000.0) ?: 0.0,
+                                    currency = bidInfo?.currency ?: AdValue.USD,
                                     precision = Precision.Precise
                                 )
                             }

@@ -1,6 +1,10 @@
+# Next 0.7.0-beta.1
+## Features:
+- [BDN-769](https://appodeal.atlassian.net/browse/BDN-769) Fixed MobileFuse SDK ad revenue calculation
+
 # Next 0.7.0-next.5
 ## Features:
-- [BDN-768](https://appodeal.atlassian.net/browse/BDN-768) Change Amazon Ads fetch token logic
+- [BDN-768](https://appodeal.atlassian.net/browse/BDN-768) Changed Amazon Ads fetch token logic
 
 # Next 0.7.0-next.4
 ## Features:
