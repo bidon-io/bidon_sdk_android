@@ -32,7 +32,7 @@ internal class VungleBannerImpl :
     private var banner: BannerAd? = null
 
     override val isAdReadyToShow: Boolean
-        get() = banner?.getBannerView() != null
+        get() = banner?.canPlayAd() == true
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {

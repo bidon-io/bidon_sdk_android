@@ -34,7 +34,7 @@ internal class BigoAdsInterstitialImpl :
     private var interstitialAd: InterstitialAd? = null
 
     override val isAdReadyToShow: Boolean
-        get() = interstitialAd != null && interstitialAd?.isExpired != false
+        get() = interstitialAd?.isExpired == false
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {

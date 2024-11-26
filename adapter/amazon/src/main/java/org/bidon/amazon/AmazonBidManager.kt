@@ -72,10 +72,12 @@ internal class AmazonBidManager {
 
         return JSONArray().apply {
             amazonInfo.forEach { (slotUuid, dtbAdResponse) ->
-                put(JSONObject().apply {
-                    put("slot_uuid", slotUuid)
-                    put("price_point", SDKUtilities.getPricePoint(dtbAdResponse))
-                })
+                put(
+                    JSONObject().apply {
+                        put("slot_uuid", slotUuid)
+                        put("price_point", SDKUtilities.getPricePoint(dtbAdResponse))
+                    }
+                )
             }
         }.toString()
     }

@@ -34,7 +34,7 @@ internal class BigoAdsRewardedAdImpl :
     private var rewardVideoAd: RewardVideoAd? = null
 
     override val isAdReadyToShow: Boolean
-        get() = rewardVideoAd != null && rewardVideoAd?.isExpired != false
+        get() = rewardVideoAd?.isExpired == false
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {

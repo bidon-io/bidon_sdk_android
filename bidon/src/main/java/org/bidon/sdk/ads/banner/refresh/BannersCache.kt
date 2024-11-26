@@ -25,6 +25,7 @@ internal interface BannersCache {
         activity: Activity,
         format: BannerFormat,
         pricefloor: Double,
+        auctionKey: String?,
         extras: Extras,
         onLoaded: (Ad, AuctionInfo, BannerView) -> Unit,
         onFailed: (AuctionInfo?, BidonError) -> Unit,
@@ -45,6 +46,7 @@ internal class BannersCacheImpl : BannersCache {
         activity: Activity,
         format: BannerFormat,
         pricefloor: Double,
+        auctionKey: String?,
         extras: Extras,
         onLoaded: (Ad, AuctionInfo, BannerView) -> Unit,
         onFailed: (AuctionInfo?, BidonError) -> Unit,
@@ -56,7 +58,10 @@ internal class BannersCacheImpl : BannersCache {
         }
         if (!isLoading.getAndSet(true)) {
             activity.runOnUiThread {
-                val banner = BannerView(activity.applicationContext)
+                val banner = BannerView(
+                    context = activity.applicationContext,
+                    auctionKey = auctionKey
+                )
                 banner.setExtras(extras)
                 banner.setBannerFormat(format)
                 banner.setBannerListener(object : BannerListener {
