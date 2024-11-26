@@ -26,13 +26,16 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class BannerManager private constructor(
     private val bannersCache: BannersCache,
-    private val extras: Extras
+    private val extras: Extras,
+    private val auctionKey: String? = null,
 ) : PositionedBanner,
     Extras {
 
-    constructor() : this(
+    @JvmOverloads
+    constructor(auctionKey: String? = null) : this(
         bannersCache = BannersCacheImpl(),
-        extras = ExtrasImpl()
+        extras = ExtrasImpl(),
+        auctionKey = auctionKey,
     ) {
         logInfo(tag, "Created $this")
     }
@@ -120,6 +123,7 @@ class BannerManager private constructor(
                 activity = activity,
                 format = bannerFormat,
                 pricefloor = pricefloor,
+                auctionKey = auctionKey,
                 extras = extras,
                 onLoaded = { ad, auctionInfo, bannerView ->
                     this.nextBannerView = bannerView

@@ -1,3 +1,7 @@
+# 0.7.1-next.1
+## Features:
+- [BDN-816](https://appodeal.atlassian.net/browse/BDN-816) Stabilized SDK for Unity plugin
+
 # 0.7.0
 ## Promoted the beta release to the stable version
 
