@@ -38,6 +38,7 @@ import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.visibilitytracker.VisibilityTracker
+import org.json.JSONObject
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -269,11 +270,19 @@ class BannerView @JvmOverloads constructor(
             TAG,
             "View added(${adSource.demandId.demandId}): ${adViewHolder.networkAdview}. Size(${adViewHolder.widthDp}, ${adViewHolder.heightDp})"
         )
-        checkBannerShown(adViewHolder.networkAdview, onBannerShown = {
+        val onBannerShown = {
             adLifecycleFlow.value = AdLifecycle.Displayed
             adSource.ad?.let { listener.onAdShown(ad = it) }
             adSource.sendShowImpression()
-        })
+        }
+        if (isVisibilityTrackingEnabled()) {
+            checkBannerShown(
+                networkAdview = adViewHolder.networkAdview,
+                onBannerShown = onBannerShown
+            )
+        } else {
+            onBannerShown.invoke()
+        }
     }
 
     private fun conductAuction(activity: Activity, pricefloor: Double) {
@@ -348,6 +357,13 @@ class BannerView @JvmOverloads constructor(
                 is AdEvent.Expired -> listener.onAdExpired(adEvent.ad)
             }
         }.launchIn(scope)
+    }
+
+    private fun isVisibilityTrackingEnabled(): Boolean {
+        return when (val extra = getExtras()) {
+            is JSONObject -> extra.optBoolean("use_visibility_tracker", true)
+            else -> true
+        }
     }
 
     private fun checkBannerShown(networkAdview: View, onBannerShown: () -> Unit) {

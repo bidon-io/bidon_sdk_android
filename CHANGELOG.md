@@ -1,3 +1,7 @@
+# develop
+## Features:
+- [BDN-782](https://appodeal.atlassian.net/browse/BDN-782) Added ability to disable visibilityTracker
+
 # 0.7.3
 ## Features:
 - [BDN-840](https://appodeal.atlassian.net/browse/BDN-840) Synchronize public api for Unity plugin
