@@ -4,6 +4,7 @@ import android.content.Context
 import io.bidmachine.BidMachine
 import org.bidon.bidmachine.ext.adapterVersion
 import org.bidon.bidmachine.ext.sdkVersion
+import org.bidon.bidmachine.ext.toBidmachineAdFormat
 import org.bidon.bidmachine.impl.BMBannerAdImpl
 import org.bidon.bidmachine.impl.BMInterstitialAdImpl
 import org.bidon.bidmachine.impl.BMRewardedAdImpl
@@ -40,7 +41,10 @@ internal class BidMachineAdapter :
     )
 
     override suspend fun getToken(adTypeParam: AdTypeParam): String? =
-        BidMachine.getBidToken(adTypeParam.activity.applicationContext)
+        BidMachine.getBidToken(
+            adTypeParam.activity.applicationContext,
+            adTypeParam.toBidmachineAdFormat()
+        )
 
     override suspend fun init(context: Context, configParams: BidMachineParameters): Unit =
         suspendCoroutine { continuation ->

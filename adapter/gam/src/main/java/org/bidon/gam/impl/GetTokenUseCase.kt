@@ -4,6 +4,7 @@ import com.google.ads.mediation.admob.AdMobAdapter
 import com.google.android.gms.ads.admanager.AdManagerAdRequest
 import com.google.android.gms.ads.query.QueryInfo
 import com.google.android.gms.ads.query.QueryInfoGenerationCallback
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 import org.bidon.gam.GamInitParameters
 import org.bidon.gam.ext.asBundle
@@ -12,7 +13,6 @@ import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.auction.AdTypeParam
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 internal object GetTokenUseCase {
     suspend operator fun invoke(
@@ -34,7 +34,7 @@ internal object GetTokenUseCase {
             .build()
         val adFormat = adTypeParam.getAdFormat()
         return withTimeoutOrNull(DefaultTokenTimeoutMs) {
-            suspendCoroutine { continuation ->
+            suspendCancellableCoroutine { continuation ->
                 QueryInfo.generate(
                     adTypeParam.activity.applicationContext,
                     adFormat,

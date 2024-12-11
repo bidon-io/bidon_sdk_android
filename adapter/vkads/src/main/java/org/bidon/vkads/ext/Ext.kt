@@ -11,10 +11,10 @@ import com.my.target.common.models.IAdLoadingError.LoadErrorType.REQUEST_TIMEOUT
 import com.my.target.common.models.IAdLoadingError.LoadErrorType.REQUIRED_FIELD_MISSED
 import com.my.target.common.models.IAdLoadingError.LoadErrorType.UNDEFINED_DATA_ERROR
 import com.my.target.common.models.IAdLoadingError.LoadErrorType.UNDEFINED_PARSE_ERROR
-import org.bidon.sdk.BuildConfig
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo
 import org.bidon.sdk.config.BidonError
+import org.bidon.vkads.BuildConfig
 import org.bidon.vkads.VkAdsDemandId
 
 internal const val adapterVersion = BuildConfig.ADAPTER_VERSION

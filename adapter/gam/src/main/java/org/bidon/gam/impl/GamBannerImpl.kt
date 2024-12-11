@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.admanager.AdManagerAdView
 import org.bidon.gam.GamBannerAuctionParams
-import org.bidon.gam.GamInitParameters
 import org.bidon.gam.asBidonError
 import org.bidon.gam.ext.asBidonAdValue
 import org.bidon.sdk.adapter.*
@@ -23,8 +22,7 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
  * [OnPaidEventListener](https://developers.google.com/android/reference/com/google/android/gms/ads/OnPaidEventListener)
  */
 internal class GamBannerImpl(
-    configParams: GamInitParameters?,
-    private val getAdRequest: GetAdRequestUseCase = GetAdRequestUseCase(configParams),
+    private val getAdRequest: GetAdRequestUseCase = GetAdRequestUseCase(),
     private val getAdAuctionParams: GetAdAuctionParamsUseCase = GetAdAuctionParamsUseCase(),
 ) : AdSource.Banner<GamBannerAuctionParams>,
     AdEventFlow by AdEventFlowImpl(),
@@ -45,7 +43,6 @@ internal class GamBannerImpl(
     override fun load(adParams: GamBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
         val adUnitId = when (adParams) {
-            is GamBannerAuctionParams.Bidding -> adParams.adUnitId
             is GamBannerAuctionParams.Network -> adParams.adUnitId
         } ?: run {
             AdEvent.LoadFailed(
@@ -57,12 +54,6 @@ internal class GamBannerImpl(
         adSize = adParams.adSize
         bannerFormat = adParams.bannerFormat
         adParams.activity.runOnUiThread {
-            val adRequest = getAdRequest(adParams) ?: run {
-                AdEvent.LoadFailed(
-                    BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
-                )
-                return@runOnUiThread
-            }
             val adView = AdManagerAdView(adParams.activity.applicationContext).also {
                 adView = it
             }
@@ -105,7 +96,7 @@ internal class GamBannerImpl(
                         emitEvent(AdEvent.PaidRevenue(it, adValue.asBidonAdValue()))
                     }
                 }
-                adView.loadAd(adRequest)
+                adView.loadAd(getAdRequest())
             }
         }
     }

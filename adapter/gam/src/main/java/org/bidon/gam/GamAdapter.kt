@@ -7,9 +7,7 @@ import org.bidon.gam.ext.sdkVersion
 import org.bidon.gam.impl.GamBannerImpl
 import org.bidon.gam.impl.GamInterstitialImpl
 import org.bidon.gam.impl.GamRewardedImpl
-import org.bidon.gam.impl.GetTokenUseCase
 import org.bidon.sdk.adapter.*
-import org.bidon.sdk.auction.AdTypeParam
 import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -21,13 +19,11 @@ internal val GamDemandId = DemandId("gam")
  */
 @Suppress("unused")
 internal class GamAdapter :
-    Adapter.Bidding,
+    Adapter.Network,
     Initializable<GamInitParameters>,
     AdProvider.Banner<GamBannerAuctionParams>,
     AdProvider.Rewarded<GamFullscreenAdAuctionParams>,
     AdProvider.Interstitial<GamFullscreenAdAuctionParams> {
-
-    private var configParams: GamInitParameters? = null
 
     override val demandId = GamDemandId
     override val adapterInfo = AdapterInfo(
@@ -35,14 +31,10 @@ internal class GamAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun getToken(adTypeParam: AdTypeParam): String? =
-        configParams?.let { configParams -> GetTokenUseCase(configParams, adTypeParam) }
-
     override suspend fun init(context: Context, configParams: GamInitParameters): Unit = suspendCoroutine { continuation ->
         // Since Bidon is the mediator, no need to initialize Google Bidding's partner SDKs.
         // https://developers.google.com/android/reference/com/google/android/gms/ads/MobileAds?hl=en#disableMediationAdapterInitialization(android.content.Context)
         // MobileAds.disableMediationAdapterInitialization(context)
-        this.configParams = configParams
         /**
          * Don't forget set Automatic refresh is Disabled for each AdUnit.
          * Manage refresh rate with [BannerView.startAutoRefresh].
@@ -53,15 +45,15 @@ internal class GamAdapter :
     }
 
     override fun interstitial(): AdSource.Interstitial<GamFullscreenAdAuctionParams> {
-        return GamInterstitialImpl(configParams)
+        return GamInterstitialImpl()
     }
 
     override fun rewarded(): AdSource.Rewarded<GamFullscreenAdAuctionParams> {
-        return GamRewardedImpl(configParams)
+        return GamRewardedImpl()
     }
 
     override fun banner(): AdSource.Banner<GamBannerAuctionParams> {
-        return GamBannerImpl(configParams)
+        return GamBannerImpl()
     }
 
     override fun parseConfigParam(json: String): GamInitParameters {

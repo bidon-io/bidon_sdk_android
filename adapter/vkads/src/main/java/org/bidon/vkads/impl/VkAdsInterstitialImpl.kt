@@ -60,6 +60,11 @@ internal class VkAdsInterstitialImpl :
                 emitEvent(AdEvent.Clicked(getAd() ?: return))
             }
 
+            override fun onFailedToShow(interstitial: InterstitialAd) {
+                logInfo(TAG, "onFailedToShow: $this")
+                emitEvent(AdEvent.ShowFailed(BidonError.Unspecified(demandId)))
+            }
+
             override fun onDismiss(interstitial: InterstitialAd) {
                 logInfo(TAG, "onDismiss: $this")
                 emitEvent(AdEvent.Closed(getAd() ?: return))
