@@ -1,3 +1,22 @@
+# develop
+## Features:
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Admob/Gam to 23.5.0
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Aamazon to 9.10.3
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Applovin to 13.0.1
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated BigoAds to 5.0.2
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Chartboost to 9.8.1
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated DtExchange to 8.3.3
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Inmobi to 10.7.8
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated IronSource to 8.4.0
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Meta to 6.18.0
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Mintegral to 16.8.81
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Mobilefuse to 1.8.0
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated VkAds to 5.24.0
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated UnityAds to 4.12.4
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Vungle to 7.4.2
+- [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Yandex to 7.7.0
+- [BDN-778](https://appodeal.atlassian.net/browse/BDN-778) Updated Bidmachine to 3.1.1
+
 # 0.7.1-next.1
 ## Features:
 - [BDN-816](https://appodeal.atlassian.net/browse/BDN-816) Stabilized SDK for Unity plugin

@@ -67,9 +67,6 @@ internal class ApplovinAdapter :
             if (regulation.ccpaApplies) {
                 AppLovinPrivacySettings.setDoNotSell(!regulation.hasCcpaConsent, context)
             }
-            if (regulation.coppaApplies) {
-                AppLovinPrivacySettings.setIsAgeRestrictedUser(true, context)
-            }
         }
     }
 

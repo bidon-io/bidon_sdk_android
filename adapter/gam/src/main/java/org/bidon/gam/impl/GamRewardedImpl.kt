@@ -6,7 +6,6 @@ import com.google.android.gms.ads.OnPaidEventListener
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import org.bidon.gam.GamFullscreenAdAuctionParams
-import org.bidon.gam.GamInitParameters
 import org.bidon.gam.asBidonError
 import org.bidon.gam.ext.asBidonAdValue
 import org.bidon.sdk.adapter.AdAuctionParamSource
@@ -23,8 +22,7 @@ import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 
 internal class GamRewardedImpl(
-    configParams: GamInitParameters?,
-    private val getAdRequest: GetAdRequestUseCase = GetAdRequestUseCase(configParams),
+    private val getAdRequest: GetAdRequestUseCase = GetAdRequestUseCase(),
     private val getFullScreenContentCallback: GetFullScreenContentCallbackUseCase = GetFullScreenContentCallbackUseCase(),
     private val obtainAdAuctionParams: GetAdAuctionParamsUseCase = GetAdAuctionParamsUseCase(),
 ) : AdSource.Rewarded<GamFullscreenAdAuctionParams>,
@@ -44,17 +42,10 @@ internal class GamRewardedImpl(
     override fun load(adParams: GamFullscreenAdAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
         val adUnitId = when (adParams) {
-            is GamFullscreenAdAuctionParams.Bidding -> adParams.adUnitId
             is GamFullscreenAdAuctionParams.Network -> adParams.adUnitId
         } ?: run {
             AdEvent.LoadFailed(
                 BidonError.IncorrectAdUnit(demandId = demandId, message = "adUnitId")
-            )
-            return
-        }
-        val adRequest = getAdRequest(adParams) ?: run {
-            AdEvent.LoadFailed(
-                BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
             )
             return
         }
@@ -92,7 +83,7 @@ internal class GamRewardedImpl(
                 }
             }
         }
-        RewardedAd.load(adParams.activity, adUnitId, adRequest, requestListener)
+        RewardedAd.load(adParams.activity, adUnitId, getAdRequest(), requestListener)
     }
 
     override fun show(activity: Activity) {

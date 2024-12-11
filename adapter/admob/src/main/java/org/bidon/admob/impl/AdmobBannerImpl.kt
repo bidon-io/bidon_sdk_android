@@ -7,7 +7,6 @@ import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.OnPaidEventListener
 import org.bidon.admob.AdmobBannerAuctionParams
-import org.bidon.admob.AdmobInitParameters
 import org.bidon.admob.asBidonError
 import org.bidon.admob.ext.asBidonAdValue
 import org.bidon.sdk.adapter.AdAuctionParamSource
@@ -29,8 +28,7 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
  * [OnPaidEventListener](https://developers.google.com/android/reference/com/google/android/gms/ads/OnPaidEventListener)
  */
 internal class AdmobBannerImpl(
-    configParams: AdmobInitParameters?,
-    private val getAdRequest: GetAdRequestUseCase = GetAdRequestUseCase(configParams),
+    private val getAdRequest: GetAdRequestUseCase = GetAdRequestUseCase(),
     private val getAdAuctionParams: GetAdAuctionParamsUseCase = GetAdAuctionParamsUseCase(),
 ) : AdSource.Banner<AdmobBannerAuctionParams>,
     AdEventFlow by AdEventFlowImpl(),
@@ -51,7 +49,6 @@ internal class AdmobBannerImpl(
     override fun load(adParams: AdmobBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
         val adUnitId: String = when (adParams) {
-            is AdmobBannerAuctionParams.Bidding -> adParams.adUnitId
             is AdmobBannerAuctionParams.Network -> adParams.adUnitId
         } ?: run {
             emitEvent(
@@ -65,14 +62,6 @@ internal class AdmobBannerImpl(
         adSize = adParams.adSize
         bannerFormat = adParams.bannerFormat
         adParams.activity.runOnUiThread {
-            val adRequest = getAdRequest(adParams) ?: run {
-                emitEvent(
-                    AdEvent.LoadFailed(
-                        BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
-                    )
-                )
-                return@runOnUiThread
-            }
             val adView = AdView(adParams.activity.applicationContext).also {
                 adView = it
             }
@@ -115,7 +104,7 @@ internal class AdmobBannerImpl(
                         emitEvent(AdEvent.PaidRevenue(it, adValue.asBidonAdValue()))
                     }
                 }
-                adView.loadAd(adRequest)
+                adView.loadAd(getAdRequest())
             }
         }
     }

@@ -61,6 +61,11 @@ internal class VkAdsRewardedAdImpl :
                 emitEvent(AdEvent.Clicked(getAd() ?: return))
             }
 
+            override fun onFailedToShow(p0: RewardedAd) {
+                logInfo(TAG, "onFailedToShow: $this")
+                emitEvent(AdEvent.ShowFailed(BidonError.Unspecified(demandId)))
+            }
+
             override fun onDismiss(rewarded: RewardedAd) {
                 logInfo(TAG, "onDismiss: $this")
                 emitEvent(AdEvent.Closed(getAd() ?: return))

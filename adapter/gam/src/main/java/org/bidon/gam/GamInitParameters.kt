@@ -32,21 +32,6 @@ sealed interface GamBannerAuctionParams : AdAuctionParams {
             return "GamBannerAuctionParams($adUnit)"
         }
     }
-
-    class Bidding(
-        override val activity: Activity,
-        override val bannerFormat: BannerFormat,
-        override val containerWidth: Float,
-        override val adUnit: AdUnit,
-    ) : GamBannerAuctionParams {
-        override val price: Double = adUnit.pricefloor
-        val adUnitId: String? = adUnit.extra?.getString("ad_unit_id")
-        val payload: String? = adUnit.extra?.getString("payload")
-
-        override fun toString(): String {
-            return "GamBannerAuctionParams($adUnitId, bidPrice=$price, payload=${payload?.take(20)})"
-        }
-    }
 }
 
 sealed interface GamFullscreenAdAuctionParams : AdAuctionParams {
@@ -61,19 +46,6 @@ sealed interface GamFullscreenAdAuctionParams : AdAuctionParams {
 
         override fun toString(): String {
             return "GamFullscreenAdAuctionParams($adUnit)"
-        }
-    }
-
-    class Bidding(
-        override val activity: Activity,
-        override val adUnit: AdUnit
-    ) : GamFullscreenAdAuctionParams {
-        override val price: Double = adUnit.pricefloor
-        val adUnitId: String? = adUnit.extra?.getString("ad_unit_id")
-        val payload: String? = adUnit.extra?.getString("payload")
-
-        override fun toString(): String {
-            return "GamFullscreenAdAuctionParams($adUnitId, bidPrice=$price, payload=${payload?.take(20)})"
         }
     }
 }

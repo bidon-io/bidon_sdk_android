@@ -6,7 +6,6 @@ import com.google.android.gms.ads.OnPaidEventListener
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import org.bidon.admob.AdmobFullscreenAdAuctionParams
-import org.bidon.admob.AdmobInitParameters
 import org.bidon.admob.asBidonError
 import org.bidon.admob.ext.asBidonAdValue
 import org.bidon.sdk.adapter.AdAuctionParamSource
@@ -21,8 +20,7 @@ import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 
 internal class AdmobInterstitialImpl(
-    configParams: AdmobInitParameters?,
-    private val getAdRequest: GetAdRequestUseCase = GetAdRequestUseCase(configParams),
+    private val getAdRequest: GetAdRequestUseCase = GetAdRequestUseCase(),
     private val getFullScreenContentCallback: GetFullScreenContentCallbackUseCase = GetFullScreenContentCallbackUseCase(),
     private val obtainAdAuctionParams: GetAdAuctionParamsUseCase = GetAdAuctionParamsUseCase(),
 ) : AdSource.Interstitial<AdmobFullscreenAdAuctionParams>,
@@ -41,16 +39,7 @@ internal class AdmobInterstitialImpl(
 
     override fun load(adParams: AdmobFullscreenAdAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
-        val adRequest = getAdRequest(adParams) ?: run {
-            emitEvent(
-                AdEvent.LoadFailed(
-                    BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
-                )
-            )
-            return
-        }
         val adUnitId = when (adParams) {
-            is AdmobFullscreenAdAuctionParams.Bidding -> adParams.adUnitId
             is AdmobFullscreenAdAuctionParams.Network -> adParams.adUnitId
         } ?: run {
             emitEvent(
@@ -89,7 +78,7 @@ internal class AdmobInterstitialImpl(
                 }
             }
         }
-        InterstitialAd.load(adParams.activity, adUnitId, adRequest, requestListener)
+        InterstitialAd.load(adParams.activity, adUnitId, getAdRequest(), requestListener)
     }
 
     override fun show(activity: Activity) {

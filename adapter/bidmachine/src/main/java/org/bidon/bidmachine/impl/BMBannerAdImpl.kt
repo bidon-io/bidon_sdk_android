@@ -9,9 +9,9 @@ import io.bidmachine.banner.BannerView
 import io.bidmachine.utils.BMError
 import org.bidon.bidmachine.BMAuctionResult
 import org.bidon.bidmachine.BMBannerAuctionParams
-import org.bidon.bidmachine.BidMachineBannerSize
 import org.bidon.bidmachine.asBidonErrorOnBid
 import org.bidon.bidmachine.asBidonErrorOnFill
+import org.bidon.bidmachine.ext.asBidMachineBannerSize
 import org.bidon.bidmachine.ext.asBidonAdValue
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
@@ -22,7 +22,6 @@ import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -194,17 +193,6 @@ internal class BMBannerAdImpl(
                 }
             )
             bannerView.load(adRequest)
-        }
-    }
-
-    private fun BannerFormat.asBidMachineBannerSize() = when (this) {
-        BannerFormat.Banner -> BidMachineBannerSize.Size_320x50
-        BannerFormat.LeaderBoard -> BidMachineBannerSize.Size_728x90
-        BannerFormat.MRec -> BidMachineBannerSize.Size_300x250
-        BannerFormat.Adaptive -> if (isTablet) {
-            BidMachineBannerSize.Size_728x90
-        } else {
-            BidMachineBannerSize.Size_320x50
         }
     }
 }

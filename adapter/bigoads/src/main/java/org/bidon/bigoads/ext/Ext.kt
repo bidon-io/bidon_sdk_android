@@ -10,7 +10,7 @@ import sg.bigo.ads.api.AdError
  * Created by Aleksei Cherniaev on 25/07/2023.
  */
 internal var adapterVersion = BuildConfig.ADAPTER_VERSION
-internal var sdkVersion = BigoAdSdk.getSDKVersion()
+internal var sdkVersion = BigoAdSdk.getSDKVersionName()
 
 internal fun AdError.asBidonError() = when (this.code) {
     AdError.ERROR_CODE_UNINITIALIZED -> BidonError.SdkNotInitialized

@@ -6,7 +6,6 @@ import com.google.android.gms.ads.OnPaidEventListener
 import com.google.android.gms.ads.admanager.AdManagerInterstitialAd
 import com.google.android.gms.ads.admanager.AdManagerInterstitialAdLoadCallback
 import org.bidon.gam.GamFullscreenAdAuctionParams
-import org.bidon.gam.GamInitParameters
 import org.bidon.gam.asBidonError
 import org.bidon.gam.ext.asBidonAdValue
 import org.bidon.sdk.adapter.AdAuctionParamSource
@@ -22,8 +21,7 @@ import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 
 internal class GamInterstitialImpl(
-    configParams: GamInitParameters?,
-    private val getAdRequest: GetAdRequestUseCase = GetAdRequestUseCase(configParams),
+    private val getAdRequest: GetAdRequestUseCase = GetAdRequestUseCase(),
     private val getFullScreenContentCallback: GetFullScreenContentCallbackUseCase = GetFullScreenContentCallbackUseCase(),
     private val obtainAdAuctionParams: GetAdAuctionParamsUseCase = GetAdAuctionParamsUseCase(),
 ) : AdSource.Interstitial<GamFullscreenAdAuctionParams>,
@@ -43,17 +41,10 @@ internal class GamInterstitialImpl(
     override fun load(adParams: GamFullscreenAdAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
         val adUnitId = when (adParams) {
-            is GamFullscreenAdAuctionParams.Bidding -> adParams.adUnitId
             is GamFullscreenAdAuctionParams.Network -> adParams.adUnitId
         } ?: run {
             AdEvent.LoadFailed(
                 BidonError.IncorrectAdUnit(demandId = demandId, message = "adUnitId")
-            )
-            return
-        }
-        val adRequest = getAdRequest(adParams) ?: run {
-            AdEvent.LoadFailed(
-                BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
             )
             return
         }
@@ -86,7 +77,7 @@ internal class GamInterstitialImpl(
                 }
             }
         }
-        AdManagerInterstitialAd.load(adParams.activity, adUnitId, adRequest, requestListener)
+        AdManagerInterstitialAd.load(adParams.activity, adUnitId, getAdRequest(), requestListener)
     }
 
     override fun show(activity: Activity) {

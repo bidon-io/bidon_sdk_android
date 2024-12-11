@@ -3,10 +3,10 @@ package org.bidon.yandex.ext
 import com.yandex.mobile.ads.common.AdRequestError
 import com.yandex.mobile.ads.common.ImpressionData
 import com.yandex.mobile.ads.common.MobileAds
-import org.bidon.sdk.BuildConfig
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
+import org.bidon.yandex.BuildConfig
 import org.bidon.yandex.YandexDemandId
 import org.json.JSONObject
 
