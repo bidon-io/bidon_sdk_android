@@ -1,4 +1,4 @@
-# develop
+# 0.7.1
 ## Features:
 - [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Admob/Gam to 23.5.0
 - [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Aamazon to 9.10.3
