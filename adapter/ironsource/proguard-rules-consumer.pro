@@ -1,3 +1,8 @@
+-keeppackagenames org.bidon.**
+
+-keep class org.bidon.ironsource.IronSourceAdapter { *; }
+
+# IronSource rules
 -keepclassmembers class * implements android.os.Parcelable {
     public static final android.os.Parcelable$Creator *;
 }
