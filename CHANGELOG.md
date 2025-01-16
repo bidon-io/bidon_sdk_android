@@ -1,5 +1,6 @@
-# develop
+# 0.7.2
 ## Features:
+- [BDN-877](https://appodeal.atlassian.net/browse/BDN-877) Updated DtExchange to 8.3.5
 - [BDN-873](https://appodeal.atlassian.net/browse/BDN-873) Standardized timestamp logic for stats requests
 
 # 0.7.1
