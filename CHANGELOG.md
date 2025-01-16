@@ -1,3 +1,7 @@
+# develop
+## Features:
+- [BDN-873](https://appodeal.atlassian.net/browse/BDN-873) Standardized timestamp logic for stats requests
+
 # 0.7.1
 ## Features:
 - [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Admob/Gam to 23.5.0

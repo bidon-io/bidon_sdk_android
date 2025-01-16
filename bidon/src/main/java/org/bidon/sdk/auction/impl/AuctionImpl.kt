@@ -76,15 +76,16 @@ internal class AuctionImpl(
                     resultsCollector.startRound(adTypeParam.pricefloor)
                     resultsCollector.serverBiddingStarted()
 
+                    // Request for Auction-data at /auction
+                    val auctionId = UUID.randomUUID().toString()
+                    auctionStat.markAuctionStarted(auctionId, adTypeParam)
+
                     val tokens = getTokens(
                         adTypeParam = adTypeParam,
                         adaptersSource = adaptersSource,
                         tokenTimeout = biddingConfig.tokenTimeout
                     )
 
-                    // Request for Auction-data at /auction
-                    val auctionId = UUID.randomUUID().toString()
-                    auctionStat.markAuctionStarted(auctionId, adTypeParam)
                     getAuctionRequest.request(
                         adTypeParam = adTypeParam,
                         auctionId = auctionId,
