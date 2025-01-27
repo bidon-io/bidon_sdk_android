@@ -209,7 +209,7 @@ fun BannerScreen(navController: NavHostController) {
             Row {
                 AppTextButton(text = "Notify Loss") {
                     bannerView?.also {
-                        it.notifyLoss(winnerDemandId = "Unity", winnerEcpm = 4.0)
+                        it.notifyLoss(winnerDemandId = "Unity", winnerPrice = 4.0)
                         logFlow.log("NotifyLoss")
                     }
                 }

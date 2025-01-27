@@ -281,9 +281,9 @@ class BannerManager private constructor(
         return extras.getExtras()
     }
 
-    override fun notifyLoss(activity: Activity, winnerDemandId: String, winnerEcpm: Double) {
+    override fun notifyLoss(activity: Activity, winnerDemandId: String, winnerPrice: Double) {
         activity.runOnUiThread {
-            nextBannerView?.notifyLoss(winnerDemandId, winnerEcpm)
+            nextBannerView?.notifyLoss(winnerDemandId, winnerPrice)
             nextBannerView = null
             nextAd = null
         }

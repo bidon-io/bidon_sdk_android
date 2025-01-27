@@ -40,4 +40,9 @@ interface Segment {
      * If value is null, then the existing attribute will be removed.
      */
     fun putCustomAttribute(attribute: String, value: Any?)
+
+    /**
+     * Retrieves all custom attributes.
+     */
+    fun getCustomAttributes(): Map<String, Any>
 }

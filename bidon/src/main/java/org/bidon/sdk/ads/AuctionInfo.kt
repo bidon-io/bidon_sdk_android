@@ -18,8 +18,6 @@ class AdUnitInfo(
     val bidType: String?,
     val fillStartTs: Long?,
     val fillFinishTs: Long?,
-    val timeout: Long?,
     val status: String?,
-    val errorMessage: String? = null,
     val ext: String?,
 )

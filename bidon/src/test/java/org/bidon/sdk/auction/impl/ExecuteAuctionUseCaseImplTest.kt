@@ -145,7 +145,7 @@ internal class ExecuteAuctionUseCaseImplTest : ConcurrentTest() {
 //                                roundId = "r123",
 //                                currencyCode = USD,
 //                                dsp = null,
-//                                ecpm = 1.3,
+//                                price = 1.3,
 //                                auctionId = "a123",
 //                                adUnit = AdUnit(
 //                                    demandId = "admob",

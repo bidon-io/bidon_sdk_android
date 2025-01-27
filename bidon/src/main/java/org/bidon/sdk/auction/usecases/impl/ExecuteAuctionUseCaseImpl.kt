@@ -124,7 +124,7 @@ internal class ExecuteAuctionUseCaseImpl(
                         if (auctionResult.roundStatus == RoundStatus.Successful &&
                             !shouldRequestNext(auctionResult = auctionResult, next = nextRequested)
                         ) {
-                            logInfo(TAG, "Request was skipped since the filled eCPM larger than the next one")
+                            logInfo(TAG, "Request was skipped since the filled price larger than the next one")
                             adUnitQueue.forEach {
                                 resultsCollector.add(
                                     getBelowPriceFloorResult(
@@ -215,10 +215,10 @@ internal class ExecuteAuctionUseCaseImpl(
         if (next == null) {
             return false
         }
-        val currentEcpm = auctionResult.adSource.getStats().ecpm
-        val nextEcpm = next.pricefloor
-        logInfo(TAG, "Loaded eCPM: $currentEcpm, next requested eCPM: $nextEcpm")
-        return currentEcpm < nextEcpm
+        val currentPrice = auctionResult.adSource.getStats().price
+        val nextPrice = next.pricefloor
+        logInfo(TAG, "Loaded price: $currentPrice, next requested price: $nextPrice")
+        return currentPrice < nextPrice
     }
 
     private fun applyParams(

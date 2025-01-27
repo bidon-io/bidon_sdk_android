@@ -27,7 +27,7 @@ internal class TestInterstitialImpl(
 //    override val ad: Ad
 //        get() = Ad(
 //            demandAd = demandAd,
-//            ecpm = adParams.lineItem.pricefloor,
+//            price = adParams.lineItem.pricefloor,
 //            roundId = roundId,
 //            networkName = "monetizationNetwork-asd",
 //            dsp = "DSP-bidmachine",

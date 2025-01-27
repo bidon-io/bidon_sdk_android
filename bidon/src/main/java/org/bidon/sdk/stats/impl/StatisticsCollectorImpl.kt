@@ -60,7 +60,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
         fillStartTs = null,
         fillFinishTs = null,
         roundStatus = null,
-        ecpm = 0.0,
+        price = 0.0,
         dspSource = null,
         auctionPricefloor = 0.0,
         tokenInfo = null,
@@ -83,7 +83,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
         }
         return Ad(
             demandAd = demandAd,
-            ecpm = stat.ecpm,
+            price = stat.price,
             currencyCode = AdValue.USD,
             auctionId = auctionId,
             dsp = stat.dspSource,
@@ -154,7 +154,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
         }
     }
 
-    override fun sendLoss(winnerDemandId: String, winnerEcpm: Double) {
+    override fun sendLoss(winnerDemandId: String, winnerPrice: Double) {
         if (!externalWinNotificationsEnabled) {
             logInfo(TAG, "External WinLoss Notifications disabled: external_win_notifications=false")
             return
@@ -164,7 +164,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
                 sendLossRequest.invoke(
                     WinLossRequestData.Loss(
                         winnerDemandId = winnerDemandId,
-                        winnerEcpm = winnerEcpm,
+                        winnerPrice = winnerPrice,
                         demandAd = demandAd,
                         body = createImpressionRequestBody(adType)
                     )
@@ -210,21 +210,21 @@ class StatisticsCollectorImpl : StatisticsCollector {
         stat = stat.copy(
             fillStartTs = SystemTimeNow,
             adUnit = adUnit,
-            ecpm = pricefloor ?: stat.ecpm,
+            price = pricefloor ?: stat.price,
         )
     }
 
-    override fun markFillFinished(roundStatus: RoundStatus, ecpm: Double?) {
+    override fun markFillFinished(roundStatus: RoundStatus, price: Double?) {
         stat = stat.copy(
             fillFinishTs = SystemTimeNow,
             roundStatus = roundStatus,
-            ecpm = ecpm ?: 0.0
+            price = price ?: 0.0
         )
     }
 
     override fun setPrice(price: Double) {
         stat = stat.copy(
-            ecpm = price
+            price = price
         )
     }
 
@@ -268,7 +268,7 @@ class StatisticsCollectorImpl : StatisticsCollector {
             auctionConfigurationId = auctionConfigurationId,
             auctionConfigurationUid = auctionConfigurationUid,
             demandId = demandId.demandId,
-            price = stat.ecpm,
+            price = stat.price,
             banner = banner,
             interstitial = interstitial,
             rewarded = rewarded,

@@ -63,7 +63,7 @@ public class JavaMainActivity extends AppCompatActivity {
 
             @Override
             public void onRevenuePaid(@NonNull Ad ad, @NonNull AdValue adValue) {
-                double a = ad.getEcpm();
+                double a = ad.getPrice();
                 adValue.getAdRevenue();
                 adValue.getCurrency();
                 adValue.getPrecision();

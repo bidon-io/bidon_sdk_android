@@ -103,12 +103,12 @@ internal class RewardedImpl(
         this.userListener = listener
     }
 
-    override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {
+    override fun notifyLoss(winnerDemandId: String, winnerPrice: Double) {
         if (!BidonSdk.isInitialized()) {
             logInfo(TAG, "Sdk is not initialized")
             return
         }
-        adCache.pop()?.adSource?.sendLoss(winnerDemandId, winnerEcpm)
+        adCache.pop()?.adSource?.sendLoss(winnerDemandId, winnerPrice)
         destroyAd()
     }
 

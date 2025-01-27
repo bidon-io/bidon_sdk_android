@@ -164,9 +164,9 @@ internal class ResultsCollectorImpl(
             .filter { it.roundStatus == RoundStatus.Successful }
             .filter {
                 /**
-                 * Received ecpm should not be less then initial one [sourcePriceFloor].
+                 * Received price should not be less then initial one [sourcePriceFloor].
                  */
-                val isAbovePricefloor = it.adSource.getStats().ecpm >= sourcePriceFloor
+                val isAbovePricefloor = it.adSource.getStats().price >= sourcePriceFloor
                 if (!isAbovePricefloor) {
                     it.adSource.markBelowPricefloor()
                 }
@@ -187,7 +187,7 @@ internal class ResultsCollectorImpl(
                                 logInfo(TAG, "Notified loss: ${adSource.demandId}")
                                 adSource.notifyLoss(
                                     winner.adSource.demandId.demandId,
-                                    winner.adSource.getStats().ecpm
+                                    winner.adSource.getStats().price
                                 )
                             }
                             if (auctionResult.roundStatus == RoundStatus.Successful) {

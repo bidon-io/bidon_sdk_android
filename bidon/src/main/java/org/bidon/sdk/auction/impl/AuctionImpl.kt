@@ -286,7 +286,7 @@ internal class AuctionImpl(
                     logInfo(TAG, "Notified loss: ${adSource.demandId}")
                     adSource.notifyLoss(
                         winner.adSource.demandId.demandId,
-                        winner.adSource.getStats().ecpm
+                        winner.adSource.getStats().price
                     )
                 }
                 if (auctionResult.roundStatus == RoundStatus.Successful) {

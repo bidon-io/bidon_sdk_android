@@ -58,7 +58,6 @@ fun AdUnitInfo.toJson(): String {
                 "fill_start_ts": $fillStartTs,
                 "fill_finish_ts": $fillFinishTs,
                 "status": ${status?.let { "\"$it\"" }},
-                "error_message": ${errorMessage?.let { "\"$it\"" }},
                 "ext": ${ext?.let { "\"$it\"" }}
             }
     """.trimIndent()
@@ -69,7 +68,7 @@ internal fun Ad.getImpressionInfo(): String {
     val networkName = networkName
     val placementId = null
     val placementName = null
-    val revenue = ecpm
+    val revenue = price
     val currency = currencyCode?.let { "\"$it\"" }
     val precision = if (adUnit.bidType == BidType.RTB) "exact" else "estimated"
     val demandSource = dsp?.let { "\"$it\"" }
