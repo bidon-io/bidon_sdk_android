@@ -8,7 +8,7 @@ internal interface ExternalWinLossNotification {
 
     fun notifyLoss(
         winnerDemandId: String,
-        winnerEcpm: Double,
+        winnerPrice: Double,
 
         /**
          * The publisher should be informed about failed loading in case of auction is cancelled.

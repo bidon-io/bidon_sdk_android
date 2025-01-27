@@ -1,3 +1,7 @@
+# Develop
+## Features:
+- [BDN-840](https://appodeal.atlassian.net/browse/BDN-840) Synchronize public api for Unity plugin
+
 # 0.7.2
 ## Features:
 - [BDN-877](https://appodeal.atlassian.net/browse/BDN-877) Updated DtExchange to 8.3.5

@@ -198,8 +198,8 @@ class BannerView @JvmOverloads constructor(
         userListener = listener
     }
 
-    override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {
-        logInfo(TAG, "Notify Loss invoked with Winner($winnerDemandId, $winnerEcpm)")
+    override fun notifyLoss(winnerDemandId: String, winnerPrice: Double) {
+        logInfo(TAG, "Notify Loss invoked with Winner($winnerDemandId, $winnerPrice)")
         if (!BidonSdk.isInitialized()) {
             logInfo(TAG, "Sdk is not initialized")
             return
@@ -214,7 +214,7 @@ class BannerView @JvmOverloads constructor(
                 if (!wasNotified.getAndSet(true)) {
                     winner?.adSource?.sendLoss(
                         winnerDemandId = winnerDemandId,
-                        winnerEcpm = winnerEcpm,
+                        winnerPrice = winnerPrice,
                     )
                     destroyAd()
                 }

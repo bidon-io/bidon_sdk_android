@@ -96,6 +96,10 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
         logInfo(TAG, "Updated attributes=$attributes")
     }
 
+    override fun getCustomAttributes(): Map<String, Any> {
+        return attributesFlow.value.customAttributes
+    }
+
     override fun parseSegmentUid(rootJsonResponse: String) {
         runCatching {
             val newSegmentUid = JSONObject(rootJsonResponse)

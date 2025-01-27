@@ -20,7 +20,7 @@ internal sealed interface WinLossRequestData {
 
     data class Loss(
         val winnerDemandId: String,
-        val winnerEcpm: Double,
+        val winnerPrice: Double,
         override val demandAd: DemandAd,
         override val body: ImpressionRequestBody
     ) : WinLossRequestData {

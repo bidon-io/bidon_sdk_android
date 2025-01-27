@@ -16,7 +16,7 @@ sealed interface AuctionResult {
         override val roundStatus: RoundStatus,
     ) : AuctionResult {
         override fun toString(): String {
-            return "AuctionResult.Network(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
+            return "AuctionResult.Network(price=${adSource.getStats().price}, roundStatus=$roundStatus, ${adSource.demandId})"
         }
     }
 
@@ -25,7 +25,7 @@ sealed interface AuctionResult {
         override val roundStatus: RoundStatus,
     ) : AuctionResult {
         override fun toString(): String {
-            return "AuctionResult.Bidding(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
+            return "AuctionResult.Bidding(price=${adSource.getStats().price}, roundStatus=$roundStatus, ${adSource.demandId})"
         }
     }
 
@@ -36,7 +36,7 @@ sealed interface AuctionResult {
     ) : AuctionResult {
         override val adSource: AdSource<*> get() = error("unexpected")
         override fun toString(): String {
-            return "AuctionResult.${adUnit.getType()}(ecpm=${adUnit.pricefloor}, roundStatus=$roundStatus, ${adUnit.demandId})"
+            return "AuctionResult.${adUnit.getType()}(price=${adUnit.pricefloor}, roundStatus=$roundStatus, ${adUnit.demandId})"
         }
     }
 }

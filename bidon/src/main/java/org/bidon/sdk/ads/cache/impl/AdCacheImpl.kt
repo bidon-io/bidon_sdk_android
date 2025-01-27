@@ -92,7 +92,7 @@ internal class AdCacheImpl(
             auction?.start(
                 demandAd = demandAd,
                 adTypeParam = adTypeParam.copy(
-                    pricefloor = maxOf(adTypeParam.pricefloor, results.value.firstOrNull()?.adSource?.getStats()?.ecpm ?: 0.0)
+                    pricefloor = maxOf(adTypeParam.pricefloor, results.value.firstOrNull()?.adSource?.getStats()?.price ?: 0.0)
                 ),
                 onSuccess = { winners, auctionInfo ->
                     scope.launch {
@@ -150,7 +150,7 @@ internal class AdCacheImpl(
 
     private fun List<AuctionResult>.asString(): String {
         return "(${this.size}) " + this.joinToString { auctionResult ->
-            auctionResult.adSource.getStats().let { "${it.demandId.demandId}:${it.ecpm}" }
+            auctionResult.adSource.getStats().let { "${it.demandId.demandId}:${it.price}" }
         }
     }
 }

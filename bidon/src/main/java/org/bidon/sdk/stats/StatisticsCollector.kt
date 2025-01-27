@@ -23,7 +23,7 @@ interface StatisticsCollector {
     fun sendShowImpression()
     fun sendClickImpression()
     fun sendRewardImpression()
-    fun sendLoss(winnerDemandId: String, winnerEcpm: Double)
+    fun sendLoss(winnerDemandId: String, winnerPrice: Double)
     fun sendWin()
 
     /**
@@ -39,7 +39,7 @@ interface StatisticsCollector {
     fun setDsp(dspSource: String?)
     fun setTokenInfo(tokenInfo: TokenInfo)
     fun markFillStarted(adUnit: AdUnit, pricefloor: Double?)
-    fun markFillFinished(roundStatus: RoundStatus, ecpm: Double?)
+    fun markFillFinished(roundStatus: RoundStatus, price: Double?)
     fun markWin()
     fun markLoss()
     fun markBelowPricefloor()

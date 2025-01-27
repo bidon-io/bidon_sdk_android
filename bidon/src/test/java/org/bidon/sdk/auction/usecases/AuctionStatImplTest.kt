@@ -13,7 +13,7 @@ import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.BidsInfo
 import org.bidon.sdk.ads.banner.helper.DeviceInfo
 import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
+import org.bidon.sdk.auction.impl.MaxPriceAuctionResolver
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.models.AuctionResult
@@ -46,7 +46,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
     private val testee: AuctionStat by lazy {
         AuctionStatImpl(
             statsRequest = statRequestUseCase,
-            resolver = MaxEcpmAuctionResolver
+            resolver = MaxPriceAuctionResolver
         )
     }
 
@@ -100,7 +100,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 every { it.demandId } returns DemandId("vungle")
                                 every { it.getStats() } returns BidStat(
                                     demandId = DemandId("vungle"),
-                                    ecpm = 1.24,
+                                    price = 1.24,
                                     auctionId = "auction_id_123",
                                     fillStartTs = 916,
                                     fillFinishTs = 917,
@@ -138,7 +138,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         adSource = mockk<AdSource<*>>(relaxed = true).also {
                             every { it.getStats() } returns BidStat(
                                 demandId = DemandId("bidmachine"),
-                                ecpm = 0.20,
+                                price = 0.20,
                                 auctionId = "auction_id_123",
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
@@ -169,7 +169,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         adSource = mockk<AdSource<*>>(relaxed = true).also {
                             every { it.getStats() } returns BidStat(
                                 demandId = DemandId("admob"),
-                                ecpm = 26.0,
+                                price = 26.0,
                                 auctionId = "auction_id_123",
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
@@ -267,7 +267,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                 getDemandStatAdapter(demandId = "dem4", status = RoundStatus.UnknownAdapter),
                 getDemandStatAdapter(demandId = "bid3", status = RoundStatus.UnknownAdapter),
             ),
-            winnerEcpm = 1.24,
+            winnerPrice = 1.24,
             noBids = listOf(
                 BidsInfo(
                     bidType = BidType.RTB.code,
@@ -327,7 +327,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 every { it.demandId } returns DemandId("bidmachine")
                                 every { it.getStats() } returns BidStat(
                                     demandId = DemandId("bidmachine"),
-                                    ecpm = 1.5,
+                                    price = 1.5,
                                     auctionId = "auction_id_123",
                                     fillStartTs = 916,
                                     fillFinishTs = 917,
@@ -360,7 +360,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         adSource = mockk<AdSource<*>>(relaxed = true).also {
                             every { it.getStats() } returns BidStat(
                                 demandId = DemandId("dem1"),
-                                ecpm = 1.3,
+                                price = 1.3,
                                 auctionId = "auction_id_123",
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
@@ -391,7 +391,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         adSource = mockk<AdSource<*>>(relaxed = true).also {
                             every { it.getStats() } returns BidStat(
                                 demandId = DemandId("dem2"),
-                                ecpm = 10.5,
+                                price = 10.5,
                                 auctionId = "auction_id_123",
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
@@ -492,7 +492,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                 getDemandStatAdapter(demandId = "dem3", status = RoundStatus.UnknownAdapter),
                 getDemandStatAdapter(demandId = "dem4", status = RoundStatus.UnknownAdapter),
             ),
-            winnerEcpm = 1.5,
+            winnerPrice = 1.5,
             winnerDemandId = DemandId("bidmachine"),
             noBids = listOf(
                 BidsInfo(
@@ -593,7 +593,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                                 every { it.demandId } returns DemandId("bidmachine")
                                 every { it.getStats() } returns BidStat(
                                     demandId = DemandId("bidmachine"),
-                                    ecpm = 1.5,
+                                    price = 1.5,
                                     auctionId = "auction_id_123",
                                     fillStartTs = 916,
                                     fillFinishTs = 917,
@@ -626,7 +626,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         adSource = mockk<AdSource<*>>(relaxed = true).also {
                             every { it.getStats() } returns BidStat(
                                 demandId = DemandId("dem1"),
-                                ecpm = 1.3,
+                                price = 1.3,
                                 auctionId = "auction_id_123",
                                 fillStartTs = 986,
                                 fillFinishTs = 987,
@@ -657,7 +657,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         adSource = mockk<AdSource<*>>(relaxed = true).also {
                             every { it.getStats() } returns BidStat(
                                 demandId = DemandId("dem2"),
-                                ecpm = 10.5,
+                                price = 10.5,
                                 auctionId = "auction_id_123",
                                 fillStartTs = 986,
                                 fillFinishTs = 987,

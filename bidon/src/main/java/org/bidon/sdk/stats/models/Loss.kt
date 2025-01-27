@@ -10,5 +10,5 @@ internal data class Loss(
     @field:JsonName("demand_id")
     val demandId: String,
     @field:JsonName("price")
-    val ecpm: Double,
+    val price: Double,
 ) : Serializable

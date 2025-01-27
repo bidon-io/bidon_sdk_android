@@ -115,7 +115,7 @@ internal class AuctionStatImpl(
             auctionId = auctionId,
             pricefloor = result.pricefloor,
             winnerDemandId = roundWinner?.adSource?.demandId,
-            winnerEcpm = roundWinner?.adSource?.getStats()?.ecpm,
+            winnerPrice = roundWinner?.adSource?.getStats()?.price,
             noBids = result.noBidsInfo,
             demands = results,
         )
@@ -128,7 +128,7 @@ internal class AuctionStatImpl(
                 StatsAdUnit(
                     demandId = stat.demandId.demandId,
                     status = roundStatus.code,
-                    price = stat.ecpm,
+                    price = stat.price,
                     tokenStartTs = null,
                     tokenFinishTs = null,
                     bidType = BidType.CPM.code,
@@ -147,7 +147,7 @@ internal class AuctionStatImpl(
                 StatsAdUnit(
                     demandId = stat.demandId.demandId,
                     status = roundStatus.code,
-                    price = stat.ecpm,
+                    price = stat.price,
                     tokenStartTs = stat.tokenInfo?.tokenStartTs,
                     tokenFinishTs = stat.tokenInfo?.tokenFinishTs,
                     bidType = BidType.RTB.code,
@@ -190,7 +190,7 @@ internal class AuctionStatImpl(
                 auctionId = auctionId,
                 pricefloor = auctionData.pricefloor,
                 winnerDemandId = winner?.adSource?.demandId,
-                winnerEcpm = winner?.adSource?.getStats()?.ecpm,
+                winnerPrice = winner?.adSource?.getStats()?.price,
                 demands = roundStat.demands.map { demandStat ->
                     demandStat.copy(
                         status = getFinalStatus(
@@ -198,7 +198,7 @@ internal class AuctionStatImpl(
 
                             isWinner = demandStat.demandId == (winner as? AuctionResult.Network)?.adSource?.demandId?.demandId &&
                                 demandStat.adUnitUid == (winner as? AuctionResult.Network)?.adSource?.getStats()?.adUnit?.uid &&
-                                demandStat.price == (winner as? AuctionResult.Network)?.adSource?.getStats()?.ecpm
+                                demandStat.price == (winner as? AuctionResult.Network)?.adSource?.getStats()?.price
                         )
                     )
                 },
@@ -232,8 +232,8 @@ internal class AuctionStatImpl(
 
     private fun updateWinnerIfNeed(roundWinner: AuctionResult?): AuctionResult? {
         if (roundWinner == null) return winner
-        val currentEcpm = winner?.adSource?.getStats()?.ecpm ?: 0.0
-        return if (currentEcpm < roundWinner.adSource.getStats().ecpm) {
+        val currentPrice = winner?.adSource?.getStats()?.price ?: 0.0
+        return if (currentPrice < roundWinner.adSource.getStats().price) {
             this.winner = roundWinner
             roundWinner
         } else {
@@ -272,7 +272,7 @@ internal class AuctionStatImpl(
                 else -> "FAIL"
             },
             winnerDemandId = stat?.demandId?.demandId.takeIf { isSucceed },
-            price = stat?.ecpm.takeIf { isSucceed },
+            price = stat?.price.takeIf { isSucceed },
             auctionStartTs = auctionStartTs,
             auctionFinishTs = auctionFinishTs,
             bidType = stat?.bidType?.code,

@@ -23,7 +23,7 @@ import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.impl.AuctionImpl
-import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
+import org.bidon.sdk.auction.impl.MaxPriceAuctionResolver
 import org.bidon.sdk.auction.impl.ResultsCollectorImpl
 import org.bidon.sdk.auction.usecases.AuctionStat
 import org.bidon.sdk.auction.usecases.ExecuteAuctionUseCase
@@ -153,11 +153,7 @@ internal object DI {
 
             // [SegmentDataSource] should be singleton per session
             singleton<TokenDataSource> { TokenDataSourceImpl(keyValueStorage = get()) }
-            singleton<Regulation> {
-                RegulationImpl(
-                    iabConsent = get()
-                )
-            }
+            singleton<Regulation> { RegulationImpl() }
             /**
              * [SegmentSynchronizer] depends on it
              */
@@ -178,7 +174,7 @@ internal object DI {
                 )
             }
             factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
-            factory<AuctionResolver> { MaxEcpmAuctionResolver }
+            factory<AuctionResolver> { MaxPriceAuctionResolver }
             factory<Auction> {
                 AuctionImpl(
                     adaptersSource = get(),
@@ -247,7 +243,10 @@ internal object DI {
             }
             factory<DataProvider> {
                 DataProviderImpl(
-                    deviceBinder = DeviceBinder(deviceDataSource = get(), locationDataSource = get()),
+                    deviceBinder = DeviceBinder(
+                        deviceDataSource = get(),
+                        locationDataSource = get()
+                    ),
                     appBinder = AppBinder(dataSource = get()),
                     sessionBinder = SessionBinder(dataSource = get()),
                     tokenBinder = TokenBinder(dataSource = get()),

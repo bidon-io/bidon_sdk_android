@@ -72,7 +72,7 @@ internal class RequestAdUnitUseCaseImpl : RequestAdUnitUseCase {
 
             logInfo(TAG, "FillFinished: $adUnit. \nResult: ${auctionResult.roundStatus}")
 
-            adSource.markFillFinished(requestStatus, adSource.ad?.ecpm)
+            adSource.markFillFinished(requestStatus, adSource.ad?.price)
 
             auctionResult
         }

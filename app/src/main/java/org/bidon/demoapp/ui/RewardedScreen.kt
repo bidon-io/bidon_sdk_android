@@ -166,7 +166,7 @@ fun RewardedScreen(
                 ) {
                     rewardedAd.notifyLoss(
                         winnerDemandId = "some_winner_demand",
-                        winnerEcpm = 123.456
+                        winnerPrice = 123.456
                     )
                     logFlow.log("NotifyLoss")
                 }

@@ -39,7 +39,7 @@ internal class BannersCacheImpl : BannersCache {
     private val Tag get() = TAG
     private val isLoading = AtomicBoolean(false)
     private val cache = sortedMapOf<Pair<Ad, AuctionInfo>, BannerView>({ ad1, ad2 ->
-        ((ad2.first.ecpm - ad1.first.ecpm) * 1000000).toInt()
+        ((ad2.first.price - ad1.first.price) * 1000000).toInt()
     })
 
     override fun get(

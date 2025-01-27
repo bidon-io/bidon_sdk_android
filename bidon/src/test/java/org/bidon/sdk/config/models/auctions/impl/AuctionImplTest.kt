@@ -18,7 +18,7 @@ import org.bidon.sdk.ads.banner.helper.DeviceInfo
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.impl.AuctionImpl
-import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
+import org.bidon.sdk.auction.impl.MaxPriceAuctionResolver
 import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResponse
 import org.bidon.sdk.auction.usecases.AuctionStat
@@ -65,7 +65,7 @@ internal class AuctionImplTest : ConcurrentTest() {
     private val auctionStat: AuctionStat by lazy {
         AuctionStatImpl(
             statRequestUseCase,
-            resolver = MaxEcpmAuctionResolver
+            resolver = MaxPriceAuctionResolver
         )
     }
 
@@ -194,8 +194,8 @@ internal class AuctionImplTest : ConcurrentTest() {
                 val winnerAd = winner.adSource.ad
                 requireNotNull(winnerAd)
                 assertThat(winnerAd.adUnit.label).isEqualTo("admob2")
-                assertThat(winnerAd.ecpm).isEqualTo(2.2235)
-                assertThat(winner.adSource.getStats().ecpm).isEqualTo(2.2235)
+                assertThat(winnerAd.price).isEqualTo(2.2235)
+                assertThat(winner.adSource.getStats().price).isEqualTo(2.2235)
                 val roundStat = slot<List<RoundStat>>()
                 val demandAd = slot<DemandAd>()
                 // AND CHECK STAT REQUEST
@@ -274,8 +274,8 @@ internal class AuctionImplTest : ConcurrentTest() {
                 val winnerAd = winner.adSource.ad
                 requireNotNull(winnerAd)
                 assertThat(winnerAd.adUnit.label).isEqualTo("AAAA2")
-                assertThat(winnerAd.ecpm).isEqualTo(2.25)
-                assertThat(winner.adSource.getStats().ecpm).isEqualTo(2.25)
+                assertThat(winnerAd.price).isEqualTo(2.25)
+                assertThat(winner.adSource.getStats().price).isEqualTo(2.25)
             },
             onFailure = { auctionInfo, throwable ->
                 error("unexpected: $throwable")
