@@ -1,18 +1,18 @@
-# develop
+# 0.7.4 (2025.02.06)
 ## Features:
 - [BDN-782](https://appodeal.atlassian.net/browse/BDN-782) Added ability to disable visibilityTracker
 - [BDN-895](https://appodeal.atlassian.net/browse/BDN-895) Implemented ability to obtain banner size in BannerManager
 
-# 0.7.3
+# 0.7.3 (2025.02.05)
 ## Features:
 - [BDN-840](https://appodeal.atlassian.net/browse/BDN-840) Synchronize public api for Unity plugin
 
-# 0.7.2
+# 0.7.2 (2025.01.16)
 ## Features:
 - [BDN-877](https://appodeal.atlassian.net/browse/BDN-877) Updated DtExchange to 8.3.5
 - [BDN-873](https://appodeal.atlassian.net/browse/BDN-873) Standardized timestamp logic for stats requests
 
-# 0.7.1
+# 0.7.1 (2024.12.11)
 ## Features:
 - [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Admob/Gam to 23.5.0
 - [BDN-799](https://appodeal.atlassian.net/browse/BDN-799) Updated Aamazon to 9.10.3
@@ -35,7 +35,7 @@
 ## Features:
 - [BDN-816](https://appodeal.atlassian.net/browse/BDN-816) Stabilized SDK for Unity plugin
 
-# 0.7.0
+# 0.7.0 (2024.11.18)
 ## Promoted the beta release to the stable version
 
 # 0.7.0-beta.1
@@ -82,7 +82,7 @@
 - [BDN-687](https://appodeal.atlassian.net/browse/BDN-687) Provided AuctionInfo to public callback
 - [BDN-703](https://appodeal.atlassian.net/browse/BDN-703) Update Amazon to 9.10.2
 
-# Release 0.6.0
+# Release 0.6.0 (2024.06.31)
 ## Features:
 - [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update Bidmachine to 2.7.0
 - [BDN-705](https://appodeal.atlassian.net/browse/BDN-705) Update AppLovin to 12.6.0
@@ -98,7 +98,7 @@
 - [BDN-643](https://appodeal.atlassian.net/browse/BDN-643) Merge Bidding And Classic Demands Into One Auction
 - [BDN-643](https://appodeal.atlassian.net/browse/BDN-643) Added auction key field to public ad api
 
-# Skip Release 0.5
+# Skip Release 0.5 (2024.06.31)
 ## Features:
 - [BDN-596](https://appodeal.atlassian.net/browse/BDN-596) Add bid_finish_ts for BID_TIMEOUT_REACHED
 - [BDN-492](https://appodeal.atlassian.net/browse/BDN-492) Continue awaiting adapter after timed out
