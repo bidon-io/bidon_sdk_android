@@ -54,7 +54,7 @@ class BannerManager private constructor(
     private var _bannerFormat: BannerFormat = BannerFormat.Banner
 
     override val bannerFormat: BannerFormat get() = _bannerFormat
-    override val adSize: AdSize? get() = currentBannerView?.adSize
+    override val adSize: AdSize? get() = nextBannerView?.adSize ?: currentBannerView?.adSize
 
     override var isDisplaying: Boolean = false
         private set

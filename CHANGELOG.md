@@ -1,6 +1,7 @@
 # develop
 ## Features:
 - [BDN-782](https://appodeal.atlassian.net/browse/BDN-782) Added ability to disable visibilityTracker
+- [BDN-895](https://appodeal.atlassian.net/browse/BDN-895) Implemented ability to obtain banner size in BannerManager
 
 # 0.7.3
 ## Features:
