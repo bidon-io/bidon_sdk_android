@@ -1,3 +1,21 @@
+# Develop (2025.02.06)
+## Features:
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated Amazon to 10.0.0
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated Applovin to 13.1.0
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated Admob/Gam to 23.6.0
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated Bidmachine to 3.2.0
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated BigoAds to 5.1.0
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated Chartboost to 9.8.2
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated DTExchange to 8.3.6
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated Inmobi to 10.8.0
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated IronSource to 8.7.0
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated Mintegral to 16.9.41
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated Mobilefuse to 1.9.0
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated UnityAds to 4.13.1
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated VkAds to 5.27.1
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated Vungle to 7.4.3
+- [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated Yandex to 7.9.0
+
 # 0.7.4 (2025.02.06)
 ## Features:
 - [BDN-782](https://appodeal.atlassian.net/browse/BDN-782) Added ability to disable visibilityTracker

@@ -9,6 +9,7 @@ import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
@@ -54,16 +55,11 @@ internal class BigoAdsBannerImpl :
         val bannerSize = when (adParams.bannerFormat) {
             BannerFormat.Banner -> AdSize.BANNER
             BannerFormat.MRec -> AdSize.MEDIUM_RECTANGLE
-            BannerFormat.Adaptive -> AdSize.BANNER
-            BannerFormat.LeaderBoard -> {
-                return emitEvent(
-                    AdEvent.LoadFailed(
-                        BidonError.AdFormatIsNotSupported(
-                            demandId.demandId,
-                            adParams.bannerFormat
-                        )
-                    )
-                )
+            BannerFormat.LeaderBoard -> AdSize.LEADERBOARD
+            BannerFormat.Adaptive -> if (isTablet) {
+                AdSize.LEADERBOARD
+            } else {
+                AdSize.BANNER
             }
         }.also { bannerSize = it }
 

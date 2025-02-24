@@ -22,5 +22,5 @@ dependencies {
     compileOnly(projects.bidon)
     testImplementation(projects.bidon)
 
-    implementation("com.ironsource.sdk:mediationsdk:8.4.0")
+    implementation("com.ironsource.sdk:mediationsdk:8.7.0")
 }

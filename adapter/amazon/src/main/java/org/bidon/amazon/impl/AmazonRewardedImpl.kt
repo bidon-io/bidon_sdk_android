@@ -57,7 +57,7 @@ internal class AmazonRewardedImpl(private val bidManager: AmazonBidManager) :
         val interstitialAd = DTBAdInterstitial(
             adParams.activity,
             object : DTBAdInterstitialListener {
-                override fun onAdLoaded(p0: View?) {
+                override fun onAdLoaded(view: View?) {
                     logInfo(TAG, "onAdLoaded")
                     emitEvent(AdEvent.Fill(getAd() ?: return))
                 }
