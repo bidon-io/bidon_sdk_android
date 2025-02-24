@@ -1,5 +1,14 @@
 package org.bidon.vungle.ext
 
+import com.vungle.ads.AdExpiredError
+import com.vungle.ads.AdExpiredOnPlayError
+import com.vungle.ads.AdNotLoadedCantPlay
+import com.vungle.ads.AdPayloadError
+import com.vungle.ads.AdResponseEmptyError
+import com.vungle.ads.InvalidBidPayloadError
+import com.vungle.ads.NetworkTimeoutError
+import com.vungle.ads.NetworkUnreachable
+import com.vungle.ads.SdkNotInitialized
 import com.vungle.ads.VungleAds
 import com.vungle.ads.VungleError
 import org.bidon.sdk.config.BidonError
@@ -12,14 +21,18 @@ import org.bidon.vungle.VungleDemandId
 internal var adapterVersion = BuildConfig.ADAPTER_VERSION
 internal var sdkVersion = VungleAds.getSdkVersion()
 
-internal fun VungleError?.asBidonError() = when (this?.code) {
-    VungleError.AD_EXPIRED -> BidonError.Expired(VungleDemandId)
-    VungleError.SDK_NOT_INITIALIZED -> BidonError.SdkNotInitialized
-    VungleError.ALREADY_PLAYING_ANOTHER_AD,
-    VungleError.AD_UNABLE_TO_PLAY,
-    VungleError.AD_IS_LOADING,
-    VungleError.AD_IS_PLAYING -> BidonError.AdNotReady
-    // Request failed with error: 10001, impression auctioned but unsold
-    10001 -> BidonError.NoFill(VungleDemandId)
-    else -> BidonError.Unspecified(VungleDemandId)
+internal fun VungleError?.asBidonError() = when (this) {
+    is SdkNotInitialized -> BidonError.SdkNotInitialized
+    is NetworkUnreachable,
+    is NetworkTimeoutError -> BidonError.NetworkError(VungleDemandId)
+
+    is AdNotLoadedCantPlay -> BidonError.AdNotReady
+    is AdResponseEmptyError -> BidonError.NoFill(VungleDemandId)
+    is AdPayloadError,
+    is InvalidBidPayloadError -> BidonError.NoBid
+
+    is AdExpiredError,
+    is AdExpiredOnPlayError -> BidonError.Expired(VungleDemandId)
+
+    else -> BidonError.Unspecified(VungleDemandId, this)
 }

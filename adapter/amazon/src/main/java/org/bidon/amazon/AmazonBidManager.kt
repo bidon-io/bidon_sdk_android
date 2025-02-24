@@ -2,6 +2,8 @@ package org.bidon.amazon
 
 import com.amazon.device.ads.AdError
 import com.amazon.device.ads.DTBAdCallback
+import com.amazon.device.ads.DTBAdNetwork
+import com.amazon.device.ads.DTBAdNetworkInfo
 import com.amazon.device.ads.DTBAdRequest
 import com.amazon.device.ads.DTBAdResponse
 import com.amazon.device.ads.DTBAdSize
@@ -117,7 +119,8 @@ internal class AmazonBidManager {
      * @return The DTBAdResponse object, or null if the request fails.
      */
     private suspend fun getDTBAdResponse(adSize: DTBAdSize): DTBAdResponse? = suspendCancellableCoroutine { continuation ->
-        val loader = DTBAdRequest()
+        val adNetworkInfo = DTBAdNetworkInfo(DTBAdNetwork.CUSTOM_MEDIATION)
+        val loader = DTBAdRequest(adNetworkInfo)
         loader.applyRegulation(regulation)
         loader.setSizes(adSize)
         loader.loadAd(object : DTBAdCallback {
