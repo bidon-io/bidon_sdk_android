@@ -10,7 +10,6 @@ import org.bidon.sdk.adapter.*
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.AdType
-import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
@@ -31,9 +30,6 @@ internal class GamBannerImpl(
     override var isAdReadyToShow: Boolean = false
 
     private var adView: AdManagerAdView? = null
-    private var price: Double? = null
-    private var adSize: AdSize? = null
-    private var bannerFormat: BannerFormat? = null
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return getAdAuctionParams(auctionParamsScope, AdType.Banner)
@@ -50,9 +46,6 @@ internal class GamBannerImpl(
             )
             return
         }
-        price = adParams.price
-        adSize = adParams.adSize
-        bannerFormat = adParams.bannerFormat
         adParams.activity.runOnUiThread {
             val adView = AdManagerAdView(adParams.activity.applicationContext).also {
                 adView = it
@@ -101,14 +94,7 @@ internal class GamBannerImpl(
         }
     }
 
-    override fun getAdView(): AdViewHolder? = adView?.let {
-        val adSize = adSize ?: return null
-        AdViewHolder(
-            networkAdview = it,
-            widthDp = adSize.width,
-            heightDp = adSize.height
-        )
-    }
+    override fun getAdView(): AdViewHolder? = adView?.let { AdViewHolder(it) }
 
     override fun destroy() {
         logInfo(TAG, "destroy $this")

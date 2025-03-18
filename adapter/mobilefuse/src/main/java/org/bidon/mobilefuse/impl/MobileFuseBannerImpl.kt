@@ -11,8 +11,6 @@ import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
-import org.bidon.sdk.auction.ext.height
-import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -29,7 +27,6 @@ internal class MobileFuseBannerImpl :
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var fuseBannerAd: MobileFuseBannerAd? = null
-    private var bannerFormat: BannerFormat? = null
 
     /**
      * This flag is used to prevent [AdError]-callback from being exposed twice.
@@ -62,7 +59,6 @@ internal class MobileFuseBannerImpl :
                 return
             }
         }
-        this.bannerFormat = adParams.bannerFormat
         // placementId should be configured in the mediation platform UI and passed back to this method:
         val adSize = when (adParams.bannerFormat) {
             BannerFormat.Banner -> MobileFuseBannerAd.AdSize.BANNER_320x50
@@ -156,17 +152,7 @@ internal class MobileFuseBannerImpl :
         bannerAd.loadAdFromBiddingToken(adParams.signalData)
     }
 
-    override fun getAdView(): AdViewHolder? {
-        logInfo(TAG, "getAdView: $this")
-        val bannerFormat = bannerFormat ?: return null
-        return fuseBannerAd?.let {
-            AdViewHolder(
-                networkAdview = it,
-                widthDp = bannerFormat.width,
-                heightDp = bannerFormat.height
-            )
-        }
-    }
+    override fun getAdView(): AdViewHolder? = fuseBannerAd?.let { AdViewHolder(it) }
 
     override fun destroy() {
         logInfo(TAG, "destroy $this")

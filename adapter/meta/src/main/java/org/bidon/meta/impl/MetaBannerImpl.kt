@@ -12,9 +12,6 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.auction.ext.height
-import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -32,7 +29,6 @@ class MetaBannerImpl :
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var bannerView: AdView? = null
-    private var bannerFormat: BannerFormat? = null
 
     override val isAdReadyToShow: Boolean
         get() = bannerView != null
@@ -67,7 +63,6 @@ class MetaBannerImpl :
                 return
             }
         }
-        bannerFormat = adParams.bannerFormat
         adParams.activity.runOnUiThread {
             val banner = AdView(adParams.activity.applicationContext, adParams.placementId, adParams.bannerSize).also {
                 bannerView = it
@@ -122,16 +117,7 @@ class MetaBannerImpl :
         bannerView = null
     }
 
-    override fun getAdView(): AdViewHolder? {
-        val bannerFormat = bannerFormat ?: return null
-        return bannerView?.let { adView ->
-            AdViewHolder(
-                networkAdview = adView,
-                widthDp = bannerFormat.width,
-                heightDp = bannerFormat.height
-            )
-        }
-    }
+    override fun getAdView(): AdViewHolder? = bannerView?.let { AdViewHolder(it) }
 }
 
 private const val TAG = "MetaBannerImpl"

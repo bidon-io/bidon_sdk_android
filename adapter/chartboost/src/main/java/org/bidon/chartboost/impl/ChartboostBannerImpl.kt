@@ -18,7 +18,6 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -110,22 +109,7 @@ internal class ChartboostBannerImpl :
         }
     }
 
-    override fun getAdView(): AdViewHolder? {
-        return if (isAdReadyToShow) {
-            adView?.let { adView ->
-                adView.getBannerWidth()
-                adView.show()
-                AdViewHolder(
-                    networkAdview = adView,
-                    widthDp = adView.getBannerWidth(),
-                    heightDp = adView.getBannerHeight()
-                )
-            }
-        } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-            null
-        }
-    }
+    override fun getAdView(): AdViewHolder? = adView?.let { AdViewHolder(it) }
 
     override fun destroy() {
         adView?.detach()

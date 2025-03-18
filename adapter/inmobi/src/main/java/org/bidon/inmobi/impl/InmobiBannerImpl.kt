@@ -13,8 +13,8 @@ import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.auction.ext.height
-import org.bidon.sdk.auction.ext.width
+import org.bidon.sdk.ads.banner.ext.height
+import org.bidon.sdk.ads.banner.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -108,11 +108,7 @@ internal class InmobiBannerImpl :
         bannerView.load()
     }
 
-    override fun getAdView(): AdViewHolder? {
-        val bannerFormat = bannerFormat ?: return null
-        val bannerAd = bannerView ?: return null
-        return AdViewHolder(bannerAd, bannerFormat.width, bannerFormat.height)
-    }
+    override fun getAdView(): AdViewHolder? = bannerView?.let { AdViewHolder(it) }
 
     override fun destroy() {
         logInfo(TAG, "destroy")

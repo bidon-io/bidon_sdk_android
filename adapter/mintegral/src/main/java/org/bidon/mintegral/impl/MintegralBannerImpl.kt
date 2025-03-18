@@ -1,7 +1,6 @@
 package org.bidon.mintegral.impl
 
 import com.mbridge.msdk.out.BannerAdListener
-import com.mbridge.msdk.out.BannerSize
 import com.mbridge.msdk.out.MBBannerView
 import com.mbridge.msdk.out.MBridgeIds
 import org.bidon.mintegral.MintegralBannerAuctionParam
@@ -32,7 +31,6 @@ internal class MintegralBannerImpl :
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var bannerView: MBBannerView? = null
-    private var bannerSize: BannerSize? = null
 
     override var isAdReadyToShow: Boolean = false
 
@@ -56,8 +54,7 @@ internal class MintegralBannerImpl :
         adParams.activity.runOnUiThread {
             val mbBannerView = MBBannerView(adParams.activity.applicationContext)
                 .also { bannerView = it }
-            bannerSize = adParams.bannerSize
-            mbBannerView.init(bannerSize, placementId, unitId)
+            mbBannerView.init(adParams.bannerSize, placementId, unitId)
             mbBannerView.setAllowShowCloseBtn(false)
             mbBannerView.setRefreshTime(0)
             mbBannerView.setBannerAdListener(object : BannerAdListener {
@@ -121,28 +118,12 @@ internal class MintegralBannerImpl :
         }
     }
 
-    override fun getAdView(): AdViewHolder? {
-        logInfo(TAG, "Starting show: $this")
-        val size = bannerSize ?: return null
-        return if (isAdReadyToShow) {
-            bannerView?.let {
-                AdViewHolder(
-                    networkAdview = it,
-                    widthDp = size.width,
-                    heightDp = size.height
-                )
-            }
-        } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-            null
-        }
-    }
+    override fun getAdView(): AdViewHolder? = bannerView?.let { AdViewHolder(it) }
 
     override fun destroy() {
         logInfo(TAG, "destroy $this")
         bannerView?.release()
         bannerView = null
-        bannerSize = null
     }
 }
 

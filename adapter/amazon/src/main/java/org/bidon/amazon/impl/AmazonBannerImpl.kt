@@ -13,8 +13,6 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.ext.height
-import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
@@ -30,7 +28,6 @@ internal class AmazonBannerImpl(private val bidManager: AmazonBidManager) :
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var adView: DTBAdView? = null
-    private var adParams: BannerAuctionParams? = null
 
     override val isAdReadyToShow: Boolean
         get() = adView != null
@@ -46,7 +43,6 @@ internal class AmazonBannerImpl(private val bidManager: AmazonBidManager) :
     }
 
     override fun load(adParams: BannerAuctionParams) {
-        this.adParams = adParams
         val slotUuid = adParams.slotUuid
         if (slotUuid == null) {
             emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, "slotUuid")))
@@ -104,22 +100,11 @@ internal class AmazonBannerImpl(private val bidManager: AmazonBidManager) :
         adView.fetchAd(bidInfo)
     }
 
-    override fun getAdView(): AdViewHolder? {
-        val adView = adView
-        val adParams = adParams
-        return if (adView == null || adParams == null) {
-            logError(TAG, "AdView is null", BidonError.AdNotReady)
-            emitEvent(AdEvent.LoadFailed(BidonError.AdNotReady))
-            null
-        } else {
-            AdViewHolder(adView, adParams.bannerFormat.width, adParams.bannerFormat.height)
-        }
-    }
+    override fun getAdView(): AdViewHolder? = adView?.let { AdViewHolder(it) }
 
     override fun destroy() {
         adView?.destroy()
         adView = null
-        adParams = null
     }
 }
 

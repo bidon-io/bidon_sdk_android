@@ -14,10 +14,10 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.ads.banner.BannerFormat
+import org.bidon.sdk.ads.banner.ext.height
+import org.bidon.sdk.ads.banner.ext.width
 import org.bidon.sdk.ads.banner.helper.DeviceInfo
 import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.ext.height
-import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
