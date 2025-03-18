@@ -92,15 +92,7 @@ internal class IronSourceBannerImpl :
         IronSource.loadISDemandOnlyBanner(adParams.activity, bannerLayout, instanceId)
     }
 
-    override fun getAdView(): AdViewHolder? {
-        return bannerLayout?.let { adView ->
-            AdViewHolder(
-                networkAdview = adView,
-                widthDp = adView.size.width,
-                heightDp = adView.size.height
-            )
-        }
-    }
+    override fun getAdView(): AdViewHolder? = bannerLayout?.let { AdViewHolder(it) }
 
     override fun destroy() {
         instanceId?.let {

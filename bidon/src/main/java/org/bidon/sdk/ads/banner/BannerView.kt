@@ -23,9 +23,10 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.AuctionInfo
+import org.bidon.sdk.ads.banner.ext.height
+import org.bidon.sdk.ads.banner.ext.width
 import org.bidon.sdk.ads.banner.helper.AdLifecycle
 import org.bidon.sdk.ads.banner.helper.LogLifecycleAdStateUseCase
-import org.bidon.sdk.ads.banner.helper.impl.dpToPx
 import org.bidon.sdk.ads.banner.helper.wrapUserBannerListener
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.Auction
@@ -37,6 +38,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
+import org.bidon.sdk.utils.ext.dpToPx
 import org.bidon.sdk.utils.visibilitytracker.VisibilityTracker
 import org.json.JSONObject
 import java.util.concurrent.atomic.AtomicBoolean
@@ -93,12 +95,9 @@ class BannerView @JvmOverloads constructor(
 
     private var internalAdSize: AdSize? = null
 
-    override val adSize: AdSize?
-        get() = internalAdSize ?: (winner?.adSource as? AdSource.Banner)?.getAdView()?.let { holder ->
-            AdSize(widthDp = holder.widthDp, heightDp = holder.heightDp).also {
-                internalAdSize = it
-            }
-        }
+    override val adSize: AdSize
+        get() = internalAdSize ?: AdSize(widthDp = format.width, heightDp = format.height)
+            .also { internalAdSize = it }
 
     override fun setBannerFormat(bannerFormat: BannerFormat) {
         this.format = bannerFormat
@@ -260,16 +259,15 @@ class BannerView @JvmOverloads constructor(
         removeAllViews()
         val adViewHolder: AdViewHolder = adSource.getAdView() ?: run {
             logError(TAG, "No AdView found.", NullPointerException())
+            adLifecycleFlow.value = AdLifecycle.DisplayingFailed
+            listener.onAdShowFailed(BidonError.AdNotReady)
             return
         }
-        val layoutParams = LayoutParams(adViewHolder.widthDp.dpToPx, adViewHolder.heightDp.dpToPx, Gravity.CENTER)
+        val layoutParams = LayoutParams(adSize.widthDp.dpToPx, adSize.heightDp.dpToPx, Gravity.CENTER)
         addView(adViewHolder.networkAdview, layoutParams)
         this.visibility = VISIBLE
         adViewHolder.networkAdview.visibility = VISIBLE
-        logInfo(
-            TAG,
-            "View added(${adSource.demandId.demandId}): ${adViewHolder.networkAdview}. Size(${adViewHolder.widthDp}, ${adViewHolder.heightDp})"
-        )
+        logInfo(TAG, "View added(${adSource.demandId.demandId}): ${adViewHolder.networkAdview}. Size(${adSize.widthDp}, ${adSize.heightDp})")
         val onBannerShown = {
             adLifecycleFlow.value = AdLifecycle.Displayed
             adSource.ad?.let { listener.onAdShown(ad = it) }

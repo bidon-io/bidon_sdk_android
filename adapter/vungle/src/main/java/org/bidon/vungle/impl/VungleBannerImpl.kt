@@ -114,20 +114,7 @@ internal class VungleBannerImpl :
         }
     }
 
-    override fun getAdView(): AdViewHolder? {
-        val banner = banner
-        if (!isAdReadyToShow || banner == null || banner.getBannerView() == null) {
-            return null
-        }
-        return banner.getBannerView()?.let { bannerView ->
-            val bannerSize = banner.getAdViewSize()
-            AdViewHolder(
-                networkAdview = bannerView,
-                widthDp = bannerSize.width,
-                heightDp = bannerSize.height
-            )
-        }
-    }
+    override fun getAdView(): AdViewHolder? = banner?.getBannerView()?.let { AdViewHolder(it) }
 
     override fun destroy() {
         banner?.finishAd()

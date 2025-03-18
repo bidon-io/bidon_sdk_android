@@ -18,8 +18,6 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.ext.height
-import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -36,7 +34,6 @@ internal class DTExchangeBanner :
 
     private var adSpot: InneractiveAdSpot? = null
     private var adViewHolder: AdViewHolder? = null
-    private var demandSource: String? = null
 
     override val isAdReadyToShow: Boolean get() = adSpot?.isReady == true
 
@@ -54,11 +51,7 @@ internal class DTExchangeBanner :
     override fun load(adParams: DTExchangeBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
         val spotId = adParams.spotId ?: run {
-            emitEvent(
-                AdEvent.LoadFailed(
-                    BidonError.IncorrectAdUnit(demandId = demandId, "spotId")
-                )
-            )
+            emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, "spotId")))
             return
         }
         val adSpot = InneractiveAdSpotManager.get().createSpot()
@@ -110,8 +103,7 @@ internal class DTExchangeBanner :
             ) {
                 logInfo(TAG, "onAdImpression: $adSpot, $impressionData")
                 val adValue = impressionData?.asAdValue() ?: return
-                demandSource = impressionData.demandSource
-                setDsp(demandSource)
+                setDsp(impressionData.demandSource)
                 val ad = getAd() ?: return
                 emitEvent(AdEvent.PaidRevenue(ad, adValue))
                 // tracked impression/shown by [BannerView]
@@ -143,13 +135,8 @@ internal class DTExchangeBanner :
             override fun onAdCollapsed(adSpot: InneractiveAdSpot?) {}
         }
         controller.bindView(container)
-        return AdViewHolder(
-            networkAdview = container,
-            widthDp = adParams.bannerFormat.width,
-            heightDp = adParams.bannerFormat.height
-        ).also {
-            this.adViewHolder = it
-        }
+        return AdViewHolder(networkAdview = container)
+            .also { this.adViewHolder = it }
     }
 }
 

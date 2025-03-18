@@ -1,3 +1,7 @@
+# develop (2025.02.*)
+## Features:
+- [BDN-903](https://appodeal.atlassian.net/browse/BDN-903) Synchronize banner view ad size logic with iOS
+
 # 0.7.5 (2025.02.24)
 ## Features:
 - [BDN-898](https://appodeal.atlassian.net/browse/BDN-898) Updated Amazon to 10.0.0

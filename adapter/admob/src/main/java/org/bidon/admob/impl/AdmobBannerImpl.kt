@@ -2,7 +2,6 @@ package org.bidon.admob.impl
 
 import android.annotation.SuppressLint
 import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.OnPaidEventListener
@@ -16,7 +15,6 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
@@ -37,9 +35,6 @@ internal class AdmobBannerImpl(
     override var isAdReadyToShow: Boolean = false
 
     private var adView: AdView? = null
-    private var price: Double? = null
-    private var adSize: AdSize? = null
-    private var bannerFormat: BannerFormat? = null
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return getAdAuctionParams(auctionParamsScope, demandAd.adType)
@@ -51,16 +46,9 @@ internal class AdmobBannerImpl(
         val adUnitId: String = when (adParams) {
             is AdmobBannerAuctionParams.Network -> adParams.adUnitId
         } ?: run {
-            emitEvent(
-                AdEvent.LoadFailed(
-                    BidonError.IncorrectAdUnit(demandId = demandId, message = "adUnitId")
-                )
-            )
+            emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "adUnitId")))
             return
         }
-        price = adParams.price
-        adSize = adParams.adSize
-        bannerFormat = adParams.bannerFormat
         adParams.activity.runOnUiThread {
             val adView = AdView(adParams.activity.applicationContext).also {
                 adView = it
@@ -109,14 +97,7 @@ internal class AdmobBannerImpl(
         }
     }
 
-    override fun getAdView(): AdViewHolder? = adView?.let {
-        val adSize = adSize ?: return null
-        AdViewHolder(
-            networkAdview = it,
-            widthDp = adSize.width,
-            heightDp = adSize.height
-        )
-    }
+    override fun getAdView(): AdViewHolder? = adView?.let { AdViewHolder(networkAdview = it) }
 
     override fun destroy() {
         logInfo(TAG, "destroy $this")

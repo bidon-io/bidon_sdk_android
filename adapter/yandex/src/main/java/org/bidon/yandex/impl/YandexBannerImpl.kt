@@ -12,8 +12,6 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.ext.height
-import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -31,7 +29,6 @@ internal class YandexBannerImpl :
     YandexLoader by singleLoader {
 
     private var bannerView: BannerAdView? = null
-    private var param: YandexBannerAuctionParam? = null
 
     override val isAdReadyToShow: Boolean
         get() = bannerView != null
@@ -47,7 +44,6 @@ internal class YandexBannerImpl :
     }
 
     override fun load(adParams: YandexBannerAuctionParam) {
-        this.param = adParams
         val adUnitId = adParams.adUnitId
             ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "adUnitId")))
 
@@ -91,21 +87,12 @@ internal class YandexBannerImpl :
         bannerView.loadAd(AdRequest.Builder().build())
     }
 
-    override fun getAdView(): AdViewHolder? {
-        return bannerView?.let { bannerAdView ->
-            AdViewHolder(
-                networkAdview = bannerAdView,
-                widthDp = bannerAdView.adSize?.width ?: param?.bannerFormat?.width ?: 0,
-                heightDp = bannerAdView.adSize?.height ?: param?.bannerFormat?.height ?: 0
-            )
-        }
-    }
+    override fun getAdView(): AdViewHolder? = bannerView?.let { AdViewHolder(it) }
 
     override fun destroy() {
         logInfo(TAG, "destroy: $this")
         bannerView?.destroy()
         bannerView = null
-        param = null
     }
 }
 

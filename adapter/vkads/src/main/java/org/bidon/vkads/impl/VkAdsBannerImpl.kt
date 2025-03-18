@@ -90,14 +90,7 @@ internal class VkAdsBannerImpl :
         }
     }
 
-    override fun getAdView(): AdViewHolder? = adView?.let { adView ->
-        val size = adView.size
-        AdViewHolder(
-            networkAdview = adView,
-            widthDp = size.width,
-            heightDp = size.height
-        )
-    }
+    override fun getAdView(): AdViewHolder? = adView?.let { AdViewHolder(it) }
 
     override fun destroy() {
         adView?.destroy()

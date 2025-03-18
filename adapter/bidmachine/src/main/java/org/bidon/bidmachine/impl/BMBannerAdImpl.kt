@@ -21,7 +21,6 @@ import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -39,7 +38,6 @@ internal class BMBannerAdImpl(
 
     private var adRequest: BannerRequest? = null
     private var bannerView: BannerView? = null
-    private var bannerFormat: BannerFormat? = null
 
     override val isAdReadyToShow: Boolean
         get() = bannerView?.canShow() == true
@@ -48,7 +46,6 @@ internal class BMBannerAdImpl(
         logInfo(TAG, "Starting with $adParams: $this")
         adParams.activity.runOnUiThread {
             bannerView = BannerView(adParams.activity.applicationContext)
-            bannerFormat = adParams.bannerFormat
             val bidType = adParams.adUnit.bidType
             val requestBuilder = BannerRequest.Builder()
                 .apply {
@@ -115,15 +112,7 @@ internal class BMBannerAdImpl(
         adRequest?.notifyMediationWin()
     }
 
-    override fun getAdView(): AdViewHolder? {
-        val adView = bannerView ?: return null
-        val bannerFormat = bannerFormat ?: return null
-        return AdViewHolder(
-            networkAdview = adView,
-            widthDp = bannerFormat.asBidMachineBannerSize().width,
-            heightDp = bannerFormat.asBidMachineBannerSize().height
-        )
-    }
+    override fun getAdView(): AdViewHolder? = bannerView?.let { AdViewHolder(it) }
 
     override fun destroy() {
         logInfo(TAG, "destroy $this")

@@ -8,8 +8,6 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.AdValue.Companion.USD
@@ -22,7 +20,6 @@ import org.bidon.sdk.stats.models.BidType
 import sg.bigo.ads.api.AdError
 import sg.bigo.ads.api.AdInteractionListener
 import sg.bigo.ads.api.AdLoadListener
-import sg.bigo.ads.api.AdSize
 import sg.bigo.ads.api.BannerAd
 import sg.bigo.ads.api.BannerAdLoader
 import sg.bigo.ads.api.BannerAdRequest
@@ -36,7 +33,6 @@ internal class BigoAdsBannerImpl :
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var bannerAd: BannerAd? = null
-    private var bannerSize: AdSize? = null
 
     override val isAdReadyToShow: Boolean
         get() = bannerAd?.isExpired == false
@@ -52,17 +48,6 @@ internal class BigoAdsBannerImpl :
     }
 
     override fun load(adParams: BigoAdsBannerAuctionParams) {
-        val bannerSize = when (adParams.bannerFormat) {
-            BannerFormat.Banner -> AdSize.BANNER
-            BannerFormat.MRec -> AdSize.MEDIUM_RECTANGLE
-            BannerFormat.LeaderBoard -> AdSize.LEADERBOARD
-            BannerFormat.Adaptive -> if (isTablet) {
-                AdSize.LEADERBOARD
-            } else {
-                AdSize.BANNER
-            }
-        }.also { bannerSize = it }
-
         val slotId = adParams.slotId
             ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId, "slotId")))
 
@@ -119,10 +104,17 @@ internal class BigoAdsBannerImpl :
             .build()
 
         val adRequestBuilder = BannerAdRequest.Builder()
-        adRequestBuilder.withAdSizes(bannerSize)
+        adRequestBuilder.withAdSizes(adParams.bannerSize)
         if (adParams.adUnit.bidType == BidType.RTB) {
             val payload = adParams.payload
-                ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")))
+                ?: return emitEvent(
+                    AdEvent.LoadFailed(
+                        BidonError.IncorrectAdUnit(
+                            demandId = demandId,
+                            message = "payload"
+                        )
+                    )
+                )
             adRequestBuilder.withBid(payload)
         }
         adRequestBuilder.withSlotId(slotId)
@@ -131,14 +123,9 @@ internal class BigoAdsBannerImpl :
         }
     }
 
-    override fun getAdView(): AdViewHolder? {
-        val adView = bannerAd?.adView() ?: return null
-        val bannerSize = bannerSize ?: return null
-        return AdViewHolder(adView, bannerSize.width, bannerSize.height)
-    }
+    override fun getAdView(): AdViewHolder? = bannerAd?.adView()?.let { AdViewHolder(it) }
 
     override fun destroy() {
-        bannerSize = null
         bannerAd?.destroy()
         bannerAd = null
     }
