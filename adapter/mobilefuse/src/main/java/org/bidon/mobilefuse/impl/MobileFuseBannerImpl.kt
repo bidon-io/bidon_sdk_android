@@ -1,23 +1,16 @@
 package org.bidon.mobilefuse.impl
 
-import android.content.Context
 import com.mobilefuse.sdk.AdError
 import com.mobilefuse.sdk.MobileFuseBannerAd
-import kotlinx.coroutines.flow.MutableSharedFlow
-import org.bidon.mobilefuse.ext.GetMobileFuseTokenUseCase
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
-import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.ext.height
-import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -25,28 +18,22 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 import java.util.concurrent.atomic.AtomicBoolean
 
-class MobileFuseBannerImpl(private val isTestMode: Boolean) :
+internal class MobileFuseBannerImpl :
     AdSource.Banner<MobileFuseBannerAuctionParams>,
-    Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var fuseBannerAd: MobileFuseBannerAd? = null
-    private var bannerFormat: BannerFormat? = null
 
     /**
      * This flag is used to prevent [AdError]-callback from being exposed twice.
      */
     private var isLoaded = AtomicBoolean(false)
 
-    override val adEvent = MutableSharedFlow<AdEvent>(extraBufferCapacity = Int.MAX_VALUE, replay = 1)
     override val isAdReadyToShow: Boolean get() = fuseBannerAd?.isLoaded == true
-
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
-        return GetMobileFuseTokenUseCase(context, isTestMode)
-    }
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return ObtainAuctionParamUseCase().getBannerParam(auctionParamsScope)
@@ -54,7 +41,24 @@ class MobileFuseBannerImpl(private val isTestMode: Boolean) :
 
     override fun load(adParams: MobileFuseBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
-        this.bannerFormat = adParams.bannerFormat
+        adParams.placementId ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, message = "placementId")
+                )
+            )
+            return
+        }
+        if (adParams.adUnit.bidType == BidType.RTB) {
+            adParams.signalData ?: run {
+                emitEvent(
+                    AdEvent.LoadFailed(
+                        BidonError.IncorrectAdUnit(demandId = demandId, message = "signalData")
+                    )
+                )
+                return
+            }
+        }
         // placementId should be configured in the mediation platform UI and passed back to this method:
         val adSize = when (adParams.bannerFormat) {
             BannerFormat.Banner -> MobileFuseBannerAd.AdSize.BANNER_320x50
@@ -74,26 +78,26 @@ class MobileFuseBannerImpl(private val isTestMode: Boolean) :
             override fun onAdLoaded() {
                 if (!isLoaded.getAndSet(true)) {
                     logInfo(TAG, "onAdLoaded")
-                    getAd()?.let { adEvent.tryEmit(AdEvent.Fill(it)) }
+                    getAd()?.let { emitEvent(AdEvent.Fill(it)) }
                 }
             }
 
             override fun onAdNotFilled() {
                 val cause = BidonError.NoFill(demandId)
-                logInfo(TAG, "onAdNotFilled $this")
-                adEvent.tryEmit(AdEvent.LoadFailed(cause))
+                logError(TAG, "onAdNotFilled", null)
+                emitEvent(AdEvent.LoadFailed(cause))
             }
 
             override fun onAdRendered() {
                 logInfo(TAG, "onAdRendered")
                 getAd()?.let {
-                    adEvent.tryEmit(AdEvent.Shown(it))
-                    adEvent.tryEmit(
+                    emitEvent(AdEvent.Shown(it))
+                    emitEvent(
                         AdEvent.PaidRevenue(
                             ad = it,
                             adValue = bannerAd.winningBidInfo.let { bidInfo ->
                                 AdValue(
-                                    adRevenue = bidInfo?.cpmPrice?.toDouble() ?: 0.0,
+                                    adRevenue = bidInfo?.cpmPrice?.div(1000.0) ?: 0.0,
                                     currency = bidInfo?.currency ?: AdValue.USD,
                                     precision = Precision.Precise
                                 )
@@ -105,34 +109,39 @@ class MobileFuseBannerImpl(private val isTestMode: Boolean) :
 
             override fun onAdClicked() {
                 logInfo(TAG, "onAdClicked")
-                getAd()?.let { adEvent.tryEmit(AdEvent.Clicked(it)) }
+                getAd()?.let { emitEvent(AdEvent.Clicked(it)) }
             }
 
             override fun onAdExpired() {
                 logInfo(TAG, "onAdExpired")
-                adEvent.tryEmit(AdEvent.LoadFailed(BidonError.Expired(demandId)))
+                emitEvent(AdEvent.LoadFailed(BidonError.Expired(demandId)))
             }
 
             override fun onAdError(adError: AdError?) {
                 logError(TAG, "onAdError $adError", Throwable(adError?.errorMessage))
                 when (adError) {
                     AdError.AD_ALREADY_RENDERED -> {
-                        adEvent.tryEmit(AdEvent.ShowFailed(BidonError.AdNotReady))
+                        emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
                     }
 
-                    AdError.AD_ALREADY_LOADED,
-                    AdError.AD_RUNTIME_ERROR -> {
+                    AdError.AD_ALREADY_LOADED -> {
                         // do nothing
                     }
-
                     AdError.AD_LOAD_ERROR -> {
                         if (!isLoaded.getAndSet(true)) {
-                            getAd()?.let { adEvent.tryEmit(AdEvent.LoadFailed(BidonError.NoFill(demandId))) }
+                            getAd()?.let { emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId))) }
                         }
                     }
 
                     else -> {
-                        // do nothing
+                        emitEvent(
+                            AdEvent.LoadFailed(
+                                BidonError.Unspecified(
+                                    demandId,
+                                    Throwable(adError?.errorMessage)
+                                )
+                            )
+                        )
                     }
                 }
             }
@@ -143,17 +152,7 @@ class MobileFuseBannerImpl(private val isTestMode: Boolean) :
         bannerAd.loadAdFromBiddingToken(adParams.signalData)
     }
 
-    override fun getAdView(): AdViewHolder? {
-        logInfo(TAG, "getAdView: $this")
-        val bannerFormat = bannerFormat ?: return null
-        return fuseBannerAd?.let {
-            AdViewHolder(
-                networkAdview = it,
-                widthDp = bannerFormat.width,
-                heightDp = bannerFormat.height
-            )
-        }
-    }
+    override fun getAdView(): AdViewHolder? = fuseBannerAd?.let { AdViewHolder(it) }
 
     override fun destroy() {
         logInfo(TAG, "destroy $this")

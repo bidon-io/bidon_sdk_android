@@ -5,13 +5,13 @@ import kotlinx.coroutines.flow.update
 import org.bidon.sdk.adapter.WinLossNotifiable
 import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.ResultsCollector
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResult
-import org.bidon.sdk.auction.models.AuctionResult.UnknownAdapter.Type
-import org.bidon.sdk.auction.models.BidResponse
-import org.bidon.sdk.auction.models.RoundRequest
 import org.bidon.sdk.auction.usecases.models.BiddingResult
 import org.bidon.sdk.auction.usecases.models.RoundResult
+import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.RoundStatus
 import org.bidon.sdk.utils.ext.SystemTimeNow
 
@@ -22,8 +22,9 @@ internal class ResultsCollectorImpl(
      * Keeps all succeeded auction results
      */
     private val auctionResults = MutableStateFlow(listOf<AuctionResult>())
-
     private val roundResult = MutableStateFlow<RoundResult>(RoundResult.Idle)
+
+    @Deprecated("")
     override fun serverBiddingStarted() {
         roundResult.update {
             require(it is RoundResult.Results)
@@ -31,44 +32,71 @@ internal class ResultsCollectorImpl(
                 biddingResult = BiddingResult.ServerBiddingStarted(serverBiddingStartTs = SystemTimeNow),
                 networkResults = it.networkResults,
                 pricefloor = it.pricefloor,
-                round = it.round
+                noBidsInfo = it.noBidsInfo
             )
         }
     }
 
-    override fun serverBiddingFinished(bids: List<BidResponse>?) {
+    @Deprecated("")
+    override fun serverBiddingFinished(adUnits: List<AdUnit>?) {
         roundResult.update { curRoundResult ->
-            require(curRoundResult is RoundResult.Results)
+            when (curRoundResult) {
+                RoundResult.Idle -> curRoundResult
+                is RoundResult.Results -> {
+                    RoundResult.Results(
+                        biddingResult = run {
+                            // TODO We should we process no_bids adUnits from AuctionResponse?
+                            // I think no, since we don`t send NO_BIDS adUnits to /stats
+                            if (curRoundResult.biddingResult is BiddingResult.ServerBiddingStarted) {
+                                if (adUnits.isNullOrEmpty()) {
+                                    BiddingResult.NoBid(
+                                        serverBiddingStartTs = curRoundResult.biddingResult.serverBiddingStartTs,
+                                        serverBiddingFinishTs = SystemTimeNow,
+                                    )
+                                } else {
+                                    BiddingResult.FilledAd(
+                                        serverBiddingStartTs = curRoundResult.biddingResult.serverBiddingStartTs,
+                                        serverBiddingFinishTs = SystemTimeNow,
+                                        adUnits = adUnits,
+                                        results = emptyList()
+                                    )
+                                }
+                            } else {
+                                logError(
+                                    TAG,
+                                    "Unexpected bidding result: ${curRoundResult.biddingResult}",
+                                    null
+                                )
+                                curRoundResult.biddingResult
+                            }
+                        },
+                        networkResults = curRoundResult.networkResults,
+                        pricefloor = curRoundResult.pricefloor,
+                        noBidsInfo = curRoundResult.noBidsInfo,
+                    )
+                }
+            }
+        }
+    }
+
+    override fun setNoBidInfo(noBidsInfo: List<AdUnit>?) {
+        roundResult.update { current ->
+            require(current is RoundResult.Results)
             RoundResult.Results(
-                biddingResult = run {
-                    require(curRoundResult.biddingResult is BiddingResult.ServerBiddingStarted)
-                    if (bids == null) {
-                        BiddingResult.NoBid(
-                            serverBiddingStartTs = curRoundResult.biddingResult.serverBiddingStartTs,
-                            serverBiddingFinishTs = SystemTimeNow,
-                        )
-                    } else {
-                        BiddingResult.FilledAd(
-                            serverBiddingStartTs = curRoundResult.biddingResult.serverBiddingStartTs,
-                            serverBiddingFinishTs = SystemTimeNow,
-                            bids = bids,
-                            results = emptyList()
-                        )
-                    }
-                },
-                networkResults = curRoundResult.networkResults,
-                pricefloor = curRoundResult.pricefloor,
-                round = curRoundResult.round
+                pricefloor = current.pricefloor,
+                biddingResult = current.biddingResult,
+                networkResults = current.networkResults,
+                noBidsInfo = noBidsInfo
             )
         }
     }
 
-    override fun startRound(round: RoundRequest, pricefloor: Double) {
+    override fun startRound(pricefloor: Double) {
         roundResult.value = RoundResult.Results(
             biddingResult = BiddingResult.Idle,
             networkResults = emptyList(),
             pricefloor = pricefloor,
-            round = round
+            noBidsInfo = listOf()
         )
     }
 
@@ -76,16 +104,15 @@ internal class ResultsCollectorImpl(
         roundResult.update { current ->
             require(current is RoundResult.Results)
             when {
-                result is AuctionResult.BiddingLose ||
-                    result is AuctionResult.Bidding ||
-                    (result as? AuctionResult.UnknownAdapter)?.type == Type.Bidding -> {
+                result is AuctionResult.Bidding ||
+                    (result as? AuctionResult.AuctionFailed)?.adUnit?.bidType == BidType.RTB -> {
                     RoundResult.Results(
                         biddingResult = when (current.biddingResult) {
                             is BiddingResult.FilledAd -> {
                                 BiddingResult.FilledAd(
                                     serverBiddingStartTs = current.biddingResult.serverBiddingStartTs,
                                     serverBiddingFinishTs = current.biddingResult.serverBiddingFinishTs,
-                                    bids = current.biddingResult.bids,
+                                    adUnits = current.biddingResult.adUnits,
                                     results = current.biddingResult.results + result
                                 )
                             }
@@ -99,16 +126,17 @@ internal class ResultsCollectorImpl(
                         },
                         networkResults = current.networkResults,
                         pricefloor = current.pricefloor,
-                        round = current.round
+                        noBidsInfo = current.noBidsInfo,
                     )
                 }
 
-                result is AuctionResult.Network || (result as? AuctionResult.UnknownAdapter)?.type == Type.Network -> {
+                result is AuctionResult.Network ||
+                    (result as? AuctionResult.AuctionFailed)?.adUnit?.bidType == BidType.CPM -> {
                     RoundResult.Results(
                         biddingResult = current.biddingResult,
                         networkResults = current.networkResults + result,
                         pricefloor = current.pricefloor,
-                        round = current.round
+                        noBidsInfo = current.noBidsInfo,
                     )
                 }
 
@@ -123,9 +151,10 @@ internal class ResultsCollectorImpl(
 
     override fun clear() {
         auctionResults.value = emptyList()
-        clearRoundResults()
+        roundResult.value = RoundResult.Idle
     }
 
+    @Deprecated("")
     override suspend fun saveWinners(sourcePriceFloor: Double) {
         val roundResults = when (val r = roundResult.value) {
             RoundResult.Idle -> emptyList()
@@ -135,9 +164,9 @@ internal class ResultsCollectorImpl(
             .filter { it.roundStatus == RoundStatus.Successful }
             .filter {
                 /**
-                 * Received ecpm should not be less then initial one [sourcePriceFloor].
+                 * Received price should not be less then initial one [sourcePriceFloor].
                  */
-                val isAbovePricefloor = it.adSource.getStats().ecpm >= sourcePriceFloor
+                val isAbovePricefloor = it.adSource.getStats().price >= sourcePriceFloor
                 if (!isAbovePricefloor) {
                     it.adSource.markBelowPricefloor()
                 }
@@ -156,7 +185,10 @@ internal class ResultsCollectorImpl(
                              */
                             if (auctionResult !is AuctionResult.Bidding && adSource is WinLossNotifiable) {
                                 logInfo(TAG, "Notified loss: ${adSource.demandId}")
-                                adSource.notifyLoss(winner.adSource.demandId.demandId, winner.adSource.getStats().ecpm)
+                                adSource.notifyLoss(
+                                    winner.adSource.demandId.demandId,
+                                    winner.adSource.getStats().price
+                                )
                             }
                             if (auctionResult.roundStatus == RoundStatus.Successful) {
                                 adSource.markLoss()
@@ -173,7 +205,7 @@ internal class ResultsCollectorImpl(
         roundResult.update {
             require(it is RoundResult.Results)
             val (startTs, finishTs) = when (it.biddingResult) {
-                is BiddingResult.ServerBiddingStarted -> it.biddingResult.serverBiddingStartTs to null
+                is BiddingResult.ServerBiddingStarted -> it.biddingResult.serverBiddingStartTs to SystemTimeNow
                 is BiddingResult.FilledAd -> it.biddingResult.serverBiddingStartTs to it.biddingResult.serverBiddingFinishTs
                 BiddingResult.Idle -> null to null
                 is BiddingResult.NoBid -> it.biddingResult.serverBiddingStartTs to it.biddingResult.serverBiddingFinishTs
@@ -186,16 +218,12 @@ internal class ResultsCollectorImpl(
                 ),
                 networkResults = it.networkResults,
                 pricefloor = it.pricefloor,
-                round = it.round
+                noBidsInfo = it.noBidsInfo,
             )
         }
     }
 
     override fun getRoundResults(): RoundResult = roundResult.value
-
-    override fun clearRoundResults() {
-        roundResult.value = RoundResult.Idle
-    }
 }
 
 private const val TAG = "ResultsCollector"

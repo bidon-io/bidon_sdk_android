@@ -13,7 +13,7 @@ import org.bidon.sdk.regulation.Regulation
 internal class TestAdapter(
     override val demandId: DemandId,
     private val testAdapterParameters: TestAdapterParameters,
-) : Adapter,
+) : Adapter.Network,
     SupportsRegulation,
     Initializable<TestAdapterParameters>,
     AdProvider.Interstitial<TestInterstitialParameters> {

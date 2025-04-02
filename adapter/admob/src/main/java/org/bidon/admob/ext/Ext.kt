@@ -1,11 +1,13 @@
 package org.bidon.admob.ext
 
 import android.content.Context
+import com.google.android.gms.ads.AdFormat
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.MobileAds
 import org.bidon.admob.BuildConfig
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
+import org.bidon.sdk.auction.AdTypeParam
 
 internal var adapterVersion = BuildConfig.ADAPTER_VERSION
 internal var sdkVersion = MobileAds.getVersion().toString()
@@ -39,3 +41,10 @@ internal fun BannerFormat.toAdmobAdSize(
         }
     }
 }
+
+internal fun AdTypeParam.getAdFormat() =
+    when (this) {
+        is AdTypeParam.Banner -> AdFormat.BANNER
+        is AdTypeParam.Interstitial -> AdFormat.INTERSTITIAL
+        is AdTypeParam.Rewarded -> AdFormat.REWARDED
+    }

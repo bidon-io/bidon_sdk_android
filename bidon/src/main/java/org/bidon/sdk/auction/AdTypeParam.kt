@@ -9,21 +9,25 @@ import org.bidon.sdk.ads.banner.BannerFormat
 sealed interface AdTypeParam {
     val activity: Activity
     val pricefloor: Double
+    val auctionKey: String?
 
     class Banner(
         override val activity: Activity,
-        val bannerFormat: BannerFormat,
         override val pricefloor: Double,
+        override val auctionKey: String?,
+        val bannerFormat: BannerFormat,
         val containerWidth: Float,
     ) : AdTypeParam
 
     class Interstitial(
         override val activity: Activity,
         override val pricefloor: Double,
+        override val auctionKey: String?,
     ) : AdTypeParam
 
     class Rewarded(
         override val activity: Activity,
         override val pricefloor: Double,
+        override val auctionKey: String?,
     ) : AdTypeParam
 }

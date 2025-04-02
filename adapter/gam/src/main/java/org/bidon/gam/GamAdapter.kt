@@ -12,20 +12,18 @@ import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-val GamDemandId = DemandId("gam")
+internal val GamDemandId = DemandId("gam")
 
 /**
  * [Google Ad Manager](https://developers.google.com/ad-manager/mobile-ads-sdk/android/quick-start)
  */
 @Suppress("unused")
-class GamAdapter :
-    Adapter,
+internal class GamAdapter :
+    Adapter.Network,
     Initializable<GamInitParameters>,
     AdProvider.Banner<GamBannerAuctionParams>,
     AdProvider.Rewarded<GamFullscreenAdAuctionParams>,
     AdProvider.Interstitial<GamFullscreenAdAuctionParams> {
-
-    private var configParams: GamInitParameters? = null
 
     override val demandId = GamDemandId
     override val adapterInfo = AdapterInfo(
@@ -37,7 +35,6 @@ class GamAdapter :
         // Since Bidon is the mediator, no need to initialize Google Bidding's partner SDKs.
         // https://developers.google.com/android/reference/com/google/android/gms/ads/MobileAds?hl=en#disableMediationAdapterInitialization(android.content.Context)
         // MobileAds.disableMediationAdapterInitialization(context)
-        this.configParams = configParams
         /**
          * Don't forget set Automatic refresh is Disabled for each AdUnit.
          * Manage refresh rate with [BannerView.startAutoRefresh].
@@ -48,15 +45,15 @@ class GamAdapter :
     }
 
     override fun interstitial(): AdSource.Interstitial<GamFullscreenAdAuctionParams> {
-        return GamInterstitialImpl(configParams)
+        return GamInterstitialImpl()
     }
 
     override fun rewarded(): AdSource.Rewarded<GamFullscreenAdAuctionParams> {
-        return GamRewardedImpl(configParams)
+        return GamRewardedImpl()
     }
 
     override fun banner(): AdSource.Banner<GamBannerAuctionParams> {
-        return GamBannerImpl(configParams)
+        return GamBannerImpl()
     }
 
     override fun parseConfigParam(json: String): GamInitParameters {

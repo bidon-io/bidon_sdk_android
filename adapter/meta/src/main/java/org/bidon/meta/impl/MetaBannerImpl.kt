@@ -1,70 +1,68 @@
 package org.bidon.meta.impl
 
-import android.content.Context
 import com.facebook.ads.Ad
 import com.facebook.ads.AdError
 import com.facebook.ads.AdListener
 import com.facebook.ads.AdView
-import com.facebook.ads.BidderTokenProvider
+import org.bidon.meta.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.auction.AdTypeParam
-import org.bidon.sdk.auction.ext.height
-import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 /**
  * Created by Aleksei Cherniaev on 08/08/2023.
  */
 class MetaBannerImpl :
     AdSource.Banner<MetaBannerAuctionParams>,
-    Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var bannerView: AdView? = null
-    private var bannerFormat: BannerFormat? = null
 
     override val isAdReadyToShow: Boolean
         get() = bannerView != null
-
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
-        return BidderTokenProvider.getBidderToken(context)
-    }
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             MetaBannerAuctionParams(
                 activity = activity,
-                placementId = requireNotNull(json?.optString("placement_id")) {
-                    "Placement id is required for Meta"
-                },
-                price = requireNotNull(json?.optDouble("price")) {
-                    "Bid price is required for Meta"
-                },
-                payload = requireNotNull(json?.optString("payload")) {
-                    "Payload is required for Meta"
-                },
-                bannerFormat = bannerFormat
+                bannerFormat = bannerFormat,
+                adUnit = adUnit
             )
         }
     }
 
     override fun load(adParams: MetaBannerAuctionParams) {
         logInfo(TAG, "load: $adParams")
-        bannerFormat = adParams.bannerFormat
+        adParams.placementId ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, message = "placementId")
+                )
+            )
+            return
+        }
+        if (adParams.adUnit.bidType == BidType.RTB) {
+            adParams.payload ?: run {
+                emitEvent(
+                    AdEvent.LoadFailed(
+                        BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
+                    )
+                )
+                return
+            }
+        }
         adParams.activity.runOnUiThread {
             val banner = AdView(adParams.activity.applicationContext, adParams.placementId, adParams.bannerSize).also {
                 bannerView = it
@@ -74,7 +72,7 @@ class MetaBannerImpl :
                     .withAdListener(object : AdListener {
                         override fun onError(ad: Ad?, adError: AdError?) {
                             logInfo(TAG, "Error while loading ad(${adError?.errorCode}: ${adError?.errorMessage}). $this")
-                            emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                            emitEvent(AdEvent.LoadFailed(adError.asBidonError()))
                         }
 
                         override fun onAdLoaded(ad: Ad?) {
@@ -119,16 +117,7 @@ class MetaBannerImpl :
         bannerView = null
     }
 
-    override fun getAdView(): AdViewHolder? {
-        val bannerFormat = bannerFormat ?: return null
-        return bannerView?.let { adView ->
-            AdViewHolder(
-                networkAdview = adView,
-                widthDp = bannerFormat.width,
-                heightDp = bannerFormat.height
-            )
-        }
-    }
+    override fun getAdView(): AdViewHolder? = bannerView?.let { AdViewHolder(it) }
 }
 
 private const val TAG = "MetaBannerImpl"

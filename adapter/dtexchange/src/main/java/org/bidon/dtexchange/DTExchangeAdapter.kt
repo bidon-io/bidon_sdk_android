@@ -30,13 +30,14 @@ import kotlin.coroutines.suspendCoroutine
 /**
  * Created by Aleksei Cherniaev on 28/02/2023.
  */
-val DTExchangeDemandId = DemandId("dtexchange")
+internal val DTExchangeDemandId = DemandId("dtexchange")
 
 /**
  * [Documentation](https://developer.digitalturbine.com/hc/en-us/articles/360019744297-Android-Ad-Formats)
  */
-class DTExchangeAdapter :
-    Adapter,
+@Suppress("unused")
+internal class DTExchangeAdapter :
+    Adapter.Network,
     SupportsRegulation,
     Initializable<DTExchangeParameters>,
     AdProvider.Rewarded<DTExchangeAdAuctionParams>,
@@ -50,6 +51,11 @@ class DTExchangeAdapter :
 
     override suspend fun init(context: Context, configParams: DTExchangeParameters) =
         suspendCoroutine { continuation ->
+            if (configParams.appId.isNullOrEmpty()) {
+                val cause =
+                    Throwable("Adapter(${DTExchangeDemandId.demandId}) appId is null or empty")
+                continuation.resumeWithException(cause)
+            }
             when (BidonSdk.loggerLevel) {
                 Logger.Level.Verbose -> InneractiveAdManager.setLogLevel(Log.VERBOSE)
                 Logger.Level.Error -> InneractiveAdManager.setLogLevel(Log.ERROR)
@@ -66,7 +72,8 @@ class DTExchangeAdapter :
                     FyberInitStatus.FAILED_NO_KITS_DETECTED,
                     FyberInitStatus.FAILED,
                     FyberInitStatus.INVALID_APP_ID, null -> {
-                        val cause = Throwable("Adapter(${DTExchangeDemandId.demandId}) not initialized ($initStatus)")
+                        val cause =
+                            Throwable("Adapter(${DTExchangeDemandId.demandId}) not initialized ($initStatus)")
                         logError(TAG, "Error while initialization", cause)
                         continuation.resumeWithException(cause)
                     }
@@ -76,16 +83,19 @@ class DTExchangeAdapter :
 
     override fun parseConfigParam(json: String): DTExchangeParameters {
         return DTExchangeParameters(
-            appId = requireNotNull(JSONObject(json).optString("app_id")),
+            appId = JSONObject(json).optString("app_id"),
         )
     }
 
     override fun updateRegulation(regulation: Regulation) {
         if (regulation.ccpaApplies) {
-            InneractiveAdManager.setUSPrivacyString(regulation.usPrivacyString)
+            if (!regulation.usPrivacyString.isNullOrBlank()) {
+                InneractiveAdManager.setUSPrivacyString(regulation.usPrivacyString)
+            }
         } else {
             InneractiveAdManager.clearUSPrivacyString()
         }
+
         if (regulation.gdprApplies) {
             InneractiveAdManager.setGdprConsent(regulation.hasGdprConsent)
             if (!regulation.gdprConsentString.isNullOrBlank()) {
@@ -94,6 +104,7 @@ class DTExchangeAdapter :
         } else {
             InneractiveAdManager.clearGdprConsentData()
         }
+
         if (regulation.coppaApplies) {
             InneractiveAdManager.currentAudienceAppliesToCoppa()
         }

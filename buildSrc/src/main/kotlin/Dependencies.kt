@@ -27,7 +27,7 @@ object Dependencies {
 
     object Android {
         const val gradlePlugin = "com.android.tools.build:gradle:7.4.2"
-        const val compileSdkVersion = 33
+        const val compileSdkVersion = 34
         const val minSdkVersion = 21
 
         const val CoreKtx = "androidx.core:core-ktx:1.6.0"
@@ -36,7 +36,7 @@ object Dependencies {
 
     object Google {
         const val Services = "com.google.gms:google-services:4.3.14"
-        const val PlayServicesAds = "com.google.android.gms:play-services-ads:22.6.0"
+        const val PlayServicesAds = "com.google.android.gms:play-services-ads:23.6.0"
         const val PlayServicesAdsIdentifier = "com.google.android.gms:play-services-ads-identifier:18.0.1"
     }
 }

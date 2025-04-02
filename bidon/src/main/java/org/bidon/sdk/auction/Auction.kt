@@ -1,6 +1,7 @@
 package org.bidon.sdk.auction
 
 import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.ads.AuctionInfo
 import org.bidon.sdk.auction.models.AuctionResult
 
 /**
@@ -10,8 +11,8 @@ internal interface Auction {
     fun start(
         demandAd: DemandAd,
         adTypeParam: AdTypeParam,
-        onSuccess: (results: List<AuctionResult>) -> Unit,
-        onFailure: (Throwable) -> Unit
+        onSuccess: (winners: List<AuctionResult>, auctionInfo: AuctionInfo) -> Unit,
+        onFailure: (AuctionInfo?, Throwable) -> Unit
     )
 
     /**

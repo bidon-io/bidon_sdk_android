@@ -9,13 +9,14 @@ import org.bidon.sdk.utils.serializer.Serializable
 internal data class StatsRequestBody(
     @field:JsonName("auction_id")
     val auctionId: String,
-    @Deprecated("Use auctionConfigurationUid instead")
     @field:JsonName("auction_configuration_id")
-    val auctionConfigurationId: Int,
+    val auctionConfigurationId: Long,
     @field:JsonName("auction_configuration_uid")
     val auctionConfigurationUid: String,
-    @field:JsonName("rounds")
-    val rounds: List<Round>,
+    @field:JsonName("auction_pricefloor")
+    val auctionPricefloor: Double?,
+    @field:JsonName("ad_units")
+    val adUnits: List<StatsAdUnit?>,
     @field:JsonName("result")
     val result: ResultBody,
 ) : Serializable

@@ -18,8 +18,8 @@ android {
 }
 
 dependencies {
-    compileOnly(project(":bidon"))
-    testImplementation(project(":bidon"))
+    compileOnly(projects.bidon)
+    testImplementation(projects.bidon)
 
-    implementation("io.bidmachine:ads:2.4.0")
+    implementation("io.bidmachine:ads:3.2.0")
 }

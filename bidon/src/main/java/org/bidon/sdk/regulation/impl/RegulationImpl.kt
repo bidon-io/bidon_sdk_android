@@ -2,13 +2,9 @@ package org.bidon.sdk.regulation.impl
 
 import org.bidon.sdk.regulation.Coppa
 import org.bidon.sdk.regulation.Gdpr
-import org.bidon.sdk.regulation.Iab
-import org.bidon.sdk.regulation.IabConsent
 import org.bidon.sdk.regulation.Regulation
 
-internal class RegulationImpl(
-    private val iabConsent: IabConsent
-) : Regulation {
+internal class RegulationImpl : Regulation {
     override var coppa: Coppa = Coppa.Default
 
     override var gdpr: Gdpr = Gdpr.Default
@@ -31,7 +27,4 @@ internal class RegulationImpl(
              */
             return usPrivacyString[0] == '1' && usPrivacyString[2].uppercaseChar() == 'N'
         }
-
-    override val iab: Iab
-        get() = iabConsent.iab
 }

@@ -23,18 +23,19 @@ import org.bidon.sdk.auction.Auction
 import org.bidon.sdk.auction.AuctionResolver
 import org.bidon.sdk.auction.ResultsCollector
 import org.bidon.sdk.auction.impl.AuctionImpl
-import org.bidon.sdk.auction.impl.MaxEcpmAuctionResolver
+import org.bidon.sdk.auction.impl.MaxPriceAuctionResolver
 import org.bidon.sdk.auction.impl.ResultsCollectorImpl
 import org.bidon.sdk.auction.usecases.AuctionStat
-import org.bidon.sdk.auction.usecases.BidRequestUseCase
-import org.bidon.sdk.auction.usecases.ConductBiddingRoundUseCase
-import org.bidon.sdk.auction.usecases.ConductNetworkRoundUseCase
-import org.bidon.sdk.auction.usecases.ExecuteRoundUseCase
+import org.bidon.sdk.auction.usecases.ExecuteAuctionUseCase
+import org.bidon.sdk.auction.usecases.GetTokensUseCase
+import org.bidon.sdk.auction.usecases.RequestAdUnitUseCase
 import org.bidon.sdk.auction.usecases.impl.AuctionStatImpl
-import org.bidon.sdk.auction.usecases.impl.BidRequestUseCaseImpl
-import org.bidon.sdk.auction.usecases.impl.ConductBiddingRoundUseCaseImpl
-import org.bidon.sdk.auction.usecases.impl.ConductNetworkRoundUseCaseImpl
-import org.bidon.sdk.auction.usecases.impl.ExecuteRoundUseCaseImpl
+import org.bidon.sdk.auction.usecases.impl.ExecuteAuctionUseCaseImpl
+import org.bidon.sdk.auction.usecases.impl.GetTokensUseCaseImpl
+import org.bidon.sdk.auction.usecases.impl.RequestAdUnitUseCaseImpl
+import org.bidon.sdk.bidding.BiddingConfig
+import org.bidon.sdk.bidding.BiddingConfigImpl
+import org.bidon.sdk.bidding.BiddingConfigSynchronizer
 import org.bidon.sdk.config.AdapterInstanceCreator
 import org.bidon.sdk.config.impl.AdapterInstanceCreatorImpl
 import org.bidon.sdk.config.impl.InitAndRegisterAdaptersUseCaseImpl
@@ -152,33 +153,36 @@ internal object DI {
 
             // [SegmentDataSource] should be singleton per session
             singleton<TokenDataSource> { TokenDataSourceImpl(keyValueStorage = get()) }
-            singleton<Regulation> {
-                RegulationImpl(
-                    iabConsent = get()
-                )
-            }
+            singleton<Regulation> { RegulationImpl() }
             /**
              * [SegmentSynchronizer] depends on it
              */
             singleton<Segment> { SegmentImpl() }
-            factory { get<Segment>() as SegmentSynchronizer }
+
+            singleton<BiddingConfig> { BiddingConfigImpl() }
+            singleton<GetTokensUseCase> { GetTokensUseCaseImpl() }
 
             /**
              * Factories
              */
+            factory { get<Segment>() as SegmentSynchronizer }
+            factory { get<BiddingConfig>() as BiddingConfigSynchronizer }
+
             factory<InitAndRegisterAdaptersUseCase> {
                 InitAndRegisterAdaptersUseCaseImpl(
                     adaptersSource = get()
                 )
             }
             factory<AdapterInstanceCreator> { AdapterInstanceCreatorImpl() }
-            factory<AuctionResolver> { MaxEcpmAuctionResolver }
+            factory<AuctionResolver> { MaxPriceAuctionResolver }
             factory<Auction> {
                 AuctionImpl(
                     adaptersSource = get(),
+                    getTokens = get(),
                     getAuctionRequest = get(),
-                    executeRound = get(),
+                    executeAuction = get(),
                     auctionStat = get(),
+                    biddingConfig = get()
                 )
             }
             factory<AuctionStat> {
@@ -194,26 +198,14 @@ internal object DI {
             }
             factory<GetOrientationUseCase> { GetOrientationUseCaseImpl(context = get()) }
             factory { JsonHttpRequest(tokenDataSource = get()) }
-            factory<ConductBiddingRoundUseCase> {
-                ConductBiddingRoundUseCaseImpl(
-                    bidRequestUseCase = get()
-                )
+            factory<RequestAdUnitUseCase> {
+                RequestAdUnitUseCaseImpl()
             }
-            factory<ConductNetworkRoundUseCase> {
-                ConductNetworkRoundUseCaseImpl()
-            }
-            factory<BidRequestUseCase> {
-                BidRequestUseCaseImpl(
-                    createRequestBody = get(),
-                    getOrientation = get(),
-                )
-            }
-            factory<ExecuteRoundUseCase> {
-                ExecuteRoundUseCaseImpl(
-                    conductNetworkAuction = get(),
-                    conductBiddingAuction = get(),
+            factory<ExecuteAuctionUseCase> {
+                ExecuteAuctionUseCaseImpl(
+                    requestAdUnit = get(),
                     adaptersSource = get(),
-                    regulation = get()
+                    regulation = get(),
                 )
             }
 
@@ -251,7 +243,10 @@ internal object DI {
             }
             factory<DataProvider> {
                 DataProviderImpl(
-                    deviceBinder = DeviceBinder(deviceDataSource = get(), locationDataSource = get()),
+                    deviceBinder = DeviceBinder(
+                        deviceDataSource = get(),
+                        locationDataSource = get()
+                    ),
                     appBinder = AppBinder(dataSource = get()),
                     sessionBinder = SessionBinder(dataSource = get()),
                     tokenBinder = TokenBinder(dataSource = get()),

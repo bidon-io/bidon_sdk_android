@@ -1,15 +1,20 @@
 package org.bidon.amazon.impl
 
 import android.app.Activity
+import org.bidon.amazon.SlotType
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
 
 data class BannerAuctionParams(
     val bannerFormat: BannerFormat,
     val activity: Activity,
-    val slotUuid: String,
-    override val price: Double
+    override val adUnit: AdUnit,
 ) : AdAuctionParams {
-    override val lineItem: LineItem? = null
+    override val price: Double = adUnit.pricefloor
+    val slotUuid: String? = adUnit.extra?.getString("slot_uuid")
+    val format: SlotType? =
+        adUnit.extra?.getString("format")?.let {
+            SlotType.getOrNull(it).takeIf { it in arrayOf(SlotType.BANNER, SlotType.MREC) }
+        }
 }

@@ -1,6 +1,7 @@
 package org.bidon.sdk.auction.models
 
 import org.bidon.sdk.adapter.AdSource
+import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.stats.models.RoundStatus
 
 /**
@@ -15,7 +16,7 @@ sealed interface AuctionResult {
         override val roundStatus: RoundStatus,
     ) : AuctionResult {
         override fun toString(): String {
-            return "AuctionResult.Network(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
+            return "AuctionResult.Network(price=${adSource.getStats().price}, roundStatus=$roundStatus, ${adSource.demandId})"
         }
     }
 
@@ -24,31 +25,20 @@ sealed interface AuctionResult {
         override val roundStatus: RoundStatus,
     ) : AuctionResult {
         override fun toString(): String {
-            return "AuctionResult.Bidding(ecpm=${adSource.getStats().ecpm}, roundStatus=$roundStatus, ${adSource.demandId})"
+            return "AuctionResult.Bidding(price=${adSource.getStats().price}, roundStatus=$roundStatus, ${adSource.demandId})"
         }
     }
 
-    data class BiddingLose(
-        val adapterName: String,
-        val ecpm: Double,
+    class AuctionFailed(
+        val adUnit: AdUnit,
+        val tokenInfo: TokenInfo?,
+        override val roundStatus: RoundStatus,
     ) : AuctionResult {
-        override val roundStatus: RoundStatus = RoundStatus.Lose
         override val adSource: AdSource<*> get() = error("unexpected")
         override fun toString(): String {
-            return "AuctionResult.Bidding($adapterName)"
-        }
-    }
-
-    data class UnknownAdapter(
-        val adapterName: String,
-        val type: Type,
-    ) : AuctionResult {
-        override val roundStatus = RoundStatus.UnknownAdapter
-        override val adSource: AdSource<*> get() = error("unexpected")
-
-        enum class Type {
-            Network,
-            Bidding,
+            return "AuctionResult.${adUnit.getType()}(price=${adUnit.pricefloor}, roundStatus=$roundStatus, ${adUnit.demandId})"
         }
     }
 }
+
+private fun AdUnit.getType() = if (bidType == BidType.RTB) "Bidding" else "Network"

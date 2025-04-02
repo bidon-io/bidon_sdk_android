@@ -1,6 +1,7 @@
 package org.bidon.sdk.ads.cache
 
 import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.ads.AuctionInfo
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.models.AuctionResult
 
@@ -15,8 +16,8 @@ internal interface AdCache : Cacheable {
      */
     fun cache(
         adTypeParam: AdTypeParam,
-        onSuccess: (AuctionResult) -> Unit,
-        onFailure: (Throwable) -> Unit,
+        onSuccess: (AuctionResult, AuctionInfo) -> Unit,
+        onFailure: (AuctionInfo?, Throwable) -> Unit,
     )
 
     /**

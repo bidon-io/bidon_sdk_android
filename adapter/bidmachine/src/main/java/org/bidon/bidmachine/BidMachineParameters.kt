@@ -5,22 +5,22 @@ import android.content.Context
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdapterParameters
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
 
-data class BidMachineParameters(
+internal class BidMachineParameters(
     val sellerId: String,
     val endpoint: String?,
     val mediationConfig: List<String>?,
 ) : AdapterParameters
 
 class BMBannerAuctionParams(
+    override val price: Double,
+    override val adUnit: AdUnit,
     val activity: Activity,
     val bannerFormat: BannerFormat,
-    override val price: Double,
     val timeout: Long,
-    val payload: String?,
+    val payload: String?
 ) : AdAuctionParams {
-    override val lineItem: LineItem? = null
 
     override fun toString(): String {
         return "BMBannerAuctionParams(bannerFormat=$bannerFormat, pricefloor=$price, timeout=$timeout)"
@@ -28,12 +28,12 @@ class BMBannerAuctionParams(
 }
 
 class BMFullscreenAuctionParams(
-    val context: Context,
     override val price: Double,
+    override val adUnit: AdUnit,
+    val context: Context,
     val timeout: Long,
-    val payload: String?,
+    val payload: String?
 ) : AdAuctionParams {
-    override val lineItem: LineItem? = null
 
     override fun toString(): String {
         return "BMFullscreenAuctionParams(pricefloor=$price, timeout=$timeout)"

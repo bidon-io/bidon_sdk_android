@@ -10,6 +10,7 @@ import org.bidon.sdk.ads.ext.asAdType
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.models.AdObjectRequest
 import org.bidon.sdk.auction.models.AuctionResponse
+import org.bidon.sdk.auction.models.TokenInfo
 import org.bidon.sdk.auction.usecases.GetAuctionRequestUseCase
 import org.bidon.sdk.databinders.DataBinderType
 import org.bidon.sdk.logs.logging.impl.logError
@@ -46,16 +47,19 @@ internal class GetAuctionRequestUseCaseImpl(
         auctionId: String,
         demandAd: DemandAd,
         adapters: Map<String, AdapterInfo>,
+        tokens: Map<String, TokenInfo>,
     ): Result<AuctionResponse> {
         return withContext(SdkDispatchers.IO) {
             val (banner, interstitial, rewarded) = adTypeParam.asAdRequestBody()
             val adObject = AdObjectRequest(
                 auctionId = auctionId,
+                auctionKey = adTypeParam.auctionKey,
                 banner = banner,
                 interstitial = interstitial,
                 rewarded = rewarded,
                 orientationCode = getOrientation().code,
-                pricefloor = adTypeParam.pricefloor
+                pricefloor = adTypeParam.pricefloor,
+                demands = tokens
             )
             val requestBody = createRequestBody(
                 binders = binders,
@@ -68,7 +72,7 @@ internal class GetAuctionRequestUseCaseImpl(
                 path = "$AuctionRequestPath/${adTypeParam.asAdType().code}",
                 body = requestBody,
             ).mapCatching { jsonResponse ->
-                segmentSynchronizer.parseSegmentId(jsonResponse)
+                segmentSynchronizer.parseSegmentUid(jsonResponse)
                 requireNotNull(JsonParsers.parseOrNull<AuctionResponse>(jsonResponse))
             }.onFailure {
                 logError(TAG, "Error while loading auction data", it)

@@ -19,7 +19,8 @@ android {
 }
 
 dependencies {
-    compileOnly(project(":bidon"))
+    compileOnly(projects.bidon)
+    testImplementation(projects.bidon)
 
-    implementation("com.unity3d.ads:unity-ads:4.9.2")
+    implementation("com.unity3d.ads:unity-ads:4.13.1")
 }

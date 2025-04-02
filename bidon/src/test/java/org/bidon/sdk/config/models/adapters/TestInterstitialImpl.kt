@@ -9,7 +9,6 @@ import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
@@ -20,7 +19,6 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
 internal class TestInterstitialImpl(
     private val testParameters: TestAdapterParameters,
 ) : AdSource.Interstitial<TestInterstitialParameters>,
-    Mode.Network,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -29,7 +27,7 @@ internal class TestInterstitialImpl(
 //    override val ad: Ad
 //        get() = Ad(
 //            demandAd = demandAd,
-//            ecpm = adParams.lineItem.pricefloor,
+//            price = adParams.lineItem.pricefloor,
 //            roundId = roundId,
 //            networkName = "monetizationNetwork-asd",
 //            dsp = "DSP-bidmachine",
@@ -62,8 +60,7 @@ internal class TestInterstitialImpl(
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
-            TestInterstitialParameters(lineItem)
+            TestInterstitialParameters(auctionParamsScope.adUnit)
         }
     }
 }

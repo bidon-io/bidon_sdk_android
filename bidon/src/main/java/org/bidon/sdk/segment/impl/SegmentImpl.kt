@@ -10,9 +10,7 @@ import org.bidon.sdk.segment.models.SegmentAttributes
 import org.bidon.sdk.utils.di.getOrNull
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
 import org.json.JSONObject
-import kotlin.collections.Map
 import kotlin.collections.set
-import kotlin.collections.toMutableMap
 
 /**
  * Created by Aleksei Cherniaev on 15/06/2023.
@@ -25,10 +23,6 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
 
     override val attributes: SegmentAttributes
         get() = attributesFlow.value
-
-    @Deprecated("Use segmentUid instead")
-    override var segmentId: String? = null
-        private set
 
     override var segmentUid: String? = null
         private set
@@ -102,14 +96,12 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
         logInfo(TAG, "Updated attributes=$attributes")
     }
 
-    override fun parseSegmentId(rootJsonResponse: String) {
+    override fun getCustomAttributes(): Map<String, Any> {
+        return attributesFlow.value.customAttributes
+    }
+
+    override fun parseSegmentUid(rootJsonResponse: String) {
         runCatching {
-            val newSegmentId = JSONObject(rootJsonResponse)
-                .optJSONObject("segment")
-                ?.optString("id", "")
-                ?.takeIf { it.isNotEmpty() }
-            keyValueStorage?.segmentId = newSegmentId
-            setSegmentId(newSegmentId)
             val newSegmentUid = JSONObject(rootJsonResponse)
                 .optJSONObject("segment")
                 ?.optString("uid", "")
@@ -117,12 +109,6 @@ internal class SegmentImpl : Segment, SegmentSynchronizer {
             keyValueStorage?.segmentUid = newSegmentUid
             setSegmentUid(newSegmentUid)
         }
-    }
-
-    @Deprecated("Use segmentUid instead")
-    override fun setSegmentId(segmentId: String?) {
-        logInfo(TAG, "Updated SegmentId($segmentId)")
-        this.segmentId = segmentId
     }
 
     override fun setSegmentUid(segmentUid: String?) {
