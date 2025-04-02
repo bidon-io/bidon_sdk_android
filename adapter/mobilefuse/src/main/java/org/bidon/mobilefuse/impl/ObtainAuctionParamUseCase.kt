@@ -11,9 +11,7 @@ internal class ObtainAuctionParamUseCase {
         return auctionParamsScope {
             MobileFuseFullscreenAuctionParams(
                 activity = activity,
-                signalData = getSignalData(),
-                price = pricefloor,
-                placementId = getPlacementId()
+                adUnit = adUnit
             )
         }
     }
@@ -22,19 +20,9 @@ internal class ObtainAuctionParamUseCase {
         return auctionParamsScope {
             MobileFuseBannerAuctionParams(
                 activity = activity,
-                signalData = getSignalData(),
-                price = pricefloor,
                 bannerFormat = bannerFormat,
-                placementId = getPlacementId()
+                adUnit = adUnit
             )
         }
-    }
-
-    private fun AdAuctionParamSource.getPlacementId() = requireNotNull(json?.getString("placement_id")) {
-        "PlacementId is required for MobileFuse"
-    }
-
-    private fun AdAuctionParamSource.getSignalData() = requireNotNull(json?.getString("signaldata")) {
-        "SignalData is required for MobileFuse"
     }
 }

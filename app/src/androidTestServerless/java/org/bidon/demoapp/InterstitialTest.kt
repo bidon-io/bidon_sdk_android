@@ -6,9 +6,10 @@ import androidx.navigation.compose.rememberNavController
 import org.bidon.demoapp.theme.AppTheme
 import org.bidon.demoapp.ui.InterstitialScreen
 import org.bidon.sdk.auction.impl.ServerlessAuctionConfig
-import org.bidon.sdk.auction.models.LineItem
-import org.bidon.sdk.auction.models.Round
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.impl.ServerlessConfigSettings
+import org.bidon.sdk.stats.models.BidType
+import org.bidon.sdk.utils.json.jsonObject
 import org.junit.Rule
 import org.junit.Test
 
@@ -25,18 +26,17 @@ class InterstitialTest {
         ServerlessConfigSettings.useAdapters("admob")
         ServerlessAuctionConfig.setLocalAuctionResponse(
             pricefloor = 0.0,
-            rounds = listOf(
-                Round(
-                    id = "ROUND_1",
-                    demandIds = listOf("admob"),
-                    timeoutMs = 10000
-                )
-            ),
-            lineItems = listOf(
-                LineItem(
+            adUnits = listOf(
+                AdUnit(
                     demandId = "admob",
+                    label = "admob",
                     pricefloor = 0.01,
-                    adUnitId = "ca-app-pub-3940256099942544/1033173712"
+                    uid = "uid123",
+                    bidType = BidType.CPM,
+                    timeout = 5000,
+                    ext = jsonObject {
+                        "adUnitId" hasValue "ca-app-pub-3940256099942544/1033173712"
+                    }.toString()
                 )
             )
         )
@@ -68,18 +68,17 @@ class InterstitialTest {
         ServerlessConfigSettings.useAdapters("admob")
         ServerlessAuctionConfig.setLocalAuctionResponse(
             pricefloor = 1.0,
-            rounds = listOf(
-                Round(
-                    id = "ROUND_1",
-                    demandIds = listOf("admob"),
-                    timeoutMs = 10000
-                )
-            ),
-            lineItems = listOf(
-                LineItem(
+            adUnits = listOf(
+                AdUnit(
                     demandId = "admob",
+                    label = "admob",
                     pricefloor = 0.01,
-                    adUnitId = "ca-app-pub-3940256099942544/1033173712"
+                    uid = "uid123",
+                    bidType = BidType.CPM,
+                    timeout = 5000,
+                    ext = jsonObject {
+                        "adUnitId" hasValue "ca-app-pub-3940256099942544/1033173712"
+                    }.toString()
                 )
             )
         )
@@ -107,18 +106,17 @@ class InterstitialTest {
         ServerlessConfigSettings.useAdapters("unityads")
         ServerlessAuctionConfig.setLocalAuctionResponse(
             pricefloor = 0.0,
-            rounds = listOf(
-                Round(
-                    id = "ROUND_1",
-                    demandIds = listOf("unityads"),
-                    timeoutMs = 10000
-                )
-            ),
-            lineItems = listOf(
-                LineItem(
+            adUnits = listOf(
+                AdUnit(
                     demandId = "unityads",
+                    label = "unityads",
                     pricefloor = 0.01,
-                    adUnitId = "Interstitial_Android"
+                    uid = "uid123",
+                    bidType = BidType.CPM,
+                    timeout = 5000,
+                    ext = jsonObject {
+                        "placementId" hasValue "video"
+                    }.toString()
                 )
             )
         )

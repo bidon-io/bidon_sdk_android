@@ -57,6 +57,6 @@ interface PositionedBanner {
     fun destroyAd(activity: Activity)
     fun setBannerListener(listener: BannerListener?)
 
-    fun notifyLoss(activity: Activity, winnerDemandId: String, winnerEcpm: Double)
+    fun notifyLoss(activity: Activity, winnerDemandId: String, winnerPrice: Double)
     fun notifyWin()
 }

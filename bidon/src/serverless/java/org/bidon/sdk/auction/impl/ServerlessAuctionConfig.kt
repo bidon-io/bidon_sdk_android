@@ -1,8 +1,7 @@
 package org.bidon.sdk.auction.impl
 
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.auction.models.AuctionResponse
-import org.bidon.sdk.auction.models.LineItem
-import org.bidon.sdk.auction.models.RoundRequest
 import java.util.UUID
 
 /**
@@ -15,23 +14,23 @@ object ServerlessAuctionConfig {
     internal fun getAuctionResponse() = auctionResponse
 
     fun setLocalAuctionResponse(
-        rounds: List<RoundRequest>,
-        lineItems: List<LineItem>,
+        adUnits: List<AdUnit>,
+        noBids: List<AdUnit>?,
         pricefloor: Double,
-
-        token: String? = null,
         auctionId: String = UUID.randomUUID().toString(),
-        auctionConfigurationId: Int = 10,
+        auctionTimeout: Long = 30_000L,
+        auctionConfigurationId: Long = 1238798479,
+        auctionConfigurationUid: String = "1238798479",
     ) {
         auctionResponse = AuctionResponse(
-            auctionId = auctionId,
+            adUnits = adUnits,
+            noBids = noBids,
             pricefloor = pricefloor,
+            auctionId = auctionId,
+            auctionTimeout = auctionTimeout,
             auctionConfigurationId = auctionConfigurationId,
-            lineItems = lineItems,
-            token = token,
-            rounds = rounds,
-            externalWinNotificationsEnabled = true,
-            auctionConfigurationUid = "a"
+            auctionConfigurationUid = auctionConfigurationUid,
+            externalWinNotificationsEnabled = false,
         )
     }
 }

@@ -16,11 +16,8 @@ import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.ext.height
-import org.bidon.sdk.auction.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
@@ -32,22 +29,19 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
  */
 internal class DTExchangeBanner :
     AdSource.Banner<DTExchangeBannerAuctionParams>,
-    Mode.Network,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var pricefloor: Double = 0.0
     private var adSpot: InneractiveAdSpot? = null
     private var adViewHolder: AdViewHolder? = null
-    private var demandSource: String? = null
 
     override val isAdReadyToShow: Boolean get() = adSpot?.isReady == true
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+            val adUnit = adUnit
             DTExchangeBannerAuctionParams(
-                lineItem = lineItem,
+                adUnit = adUnit,
                 bannerFormat = bannerFormat,
                 activity = activity,
             )
@@ -56,11 +50,14 @@ internal class DTExchangeBanner :
 
     override fun load(adParams: DTExchangeBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams")
-        pricefloor = adParams.price
+        val spotId = adParams.spotId ?: run {
+            emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, "spotId")))
+            return
+        }
         val adSpot = InneractiveAdSpotManager.get().createSpot()
         val controller = InneractiveAdViewUnitController()
         adSpot.addUnitController(controller)
-        val adRequest = InneractiveAdRequest(adParams.spotId)
+        val adRequest = InneractiveAdRequest(spotId)
         adSpot.setRequestListener(object : InneractiveAdSpot.RequestListener {
             override fun onInneractiveSuccessfulAdRequest(inneractiveAdSpot: InneractiveAdSpot?) {
                 logInfo(TAG, "onInneractiveSuccessfulAdRequest: $inneractiveAdSpot")
@@ -78,7 +75,7 @@ internal class DTExchangeBanner :
                 inneractiveErrorCode: InneractiveErrorCode?
             ) {
                 logInfo(TAG, "onInneractiveFailedAdRequest: $inneractiveErrorCode")
-                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                emitEvent(AdEvent.LoadFailed(inneractiveErrorCode.asBidonError()))
             }
         })
         adSpot.requestAd(adRequest)
@@ -106,8 +103,7 @@ internal class DTExchangeBanner :
             ) {
                 logInfo(TAG, "onAdImpression: $adSpot, $impressionData")
                 val adValue = impressionData?.asAdValue() ?: return
-                demandSource = impressionData.demandSource
-                setDsp(demandSource)
+                setDsp(impressionData.demandSource)
                 val ad = getAd() ?: return
                 emitEvent(AdEvent.PaidRevenue(ad, adValue))
                 // tracked impression/shown by [BannerView]
@@ -139,13 +135,8 @@ internal class DTExchangeBanner :
             override fun onAdCollapsed(adSpot: InneractiveAdSpot?) {}
         }
         controller.bindView(container)
-        return AdViewHolder(
-            networkAdview = container,
-            widthDp = adParams.bannerFormat.width,
-            heightDp = adParams.bannerFormat.height
-        ).also {
-            this.adViewHolder = it
-        }
+        return AdViewHolder(networkAdview = container)
+            .also { this.adViewHolder = it }
     }
 }
 

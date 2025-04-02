@@ -1,6 +1,6 @@
 package org.bidon.sdk.auction.models
 
-import org.bidon.sdk.auction.models.AdObjectRequest.*
+import org.bidon.sdk.auction.models.AdObjectRequest.Orientation
 import org.bidon.sdk.utils.serializer.JsonName
 import org.bidon.sdk.utils.serializer.Serializable
 
@@ -14,7 +14,9 @@ internal data class AdObjectRequest(
     val orientationCode: String,
     @field:JsonName("auction_id")
     val auctionId: String,
-    @field:JsonName("pricefloor")
+    @field:JsonName("auction_key")
+    val auctionKey: String?,
+    @field:JsonName("auction_pricefloor")
     val pricefloor: Double,
     @field:JsonName("banner")
     val banner: BannerRequest?,
@@ -22,6 +24,8 @@ internal data class AdObjectRequest(
     val interstitial: InterstitialRequest?,
     @field:JsonName("rewarded")
     val rewarded: RewardedRequest?,
+    @field:JsonName("demands")
+    val demands: Map<String, TokenInfo>,
 ) : Serializable {
 
     enum class Orientation(val code: String) {

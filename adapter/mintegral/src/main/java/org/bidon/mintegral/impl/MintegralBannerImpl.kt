@@ -1,29 +1,24 @@
 package org.bidon.mintegral.impl
 
-import android.content.Context
-import com.mbridge.msdk.mbbid.out.BidManager
 import com.mbridge.msdk.out.BannerAdListener
-import com.mbridge.msdk.out.BannerSize
 import com.mbridge.msdk.out.MBBannerView
 import com.mbridge.msdk.out.MBridgeIds
 import org.bidon.mintegral.MintegralBannerAuctionParam
+import org.bidon.mintegral.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
-import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 /**
  * Created by Aleksei Cherniaev on 20/06/2023.
@@ -32,66 +27,47 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
  */
 internal class MintegralBannerImpl :
     AdSource.Banner<MintegralBannerAuctionParam>,
-    Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var bannerView: MBBannerView? = null
-    private var bannerSize: BannerSize? = null
 
     override var isAdReadyToShow: Boolean = false
-
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = BidManager.getBuyerUid(context)
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             MintegralBannerAuctionParam(
                 activity = activity,
-                price = pricefloor,
-                payload = requireNotNull(json?.getString("payload")) {
-                    "Payload is required for Mintegral"
-                },
-                unitId = json?.getString("unit_id"),
-                placementId = json?.getString("placement_id"),
                 bannerFormat = bannerFormat,
+                adUnit = adUnit
             )
         }
     }
 
     override fun load(adParams: MintegralBannerAuctionParam) {
         logInfo(TAG, "Starting with $adParams: $this")
+        val placementId = adParams.placementId
+            ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "placementId")))
+        val unitId = adParams.unitId
+            ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "unitId")))
+
         adParams.activity.runOnUiThread {
-            val mbBannerView = MBBannerView(adParams.activity.applicationContext).also {
-                bannerView = it
-            }
-            val size = when (adParams.bannerFormat) {
-                BannerFormat.Banner -> BannerSize(BannerSize.STANDARD_TYPE, 320, 50)
-                BannerFormat.LeaderBoard -> BannerSize(BannerSize.DEV_SET_TYPE, 728, 90)
-                BannerFormat.MRec -> BannerSize(BannerSize.MEDIUM_TYPE, 300, 250)
-                BannerFormat.Adaptive -> if (isTablet) {
-                    BannerSize(BannerSize.DEV_SET_TYPE, 728, 90)
-                } else {
-                    BannerSize(BannerSize.STANDARD_TYPE, 320, 50)
-                }
-            }.also {
-                bannerSize = it
-            }
-            mbBannerView.init(size, adParams.placementId, adParams.unitId)
+            val mbBannerView = MBBannerView(adParams.activity.applicationContext)
+                .also { bannerView = it }
+            mbBannerView.init(adParams.bannerSize, placementId, unitId)
+            mbBannerView.setAllowShowCloseBtn(false)
+            mbBannerView.setRefreshTime(0)
             mbBannerView.setBannerAdListener(object : BannerAdListener {
                 override fun onLoadFailed(mBridgeIds: MBridgeIds?, message: String?) {
                     logInfo(TAG, "onLoadFailed $mBridgeIds")
-                    emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                    emitEvent(AdEvent.LoadFailed(message.asBidonError()))
                 }
 
                 override fun onLoadSuccessed(mBridgeIds: MBridgeIds?) {
                     logInfo(TAG, "onLoadSuccessed $mBridgeIds")
+                    val ad = getAd() ?: return
+                    emitEvent(AdEvent.Fill(ad))
                     isAdReadyToShow = true
-                    val ad = getAd()
-                    if (mBridgeIds != null && ad != null) {
-                        emitEvent(AdEvent.Fill(ad))
-                    } else {
-                        emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-                    }
                 }
 
                 override fun onLogImpression(mBridgeIds: MBridgeIds?) {
@@ -115,36 +91,39 @@ internal class MintegralBannerImpl :
                     emitEvent(AdEvent.Clicked(ad))
                 }
 
-                override fun onLeaveApp(mBridgeIds: MBridgeIds?) {}
-                override fun showFullScreen(mBridgeIds: MBridgeIds?) {}
-                override fun closeFullScreen(mBridgeIds: MBridgeIds?) {}
-                override fun onCloseBanner(mBridgeIds: MBridgeIds?) {}
+                override fun onLeaveApp(mBridgeIds: MBridgeIds?) {
+                    logInfo(TAG, "onLeaveApp $mBridgeIds")
+                }
+
+                override fun showFullScreen(mBridgeIds: MBridgeIds?) {
+                    logInfo(TAG, "showFullScreen $mBridgeIds")
+                }
+
+                override fun closeFullScreen(mBridgeIds: MBridgeIds?) {
+                    logInfo(TAG, "closeFullScreen $mBridgeIds")
+                }
+
+                override fun onCloseBanner(mBridgeIds: MBridgeIds?) {
+                    logInfo(TAG, "onCloseBanner $mBridgeIds")
+                }
             })
-            mbBannerView.loadFromBid(adParams.payload)
+
+            if (adParams.adUnit.bidType == BidType.CPM) {
+                mbBannerView.load()
+            } else {
+                val payload = adParams.payload
+                    ?: return@runOnUiThread emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")))
+                mbBannerView.loadFromBid(payload)
+            }
         }
     }
 
-    override fun getAdView(): AdViewHolder? {
-        logInfo(TAG, "Starting show: $this")
-        val size = bannerSize ?: return null
-        return if (isAdReadyToShow) {
-            bannerView?.let {
-                AdViewHolder(
-                    networkAdview = it,
-                    widthDp = size.width,
-                    heightDp = size.height
-                )
-            }
-        } else {
-            emitEvent(AdEvent.ShowFailed(BidonError.AdNotReady))
-            null
-        }
-    }
+    override fun getAdView(): AdViewHolder? = bannerView?.let { AdViewHolder(it) }
 
     override fun destroy() {
         logInfo(TAG, "destroy $this")
+        bannerView?.release()
         bannerView = null
-        bannerSize = null
     }
 }
 

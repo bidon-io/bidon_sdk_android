@@ -19,7 +19,8 @@ android {
 }
 
 dependencies {
-    compileOnly(project(":bidon"))
+    compileOnly(projects.bidon)
+    testImplementation(projects.bidon)
 
-    implementation("com.mobilefuse.sdk:mobilefuse-sdk-core:1.6.2")
+    implementation("com.mobilefuse.sdk:mobilefuse-sdk-core:1.9.0")
 }

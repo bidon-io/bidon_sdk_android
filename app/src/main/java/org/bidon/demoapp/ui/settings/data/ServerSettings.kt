@@ -24,8 +24,9 @@ internal sealed interface Host {
     }
 
     class Staging(val prefix: String) : Host {
+        override val baseUrl: String = "$SCHEME$prefix$SUFFIX/"
         override val name: String = "Staging"
-        override val baseUrl: String = "$SCHEME$prefix$SUFFIX"
+
         fun getBasicAuth(): String {
             val username = STAGING_BASIC_AUTH_USERNAME
             val password = STAGING_BASIC_AUTH_PASSWORD

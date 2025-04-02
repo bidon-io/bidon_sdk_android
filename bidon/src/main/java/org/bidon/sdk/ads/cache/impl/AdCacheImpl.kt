@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.DemandAd
+import org.bidon.sdk.ads.AuctionInfo
 import org.bidon.sdk.ads.cache.AdCache
 import org.bidon.sdk.ads.cache.Cacheable
 import org.bidon.sdk.auction.AdTypeParam
@@ -44,8 +45,8 @@ internal class AdCacheImpl(
 
     override fun cache(
         adTypeParam: AdTypeParam,
-        onSuccess: (AuctionResult) -> Unit,
-        onFailure: (Throwable) -> Unit,
+        onSuccess: (AuctionResult, AuctionInfo) -> Unit,
+        onFailure: (AuctionInfo?, Throwable) -> Unit,
     ) {
         load(adTypeParam, onSuccess, onFailure)
     }
@@ -77,8 +78,8 @@ internal class AdCacheImpl(
 
     private fun load(
         adTypeParam: AdTypeParam,
-        onSuccess: (AuctionResult) -> Unit,
-        onFailure: (Throwable) -> Unit,
+        onSuccess: (AuctionResult, AuctionInfo) -> Unit,
+        onFailure: (AuctionInfo?, Throwable) -> Unit,
     ) {
         logInfo(tag, "Cache started: ${results.value.asString()}")
         if (results.value.size >= settings.minCacheSize) {
@@ -91,23 +92,22 @@ internal class AdCacheImpl(
             auction?.start(
                 demandAd = demandAd,
                 adTypeParam = adTypeParam.copy(
-                    pricefloor = maxOf(adTypeParam.pricefloor, results.value.firstOrNull()?.adSource?.getStats()?.ecpm ?: 0.0)
+                    pricefloor = maxOf(adTypeParam.pricefloor, results.value.firstOrNull()?.adSource?.getStats()?.price ?: 0.0)
                 ),
-                onSuccess = { auctionResults ->
-                    logInfo(tag, "Auction completed ${results.value.asString()}")
+                onSuccess = { winners, auctionInfo ->
                     scope.launch {
                         results.update {
-                            resolver.sortWinners(it + auctionResults).take(settings.cacheCapacity)
+                            resolver.sortWinners(winners).take(settings.cacheCapacity)
                         }
-                        auctionResults.intersect(results.value.toSet()).forEach { trackExpired(it) }
+                        winners.intersect(results.value.toSet()).forEach { trackExpired(it) }
                         logInfo(tag, "Auction completed: ${results.value.asString()}")
                         isLoading.value = false
-                        results.value.firstOrNull()?.let { onSuccess.invoke(it) }
+                        results.value.firstOrNull()?.let { onSuccess.invoke(it, auctionInfo) }
                     }
                 },
-                onFailure = {
+                onFailure = { auctionInfo, cause ->
                     logInfo(tag, "Auction failed: ${results.value.asString()}")
-                    onFailure.invoke(it)
+                    onFailure.invoke(auctionInfo, cause)
                     isLoading.value = false
                 },
             )
@@ -121,18 +121,21 @@ internal class AdCacheImpl(
             is AdTypeParam.Banner -> AdTypeParam.Banner(
                 activity = param.activity,
                 pricefloor = pricefloor,
+                auctionKey = param.auctionKey,
                 bannerFormat = param.bannerFormat,
-                containerWidth = param.containerWidth
+                containerWidth = param.containerWidth,
             )
 
             is AdTypeParam.Interstitial -> AdTypeParam.Interstitial(
                 activity = param.activity,
                 pricefloor = pricefloor,
+                auctionKey = param.auctionKey,
             )
 
             is AdTypeParam.Rewarded -> AdTypeParam.Rewarded(
                 activity = param.activity,
                 pricefloor = pricefloor,
+                auctionKey = param.auctionKey,
             )
         }
     }
@@ -147,7 +150,7 @@ internal class AdCacheImpl(
 
     private fun List<AuctionResult>.asString(): String {
         return "(${this.size}) " + this.joinToString { auctionResult ->
-            auctionResult.adSource.getStats().let { "${it.demandId.demandId}:${it.ecpm}" }
+            auctionResult.adSource.getStats().let { "${it.demandId.demandId}:${it.price}" }
         }
     }
 }

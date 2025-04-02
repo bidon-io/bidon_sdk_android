@@ -1,10 +1,11 @@
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 pluginManagement {
     repositories {
-        gradlePluginPortal()
         google()
         mavenCentral()
-        maven("https://kotlin.bintray.com/kotlinx")
-        maven("https://plugins.gradle.org/m2/")
+        gradlePluginPortal()
     }
 }
 dependencyResolutionManagement {
@@ -13,19 +14,14 @@ dependencyResolutionManagement {
         google()
         // mavenLocal()
         mavenCentral()
-        maven("https://cboost.jfrog.io/artifactory/chartboost-mediation/")
-        maven {
-            url = uri("https://artifacts.applovin.com/android")
+        maven(url = "https://artifactory.bidon.org/bidon")
+        maven(url = "https://artifactory.bidon.org/bidon-private") {
+            credentials {
+                username = System.getenv("BDN_USER")
+                password = System.getenv("BDN_PASSWORD")
+            }
         }
-        maven {
-            name = "BidMachine Ads maven repository"
-            url = uri("https://artifactory.bidmachine.io/bidmachine")
-        }
-        maven {
-            url = uri("https://android-sdk.is.com/")
-        }
-        maven {
-            url = uri("https://maven.pkg.github.com/bidon-io/bidon-sdk-android")
+        maven(url = "https://maven.pkg.github.com/bidon-io/bidon-sdk-android") {
             credentials {
                 username = System.getenv("GPR_USER")
                 password = System.getenv("GPR_TOKEN")
@@ -33,27 +29,30 @@ dependencyResolutionManagement {
         }
     }
 }
-rootProject.name = "Bidon SDK"
+rootProject.name = "BidonSDK"
 
 include(
     ":app",
 )
 include(
     ":bidon",
-    ":adapter:bidmachine",
     ":adapter:admob",
-    ":adapter:applovin",
-    ":adapter:dtexchange",
-    ":adapter:unityads",
-    ":adapter:vungle",
-    ":adapter:bigoads",
-    ":adapter:mintegral",
-    ":adapter:meta",
-    ":adapter:inmobi",
     ":adapter:amazon",
-    ":adapter:mobilefuse",
+    ":adapter:applovin",
+    ":adapter:bidmachine",
+    ":adapter:bigoads",
+    ":adapter:chartboost",
+    ":adapter:dtexchange",
     ":adapter:gam",
+    ":adapter:inmobi",
+    ":adapter:ironsource",
+    ":adapter:meta",
+    ":adapter:mintegral",
+    ":adapter:mobilefuse",
+    ":adapter:unityads",
+    ":adapter:vkads",
+    ":adapter:vungle",
+    ":adapter:yandex",
 //    ":adapter:fyber",
-//    ":adapter:ironsource",
 //    ":adapter:appsflyer"
 )

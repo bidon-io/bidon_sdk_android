@@ -4,17 +4,17 @@ import com.inmobi.ads.AdMetaInfo
 import com.inmobi.ads.InMobiAdRequestStatus
 import com.inmobi.ads.InMobiBanner
 import com.inmobi.ads.listeners.BannerAdEventListener
+import org.bidon.inmobi.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.AdViewHolder
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.auction.ext.height
-import org.bidon.sdk.auction.ext.width
+import org.bidon.sdk.ads.banner.ext.height
+import org.bidon.sdk.ads.banner.ext.width
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -29,8 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 internal class InmobiBannerImpl :
     AdSource.Banner<InmobiBannerAuctionParams>,
     AdEventFlow by AdEventFlowImpl(),
-    StatisticsCollector by StatisticsCollectorImpl(),
-    Mode.Network {
+    StatisticsCollector by StatisticsCollectorImpl() {
 
     private var bannerView: InMobiBanner? = null
     private var adMetaInfo: AdMetaInfo? = null
@@ -42,18 +41,25 @@ internal class InmobiBannerImpl :
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
+            val adUnit = adUnit
             InmobiBannerAuctionParams(
                 activity = activity,
                 bannerFormat = bannerFormat,
-                price = lineItem.pricefloor,
-                lineItem = lineItem
+                adUnit = adUnit
             )
         }
     }
 
     override fun load(adParams: InmobiBannerAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
+        adParams.placementId ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, message = "placementId")
+                )
+            )
+            return
+        }
         bannerFormat = adParams.bannerFormat
         val bannerView = InMobiBanner(adParams.activity.applicationContext, adParams.placementId).also {
             this.bannerView = it
@@ -71,7 +77,7 @@ internal class InmobiBannerImpl :
 
             override fun onAdLoadFailed(inMobiBanner: InMobiBanner, status: InMobiAdRequestStatus) {
                 logInfo(TAG, "Error while loading ad: ${status.statusCode} ${status.message}. $this")
-                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                emitEvent(AdEvent.LoadFailed(status.asBidonError()))
                 this@InmobiBannerImpl.bannerView = null
             }
 
@@ -102,11 +108,7 @@ internal class InmobiBannerImpl :
         bannerView.load()
     }
 
-    override fun getAdView(): AdViewHolder? {
-        val bannerFormat = bannerFormat ?: return null
-        val bannerAd = bannerView ?: return null
-        return AdViewHolder(bannerAd, bannerFormat.width, bannerFormat.height)
-    }
+    override fun getAdView(): AdViewHolder? = bannerView?.let { AdViewHolder(it) }
 
     override fun destroy() {
         logInfo(TAG, "destroy")

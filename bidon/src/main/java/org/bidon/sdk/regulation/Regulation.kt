@@ -24,6 +24,4 @@ interface Regulation {
      */
     var coppa: Coppa
     val coppaApplies: Boolean get() = coppa == Coppa.Yes
-
-    val iab: Iab
 }

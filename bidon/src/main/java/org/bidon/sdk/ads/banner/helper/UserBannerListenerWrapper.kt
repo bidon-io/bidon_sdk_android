@@ -1,6 +1,7 @@
 package org.bidon.sdk.ads.banner.helper
 
 import org.bidon.sdk.ads.Ad
+import org.bidon.sdk.ads.AuctionInfo
 import org.bidon.sdk.ads.banner.BannerListener
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
@@ -9,12 +10,12 @@ import org.bidon.sdk.logs.analytic.AdValue
  * Created by Bidon Team on 06/02/2023.
  */
 internal fun wrapUserBannerListener(userListener: () -> BannerListener?) = object : BannerListener {
-    override fun onAdLoaded(ad: Ad) {
-        userListener()?.onAdLoaded(ad)
+    override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {
+        userListener()?.onAdLoaded(ad, auctionInfo)
     }
 
-    override fun onAdLoadFailed(cause: BidonError) {
-        userListener()?.onAdLoadFailed(cause)
+    override fun onAdLoadFailed(auctionInfo: AuctionInfo?, cause: BidonError) {
+        userListener()?.onAdLoadFailed(auctionInfo, cause)
     }
 
     override fun onAdShown(ad: Ad) {

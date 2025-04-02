@@ -15,6 +15,8 @@ internal class AdObjectRequestBodySerializerTest {
         val data = AdObjectRequest(
             pricefloor = 1.23,
             auctionId = "aId",
+            auctionKey = null,
+            demands = mapOf(),
             orientationCode = AdObjectRequest.Orientation.Portrait.code,
             banner = BannerRequest(BannerRequest.StatFormat.LEADERBOARD_728x90.code),
             interstitial = InterstitialRequest,
@@ -24,7 +26,7 @@ internal class AdObjectRequestBodySerializerTest {
 
         actual.assertEquals(
             expectedJsonStructure {
-                "pricefloor" hasValue 1.23
+                "auction_pricefloor" hasValue 1.23
                 "auction_id" hasValue "aId"
                 "orientation" hasValue "PORTRAIT"
                 "banner" hasJson expectedJsonStructure {
@@ -32,6 +34,7 @@ internal class AdObjectRequestBodySerializerTest {
                 }
                 "interstitial" hasJson expectedJsonStructure { /* EMPTY */ }
                 "rewarded" hasJson expectedJsonStructure { /* EMPTY */ }
+                "demands" hasJson expectedJsonStructure { /* EMPTY */ }
             }
         )
     }
@@ -41,21 +44,24 @@ internal class AdObjectRequestBodySerializerTest {
         val data = AdObjectRequest(
             pricefloor = 1.23,
             auctionId = "aId",
+            auctionKey = null,
             orientationCode = AdObjectRequest.Orientation.Portrait.code,
             banner = BannerRequest(BannerRequest.StatFormat.LEADERBOARD_728x90.code),
             interstitial = null,
+            demands = mapOf(),
             rewarded = null,
         )
         val actual = data.serialize()
 
         actual.assertEquals(
             expectedJsonStructure {
-                "pricefloor" hasValue 1.23
+                "auction_pricefloor" hasValue 1.23
                 "auction_id" hasValue "aId"
                 "orientation" hasValue "PORTRAIT"
                 "banner" hasJson expectedJsonStructure {
                     "format" hasValue "LEADERBOARD"
                 }
+                "demands" hasJson expectedJsonStructure { /* EMPTY */ }
             }
         )
     }
@@ -65,6 +71,8 @@ internal class AdObjectRequestBodySerializerTest {
         val data = AdObjectRequest(
             pricefloor = 1.23,
             auctionId = "aId",
+            auctionKey = null,
+            demands = mapOf(),
             orientationCode = AdObjectRequest.Orientation.Portrait.code,
             banner = null,
             interstitial = InterstitialRequest,
@@ -74,10 +82,11 @@ internal class AdObjectRequestBodySerializerTest {
 
         actual.assertEquals(
             expectedJsonStructure {
-                "pricefloor" hasValue 1.23
+                "auction_pricefloor" hasValue 1.23
                 "auction_id" hasValue "aId"
                 "orientation" hasValue "PORTRAIT"
                 "interstitial" hasJson expectedJsonStructure { /* EMPTY */ }
+                "demands" hasJson expectedJsonStructure { /* EMPTY */ }
             }
         )
     }
@@ -87,6 +96,8 @@ internal class AdObjectRequestBodySerializerTest {
         val data = AdObjectRequest(
             pricefloor = 1.23,
             auctionId = "aId",
+            auctionKey = null,
+            demands = mapOf(),
             orientationCode = AdObjectRequest.Orientation.Portrait.code,
             banner = null,
             interstitial = null,
@@ -96,10 +107,11 @@ internal class AdObjectRequestBodySerializerTest {
 
         actual.assertEquals(
             expectedJsonStructure {
-                "pricefloor" hasValue 1.23
+                "auction_pricefloor" hasValue 1.23
                 "auction_id" hasValue "aId"
                 "orientation" hasValue "PORTRAIT"
                 "rewarded" hasJson expectedJsonStructure { /* EMPTY */ }
+                "demands" hasJson expectedJsonStructure { /* EMPTY */ }
             }
         )
     }

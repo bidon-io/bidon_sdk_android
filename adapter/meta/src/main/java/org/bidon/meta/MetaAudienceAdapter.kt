@@ -3,6 +3,7 @@ package org.bidon.meta
 import android.content.Context
 import com.facebook.ads.AdSettings
 import com.facebook.ads.AudienceNetworkAds
+import com.facebook.ads.BidderTokenProvider
 import org.bidon.meta.ext.adapterVersion
 import org.bidon.meta.ext.sdkVersion
 import org.bidon.meta.impl.MetaBannerAuctionParams
@@ -20,6 +21,7 @@ import org.bidon.sdk.adapter.Initializable
 import org.bidon.sdk.adapter.SupportsRegulation
 import org.bidon.sdk.adapter.SupportsTestMode
 import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.regulation.Regulation
@@ -31,10 +33,11 @@ import kotlin.coroutines.suspendCoroutine
 /**
  * Created by Aleksei Cherniaev on 08/08/2023.
  */
-val MetaDemandId = DemandId("meta")
+internal val MetaDemandId = DemandId("meta")
 
-class MetaAudienceAdapter :
-    Adapter,
+@Suppress("unused")
+internal class MetaAudienceAdapter :
+    Adapter.Bidding,
     SupportsRegulation,
     SupportsTestMode by SupportsTestModeImpl(),
     AdProvider.Interstitial<MetaFullscreenAuctionParams>,
@@ -46,6 +49,9 @@ class MetaAudienceAdapter :
         adapterVersion = adapterVersion,
         sdkVersion = sdkVersion
     )
+
+    override suspend fun getToken(adTypeParam: AdTypeParam): String? =
+        BidderTokenProvider.getBidderToken(adTypeParam.activity.applicationContext)
 
     override suspend fun init(context: Context, configParams: MetaParams) = suspendCoroutine {
         if (isTestMode) {

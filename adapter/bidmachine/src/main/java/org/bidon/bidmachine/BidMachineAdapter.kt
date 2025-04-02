@@ -4,26 +4,29 @@ import android.content.Context
 import io.bidmachine.BidMachine
 import org.bidon.bidmachine.ext.adapterVersion
 import org.bidon.bidmachine.ext.sdkVersion
+import org.bidon.bidmachine.ext.toBidmachineAdFormat
 import org.bidon.bidmachine.impl.BMBannerAdImpl
 import org.bidon.bidmachine.impl.BMInterstitialAdImpl
 import org.bidon.bidmachine.impl.BMRewardedAdImpl
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.*
 import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.logs.logging.Logger
 import org.bidon.sdk.regulation.Regulation
 import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-val BidMachineDemandId = DemandId("bidmachine")
+internal val BidMachineDemandId = DemandId("bidmachine")
 
 internal typealias BidMachineBannerSize = io.bidmachine.banner.BannerSize
 internal typealias BMAuctionResult = io.bidmachine.models.AuctionResult
 
 @Suppress("unused")
-class BidMachineAdapter :
-    Adapter,
+internal class BidMachineAdapter :
+    Adapter.Bidding,
+    Adapter.Network,
     SupportsRegulation,
     SupportsTestMode by SupportsTestModeImpl(),
     Initializable<BidMachineParameters>,
@@ -31,17 +34,20 @@ class BidMachineAdapter :
     AdProvider.Rewarded<BMFullscreenAuctionParams>,
     AdProvider.Interstitial<BMFullscreenAuctionParams> {
 
-    private var context: Context? = null
-
     override val demandId = BidMachineDemandId
     override val adapterInfo = AdapterInfo(
         adapterVersion = adapterVersion,
         sdkVersion = sdkVersion
     )
 
+    override suspend fun getToken(adTypeParam: AdTypeParam): String? =
+        BidMachine.getBidToken(
+            adTypeParam.activity.applicationContext,
+            adTypeParam.toBidmachineAdFormat()
+        )
+
     override suspend fun init(context: Context, configParams: BidMachineParameters): Unit =
         suspendCoroutine { continuation ->
-            this.context = context
             val sourceId = configParams.sellerId
             BidMachine.setTestMode(isTestMode)
             BidMachine.setLoggingEnabled(BidonSdk.loggerLevel != Logger.Level.Off)

@@ -8,10 +8,11 @@ import java.util.*
  * Created by Bidon Team on 07/02/2023.
  */
 internal class BidonEndpointsImpl : BidonEndpoints {
+    private val apiVersion = "v2"
     private val hosts: Queue<String> = LinkedList()
     private var defaultEndpoint: String = NetworkSettings.BidonBaseUrl
 
-    override val activeEndpoint: String get() = hosts.peek() ?: defaultEndpoint
+    override val activeEndpoint: String get() = (hosts.peek() ?: defaultEndpoint) + "/$apiVersion"
 
     override fun init(defaultBaseUrl: String, loadedUrls: Set<String>) {
         this.defaultEndpoint = defaultBaseUrl

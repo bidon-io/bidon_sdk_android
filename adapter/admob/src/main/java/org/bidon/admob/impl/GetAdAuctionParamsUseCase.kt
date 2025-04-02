@@ -1,12 +1,10 @@
 package org.bidon.admob.impl
 
 import org.bidon.admob.AdmobBannerAuctionParams
-import org.bidon.admob.AdmobDemandId
 import org.bidon.admob.AdmobFullscreenAdAuctionParams
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.AdType
-import org.bidon.sdk.config.BidonError
 
 /**
  * Created by Aleksei Cherniaev on 18/08/2023.
@@ -14,46 +12,24 @@ import org.bidon.sdk.config.BidonError
 internal class GetAdAuctionParamsUseCase {
     operator fun invoke(
         auctionParamsScope: AdAuctionParamSource,
-        adType: AdType,
-        isBiddingMode: Boolean
+        adType: AdType
     ): Result<AdAuctionParams> {
         return auctionParamsScope {
             when (adType) {
                 AdType.Banner -> {
-                    if (isBiddingMode) {
-                        AdmobBannerAuctionParams.Bidding(
-                            activity = activity,
-                            bannerFormat = bannerFormat,
-                            containerWidth = containerWidth,
-                            price = pricefloor,
-                            adUnitId = requireNotNull(json?.getString("ad_unit_id")),
-                            payload = requireNotNull(json?.getString("payload"))
-                        )
-                    } else {
-                        AdmobBannerAuctionParams.Network(
-                            lineItem = popLineItem(AdmobDemandId) ?: error(BidonError.NoAppropriateAdUnitId),
-                            bannerFormat = bannerFormat,
-                            activity = activity,
-                            containerWidth = containerWidth,
-                        )
-                    }
+                    AdmobBannerAuctionParams.Network(
+                        activity = activity,
+                        bannerFormat = bannerFormat,
+                        containerWidth = containerWidth,
+                        adUnit = adUnit,
+                    )
                 }
 
-                AdType.Interstitial,
-                AdType.Rewarded -> {
-                    if (isBiddingMode) {
-                        AdmobFullscreenAdAuctionParams.Bidding(
-                            activity = activity,
-                            price = pricefloor,
-                            adUnitId = requireNotNull(json?.getString("ad_unit_id")),
-                            payload = requireNotNull(json?.getString("payload"))
-                        )
-                    } else {
-                        AdmobFullscreenAdAuctionParams.Network(
-                            lineItem = popLineItem(AdmobDemandId) ?: error(BidonError.NoAppropriateAdUnitId),
-                            activity = activity,
-                        )
-                    }
+                AdType.Interstitial, AdType.Rewarded -> {
+                    AdmobFullscreenAdAuctionParams.Network(
+                        activity = activity,
+                        adUnit = adUnit,
+                    )
                 }
             }
         }

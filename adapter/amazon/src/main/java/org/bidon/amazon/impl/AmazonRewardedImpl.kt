@@ -1,20 +1,18 @@
 package org.bidon.amazon.impl
 
 import android.app.Activity
-import android.content.Context
 import android.view.View
+import com.amazon.device.ads.DTBActivityMonitor
 import com.amazon.device.ads.DTBAdInterstitial
 import com.amazon.device.ads.DTBAdInterstitialListener
 import com.amazon.device.ads.SDKUtilities
-import org.bidon.amazon.SlotType
+import org.bidon.amazon.AmazonBidManager
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -22,69 +20,44 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import org.json.JSONArray
-import org.json.JSONObject
 
-internal class AmazonRewardedImpl(
-    private val slots: Map<SlotType, List<String>>
-) : AdSource.Rewarded<FullscreenAuctionParams>,
-    Mode.Bidding,
+internal class AmazonRewardedImpl(private val bidManager: AmazonBidManager) :
+    AdSource.Rewarded<FullscreenAuctionParams>,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private val obtainToken: ObtainTokenUseCase get() = ObtainTokenUseCase()
-    private var amazonInfos = mutableListOf<AmazonInfo>()
     private var interstitial: DTBAdInterstitial? = null
 
     override val isAdReadyToShow: Boolean
         get() = interstitial != null
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
-        val amazonInfo = obtainToken(slots, adTypeParam).takeIf { it.isNotEmpty() }?.also {
-            this.amazonInfos.addAll(it)
-        } ?: return null
-        return JSONArray().apply {
-            amazonInfo.map {
-                it.adSizes.slotUUID to SDKUtilities.getPricePoint(it.dtbAdResponse)
-            }.forEach { (slotUuid, pricePoint) ->
-                this.put(
-                    JSONObject().apply {
-                        this.put("slot_uuid", slotUuid)
-                        this.put("price_point", pricePoint)
-                    }
-                )
-            }
-        }.toString()
-    }
-
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             FullscreenAuctionParams(
                 activity = activity,
-                slotUuid = requireNotNull(json?.optString("slot_uuid")) {
-                    "SlotUid is required for Amazon banner ad"
-                },
-                price = pricefloor
+                adUnit = adUnit
             )
         }
     }
 
     override fun load(adParams: FullscreenAuctionParams) {
-        if (amazonInfos.isEmpty()) {
-            logError(TAG, "No Amazon slot found", BidonError.NoAppropriateAdUnitId)
-            emitEvent(AdEvent.LoadFailed(BidonError.NoAppropriateAdUnitId))
+        val slotUuid = adParams.slotUuid
+        if (slotUuid == null) {
+            emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, "slotUuid")))
             return
         }
-        val dtbAdResponse = amazonInfos.firstOrNull { adParams.slotUuid == it.adSizes.slotUUID }?.dtbAdResponse
+
+        val dtbAdResponse = bidManager.getResponse(slotUuid)
         if (dtbAdResponse == null) {
             logError(TAG, "DTBAdResponse is null", BidonError.NoBid)
             emitEvent(AdEvent.LoadFailed(BidonError.NoBid))
             return
         }
+        DTBActivityMonitor.setActivity(adParams.activity)
         val interstitialAd = DTBAdInterstitial(
             adParams.activity,
             object : DTBAdInterstitialListener {
-                override fun onAdLoaded(p0: View?) {
+                override fun onAdLoaded(view: View?) {
                     logInfo(TAG, "onAdLoaded")
                     emitEvent(AdEvent.Fill(getAd() ?: return))
                 }
@@ -119,7 +92,7 @@ internal class AmazonRewardedImpl(
                             AdEvent.PaidRevenue(
                                 ad = it,
                                 adValue = AdValue(
-                                    adRevenue = adParams.price,
+                                    adRevenue = adParams.price / 1000.0,
                                     currency = AdValue.USD,
                                     Precision.Precise
                                 )
@@ -152,7 +125,6 @@ internal class AmazonRewardedImpl(
 
     override fun destroy() {
         interstitial = null
-        amazonInfos.clear()
     }
 }
 

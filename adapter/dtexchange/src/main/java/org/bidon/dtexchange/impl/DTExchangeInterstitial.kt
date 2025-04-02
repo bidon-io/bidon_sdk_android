@@ -16,11 +16,11 @@ import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
@@ -30,11 +30,10 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
  */
 internal class DTExchangeInterstitial :
     AdSource.Interstitial<DTExchangeAdAuctionParams>,
-    Mode.Network,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
-    private var lineItem: LineItem? = null
+    private var adUnit: AdUnit? = null
     private var inneractiveAdSpot: InneractiveAdSpot? = null
     private var demandSource: String? = null
 
@@ -43,14 +42,21 @@ internal class DTExchangeInterstitial :
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            val lineItem = popLineItem(demandId) ?: error(BidonError.NoAppropriateAdUnitId)
-            DTExchangeAdAuctionParams(lineItem)
+            DTExchangeAdAuctionParams(adUnit)
         }
     }
 
     override fun load(adParams: DTExchangeAdAuctionParams) {
         logInfo(TAG, "Starting with $adParams: $this")
-        lineItem = adParams.lineItem
+        val spotId = adParams.spotId ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, "spotId")
+                )
+            )
+            return
+        }
+        adUnit = adParams.adUnit
         val spot = InneractiveAdSpotManager.get().createSpot()
         val controller = InneractiveFullscreenUnitController()
         val videoController = InneractiveFullscreenVideoContentController()
@@ -98,7 +104,7 @@ internal class DTExchangeInterstitial :
             }
         }
         spot.addUnitController(controller)
-        val adRequest = InneractiveAdRequest(adParams.spotId)
+        val adRequest = InneractiveAdRequest(spotId)
         spot.setRequestListener(
             object : InneractiveAdSpot.RequestListener {
                 override fun onInneractiveSuccessfulAdRequest(inneractiveAdSpot: InneractiveAdSpot?) {
@@ -114,8 +120,9 @@ internal class DTExchangeInterstitial :
                     inneractiveAdSpot: InneractiveAdSpot?,
                     inneractiveErrorCode: InneractiveErrorCode?
                 ) {
-                    logInfo(TAG, "onInneractiveFailedAdRequest: $inneractiveErrorCode")
-                    emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                    val error = inneractiveErrorCode.asBidonError()
+                    logError(TAG, "onInneractiveFailedAdRequest: $inneractiveErrorCode", error)
+                    emitEvent(AdEvent.LoadFailed(error))
                 }
             }
         )

@@ -1,33 +1,30 @@
 package org.bidon.meta.impl
 
 import android.app.Activity
-import android.content.Context
 import com.facebook.ads.Ad
 import com.facebook.ads.AdError
-import com.facebook.ads.BidderTokenProvider
 import com.facebook.ads.InterstitialAd
 import com.facebook.ads.InterstitialAdListener
+import org.bidon.meta.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 /**
  * Created by Aleksei Cherniaev on 08/08/2023.
  */
 class MetaInterstitialImpl :
     AdSource.Interstitial<MetaFullscreenAuctionParams>,
-    Mode.Bidding,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -36,28 +33,34 @@ class MetaInterstitialImpl :
     override val isAdReadyToShow: Boolean
         get() = interstitialAd?.isAdLoaded ?: false
 
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? {
-        return BidderTokenProvider.getBidderToken(context)
-    }
-
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
             MetaFullscreenAuctionParams(
                 context = activity.applicationContext,
-                placementId = requireNotNull(json?.optString("placement_id")) {
-                    "Placement id is required for Meta"
-                },
-                price = requireNotNull(json?.optDouble("price")) {
-                    "Bid price is required for Meta"
-                },
-                payload = requireNotNull(json?.optString("payload")) {
-                    "Payload is required for Meta"
-                },
+                adUnit = adUnit,
             )
         }
     }
 
     override fun load(adParams: MetaFullscreenAuctionParams) {
+        adParams.placementId ?: run {
+            emitEvent(
+                AdEvent.LoadFailed(
+                    BidonError.IncorrectAdUnit(demandId = demandId, message = "placementId")
+                )
+            )
+            return
+        }
+        if (adParams.adUnit.bidType == BidType.RTB) {
+            adParams.payload ?: run {
+                emitEvent(
+                    AdEvent.LoadFailed(
+                        BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
+                    )
+                )
+                return
+            }
+        }
         val interstitial = InterstitialAd(adParams.context, adParams.placementId).also {
             interstitialAd = it
         }
@@ -66,7 +69,7 @@ class MetaInterstitialImpl :
                 .withAdListener(object : InterstitialAdListener {
                     override fun onError(ad: Ad?, adError: AdError?) {
                         logInfo(TAG, "Error while loading ad(${adError?.errorCode}: ${adError?.errorMessage}). $this")
-                        emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
+                        emitEvent(AdEvent.LoadFailed(adError.asBidonError()))
                     }
 
                     override fun onAdLoaded(ad: Ad?) {

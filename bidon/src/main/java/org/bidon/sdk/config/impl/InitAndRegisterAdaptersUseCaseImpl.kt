@@ -1,11 +1,17 @@
 package org.bidon.sdk.config.impl
 
 import android.content.Context
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.adapter.AdapterParameters
 import org.bidon.sdk.adapter.AdaptersSource
@@ -22,12 +28,11 @@ import kotlin.system.measureTimeMillis
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-@Suppress("UNCHECKED_CAST")
 internal class InitAndRegisterAdaptersUseCaseImpl(
     private val adaptersSource: AdaptersSource
 ) : InitAndRegisterAdaptersUseCase {
 
-    private val scope get() = CoroutineScope(SdkDispatchers.Single)
+    private val scope get() = CoroutineScope(SdkDispatchers.Bidon + SupervisorJob())
     private val canContinueFlow = MutableStateFlow(false)
 
     override suspend operator fun invoke(
@@ -83,8 +88,7 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
             logInfo(TAG, "Adapters: ${adapterList.joinToString { it.demandId.demandId }}")
             val groupedAdapters = configResponse.adapters.toList()
                 .groupBy { (_, initJson) -> initJson.optInt("order", 0) }
-                .toList()
-                .sortedBy { (order, _) -> order }
+                .toSortedMap()
                 .onEach { (order, adaptersInfo) ->
                     logInfo(TAG, "Initialization order #$order: ${adaptersInfo.joinToString { it.first }}")
                 }
@@ -123,33 +127,38 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                 onAdapterInitializationStarted(it.toSet())
             }
         val deferredList = nextAdaptersGroup.map { adapter ->
-            val demandId = adapter.demandId
             scope.async {
                 runCatching {
-                    // initialize if needed
-                    val initializable = adapter as? Initializable<AdapterParameters>
-                    if (initializable == null) {
-                        adapter
-                    } else {
-                        val measuredTime = measureTimeMillis {
-                            val adapterParameters =
-                                parseAdapterParameters(configResponse, adapter).getOrThrow()
-                            adapter.init(context, adapterParameters)
-                        }
-                        logInfo(TAG, "Adapter ${demandId.demandId} initialized in $measuredTime ms.")
-                    }
+                    initializeSingleAdapter(adapter, context, configResponse)
                 }.onSuccess {
                     /**
                      * Add adapter to [AdaptersSource] only if it was initialized successfully.
                      */
                     adaptersSource.add(adapter)
                 }.onFailure { cause ->
-                    logError(TAG, "Adapter not initialized: ${demandId.demandId}: ${cause.message}", cause)
-                }.getOrNull()
+                    logError(TAG, "Adapter not initialized: ${adapter.demandId.demandId}: ${cause.message}", cause)
+                }
             }
         }
         withTimeoutOrNull(configResponse.initializationTimeout) {
-            deferredList.forEach { it.await() }
+            deferredList.awaitAll()
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private suspend fun initializeSingleAdapter(
+        adapter: Adapter,
+        context: Context,
+        configResponse: ConfigResponse
+    ) {
+        val initializable = adapter as? Initializable<AdapterParameters>
+        if (initializable != null) {
+            val measuredTime = measureTimeMillis {
+                val adapterParameters =
+                    parseAdapterParameters(configResponse, initializable).getOrThrow()
+                adapter.init(context, adapterParameters)
+            }
+            logInfo(TAG, "Adapter ${adapter.demandId.demandId} initialized in $measuredTime ms.")
         }
     }
 

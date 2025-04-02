@@ -8,15 +8,18 @@ import org.bidon.sdk.adapter.AdapterInfo
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Initializable
 import org.bidon.sdk.adapter.SupportsRegulation
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.regulation.Regulation
 
 internal class TestBiddingAdapter(
     override val demandId: DemandId,
     private val testAdapterParameters: TestAdapterParameters,
-) : Adapter,
+) : Adapter.Bidding,
     SupportsRegulation,
     Initializable<TestAdapterParameters>,
     AdProvider.Interstitial<TestInterstitialParameters> {
+
+    override suspend fun getToken(adTypeParam: AdTypeParam): String? = "token"
 
     override val adapterInfo = AdapterInfo(adapterVersion = "adapterVersion1", sdkVersion = "sdkVersion1")
 
@@ -28,7 +31,6 @@ internal class TestBiddingAdapter(
 
     override fun interstitial(): AdSource.Interstitial<TestInterstitialParameters> {
         return TestBiddingInterstitialImpl(
-            demandId = demandId,
             testParameters = testAdapterParameters
         )
     }

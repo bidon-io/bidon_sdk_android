@@ -2,16 +2,17 @@ package org.bidon.sdk.adapter
 
 import android.app.Activity
 import org.bidon.sdk.ads.banner.BannerFormat
-import org.bidon.sdk.auction.models.LineItem
+import org.bidon.sdk.auction.models.AdUnit
 import org.bidon.sdk.config.BidonError
+import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.utils.ext.mapFailure
-import org.json.JSONObject
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
 interface AdAuctionParams {
-    val lineItem: LineItem?
+    val adUnit: AdUnit
+
     /**
      * DSP line item eCPM or Bidding bid price
      */
@@ -24,14 +25,7 @@ class AdAuctionParamSource(
      * DSP pricefloor or Bidding bid price
      */
     val pricefloor: Double,
-    val timeout: Long,
-    private val lineItems: List<LineItem> = emptyList(),
-    private val onLineItemConsumed: (LineItem) -> Unit = {},
-
-    /**
-     * Bid specific params
-     */
-    val json: JSONObject? = null,
+    val adUnit: AdUnit,
 
     /**
      * Banner specific params
@@ -45,21 +39,7 @@ class AdAuctionParamSource(
     operator fun <T> invoke(data: AdAuctionParamSource.() -> T): Result<T> = runCatching {
         data.invoke(this)
     }.mapFailure {
+        logError("AdAuctionParamSource", "${it?.message}", it)
         BidonError.NoAppropriateAdUnitId
-    }
-
-    /**
-     * Search for a [LineItem] for the given demandId with the lowest pricefloor
-     */
-    fun popLineItem(demandId: DemandId): LineItem? = lineItems
-        .minByPricefloorOrNull(demandId, pricefloor)
-        ?.also(onLineItemConsumed)
-
-    private fun List<LineItem>.minByPricefloorOrNull(demandId: DemandId, pricefloor: Double): LineItem? {
-        return this
-            .filter { it.demandId == demandId.demandId }
-            .filterNot { it.adUnitId.isNullOrBlank() }
-            .sortedBy { it.pricefloor }
-            .firstOrNull { it.pricefloor > pricefloor }
     }
 }

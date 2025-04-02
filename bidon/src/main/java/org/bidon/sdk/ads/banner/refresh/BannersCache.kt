@@ -2,6 +2,7 @@ package org.bidon.sdk.ads.banner.refresh
 
 import android.app.Activity
 import org.bidon.sdk.ads.Ad
+import org.bidon.sdk.ads.AuctionInfo
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.BannerListener
 import org.bidon.sdk.ads.banner.BannerView
@@ -24,9 +25,10 @@ internal interface BannersCache {
         activity: Activity,
         format: BannerFormat,
         pricefloor: Double,
+        auctionKey: String?,
         extras: Extras,
-        onLoaded: (Ad, BannerView) -> Unit,
-        onFailed: (BidonError) -> Unit,
+        onLoaded: (Ad, AuctionInfo, BannerView) -> Unit,
+        onFailed: (AuctionInfo?, BidonError) -> Unit,
     )
 
     fun clear()
@@ -36,38 +38,42 @@ internal interface BannersCache {
 internal class BannersCacheImpl : BannersCache {
     private val Tag get() = TAG
     private val isLoading = AtomicBoolean(false)
-    private val cache = sortedMapOf<Ad, BannerView>({ ad1, ad2 ->
-        ((ad2.ecpm - ad1.ecpm) * 1000000).toInt()
+    private val cache = sortedMapOf<Pair<Ad, AuctionInfo>, BannerView>({ ad1, ad2 ->
+        ((ad2.first.price - ad1.first.price) * 1000000).toInt()
     })
 
     override fun get(
         activity: Activity,
         format: BannerFormat,
         pricefloor: Double,
+        auctionKey: String?,
         extras: Extras,
-        onLoaded: (Ad, BannerView) -> Unit,
-        onFailed: (BidonError) -> Unit,
+        onLoaded: (Ad, AuctionInfo, BannerView) -> Unit,
+        onFailed: (AuctionInfo?, BidonError) -> Unit,
     ) {
         if (cache.isNotEmpty()) {
             val (ad, banner) = cache.pop() ?: return
-            onLoaded(ad, banner)
+            onLoaded(ad.first, ad.second, banner)
             return
         }
         if (!isLoading.getAndSet(true)) {
             activity.runOnUiThread {
-                val banner = BannerView(activity.applicationContext)
+                val banner = BannerView(
+                    context = activity.applicationContext,
+                    auctionKey = auctionKey
+                )
                 banner.setExtras(extras)
                 banner.setBannerFormat(format)
                 banner.setBannerListener(object : BannerListener {
-                    override fun onAdLoaded(ad: Ad) {
+                    override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {
                         logInfo(Tag, "Banner loaded: $ad")
-                        onLoaded(ad, banner)
+                        onLoaded(ad, auctionInfo, banner)
                         isLoading.set(false)
                     }
 
-                    override fun onAdLoadFailed(cause: BidonError) {
+                    override fun onAdLoadFailed(auctionInfo: AuctionInfo?, cause: BidonError) {
                         logInfo(Tag, "Banner load failed: $cause")
-                        onFailed(cause)
+                        onFailed(auctionInfo, cause)
                         isLoading.set(false)
                     }
 
@@ -86,7 +92,7 @@ internal class BannersCacheImpl : BannersCache {
         cache.clear()
     }
 
-    private fun SortedMap<Ad, BannerView>.pop(): Pair<Ad, BannerView>? {
+    private fun SortedMap<Pair<Ad, AuctionInfo>, BannerView>.pop(): Pair<Pair<Ad, AuctionInfo>, BannerView>? {
         if (isEmpty()) return null
         val ad = firstKey()
         val banner = this[ad] ?: return null
@@ -95,7 +101,7 @@ internal class BannersCacheImpl : BannersCache {
         return ad to banner
     }
 
-    private fun SortedMap<Ad, BannerView>.removeBannerView(banner: BannerView) {
+    private fun SortedMap<Pair<Ad, AuctionInfo>, BannerView>.removeBannerView(banner: BannerView) {
         if (this.containsValue(banner)) {
             logInfo(Tag, "Banner expired and will be removed from cache: $banner")
             val (key, _) = this.filter { (_, bannerView) ->

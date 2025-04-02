@@ -47,7 +47,7 @@ internal class SendWinLossRequestUseCaseImpl(
                     is WinLossRequestData.Loss -> {
                         Loss(
                             demandId = data.winnerDemandId,
-                            ecpm = data.winnerEcpm
+                            price = data.winnerPrice
                         )
                     }
 

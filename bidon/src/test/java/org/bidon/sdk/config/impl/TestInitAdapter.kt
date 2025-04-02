@@ -19,7 +19,7 @@ internal class TestInitAdapter(
     private val name: String,
     private val initializationTime: Long,
     private val succeedInitialization: Boolean,
-) : Adapter,
+) : Adapter.Network,
     Initializable<TestInitAdapterParameters> {
     override val demandId: DemandId = DemandId(name)
     override val adapterInfo: AdapterInfo =

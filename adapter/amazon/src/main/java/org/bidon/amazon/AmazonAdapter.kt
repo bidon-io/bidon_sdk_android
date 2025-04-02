@@ -20,6 +20,7 @@ import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Initializable
 import org.bidon.sdk.adapter.SupportsTestMode
 import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.logs.logging.Logger
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.json.JSONObject
@@ -33,54 +34,72 @@ import kotlin.coroutines.suspendCoroutine
  */
 internal val AmazonDemandId = DemandId("amazon")
 
-class AmazonAdapter :
-    Adapter,
+@Suppress("unused")
+internal class AmazonAdapter :
+    Adapter.Bidding,
     Initializable<AmazonParameters>,
     SupportsTestMode by SupportsTestModeImpl(),
     AdProvider.Banner<BannerAuctionParams>,
     AdProvider.Interstitial<FullscreenAuctionParams>,
     AdProvider.Rewarded<FullscreenAuctionParams> {
+
     private var slots: Map<SlotType, List<String>> = emptyMap()
+    private val bidManager: AmazonBidManager get() = amazonBidManager
 
     override val demandId: DemandId = AmazonDemandId
-
     override val adapterInfo = AdapterInfo(
         adapterVersion = adapterVersion,
         sdkVersion = sdkVersion
     )
+
+    override suspend fun getToken(adTypeParam: AdTypeParam): String? =
+        bidManager.obtainToken(slots, adTypeParam)
 
     override fun parseConfigParam(json: String): AmazonParameters {
         val jsonObject = JSONObject(json)
         return AmazonParameters(
             appKey = jsonObject.getString("app_key"),
             slots = ParseSlotsUseCase()(jsonObject).also {
-                logInfo("AmazonAdapter", "Parsed slots: $it")
+                logInfo(TAG, "Parsed slots: $it")
             }
         )
     }
 
-    override suspend fun init(context: Context, configParams: AmazonParameters) = suspendCoroutine { continuation ->
-        if (isTestMode) {
-            AdRegistration.enableTesting(true)
-        }
-        AdRegistration.enableLogging(BidonSdk.loggerLevel in arrayOf(Logger.Level.Verbose, Logger.Level.Error))
+    override suspend fun init(context: Context, configParams: AmazonParameters) =
+        suspendCoroutine { continuation ->
+            this.slots = configParams.slots
 
-        AdRegistration.getInstance(configParams.appKey, context)
-        slots = configParams.slots
-        AdRegistration.setMRAIDSupportedVersions(arrayOf("1.0", "2.0", "3.0"))
-        AdRegistration.setMRAIDPolicy(MRAIDPolicy.CUSTOM)
-        continuation.resume(Unit)
-    }
+            AdRegistration.enableTesting(isTestMode)
+            AdRegistration.enableLogging(BidonSdk.loggerLevel in arrayOf(Logger.Level.Verbose, Logger.Level.Error))
+
+            if (AdRegistration.isInitialized()) {
+                logInfo(TAG, "Amazon SDK is already initialized")
+                continuation.resume(Unit)
+            } else {
+                logInfo(TAG, "Initializing Amazon SDK")
+                // TODO: 16/09/2024 [glavatskikh] Pass activity to AdRegistration.getInstance
+                //  for correct initialization of com.amazon.device.ads.ActivityMonitor.
+                //  Currently, we pass activity through DTBActivityMonitor.setActivity(activity) as a workaround.
+                // Initialize Amazon SDK
+                AdRegistration.getInstance(configParams.appKey, context)
+
+                AdRegistration.setMRAIDSupportedVersions(arrayOf("1.0", "2.0", "3.0"))
+                AdRegistration.setMRAIDPolicy(MRAIDPolicy.CUSTOM)
+                continuation.resume(Unit)
+            }
+        }
 
     override fun banner(): AdSource.Banner<BannerAuctionParams> {
-        return AmazonBannerImpl(slots)
+        return AmazonBannerImpl(bidManager)
     }
 
     override fun interstitial(): AdSource.Interstitial<FullscreenAuctionParams> {
-        return AmazonInterstitialImpl(slots)
+        return AmazonInterstitialImpl(bidManager)
     }
 
     override fun rewarded(): AdSource.Rewarded<FullscreenAuctionParams> {
-        return AmazonRewardedImpl(slots)
+        return AmazonRewardedImpl(bidManager)
     }
 }
+
+private const val TAG = "AmazonAdapter"

@@ -1,16 +1,13 @@
 package org.bidon.bigoads.impl
 
 import android.app.Activity
-import android.content.Context
 import org.bidon.bigoads.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
-import org.bidon.sdk.adapter.Mode
 import org.bidon.sdk.adapter.impl.AdEventFlow
 import org.bidon.sdk.adapter.impl.AdEventFlowImpl
-import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
@@ -18,7 +15,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
-import sg.bigo.ads.BigoAdSdk
+import org.bidon.sdk.stats.models.BidType
 import sg.bigo.ads.api.AdError
 import sg.bigo.ads.api.AdLoadListener
 import sg.bigo.ads.api.RewardAdInteractionListener
@@ -30,52 +27,49 @@ import sg.bigo.ads.api.RewardVideoAdRequest
  * Created by Aleksei Cherniaev on 25/07/2023.
  */
 internal class BigoAdsRewardedAdImpl :
-    AdSource.Rewarded<BigoFullscreenAuctionParams>,
+    AdSource.Rewarded<BigoAdsFullscreenAuctionParams>,
     AdEventFlow by AdEventFlowImpl(),
-    Mode.Bidding,
     StatisticsCollector by StatisticsCollectorImpl() {
 
     private var rewardVideoAd: RewardVideoAd? = null
 
     override val isAdReadyToShow: Boolean
-        get() = rewardVideoAd != null && rewardVideoAd?.isExpired != false
-
-    override suspend fun getToken(context: Context, adTypeParam: AdTypeParam): String? = BigoAdSdk.getBidderToken()
+        get() = rewardVideoAd?.isExpired == false
 
     override fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams> {
         return auctionParamsScope {
-            BigoFullscreenAuctionParams(
-                payload = requireNotNull(json?.optString("payload")) {
-                    "Payload is required for BigoAds"
-                },
-                slotId = requireNotNull(json?.optString("slot_id")) {
-                    "Slot id is required for BigoAds"
-                },
-                bidPrice = pricefloor,
-            )
+            BigoAdsFullscreenAuctionParams(adUnit = adUnit)
         }
     }
 
-    override fun load(adParams: BigoFullscreenAuctionParams) {
-        val builder = RewardVideoAdRequest.Builder()
-        builder
-            .withBid(adParams.payload)
-            .withSlotId(adParams.slotId)
-        val loader = RewardVideoAdLoader.Builder().withAdLoadListener(object : AdLoadListener<RewardVideoAd> {
-            override fun onError(adError: AdError) {
-                val error = adError.asBidonError()
-                logError(TAG, "Error while loading ad: $adError. $this", error)
-                emitEvent(AdEvent.LoadFailed(BidonError.NoFill(demandId)))
-            }
+    override fun load(adParams: BigoAdsFullscreenAuctionParams) {
+        val slotId = adParams.slotId
+            ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "slotId")))
 
-            override fun onAdLoaded(rewardVideoAd: RewardVideoAd) {
-                logInfo(TAG, "onAdLoaded: $rewardVideoAd, $this")
-                this@BigoAdsRewardedAdImpl.rewardVideoAd = rewardVideoAd
-                fillAd(rewardVideoAd, adParams)
-            }
-        })
-        loader.build()
-            .loadAd(builder.build())
+        val loader = RewardVideoAdLoader.Builder()
+            .withAdLoadListener(object : AdLoadListener<RewardVideoAd> {
+                override fun onError(adError: AdError) {
+                    val error = adError.asBidonError()
+                    logError(TAG, "Error while loading ad: ${adError.code} ${adError.message}. $this", error)
+                    emitEvent(AdEvent.LoadFailed(error))
+                }
+
+                override fun onAdLoaded(rewardVideoAd: RewardVideoAd) {
+                    logInfo(TAG, "onAdLoaded: $rewardVideoAd, $this")
+                    this@BigoAdsRewardedAdImpl.rewardVideoAd = rewardVideoAd
+                    fillAd(rewardVideoAd, adParams)
+                }
+            })
+            .build()
+
+        val adRequestBuilder = RewardVideoAdRequest.Builder()
+        if (adParams.adUnit.bidType == BidType.RTB) {
+            val payload = adParams.payload
+                ?: return emitEvent(AdEvent.LoadFailed(BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")))
+            adRequestBuilder.withBid(payload)
+        }
+        adRequestBuilder.withSlotId(slotId)
+        loader.loadAd(adRequestBuilder.build())
     }
 
     override fun show(activity: Activity) {
@@ -94,7 +88,7 @@ internal class BigoAdsRewardedAdImpl :
 
     private fun fillAd(
         rewardVideoAd: RewardVideoAd,
-        adParams: BigoFullscreenAuctionParams
+        adParams: BigoAdsFullscreenAuctionParams
     ) {
         rewardVideoAd.setAdInteractionListener(object : RewardAdInteractionListener {
             override fun onAdError(error: AdError) {
@@ -110,7 +104,7 @@ internal class BigoAdsRewardedAdImpl :
                         AdEvent.PaidRevenue(
                             ad = ad,
                             adValue = AdValue(
-                                adRevenue = adParams.bidPrice / 1000.0,
+                                adRevenue = adParams.price / 1000.0,
                                 precision = Precision.Precise,
                                 currency = AdValue.USD,
                             )

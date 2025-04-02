@@ -8,16 +8,14 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import android.widget.FrameLayout.LayoutParams
-import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.BannerPosition
 import org.bidon.sdk.ads.banner.BannerView
 import org.bidon.sdk.ads.banner.render.AdRenderer.PositionState
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.ext.TAG
-import org.bidon.sdk.utils.ext.dp
+import org.bidon.sdk.utils.ext.dpToPx
 import java.lang.ref.WeakReference
 
 /**
@@ -223,17 +221,7 @@ internal class AdRendererImpl(
         )
     }
 
-    private fun BannerView.obtainWidth() = this.adSize?.widthDp?.dp ?: when (format) {
-        BannerFormat.MRec -> 300.dp
-        BannerFormat.LeaderBoard -> 728.dp
-        BannerFormat.Banner -> 320.dp
-        BannerFormat.Adaptive -> WRAP_CONTENT
-    }
+    private fun BannerView.obtainWidth() = this.adSize.widthDp.dpToPx
 
-    private fun BannerView.obtainHeight() = this.adSize?.heightDp?.dp ?: when (format) {
-        BannerFormat.MRec -> 250.dp
-        BannerFormat.LeaderBoard -> 90.dp
-        BannerFormat.Banner -> 50.dp
-        BannerFormat.Adaptive -> WRAP_CONTENT
-    }
+    private fun BannerView.obtainHeight() = this.adSize.heightDp.dpToPx
 }

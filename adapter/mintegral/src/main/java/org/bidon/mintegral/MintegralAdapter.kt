@@ -3,6 +3,7 @@ package org.bidon.mintegral
 import android.app.Application
 import android.content.Context
 import com.mbridge.msdk.MBridgeConstans
+import com.mbridge.msdk.mbbid.out.BidManager
 import com.mbridge.msdk.out.MBridgeSDKFactory
 import com.mbridge.msdk.out.SDKInitStatusListener
 import kotlinx.coroutines.withContext
@@ -11,7 +12,6 @@ import org.bidon.mintegral.ext.sdkVersion
 import org.bidon.mintegral.impl.MintegralBannerImpl
 import org.bidon.mintegral.impl.MintegralInterstitialImpl
 import org.bidon.mintegral.impl.MintegralRewardedImpl
-import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.AdProvider
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.Adapter
@@ -19,6 +19,7 @@ import org.bidon.sdk.adapter.AdapterInfo
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.adapter.Initializable
 import org.bidon.sdk.adapter.SupportsRegulation
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.regulation.Regulation
@@ -35,8 +36,10 @@ import kotlin.coroutines.suspendCoroutine
  */
 internal val MintegralDemandId = DemandId("mintegral")
 
-class MintegralAdapter :
-    Adapter,
+@Suppress("unused")
+internal class MintegralAdapter :
+    Adapter.Bidding,
+    Adapter.Network,
     SupportsRegulation,
     Initializable<MintegralInitParam>,
     AdProvider.Banner<MintegralBannerAuctionParam>,
@@ -50,15 +53,18 @@ class MintegralAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun init(context: Context, configParams: MintegralInitParam) =
+    override suspend fun getToken(adTypeParam: AdTypeParam): String? =
+        BidManager.getBuyerUid(adTypeParam.activity.applicationContext)
+
+    override suspend fun init(context: Context, configParams: MintegralInitParam) {
         withContext(SdkDispatchers.Main) {
             suspendCoroutine { continuation ->
                 this@MintegralAdapter.context = context
                 val sdk = MBridgeSDKFactory.getMBridgeSDK()
                 val configurationMap = sdk.getMBConfigurationMap(configParams.appId, configParams.appKey)
-                updateRegulation(BidonSdk.regulation)
                 sdk.init(
-                    configurationMap, context.applicationContext as Application,
+                    configurationMap,
+                    context.applicationContext as Application,
                     object : SDKInitStatusListener {
                         override fun onInitSuccess() {
                             continuation.resume(Unit)
@@ -72,6 +78,7 @@ class MintegralAdapter :
                 )
             }
         }
+    }
 
     override fun parseConfigParam(json: String): MintegralInitParam {
         val jsonObject = JSONObject(json)

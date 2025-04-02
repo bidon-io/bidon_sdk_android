@@ -15,6 +15,7 @@ import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
+import org.bidon.sdk.ads.AuctionInfo
 import org.bidon.sdk.ads.cache.AdCache
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
@@ -27,6 +28,7 @@ import org.bidon.sdk.utils.di.get
 
 internal class InterstitialImpl(
     dispatcher: CoroutineDispatcher = SdkDispatchers.Main,
+    private val auctionKey: String? = null,
     private val demandAd: DemandAd = DemandAd(AdType.Interstitial)
 ) : Interstitial, Extras by demandAd {
     private var userListener: InterstitialListener? = null
@@ -55,7 +57,7 @@ internal class InterstitialImpl(
     override fun loadAd(activity: Activity, pricefloor: Double) {
         if (!BidonSdk.isInitialized()) {
             logInfo(TAG, "Sdk is not initialized")
-            listener.onAdLoadFailed(BidonError.SdkNotInitialized)
+            listener.onAdLoadFailed(null, BidonError.SdkNotInitialized)
             return
         }
         logInfo(TAG, "Load (pricefloor=$pricefloor)")
@@ -63,17 +65,22 @@ internal class InterstitialImpl(
             adTypeParam = AdTypeParam.Interstitial(
                 activity = activity,
                 pricefloor = pricefloor,
+                auctionKey = auctionKey,
             ),
-            onSuccess = { auctionResult ->
-                subscribeToWinner(auctionResult.adSource)
+            onSuccess = { auctionResult, auctionInfo ->
+                subscribeToWinner(auctionInfo, auctionResult.adSource)
                 listener.onAdLoaded(
-                    requireNotNull(auctionResult.adSource.ad) {
+                    ad = requireNotNull(auctionResult.adSource.ad) {
                         "[Ad] should exist when action succeeds"
-                    }
+                    },
+                    auctionInfo = auctionInfo
                 )
             },
-            onFailure = { cause ->
-                listener.onAdLoadFailed(cause = cause.asBidonErrorOrUnspecified())
+            onFailure = { auctionResult, cause ->
+                listener.onAdLoadFailed(
+                    auctionInfo = auctionResult,
+                    cause = cause.asBidonErrorOrUnspecified()
+                )
             }
         )
     }
@@ -101,12 +108,12 @@ internal class InterstitialImpl(
         this.userListener = listener
     }
 
-    override fun notifyLoss(winnerDemandId: String, winnerEcpm: Double) {
+    override fun notifyLoss(winnerDemandId: String, winnerPrice: Double) {
         if (!BidonSdk.isInitialized()) {
             logInfo(TAG, "Sdk is not initialized")
             return
         }
-        adCache.pop()?.adSource?.sendLoss(winnerDemandId, winnerEcpm)
+        adCache.pop()?.adSource?.sendLoss(winnerDemandId, winnerPrice)
         destroyAd()
     }
 
@@ -134,7 +141,7 @@ internal class InterstitialImpl(
      * Private
      */
 
-    private fun subscribeToWinner(adSource: AdSource<*>) {
+    private fun subscribeToWinner(auctionInfo: AuctionInfo, adSource: AdSource<*>) {
         require(adSource is AdSource.Interstitial<*>)
         observeCallbacksJob = adSource.adEvent.onEach { adEvent ->
             when (adEvent) {
@@ -161,19 +168,19 @@ internal class InterstitialImpl(
 
                 is AdEvent.PaidRevenue -> listener.onRevenuePaid(adEvent.ad, adEvent.adValue)
                 is AdEvent.ShowFailed -> listener.onAdShowFailed(adEvent.cause)
-                is AdEvent.LoadFailed -> listener.onAdLoadFailed(adEvent.cause)
+                is AdEvent.LoadFailed -> listener.onAdLoadFailed(auctionInfo, adEvent.cause)
                 is AdEvent.Expired -> listener.onAdExpired(adEvent.ad)
             }
         }.launchIn(scope)
     }
 
     private fun getInterstitialListener() = object : InterstitialListener {
-        override fun onAdLoaded(ad: Ad) {
-            userListener?.onAdLoaded(ad)
+        override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {
+            userListener?.onAdLoaded(ad, auctionInfo)
         }
 
-        override fun onAdLoadFailed(cause: BidonError) {
-            userListener?.onAdLoadFailed(cause)
+        override fun onAdLoadFailed(auctionInfo: AuctionInfo?, cause: BidonError) {
+            userListener?.onAdLoadFailed(auctionInfo, cause)
         }
 
         override fun onAdShowFailed(cause: BidonError) {

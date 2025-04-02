@@ -9,6 +9,6 @@ import org.bidon.sdk.utils.serializer.Serializable
 internal data class Loss(
     @field:JsonName("demand_id")
     val demandId: String,
-    @field:JsonName("ecpm")
-    val ecpm: Double,
+    @field:JsonName("price")
+    val price: Double,
 ) : Serializable

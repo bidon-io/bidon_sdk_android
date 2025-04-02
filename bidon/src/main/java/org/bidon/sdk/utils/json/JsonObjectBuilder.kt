@@ -6,8 +6,7 @@ import org.json.JSONObject
 /**
  * Created by Bidon Team on 08/02/2023.
  */
-
-internal fun jsonObject(method: JsonObjectBuilder.() -> Unit): JSONObject {
+fun jsonObject(method: JsonObjectBuilder.() -> Unit): JSONObject {
     return JsonObjectBuilder().apply(method).build()
 }
 
@@ -19,7 +18,7 @@ internal fun jsonArray(method: JsonArrayBuilder.() -> Unit): JSONArray {
     return JsonArrayBuilder().apply(method).build()
 }
 
-internal class JsonObjectBuilder(
+class JsonObjectBuilder(
     private val jsonObject: JSONObject = JSONObject()
 ) {
     /**

@@ -4,6 +4,8 @@ import org.bidon.sdk.adapter.AdapterInfo
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.models.AuctionResponse
+import org.bidon.sdk.auction.models.TokenInfo
+
 /**
  * Created by Bidon Team on 06/02/2023.
  */
@@ -13,5 +15,6 @@ internal interface GetAuctionRequestUseCase {
         auctionId: String,
         demandAd: DemandAd,
         adapters: Map<String, AdapterInfo>,
+        tokens: Map<String, TokenInfo>,
     ): Result<AuctionResponse>
 }
