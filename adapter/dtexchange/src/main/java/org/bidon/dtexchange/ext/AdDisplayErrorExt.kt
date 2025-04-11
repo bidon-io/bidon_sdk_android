@@ -8,4 +8,4 @@ import org.bidon.sdk.config.BidonError
  * Created by Bidon Team on 01/03/2023.
  */
 internal fun InneractiveUnitController.AdDisplayError?.asBidonError() =
-    BidonError.Unspecified(demandId = DTExchangeDemandId, sourceError = this)
+    BidonError.Unspecified(demandId = DTExchangeDemandId, cause = this)

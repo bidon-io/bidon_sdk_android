@@ -17,13 +17,13 @@ internal var adapterVersion = BuildConfig.ADAPTER_VERSION
 internal var sdkVersion = MobileAds.libraryVersion
 
 internal fun AdRequestError?.asBidonError() = when (this?.code) {
-    AdRequestError.Code.INTERNAL_ERROR -> BidonError.Unspecified(YandexDemandId)
     AdRequestError.Code.INVALID_REQUEST -> BidonError.IncorrectAdUnit(YandexDemandId, "Invalid request")
     AdRequestError.Code.NETWORK_ERROR -> BidonError.NetworkError(YandexDemandId, description)
     AdRequestError.Code.NO_FILL -> BidonError.NoFill(YandexDemandId)
-    AdRequestError.Code.SYSTEM_ERROR -> BidonError.Unspecified(YandexDemandId)
-    AdRequestError.Code.UNKNOWN_ERROR -> BidonError.Unspecified(YandexDemandId)
-    else -> BidonError.Unspecified(YandexDemandId)
+    else -> BidonError.Unspecified(
+        demandId = YandexDemandId,
+        cause = Throwable("Message: ${this?.description}. Code: ${this?.code}")
+    )
 }
 
 internal fun ImpressionData?.asBidonAdValue(): AdValue {

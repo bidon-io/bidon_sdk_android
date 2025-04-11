@@ -10,6 +10,6 @@ internal fun Throwable.asBidonErrorOrUnspecified(): BidonError {
     return when (this) {
         is BidonError -> this
         is AuctionCancellation -> BidonError.AuctionCancelled
-        else -> BidonError.Unspecified(demandId = null, sourceError = this)
+        else -> BidonError.Unspecified(demandId = null, cause = this)
     }
 }

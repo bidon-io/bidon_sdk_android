@@ -124,7 +124,10 @@ internal class MobileFuseRewardedAdImpl :
                     else -> {
                         emitEvent(
                             AdEvent.LoadFailed(
-                                BidonError.Unspecified(demandId, Throwable(adError?.errorMessage))
+                                BidonError.Unspecified(
+                                    demandId = demandId,
+                                    cause = Throwable("Message: ${adError?.errorMessage}. Code: ${adError?.errorCode}")
+                                )
                             )
                         )
                     }
