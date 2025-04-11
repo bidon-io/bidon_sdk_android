@@ -117,7 +117,7 @@ fun BannerScreen(navController: NavHostController) {
                                     }
 
                                     override fun onAdLoadFailed(auctionInfo: AuctionInfo?, cause: BidonError) {
-                                        logFlow.log("onAdLoadFailed: $cause. AuctionInfo: \n${auctionInfo?.toJson()}")
+                                        logFlow.log("onAdLoadFailed: $cause: ${cause.message}. AuctionInfo: \n${auctionInfo?.toJson()}")
                                     }
 
                                     override fun onAdShown(ad: Ad) {
@@ -139,7 +139,7 @@ fun BannerScreen(navController: NavHostController) {
                                     }
 
                                     override fun onAdShowFailed(cause: BidonError) {
-                                        logFlow.log("onAdShowFailed: $cause")
+                                        logFlow.log("onAdShowFailed: $cause: ${cause.message}")
                                     }
                                 }
                             )

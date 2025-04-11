@@ -90,8 +90,9 @@ internal class InmobiInterstitialImpl :
                 }
 
                 override fun onAdDisplayFailed(interstitial: InMobiInterstitial) {
-                    logError(TAG, "onAdDisplayFailed. $this", BidonError.Unspecified(demandId))
-                    emitEvent(AdEvent.ShowFailed(BidonError.Unspecified(demandId)))
+                    val error = BidonError.Unspecified(demandId)
+                    logError(TAG, "onAdDisplayFailed. $this", error)
+                    emitEvent(AdEvent.ShowFailed(error))
                 }
 
                 override fun onAdDismissed(interstitial: InMobiInterstitial) {

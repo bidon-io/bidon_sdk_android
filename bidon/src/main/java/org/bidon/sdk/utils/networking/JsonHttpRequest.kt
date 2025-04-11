@@ -54,7 +54,9 @@ internal class JsonHttpRequest(
                         }
 
                         500 -> throw BidonError.InternalServerSdkError(message = baseResponse?.error?.message)
-                        else -> throw BidonError.Unspecified(demandId = null, sourceError = response.httpError)
+                        else -> {
+                            throw BidonError.Unspecified(demandId = null, cause = response.httpError.cause)
+                        }
                     }
                 }
             }

@@ -17,6 +17,9 @@ internal fun AdError?.asBidonError() = when (this?.errorCode) {
     NO_FILL_ERROR_CODE -> BidonError.NoFill(MetaDemandId)
     INTERSTITIAL_AD_TIMEOUT -> BidonError.Expired(MetaDemandId)
     else -> {
-        BidonError.Unspecified(MetaDemandId, Throwable(this?.errorMessage))
+        BidonError.Unspecified(
+            demandId = MetaDemandId,
+            cause = Throwable("Message: ${this?.errorMessage}. Code: ${this?.errorCode}")
+        )
     }
 }

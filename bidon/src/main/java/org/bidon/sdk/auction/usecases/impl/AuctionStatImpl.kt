@@ -225,7 +225,7 @@ internal class AuctionStatImpl(
         return when {
             isWinner -> RoundStatus.Win.code
             currentStatus == RoundStatus.Successful.code -> RoundStatus.Lose.code
-            currentStatus == null -> RoundStatus.UnspecifiedException("").code
+            currentStatus == null -> "NO_EXPLANATION_AVAILABLE"
             else -> currentStatus
         }
     }

@@ -137,8 +137,8 @@ internal class MobileFuseBannerImpl :
                         emitEvent(
                             AdEvent.LoadFailed(
                                 BidonError.Unspecified(
-                                    demandId,
-                                    Throwable(adError?.errorMessage)
+                                    demandId = demandId,
+                                    cause = Throwable("Message: ${adError?.errorMessage}. Code: ${adError?.errorCode}")
                                 )
                             )
                         )

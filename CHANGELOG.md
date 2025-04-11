@@ -1,3 +1,7 @@
+# develop (2025.**.**)
+## Features:
+- [BDN-901](https://appodeal.atlassian.net/browse/BDN-901) Expanded the description of Unspecified exceptions
+
 # 0.7.6 (2025.03.18)
 ## Features:
 - [BDN-903](https://appodeal.atlassian.net/browse/BDN-903) Synchronize banner view ad size logic with iOS

@@ -26,15 +26,19 @@ sealed class BidonError : Throwable() {
 
     object NoContextFound : BidonError()
     object NoBid : BidonError()
+    object AdNotReady : BidonError()
+    object NoAppropriateAdUnitId : BidonError()
+
     class NoFill(val demandId: DemandId) : BidonError()
     class BidTimedOut(val demandId: DemandId) : BidonError()
     class FillTimedOut(val demandId: DemandId) : BidonError()
     class IncorrectAdUnit(val demandId: DemandId, override val message: String) : BidonError()
     class AdFormatIsNotSupported(val demandId: String, val bannerFormat: BannerFormat) : BidonError()
-    class Unspecified(val demandId: DemandId?, val sourceError: Throwable? = null) : BidonError()
-
-    object AdNotReady : BidonError()
-    object NoAppropriateAdUnitId : BidonError()
-
     class Expired(val demandId: DemandId?) : BidonError()
+
+    class Unspecified(
+        val demandId: DemandId?,
+        override val cause: Throwable? = null,
+        override val message: String = cause?.message ?: "NO_EXPLANATION_AVAILABLE"
+    ) : BidonError()
 }
