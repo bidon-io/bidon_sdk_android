@@ -35,9 +35,8 @@ internal fun AdError.asBidonError() = when (this.code) {
     AdError.ERROR_CODE_FULLSCREEN_AD_FAILED_TO_SHOW,
     AdError.ERROR_CODE_FULLSCREEN_AD_FAILED_TO_OPEN -> BidonError.AdNotReady
 
-    AdError.ERROR_CODE_VIDEO_ERROR,
-    AdError.ERROR_CODE_ACTIVITY_CREATE_ERROR,
-    AdError.ERROR_CODE_NATIVE_VIEW_MISSING -> BidonError.Unspecified(BigoAdsDemandId, Throwable(this.message))
-
-    else -> BidonError.Unspecified(BigoAdsDemandId, Throwable(this.message))
+    else -> BidonError.Unspecified(
+        demandId = BigoAdsDemandId,
+        cause = Throwable("Message: $message. Code: $code")
+    )
 }

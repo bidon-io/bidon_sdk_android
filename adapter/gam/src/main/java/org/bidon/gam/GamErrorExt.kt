@@ -11,12 +11,18 @@ internal fun LoadAdError.asBidonError(): BidonError = when (this.code) {
     ERROR_CODE_NO_FILL,
     ERROR_CODE_MEDIATION_NO_FILL -> BidonError.NoFill(GamDemandId)
     ERROR_CODE_NETWORK_ERROR -> BidonError.NetworkError(GamDemandId)
-    else -> BidonError.Unspecified(GamDemandId)
+    else -> BidonError.Unspecified(
+        demandId = GamDemandId,
+        cause = Throwable("Domain: $domain. Message: $message. Code: $code")
+    )
 }
 
 internal fun AdError.asBidonError(): BidonError = when (this.code) {
     ERROR_CODE_NO_FILL,
     ERROR_CODE_MEDIATION_NO_FILL -> BidonError.NoFill(GamDemandId)
     ERROR_CODE_NETWORK_ERROR -> BidonError.NetworkError(GamDemandId)
-    else -> BidonError.Unspecified(GamDemandId)
+    else -> BidonError.Unspecified(
+        demandId = GamDemandId,
+        cause = Throwable("Domain: $domain. Message: $message. Code: $code")
+    )
 }

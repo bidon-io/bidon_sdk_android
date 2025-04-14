@@ -40,5 +40,8 @@ internal fun IronSourceError?.asBidonError(): BidonError = when (this?.errorCode
     IronSourceError.ERROR_DO_RV_CALL_LOAD_BEFORE_SHOW,
     7202 -> BidonError.AdNotReady
 
-    else -> BidonError.Unspecified(IronSourceDemandId)
+    else -> BidonError.Unspecified(
+        demandId = IronSourceDemandId,
+        cause = Throwable("Message: ${this?.errorMessage}. Code: ${this?.errorCode}")
+    )
 }
