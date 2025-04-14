@@ -115,8 +115,9 @@ internal class MintegralRewardedImpl :
             }
 
             override fun onShowFail(mBridgeIds: MBridgeIds?, message: String?) {
-                logError(TAG, "onShowFail $mBridgeIds", Throwable(message))
-                emitEvent(AdEvent.ShowFailed(BidonError.Unspecified(demandId, Throwable(message))))
+                val error = BidonError.Unspecified(demandId, Throwable(message))
+                logError(TAG, "onShowFail $mBridgeIds", error)
+                emitEvent(AdEvent.ShowFailed(error))
             }
 
             override fun onVideoComplete(mBridgeIds: MBridgeIds?) {
