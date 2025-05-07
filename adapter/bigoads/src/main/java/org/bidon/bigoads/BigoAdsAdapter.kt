@@ -96,9 +96,7 @@ internal class BigoAdsAdapter :
             if (regulation.ccpaApplies) {
                 BigoAdSdk.setUserConsent(context, ConsentOptions.CCPA, regulation.hasCcpaConsent)
             }
-            if (regulation.coppaApplies) {
-                BigoAdSdk.setUserConsent(context, ConsentOptions.COPPA, true)
-            }
+            BigoAdSdk.setUserConsent(context, ConsentOptions.COPPA, !regulation.coppaApplies)
         }
     }
 }
