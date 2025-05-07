@@ -1,3 +1,7 @@
+# Develop 
+## Features:
+- [BDN-922](https://appodeal.atlassian.net/browse/BDN-922) Updated BigoAds to 5.2.1, changed coppa setting logic
+
 # 0.7.7 (2025.04.11)
 ## Features:
 - [BDN-901](https://appodeal.atlassian.net/browse/BDN-901) Expanded the description of Unspecified exceptions
