@@ -29,6 +29,10 @@ object Versions {
         val Fyber = "$mainVersion.0"
     }
 
+    object ThirdPartyMediationAdapters {
+        val ApplovinMax = "$mainVersion.0" + semanticVersion
+    }
+
     private val mainVersion get() = "$major.$minor.$patch"
     private val semanticVersion get() = semantic.takeIf { !it.isNullOrBlank() }.orEmpty()
 }

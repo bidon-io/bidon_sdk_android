@@ -1,3 +1,7 @@
+# develop (2025.*.*)
+## Features:
+- [BDN-933](https://appodeal.atlassian.net/browse/BDN-933) Added BCA-MAX to Bidon Sdk repository and publish to Bidon artifactory
+
 # 0.7.8 (2025.05.07)
 ## Features:
 - [BDN-922](https://appodeal.atlassian.net/browse/BDN-922) Updated BigoAds to 5.2.1, changed coppa setting logic
