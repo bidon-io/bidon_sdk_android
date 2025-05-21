@@ -1,7 +1,6 @@
 package org.bidon.bidmachine.impl
 
 import io.bidmachine.AdRequest
-import io.bidmachine.CustomParams
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.banner.BannerListener
 import io.bidmachine.banner.BannerRequest
@@ -55,7 +54,7 @@ internal class BMBannerAdImpl(
                 }
                 .setSize(adParams.bannerFormat.asBidMachineBannerSize())
                 .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.price))
-                .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
+                .setCustomParams(adParams.customParameters)
                 .setLoadingTimeOut(adParams.timeout.toInt())
                 .setListener(
                     object : AdRequest.AdRequestListener<BannerRequest> {
