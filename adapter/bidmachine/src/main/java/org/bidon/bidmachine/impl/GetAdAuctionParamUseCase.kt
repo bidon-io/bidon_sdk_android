@@ -1,8 +1,10 @@
 package org.bidon.bidmachine.impl
 
+import io.bidmachine.CustomParams
 import org.bidon.bidmachine.BMBannerAuctionParams
 import org.bidon.bidmachine.BMFullscreenAuctionParams
 import org.bidon.sdk.adapter.AdAuctionParamSource
+import org.json.JSONObject
 
 /**
  * Created by Aleksei Cherniaev on 21/11/2023.
@@ -15,7 +17,8 @@ class GetAdAuctionParamUseCase {
                 timeout = adUnit.timeout,
                 context = activity.applicationContext,
                 adUnit = adUnit,
-                payload = adUnit.extra?.optString("payload")
+                payload = adUnit.extra?.optString("payload"),
+                customParameters = buildCustomParameters(adUnit.extra)
             )
         }
     }
@@ -28,8 +31,27 @@ class GetAdAuctionParamUseCase {
                 activity = activity,
                 bannerFormat = bannerFormat,
                 adUnit = adUnit,
-                payload = adUnit.extra?.optString("payload")
+                payload = adUnit.extra?.optString("payload"),
+                customParameters = buildCustomParameters(adUnit.extra)
             )
         }
+    }
+
+    private fun buildCustomParameters(extra: JSONObject?): CustomParams {
+        val customParams = CustomParams().addParam("mediation_mode", "bidon")
+        val paramsJson = extra?.optJSONObject("custom_parameters") ?: return customParams
+
+        try {
+            val keys = paramsJson.keys()
+            while (keys.hasNext()) {
+                val key = keys.next()
+                val value = paramsJson.optString(key)
+                customParams.addParam(key, value)
+            }
+        } catch (_: Throwable) {
+            // ignore
+        }
+
+        return customParams
     }
 }

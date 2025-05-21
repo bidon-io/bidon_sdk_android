@@ -2,6 +2,7 @@ package org.bidon.bidmachine
 
 import android.app.Activity
 import android.content.Context
+import io.bidmachine.CustomParams
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.adapter.AdapterParameters
 import org.bidon.sdk.ads.banner.BannerFormat
@@ -19,7 +20,8 @@ class BMBannerAuctionParams(
     val activity: Activity,
     val bannerFormat: BannerFormat,
     val timeout: Long,
-    val payload: String?
+    val customParameters: CustomParams,
+    val payload: String?,
 ) : AdAuctionParams {
 
     override fun toString(): String {
@@ -32,7 +34,8 @@ class BMFullscreenAuctionParams(
     override val adUnit: AdUnit,
     val context: Context,
     val timeout: Long,
-    val payload: String?
+    val customParameters: CustomParams,
+    val payload: String?,
 ) : AdAuctionParams {
 
     override fun toString(): String {

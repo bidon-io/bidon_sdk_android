@@ -3,7 +3,6 @@ package org.bidon.bidmachine.impl
 import android.app.Activity
 import android.content.Context
 import io.bidmachine.AdRequest
-import io.bidmachine.CustomParams
 import io.bidmachine.PriceFloorParams
 import io.bidmachine.rewarded.RewardedAd
 import io.bidmachine.rewarded.RewardedListener
@@ -58,7 +57,7 @@ internal class BMRewardedAdImpl(
                 }
             }
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.price))
-            .setCustomParams(CustomParams().addParam("mediation_mode", "bidon"))
+            .setCustomParams(adParams.customParameters)
             .setLoadingTimeOut(adParams.timeout.toInt())
             .setListener(
                 object : AdRequest.AdRequestListener<RewardedRequest> {
