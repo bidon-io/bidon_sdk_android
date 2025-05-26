@@ -1,12 +1,14 @@
 package com.applovin.mediation.adapters.interstitial
 
 import android.app.Activity
+import com.applovin.mediation.MaxAdFormat
 import com.applovin.mediation.adapter.MaxAdapterError
 import com.applovin.mediation.adapter.listeners.MaxInterstitialAdapterListener
 import com.applovin.mediation.adapter.parameters.MaxAdapterResponseParameters
 import com.applovin.mediation.adapters.ext.getAsDouble
 import com.applovin.mediation.adapters.keeper.AdKeeper
 import com.applovin.mediation.adapters.keeper.AdKeepers
+import com.applovin.mediation.adapters.mockk.mockkLog
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -30,6 +32,8 @@ class BidonInterstitialTest {
 
     @Before
     fun setup() {
+        mockkLog()
+
         mockActivity = mockk()
         mockListener = mockk(relaxed = true)
         mockParameters = mockk(relaxed = true)
@@ -37,7 +41,10 @@ class BidonInterstitialTest {
 
         mockkObject(AdKeepers)
 
-        every { AdKeepers.interstitial } returns mockAdKeeper
+        // Mock AppLovin MAX parameters
+        every { mockParameters.adUnitId } returns "test_ad_unit_id"
+
+        every { AdKeepers.getKeeper<InterstitialAdInstance>(any(), MaxAdFormat.INTERSTITIAL) } returns mockAdKeeper
         every { mockAdKeeper.lastRegisteredEcpm() } returns null
         every { mockAdKeeper.registerEcpm(any()) } just Runs
         every { mockAdKeeper.keepAd(any()) } returns null
@@ -55,6 +62,7 @@ class BidonInterstitialTest {
         // Mock InterstitialAdInstance creation
         mockkConstructor(InterstitialAdInstance::class)
         every { anyConstructed<InterstitialAdInstance>().load(any()) } just Runs
+        every { anyConstructed<InterstitialAdInstance>().addExtra(any(), any()) } just Runs
 
         bidonInterstitial = BidonInterstitial()
     }
@@ -93,6 +101,7 @@ class BidonInterstitialTest {
         bidonInterstitial.loadInterstitialAd(mockParameters, mockActivity, mockListener)
 
         // Then
+        verify { AdKeepers.getKeeper<InterstitialAdInstance>("test_ad_unit_id", MaxAdFormat.INTERSTITIAL) }
         verify { mockAdKeeper.registerEcpm(2.0) }
         verify { anyConstructed<InterstitialAdInstance>().load(mockActivity) }
         verify { anyConstructed<InterstitialAdInstance>().addExtra("previous_auction_price", null) }

@@ -45,8 +45,7 @@ internal class BidonBanner : MaxAdViewAdapter, Logger by AppLovinSdkLogger {
         maxPlacementId = parameters.thirdPartyAdPlacementId
         maxEcpm = customParameters.getAsDouble("ecpm")
 
-        // Get the appropriate keeper for the ad format
-        val adKeeper = AdKeepers.getBannerKeeper(adFormat)
+        val adKeeper = AdKeepers.getKeeper<BannerAdInstance>(parameters.adUnitId, adFormat)
             .also { this.adKeeper = it }
 
         // Get last registered ecpm

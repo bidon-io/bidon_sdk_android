@@ -8,6 +8,7 @@ import com.applovin.mediation.adapter.parameters.MaxAdapterResponseParameters
 import com.applovin.mediation.adapters.ext.getAsDouble
 import com.applovin.mediation.adapters.keeper.AdKeeper
 import com.applovin.mediation.adapters.keeper.AdKeepers
+import com.applovin.mediation.adapters.mockk.mockkLog
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -31,6 +32,8 @@ class BidonBannerTest {
 
     @Before
     fun setup() {
+        mockkLog()
+
         mockActivity = mockk(relaxed = true)
         mockListener = mockk(relaxed = true)
         mockParameters = mockk(relaxed = true)
@@ -38,7 +41,11 @@ class BidonBannerTest {
 
         mockkObject(AdKeepers)
 
-        every { AdKeepers.getBannerKeeper(any()) } returns mockAdKeeper
+        // Mock AppLovin MAX parameters
+        every { mockParameters.adUnitId } returns "test_ad_unit_id"
+
+        // Mock AdKeepers
+        every { AdKeepers.getKeeper<BannerAdInstance>(any(), MaxAdFormat.BANNER) } returns mockAdKeeper
         every { mockAdKeeper.lastRegisteredEcpm() } returns null
         every { mockAdKeeper.registerEcpm(any()) } just Runs
         every { mockAdKeeper.keepAd(any()) } returns null
@@ -50,9 +57,10 @@ class BidonBannerTest {
         every { mockConsumedAd.bannerAd } returns mockk()
         every { mockAdKeeper.consumeAd(any()) } returns mockConsumedAd
 
-        // Mock BannerAdInstance constructor
+        // Mock BannerAdInstance creation
         mockkConstructor(BannerAdInstance::class)
         every { anyConstructed<BannerAdInstance>().load(any()) } just Runs
+        every { anyConstructed<BannerAdInstance>().addExtra(any(), any()) } just Runs
 
         bidonBanner = BidonBanner()
     }
@@ -78,7 +86,7 @@ class BidonBannerTest {
     }
 
     @Test
-    fun `loadAdViewAd with unicorn true and null last ecpm should load new ad`() {
+    fun `loadAdViewAd with unicorn true should load new ad and register ecpm`() {
         // Given
         every { mockParameters.customParameters } returns mockk {
             every { getBoolean("unicorn") } returns true
@@ -91,13 +99,14 @@ class BidonBannerTest {
         bidonBanner.loadAdViewAd(mockParameters, MaxAdFormat.BANNER, mockActivity, mockListener)
 
         // Then
-        verify { anyConstructed<BannerAdInstance>().load(mockActivity) }
+        verify { AdKeepers.getKeeper<BannerAdInstance>("test_ad_unit_id", MaxAdFormat.BANNER) }
         verify { mockAdKeeper.registerEcpm(2.0) }
+        verify { anyConstructed<BannerAdInstance>().load(mockActivity) }
         verify { anyConstructed<BannerAdInstance>().addExtra("previous_auction_price", null) }
     }
 
     @Test
-    fun `loadAdViewAd with unicorn true and existing last ecpm should load new ad`() {
+    fun `loadAdViewAd with unicorn true and last ecpm should pass it as extra`() {
         // Given
         every { mockParameters.customParameters } returns mockk {
             every { getBoolean("unicorn") } returns true
@@ -110,9 +119,8 @@ class BidonBannerTest {
         bidonBanner.loadAdViewAd(mockParameters, MaxAdFormat.BANNER, mockActivity, mockListener)
 
         // Then
-        verify { anyConstructed<BannerAdInstance>().load(mockActivity) }
-        verify { mockAdKeeper.registerEcpm(2.0) }
         verify { anyConstructed<BannerAdInstance>().addExtra("previous_auction_price", 1.5) }
+        verify { anyConstructed<BannerAdInstance>().load(mockActivity) }
     }
 
     @Test
