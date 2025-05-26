@@ -2,6 +2,7 @@ package com.applovin.mediation.adapters.rewarded
 
 import android.app.Activity
 import com.applovin.impl.mediation.MaxRewardImpl
+import com.applovin.mediation.MaxAdFormat
 import com.applovin.mediation.adapter.MaxAdapterError
 import com.applovin.mediation.adapter.MaxRewardedAdapter
 import com.applovin.mediation.adapter.listeners.MaxRewardedAdapterListener
@@ -21,11 +22,10 @@ import org.bidon.sdk.ads.rewarded.RewardedListener
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 
-internal class BidonRewarded(
-    private val adKeeper: AdKeeper<RewardedAdInstance> = AdKeepers.rewarded
-) : MaxRewardedAdapter, Logger by AppLovinSdkLogger {
+internal class BidonRewarded : MaxRewardedAdapter, Logger by AppLovinSdkLogger {
 
     private var adInstance: RewardedAdInstance? = null
+    private var adKeeper: AdKeeper<RewardedAdInstance>? = null
 
     private var maxPlacementId: String = "UNDEFINED"
     private var maxEcpm: Double = 0.0
@@ -45,6 +45,9 @@ internal class BidonRewarded(
 
         maxPlacementId = parameters.thirdPartyAdPlacementId
         maxEcpm = customParameters.getAsDouble("ecpm")
+
+        val adKeeper = AdKeepers.getKeeper<RewardedAdInstance>(parameters.adUnitId, MaxAdFormat.REWARDED)
+            .also { this.adKeeper = it }
 
         // Get last registered ecpm
         val lastRegisteredEcpm = adKeeper.lastRegisteredEcpm()
@@ -128,6 +131,7 @@ internal class BidonRewarded(
         log(TAG, "Destroying rewarded ad: $adInstance, Placement ID: $maxPlacementId")
         adInstance?.destroy()
         adInstance = null
+        adKeeper = null
     }
 
     private fun MaxRewardedAdapterListener.asBidonListener(): RewardedListener {
@@ -135,11 +139,12 @@ internal class BidonRewarded(
         var hasGrantedReward = false
         return object : RewardedListener {
             override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {
-                val loadedAdInstance = adInstance
-                if (loadedAdInstance == null) {
+                val loadedAdInstance = this@BidonRewarded.adInstance
+                val adKeeper = this@BidonRewarded.adKeeper
+                if (loadedAdInstance == null || adKeeper == null) {
                     log(
                         TAG,
-                        "Rewarded ad failed to load: Ad is null, Placement ID: $maxPlacementId"
+                        "Rewarded ad failed to load: Ad is null or keeper is null, Placement ID: $maxPlacementId"
                     )
                     maxRewardedCallback.onRewardedAdLoadFailed(MaxAdapterError.NO_FILL)
                     onDestroy()

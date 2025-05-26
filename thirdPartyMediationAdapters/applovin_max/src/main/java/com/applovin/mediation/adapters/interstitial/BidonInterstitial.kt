@@ -1,6 +1,7 @@
 package com.applovin.mediation.adapters.interstitial
 
 import android.app.Activity
+import com.applovin.mediation.MaxAdFormat
 import com.applovin.mediation.adapter.MaxAdapterError
 import com.applovin.mediation.adapter.MaxInterstitialAdapter
 import com.applovin.mediation.adapter.listeners.MaxInterstitialAdapterListener
@@ -19,11 +20,10 @@ import org.bidon.sdk.ads.interstitial.InterstitialListener
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 
-internal class BidonInterstitial(
-    private val adKeeper: AdKeeper<InterstitialAdInstance> = AdKeepers.interstitial
-) : MaxInterstitialAdapter, Logger by AppLovinSdkLogger {
+internal class BidonInterstitial : MaxInterstitialAdapter, Logger by AppLovinSdkLogger {
 
     private var adInstance: InterstitialAdInstance? = null
+    private var adKeeper: AdKeeper<InterstitialAdInstance>? = null
 
     private var maxPlacementId: String = "UNDEFINED"
     private var maxEcpm: Double = 0.0
@@ -43,6 +43,9 @@ internal class BidonInterstitial(
 
         maxPlacementId = parameters.thirdPartyAdPlacementId
         maxEcpm = customParameters.getAsDouble("ecpm")
+
+        val adKeeper = AdKeepers.getKeeper<InterstitialAdInstance>(parameters.adUnitId, MaxAdFormat.INTERSTITIAL)
+            .also { this.adKeeper = it }
 
         // Get last registered ecpm
         val lastRegisteredEcpm = adKeeper.lastRegisteredEcpm()
@@ -126,17 +129,19 @@ internal class BidonInterstitial(
         log(TAG, "Destroying interstitial ad: $adInstance, Placement ID: $maxPlacementId")
         adInstance?.destroy()
         adInstance = null
+        adKeeper = null
     }
 
     private fun MaxInterstitialAdapterListener.asBidonListener(): InterstitialListener {
         val maxInterstitialCallback = this
         return object : InterstitialListener {
             override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {
-                val loadedAdInstance = adInstance
-                if (loadedAdInstance == null) {
+                val loadedAdInstance = this@BidonInterstitial.adInstance
+                val adKeeper = this@BidonInterstitial.adKeeper
+                if (loadedAdInstance == null || adKeeper == null) {
                     log(
                         TAG,
-                        "Interstitial ad failed to load: Ad is null, Placement ID: $maxPlacementId"
+                        "Interstitial ad failed to load: Ad is null or keeper is null, Placement ID: $maxPlacementId"
                     )
                     maxInterstitialCallback.onInterstitialAdLoadFailed(MaxAdapterError.NO_FILL)
                     onDestroy()
