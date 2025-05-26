@@ -1,6 +1,7 @@
 # develop (2025.*.*)
 ## Features:
 - [BDN-933](https://appodeal.atlassian.net/browse/BDN-933) Added BCA-MAX to Bidon Sdk repository and publish to Bidon artifactory
+- [BDN-949](https://appodeal.atlassian.net/browse/BDN-949) Refactoring BCA-MAX Ad Caching to Support Multiple MAX Ad Units
 
 # 0.7.8 (2025.05.07)
 ## Features:
