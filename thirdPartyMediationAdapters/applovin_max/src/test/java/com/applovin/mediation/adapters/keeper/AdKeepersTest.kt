@@ -5,9 +5,9 @@ import com.applovin.mediation.adapters.banner.BannerAdInstance
 import com.applovin.mediation.adapters.interstitial.InterstitialAdInstance
 import com.applovin.mediation.adapters.rewarded.RewardedAdInstance
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
-import org.junit.Assert.assertNotSame
 import org.junit.Before
 import org.junit.Test
 
