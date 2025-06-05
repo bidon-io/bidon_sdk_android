@@ -23,7 +23,6 @@ import org.bidon.sdk.logs.analytic.AdValue
 internal class BidonInterstitial : MaxInterstitialAdapter, Logger by AppLovinSdkLogger {
 
     private var adInstance: InterstitialAdInstance? = null
-    private var adKeeper: AdKeeper<InterstitialAdInstance>? = null
 
     private var maxPlacementId: String = "UNDEFINED"
     private var maxEcpm: Double = 0.0
@@ -45,7 +44,6 @@ internal class BidonInterstitial : MaxInterstitialAdapter, Logger by AppLovinSdk
         maxEcpm = customParameters.getAsDouble("ecpm")
 
         val adKeeper = AdKeepers.getKeeper<InterstitialAdInstance>(parameters.adUnitId, MaxAdFormat.INTERSTITIAL)
-            .also { this.adKeeper = it }
 
         // Get last registered ecpm
         val lastRegisteredEcpm = adKeeper.lastRegisteredEcpm()
@@ -68,7 +66,7 @@ internal class BidonInterstitial : MaxInterstitialAdapter, Logger by AppLovinSdk
 
                 val newAdInstance = InterstitialAdInstance(auctionKey = auctionKey)
                     .also { this.adInstance = it }
-                newAdInstance.setListener(listener.asBidonListener())
+                newAdInstance.setListener(listener.asBidonListener(adKeeper))
                 newAdInstance.addExtra("previous_auction_price", lastRegisteredEcpm)
                 newAdInstance.load(activity)
             }
@@ -88,7 +86,7 @@ internal class BidonInterstitial : MaxInterstitialAdapter, Logger by AppLovinSdk
                     TAG,
                     "Interstitial ad loaded $consumeAdInstance from cache, Placement ID: $maxPlacementId"
                 )
-                consumeAdInstance.setListener(listener.asBidonListener())
+                consumeAdInstance.setListener(listener.asBidonListener(adKeeper))
                 listener.onInterstitialAdLoaded()
             }
         }
@@ -129,19 +127,17 @@ internal class BidonInterstitial : MaxInterstitialAdapter, Logger by AppLovinSdk
         log(TAG, "Destroying interstitial ad: $adInstance, Placement ID: $maxPlacementId")
         adInstance?.destroy()
         adInstance = null
-        adKeeper = null
     }
 
-    private fun MaxInterstitialAdapterListener.asBidonListener(): InterstitialListener {
+    private fun MaxInterstitialAdapterListener.asBidonListener(adKeeper: AdKeeper<InterstitialAdInstance>): InterstitialListener {
         val maxInterstitialCallback = this
         return object : InterstitialListener {
             override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {
                 val loadedAdInstance = this@BidonInterstitial.adInstance
-                val adKeeper = this@BidonInterstitial.adKeeper
-                if (loadedAdInstance == null || adKeeper == null) {
+                if (loadedAdInstance == null) {
                     log(
                         TAG,
-                        "Interstitial ad failed to load: Ad is null or keeper is null, Placement ID: $maxPlacementId"
+                        "Interstitial ad failed to load: Ad is null, Placement ID: $maxPlacementId"
                     )
                     maxInterstitialCallback.onInterstitialAdLoadFailed(MaxAdapterError.NO_FILL)
                     onDestroy()
