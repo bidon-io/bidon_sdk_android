@@ -25,7 +25,6 @@ import org.bidon.sdk.logs.analytic.AdValue
 internal class BidonRewarded : MaxRewardedAdapter, Logger by AppLovinSdkLogger {
 
     private var adInstance: RewardedAdInstance? = null
-    private var adKeeper: AdKeeper<RewardedAdInstance>? = null
 
     private var maxPlacementId: String = "UNDEFINED"
     private var maxEcpm: Double = 0.0
@@ -47,7 +46,6 @@ internal class BidonRewarded : MaxRewardedAdapter, Logger by AppLovinSdkLogger {
         maxEcpm = customParameters.getAsDouble("ecpm")
 
         val adKeeper = AdKeepers.getKeeper<RewardedAdInstance>(parameters.adUnitId, MaxAdFormat.REWARDED)
-            .also { this.adKeeper = it }
 
         // Get last registered ecpm
         val lastRegisteredEcpm = adKeeper.lastRegisteredEcpm()
@@ -70,7 +68,7 @@ internal class BidonRewarded : MaxRewardedAdapter, Logger by AppLovinSdkLogger {
 
                 val newAdInstance = RewardedAdInstance(auctionKey = auctionKey)
                     .also { this.adInstance = it }
-                newAdInstance.setListener(listener.asBidonListener())
+                newAdInstance.setListener(listener.asBidonListener(adKeeper))
                 newAdInstance.addExtra("previous_auction_price", lastRegisteredEcpm)
                 newAdInstance.load(activity)
             }
@@ -90,7 +88,7 @@ internal class BidonRewarded : MaxRewardedAdapter, Logger by AppLovinSdkLogger {
                     TAG,
                     "Rewarded ad loaded $consumeAdInstance from cache, Placement ID: $maxPlacementId"
                 )
-                consumeAdInstance.setListener(listener.asBidonListener())
+                consumeAdInstance.setListener(listener.asBidonListener(adKeeper))
                 listener.onRewardedAdLoaded()
             }
         }
@@ -131,20 +129,18 @@ internal class BidonRewarded : MaxRewardedAdapter, Logger by AppLovinSdkLogger {
         log(TAG, "Destroying rewarded ad: $adInstance, Placement ID: $maxPlacementId")
         adInstance?.destroy()
         adInstance = null
-        adKeeper = null
     }
 
-    private fun MaxRewardedAdapterListener.asBidonListener(): RewardedListener {
+    private fun MaxRewardedAdapterListener.asBidonListener(adKeeper: AdKeeper<RewardedAdInstance>): RewardedListener {
         val maxRewardedCallback = this
         var hasGrantedReward = false
         return object : RewardedListener {
             override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {
                 val loadedAdInstance = this@BidonRewarded.adInstance
-                val adKeeper = this@BidonRewarded.adKeeper
-                if (loadedAdInstance == null || adKeeper == null) {
+                if (loadedAdInstance == null) {
                     log(
                         TAG,
-                        "Rewarded ad failed to load: Ad is null or keeper is null, Placement ID: $maxPlacementId"
+                        "Rewarded ad failed to load: Ad is null, Placement ID: $maxPlacementId"
                     )
                     maxRewardedCallback.onRewardedAdLoadFailed(MaxAdapterError.NO_FILL)
                     onDestroy()
