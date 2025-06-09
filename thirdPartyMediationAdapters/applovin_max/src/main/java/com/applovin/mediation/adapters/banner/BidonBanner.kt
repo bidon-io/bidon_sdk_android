@@ -23,7 +23,6 @@ import org.bidon.sdk.logs.analytic.AdValue
 internal class BidonBanner : MaxAdViewAdapter, Logger by AppLovinSdkLogger {
 
     private var adInstance: BannerAdInstance? = null
-    private var adKeeper: AdKeeper<BannerAdInstance>? = null
 
     private var maxPlacementId: String = "UNDEFINED"
     private var maxEcpm: Double = 0.0
@@ -45,9 +44,7 @@ internal class BidonBanner : MaxAdViewAdapter, Logger by AppLovinSdkLogger {
         maxPlacementId = parameters.thirdPartyAdPlacementId
         maxEcpm = customParameters.getAsDouble("ecpm")
 
-        // Get the appropriate keeper for the ad format
-        val adKeeper = AdKeepers.getBannerKeeper(adFormat)
-            .also { this.adKeeper = it }
+        val adKeeper = AdKeepers.getKeeper<BannerAdInstance>(parameters.adUnitId, adFormat)
 
         // Get last registered ecpm
         val lastRegisteredEcpm = adKeeper.lastRegisteredEcpm()
@@ -73,7 +70,7 @@ internal class BidonBanner : MaxAdViewAdapter, Logger by AppLovinSdkLogger {
                     format = adFormat,
                     auctionKey = auctionKey,
                 ).also { this.adInstance = it }
-                newAdInstance.setListener(listener.asBidonListener())
+                newAdInstance.setListener(listener.asBidonListener(adKeeper))
                 newAdInstance.addExtra("previous_auction_price", lastRegisteredEcpm)
                 newAdInstance.load(activity)
             }
@@ -93,7 +90,7 @@ internal class BidonBanner : MaxAdViewAdapter, Logger by AppLovinSdkLogger {
                     TAG,
                     "Banner ad loaded $consumeAdInstance from cache, Placement ID: $maxPlacementId"
                 )
-                consumeAdInstance.setListener(listener.asBidonListener())
+                consumeAdInstance.setListener(listener.asBidonListener(adKeeper))
                 consumeAdInstance.show()
                 listener.onAdViewAdLoaded(consumeAdInstance.bannerAd)
             }
@@ -104,19 +101,17 @@ internal class BidonBanner : MaxAdViewAdapter, Logger by AppLovinSdkLogger {
         log(TAG, "Destroying banner ad: $adInstance, Placement ID: $maxPlacementId")
         adInstance?.destroy()
         adInstance = null
-        adKeeper = null
     }
 
-    private fun MaxAdViewAdapterListener.asBidonListener(): BannerListener {
+    private fun MaxAdViewAdapterListener.asBidonListener(adKeeper: AdKeeper<BannerAdInstance>): BannerListener {
         val maxBannerCallback = this
         return object : BannerListener {
             override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {
                 val loadedAdInstance = this@BidonBanner.adInstance
-                val adKeeper = this@BidonBanner.adKeeper
-                if (loadedAdInstance == null || adKeeper == null) {
+                if (loadedAdInstance == null) {
                     log(
                         TAG,
-                        "Banner ad failed to load: Ad is null or keeper is null, Placement ID: $maxPlacementId"
+                        "Banner ad failed to load: Ad is null, Placement ID: $maxPlacementId"
                     )
                     maxBannerCallback.onAdViewAdLoadFailed(MaxAdapterError.NO_FILL)
                     onDestroy()

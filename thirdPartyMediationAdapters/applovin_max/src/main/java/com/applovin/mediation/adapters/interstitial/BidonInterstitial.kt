@@ -1,6 +1,7 @@
 package com.applovin.mediation.adapters.interstitial
 
 import android.app.Activity
+import com.applovin.mediation.MaxAdFormat
 import com.applovin.mediation.adapter.MaxAdapterError
 import com.applovin.mediation.adapter.MaxInterstitialAdapter
 import com.applovin.mediation.adapter.listeners.MaxInterstitialAdapterListener
@@ -19,9 +20,7 @@ import org.bidon.sdk.ads.interstitial.InterstitialListener
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 
-internal class BidonInterstitial(
-    private val adKeeper: AdKeeper<InterstitialAdInstance> = AdKeepers.interstitial
-) : MaxInterstitialAdapter, Logger by AppLovinSdkLogger {
+internal class BidonInterstitial : MaxInterstitialAdapter, Logger by AppLovinSdkLogger {
 
     private var adInstance: InterstitialAdInstance? = null
 
@@ -44,6 +43,8 @@ internal class BidonInterstitial(
         maxPlacementId = parameters.thirdPartyAdPlacementId
         maxEcpm = customParameters.getAsDouble("ecpm")
 
+        val adKeeper = AdKeepers.getKeeper<InterstitialAdInstance>(parameters.adUnitId, MaxAdFormat.INTERSTITIAL)
+
         // Get last registered ecpm
         val lastRegisteredEcpm = adKeeper.lastRegisteredEcpm()
         // Register ecpm for range calculation
@@ -65,7 +66,7 @@ internal class BidonInterstitial(
 
                 val newAdInstance = InterstitialAdInstance(auctionKey = auctionKey)
                     .also { this.adInstance = it }
-                newAdInstance.setListener(listener.asBidonListener())
+                newAdInstance.setListener(listener.asBidonListener(adKeeper))
                 newAdInstance.addExtra("previous_auction_price", lastRegisteredEcpm)
                 newAdInstance.load(activity)
             }
@@ -85,7 +86,7 @@ internal class BidonInterstitial(
                     TAG,
                     "Interstitial ad loaded $consumeAdInstance from cache, Placement ID: $maxPlacementId"
                 )
-                consumeAdInstance.setListener(listener.asBidonListener())
+                consumeAdInstance.setListener(listener.asBidonListener(adKeeper))
                 listener.onInterstitialAdLoaded()
             }
         }
@@ -128,11 +129,11 @@ internal class BidonInterstitial(
         adInstance = null
     }
 
-    private fun MaxInterstitialAdapterListener.asBidonListener(): InterstitialListener {
+    private fun MaxInterstitialAdapterListener.asBidonListener(adKeeper: AdKeeper<InterstitialAdInstance>): InterstitialListener {
         val maxInterstitialCallback = this
         return object : InterstitialListener {
             override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {
-                val loadedAdInstance = adInstance
+                val loadedAdInstance = this@BidonInterstitial.adInstance
                 if (loadedAdInstance == null) {
                     log(
                         TAG,

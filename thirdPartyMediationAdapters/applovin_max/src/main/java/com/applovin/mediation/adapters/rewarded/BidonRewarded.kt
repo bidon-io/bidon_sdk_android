@@ -2,6 +2,7 @@ package com.applovin.mediation.adapters.rewarded
 
 import android.app.Activity
 import com.applovin.impl.mediation.MaxRewardImpl
+import com.applovin.mediation.MaxAdFormat
 import com.applovin.mediation.adapter.MaxAdapterError
 import com.applovin.mediation.adapter.MaxRewardedAdapter
 import com.applovin.mediation.adapter.listeners.MaxRewardedAdapterListener
@@ -21,9 +22,7 @@ import org.bidon.sdk.ads.rewarded.RewardedListener
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.analytic.AdValue
 
-internal class BidonRewarded(
-    private val adKeeper: AdKeeper<RewardedAdInstance> = AdKeepers.rewarded
-) : MaxRewardedAdapter, Logger by AppLovinSdkLogger {
+internal class BidonRewarded : MaxRewardedAdapter, Logger by AppLovinSdkLogger {
 
     private var adInstance: RewardedAdInstance? = null
 
@@ -46,6 +45,8 @@ internal class BidonRewarded(
         maxPlacementId = parameters.thirdPartyAdPlacementId
         maxEcpm = customParameters.getAsDouble("ecpm")
 
+        val adKeeper = AdKeepers.getKeeper<RewardedAdInstance>(parameters.adUnitId, MaxAdFormat.REWARDED)
+
         // Get last registered ecpm
         val lastRegisteredEcpm = adKeeper.lastRegisteredEcpm()
         // Register ecpm for range calculation
@@ -67,7 +68,7 @@ internal class BidonRewarded(
 
                 val newAdInstance = RewardedAdInstance(auctionKey = auctionKey)
                     .also { this.adInstance = it }
-                newAdInstance.setListener(listener.asBidonListener())
+                newAdInstance.setListener(listener.asBidonListener(adKeeper))
                 newAdInstance.addExtra("previous_auction_price", lastRegisteredEcpm)
                 newAdInstance.load(activity)
             }
@@ -87,7 +88,7 @@ internal class BidonRewarded(
                     TAG,
                     "Rewarded ad loaded $consumeAdInstance from cache, Placement ID: $maxPlacementId"
                 )
-                consumeAdInstance.setListener(listener.asBidonListener())
+                consumeAdInstance.setListener(listener.asBidonListener(adKeeper))
                 listener.onRewardedAdLoaded()
             }
         }
@@ -130,12 +131,12 @@ internal class BidonRewarded(
         adInstance = null
     }
 
-    private fun MaxRewardedAdapterListener.asBidonListener(): RewardedListener {
+    private fun MaxRewardedAdapterListener.asBidonListener(adKeeper: AdKeeper<RewardedAdInstance>): RewardedListener {
         val maxRewardedCallback = this
         var hasGrantedReward = false
         return object : RewardedListener {
             override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {
-                val loadedAdInstance = adInstance
+                val loadedAdInstance = this@BidonRewarded.adInstance
                 if (loadedAdInstance == null) {
                     log(
                         TAG,
