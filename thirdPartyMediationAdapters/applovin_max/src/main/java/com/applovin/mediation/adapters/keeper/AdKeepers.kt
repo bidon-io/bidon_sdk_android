@@ -25,14 +25,12 @@ internal object AdKeepers {
      */
     @Suppress("UNCHECKED_CAST")
     fun <T> getKeeper(maxAdUnitId: String, format: MaxAdFormat): AdKeeper<T> {
-        val key = if (settings.singleKeeperEnabled) format.label else maxAdUnitId
+        val key = if (settings.singleKeeperEnabled) format.label else "${format.label}_$maxAdUnitId"
         return keepers.getOrPut(key) {
             when (format) {
-                MaxAdFormat.BANNER -> AdKeeperImpl<BannerAdInstance>("Banner_$maxAdUnitId")
-                MaxAdFormat.MREC -> AdKeeperImpl<BannerAdInstance>("MRec_$maxAdUnitId")
-                MaxAdFormat.LEADER -> AdKeeperImpl<BannerAdInstance>("Leader_$maxAdUnitId")
-                MaxAdFormat.INTERSTITIAL -> AdKeeperImpl<InterstitialAdInstance>("Interstitial_$maxAdUnitId")
-                MaxAdFormat.REWARDED -> AdKeeperImpl<RewardedAdInstance>("Rewarded_$maxAdUnitId")
+                MaxAdFormat.BANNER, MaxAdFormat.MREC, MaxAdFormat.LEADER -> AdKeeperImpl<BannerAdInstance>(key)
+                MaxAdFormat.INTERSTITIAL -> AdKeeperImpl<InterstitialAdInstance>(key)
+                MaxAdFormat.REWARDED -> AdKeeperImpl<RewardedAdInstance>(key)
                 else -> throw IllegalArgumentException("Unsupported ad format: $format")
             }
         } as AdKeeper<T>
