@@ -12,6 +12,7 @@ import com.applovin.mediation.adapter.parameters.MaxAdapterInitializationParamet
 import com.applovin.mediation.adapters.banner.BidonBanner
 import com.applovin.mediation.adapters.ext.updatePrivacySettings
 import com.applovin.mediation.adapters.interstitial.BidonInterstitial
+import com.applovin.mediation.adapters.keeper.AdKeepers
 import com.applovin.mediation.adapters.rewarded.BidonRewarded
 import com.applovin.sdk.AppLovinSdk
 import org.bidon.sdk.BidonSdk
@@ -38,6 +39,12 @@ internal class BidonMediationAdapter(
     ) {
         BidonSdk.updatePrivacySettings(parameters)
 
+        val context = activity?.applicationContext ?: applicationContext
+
+        // Provide settings to AdKeepers
+        val extraParameters = AppLovinSdk.getInstance(context).settings.extraParameters
+        AdKeepers.withSettings(AdKeepers.Settings.from(extraParameters))
+
         val appKey = parameters.serverParameters.getString("app_id")
         if (BidonSdk.isInitialized()) {
             log("Bidon SDK already initialized")
@@ -46,7 +53,6 @@ internal class BidonMediationAdapter(
             log("Bidon SDK initialization failed: Missing app key")
             onCompletionListener.onCompletion(INITIALIZED_FAILURE, "Missing app key")
         } else {
-            val context = activity?.applicationContext ?: applicationContext
             val isTesting = parameters.isTesting
 
             log("Bidon SDK initializing with app key:$appKey, test mode: $isTesting, context: $context")

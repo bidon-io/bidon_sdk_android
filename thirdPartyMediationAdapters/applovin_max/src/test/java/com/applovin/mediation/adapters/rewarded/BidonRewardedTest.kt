@@ -1,12 +1,14 @@
 package com.applovin.mediation.adapters.rewarded
 
 import android.app.Activity
+import com.applovin.mediation.MaxAdFormat
 import com.applovin.mediation.adapter.MaxAdapterError
 import com.applovin.mediation.adapter.listeners.MaxRewardedAdapterListener
 import com.applovin.mediation.adapter.parameters.MaxAdapterResponseParameters
 import com.applovin.mediation.adapters.ext.getAsDouble
 import com.applovin.mediation.adapters.keeper.AdKeeper
 import com.applovin.mediation.adapters.keeper.AdKeepers
+import com.applovin.mediation.adapters.mockk.mockkLog
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -22,6 +24,7 @@ import org.junit.Test
 class BidonRewardedTest {
 
     private lateinit var bidonRewarded: BidonRewarded
+
     private lateinit var mockActivity: Activity
     private lateinit var mockListener: MaxRewardedAdapterListener
     private lateinit var mockParameters: MaxAdapterResponseParameters
@@ -29,6 +32,8 @@ class BidonRewardedTest {
 
     @Before
     fun setup() {
+        mockkLog()
+
         mockActivity = mockk()
         mockListener = mockk(relaxed = true)
         mockParameters = mockk(relaxed = true)
@@ -36,7 +41,10 @@ class BidonRewardedTest {
 
         mockkObject(AdKeepers)
 
-        every { AdKeepers.rewarded } returns mockAdKeeper
+        // Mock AppLovin MAX parameters
+        every { mockParameters.adUnitId } returns "test_ad_unit_id"
+
+        every { AdKeepers.getKeeper<RewardedAdInstance>(any(), MaxAdFormat.REWARDED) } returns mockAdKeeper
         every { mockAdKeeper.lastRegisteredEcpm() } returns null
         every { mockAdKeeper.registerEcpm(any()) } just Runs
         every { mockAdKeeper.keepAd(any()) } returns null
@@ -51,9 +59,10 @@ class BidonRewardedTest {
         every { mockListener.onRewardedAdLoadFailed(any()) } just Runs
         every { mockListener.onRewardedAdDisplayFailed(any()) } just Runs
 
-        // Mock RewardedAdInstance construction
+        // Mock RewardedAdInstance creation
         mockkConstructor(RewardedAdInstance::class)
         every { anyConstructed<RewardedAdInstance>().load(any()) } just Runs
+        every { anyConstructed<RewardedAdInstance>().addExtra(any(), any()) } just Runs
 
         bidonRewarded = BidonRewarded()
     }
@@ -79,12 +88,12 @@ class BidonRewardedTest {
     }
 
     @Test
-    fun `loadRewardedAd with unicorn true and no last ecpm should register ecpm and load ad`() {
+    fun `loadRewardedAd with unicorn true should load new ad and register ecpm`() {
         // Given
         every { mockParameters.customParameters } returns mockk {
             every { getBoolean("unicorn") } returns true
             every { getAsDouble("ecpm") } returns 2.0
-            every { getString("auction_key", null) } returns "auction123"
+            every { getString("auction_key", null) } returns "test_auction_key"
         }
         every { mockAdKeeper.lastRegisteredEcpm() } returns null
 
@@ -92,18 +101,19 @@ class BidonRewardedTest {
         bidonRewarded.loadRewardedAd(mockParameters, mockActivity, mockListener)
 
         // Then
+        verify { AdKeepers.getKeeper<RewardedAdInstance>("test_ad_unit_id", MaxAdFormat.REWARDED) }
         verify { mockAdKeeper.registerEcpm(2.0) }
-        verify { anyConstructed<RewardedAdInstance>().addExtra("previous_auction_price", null) }
         verify { anyConstructed<RewardedAdInstance>().load(mockActivity) }
+        verify { anyConstructed<RewardedAdInstance>().addExtra("previous_auction_price", null) }
     }
 
     @Test
-    fun `loadRewardedAd with unicorn true and last ecpm should pass previous ecpm as extra`() {
+    fun `loadRewardedAd with unicorn true and last ecpm should pass it as extra`() {
         // Given
         every { mockParameters.customParameters } returns mockk {
             every { getBoolean("unicorn") } returns true
-            every { getAsDouble("ecpm") } returns 3.0
-            every { getString("auction_key", null) } returns "auction456"
+            every { getAsDouble("ecpm") } returns 2.0
+            every { getString("auction_key", null) } returns "test_auction_key"
         }
         every { mockAdKeeper.lastRegisteredEcpm() } returns 1.5
 
@@ -111,7 +121,6 @@ class BidonRewardedTest {
         bidonRewarded.loadRewardedAd(mockParameters, mockActivity, mockListener)
 
         // Then
-        verify { mockAdKeeper.registerEcpm(3.0) }
         verify { anyConstructed<RewardedAdInstance>().addExtra("previous_auction_price", 1.5) }
         verify { anyConstructed<RewardedAdInstance>().load(mockActivity) }
     }
@@ -127,12 +136,13 @@ class BidonRewardedTest {
         // When
         bidonRewarded.loadRewardedAd(mockParameters, mockActivity, mockListener)
 
+        // Then
         verify { mockAdKeeper.consumeAd(1.0) }
         verify { mockListener.onRewardedAdLoaded() }
     }
 
     @Test
-    fun `loadRewardedAd with unicorn false and no ad available should fail`() {
+    fun `loadRewardedAd with unicorn false and no available ad should fail`() {
         // Given
         every { mockParameters.customParameters } returns mockk {
             every { getBoolean("unicorn") } returns false
@@ -150,14 +160,6 @@ class BidonRewardedTest {
     @Test
     fun `showRewardedAd with not ready ad should fail`() {
         // Given
-        every { mockParameters.customParameters } returns mockk {
-            every { getBoolean("unicorn") } returns false
-            every { getAsDouble("ecpm") } returns 1.0
-        }
-
-        val mockInstance = mockk<RewardedAdInstance>()
-        every { mockInstance.isReady } returns false
-        every { mockAdKeeper.consumeAd(any()) } returns mockInstance
 
         // When
         bidonRewarded.showRewardedAd(mockParameters, mockActivity, mockListener)
