@@ -22,5 +22,5 @@ dependencies {
     compileOnly(projects.bidon)
     testImplementation(projects.bidon)
 
-    implementation("com.mbridge.msdk.oversea:mbridge_android_sdk:16.9.41")
+    implementation("com.mbridge.msdk.oversea:mbridge_android_sdk:16.9.71")
 }

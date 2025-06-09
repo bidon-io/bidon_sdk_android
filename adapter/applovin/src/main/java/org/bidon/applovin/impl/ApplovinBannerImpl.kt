@@ -5,7 +5,6 @@ import com.applovin.sdk.AppLovinAd
 import com.applovin.sdk.AppLovinAdClickListener
 import com.applovin.sdk.AppLovinAdDisplayListener
 import com.applovin.sdk.AppLovinAdLoadListener
-import com.applovin.sdk.AppLovinSdk
 import org.bidon.applovin.ApplovinBannerAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
 import org.bidon.applovin.ext.asBidonError
@@ -27,9 +26,7 @@ import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
  *
  * https://appodeal.slack.com/archives/C02PE4GAFU0/p1661421318406689
  */
-internal class ApplovinBannerImpl(
-    private val applovinSdk: AppLovinSdk,
-) : AdSource.Banner<ApplovinBannerAuctionParams>,
+internal class ApplovinBannerImpl : AdSource.Banner<ApplovinBannerAuctionParams>,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {
 
@@ -99,12 +96,9 @@ internal class ApplovinBannerImpl(
             }
         }
         adParams.activity.runOnUiThread {
-            val bannerView = AppLovinAdView(
-                applovinSdk,
-                adParams.bannerSize,
-                zoneId,
-                adParams.activity.applicationContext
-            ).also { adView = it }
+            val bannerView = AppLovinAdView(adParams.bannerSize, zoneId).also {
+                adView = it
+            }
             bannerView.setAdClickListener(listener)
             bannerView.setAdDisplayListener(listener)
             bannerView.setAdLoadListener(requestListener)
