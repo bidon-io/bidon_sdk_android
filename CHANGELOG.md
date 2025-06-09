@@ -1,5 +1,22 @@
-# develop (2025.*.*)
+# 0.7.9 (2025.06.11)
 ## Features:
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Min sdk api increased to 23
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated Admob SDK to 24.3.0
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Migrated to gradle 8
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Migrated to Kotlin 2.1.0
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated Amazon SDK to 11.0.0
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated Applovin SDK to 13.2.0
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated Bidmachine SDK to 3.3.0
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated BigoAds SDK to 5.3.0
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated Chartboost SDK to 9.8.3
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated DtExchange SDK to 8.3.7
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated Inmobi SDK to 10.8.3
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated Meta SDK to 6.20.0
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated MobileFuse SDK to 1.9.2
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated Mintegral SDK to 16.9.71
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated UnityAds SDK to 4.14.2
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated Vungle SDK to 7.5.0
+- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated BCA-MAX SDK to 13.2.0
 - [BDN-933](https://appodeal.atlassian.net/browse/BDN-933) Added BCA-MAX to Bidon Sdk repository and publish to Bidon artifactory
 - [BDN-946](https://appodeal.atlassian.net/browse/BDN-946) Handled `custom_parameters` from server and provided to BidMachine SDK ad requests
 - [BDN-949](https://appodeal.atlassian.net/browse/BDN-949) Refactoring BCA-MAX Ad Caching to Support Multiple MAX Ad Units

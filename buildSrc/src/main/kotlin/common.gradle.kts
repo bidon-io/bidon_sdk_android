@@ -7,6 +7,9 @@ plugins {
 
 android {
     compileSdk = Dependencies.Android.compileSdkVersion
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         minSdk = Dependencies.Android.minSdkVersion
         consumerProguardFiles("proguard-rules-consumer.pro")
@@ -35,11 +38,11 @@ android {
         }
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 

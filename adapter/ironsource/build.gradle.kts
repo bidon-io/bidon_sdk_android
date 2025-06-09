@@ -22,5 +22,5 @@ dependencies {
     compileOnly(projects.bidon)
     testImplementation(projects.bidon)
 
-    implementation("com.ironsource.sdk:mediationsdk:8.7.0")
+    implementation("com.unity3d.ads-mediation:mediation-sdk:8.8.0")
 }

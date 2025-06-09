@@ -22,5 +22,5 @@ dependencies {
     compileOnly(projects.bidon)
     testImplementation(projects.bidon)
 
-    implementation("com.vungle:vungle-ads:7.4.3")
+    implementation("com.vungle:vungle-ads:7.5.0")
 }

@@ -22,6 +22,6 @@ dependencies {
     compileOnly(projects.bidon)
     testImplementation(projects.bidon)
 
-    implementation("com.fyber:marketplace-sdk:8.3.6")
+    implementation("com.fyber:marketplace-sdk:8.3.7")
     implementation(Dependencies.Google.PlayServicesAdsIdentifier)
 }
