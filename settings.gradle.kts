@@ -55,4 +55,5 @@ include(
     ":adapter:yandex",
 //    ":adapter:fyber",
 //    ":adapter:appsflyer"
+    ":thirdPartyMediationAdapters:applovin_max"
 )
