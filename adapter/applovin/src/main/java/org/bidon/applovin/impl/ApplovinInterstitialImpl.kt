@@ -112,7 +112,7 @@ internal class ApplovinInterstitialImpl(
         logInfo(TAG, "Starting show: $this")
         val applovinAd = applovinAd
         if (applovinAd != null) {
-            val adDialog = AppLovinInterstitialAd.create(applovinSdk, activity.applicationContext).apply {
+            val adDialog = AppLovinInterstitialAd.create().apply {
                 setAdDisplayListener(listener)
                 setAdClickListener(listener)
             }

@@ -6,6 +6,7 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
+    id("org.jetbrains.kotlin.plugin.compose")
     kotlin("android")
 }
 
@@ -20,10 +21,13 @@ val keystoreProperties = Properties().apply {
 android {
     compileSdk = 34
     namespace = defaultPackage
-
+    buildFeatures {
+        buildConfig = true
+        compose = true
+    }
     defaultConfig {
         applicationId = keystoreProperties["DEMO_APPLICATION_ID"] as? String ?: defaultPackage
-        minSdk = 21
+        minSdk = 23
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -75,12 +79,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = Dependencies.Kotlin.kotlinCompilerExtensionVersion
     }
     lint {
         checkReleaseBuilds = false

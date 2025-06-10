@@ -7,6 +7,9 @@ plugins {
 
 android {
     compileSdk = Dependencies.Android.compileSdkVersion
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         minSdk = Dependencies.Android.minSdkVersion
         consumerProguardFiles("proguard-rules-consumer.pro")
