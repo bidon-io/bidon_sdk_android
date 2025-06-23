@@ -22,6 +22,7 @@ import org.bidon.sdk.utils.di.DI
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
 import org.bidon.sdk.utils.networking.BidonEndpoints
+import java.util.concurrent.CopyOnWriteArraySet
 
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
@@ -41,7 +42,7 @@ internal class BidonInitializerImpl : BidonInitializer {
     private var useDefaultAdapters = false
     private var publisherAdapters = mutableMapOf<Class<out Adapter>, Adapter>()
     private var publisherAdapterClasses = mutableSetOf<String>()
-    private var initializationCallback: InitializationCallback? = null
+    private val initializationCallbacks = CopyOnWriteArraySet<InitializationCallback>()
     private val initializationState = MutableStateFlow(SdkState.NotInitialized)
 
     private val initAndRegisterAdapters: InitAndRegisterAdaptersUseCase get() = get()
@@ -72,7 +73,12 @@ internal class BidonInitializerImpl : BidonInitializer {
     }
 
     override fun setInitializationCallback(initializationCallback: InitializationCallback) {
-        this.initializationCallback = initializationCallback
+        if (isInitialized) {
+            logInfo(TAG, "setInitializationCallback: already initialized")
+            initializationCallback.onFinished()
+        } else {
+            initializationCallbacks.add(initializationCallback)
+        }
     }
 
     override fun setBaseUrl(host: String) {
@@ -162,9 +168,12 @@ internal class BidonInitializerImpl : BidonInitializer {
     }
 
     private fun notifyInitialized() {
-        initializationCallback?.onFinished()
+        initializationCallbacks.forEach { callback ->
+            logInfo(TAG, "notifyInitialized: notified callback: $callback")
+            callback.onFinished()
+        }
         publisherAdapters.clear()
-        initializationCallback = null
+        initializationCallbacks.clear()
     }
 }
 

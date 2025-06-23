@@ -1,3 +1,7 @@
+# 0.8.0 (2025.**.**)
+## Features:
+- [BDN-956](https://appodeal.atlassian.net/browse/BDN-956) Added ability to add multiple InitializationCallback
+
 # 0.7.9 (2025.06.11)
 ## Features:
 - [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Min sdk api increased to 23
