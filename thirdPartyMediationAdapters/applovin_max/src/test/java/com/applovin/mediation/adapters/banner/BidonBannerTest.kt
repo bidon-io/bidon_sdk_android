@@ -74,7 +74,8 @@ class BidonBannerTest {
     fun `loadAdViewAd with null activity should fail with missing activity error`() {
         // Given
         every { mockParameters.customParameters } returns mockk {
-            every { getBoolean("unicorn") } returns true
+            every { getBoolean("unicorn", false) } returns true
+            every { getBoolean("should_load", false) } returns false
             every { getAsDouble("ecpm") } returns 1.0
         }
 
@@ -89,7 +90,8 @@ class BidonBannerTest {
     fun `loadAdViewAd with unicorn true should load new ad and register ecpm`() {
         // Given
         every { mockParameters.customParameters } returns mockk {
-            every { getBoolean("unicorn") } returns true
+            every { getBoolean("unicorn", false) } returns true
+            every { getBoolean("should_load", false) } returns false
             every { getAsDouble("ecpm") } returns 2.0
             every { getString("auction_key", null) } returns "test_auction_key"
         }
@@ -109,7 +111,8 @@ class BidonBannerTest {
     fun `loadAdViewAd with unicorn true and last ecpm should pass it as extra`() {
         // Given
         every { mockParameters.customParameters } returns mockk {
-            every { getBoolean("unicorn") } returns true
+            every { getBoolean("unicorn", false) } returns true
+            every { getBoolean("should_load", false) } returns false
             every { getAsDouble("ecpm") } returns 2.0
             every { getString("auction_key", null) } returns "test_auction_key"
         }
@@ -124,26 +127,11 @@ class BidonBannerTest {
     }
 
     @Test
-    fun `loadAdViewAd with unicorn false should consume ad from keeper`() {
-        // Given
-        every { mockParameters.customParameters } returns mockk {
-            every { getBoolean("unicorn") } returns false
-            every { getAsDouble("ecpm") } returns 1.0
-        }
-
-        // When
-        bidonBanner.loadAdViewAd(mockParameters, MaxAdFormat.BANNER, mockActivity, mockListener)
-
-        // Then
-        verify { mockAdKeeper.consumeAd(1.0) }
-        verify { mockListener.onAdViewAdLoaded(any()) }
-    }
-
-    @Test
     fun `loadAdViewAd with unicorn false and no available ad should fail`() {
         // Given
         every { mockParameters.customParameters } returns mockk {
-            every { getBoolean("unicorn") } returns false
+            every { getBoolean("unicorn", false) } returns false
+            every { getBoolean("should_load", false) } returns false
             every { getAsDouble("ecpm") } returns 1.0
         }
         every { mockAdKeeper.consumeAd(any()) } returns null
@@ -153,5 +141,85 @@ class BidonBannerTest {
 
         // Then
         verify { mockListener.onAdViewAdLoadFailed(MaxAdapterError.NO_FILL) }
+    }
+
+    @Test
+    fun `loadAdViewAd with should_load true should load new ad and register ecpm`() {
+        // Given
+        every { mockParameters.customParameters } returns mockk {
+            every { getBoolean("unicorn", false) } returns false
+            every { getBoolean("should_load", false) } returns true
+            every { getAsDouble("ecpm") } returns 2.0
+            every { getString("auction_key", null) } returns "test_auction_key"
+        }
+        every { mockAdKeeper.lastRegisteredEcpm() } returns null
+
+        // When
+        bidonBanner.loadAdViewAd(mockParameters, MaxAdFormat.BANNER, mockActivity, mockListener)
+
+        // Then
+        verify { AdKeepers.getKeeper<BannerAdInstance>("test_ad_unit_id", MaxAdFormat.BANNER) }
+        verify { mockAdKeeper.registerEcpm(2.0) }
+        verify { anyConstructed<BannerAdInstance>().load(mockActivity) }
+        verify { anyConstructed<BannerAdInstance>().addExtra("previous_auction_price", null) }
+    }
+
+    @Test
+    fun `loadAdViewAd with both should_load and unicorn true should prioritize should_load`() {
+        // Given
+        every { mockParameters.customParameters } returns mockk {
+            every { getBoolean("unicorn", false) } returns true
+            every { getBoolean("should_load", false) } returns true
+            every { getAsDouble("ecpm") } returns 2.0
+            every { getString("auction_key", null) } returns "test_auction_key"
+        }
+        every { mockAdKeeper.lastRegisteredEcpm() } returns null
+
+        // When
+        bidonBanner.loadAdViewAd(mockParameters, MaxAdFormat.BANNER, mockActivity, mockListener)
+
+        // Then
+        verify { AdKeepers.getKeeper<BannerAdInstance>("test_ad_unit_id", MaxAdFormat.BANNER) }
+        verify { mockAdKeeper.registerEcpm(2.0) }
+        verify { anyConstructed<BannerAdInstance>().load(mockActivity) }
+        verify { anyConstructed<BannerAdInstance>().addExtra("previous_auction_price", null) }
+    }
+
+    @Test
+    fun `loadAdViewAd with should_load false and unicorn true should load new ad`() {
+        // Given
+        every { mockParameters.customParameters } returns mockk {
+            every { getBoolean("unicorn", false) } returns true
+            every { getBoolean("should_load", false) } returns false
+            every { getAsDouble("ecpm") } returns 2.0
+            every { getString("auction_key", null) } returns "test_auction_key"
+        }
+        every { mockAdKeeper.lastRegisteredEcpm() } returns null
+
+        // When
+        bidonBanner.loadAdViewAd(mockParameters, MaxAdFormat.BANNER, mockActivity, mockListener)
+
+        // Then
+        verify { AdKeepers.getKeeper<BannerAdInstance>("test_ad_unit_id", MaxAdFormat.BANNER) }
+        verify { mockAdKeeper.registerEcpm(2.0) }
+        verify { anyConstructed<BannerAdInstance>().load(mockActivity) }
+        verify { anyConstructed<BannerAdInstance>().addExtra("previous_auction_price", null) }
+    }
+
+    @Test
+    fun `loadAdViewAd with both should_load and unicorn false should consume ad from keeper`() {
+        // Given
+        every { mockParameters.customParameters } returns mockk {
+            every { getBoolean("unicorn", false) } returns false
+            every { getBoolean("should_load", false) } returns false
+            every { getAsDouble("ecpm") } returns 1.0
+        }
+
+        // When
+        bidonBanner.loadAdViewAd(mockParameters, MaxAdFormat.BANNER, mockActivity, mockListener)
+
+        // Then
+        verify { mockAdKeeper.consumeAd(1.0) }
+        verify { mockListener.onAdViewAdLoaded(any()) }
     }
 }
