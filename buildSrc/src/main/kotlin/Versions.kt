@@ -31,6 +31,7 @@ object Versions {
 
     object ThirdPartyMediationAdapters {
         val ApplovinMax = "$mainVersion.0" + semanticVersion
+        val LevelPlay = "$mainVersion.0" + semanticVersion
     }
 
     private val mainVersion get() = "$major.$minor.$patch"
