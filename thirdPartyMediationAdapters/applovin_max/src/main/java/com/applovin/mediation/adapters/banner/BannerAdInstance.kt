@@ -6,8 +6,10 @@ import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import com.applovin.mediation.MaxAdFormat
 import com.applovin.mediation.adapters.keeper.AdInstance
+import com.applovin.mediation.adapters.keeper.DEFAULT_BID_TYPE
 import com.applovin.mediation.adapters.keeper.DEFAULT_DEMAND_ID
 import com.applovin.mediation.adapters.keeper.DEFAULT_ECPM
+import com.applovin.mediation.adapters.keeper.DEFAULT_UID
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.banner.BannerFormat
@@ -41,6 +43,8 @@ internal class BannerAdInstance(
     override val ecpm: Double get() = bannerAdInfo?.price ?: DEFAULT_ECPM
     override val demandId: String get() = bannerAdInfo?.networkName ?: DEFAULT_DEMAND_ID
     override val isReady: Boolean get() = bannerAd.isReady()
+    override val uid: String get() = bannerAdInfo?.adUnit?.uid ?: DEFAULT_UID
+    override val bidType: String get() = bannerAdInfo?.bidType?.code ?: DEFAULT_BID_TYPE
 
     fun setListener(listener: BannerListener) {
         this.bannerListener = listener

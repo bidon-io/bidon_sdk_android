@@ -1,4 +1,8 @@
-# develop
+# 0.8.1.0 (2025.**.**)
+## Features:
+- [APDM-1337](https://appodeal.atlassian.net/browse/APDM-1337) Added passing ImpressionLevelData to Max CA
+
+# 0.8.0.0 (2025.06.26)
 ## Features:
 - [BDN-967](https://appodeal.atlassian.net/browse/BDN-967) Added support for the "should_load" field alongside "unicorn" for the BCAMAX adapter
 
