@@ -25,6 +25,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.regulation.Regulation
 import org.bidon.sdk.utils.SdkDispatchers
 import org.json.JSONObject
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -46,17 +47,21 @@ internal class MintegralAdapter :
     AdProvider.Interstitial<MintegralAuctionParam>,
     AdProvider.Rewarded<MintegralAuctionParam> {
 
-    private var context: Context? = null
     override val demandId: DemandId = MintegralDemandId
     override val adapterInfo: AdapterInfo = AdapterInfo(
         adapterVersion = adapterVersion,
         sdkVersion = sdkVersion
     )
 
+    private val isInitialized: AtomicBoolean = AtomicBoolean(false)
+    private var context: Context? = null
+
     override suspend fun getToken(adTypeParam: AdTypeParam): String? =
         BidManager.getBuyerUid(adTypeParam.activity.applicationContext)
 
     override suspend fun init(context: Context, configParams: MintegralInitParam) {
+        if (isInitialized.get()) return
+
         withContext(SdkDispatchers.Main) {
             suspendCoroutine { continuation ->
                 this@MintegralAdapter.context = context
@@ -67,13 +72,17 @@ internal class MintegralAdapter :
                     context.applicationContext as Application,
                     object : SDKInitStatusListener {
                         override fun onInitSuccess() {
-                            continuation.resume(Unit)
+                            if (isInitialized.compareAndSet(false, true)) {
+                                continuation.resume(Unit)
+                            }
                         }
 
                         override fun onInitFail(message: String?) {
-                            val error = BidonError.Unspecified(demandId, Throwable(message))
-                            logError(TAG, "Error while initialization: $message", error)
-                            continuation.resumeWithException(error)
+                            if (isInitialized.compareAndSet(false, true)) {
+                                val error = BidonError.Unspecified(demandId, Throwable(message))
+                                logError(TAG, "Error while initialization: $message", error)
+                                continuation.resumeWithException(error)
+                            }
                         }
                     }
                 )
