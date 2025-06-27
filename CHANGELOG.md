@@ -1,3 +1,7 @@
+# develop (2025.*.*)
+## Features:
+- [BDN-982](https://appodeal.atlassian.net/browse/BDN-982) Fixed an `IllegalStateException: Already resumed` in the Mintegral Adapter
+
 # 0.8.0 (2025.06.26)
 ## Features:
 - [BDN-956](https://appodeal.atlassian.net/browse/BDN-956) Added ability to add multiple InitializationCallback
