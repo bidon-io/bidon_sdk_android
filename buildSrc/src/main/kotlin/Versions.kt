@@ -1,7 +1,7 @@
 object Versions {
     private val major = 0
-    private val minor = 7
-    private val patch = 9
+    private val minor = 8
+    private val patch = 0
     private val semantic: String = ""
 
     val BidonVersionName = mainVersion + semanticVersion
@@ -31,6 +31,7 @@ object Versions {
 
     object ThirdPartyMediationAdapters {
         val ApplovinMax = "$mainVersion.0" + semanticVersion
+        val LevelPlay = "$mainVersion.0" + semanticVersion
     }
 
     private val mainVersion get() = "$major.$minor.$patch"

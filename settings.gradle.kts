@@ -55,5 +55,6 @@ include(
     ":adapter:yandex",
 //    ":adapter:fyber",
 //    ":adapter:appsflyer"
-    ":thirdPartyMediationAdapters:applovin_max"
+    ":thirdPartyMediationAdapters:applovin_max",
+    ":thirdPartyMediationAdapters:level_play"
 )
