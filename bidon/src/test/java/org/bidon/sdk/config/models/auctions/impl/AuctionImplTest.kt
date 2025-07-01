@@ -95,7 +95,6 @@ internal class AuctionImplTest : ConcurrentTest() {
 
     @Test
     fun `it should detect winner in #round_2 when 2 rounds are completed`() = runTest {
-
         // PREPARE
         every { adaptersSource.adapters } returns setOf(
             TestAdapter(

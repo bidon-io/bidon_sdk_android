@@ -24,7 +24,6 @@ abstract class ConcurrentTest {
 
     @Before
     open fun setUp() {
-
         defaultDispatcherOverridden = mainThreadSurrogate
         ioDispatcherOverridden = mainThreadSurrogate
         singleDispatcherOverridden = mainThreadSurrogate

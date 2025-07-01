@@ -54,7 +54,7 @@ internal class BidonRewarded : MaxRewardedAdapter, Logger by AppLovinSdkLogger {
         adKeeper.registerEcpm(maxEcpm)
 
         val unicorn = customParameters.getBoolean("unicorn", false) ||
-                customParameters.getBoolean("should_load", false)
+            customParameters.getBoolean("should_load", false)
         if (unicorn) {
             log(TAG, "Placement ID: $maxPlacementId, Unicorn Detected, Placement ECPM: $maxEcpm")
             if (activity == null) {

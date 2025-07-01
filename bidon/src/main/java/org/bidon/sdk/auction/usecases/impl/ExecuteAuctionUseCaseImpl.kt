@@ -57,7 +57,6 @@ internal class ExecuteAuctionUseCaseImpl(
                 logInfo(TAG, "AdUnits for request: ${adUnitQueue.size}")
 
                 while (adUnitQueue.isNotEmpty()) {
-
                     val adUnit = adUnitQueue.peek()
                     if (adUnit == null) {
                         logInfo(TAG, "All adUnits were requested")

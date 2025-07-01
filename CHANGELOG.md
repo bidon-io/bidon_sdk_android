@@ -1,5 +1,6 @@
 # develop (2025.*.*)
 ## Features:
+- [BDN-985](https://appodeal.atlassian.net/browse/BDN-985) Updated Ktlint to 0.48.2+ and configured .editorconfig for compatibility
 - [BDN-982](https://appodeal.atlassian.net/browse/BDN-982) Fixed an `IllegalStateException: Already resumed` in the Mintegral Adapter
 
 # 0.8.0 (2025.06.26)

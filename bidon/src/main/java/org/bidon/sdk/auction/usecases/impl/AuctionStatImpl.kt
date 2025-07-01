@@ -38,8 +38,11 @@ internal class AuctionStatImpl(
 
     private var winner: AuctionResult? = null
         get() {
-            return if (isAuctionCanceled) return null
-            else field
+            return if (isAuctionCanceled) {
+                return null
+            } else {
+                field
+            }
         }
 
     private var isAuctionCanceled = false

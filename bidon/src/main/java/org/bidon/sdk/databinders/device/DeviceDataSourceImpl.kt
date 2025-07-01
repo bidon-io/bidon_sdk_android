@@ -173,9 +173,13 @@ internal class DeviceDataSourceImpl(
                 val packageInfo = pm.getPackageInfo(context.packageName, 0)
                 builder.append(" ")
                     .append(
-                        if (appInfo.labelRes == 0) appInfo.nonLocalizedLabel.toString() else context.getString(
-                            appInfo.labelRes
-                        )
+                        if (appInfo.labelRes == 0) {
+                            appInfo.nonLocalizedLabel.toString()
+                        } else {
+                            context.getString(
+                                appInfo.labelRes
+                            )
+                        }
                     )
                     .append("/")
                     .append(packageInfo.versionName)
