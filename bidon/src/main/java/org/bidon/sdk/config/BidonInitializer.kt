@@ -1,6 +1,7 @@
 package org.bidon.sdk.config
 
 import android.content.Context
+import kotlinx.coroutines.flow.StateFlow
 import org.bidon.sdk.adapter.Adapter
 import org.bidon.sdk.utils.networking.NetworkSettings
 
@@ -10,6 +11,7 @@ import org.bidon.sdk.utils.networking.NetworkSettings
 internal interface BidonInitializer {
 
     val isInitialized: Boolean
+    val initializationState: StateFlow<SdkState>
     var isTestMode: Boolean
     val baseUrl: String
 
