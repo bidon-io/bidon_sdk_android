@@ -1,3 +1,7 @@
+# 0.8.0 (2025.06.26)
+## Features:
+- [BDN-956](https://appodeal.atlassian.net/browse/BDN-956) Added ability to add multiple InitializationCallback
+
 # 0.7.9 (2025.06.11)
 ## Features:
 - [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Min sdk api increased to 23
@@ -16,10 +20,6 @@
 - [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated Mintegral SDK to 16.9.71
 - [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated UnityAds SDK to 4.14.2
 - [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated Vungle SDK to 7.5.0
-- [BDN-931](https://appodeal.atlassian.net/browse/BDN-931) Updated BCA-MAX SDK to 13.2.0
-- [BDN-933](https://appodeal.atlassian.net/browse/BDN-933) Added BCA-MAX to Bidon Sdk repository and publish to Bidon artifactory
-- [BDN-949](https://appodeal.atlassian.net/browse/BDN-949) Modified BCA-MAX Ad Caching to Support Multiple MAX Ad Units
-- [BDN-946](https://appodeal.atlassian.net/browse/BDN-946) Handled `custom_parameters` from server and provided to BidMachine SDK ad requests
 
 # 0.7.8 (2025.05.07)
 ## Features:
