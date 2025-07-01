@@ -19,12 +19,20 @@ internal class AppSetIdReceiver(
     private val cachedAppSetIdInfo = AtomicReference<AppSetIdInfo?>(null)
     private val mutex = Mutex()
 
-    suspend fun getAppSetId() = getOrFetchAppSetIdInfo()?.id
+    suspend fun getAppSetId(): String? {
+        return runCatching {
+            getOrFetchAppSetIdInfo()?.id
+        }.getOrNull()
+    }
 
-    suspend fun getAppSetIdScope() = when (getOrFetchAppSetIdInfo()?.scope) {
-        AppSetIdInfo.SCOPE_DEVELOPER -> DEVELOPER_SCOPE
-        AppSetIdInfo.SCOPE_APP -> APP_SCOPE
-        else -> null
+    suspend fun getAppSetIdScope(): String? {
+        return runCatching {
+            when (getOrFetchAppSetIdInfo()?.scope) {
+                AppSetIdInfo.SCOPE_DEVELOPER -> DEVELOPER_SCOPE
+                AppSetIdInfo.SCOPE_APP -> APP_SCOPE
+                else -> null
+            }
+        }.getOrNull()
     }
 
     private fun isDeveloperScope(scope: Int) = scope == AppSetIdInfo.SCOPE_DEVELOPER
