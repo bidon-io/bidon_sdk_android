@@ -12,7 +12,7 @@ class InterstitialAd @JvmOverloads constructor(
     auctionKey: String? = null
 ) : Interstitial by InterstitialImpl(auctionKey = auctionKey)
 
-interface Interstitial : Extras, WinLossNotifier {
+internal interface Interstitial : Extras, WinLossNotifier {
     fun loadAd(activity: Activity, pricefloor: Double = DefaultPricefloor)
     fun destroyAd()
     fun isReady(): Boolean

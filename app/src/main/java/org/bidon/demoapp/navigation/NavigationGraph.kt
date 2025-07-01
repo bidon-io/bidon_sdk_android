@@ -10,11 +10,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import org.bidon.demoapp.ui.*
+import org.bidon.demoapp.ui.model.SdkStateViewModel
 import org.bidon.demoapp.ui.settings.ServerSettingsScreen
 
 @Composable
 fun NavigationGraph(
     navController: NavHostController,
+    sdkStateViewModel: SdkStateViewModel,
 ) {
     val initState = remember {
         mutableStateOf(MainScreenState.NotInitialized)
@@ -23,7 +25,9 @@ fun NavigationGraph(
 
     NavHost(navController = navController, startDestination = Screen.Main.route) {
         composable(Screen.Main.route) {
-            MainScreen(navController, initState, shared)
+            MainScreen(
+                navController, initState, shared, sdkStateViewModel
+            )
         }
         composable(Screen.Interstitial.route) {
             InterstitialScreen(navController)

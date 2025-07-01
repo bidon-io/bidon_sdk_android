@@ -8,6 +8,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
@@ -16,6 +17,8 @@ import org.bidon.sdk.adapter.ext.ad
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.AuctionInfo
+import org.bidon.sdk.ads.InitAwaiter
+import org.bidon.sdk.ads.InitAwaiterImpl
 import org.bidon.sdk.ads.cache.AdCache
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
@@ -30,10 +33,13 @@ internal class RewardedImpl(
     dispatcher: CoroutineDispatcher = SdkDispatchers.Main,
     private val auctionKey: String? = null,
     private val demandAd: DemandAd = DemandAd(AdType.Rewarded)
-) : Rewarded, Extras by demandAd {
+) : InitAwaiter by InitAwaiterImpl(),
+    Rewarded,
+    Extras by demandAd {
 
     private var userListener: RewardedListener? = null
     private var observeCallbacksJob: Job? = null
+
     private val adCache: AdCache by lazy {
         get { params(demandAd) }
     }
@@ -53,31 +59,44 @@ internal class RewardedImpl(
     }
 
     override fun loadAd(activity: Activity, pricefloor: Double) {
-        if (!BidonSdk.isInitialized()) {
-            logInfo(TAG, "Sdk is not initialized")
-            listener.onAdLoadFailed(null, BidonError.SdkNotInitialized)
-            return
+        scope.launch(Dispatchers.Default) {
+            initWaitAndContinueIfRequired(
+                onSuccess = {
+                    logInfo(TAG, "Load (pricefloor=$pricefloor)")
+                    adCache.cache(
+                        adTypeParam = AdTypeParam.Rewarded(
+                            activity = activity,
+                            pricefloor = pricefloor,
+                            auctionKey = auctionKey,
+                        ),
+                        onSuccess = { auctionResult, auctionInfo ->
+                            subscribeToWinner(auctionInfo, auctionResult.adSource)
+                            listener.onAdLoaded(
+                                ad = requireNotNull(auctionResult.adSource.ad) {
+                                    "[Ad] should exist when action succeeds"
+                                },
+                                auctionInfo = auctionInfo
+                            )
+                        },
+                        onFailure = { auctionResult, cause ->
+                            listener.onAdLoadFailed(
+                                auctionInfo = auctionResult,
+                                cause = cause.asBidonErrorOrUnspecified()
+                            )
+                        }
+                    )
+                },
+                onFailure = {
+                    withContext(Dispatchers.Main) {
+                        logInfo(TAG, "Sdk was initialized with error")
+                        listener.onAdLoadFailed(
+                            auctionInfo = null,
+                            cause = BidonError.SdkNotInitialized
+                        )
+                    }
+                }
+            )
         }
-        logInfo(TAG, "Load (pricefloor=$pricefloor)")
-        adCache.cache(
-            adTypeParam = AdTypeParam.Rewarded(
-                activity = activity,
-                pricefloor = pricefloor,
-                auctionKey = auctionKey,
-            ),
-            onSuccess = { auctionResult, auctionInfo ->
-                subscribeToWinner(auctionInfo, auctionResult.adSource)
-                listener.onAdLoaded(
-                    ad = requireNotNull(auctionResult.adSource.ad) {
-                        "[Ad] should exist when action succeeds"
-                    },
-                    auctionInfo = auctionInfo
-                )
-            },
-            onFailure = { auctionResult, cause ->
-                listener.onAdLoadFailed(auctionInfo = auctionResult, cause = cause.asBidonErrorOrUnspecified())
-            }
-        )
     }
 
     override fun showAd(activity: Activity) {

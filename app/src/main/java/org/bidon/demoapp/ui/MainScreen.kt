@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,6 +36,7 @@ import androidx.navigation.NavHostController
 import org.bidon.demoapp.BannerViewActivity
 import org.bidon.demoapp.BuildConfig
 import org.bidon.demoapp.component.AppButton
+import org.bidon.demoapp.component.AppOutlinedButton
 import org.bidon.demoapp.component.AppTextButton
 import org.bidon.demoapp.component.Body1Text
 import org.bidon.demoapp.component.CaptionText
@@ -45,6 +47,7 @@ import org.bidon.demoapp.navigation.Screen
 import org.bidon.demoapp.theme.AppColors
 import org.bidon.demoapp.ui.FullscreenModeExt.immersiveSystemUI
 import org.bidon.demoapp.ui.FullscreenModeExt.translucentSystemUI
+import org.bidon.demoapp.ui.model.SdkStateViewModel
 import org.bidon.demoapp.ui.settings.TestModeInfo
 import org.bidon.demoapp.ui.settings.data.Host
 import org.bidon.sdk.BidonSdk
@@ -58,7 +61,8 @@ import org.bidon.sdk.utils.networking.NetworkSettings
 internal fun MainScreen(
     navController: NavHostController,
     initState: MutableState<MainScreenState>,
-    sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences,
+    sdkStateViewModel: SdkStateViewModel,
 ) {
     val activity = LocalContext.current as Activity
     val shared = LocalContext.current.getSharedPreferences("app_test", Context.MODE_PRIVATE)
@@ -137,43 +141,61 @@ internal fun MainScreen(
                     AppTextButton(text = "Server settings", modifier = Modifier.padding(top = 0.dp)) {
                         navController.navigate(Screen.ServerSettings.route)
                     }
-                    AppButton(text = "Init") {
-                        val host = Host.fromString(sharedPreferences.getString("host", null))
-                        if (host is Host.Staging) {
-                            println("Using staging: ${host.baseUrl}")
-                            NetworkSettings.basicAuthHeader = host.getBasicAuth()
-                        }
-                        BidonSdk.setTestMode(isTestMode.value)
-                        BidonSdk.regulation.gdpr = sharedPreferences.getInt("gdpr", Gdpr.Default.code).let { code ->
-                            Gdpr.values().first { it.code == code }.also {
-                                if (it == Gdpr.DoesNotApply) {
-                                    BidonSdk.regulation.usPrivacyString = "1---"
-                                }
-                            }
-                        }
-                        BidonSdk.regulation.coppa = sharedPreferences.getInt("coppa", Coppa.Default.code).let { code ->
-                            Coppa.values().first { it.code == code }
-                        }
 
-                        initState.value = MainScreenState.Initializing
-                        BidonSdk
-                            .setLoggerLevel(Logger.Level.Verbose)
-                            .apply {
-                                adapters.value.forEach {
-                                    registerAdapter(it.classPath)
+                    Column(
+                        modifier = Modifier.padding(start = 100.dp, end = 100.dp, top = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        AppButton(
+                            text = "Init",
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            val host = Host.fromString(sharedPreferences.getString("host", null))
+                            if (host is Host.Staging) {
+                                println("Using staging: ${host.baseUrl}")
+                                NetworkSettings.basicAuthHeader = host.getBasicAuth()
+                            }
+                            BidonSdk.setTestMode(isTestMode.value)
+                            BidonSdk.regulation.gdpr =
+                                sharedPreferences.getInt("gdpr", Gdpr.Default.code).let { code ->
+                                    Gdpr.entries.first { it.code == code }.also {
+                                        if (it == Gdpr.DoesNotApply) {
+                                            BidonSdk.regulation.usPrivacyString = "1---"
+                                        }
+                                    }
                                 }
-                            }
-//                            .registerDefaultAdapters()
-//                            .registerAdapters(ApplovinAdapter())
-//                            .registerAdapter("org.bidon.admob.AdmobAdapter")
-                            .setBaseUrl(host.baseUrl)
-                            .setInitializationCallback {
-                                initState.value = MainScreenState.Initialized
-                            }
-                            .initialize(
-                                context = context,
-                                appKey = BuildConfig.BIDON_API_KEY,
-                            )
+                            BidonSdk.regulation.coppa =
+                                sharedPreferences.getInt("coppa", Coppa.Default.code).let { code ->
+                                    Coppa.entries.first { it.code == code }
+                                }
+
+                            initState.value = MainScreenState.Initializing
+                            BidonSdk
+                                .setLoggerLevel(Logger.Level.Verbose)
+                                .apply {
+                                    adapters.value.forEach {
+                                        registerAdapter(it.classPath)
+                                    }
+                                }
+//                              .registerDefaultAdapters()
+//                              .registerAdapters(ApplovinAdapter())
+//                              .registerAdapter("org.bidon.admob.AdmobAdapter")
+                                .setBaseUrl(host.baseUrl)
+                                .setInitializationCallback {
+                                    sdkStateViewModel.notifySdkInitialized()
+                                    initState.value = MainScreenState.Initialized
+                                }
+                                .initialize(
+                                    context = context,
+                                    appKey = BuildConfig.BIDON_API_KEY,
+                                )
+                        }
+                        AppOutlinedButton(
+                            text = "Skip init",
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            initState.value = MainScreenState.Initialized
+                        }
                     }
                 } else {
                     CircularProgressIndicator()

@@ -106,9 +106,11 @@ internal class AdCacheImpl(
                     }
                 },
                 onFailure = { auctionInfo, cause ->
-                    logInfo(tag, "Auction failed: ${results.value.asString()}")
-                    onFailure.invoke(auctionInfo, cause)
-                    isLoading.value = false
+                    scope.launch {
+                        logInfo(tag, "Auction failed: ${results.value.asString()}")
+                        onFailure.invoke(auctionInfo, cause)
+                        isLoading.value = false
+                    }
                 },
             )
         } else {

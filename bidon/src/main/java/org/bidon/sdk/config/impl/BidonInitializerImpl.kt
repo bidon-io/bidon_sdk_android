@@ -43,7 +43,6 @@ internal class BidonInitializerImpl : BidonInitializer {
     private var publisherAdapters = mutableMapOf<Class<out Adapter>, Adapter>()
     private var publisherAdapterClasses = mutableSetOf<String>()
     private val initializationCallbacks = CopyOnWriteArraySet<InitializationCallback>()
-    private val initializationState = MutableStateFlow(SdkState.NotInitialized)
 
     private val initAndRegisterAdapters: InitAndRegisterAdaptersUseCase get() = get()
     private val getConfigRequest: GetConfigRequestUseCase get() = get()
@@ -52,6 +51,7 @@ internal class BidonInitializerImpl : BidonInitializer {
     private val bidOnEndpoints: BidonEndpoints get() = get()
     private val segmentSynchronizer: SegmentSynchronizer get() = get()
 
+    override val initializationState = MutableStateFlow(SdkState.NotInitialized)
     override val isInitialized: Boolean
         get() = initializationState.value == SdkState.Initialized
     override var isTestMode: Boolean = false
