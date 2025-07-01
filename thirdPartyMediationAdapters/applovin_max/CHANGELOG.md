@@ -1,4 +1,4 @@
-# 0.8.1.0 (2025.**.**)
+# 0.8.1.0 (2025.07.02)
 ## Features:
 - [APDM-1337](https://appodeal.atlassian.net/browse/APDM-1337) Added passing ImpressionLevelData to Max CA
 
