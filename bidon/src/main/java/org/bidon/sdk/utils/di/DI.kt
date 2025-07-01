@@ -71,6 +71,7 @@ import org.bidon.sdk.databinders.user.AdvertisingData
 import org.bidon.sdk.databinders.user.UserBinder
 import org.bidon.sdk.databinders.user.UserDataSource
 import org.bidon.sdk.databinders.user.impl.AdvertisingDataImpl
+import org.bidon.sdk.databinders.user.impl.AppSetIdReceiver
 import org.bidon.sdk.databinders.user.impl.UserDataSourceImpl
 import org.bidon.sdk.regulation.IabConsent
 import org.bidon.sdk.regulation.Regulation
@@ -133,6 +134,11 @@ internal object DI {
             }
             singleton<AdvertisingData> {
                 AdvertisingDataImpl(
+                    context = get()
+                )
+            }
+            singleton<AppSetIdReceiver> {
+                AppSetIdReceiver(
                     context = get()
                 )
             }
@@ -232,7 +238,8 @@ internal object DI {
             factory<UserDataSource> {
                 UserDataSourceImpl(
                     keyValueStorage = get(),
-                    advertisingData = get()
+                    advertisingData = get(),
+                    appSetIdReceiver = get()
                 )
             }
             factory<PlacementDataSource> { PlacementDataSourceImpl() }
