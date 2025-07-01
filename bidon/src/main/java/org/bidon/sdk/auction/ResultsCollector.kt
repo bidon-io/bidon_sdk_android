@@ -9,8 +9,10 @@ import org.bidon.sdk.auction.usecases.models.RoundResult
  */
 internal interface ResultsCollector {
     fun startRound(pricefloor: Double)
+
     @Deprecated("")
     fun serverBiddingStarted()
+
     @Deprecated("")
     fun serverBiddingFinished(adUnits: List<AdUnit>?)
     fun setNoBidInfo(noBidsInfo: List<AdUnit>?)
@@ -20,6 +22,7 @@ internal interface ResultsCollector {
 
     fun getAll(): List<AuctionResult>
     fun clear()
+
     @Deprecated("")
     suspend fun saveWinners(sourcePriceFloor: Double)
 

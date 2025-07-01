@@ -95,8 +95,11 @@ class GoogleBiddingAdapter : PartnerAdapter {
                 PartnerLogController.log(
                     CUSTOM,
                     "Google Bidding test device ID(s) to be set: ${
-                    if (value.isEmpty()) "none"
-                    else value.joinToString()
+                        if (value.isEmpty()) {
+                            "none"
+                        } else {
+                            value.joinToString()
+                        }
                     }"
                 )
                 MobileAds.setRequestConfiguration(
@@ -249,8 +252,11 @@ class GoogleBiddingAdapter : PartnerAdapter {
         privacyString: String
     ) {
         PartnerLogController.log(
-            if (hasGrantedCcpaConsent) CCPA_CONSENT_GRANTED
-            else CCPA_CONSENT_DENIED
+            if (hasGrantedCcpaConsent) {
+                CCPA_CONSENT_GRANTED
+            } else {
+                CCPA_CONSENT_DENIED
+            }
         )
 
         ccpaPrivacyString = privacyString
@@ -264,8 +270,11 @@ class GoogleBiddingAdapter : PartnerAdapter {
      */
     override fun setUserSubjectToCoppa(context: Context, isSubjectToCoppa: Boolean) {
         PartnerLogController.log(
-            if (isSubjectToCoppa) COPPA_SUBJECT
-            else COPPA_NOT_SUBJECT
+            if (isSubjectToCoppa) {
+                COPPA_SUBJECT
+            } else {
+                COPPA_NOT_SUBJECT
+            }
         )
 
         MobileAds.setRequestConfiguration(

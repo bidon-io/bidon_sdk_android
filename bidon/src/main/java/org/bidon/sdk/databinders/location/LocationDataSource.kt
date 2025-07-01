@@ -5,6 +5,7 @@ import org.bidon.sdk.databinders.DataSource
 internal interface LocationDataSource : DataSource {
 
     val isLocationAvailable: Boolean
+
     /**
      * @return current device location latitude if permission is granted, if it's `null` - latitude
      * which were received from server. If it's not available by restrictions, will return `null`.
