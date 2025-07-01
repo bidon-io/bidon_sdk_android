@@ -3,6 +3,7 @@
 - [BDN-985](https://appodeal.atlassian.net/browse/BDN-985) Updated Ktlint to 0.48.2+ and configured .editorconfig for compatibility
 - [BDN-982](https://appodeal.atlassian.net/browse/BDN-982) Fixed an `IllegalStateException: Already resumed` in the Mintegral Adapter
 - [BDN-977](https://appodeal.atlassian.net/browse/BDN-977) Added initialization awaiting logic to ad loading
+- [BDN-958](https://appodeal.atlassian.net/browse/BDN-958) Added appSet id receiving logic
 
 # 0.8.0 (2025.06.26)
 ## Features:

@@ -11,6 +11,7 @@ import org.bidon.sdk.utils.keyvaluestorage.KeyValueStorage
 internal class UserDataSourceImpl(
     private val keyValueStorage: KeyValueStorage,
     private val advertisingData: AdvertisingData,
+    private val appSetIdReceiver: AppSetIdReceiver
 ) : UserDataSource {
 
     override fun getTrackingAuthorizationStatus(): String {
@@ -36,6 +37,14 @@ internal class UserDataSourceImpl(
             is AdvertisingProfile.Huawei -> data.advertisingId
             AdvertisingProfile.Denied -> defaultAdvertisingId
         }
+    }
+
+    override suspend fun getAppSetId(): String? {
+        return appSetIdReceiver.getAppSetId()
+    }
+
+    override suspend fun getAppSetIdScope(): String? {
+        return appSetIdReceiver.getAppSetIdScope()
     }
 }
 

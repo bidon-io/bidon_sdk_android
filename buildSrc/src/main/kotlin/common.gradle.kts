@@ -56,7 +56,7 @@ dependencies {
 
     implementation(Dependencies.Android.CoreKtx)
     implementation(Dependencies.Android.Annotation)
-
+    implementation(Dependencies.Google.AppSet)
     /**
      * Testing
      */
