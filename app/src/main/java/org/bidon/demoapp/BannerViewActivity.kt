@@ -12,6 +12,7 @@ import org.bidon.sdk.ads.banner.BannerView
 class BannerViewActivity : AppCompatActivity(R.layout.banner_view_layout) {
 
     private var bannerView: BannerView? = StaticBanner.bannerView
+
     //    private val bannerView by lazy {
 //        findViewById<BannerView>(R.id.bannerView)
 //    }

@@ -32,6 +32,7 @@ internal class AppSerializerTest {
             }
         )
     }
+
     @Test
     fun `App serializer with optional`() {
         val actual = App(

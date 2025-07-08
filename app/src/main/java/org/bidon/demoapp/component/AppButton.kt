@@ -30,10 +30,12 @@ fun AppButton(
 fun AppOutlinedButton(
     modifier: Modifier = Modifier,
     text: String,
+    enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
     OutlinedButton(
         modifier = modifier,
+        enabled = enabled,
         onClick = {
             onClick.invoke()
         }

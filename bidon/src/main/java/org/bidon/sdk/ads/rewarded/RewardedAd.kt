@@ -12,7 +12,7 @@ class RewardedAd @JvmOverloads constructor(
     auctionKey: String? = null
 ) : Rewarded by RewardedImpl(auctionKey = auctionKey)
 
-interface Rewarded : Extras, WinLossNotifier {
+internal interface Rewarded : Extras, WinLossNotifier {
     fun isReady(): Boolean // for show
     fun loadAd(activity: Activity, pricefloor: Double = DefaultPricefloor)
     fun destroyAd()

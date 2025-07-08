@@ -4,9 +4,15 @@ import android.app.Activity
 import android.graphics.Point
 import android.graphics.PointF
 import androidx.core.view.children
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AuctionInfo
+import org.bidon.sdk.ads.InitAwaiter
+import org.bidon.sdk.ads.InitAwaiterImpl
 import org.bidon.sdk.ads.banner.refresh.BannersCache
 import org.bidon.sdk.ads.banner.refresh.BannersCacheImpl
 import org.bidon.sdk.ads.banner.render.AdRenderer
@@ -16,6 +22,7 @@ import org.bidon.sdk.databinders.extras.Extras
 import org.bidon.sdk.databinders.extras.ExtrasImpl
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logInfo
+import org.bidon.sdk.utils.SdkDispatchers
 import org.bidon.sdk.utils.di.get
 import org.bidon.sdk.utils.ext.TAG
 import java.lang.ref.WeakReference
@@ -28,7 +35,8 @@ class BannerManager private constructor(
     private val bannersCache: BannersCache,
     private val extras: Extras,
     private val auctionKey: String? = null,
-) : PositionedBanner,
+) : InitAwaiter by InitAwaiterImpl(),
+    PositionedBanner,
     Extras {
 
     @JvmOverloads
@@ -41,6 +49,7 @@ class BannerManager private constructor(
     }
 
     private val tag get() = TAG
+    private val scope: CoroutineScope by lazy { CoroutineScope(SdkDispatchers.Default) }
     private var weakActivity = WeakReference<Activity>(null)
     private var nextBannerView: BannerView? = null
     private var nextAd: Ad? = null
@@ -100,44 +109,58 @@ class BannerManager private constructor(
     }
 
     override fun loadAd(activity: Activity, pricefloor: Double) {
-        activity.runOnUiThread {
-            weakActivity = WeakReference(activity)
-            if (!BidonSdk.isInitialized()) {
-                publisherListener?.onAdLoadFailed(null, BidonError.SdkNotInitialized)
-                return@runOnUiThread
-            }
-            val nextBannerView = nextBannerView
-            if (nextBannerView != null) {
-                logInfo(tag, "Ad is already loaded")
-                nextAd?.let {
-                    publisherListener?.onAdLoaded(
-                        ad = it,
-                        auctionInfo = requireNotNull(nextAuctionInfo) {
-                            "Could not receive nextAuctionInfo"
+        weakActivity = WeakReference(activity)
+        scope.launch {
+            initWaitAndContinueIfRequired(
+                onSuccess = {
+                    val nextBannerView = nextBannerView
+                    if (nextBannerView != null) {
+                        logInfo(tag, "Ad is already loaded")
+                        nextAd?.let {
+                            withContext(Dispatchers.Main) {
+                                publisherListener?.onAdLoaded(
+                                    ad = it,
+                                    auctionInfo = requireNotNull(nextAuctionInfo) {
+                                        "Could not receive nextAuctionInfo"
+                                    }
+                                )
+                            }
+                        }
+                        return@initWaitAndContinueIfRequired
+                    }
+                    bannersCache.get(
+                        activity = activity,
+                        format = bannerFormat,
+                        pricefloor = pricefloor,
+                        auctionKey = auctionKey,
+                        extras = extras,
+                        onLoaded = { ad, auctionInfo, bannerView ->
+                            this@BannerManager.nextBannerView = bannerView
+                            this@BannerManager.nextAd = ad
+                            nextAuctionInfo = auctionInfo
+                            publisherListener?.onAdLoaded(ad, auctionInfo)
+                            if (showAfterLoad.getAndSet(false) || isDisplaying) {
+                                weakActivity.get()?.let { activity ->
+                                    showAd(activity)
+                                }
+                            }
+                        },
+                        onFailed = { auctionInfo, cause ->
+                            publisherListener?.onAdLoadFailed(
+                                auctionInfo = auctionInfo,
+                                cause = cause
+                            )
                         }
                     )
-                }
-                return@runOnUiThread
-            }
-            bannersCache.get(
-                activity = activity,
-                format = bannerFormat,
-                pricefloor = pricefloor,
-                auctionKey = auctionKey,
-                extras = extras,
-                onLoaded = { ad, auctionInfo, bannerView ->
-                    this.nextBannerView = bannerView
-                    this.nextAd = ad
-                    nextAuctionInfo = auctionInfo
-                    publisherListener?.onAdLoaded(ad, auctionInfo)
-                    if (showAfterLoad.getAndSet(false) || isDisplaying) {
-                        weakActivity.get()?.let { activity ->
-                            showAd(activity)
-                        }
-                    }
                 },
-                onFailed = { auctionInfo, cause ->
-                    publisherListener?.onAdLoadFailed(auctionInfo, cause)
+                onFailure = {
+                    logInfo(TAG, "Sdk was initialized with error")
+                    withContext(Dispatchers.Main) {
+                        publisherListener?.onAdLoadFailed(
+                            auctionInfo = null,
+                            cause = BidonError.SdkNotInitialized
+                        )
+                    }
                 }
             )
         }

@@ -15,11 +15,13 @@ internal class UserBinder(
 
     override suspend fun getJsonObject(): JSONObject = createUser().serialize()
 
-    private fun createUser(): User {
+    private suspend fun createUser(): User {
         return User(
             platformAdvertisingId = dataSource.getAdvertisingId(),
             trackingAuthorizationStatus = dataSource.getTrackingAuthorizationStatus(),
             applicationId = dataSource.getApplicationId(),
+            appSetId = dataSource.getAppSetId(),
+            appSetIdScope = dataSource.getAppSetIdScope()
         )
     }
 }

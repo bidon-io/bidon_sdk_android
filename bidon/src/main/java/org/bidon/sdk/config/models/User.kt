@@ -13,4 +13,8 @@ internal data class User(
     var trackingAuthorizationStatus: String,
     @field:JsonName("idg")
     var applicationId: String?, // ID that app generates on the very first launch and send across session.
+    @field:JsonName("app_set_id")
+    var appSetId: String?,
+    @field:JsonName("app_set_id_scope")
+    var appSetIdScope: String?,
 ) : Serializable

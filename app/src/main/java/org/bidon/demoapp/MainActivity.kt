@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
@@ -35,6 +36,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -44,6 +46,7 @@ import org.bidon.demoapp.navigation.NavigationGraph
 import org.bidon.demoapp.theme.AppTheme
 import org.bidon.demoapp.ui.SdkSettings
 import org.bidon.demoapp.ui.TestModeKey
+import org.bidon.demoapp.ui.model.SdkStateViewModel
 import org.bidon.demoapp.ui.settings.TestModeInfo
 
 class MainActivity : FragmentActivity() {
@@ -52,6 +55,8 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val sdkStateViewModel: SdkStateViewModel =
+                viewModel(LocalContext.current as ComponentActivity)
             val coroutineScope = rememberCoroutineScope()
             val modalSheetState = rememberModalBottomSheetState(
                 initialValue = ModalBottomSheetValue.Hidden,
@@ -70,7 +75,7 @@ class MainActivity : FragmentActivity() {
                     sheetState = modalSheetState,
                     sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
                     sheetContent = {
-                        SdkSettings()
+                        SdkSettings(sdkStateViewModel)
                     }
                 ) {
                     Box(
@@ -80,6 +85,7 @@ class MainActivity : FragmentActivity() {
                         Column {
                             NavigationGraph(
                                 navController = navController,
+                                sdkStateViewModel = sdkStateViewModel
                             )
                         }
                         FloatingActionButton(

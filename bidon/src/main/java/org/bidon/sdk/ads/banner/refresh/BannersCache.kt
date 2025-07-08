@@ -53,7 +53,9 @@ internal class BannersCacheImpl : BannersCache {
     ) {
         if (cache.isNotEmpty()) {
             val (ad, banner) = cache.pop() ?: return
-            onLoaded(ad.first, ad.second, banner)
+            activity.runOnUiThread {
+                onLoaded(ad.first, ad.second, banner)
+            }
             return
         }
         if (!isLoading.getAndSet(true)) {
