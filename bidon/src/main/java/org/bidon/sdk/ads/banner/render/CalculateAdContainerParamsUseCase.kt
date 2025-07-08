@@ -12,7 +12,6 @@ internal class CalculateAdContainerParamsUseCase {
         bannerWidth: Int,
         bannerHeight: Int,
     ): AdViewsParameters {
-
         val params = when (positionState) {
             is AdRenderer.PositionState.Coordinate -> positionState.adContainerParams
 

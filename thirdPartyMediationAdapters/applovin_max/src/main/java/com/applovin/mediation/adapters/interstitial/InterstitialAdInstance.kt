@@ -2,8 +2,10 @@ package com.applovin.mediation.adapters.interstitial
 
 import android.app.Activity
 import com.applovin.mediation.adapters.keeper.AdInstance
+import com.applovin.mediation.adapters.keeper.DEFAULT_BID_TYPE
 import com.applovin.mediation.adapters.keeper.DEFAULT_DEMAND_ID
 import com.applovin.mediation.adapters.keeper.DEFAULT_ECPM
+import com.applovin.mediation.adapters.keeper.DEFAULT_UID
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.interstitial.InterstitialAd
@@ -23,6 +25,8 @@ internal class InterstitialAdInstance(auctionKey: String? = null) : AdInstance {
     override val ecpm: Double get() = interstitialAdInfo?.price ?: DEFAULT_ECPM
     override val demandId: String get() = interstitialAdInfo?.networkName ?: DEFAULT_DEMAND_ID
     override val isReady: Boolean get() = interstitialAd.isReady()
+    override val uid: String get() = interstitialAdInfo?.adUnit?.uid ?: DEFAULT_UID
+    override val bidType: String get() = interstitialAdInfo?.bidType?.code ?: DEFAULT_BID_TYPE
 
     fun setListener(listener: InterstitialListener) {
         this.interstitialListener = listener

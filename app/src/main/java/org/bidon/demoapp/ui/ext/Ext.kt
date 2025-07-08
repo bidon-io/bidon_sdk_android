@@ -26,22 +26,22 @@ fun AuctionInfo.toJson(): String {
                 "auction_configuration_uid": ${auctionConfigurationUid?.let { "\"$it\"" }},
                 "auction_pricefloor": $auctionPricefloor,
                 "no_bids": ${
-    noBids?.let {
-        it.joinToString(
-            prefix = "[",
-            postfix = "]",
-            separator = ","
-        ) { adUnit -> adUnit.toJson() }
-    }
+        noBids?.let {
+            it.joinToString(
+                prefix = "[",
+                postfix = "]",
+                separator = ","
+            ) { adUnit -> adUnit.toJson() }
+        }
     },
                 "adUnits": ${
-    adUnits?.let {
-        it.joinToString(
-            prefix = "[",
-            postfix = "]",
-            separator = ","
-        ) { adUnit -> adUnit.toJson() }
-    }
+        adUnits?.let {
+            it.joinToString(
+                prefix = "[",
+                postfix = "]",
+                separator = ","
+            ) { adUnit -> adUnit.toJson() }
+        }
     }
             }
     """.trimIndent()

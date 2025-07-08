@@ -254,8 +254,11 @@ class StatisticsCollectorImpl : StatisticsCollector {
 
     override fun markBelowPricefloor() {
         stat = stat.copy(
-            roundStatus = if (stat.adUnit?.bidType == BidType.RTB) RoundStatus.Lose
-            else RoundStatus.BelowPricefloor
+            roundStatus = if (stat.adUnit?.bidType == BidType.RTB) {
+                RoundStatus.Lose
+            } else {
+                RoundStatus.BelowPricefloor
+            }
         )
     }
 

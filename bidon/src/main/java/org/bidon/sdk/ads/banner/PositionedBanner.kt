@@ -10,7 +10,7 @@ import org.bidon.sdk.BidonSdk
  *
  * [showAd], [hideAd], [destroyAd], [notifyLoss] need activity to be passed as parameter, mainly for Unity UI thread.
  */
-interface PositionedBanner {
+internal interface PositionedBanner {
     /**
      * Common interface for [BannerView]
      */

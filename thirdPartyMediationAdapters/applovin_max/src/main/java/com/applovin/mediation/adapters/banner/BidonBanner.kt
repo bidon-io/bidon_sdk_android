@@ -8,6 +8,7 @@ import com.applovin.mediation.adapter.listeners.MaxAdViewAdapterListener
 import com.applovin.mediation.adapter.parameters.MaxAdapterResponseParameters
 import com.applovin.mediation.adapters.ext.asMaxAdapterError
 import com.applovin.mediation.adapters.ext.getAsDouble
+import com.applovin.mediation.adapters.ext.toAdValueBundle
 import com.applovin.mediation.adapters.ext.updatePrivacySettings
 import com.applovin.mediation.adapters.keeper.AdKeeper
 import com.applovin.mediation.adapters.keeper.AdKeepers
@@ -52,7 +53,7 @@ internal class BidonBanner : MaxAdViewAdapter, Logger by AppLovinSdkLogger {
         adKeeper.registerEcpm(maxEcpm)
 
         val unicorn = customParameters.getBoolean("unicorn", false) ||
-                customParameters.getBoolean("should_load", false)
+            customParameters.getBoolean("should_load", false)
         if (unicorn) {
             log(TAG, "Placement ID: $maxPlacementId, Unicorn Detected, Placement ECPM: $maxEcpm")
             if (activity == null) {
@@ -87,13 +88,14 @@ internal class BidonBanner : MaxAdViewAdapter, Logger by AppLovinSdkLogger {
                 listener.onAdViewAdLoadFailed(MaxAdapterError.NO_FILL)
                 onDestroy()
             } else {
+                val adValue = consumeAdInstance.toAdValueBundle(maxPlacementId, maxEcpm)
                 log(
                     TAG,
-                    "Banner ad loaded $consumeAdInstance from cache, Placement ID: $maxPlacementId"
+                    "Banner ad loaded $consumeAdInstance from cache, Placement ID: $maxPlacementId, adValue: $adValue"
                 )
                 consumeAdInstance.setListener(listener.asBidonListener(adKeeper))
                 consumeAdInstance.show()
-                listener.onAdViewAdLoaded(consumeAdInstance.bannerAd)
+                listener.onAdViewAdLoaded(consumeAdInstance.bannerAd, adValue)
             }
         }
     }
@@ -138,13 +140,14 @@ internal class BidonBanner : MaxAdViewAdapter, Logger by AppLovinSdkLogger {
                         maxBannerCallback.onAdViewAdLoadFailed(MaxAdapterError.NO_FILL)
                         onDestroy()
                     } else {
+                        val adValue = consumeAdInstance.toAdValueBundle(maxPlacementId, maxEcpm)
                         log(
                             TAG,
-                            "Banner ad loaded $consumeAdInstance from cache, Placement ID: $maxPlacementId"
+                            "Banner ad loaded $consumeAdInstance from cache, Placement ID: $maxPlacementId, adValue: $adValue"
                         )
                         consumeAdInstance.setListener(this)
                         consumeAdInstance.show()
-                        maxBannerCallback.onAdViewAdLoaded(consumeAdInstance.bannerAd)
+                        maxBannerCallback.onAdViewAdLoaded(consumeAdInstance.bannerAd, adValue)
                     }
                 }
             }

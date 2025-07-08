@@ -6,6 +6,7 @@ package org.bidon.sdk.databinders
 internal enum class DataBinderType {
     Device,
     App,
+
     // Geo, -> moved to Device
     Session,
     User,

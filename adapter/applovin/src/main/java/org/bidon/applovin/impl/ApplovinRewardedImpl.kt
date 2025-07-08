@@ -8,7 +8,6 @@ import com.applovin.sdk.AppLovinAdDisplayListener
 import com.applovin.sdk.AppLovinAdLoadListener
 import com.applovin.sdk.AppLovinAdRewardListener
 import com.applovin.sdk.AppLovinAdVideoPlaybackListener
-import com.applovin.sdk.AppLovinSdk
 import org.bidon.applovin.ApplovinFullscreenAdAuctionParams
 import org.bidon.applovin.ext.asBidonAdValue
 import org.bidon.applovin.ext.asBidonError

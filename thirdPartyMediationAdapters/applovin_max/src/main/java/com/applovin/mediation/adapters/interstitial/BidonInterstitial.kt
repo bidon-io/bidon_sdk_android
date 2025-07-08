@@ -8,6 +8,7 @@ import com.applovin.mediation.adapter.listeners.MaxInterstitialAdapterListener
 import com.applovin.mediation.adapter.parameters.MaxAdapterResponseParameters
 import com.applovin.mediation.adapters.ext.asMaxAdapterError
 import com.applovin.mediation.adapters.ext.getAsDouble
+import com.applovin.mediation.adapters.ext.toAdValueBundle
 import com.applovin.mediation.adapters.ext.updatePrivacySettings
 import com.applovin.mediation.adapters.keeper.AdKeeper
 import com.applovin.mediation.adapters.keeper.AdKeepers
@@ -51,7 +52,7 @@ internal class BidonInterstitial : MaxInterstitialAdapter, Logger by AppLovinSdk
         adKeeper.registerEcpm(maxEcpm)
 
         val unicorn = customParameters.getBoolean("unicorn", false) ||
-                customParameters.getBoolean("should_load", false)
+            customParameters.getBoolean("should_load", false)
         if (unicorn) {
             log(TAG, "Placement ID: $maxPlacementId, Unicorn Detected, Placement ECPM: $maxEcpm")
             if (activity == null) {
@@ -83,12 +84,13 @@ internal class BidonInterstitial : MaxInterstitialAdapter, Logger by AppLovinSdk
                 listener.onInterstitialAdLoadFailed(MaxAdapterError.NO_FILL)
                 onDestroy()
             } else {
+                val adValue = consumeAdInstance.toAdValueBundle(maxPlacementId, maxEcpm)
                 log(
                     TAG,
-                    "Interstitial ad loaded $consumeAdInstance from cache, Placement ID: $maxPlacementId"
+                    "Interstitial ad loaded $consumeAdInstance from cache, Placement ID: $maxPlacementId, adValue: $adValue"
                 )
                 consumeAdInstance.setListener(listener.asBidonListener(adKeeper))
-                listener.onInterstitialAdLoaded()
+                listener.onInterstitialAdLoaded(adValue)
             }
         }
     }
@@ -164,12 +166,13 @@ internal class BidonInterstitial : MaxInterstitialAdapter, Logger by AppLovinSdk
                         maxInterstitialCallback.onInterstitialAdLoadFailed(MaxAdapterError.NO_FILL)
                         onDestroy()
                     } else {
+                        val adValue = consumeAdInstance.toAdValueBundle(maxPlacementId, maxEcpm)
                         log(
                             TAG,
-                            "Interstitial ad loaded $consumeAdInstance from cache, Placement ID: $maxPlacementId"
+                            "Interstitial ad loaded $consumeAdInstance from cache, Placement ID: $maxPlacementId, adValue: $adValue"
                         )
                         consumeAdInstance.setListener(this)
-                        maxInterstitialCallback.onInterstitialAdLoaded()
+                        maxInterstitialCallback.onInterstitialAdLoaded(adValue)
                     }
                 }
             }
