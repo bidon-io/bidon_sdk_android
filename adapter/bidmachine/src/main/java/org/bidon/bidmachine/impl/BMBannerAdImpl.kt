@@ -48,8 +48,24 @@ internal class BMBannerAdImpl(
             val bidType = adParams.adUnit.bidType
             val requestBuilder = BannerRequest.Builder()
                 .apply {
-                    if (bidType == BidType.CPM) {
-                        this.setNetworks("")
+                    when (bidType) {
+                        BidType.CPM -> {
+                            setNetworks("")
+                            setPlacementId(adParams.placement)
+                        }
+
+                        BidType.RTB -> {
+                            val payload = adParams.payload
+                            if (payload == null) {
+                                val error = BidonError.IncorrectAdUnit(
+                                    demandId = demandId,
+                                    message = "Payload is null for RTB"
+                                )
+                                emitEvent(AdEvent.LoadFailed(error))
+                                return@runOnUiThread
+                            }
+                            setBidPayload(payload)
+                        }
                     }
                 }
                 .setSize(adParams.bannerFormat.asBidMachineBannerSize())
@@ -79,18 +95,6 @@ internal class BMBannerAdImpl(
                         }
                     }
                 )
-            if (bidType == BidType.RTB) {
-                adParams.payload?.let {
-                    requestBuilder.setBidPayload(it)
-                } ?: run {
-                    emitEvent(
-                        AdEvent.LoadFailed(
-                            BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
-                        )
-                    )
-                    return@runOnUiThread
-                }
-            }
             requestBuilder.build()
                 .also { adRequest = it }
                 .request(adParams.activity.applicationContext)

@@ -8,10 +8,11 @@ import org.bidon.sdk.adapter.AdapterParameters
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.AdUnit
 
-internal class BidMachineParameters(
+internal data class BidMachineParameters(
     val sellerId: String,
     val endpoint: String?,
     val mediationConfig: List<String>?,
+    val placements: Map<String, String>?,
 ) : AdapterParameters
 
 class BMBannerAuctionParams(
@@ -22,6 +23,7 @@ class BMBannerAuctionParams(
     val timeout: Long,
     val customParameters: CustomParams,
     val payload: String?,
+    val placement: String?,
 ) : AdAuctionParams {
 
     override fun toString(): String {
@@ -36,6 +38,7 @@ class BMFullscreenAuctionParams(
     val timeout: Long,
     val customParameters: CustomParams,
     val payload: String?,
+    val placement: String?,
 ) : AdAuctionParams {
 
     override fun toString(): String {

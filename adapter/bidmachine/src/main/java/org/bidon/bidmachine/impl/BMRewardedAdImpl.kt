@@ -52,8 +52,24 @@ internal class BMRewardedAdImpl(
         val bidType = adParams.adUnit.bidType
         val requestBuilder = RewardedRequest.Builder()
             .apply {
-                if (bidType == BidType.CPM) {
-                    this.setNetworks("")
+                when (bidType) {
+                    BidType.CPM -> {
+                        setNetworks("")
+                        setPlacementId(adParams.placement)
+                    }
+
+                    BidType.RTB -> {
+                        val payload = adParams.payload
+                        if (payload == null) {
+                            val error = BidonError.IncorrectAdUnit(
+                                demandId = demandId,
+                                message = "Payload is null for RTB"
+                            )
+                            emitEvent(AdEvent.LoadFailed(error))
+                            return
+                        }
+                        setBidPayload(payload)
+                    }
                 }
             }
             .setPriceFloorParams(PriceFloorParams().addPriceFloor(adParams.price))
@@ -85,22 +101,8 @@ internal class BMRewardedAdImpl(
                     }
                 }
             )
-        if (bidType == BidType.RTB) {
-            adParams.payload?.let {
-                requestBuilder.setBidPayload(it)
-            } ?: run {
-                emitEvent(
-                    AdEvent.LoadFailed(
-                        BidonError.IncorrectAdUnit(demandId = demandId, message = "payload")
-                    )
-                )
-                return
-            }
-        }
         requestBuilder.build()
-            .also {
-                adRequest = it
-            }
+            .also { adRequest = it }
             .request(adParams.context)
     }
 

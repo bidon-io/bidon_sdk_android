@@ -18,6 +18,7 @@ class GetAdAuctionParamUseCase {
                 context = activity.applicationContext,
                 adUnit = adUnit,
                 payload = adUnit.extra?.optString("payload"),
+                placement = adUnit.extra?.optString("placement"),
                 customParameters = buildCustomParameters(adUnit.extra)
             )
         }
@@ -32,7 +33,8 @@ class GetAdAuctionParamUseCase {
                 bannerFormat = bannerFormat,
                 adUnit = adUnit,
                 payload = adUnit.extra?.optString("payload"),
-                customParameters = buildCustomParameters(adUnit.extra)
+                placement = adUnit.extra?.optString("placement"),
+                customParameters = buildCustomParameters(adUnit.extra),
             )
         }
     }
