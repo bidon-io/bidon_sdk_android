@@ -1,3 +1,7 @@
+# develop
+## Features:
+- [BDN-1000](https://appodeal.atlassian.net/browse/BDN-1000) Updated MyTarget (VK) Ads SDK to 5.27.2
+
 # 0.8.1 (2025.07.02)
 ## Features:
 - [BDN-985](https://appodeal.atlassian.net/browse/BDN-985) Updated Ktlint to 0.48.2+ and configured .editorconfig for compatibility
