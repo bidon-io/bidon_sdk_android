@@ -30,7 +30,7 @@ jobs:
               echo "❌ Publishing to public repository is only allowed from 'release/' branch"
               exit 1
             fi
-          fi
+          fi 
           
           echo "✅ Branch and repository check passed"
         env:
@@ -45,8 +45,9 @@ jobs:
           SLACK_COLOR: '2a4ed1'
           SLACK_ICON: https://avatars.githubusercontent.com/u/10354620?s=200&v=4
           SLACK_MESSAGE: |
-            🚀 ${{ github.ref_name }}
-            Deployment start to $ORG_GRADLE_PROJECT_repo repository from ${GITHUB_REF#refs/heads/} branch
+            🚀 Deployment started
+            Repository: ${{ github.event.inputs.ORG_GRADLE_PROJECT_repo }}
+            Branch: ${{ github.ref_name }}
           SLACK_USERNAME: appodeal-release-bot
           MSG_MINIMAL: actions url,commit
 
