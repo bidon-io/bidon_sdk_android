@@ -3,6 +3,7 @@
 - [BDN-995](https://appodeal.atlassian.net/browse/BDN-995) Updated Bidmachine SDK to 3.3.0. Added support for BidMachine Placement ID
 - [BDN-999](https://appodeal.atlassian.net/browse/BDN-999) Updated Yandex ads SDK to 7.14.1
 - [BDN-1000](https://appodeal.atlassian.net/browse/BDN-1000) Updated MyTarget (VK) Ads SDK to 5.27.2
+- [BDN-953](https://appodeal.atlassian.net/browse/BDN-953) Added github action for release automation
 
 # 0.8.1 (2025.07.02)
 ## Features:
