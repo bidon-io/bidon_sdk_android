@@ -43,7 +43,7 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_COLOR: '2a4ed1'
-          SLACK_ICON: https://avatars.githubusercontent.com/u/10354620?s=200&v=4
+          SLACK_ICON: https://avatars.githubusercontent.com/u/120632208?s=200&v=4
           SLACK_MESSAGE: |
             🚀 Deployment started
             Repository: ${{ github.event.inputs.ORG_GRADLE_PROJECT_repo }}
