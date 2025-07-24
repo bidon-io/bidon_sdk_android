@@ -1,6 +1,7 @@
 package org.bidon.bidmachine
 
 import android.content.Context
+import io.bidmachine.AdPlacementConfig
 import io.bidmachine.BidMachine
 import org.bidon.bidmachine.ext.adapterVersion
 import org.bidon.bidmachine.ext.sdkVersion
@@ -40,14 +41,25 @@ internal class BidMachineAdapter :
         sdkVersion = sdkVersion
     )
 
-    override suspend fun getToken(adTypeParam: AdTypeParam): String? =
-        BidMachine.getBidToken(
+    private var placements: Map<String, String> = emptyMap()
+
+    override suspend fun getToken(adTypeParam: AdTypeParam): String? {
+        val placementId = adTypeParam.auctionKey?.let { placements[it] }
+        val adPlacementConfig = AdPlacementConfig.Builder(adTypeParam.toBidmachineAdFormat())
+            .apply {
+                placementId?.let { withPlacementId(it) }
+            }
+            .build()
+
+        return BidMachine.getBidToken(
             adTypeParam.activity.applicationContext,
-            adTypeParam.toBidmachineAdFormat()
+            adPlacementConfig
         )
+    }
 
     override suspend fun init(context: Context, configParams: BidMachineParameters): Unit =
         suspendCoroutine { continuation ->
+            this.placements = configParams.placements ?: emptyMap()
             val sourceId = configParams.sellerId
             BidMachine.setTestMode(isTestMode)
             BidMachine.setLoggingEnabled(BidonSdk.loggerLevel != Logger.Level.Off)
@@ -68,6 +80,13 @@ internal class BidMachineAdapter :
                     }
                 }
             },
+            placements = jsonObject.optJSONObject("placements")?.let { placements ->
+                buildMap {
+                    placements.keys().forEach { key ->
+                        put(key, placements.optString(key))
+                    }
+                }
+            }
         )
     }
 
