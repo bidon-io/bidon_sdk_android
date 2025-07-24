@@ -1,4 +1,4 @@
-# Develop (2025.**.**)
+# 0.9.0 (2025.07.24)
 ## Features:
 - [BDN-995](https://appodeal.atlassian.net/browse/BDN-995) Updated Bidmachine SDK to 3.3.0. Added support for BidMachine Placement ID
 - [BDN-999](https://appodeal.atlassian.net/browse/BDN-999) Updated Yandex ads SDK to 7.14.1
