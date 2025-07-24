@@ -1,0 +1,97 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      ORG_GRADLE_PROJECT_repo:
+        description: 'Repository to publish'
+        required: true
+        default: 'bidon-private'
+        type: choice
+        options:
+          - bidon-private
+          - bidon
+
+jobs:
+  publish:
+    name: Release Bidon SDK Library
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check branch
+        run: |
+          echo "Checking repo: $ORG_GRADLE_PROJECT_repo"
+          echo "Current branch: ${GITHUB_REF#refs/heads/}"
+          
+          if [[ "$ORG_GRADLE_PROJECT_repo" == "bidon" ]]; then
+            if [[ "${GITHUB_REF#refs/heads/}" != release/* ]]; then
+              echo "❌ Publishing to public repository is only allowed from 'release/' branch"
+              exit 1
+            fi
+          fi 
+          
+          echo "✅ Branch and repository check passed"
+        env:
+          ORG_GRADLE_PROJECT_repo: ${{ github.event.inputs.ORG_GRADLE_PROJECT_repo }}
+
+      - uses: actions/checkout@v2
+
+      - name: Slack Notify Start
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_COLOR: '2a4ed1'
+          SLACK_ICON: https://avatars.githubusercontent.com/u/120632208?s=200&v=4
+          SLACK_MESSAGE: |
+            🚀 Deployment started
+            Repository: ${{ github.event.inputs.ORG_GRADLE_PROJECT_repo }}
+            Branch: ${{ github.ref_name }}
+          SLACK_USERNAME: appodeal-release-bot
+          MSG_MINIMAL: actions url,commit
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Gradle and Wrapper
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Clean Build Directories
+        run: rm -rf */build buildSrc/build
+
+      - name: Publish to Artifactory
+        run: ./gradlew publishAllPublicationsToBidonRepository
+        env:
+          ORG_GRADLE_PROJECT_repo: ${{ github.event.inputs.ORG_GRADLE_PROJECT_repo }}
+          ORG_GRADLE_PROJECT_uname: ${{ secrets.ARTIFACTORY_USER }}
+          ORG_GRADLE_PROJECT_upassword: ${{ secrets.ARTIFACTORY_PASSWORD }}
+
+      #- name: Publish to Maven Central
+      #  run: ./gradlew publishReleasePublicationToSonatypeRepository --no-parallel
+      #  env:
+      #    ORG_GRADLE_PROJECT_uname: ${{ secrets.SONATYPE_USER }}
+      #    ORG_GRADLE_PROJECT_upassword: ${{ secrets.SONATYPE_PASSWORD }}
+      #    ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+      #    ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.SIGNING_KEY_ID }}
+      #    ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+
+      - name: Slack Notify Finished
+        if: always()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON: https://avatars.githubusercontent.com/u/10354620?s=200&v=4
+          SLACK_MESSAGE: "✅ ${{ github.ref_name }} — ${{ job.status }}"
+          SLACK_USERNAME: appodeal-release-bot
+          MSG_MINIMAL: actions url,commit
