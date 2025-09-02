@@ -7,6 +7,7 @@ internal interface AdInstance {
     val demandId: String
     val isReady: Boolean
     fun applyAdInfo(ad: Ad): AdInstance
+    fun notifyWin()
     fun notifyLoss(winnerDemandId: String, winnerPrice: Double)
     fun destroy()
 }

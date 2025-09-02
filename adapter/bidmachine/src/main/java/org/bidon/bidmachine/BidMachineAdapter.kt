@@ -73,13 +73,6 @@ internal class BidMachineAdapter :
         return BidMachineParameters(
             sellerId = jsonObject.getString("seller_id"),
             endpoint = jsonObject.optString("endpoint", "").takeIf { !it.isNullOrBlank() },
-            mediationConfig = jsonObject.optJSONArray("mediation_config")?.let {
-                buildList {
-                    repeat(it.length()) { index ->
-                        add(it.getString(index))
-                    }
-                }
-            },
             placements = jsonObject.optJSONObject("placements")?.let { placements ->
                 buildMap {
                     placements.keys().forEach { key ->

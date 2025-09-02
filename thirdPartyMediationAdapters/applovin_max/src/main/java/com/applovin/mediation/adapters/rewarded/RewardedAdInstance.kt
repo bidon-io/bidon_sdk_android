@@ -49,6 +49,10 @@ internal class RewardedAdInstance(
 
     override fun applyAdInfo(ad: Ad): RewardedAdInstance = this.apply { rewardedAdInfo = ad }
 
+    override fun notifyWin() {
+        rewardedAd.notifyWin()
+    }
+
     override fun notifyLoss(winnerDemandId: String, winnerPrice: Double) {
         rewardedAd.notifyLoss(
             winnerDemandId = "maxca_$winnerDemandId",

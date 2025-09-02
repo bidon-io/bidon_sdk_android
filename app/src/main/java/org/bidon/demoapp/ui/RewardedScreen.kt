@@ -16,14 +16,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import org.bidon.demoapp.component.*
 import org.bidon.demoapp.component.AppToolbar
-import org.bidon.demoapp.ui.ext.getImpressionInfo
-import org.bidon.demoapp.ui.ext.toJson
+import org.bidon.demoapp.component.Body1Text
+import org.bidon.demoapp.component.Body2Text
+import org.bidon.demoapp.ui.ext.toUiString
 import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AuctionInfo
@@ -48,48 +50,46 @@ fun RewardedScreen(
     val pricefloor = remember {
         mutableStateOf("0.001")
     }
+    val auctionKeyState = remember { mutableStateOf("") }
 
     val rewardedAd by lazy {
-        RewardedAd().apply {
+        RewardedAd(auctionKey = auctionKeyState.value.ifBlank { null }).apply {
             setRewardedListener(
                 object : RewardedListener {
                     override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {
-                        logFlow.log("onAdLoaded WINNER:\n$ad. AuctionInfo: \n${auctionInfo.toJson()}")
-                        logFlow.log("onAdLoaded ImpressionInfo: \n${ad.getImpressionInfo()}")
+                        logFlow.log("onAdLoaded ad: ${ad.toUiString()}. auctionInfo: ${auctionInfo.toUiString()}")
                     }
 
                     override fun onAdLoadFailed(auctionInfo: AuctionInfo?, cause: BidonError) {
-                        logFlow.log("onAdLoadFailed: $cause: ${cause.message}. AuctionInfo: \n${auctionInfo?.toJson()}")
+                        logFlow.log("onAdLoadFailed: $cause. auctionInfo: ${auctionInfo?.toUiString()}")
                     }
 
                     override fun onAdShowFailed(cause: BidonError) {
-                        logFlow.log("onAdShowFailed: $cause: ${cause.message}")
+                        logFlow.log("onAdShowFailed: $cause")
                     }
 
                     override fun onAdShown(ad: Ad) {
-                        logFlow.log("onAdShown: $ad")
-                        logFlow.log("onAdShown ImpressionInfo: \n${ad.getImpressionInfo()}")
+                        logFlow.log("onAdShown: ${ad.toUiString()}")
                     }
 
                     override fun onAdClicked(ad: Ad) {
-                        logFlow.log("onAdClicked: $ad")
+                        logFlow.log("onAdClicked: ${ad.toUiString()}")
                     }
 
                     override fun onAdClosed(ad: Ad) {
-                        logFlow.log("onAdClosed: $ad")
+                        logFlow.log("onAdClosed: ${ad.toUiString()}")
                     }
 
                     override fun onAdExpired(ad: Ad) {
-                        logFlow.log("onAdExpired: $ad")
+                        logFlow.log("onAdExpired: ${ad.toUiString()}")
                     }
 
                     override fun onUserRewarded(ad: Ad, reward: Reward?) {
-                        logFlow.log("onUserRewarded: reward=$reward, ad=$ad")
+                        logFlow.log("onUserRewarded: reward=$reward, ad=${ad.toUiString()}")
                     }
 
                     override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
-                        logFlow.log("onRevenuePaid: ad=$ad, adValue=$adValue")
-                        logFlow.log("onRevenuePaid ImpressionInfo: \n${ad.getImpressionInfo()}")
+                        logFlow.log("onRevenuePaid: ad: ${ad.toUiString()}, adValue: $adValue")
                     }
                 }
             )
@@ -110,6 +110,26 @@ fun RewardedScreen(
                 .fillMaxSize()
                 .padding(start = 24.dp, end = 24.dp, top = 0.dp)
         ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Body1Text(text = "Auction Key")
+                BasicTextField(
+                    value = auctionKeyState.value,
+                    onValueChange = { auctionKeyState.value = it },
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        background = MaterialTheme.colorScheme.surface
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 4.dp),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Done
+                    ),
+                    maxLines = 1
+                )
+            }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
@@ -128,7 +148,10 @@ fun RewardedScreen(
                         .weight(1f)
                         .padding(horizontal = 4.dp),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    ),
                     maxLines = 1
                 )
                 AppTextButton(

@@ -1,16 +1,20 @@
 import ext.ADAPTER_VERSION
+import ext.Versions
+import ext.Dependencies
 
 plugins {
     id("common")
-    //  id("publish-adapter")
+    id("publish-adapter")
 }
 
-project.extra.apply {
-    this.set("AdapterArtifactId", "fyber-adapter")
-    this.set("AdapterVersionName", Versions.Adapters.Fyber)
+publishAdapter {
+    artifactId = "fyber-adapter"
+    versionName = Versions.Adapters.Fyber
 }
 
 android {
+    namespace = "org.bidon.fyber"
+
     defaultConfig {
         ADAPTER_VERSION = Versions.Adapters.Fyber
     }

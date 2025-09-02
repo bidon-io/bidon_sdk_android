@@ -47,6 +47,10 @@ internal class InterstitialAdInstance(auctionKey: String? = null) : AdInstance {
 
     override fun applyAdInfo(ad: Ad): InterstitialAdInstance = this.apply { interstitialAdInfo = ad }
 
+    override fun notifyWin() {
+        interstitialAd.notifyWin()
+    }
+
     override fun notifyLoss(winnerDemandId: String, winnerPrice: Double) {
         interstitialAd.notifyLoss(
             winnerDemandId = "maxca_$winnerDemandId",

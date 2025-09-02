@@ -57,6 +57,17 @@ interface StatisticsCollector {
 
     fun getStats(): BidStat
 
+    /**
+     * Checks if win/lose external notifications can be sent
+     * @return true if external notifications are enabled and not already sent
+     */
+    fun canSendWinLoseNotifications(): Boolean
+
+    /**
+     * Marks win/lose notifications as sent to prevent duplicate notifications
+     */
+    fun markWinLoseNotificationsSent()
+
     sealed interface AdType {
         object Rewarded : AdType
         object Interstitial : AdType

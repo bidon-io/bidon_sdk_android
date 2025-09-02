@@ -3,9 +3,7 @@ package org.bidon.demoapp.ui
 import android.app.Activity
 import android.content.Context
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
@@ -18,15 +16,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
-import com.chartboost.heliumsdk.domain.AdFormat
-import com.chartboost.mediation.googlebiddingadapter.DeleteMe
 import org.bidon.demoapp.BuildConfig
 import org.bidon.demoapp.component.AppOutlinedButton
-import org.bidon.demoapp.component.AppTextButton
 import org.bidon.demoapp.component.ItemSelector
 import org.bidon.demoapp.component.Subtitle1Text
 import org.bidon.demoapp.ui.ext.LocalDateTimeNow
@@ -46,7 +40,6 @@ import org.json.JSONObject
  */
 @Composable
 fun SdkSettings(sdkStateViewModel: SdkStateViewModel) {
-    val tempAdmobBid = DeleteMe.payloadFlow.collectAsState().value
     val isInitialized by sdkStateViewModel.isInitialized.collectAsState()
     val buttonText = if (isInitialized) "SDK Initialized" else "Initialize SDK"
     val shared = LocalContext.current.getSharedPreferences("app_test", Context.MODE_PRIVATE)
@@ -75,33 +68,6 @@ fun SdkSettings(sdkStateViewModel: SdkStateViewModel) {
                     Gdpr.values().first { it.code == code }
                 }
             )
-        }
-        Subtitle1Text(text = "Intercept Chartboost payload (adm)")
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.horizontalScroll(rememberScrollState())) {
-            AppTextButton(
-                modifier = Modifier.background(
-                    if (tempAdmobBid is DeleteMe.AdType.Interstitial) Color.Green else Color.Transparent
-                ),
-                text = "Interstitial",
-            ) {
-                ChartBoo.st(AdFormat.INTERSTITIAL, activity)
-            }
-            AppTextButton(
-                modifier = Modifier.background(
-                    if (tempAdmobBid is DeleteMe.AdType.Rewarded) Color.Green else Color.Transparent
-                ),
-                text = "Rewarded",
-            ) {
-                ChartBoo.st(AdFormat.REWARDED, activity)
-            }
-            AppTextButton(
-                modifier = Modifier.background(
-                    if (tempAdmobBid is DeleteMe.AdType.Banner) Color.Green else Color.Transparent
-                ),
-                text = "Banner",
-            ) {
-                ChartBoo.st(AdFormat.BANNER, activity)
-            }
         }
         Subtitle1Text(text = "Bidon SDK settings")
         AppOutlinedButton(

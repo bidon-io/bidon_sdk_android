@@ -1,13 +1,13 @@
 import ext.ADAPTER_VERSION
+import ext.Versions
 
 plugins {
     id("common")
-    id("publish-adapter")
 }
 
-project.extra.apply {
-    this.set("AdapterArtifactId", "applovin-adapter")
-    this.set("AdapterVersionName", Versions.Adapters.Applovin)
+publishAdapter {
+    artifactId = "applovin-adapter"
+    versionName = Versions.Adapters.Applovin
 }
 
 android {
@@ -21,5 +21,5 @@ dependencies {
     compileOnly(projects.bidon)
     testImplementation(projects.bidon)
 
-    implementation("com.applovin:applovin-sdk:13.2.0")
+    implementation("com.applovin:applovin-sdk:13.3.1")
 }
