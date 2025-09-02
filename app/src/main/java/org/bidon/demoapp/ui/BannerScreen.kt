@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
@@ -17,16 +19,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import org.bidon.demoapp.component.*
-import org.bidon.demoapp.ui.ext.getImpressionInfo
-import org.bidon.demoapp.ui.ext.toJson
+import org.bidon.demoapp.ui.ext.toUiString
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AuctionInfo
 import org.bidon.sdk.ads.banner.BannerFormat
@@ -72,6 +77,11 @@ fun BannerScreen(navController: NavHostController) {
     }
     var bannerView: BannerView? = null
 
+    val pricefloor = remember {
+        mutableStateOf("0.001")
+    }
+    val auctionKeyState = remember { mutableStateOf("") }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -104,42 +114,40 @@ fun BannerScreen(navController: NavHostController) {
                         logInfo(TAG, "AndroidView factory")
                         BannerView(
                             context = context,
+                            auctionKey = auctionKeyState.value.ifBlank { null } // Pass auctionKey
                         ).apply {
                             setBannerFormat(bannerFormat.value)
                             setBannerListener(
                                 object : BannerListener {
                                     override fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo) {
-                                        logFlow.log("onAdLoaded WINNER:\n$ad. AuctionInfo: \n${auctionInfo.toJson()}")
+                                        logFlow.log("onAdLoaded ad: ${ad.toUiString()}. auctionInfo: ${auctionInfo.toUiString()}")
                                         if (showOnLoad.value) {
                                             bannerView?.showAd()
                                         }
-                                        logFlow.log("onAdLoaded ImpressionInfo: \n${ad.getImpressionInfo()}")
                                     }
 
                                     override fun onAdLoadFailed(auctionInfo: AuctionInfo?, cause: BidonError) {
-                                        logFlow.log("onAdLoadFailed: $cause: ${cause.message}. AuctionInfo: \n${auctionInfo?.toJson()}")
+                                        logFlow.log("onAdLoadFailed: $cause. auctionInfo: ${auctionInfo?.toUiString()}")
                                     }
 
                                     override fun onAdShown(ad: Ad) {
-                                        logFlow.log("onAdShown: $ad")
-                                        logFlow.log("onAdShown ImpressionInfo: \n${ad.getImpressionInfo()}")
+                                        logFlow.log("onAdShown: ${ad.toUiString()}")
                                     }
 
                                     override fun onAdClicked(ad: Ad) {
-                                        logFlow.log("onAdClicked: $ad")
+                                        logFlow.log("onAdClicked: ${ad.toUiString()}")
                                     }
 
                                     override fun onAdExpired(ad: Ad) {
-                                        logFlow.log("onAdExpired: $ad")
+                                        logFlow.log("onAdExpired: ${ad.toUiString()}")
                                     }
 
                                     override fun onRevenuePaid(ad: Ad, adValue: AdValue) {
-                                        logFlow.log("onRevenuePaid: ad=$ad, adValue=$adValue")
-                                        logFlow.log("onRevenuePaid ImpressionInfo: \n${ad.getImpressionInfo()}")
+                                        logFlow.log("onRevenuePaid: ad: ${ad.toUiString()}, adValue: $adValue")
                                     }
 
                                     override fun onAdShowFailed(cause: BidonError) {
-                                        logFlow.log("onAdShowFailed: $cause: ${cause.message}")
+                                        logFlow.log("onAdShowFailed: $cause")
                                     }
                                 }
                             )
@@ -156,7 +164,7 @@ fun BannerScreen(navController: NavHostController) {
         }
         Column(modifier = Modifier.padding(8.dp)) {
             ItemSelector(
-                items = BannerFormat.values().toList(),
+                items = BannerFormat.entries,
                 selectedItem = bannerFormat.value,
                 horizontalAlignment = Alignment.Start,
                 getItemTitle = {
@@ -174,6 +182,58 @@ fun BannerScreen(navController: NavHostController) {
             )
             Spacer(modifier = Modifier.padding(top = 2.dp))
 
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Body1Text(text = "Auction Key")
+                BasicTextField(
+                    value = auctionKeyState.value,
+                    onValueChange = { auctionKeyState.value = it },
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        background = MaterialTheme.colorScheme.surface
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 4.dp),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Done
+                    ),
+                    maxLines = 1
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Body1Text(text = "Pricefloor $")
+                BasicTextField(
+                    value = pricefloor.value,
+                    onValueChange = { newValue ->
+                        pricefloor.value = newValue
+                    },
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        background = MaterialTheme.colorScheme.surface
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 4.dp),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    ),
+                    maxLines = 1
+                )
+                AppTextButton(
+                    text = "Add extras"
+                ) {
+                    bannerView?.addExtra("some_extra_int", 321)
+                    bannerView?.addExtra("some_extra_data", "rewarded+some_value")
+                }
+            }
+
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 AppButton(text = "Create") {
                     bannerExists.value = true
@@ -182,7 +242,11 @@ fun BannerScreen(navController: NavHostController) {
                 AppButton(
                     text = "Load",
                 ) {
-                    bannerView?.loadAd(activity = activity)
+                    val minPrice = pricefloor.value.toDoubleOrNull()
+                    if (minPrice == null) {
+                        pricefloor.value = BidonSdk.DefaultPricefloor.toString()
+                    }
+                    bannerView?.loadAd(activity = activity, pricefloor = minPrice ?: BidonSdk.DefaultPricefloor)
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Body2Text(text = "Show onLoad")
@@ -233,7 +297,10 @@ fun BannerScreen(navController: NavHostController) {
                 Column(
                     modifier = Modifier
                         .padding(bottom = 2.dp)
-                        .background(MaterialTheme.colorScheme.secondary, MaterialTheme.shapes.medium)
+                        .background(
+                            MaterialTheme.colorScheme.secondary,
+                            MaterialTheme.shapes.medium
+                        )
                         .padding(4.dp)
                 ) {
                     Body2Text(text = logLine)

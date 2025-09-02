@@ -14,6 +14,8 @@ import org.bidon.sdk.adapter.AdEvent
 import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.ext.ad
+import org.bidon.sdk.adapter.ext.notifyExternalLoss
+import org.bidon.sdk.adapter.ext.notifyExternalWin
 import org.bidon.sdk.ads.Ad
 import org.bidon.sdk.ads.AdType
 import org.bidon.sdk.ads.AuctionInfo
@@ -38,6 +40,7 @@ internal class RewardedImpl(
     Extras by demandAd {
 
     private var userListener: RewardedListener? = null
+    private var winner: AdSource.Rewarded<*>? = null
     private var observeCallbacksJob: Job? = null
 
     private val adCache: AdCache by lazy {
@@ -112,6 +115,7 @@ internal class RewardedImpl(
                 logInfo(TAG, "Show failed. No Auction results.")
                 listener.onAdShowFailed(BidonError.AdNotReady)
             } else {
+                winner = adSource
                 adSource.show(activity)
             }
         }
@@ -127,7 +131,7 @@ internal class RewardedImpl(
             logInfo(TAG, "Sdk is not initialized")
             return
         }
-        adCache.pop()?.adSource?.sendLoss(winnerDemandId, winnerPrice)
+        adCache.pop()?.adSource?.notifyExternalLoss(winnerDemandId, winnerPrice)
         destroyAd()
     }
 
@@ -136,7 +140,9 @@ internal class RewardedImpl(
             logInfo(TAG, "Sdk is not initialized")
             return
         }
-        adCache.peek()?.adSource?.sendWin()
+        val notifiedSource = winner ?: adCache.peek()?.adSource as? AdSource.Interstitial
+        notifiedSource?.notifyExternalWin()
+        winner = null
     }
 
     override fun destroyAd() {
@@ -148,6 +154,7 @@ internal class RewardedImpl(
             adCache.clear()
             observeCallbacksJob?.cancel()
             observeCallbacksJob = null
+            winner = null
         }
     }
 

@@ -61,6 +61,7 @@ internal class AdKeeperImpl<T : AdInstance>(
         return if (currentEcpm in lowerBound..upperBound) {
             log(TAG, "[$adType] Ad with eCPM: $currentEcpm consumed and removed")
             adInstance = null
+            currentAdInstance.notifyWin()
             currentAdInstance
         } else {
             log(TAG, "[$adType] No matching ad found in range for eCPM: $ecpm")

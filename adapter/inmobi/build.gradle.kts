@@ -1,13 +1,13 @@
 import ext.ADAPTER_VERSION
+import ext.Versions
 
 plugins {
     id("common")
-    id("publish-adapter")
 }
 
-project.extra.apply {
-    this.set("AdapterArtifactId", "inmobi-adapter")
-    this.set("AdapterVersionName", Versions.Adapters.Inmobi)
+publishAdapter {
+    artifactId = "inmobi-adapter"
+    versionName = Versions.Adapters.Inmobi
 }
 
 android {
@@ -22,5 +22,5 @@ dependencies {
     compileOnly(projects.bidon)
     testImplementation(projects.bidon)
 
-    implementation("com.inmobi.monetization:inmobi-ads-kotlin:10.8.3")
+    implementation("com.inmobi.monetization:inmobi-ads-kotlin:10.8.7")
 }

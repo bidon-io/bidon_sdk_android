@@ -1,13 +1,14 @@
 import ext.ADAPTER_VERSION
+import ext.Dependencies
+import ext.Versions
 
 plugins {
     id("common")
-    id("publish-adapter")
 }
 
-project.extra.apply {
-    this.set("AdapterArtifactId", "dtexchange-adapter")
-    this.set("AdapterVersionName", Versions.Adapters.DTExchange)
+publishAdapter {
+    artifactId = "dtexchange-adapter"
+    versionName = Versions.Adapters.DTExchange
 }
 
 android {
@@ -22,6 +23,6 @@ dependencies {
     compileOnly(projects.bidon)
     testImplementation(projects.bidon)
 
-    implementation("com.fyber:marketplace-sdk:8.3.7")
+    implementation("com.fyber:marketplace-sdk:8.3.8")
     implementation(Dependencies.Google.PlayServicesAdsIdentifier)
 }

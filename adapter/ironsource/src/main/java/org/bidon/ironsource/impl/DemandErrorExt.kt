@@ -1,7 +1,6 @@
 package org.bidon.ironsource.impl
 
 import com.ironsource.mediationsdk.logger.IronSourceError
-import com.ironsource.mediationsdk.utils.IronSourceConstants
 import org.bidon.ironsource.IronSourceDemandId
 import org.bidon.sdk.config.BidonError
 
@@ -13,7 +12,6 @@ internal fun IronSourceError?.asBidonError(): BidonError = when (this?.errorCode
     IronSourceError.ERROR_RV_LOAD_NO_FILL,
     IronSourceError.ERROR_IS_LOAD_NO_FILL,
     IronSourceError.ERROR_BN_INSTANCE_LOAD_AUCTION_FAILED,
-    IronSourceConstants.BN_INSTANCE_LOAD_NO_FILL,
     IronSourceError.ERROR_RV_SHOW_CALLED_DURING_SHOW,
     IronSourceError.ERROR_RV_SHOW_CALLED_WRONG_STATE,
     IronSourceError.ERROR_RV_LOAD_DURING_LOAD,

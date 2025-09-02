@@ -1,13 +1,14 @@
 import ext.ADAPTER_VERSION
+import ext.Dependencies
+import ext.Versions
 
 plugins {
     id("common")
-    id("publish-adapter")
 }
 
-project.extra.apply {
-    this.set("AdapterArtifactId", "meta-adapter")
-    this.set("AdapterVersionName", Versions.Adapters.Meta)
+publishAdapter {
+    artifactId = "meta-adapter"
+    versionName = Versions.Adapters.Meta
 }
 
 android {

@@ -1,6 +1,8 @@
+package ext
+
 object Versions {
     private val major = 0
-    private val minor = 9
+    private val minor = 10
     private val patch = 0
     private val semantic: String = ""
 

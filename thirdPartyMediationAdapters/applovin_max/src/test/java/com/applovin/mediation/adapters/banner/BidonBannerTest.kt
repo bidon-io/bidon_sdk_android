@@ -55,6 +55,11 @@ class BidonBannerTest {
         every { mockConsumedAd.setListener(any()) } just Runs
         every { mockConsumedAd.show() } just Runs
         every { mockConsumedAd.bannerAd } returns mockk()
+        every { mockConsumedAd.uid } returns "test-uid"
+        every { mockConsumedAd.bidType } returns "test-bid-type"
+        every { mockConsumedAd.ecpm } returns 1.0
+        every { mockConsumedAd.demandId } returns "test-demand-id"
+        every { mockConsumedAd.notifyWin() } just Runs
         every { mockAdKeeper.consumeAd(any()) } returns mockConsumedAd
 
         // Mock BannerAdInstance creation
@@ -220,6 +225,6 @@ class BidonBannerTest {
 
         // Then
         verify { mockAdKeeper.consumeAd(1.0) }
-        verify { mockListener.onAdViewAdLoaded(any()) }
+        verify { mockListener.onAdViewAdLoaded(any(), any()) }
     }
 }

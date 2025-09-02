@@ -75,6 +75,10 @@ internal class BannerAdInstance(
 
     override fun applyAdInfo(ad: Ad): BannerAdInstance = this.apply { bannerAdInfo = ad }
 
+    override fun notifyWin() {
+        bannerAd.notifyWin()
+    }
+
     override fun notifyLoss(winnerDemandId: String, winnerPrice: Double) {
         bannerAd.notifyLoss(
             winnerDemandId = "maxca_$winnerDemandId",

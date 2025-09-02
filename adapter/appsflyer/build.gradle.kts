@@ -1,17 +1,21 @@
 import ext.ADAPTER_SDK_VERSION
 import ext.ADAPTER_VERSION
+import ext.Versions
+import ext.Dependencies
 
 plugins {
     id("common")
     id("publish-adapter")
 }
 
-project.extra.apply {
-    this.set("AdapterArtifactId", "appsflyer-adapter")
-    this.set("AdapterVersionName", Versions.Adapters.Appsflyer)
+publishAdapter {
+    artifactId = "appsflyer-adapter"
+    versionName = Versions.Adapters.Appsflyer
 }
 
 android {
+    namespace = "org.bidon.appsflyer"
+
     defaultConfig {
         ADAPTER_VERSION = Versions.Adapters.Appsflyer
         ADAPTER_SDK_VERSION = Dependencies.SdkAdapter.AppsflyerVersion

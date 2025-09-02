@@ -1,14 +1,14 @@
 import ext.ADAPTER_VERSION
+import ext.Versions
 
 plugins {
     id("common")
-    id("publish-adapter")
 }
 
-project.extra.apply {
-    this.set("AdapterGroupId", "com.ironsource.adapters")
-    this.set("AdapterArtifactId", "bidon-adapter")
-    this.set("AdapterVersionName", Versions.ThirdPartyMediationAdapters.LevelPlay)
+publishAdapter {
+    groupId = "com.ironsource.adapters"
+    artifactId = "bidon-adapter"
+    versionName = Versions.ThirdPartyMediationAdapters.LevelPlay
 }
 
 android {
@@ -21,6 +21,6 @@ android {
 dependencies {
     implementation(projects.bidon)
 
-    compileOnly("com.unity3d.ads-mediation:mediation-sdk:8.8.0")
-    testImplementation("com.unity3d.ads-mediation:mediation-sdk:8.8.0")
+    compileOnly("com.unity3d.ads-mediation:mediation-sdk:8.10.0")
+    testImplementation("com.unity3d.ads-mediation:mediation-sdk:8.10.0")
 }

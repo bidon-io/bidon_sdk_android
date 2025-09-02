@@ -56,6 +56,11 @@ class BidonInterstitialTest {
         // Mock consumed ad instance
         val mockConsumedAd = mockk<InterstitialAdInstance>()
         every { mockConsumedAd.setListener(any()) } just Runs
+        every { mockConsumedAd.uid } returns "test-uid"
+        every { mockConsumedAd.bidType } returns "test-bid-type"
+        every { mockConsumedAd.ecpm } returns 1.0
+        every { mockConsumedAd.demandId } returns "test-demand-id"
+        every { mockConsumedAd.notifyWin() } just Runs
         every { mockAdKeeper.consumeAd(any()) } returns mockConsumedAd
 
         // Mock listener methods
@@ -211,7 +216,7 @@ class BidonInterstitialTest {
 
         // Then
         verify { mockAdKeeper.consumeAd(1.0) }
-        verify { mockListener.onInterstitialAdLoaded() }
+        verify { mockListener.onInterstitialAdLoaded(any()) }
     }
 
     @Test

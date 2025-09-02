@@ -1,13 +1,13 @@
 import ext.ADAPTER_VERSION
+import ext.Versions
 
 plugins {
-    id("common")
-    id("publish-adapter")
+    id("core")
 }
 
-project.extra.apply {
-    this.set("AdapterArtifactId", "bidon-sdk")
-    this.set("AdapterVersionName", Versions.BidonVersionName)
+publishAdapter {
+    artifactId = "bidon-sdk"
+    versionName = Versions.BidonVersionName
 }
 
 android {
@@ -15,7 +15,4 @@ android {
     defaultConfig {
         ADAPTER_VERSION = Versions.BidonVersionName
     }
-}
-
-dependencies {
 }

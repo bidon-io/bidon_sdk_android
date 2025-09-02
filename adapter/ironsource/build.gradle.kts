@@ -1,13 +1,13 @@
 import ext.ADAPTER_VERSION
+import ext.Versions
 
 plugins {
     id("common")
-    id("publish-adapter")
 }
 
-project.extra.apply {
-    this.set("AdapterArtifactId", "ironsource-adapter")
-    this.set("AdapterVersionName", Versions.Adapters.IronSource)
+publishAdapter {
+    artifactId = "ironsource-adapter"
+    versionName = Versions.Adapters.IronSource
 }
 
 android {
@@ -22,5 +22,5 @@ dependencies {
     compileOnly(projects.bidon)
     testImplementation(projects.bidon)
 
-    implementation("com.unity3d.ads-mediation:mediation-sdk:8.8.0")
+    implementation("com.unity3d.ads-mediation:mediation-sdk:8.10.0")
 }

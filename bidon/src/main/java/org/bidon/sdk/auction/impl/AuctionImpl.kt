@@ -185,12 +185,13 @@ internal class AuctionImpl(
         _auctionDataResponse = auctionData
         _demandAd = demandAd
         val auctionPriceFloor = auctionData.pricefloor
+        val externalWinNotificationsEnabled = auctionData.externalWinNotificationsEnabled
         // Start auction
         executeAuction(
             auctionId = auctionData.auctionId,
             auctionConfigurationId = auctionData.auctionConfigurationId ?: 0L,
             auctionConfigurationUid = auctionData.auctionConfigurationUid ?: "",
-            externalWinNotificationsEnabled = auctionData.externalWinNotificationsEnabled,
+            externalWinNotificationsEnabled = externalWinNotificationsEnabled,
             auctionTimeout = auctionData.auctionTimeout,
             pricefloor = auctionPriceFloor,
             demandAd = demandAd,
@@ -226,7 +227,7 @@ internal class AuctionImpl(
             demandAd = demandAd,
         )
 
-        notifyWinLoss(finalResults)
+        notifyWinLoss(finalResults, externalWinNotificationsEnabled)
 
         // Finish auction
         state.value = AuctionState.Finished
@@ -263,37 +264,53 @@ internal class AuctionImpl(
         _auctionDataResponse = null
     }
 
-    private fun notifyWinLoss(finalResults: List<AuctionResult>) {
+    private fun notifyWinLoss(
+        finalResults: List<AuctionResult>,
+        externalWinNotificationsEnabled: Boolean
+    ) {
         val winner = finalResults.getOrNull(0) ?: return
+        val winnerAdSource = winner.adSource
 
         /**
          *  For internal statistics
          */
-        winner.adSource.markWin()
+        winnerAdSource.markWin()
 
         /**
-         * For AdNetworks
+         * For AdNetworks - notify winner only if external notifications are disabled
+         * Bidding demands should not be notified (server notifies them)
          */
-        (winner.adSource as? WinLossNotifiable)?.notifyWin()
+        if (!externalWinNotificationsEnabled) {
+            if (winner !is AuctionResult.Bidding && winnerAdSource is WinLossNotifiable) {
+                winnerAdSource.notifyWin()
+                logInfo(TAG, "Notified win to adapter: ${winnerAdSource.demandId} (external_win_notifications=false)")
+            } else if (winner is AuctionResult.Bidding) {
+                logInfo(TAG, "Skipped win notification for bidding demand: ${winnerAdSource.demandId}")
+            }
+        } else {
+            logInfo(TAG, "Skipped win notification to adapter: ${winnerAdSource.demandId} (external_win_notifications=true, will be notified externally)")
+        }
 
+        // Notify all losers regardless of external_win_notifications flag
         finalResults.drop(1)
-            .forEach { auctionResult ->
-                val adSource = auctionResult.adSource
+            .forEach { loser ->
+                val loserAdSource = loser.adSource
                 /**
                  *  Bidding demands should not be notified.
+                 *  All losers should be notified immediately regardless of external_win_notifications
                  */
-                if (auctionResult !is AuctionResult.Bidding && adSource is WinLossNotifiable) {
-                    logInfo(TAG, "Notified loss: ${adSource.demandId}")
-                    adSource.notifyLoss(
-                        winner.adSource.demandId.demandId,
-                        winner.adSource.getStats().price
+                if (loser !is AuctionResult.Bidding && loserAdSource is WinLossNotifiable) {
+                    logInfo(TAG, "Notified loss: ${loserAdSource.demandId}")
+                    loserAdSource.notifyLoss(
+                        winnerAdSource.demandId.demandId,
+                        winnerAdSource.getStats().price
                     )
                 }
-                if (auctionResult.roundStatus == RoundStatus.Successful) {
-                    adSource.markLoss()
+                if (loser.roundStatus == RoundStatus.Successful) {
+                    loserAdSource.markLoss()
                 }
-                logInfo(TAG, "Destroying loser: ${adSource.demandId}")
-                adSource.destroy()
+                logInfo(TAG, "Destroying loser: ${loserAdSource.demandId}")
+                loserAdSource.destroy()
             }
     }
 }

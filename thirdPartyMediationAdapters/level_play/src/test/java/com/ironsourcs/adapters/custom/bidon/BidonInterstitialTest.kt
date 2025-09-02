@@ -18,6 +18,8 @@ import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -48,6 +50,10 @@ class BidonInterstitialTest {
         // Mock consumed ad instance
         val mockConsumedAd = mockk<InterstitialAdInstance>()
         every { mockConsumedAd.setListener(any()) } just Runs
+        every { mockConsumedAd.ecpm } returns 1.0
+        every { mockConsumedAd.demandId } returns "test-demand-id"
+        every { mockConsumedAd.isReady } returns true
+        every { mockConsumedAd.notifyWin() } just Runs
         every { mockAdKeeper.consumeAd(any()) } returns mockConsumedAd
 
         // Mock listener methods
@@ -74,7 +80,7 @@ class BidonInterstitialTest {
         every { mockAdUnitData["adUnitId"] } returns "testAdUnitId"
 
         val mockConfig = mockk<Map<String, Any>>()
-        every { mockConfig["ext"] } returns "true"
+        every { mockConfig["should_load"] } returns "true"
         every { mockConfig["price"] } returns "2.0"
         every { mockConfig["auctionKey"] } returns "test_auctionKey"
         every { mockConfig["instanceName"] } returns "test_instanceName"
@@ -98,7 +104,7 @@ class BidonInterstitialTest {
         every { mockAdUnitData["adUnitId"] } returns "testAdUnitId"
 
         val mockConfig = mockk<Map<String, Any>>()
-        every { mockConfig["ext"] } returns "true"
+        every { mockConfig["should_load"] } returns "true"
         every { mockConfig["price"] } returns "2.0"
         every { mockConfig["auctionKey"] } returns "test_auctionKey"
         every { mockConfig["instanceName"] } returns "test_instanceName"
@@ -121,7 +127,7 @@ class BidonInterstitialTest {
         every { mockAdUnitData["adUnitId"] } returns "testAdUnitId"
 
         val mockConfig = mockk<Map<String, Any>>()
-        every { mockConfig["ext"] } returns "false"
+        every { mockConfig["should_load"] } returns "false"
         every { mockConfig["price"] } returns "1.0"
         every { mockConfig["instanceName"] } returns "test_instanceName"
         every { mockParameters.configuration } returns mockConfig
@@ -136,13 +142,14 @@ class BidonInterstitialTest {
     }
 
     @Test
-    fun `loadInterstitialAd with ext false and no available ad should fail`() {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun `loadInterstitialAd with ext false and no available ad should fail`() = runTest {
         // Given
         val mockAdUnitData = mockk<Map<String, Any>>()
         every { mockAdUnitData["adUnitId"] } returns "testAdUnitId"
 
         val mockConfig = mockk<Map<String, Any>>()
-        every { mockConfig["ext"] } returns "false"
+        every { mockConfig["should_load"] } returns "false"
         every { mockConfig["price"] } returns "1.0"
         every { mockConfig["instanceName"] } returns "test_instanceName"
         every { mockParameters.configuration } returns mockConfig
@@ -152,8 +159,10 @@ class BidonInterstitialTest {
         // When
         bidonInterstitial.loadAd(mockParameters, mockActivity, mockListener)
 
-        // Then
-        verify { mockListener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_NO_FILL, NO_FILL_ERROR, any()) }
+        // Then - runTest automatically waits for all coroutines to complete
+        verify {
+            mockListener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_NO_FILL, NO_FILL_ERROR, any())
+        }
     }
 
     @Test

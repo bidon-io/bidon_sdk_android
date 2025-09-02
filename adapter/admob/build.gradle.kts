@@ -1,13 +1,14 @@
 import ext.ADAPTER_VERSION
+import ext.Dependencies
+import ext.Versions
 
 plugins {
     id("common")
-    id("publish-adapter")
 }
 
-project.extra.apply {
-    this.set("AdapterArtifactId", "admob-adapter")
-    this.set("AdapterVersionName", Versions.Adapters.Admob)
+publishAdapter {
+    artifactId = "admob-adapter"
+    versionName = Versions.Adapters.Admob
 }
 
 android {

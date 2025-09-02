@@ -11,7 +11,6 @@ import org.bidon.sdk.auction.models.AdUnit
 internal data class BidMachineParameters(
     val sellerId: String,
     val endpoint: String?,
-    val mediationConfig: List<String>?,
     val placements: Map<String, String>?,
 ) : AdapterParameters
 

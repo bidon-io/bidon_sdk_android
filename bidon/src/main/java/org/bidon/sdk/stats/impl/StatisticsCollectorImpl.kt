@@ -13,7 +13,6 @@ import org.bidon.sdk.auction.models.RewardedRequest
 import org.bidon.sdk.auction.models.TokenInfo
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.logging.impl.logError
-import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.models.BidStat
 import org.bidon.sdk.stats.models.BidType
@@ -155,38 +154,26 @@ class StatisticsCollectorImpl : StatisticsCollector {
     }
 
     override fun sendLoss(winnerDemandId: String, winnerPrice: Double) {
-        if (!externalWinNotificationsEnabled) {
-            logInfo(TAG, "External WinLoss Notifications disabled: external_win_notifications=false")
-            return
-        }
-        if (!isShowSent.getAndSet(true) && !isWinLossSent.getAndSet(true)) {
-            scope.launch {
-                sendLossRequest.invoke(
-                    WinLossRequestData.Loss(
-                        winnerDemandId = winnerDemandId,
-                        winnerPrice = winnerPrice,
-                        demandAd = demandAd,
-                        body = createImpressionRequestBody(adType)
-                    )
+        scope.launch {
+            sendLossRequest.invoke(
+                WinLossRequestData.Loss(
+                    winnerDemandId = winnerDemandId,
+                    winnerPrice = winnerPrice,
+                    demandAd = demandAd,
+                    body = createImpressionRequestBody(adType)
                 )
-            }
+            )
         }
     }
 
     override fun sendWin() {
-        if (!externalWinNotificationsEnabled) {
-            logInfo(TAG, "External WinLoss Notifications disabled: external_win_notifications=false")
-            return
-        }
-        if (!isShowSent.get() && !isWinLossSent.getAndSet(true)) {
-            scope.launch {
-                sendLossRequest.invoke(
-                    WinLossRequestData.Win(
-                        demandAd = demandAd,
-                        body = createImpressionRequestBody(adType)
-                    )
+        scope.launch {
+            sendLossRequest.invoke(
+                WinLossRequestData.Win(
+                    demandAd = demandAd,
+                    body = createImpressionRequestBody(adType)
                 )
-            }
+            )
         }
     }
 
@@ -263,6 +250,14 @@ class StatisticsCollectorImpl : StatisticsCollector {
     }
 
     override fun getStats(): BidStat = stat
+
+    override fun canSendWinLoseNotifications(): Boolean {
+        return externalWinNotificationsEnabled && !isWinLossSent.get()
+    }
+
+    override fun markWinLoseNotificationsSent() {
+        isWinLossSent.set(true)
+    }
 
     private fun createImpressionRequestBody(adType: StatisticsCollector.AdType): ImpressionRequestBody {
         val (banner, interstitial, rewarded) = getData(adType)
