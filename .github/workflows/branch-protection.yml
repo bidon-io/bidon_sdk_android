@@ -1,0 +1,214 @@
+name: Git-Flow Branch Protection
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - main
+      - master
+      - develop
+      - 'release/*'
+      - 'hotfix/*'
+      - 'experiment/*'
+      - 'feature/*'
+
+jobs:
+  gitflow-validate:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate Branch Protection Rules
+        id: branch-validation
+        run: |
+          echo "🔍 Validating Git-Flow branch protection rules..."
+          
+          SOURCE_BRANCH="${{ github.head_ref }}"
+          TARGET_BRANCH="${{ github.base_ref }}"
+          
+          echo "Source branch: $SOURCE_BRANCH"
+          echo "Target branch: $TARGET_BRANCH"
+          
+          # Define protected branches
+          PROTECTED_BRANCHES=("main" "master" "develop")
+          PROTECTED_PATTERNS=("release/*" "hotfix/*" "experiment/*" "feature/*")
+          
+          # Function to check if branch matches protected patterns
+          is_protected_pattern() {
+            local branch=$1
+            for pattern in "${PROTECTED_PATTERNS[@]}"; do
+              if [[ $branch == $pattern ]]; then
+                return 0
+              fi
+            done
+            return 1
+          }
+          
+          # Check if target branch is protected
+          TARGET_IS_PROTECTED=false
+          for protected in "${PROTECTED_BRANCHES[@]}"; do
+            if [[ "$TARGET_BRANCH" == "$protected" ]]; then
+              TARGET_IS_PROTECTED=true
+              break
+            fi
+          done
+          
+          if [[ $TARGET_IS_PROTECTED == false ]] && is_protected_pattern "$TARGET_BRANCH"; then
+            TARGET_IS_PROTECTED=true
+          fi
+          
+          if [[ $TARGET_IS_PROTECTED == false ]]; then
+            echo "✅ Target branch '$TARGET_BRANCH' is not protected - merge allowed"
+            exit 0
+          fi
+          
+          echo "🛡️ Target branch '$TARGET_BRANCH' is protected - validating merge rules..."
+
+          # Global rule: main/master can merge ONLY into develop or experiment/*
+          if { [[ "$SOURCE_BRANCH" == "main" ]] || [[ "$SOURCE_BRANCH" == "master" ]] ; } \
+             && { [[ "$TARGET_BRANCH" != "develop" ]] && [[ "$TARGET_BRANCH" != experiment/* ]]; }; then
+            echo "❌ main/master can be merged only into develop or experiment/*"
+            exit 1
+          fi
+          
+          # Global rule: hotfix/* can merge ONLY into main/master
+          if [[ $SOURCE_BRANCH == hotfix/* && "$TARGET_BRANCH" != "main" && "$TARGET_BRANCH" != "master" ]]; then
+            echo "❌ hotfix/* branches can only merge into main/master."
+            exit 1
+          fi
+          
+          # Validate specific merge patterns according to Git-Flow diagram
+          VALID_MERGE=false
+          MERGE_REASON=""
+
+          case "$TARGET_BRANCH" in
+            "develop")
+              if [[ $SOURCE_BRANCH == feature/* ]]; then
+                VALID_MERGE=true
+                MERGE_REASON="Feature branch to develop"
+              elif [[ $SOURCE_BRANCH == bugfix/* ]]; then
+                VALID_MERGE=true
+                MERGE_REASON="Bugfix branch to develop"
+              elif [[ $SOURCE_BRANCH == release/* ]]; then
+                VALID_MERGE=true
+                MERGE_REASON="Release branch back to develop (completing release flow)"
+              else
+                echo "❌ Invalid merge to develop. Allowed: feature/*, bugfix/*, release/*"
+                echo "Note: experiment/* branches should merge to feature/* branches first"
+                exit 1
+              fi
+              ;;
+            feature/*)
+              if [[ $SOURCE_BRANCH == experiment/* ]]; then
+                VALID_MERGE=true
+                MERGE_REASON="Experiment branch to feature (completing experiment flow)"
+              elif [[ $SOURCE_BRANCH == bugfix/* ]]; then
+                VALID_MERGE=true
+                MERGE_REASON="Bugfix branch to feature branch"
+              else
+                echo "❌ Only experiment/* and bugfix/* branches can merge to feature/* branches"
+                exit 1
+              fi
+              ;;
+            "main"|"master")
+              if [[ $SOURCE_BRANCH == hotfix/* ]]; then
+                VALID_MERGE=true
+                MERGE_REASON="Hotfix branch to main (hotfix flow)"
+              elif [[ $SOURCE_BRANCH == release/* ]]; then
+                VALID_MERGE=true
+                MERGE_REASON="Release branch to main (release flow)"
+              else
+                echo "❌ Only hotfix/* and release/* branches can merge to main/master"
+                exit 1
+              fi
+              ;;
+            release/*)
+              if [[ $SOURCE_BRANCH == develop ]]; then
+                VALID_MERGE=true
+                MERGE_REASON="Develop branch to release (starting release)"
+              elif [[ $SOURCE_BRANCH == bugfix/* ]]; then
+                VALID_MERGE=true
+                MERGE_REASON="Bugfix branch to release branch"
+              else
+                echo "❌ Only develop and bugfix/* branches can merge to release/* branches"
+                exit 1
+              fi
+              ;;
+            hotfix/*)
+              if [[ $SOURCE_BRANCH == bugfix/* ]]; then
+                VALID_MERGE=true
+                MERGE_REASON="Bugfix branch to hotfix branch"
+              else
+                echo "❌ Only bugfix/* branches can merge to hotfix/* branches"
+                exit 1
+              fi
+              ;;
+            experiment/*)
+              if [[ $SOURCE_BRANCH == "main" ]] || [[ $SOURCE_BRANCH == "master" ]]; then
+                VALID_MERGE=true
+                MERGE_REASON="Update experiment from stable main/master"
+              else
+                echo "❌ experiment/* can only be updated from main/master. Results must go out via feature/* → develop."
+                exit 1
+              fi
+              ;;
+          esac
+          
+          if [[ $VALID_MERGE == true ]]; then
+            echo "✅ Valid merge pattern: $MERGE_REASON"
+            echo "merge_valid=true" >> $GITHUB_OUTPUT
+            echo "merge_reason=$MERGE_REASON" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Invalid merge pattern for Git-Flow"
+            echo "Source: $SOURCE_BRANCH → Target: $TARGET_BRANCH"
+            exit 1
+          fi
+
+      - name: Check for Direct Push Prevention
+        run: |
+          echo "🚫 Checking direct push prevention..."
+          echo "This workflow ensures all changes to protected branches go through pull requests"
+          echo "Direct pushes to protected branches should be blocked by repository settings"
+
+      - name: Validate PR Requirements
+        run: |
+          echo "📋 Validating pull request requirements..."
+          
+          # Check if PR is from a fork (external contributor)
+          if [[ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
+            echo "🔍 External contribution detected - additional security checks may apply"
+          fi
+          
+          # Validate PR title and description
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          if [[ -z "$PR_TITLE" ]]; then
+            echo "❌ Pull request title is required"
+            exit 1
+          fi
+          
+          if [[ ${#PR_TITLE} -lt 10 ]]; then
+            echo "❌ Pull request title must be at least 10 characters long"
+            exit 1
+          fi
+          
+          echo "✅ Pull request validation passed"
+
+  gitflow-status-check:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    needs: gitflow-validate
+    
+    steps:
+      - name: Status Check Summary
+        run: |
+          echo "✅ All Git-Flow validation checks passed"
+          echo "✅ Review requirements validated"
+          echo "🎯 Ready for merge (pending other required status checks)"

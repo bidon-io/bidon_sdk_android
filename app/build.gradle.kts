@@ -86,6 +86,7 @@ dependencies {
     implementation(projects.adapter.meta)
     implementation(projects.adapter.mintegral)
     implementation(projects.adapter.mobilefuse)
+    implementation(projects.adapter.moloco)
     implementation(projects.adapter.unityads)
     implementation(projects.adapter.vkads)
     implementation(projects.adapter.vungle)

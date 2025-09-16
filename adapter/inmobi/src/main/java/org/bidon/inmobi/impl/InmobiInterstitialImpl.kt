@@ -5,6 +5,7 @@ import com.inmobi.ads.AdMetaInfo
 import com.inmobi.ads.InMobiAdRequestStatus
 import com.inmobi.ads.InMobiInterstitial
 import com.inmobi.ads.listeners.InterstitialAdEventListener
+import org.bidon.inmobi.InmobiAdapter
 import org.bidon.inmobi.ext.asBidonError
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.adapter.AdAuctionParams
@@ -19,6 +20,7 @@ import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.stats.StatisticsCollector
 import org.bidon.sdk.stats.impl.StatisticsCollectorImpl
+import org.bidon.sdk.stats.models.BidType
 
 /**
  * Created by Aleksei Cherniaev on 11/09/2023.
@@ -58,7 +60,6 @@ internal class InmobiInterstitialImpl :
             object : InterstitialAdEventListener() {
                 override fun onAdLoadSucceeded(interstitial: InMobiInterstitial, adMetaInfo: AdMetaInfo) {
                     logInfo(TAG, "onAdLoadSucceeded: $this")
-                    setPrice(adMetaInfo.bid)
                     emitEvent(AdEvent.Fill(getAd() ?: return))
                 }
 
@@ -79,7 +80,7 @@ internal class InmobiInterstitialImpl :
                         AdEvent.PaidRevenue(
                             ad = ad,
                             adValue = AdValue(
-                                adRevenue = adMetaInfo.bid / 1000.0,
+                                adRevenue = adParams.price / 1000.0,
                                 precision = Precision.Precise,
                                 currency = AdValue.USD,
                             )
@@ -101,9 +102,25 @@ internal class InmobiInterstitialImpl :
                     this@InmobiInterstitialImpl.interstitial = null
                 }
             }
-        )
-        this.interstitial = interstitialAd
-        interstitialAd.load()
+        ).also { this.interstitial = it }
+        interstitialAd.setExtras(InmobiAdapter.getExtras())
+        if (adParams.adUnit.bidType == BidType.RTB) {
+            val payload = adParams.payload
+            if (payload != null) {
+                interstitialAd.load(payload.toByteArray())
+            } else {
+                emitEvent(
+                    AdEvent.LoadFailed(
+                        BidonError.IncorrectAdUnit(
+                            demandId = demandId,
+                            message = "payload"
+                        )
+                    )
+                )
+            }
+        } else {
+            interstitialAd.load()
+        }
     }
 
     override fun show(activity: Activity) {

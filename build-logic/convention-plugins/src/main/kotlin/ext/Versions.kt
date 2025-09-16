@@ -2,7 +2,7 @@ package ext
 
 object Versions {
     private val major = 0
-    private val minor = 10
+    private val minor = 11
     private val patch = 0
     private val semantic: String = ""
 
@@ -22,6 +22,7 @@ object Versions {
         val Meta = "$mainVersion.0" + semanticVersion
         val Mintegral = "$mainVersion.0" + semanticVersion
         val MobileFuse = "$mainVersion.0" + semanticVersion
+        val Moloco = "$mainVersion.0" + semanticVersion
         val UnityAds = "$mainVersion.0" + semanticVersion
         val VkAds = "$mainVersion.0" + semanticVersion
         val Vungle = "$mainVersion.0" + semanticVersion
