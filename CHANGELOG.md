@@ -1,8 +1,11 @@
-# 0.10.0 (2025.08.27)
+# 0.11.0 (2025.09.10)
 ## Features:
--[APDM-1462](https://appodeal.atlassian.net/browse/APDM-1462) Promoted 0.10.0 release to stable
+- [BDN-1030](https://appodeal.atlassian.net/browse/BDN-1030) Added Moloco SDK 3.12.0 as ad adapter
+- [APDM-1217](https://appodeal.atlassian.net/browse/APDM-1217) Added github action validation flow
+- [BDN-1039](https://appodeal.atlassian.net/browse/BDN-1039) Implemented RTB mode for Inmobi adapter
+- [BDN-1008](https://appodeal.atlassian.net/browse/BDN-1008) Optimized Bidon SDK startup by initializing lowest-order adapters first; others load asynchronously in background
 
-# 0.10.0-alpha.1 (2025.08.14)
+# 0.10.0 (2025.08.27)
 ## Features:
 - [BDN-1020](https://appodeal.atlassian.net/browse/BDN-1020) Improved Win/Loss notification flow to respect external_win_notifications parameter
 - [BDN-990](https://appodeal.atlassian.net/browse/BDN-990) Updated compileSdkVersion to 35

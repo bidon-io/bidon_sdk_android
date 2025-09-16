@@ -92,23 +92,31 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                 .onEach { (order, adaptersInfo) ->
                     logInfo(TAG, "Initialization order #$order: ${adaptersInfo.joinToString { it.first }}")
                 }
+
+            val minOrder = groupedAdapters.keys.minOrNull()
+
+            // Initialize critical adapters (lowest order) synchronously
             groupedAdapters.forEach { (order, adaptersInfo) ->
-                logInfo(TAG, "Start initialization #$order: ${adaptersInfo.joinToString { it.first }}")
+                val isCritical = (order == minOrder)
+                logInfo(TAG, "Start ${if (isCritical) "critical" else "background"} initialization #$order: ${adaptersInfo.joinToString { it.first }}")
+
                 initializeAdapterGroup(
                     context = context,
                     adaptersInfo = adaptersInfo,
                     adapters = adapterList,
                     configResponse = configResponse,
-                    onAdapterInitializationStarted = {
-                        adapterList.removeAll(it)
-                    }
+                    onAdapterInitializationStarted = { adapterList.removeAll(it) }
                 )
-            }
-            canContinueFlow.update { isTimedOut ->
-                if (isTimedOut) {
-                    logError(TAG, "Initialization finished after timeout ${configResponse.initializationTimeout} ms reached", null)
+
+                // Signal ready after critical adapters complete
+                if (isCritical) {
+                    canContinueFlow.update { isTimedOut ->
+                        if (isTimedOut) {
+                            logError(TAG, "Critical adapters initialized after timeout ${configResponse.initializationTimeout} ms", null)
+                        }
+                        true
+                    }
                 }
-                true
             }
         }
     }

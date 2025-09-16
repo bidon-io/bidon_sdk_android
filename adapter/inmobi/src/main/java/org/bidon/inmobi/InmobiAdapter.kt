@@ -1,6 +1,7 @@
 package org.bidon.inmobi
 
 import android.content.Context
+import com.inmobi.compliance.InMobiPrivacyCompliance
 import com.inmobi.sdk.InMobiSdk
 import com.inmobi.sdk.SdkInitializationListener
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,7 @@ import org.bidon.sdk.adapter.Initializable
 import org.bidon.sdk.adapter.SupportsRegulation
 import org.bidon.sdk.adapter.SupportsTestMode
 import org.bidon.sdk.adapter.impl.SupportsTestModeImpl
+import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.regulation.Gdpr
@@ -40,6 +42,7 @@ internal val InmobiDemandId = DemandId("inmobi")
 
 @Suppress("unused")
 internal class InmobiAdapter :
+    Adapter.Bidding,
     Adapter.Network,
     Initializable<InmobiParams>,
     SupportsRegulation,
@@ -54,6 +57,9 @@ internal class InmobiAdapter :
             adapterVersion = adapterVersion,
             sdkVersion = sdkVersion
         )
+
+    override suspend fun getToken(adTypeParam: AdTypeParam): String? =
+        InMobiSdk.getToken(getExtras(), null)
 
     override suspend fun init(context: Context, configParams: InmobiParams) = withContext(Dispatchers.Main.immediate) {
         suspendCoroutine {
@@ -81,9 +87,33 @@ internal class InmobiAdapter :
         return InmobiParams(JSONObject(json).optString("account_id"))
     }
 
+    // TODO: 02/09/2025 [glavatskikh] https://appodeal.slack.com/archives/C02PE4GAFU0/p1756807478969089?thread_ts=1754615120.657369&cid=C02PE4GAFU0
     override fun updateRegulation(regulation: Regulation) {
-        val consentObject = getConsentObject(regulation)
-        InMobiSdk.updateGDPRConsent(consentObject)
+        // GDPR compliance - use both methods for maximum compatibility
+        if (regulation.gdprApplies) {
+            // Method 1: Direct SDK integration approach with full consent details
+            val consentObject = getConsentObject(regulation)
+            InMobiSdk.updateGDPRConsent(consentObject)
+
+            // Method 2: Partner/Mediation approach
+            val partnerConsentObject = JSONObject().apply {
+                put("partner_gdpr_consent_available", regulation.hasGdprConsent)
+            }
+            InMobiSdk.setPartnerGDPRConsent(partnerConsentObject)
+        }
+
+        // CCPA compliance
+        if (regulation.ccpaApplies) {
+            // Set whether user has opted out of data sale (inverted: true = do not sell)
+            InMobiPrivacyCompliance.setDoNotSell(!regulation.hasCcpaConsent)
+
+            // Set US Privacy String if available
+            regulation.usPrivacyString?.let {
+                InMobiPrivacyCompliance.setUSPrivacyString(it)
+            }
+        }
+
+        // COPPA compliance
         if (regulation.coppaApplies) {
             InMobiSdk.setIsAgeRestricted(true)
         }
@@ -110,6 +140,15 @@ internal class InmobiAdapter :
                 this.put(InMobiSdk.IM_GDPR_CONSENT_AVAILABLE, regulation.hasGdprConsent)
                 this.put(InMobiSdk.IM_GDPR_CONSENT_IAB, regulation.gdprConsentString)
             }
+        }
+    }
+
+    companion object {
+        fun getExtras(): Map<String, String> {
+            return mapOf(
+                "tp" to "c_bidon",
+                "tp-ver" to BidonSdk.SdkVersion
+            )
         }
     }
 }

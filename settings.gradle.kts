@@ -57,6 +57,7 @@ include(
     ":adapter:meta",
     ":adapter:mintegral",
     ":adapter:mobilefuse",
+    ":adapter:moloco",
     ":adapter:unityads",
     ":adapter:vkads",
     ":adapter:vungle",

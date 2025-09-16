@@ -10,6 +10,7 @@ class InmobiFullscreenAuctionParams(
 ) : AdAuctionParams {
     override val price: Double = adUnit.pricefloor
     val placementId: Long? = adUnit.extra?.optLong("placement_id")
+    val payload: String? = adUnit.extra?.optString("payload")
 
     override fun toString(): String {
         return "InmobiFullscreenAuctionParams(placementId=$placementId, price=$price)"
