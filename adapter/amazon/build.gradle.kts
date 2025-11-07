@@ -1,27 +1,31 @@
 import ext.ADAPTER_VERSION
+import ext.Dependencies
 import ext.Versions
 
 plugins {
-    id("common")
+    id("adapter")
 }
+
+val adapterSdkVersion = "11.0.1"
+val adapterMinor = 0
+val adapterSemantic = Versions.semanticVersion
+
+val adapterMainVersion = "$adapterSdkVersion.$adapterMinor$adapterSemantic"
 
 publishAdapter {
     artifactId = "amazon-adapter"
-    versionName = Versions.Adapters.Amazon
+    versionName = adapterMainVersion
 }
 
 android {
     namespace = "org.bidon.amazon"
 
     defaultConfig {
-        ADAPTER_VERSION = Versions.Adapters.Amazon
+        ADAPTER_VERSION = adapterMainVersion
     }
 }
 
 dependencies {
-    compileOnly(projects.bidon)
-    testImplementation(projects.bidon)
-
-    implementation("com.amazon.android:aps-sdk:11.0.1")
-    implementation("com.iabtcf:iabtcf-decoder:2.0.10")
+    implementation("com.amazon.android:aps-sdk:$adapterSdkVersion")
+    implementation(Dependencies.Others.IabTcfDecoder)
 }

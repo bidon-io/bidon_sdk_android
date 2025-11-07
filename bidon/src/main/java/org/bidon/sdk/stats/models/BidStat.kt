@@ -8,7 +8,7 @@ import org.bidon.sdk.auction.models.TokenInfo
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-data class BidStat(
+public data class BidStat(
     val auctionId: String?,
     val demandId: DemandId,
     val roundStatus: RoundStatus?,

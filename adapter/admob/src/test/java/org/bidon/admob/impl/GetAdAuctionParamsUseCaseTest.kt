@@ -51,7 +51,7 @@ class GetAdAuctionParamsUseCaseTest {
             adType = AdType.Banner,
         ).getOrThrow()
 
-        require(actual is AdmobBannerAuctionParams.Bidding)
+        require(actual is AdmobBannerAuctionParams.Network)
         assertThat(actual.adUnit).isEqualTo(
             AdUnit(
                 demandId = "admob",
@@ -67,7 +67,6 @@ class GetAdAuctionParamsUseCaseTest {
             )
         )
         assertThat(actual.price).isEqualTo(2.6)
-        assertThat(actual.payload).isEqualTo("test_payload")
         assertThat(actual.adUnitId).isEqualTo("ad_unit_id4")
     }
 
@@ -142,7 +141,7 @@ class GetAdAuctionParamsUseCaseTest {
             adType = AdType.Rewarded,
         ).getOrThrow()
 
-        require(actual is AdmobFullscreenAdAuctionParams.Bidding)
+        require(actual is AdmobFullscreenAdAuctionParams.Network)
         assertThat(actual.adUnit).isEqualTo(
             AdUnit(
                 demandId = "admob",
@@ -158,7 +157,6 @@ class GetAdAuctionParamsUseCaseTest {
             )
         )
         assertThat(actual.price).isEqualTo(2.75)
-        assertThat(actual.payload).isEqualTo("test_payload")
         assertThat(actual.adUnitId).isEqualTo("ad_unit_id888")
     }
 

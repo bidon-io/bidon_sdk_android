@@ -7,7 +7,7 @@ import org.bidon.sdk.databinders.extras.ExtrasImpl
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-class DemandAd(val adType: AdType) : Extras by ExtrasImpl() {
+public class DemandAd(public val adType: AdType) : Extras by ExtrasImpl() {
     override fun toString(): String {
         return "DemandAd(adType=$adType, extras=${getExtras()}, hashcode=${hashCode()})"
     }

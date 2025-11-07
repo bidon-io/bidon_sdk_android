@@ -6,7 +6,7 @@ import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.auction.models.AdUnit
 
-data class BannerAuctionParams(
+internal data class BannerAuctionParams(
     val bannerFormat: BannerFormat,
     val activity: Activity,
     override val adUnit: AdUnit,

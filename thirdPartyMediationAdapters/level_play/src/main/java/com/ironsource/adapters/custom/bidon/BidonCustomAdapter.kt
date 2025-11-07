@@ -14,10 +14,10 @@ import org.bidon.sdk.logs.logging.Logger.Level.Verbose
 import org.bidon.sdk.regulation.Coppa
 import org.bidon.sdk.regulation.Gdpr
 
-class BidonCustomAdapter : BaseAdapter(), Logger by LevelPLaySdkLogger {
+public class BidonCustomAdapter : BaseAdapter(), Logger by LevelPLaySdkLogger {
 
-    override fun getNetworkSDKVersion() = BidonSdk.SdkVersion
-    override fun getAdapterVersion() = "${BidonSdk.SdkVersion}.${BuildConfig.ADAPTER_VERSION}"
+    override fun getNetworkSDKVersion(): String = BidonSdk.SdkVersion
+    override fun getAdapterVersion(): String = "${BidonSdk.SdkVersion}.${BuildConfig.ADAPTER_VERSION}"
 
     override fun init(
         adData: AdData,

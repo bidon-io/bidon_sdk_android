@@ -67,7 +67,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Clean Build Directories
-        run: rm -rf */build buildSrc/build
+        run: rm -rf */build build-logic/build build-logic/convention-plugins/build
 
       - name: Publish to Artifactory
         run: ./gradlew publishAllPublicationsToBidonRepository

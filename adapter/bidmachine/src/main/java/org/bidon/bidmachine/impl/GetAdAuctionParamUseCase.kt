@@ -9,7 +9,7 @@ import org.json.JSONObject
 /**
  * Created by Aleksei Cherniaev on 21/11/2023.
  */
-class GetAdAuctionParamUseCase {
+internal class GetAdAuctionParamUseCase {
     fun getBMFullscreenAuctionParams(auctionParamsScope: AdAuctionParamSource): Result<BMFullscreenAuctionParams> {
         return auctionParamsScope {
             BMFullscreenAuctionParams(

@@ -7,19 +7,19 @@ import org.bidon.sdk.stats.models.BidType
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-class Ad(
-    val demandAd: DemandAd,
-    val price: Double,
-    val auctionId: String,
-    val dsp: String?,
-    val currencyCode: String?,
-    val adUnit: AdUnit
+public class Ad(
+    public val demandAd: DemandAd,
+    public val price: Double,
+    public val auctionId: String,
+    public val dsp: String?,
+    public val currencyCode: String?,
+    public val adUnit: AdUnit
 ) {
     // Monetization Network name
-    val networkName: String
+    public val networkName: String
         get() = adUnit.demandId
 
-    val bidType: BidType
+    public val bidType: BidType
         get() = adUnit.bidType
 
     override fun toString(): String {

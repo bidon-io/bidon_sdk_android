@@ -7,23 +7,23 @@ import org.bidon.sdk.stats.StatisticsCollector
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-sealed interface AdSource<T : AdAuctionParams> : StatisticsCollector, AdEventFlow {
-    val isAdReadyToShow: Boolean
+public sealed interface AdSource<T : AdAuctionParams> : StatisticsCollector, AdEventFlow {
+    public val isAdReadyToShow: Boolean
 
-    fun load(adParams: T)
-    fun destroy()
-    fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams>
+    public fun load(adParams: T)
+    public fun destroy()
+    public fun getAuctionParam(auctionParamsScope: AdAuctionParamSource): Result<AdAuctionParams>
 
-    interface Interstitial<T : AdAuctionParams> : AdSource<T> {
+    public interface Interstitial<T : AdAuctionParams> : AdSource<T> {
         /**
          * DTExchange, Applovin, UnityAds need [Activity] instance for displaying ad 🤦‍️
          */
-        fun show(activity: Activity)
+        public fun show(activity: Activity)
     }
-    interface Rewarded<T : AdAuctionParams> : AdSource<T> {
-        fun show(activity: Activity)
+    public interface Rewarded<T : AdAuctionParams> : AdSource<T> {
+        public fun show(activity: Activity)
     }
-    interface Banner<T : AdAuctionParams> : AdSource<T> {
-        fun getAdView(): AdViewHolder?
+    public interface Banner<T : AdAuctionParams> : AdSource<T> {
+        public fun getAdView(): AdViewHolder?
     }
 }

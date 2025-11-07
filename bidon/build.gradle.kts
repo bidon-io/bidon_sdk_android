@@ -1,4 +1,4 @@
-import ext.ADAPTER_VERSION
+import ext.BIDON_SDK_VERSION
 import ext.Versions
 
 plugins {
@@ -13,6 +13,6 @@ publishAdapter {
 android {
     namespace = "org.bidon.sdk"
     defaultConfig {
-        ADAPTER_VERSION = Versions.BidonVersionName
+        BIDON_SDK_VERSION = Versions.BidonVersionName
     }
 }

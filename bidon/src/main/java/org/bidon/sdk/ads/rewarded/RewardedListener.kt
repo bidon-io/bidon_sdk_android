@@ -8,17 +8,17 @@ import org.bidon.sdk.logs.analytic.AdRevenueListener
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-interface RewardedListener :
+public interface RewardedListener :
     AdListener,
     AdRevenueListener,
     FullscreenAdListener,
     RewardedAdListener
 
-interface RewardedAdListener {
-    fun onUserRewarded(ad: Ad, reward: Reward?) {}
+public interface RewardedAdListener {
+    public fun onUserRewarded(ad: Ad, reward: Reward?) {}
 }
 
-data class Reward(
+public data class Reward(
     val label: String,
     val amount: Int
 )

@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-class StatisticsCollectorImpl : StatisticsCollector {
+public class StatisticsCollectorImpl : StatisticsCollector {
 
     private var auctionConfigurationId: Long = 0L
     private var auctionConfigurationUid: String = ""

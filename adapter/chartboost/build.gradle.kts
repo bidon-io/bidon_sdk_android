@@ -2,25 +2,28 @@ import ext.ADAPTER_VERSION
 import ext.Versions
 
 plugins {
-    id("common")
+    id("adapter")
 }
+
+val adapterSdkVersion = "9.9.1"
+val adapterMinor = 0
+val adapterSemantic = Versions.semanticVersion
+
+val adapterMainVersion = "$adapterSdkVersion.$adapterMinor$adapterSemantic"
 
 publishAdapter {
     artifactId = "chartboost-adapter"
-    versionName = Versions.Adapters.Chartboost
+    versionName = adapterMainVersion
 }
 
 android {
     namespace = "org.bidon.chartboost"
 
     defaultConfig {
-        ADAPTER_VERSION = Versions.Adapters.Chartboost
+        ADAPTER_VERSION = adapterMainVersion
     }
 }
 
 dependencies {
-    compileOnly(projects.bidon)
-    testImplementation(projects.bidon)
-
-    implementation("com.chartboost:chartboost-sdk:9.9.1")
+    implementation("com.chartboost:chartboost-sdk:$adapterSdkVersion")
 }

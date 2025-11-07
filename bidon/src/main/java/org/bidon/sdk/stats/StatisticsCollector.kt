@@ -13,64 +13,64 @@ import org.bidon.sdk.stats.models.RoundStatus
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-interface StatisticsCollector {
+public interface StatisticsCollector {
 
-    val demandAd: DemandAd
-    val demandId: DemandId
-    val auctionId: String
-    fun getAd(): Ad?
+    public val demandAd: DemandAd
+    public val demandId: DemandId
+    public val auctionId: String
+    public fun getAd(): Ad?
 
-    fun sendShowImpression()
-    fun sendClickImpression()
-    fun sendRewardImpression()
-    fun sendLoss(winnerDemandId: String, winnerPrice: Double)
-    fun sendWin()
+    public fun sendShowImpression()
+    public fun sendClickImpression()
+    public fun sendRewardImpression()
+    public fun sendLoss(winnerDemandId: String, winnerPrice: Double)
+    public fun sendWin()
 
     /**
      * Some adapters don't use [AdUnit]s (BidMachine), so we need to set price manually after ad is loaded.
      * Need to be used before [AdEvent.Fill] is exposed
      */
-    fun setPrice(price: Double)
+    public fun setPrice(price: Double)
 
     /**
      * Set DSP source name (actually for BidMachine, DTExchange) if it's possible.
      * Need to be used before [AdEvent.Fill] is exposed
      */
-    fun setDsp(dspSource: String?)
-    fun setTokenInfo(tokenInfo: TokenInfo)
-    fun markFillStarted(adUnit: AdUnit, pricefloor: Double?)
-    fun markFillFinished(roundStatus: RoundStatus, price: Double?)
-    fun markWin()
-    fun markLoss()
-    fun markBelowPricefloor()
+    public fun setDsp(dspSource: String?)
+    public fun setTokenInfo(tokenInfo: TokenInfo)
+    public fun markFillStarted(adUnit: AdUnit, pricefloor: Double?)
+    public fun markFillFinished(roundStatus: RoundStatus, price: Double?)
+    public fun markWin()
+    public fun markLoss()
+    public fun markBelowPricefloor()
 
-    fun setStatisticAdType(adType: AdType)
-    fun addAuctionConfigurationId(auctionConfigurationId: Long)
-    fun addAuctionConfigurationUid(auctionConfigurationUid: String)
-    fun addExternalWinNotificationsEnabled(enabled: Boolean)
-    fun addDemandId(demandId: DemandId)
-    fun addRoundInfo(
+    public fun setStatisticAdType(adType: AdType)
+    public fun addAuctionConfigurationId(auctionConfigurationId: Long)
+    public fun addAuctionConfigurationUid(auctionConfigurationUid: String)
+    public fun addExternalWinNotificationsEnabled(enabled: Boolean)
+    public fun addDemandId(demandId: DemandId)
+    public fun addRoundInfo(
         auctionId: String,
         demandAd: DemandAd,
         auctionPricefloor: Double,
     )
 
-    fun getStats(): BidStat
+    public fun getStats(): BidStat
 
     /**
      * Checks if win/lose external notifications can be sent
      * @return true if external notifications are enabled and not already sent
      */
-    fun canSendWinLoseNotifications(): Boolean
+    public fun canSendWinLoseNotifications(): Boolean
 
     /**
      * Marks win/lose notifications as sent to prevent duplicate notifications
      */
-    fun markWinLoseNotificationsSent()
+    public fun markWinLoseNotificationsSent()
 
-    sealed interface AdType {
-        object Rewarded : AdType
-        object Interstitial : AdType
-        data class Banner(val format: BannerRequest.StatFormat) : AdType
+    public sealed interface AdType {
+        public object Rewarded : AdType
+        public object Interstitial : AdType
+        public data class Banner(val format: BannerRequest.StatFormat) : AdType
     }
 }

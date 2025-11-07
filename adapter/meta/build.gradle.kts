@@ -3,27 +3,30 @@ import ext.Dependencies
 import ext.Versions
 
 plugins {
-    id("common")
+    id("adapter")
 }
+
+val adapterSdkVersion = "6.20.0"
+val adapterMinor = 0
+val adapterSemantic = Versions.semanticVersion
+
+val adapterMainVersion = "$adapterSdkVersion.$adapterMinor$adapterSemantic"
 
 publishAdapter {
     artifactId = "meta-adapter"
-    versionName = Versions.Adapters.Meta
+    versionName = adapterMainVersion
 }
 
 android {
     namespace = "org.bidon.meta"
 
     defaultConfig {
-        ADAPTER_VERSION = Versions.Adapters.Meta
+        ADAPTER_VERSION = adapterMainVersion
     }
 }
 
 dependencies {
-    compileOnly(projects.bidon)
-    testImplementation(projects.bidon)
-
-    implementation("com.facebook.android:audience-network-sdk:6.20.0") {
+    implementation("com.facebook.android:audience-network-sdk:$adapterSdkVersion") {
         exclude(group = "com.google.android.gms", module = "play-services-basement")
     }
     implementation(Dependencies.Google.PlayServicesAdsIdentifier)

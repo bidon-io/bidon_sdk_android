@@ -6,7 +6,7 @@ import org.bidon.sdk.utils.serializer.Serializable
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-data class Session(
+internal data class Session(
     @field:JsonName("id")
     var id: String,
     @field:JsonName("launch_ts")

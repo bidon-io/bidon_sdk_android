@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Created by Aleksei Cherniaev on 05/09/2023.
  */
-class BannerManager private constructor(
+public class BannerManager private constructor(
     private val bannersCache: BannersCache,
     private val extras: Extras,
     private val auctionKey: String? = null,
@@ -40,7 +40,7 @@ class BannerManager private constructor(
     Extras {
 
     @JvmOverloads
-    constructor(auctionKey: String? = null) : this(
+    public constructor(auctionKey: String? = null) : this(
         bannersCache = BannersCacheImpl(),
         extras = ExtrasImpl(),
         auctionKey = auctionKey,

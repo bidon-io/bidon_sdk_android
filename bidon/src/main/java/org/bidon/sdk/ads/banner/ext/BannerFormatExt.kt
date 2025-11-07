@@ -3,7 +3,7 @@ package org.bidon.sdk.ads.banner.ext
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo
 
-val BannerFormat.width
+public val BannerFormat.width: Int
     get() = when (this) {
         BannerFormat.Banner -> 320
         BannerFormat.LeaderBoard -> 728
@@ -11,7 +11,7 @@ val BannerFormat.width
         BannerFormat.Adaptive -> DeviceInfo.screenWidthDp
     }
 
-val BannerFormat.height
+public val BannerFormat.height: Int
     get() = when (this) {
         BannerFormat.Banner -> 50
         BannerFormat.LeaderBoard -> 90

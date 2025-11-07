@@ -7,7 +7,7 @@ import org.bidon.sdk.stats.models.RoundStatus
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-sealed interface AuctionResult {
+internal sealed interface AuctionResult {
     val adSource: AdSource<*>
     val roundStatus: RoundStatus
 

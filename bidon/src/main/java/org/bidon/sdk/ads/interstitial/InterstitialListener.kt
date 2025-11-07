@@ -7,7 +7,7 @@ import org.bidon.sdk.logs.analytic.AdRevenueListener
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-interface InterstitialListener :
+public interface InterstitialListener :
     AdListener,
     AdRevenueListener,
     FullscreenAdListener

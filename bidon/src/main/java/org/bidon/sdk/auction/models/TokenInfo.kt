@@ -6,7 +6,7 @@ import org.bidon.sdk.utils.serializer.Serializable
 /**
  * Created by Aleksei Cherniaev on 14/11/2023.
  */
-data class TokenInfo(
+public data class TokenInfo(
     @field:JsonName("token")
     val token: String?,
     @field:JsonName("token_start_ts")
@@ -16,7 +16,7 @@ data class TokenInfo(
     @field:JsonName("status")
     val status: String,
 ) : Serializable {
-    enum class Status(val code: String) {
+    public enum class Status(internal val code: String) {
         SUCCESS("SUCCESS"),
         TIMEOUT_REACHED("TIMEOUT_REACHED"),
         NO_TOKEN("NO_TOKEN"),

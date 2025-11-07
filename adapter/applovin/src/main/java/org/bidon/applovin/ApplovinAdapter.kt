@@ -50,8 +50,15 @@ internal class ApplovinAdapter :
                 .also { applovinSdk = it }
             instance.settings.setVerboseLogging(BidonSdk.loggerLevel != Logger.Level.Off)
             if (!instance.isInitialized) {
-                val initConfig = AppLovinSdkInitializationConfiguration.builder(configParams.key)
-                    .build()
+                val initConfigBuilder =
+                    AppLovinSdkInitializationConfiguration.builder(configParams.key)
+                configParams.mediator?.let { mediator ->
+                    initConfigBuilder.setMediationProvider(mediator)
+                }
+                configParams.adUnitIds?.let { adUnitIds ->
+                    initConfigBuilder.setAdUnitIds(adUnitIds)
+                }
+                val initConfig = initConfigBuilder.build()
                 instance.initialize(initConfig) {
                     continuation.resume(Unit)
                 }
@@ -62,8 +69,19 @@ internal class ApplovinAdapter :
 
     override fun parseConfigParam(json: String): ApplovinParameters {
         val jsonObject = JSONObject(json)
+        val adUnitIds = buildList {
+            jsonObject.optJSONArray("ad_unit_ids")?.let { jsonArray ->
+                repeat(jsonArray.length()) { index ->
+                    runCatching {
+                        add(jsonArray.optString(index))
+                    }
+                }
+            }
+        }
         return ApplovinParameters(
             key = jsonObject.getString("app_key"),
+            mediator = jsonObject.optString("mediator").takeIf { it.isNotEmpty() },
+            adUnitIds = adUnitIds.takeIf { it.isNotEmpty() },
         )
     }
 

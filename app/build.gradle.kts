@@ -87,7 +87,9 @@ dependencies {
     implementation(projects.adapter.mintegral)
     implementation(projects.adapter.mobilefuse)
     implementation(projects.adapter.moloco)
+    implementation(projects.adapter.taurusx)
     implementation(projects.adapter.unityads)
+    implementation(projects.adapter.startio)
     implementation(projects.adapter.vkads)
     implementation(projects.adapter.vungle)
     implementation(projects.adapter.yandex)
@@ -109,18 +111,17 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
 
     // compose
-    val composeVersion = "1.4.3"
-    val material3Version = "1.1.1"
+    val composeVersion = "1.9.3"
     implementation("androidx.compose.runtime:runtime:$composeVersion")
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.ui:ui-tooling:$composeVersion")
     implementation("androidx.compose.foundation:foundation:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
 
-    implementation("androidx.compose.material3:material3:$material3Version")
-    implementation("androidx.compose.material:material-icons-core:$composeVersion")
-    implementation("androidx.compose.material:material-icons-extended:$composeVersion")
-    implementation("androidx.activity:activity-compose:1.7.2")
+    implementation("androidx.compose.material3:material3:1.4.0")
+    implementation("androidx.compose.material:material-icons-core:1.7.8")
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha07")
     implementation("androidx.navigation:navigation-compose:2.6.0")
     implementation("com.google.accompanist:accompanist-flowlayout:0.23.1")

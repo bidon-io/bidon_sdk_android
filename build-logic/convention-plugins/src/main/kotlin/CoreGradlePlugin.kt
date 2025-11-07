@@ -11,6 +11,8 @@ class CoreGradlePlugin : Plugin<Project> {
 
         dependencies {
             add("implementation", Dependencies.Google.AppSet)
+            add("implementation", Dependencies.Kotlin.reflect)
+            add("implementation", Dependencies.Android.CoreKtx)
         }
     }
 }

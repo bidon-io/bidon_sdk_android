@@ -33,6 +33,7 @@ class StatsRequestBodySerializerTest {
                     adUnitUid = "123",
                     adUnitLabel = "label124",
                     ext = JSONObject(),
+                    timeout = 5000
                 ),
                 StatsAdUnit(
                     demandId = "d6",
@@ -46,6 +47,7 @@ class StatsRequestBodySerializerTest {
                     adUnitLabel = "label123",
                     adUnitUid = "123",
                     ext = JSONObject(),
+                    timeout = 5000
                 ),
                 StatsAdUnit(
                     demandId = "d011",
@@ -59,6 +61,7 @@ class StatsRequestBodySerializerTest {
                     tokenStartTs = 678L,
                     tokenFinishTs = 679L,
                     ext = JSONObject(),
+                    timeout = 5000
                 )
             ),
             result = ResultBody(
@@ -146,6 +149,7 @@ class StatsRequestBodySerializerTest {
             tokenStartTs = 678L,
             tokenFinishTs = 679L,
             ext = JSONObject(),
+            timeout = 5000
         ).serialize()
 
         actual.assertEquals(

@@ -4,7 +4,7 @@ import org.bidon.sdk.stats.models.BidType
 import org.bidon.sdk.utils.json.JsonParser
 import org.json.JSONObject
 
-data class AdUnit(
+public data class AdUnit(
     val demandId: String,
     val label: String,
     val pricefloor: Double,

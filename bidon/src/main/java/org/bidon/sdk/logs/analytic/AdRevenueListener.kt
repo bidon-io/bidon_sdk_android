@@ -8,6 +8,6 @@ import org.bidon.sdk.ads.Ad
  * Bidon SDK allows you to get impression-level revenue data with Ad Revenue Callbacks.
  * This data includes information about network name, revenue, ad type, etc.
  */
-interface AdRevenueListener {
-    fun onRevenuePaid(ad: Ad, adValue: AdValue) {}
+public interface AdRevenueListener {
+    public fun onRevenuePaid(ad: Ad, adValue: AdValue) {}
 }

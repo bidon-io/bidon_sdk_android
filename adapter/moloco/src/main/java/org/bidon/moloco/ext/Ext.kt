@@ -8,7 +8,7 @@ import org.bidon.moloco.MolocoDemandId
 import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.config.BidonError
 
-fun MolocoAdError.toBidonLoadError() = when (errorType) {
+internal fun MolocoAdError.toBidonLoadError() = when (errorType) {
     MolocoAdError.ErrorType.AD_LOAD_FAILED_SDK_NOT_INIT,
     MolocoAdError.ErrorType.SDK_INIT_ERROR -> BidonError.SdkNotInitialized
 
@@ -18,7 +18,7 @@ fun MolocoAdError.toBidonLoadError() = when (errorType) {
     else -> BidonError.Unspecified(MolocoDemandId, message = this.description)
 }
 
-fun MolocoAdError.toBidonShowError() = when (errorType) {
+internal fun MolocoAdError.toBidonShowError() = when (errorType) {
     MolocoAdError.ErrorType.AD_SHOW_ERROR_NOT_LOADED -> BidonError.AdNotReady
     else -> BidonError.Unspecified(MolocoDemandId, message = this.description)
 }

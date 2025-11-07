@@ -8,7 +8,7 @@ import org.bidon.sdk.ads.banner.BannerFormat
 import org.bidon.sdk.ads.banner.helper.DeviceInfo.isTablet
 import org.bidon.sdk.auction.models.AdUnit
 
-class MetaFullscreenAuctionParams(
+internal class MetaFullscreenAuctionParams(
     val context: Context,
     override val adUnit: AdUnit,
 ) : AdAuctionParams {
@@ -17,7 +17,7 @@ class MetaFullscreenAuctionParams(
     val payload = adUnit.extra?.optString("payload")
 }
 
-class MetaBannerAuctionParams(
+internal class MetaBannerAuctionParams(
     val activity: Activity,
     val bannerFormat: BannerFormat,
     override val adUnit: AdUnit,

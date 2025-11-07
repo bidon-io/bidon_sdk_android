@@ -7,7 +7,7 @@ import org.bidon.sdk.logs.analytic.Precision
  * Created by Bidon Team on 21/02/2023.
  */
 
-typealias GoogleAdValue = com.google.android.gms.ads.AdValue
+internal typealias GoogleAdValue = com.google.android.gms.ads.AdValue
 
 internal fun GoogleAdValue.asBidonAdValue(): AdValue {
     return AdValue(

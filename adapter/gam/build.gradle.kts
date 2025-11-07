@@ -1,26 +1,28 @@
 import ext.ADAPTER_VERSION
-import ext.Dependencies
 import ext.Versions
 
 plugins {
-    id("common")
+    id("adapter")
 }
+
+val adapterSdkVersion = "24.5.0"
+val adapterMinor = 0
+val adapterSemantic = Versions.semanticVersion
+
+val adapterMainVersion = "$adapterSdkVersion.$adapterMinor$adapterSemantic"
 
 publishAdapter {
     artifactId = "gam-adapter"
-    versionName = Versions.Adapters.Gam
+    versionName = adapterMainVersion
 }
 
 android {
     namespace = "org.bidon.gam"
     defaultConfig {
-        ADAPTER_VERSION = Versions.Adapters.Gam
+        ADAPTER_VERSION = adapterMainVersion
     }
 }
 
 dependencies {
-    compileOnly(projects.bidon)
-    testImplementation(projects.bidon)
-
-    implementation(Dependencies.Google.PlayServicesAds)
+    implementation("com.google.android.gms:play-services-ads:$adapterSdkVersion")
 }

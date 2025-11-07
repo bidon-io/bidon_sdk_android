@@ -3,7 +3,7 @@ package org.bidon.sdk.ads.banner
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-enum class BannerFormat {
+public enum class BannerFormat {
     Banner, // 320x50
 
     // Large, // 320x100 is not supported

@@ -7,11 +7,11 @@ import org.json.JSONObject
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-data class BaseResponse(
+internal data class BaseResponse(
     val success: Boolean?,
     val error: Error?,
 ) {
-    data class Error(
+    internal data class Error(
         val code: Int,
         val message: String,
     )

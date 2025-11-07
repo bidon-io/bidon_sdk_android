@@ -6,7 +6,7 @@ import org.bidon.sdk.utils.serializer.Serializable
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-data class AdapterInfo(
+public data class AdapterInfo(
     @field:JsonName("version")
     val adapterVersion: String,
     @field:JsonName("sdk_version")

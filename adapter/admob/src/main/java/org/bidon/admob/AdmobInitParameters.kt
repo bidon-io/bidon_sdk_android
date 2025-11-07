@@ -13,7 +13,7 @@ internal class AdmobInitParameters(
     val queryInfoType: String?
 ) : AdapterParameters
 
-sealed interface AdmobBannerAuctionParams : AdAuctionParams {
+internal sealed interface AdmobBannerAuctionParams : AdAuctionParams {
     val activity: Activity
     val bannerFormat: BannerFormat
     val containerWidth: Float
@@ -34,7 +34,7 @@ sealed interface AdmobBannerAuctionParams : AdAuctionParams {
     }
 }
 
-sealed interface AdmobFullscreenAdAuctionParams : AdAuctionParams {
+internal sealed interface AdmobFullscreenAdAuctionParams : AdAuctionParams {
     val activity: Activity
 
     class Network(

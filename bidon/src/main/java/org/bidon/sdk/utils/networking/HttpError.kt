@@ -1,6 +1,6 @@
 package org.bidon.sdk.utils.networking
 
-sealed class HttpError : Throwable() {
+internal sealed class HttpError : Throwable() {
     abstract override val cause: Throwable
     abstract val rawResponse: ByteArray?
     abstract val code: Int

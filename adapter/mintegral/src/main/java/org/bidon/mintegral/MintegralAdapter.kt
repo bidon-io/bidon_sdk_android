@@ -6,6 +6,7 @@ import com.mbridge.msdk.MBridgeConstans
 import com.mbridge.msdk.mbbid.out.BidManager
 import com.mbridge.msdk.out.MBridgeSDKFactory
 import com.mbridge.msdk.out.SDKInitStatusListener
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.bidon.mintegral.ext.adapterVersion
 import org.bidon.mintegral.ext.sdkVersion
@@ -23,7 +24,6 @@ import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.config.BidonError
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.regulation.Regulation
-import org.bidon.sdk.utils.SdkDispatchers
 import org.json.JSONObject
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
@@ -62,7 +62,7 @@ internal class MintegralAdapter :
     override suspend fun init(context: Context, configParams: MintegralInitParam) {
         if (isInitialized.get()) return
 
-        withContext(SdkDispatchers.Main) {
+        withContext(Dispatchers.Main.immediate) {
             suspendCoroutine { continuation ->
                 this@MintegralAdapter.context = context
                 val sdk = MBridgeSDKFactory.getMBridgeSDK()

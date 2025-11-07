@@ -5,7 +5,7 @@ import android.content.Context
 /**
  * Created by Bidon Team on 07/09/2023.
  */
-interface Initializable<T : AdapterParameters> {
-    suspend fun init(context: Context, configParams: T)
-    fun parseConfigParam(json: String): T
+public interface Initializable<T : AdapterParameters> {
+    public suspend fun init(context: Context, configParams: T)
+    public fun parseConfigParam(json: String): T
 }

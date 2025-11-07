@@ -5,6 +5,6 @@ import org.bidon.sdk.regulation.Regulation
 /**
  * Created by Aleksei Cherniaev on 21/06/2023.
  */
-interface SupportsRegulation {
-    fun updateRegulation(regulation: Regulation)
+public interface SupportsRegulation {
+    public fun updateRegulation(regulation: Regulation)
 }

@@ -14,7 +14,7 @@ internal data class BidMachineParameters(
     val placements: Map<String, String>?,
 ) : AdapterParameters
 
-class BMBannerAuctionParams(
+internal class BMBannerAuctionParams(
     override val price: Double,
     override val adUnit: AdUnit,
     val activity: Activity,
@@ -30,7 +30,7 @@ class BMBannerAuctionParams(
     }
 }
 
-class BMFullscreenAuctionParams(
+internal class BMFullscreenAuctionParams(
     override val price: Double,
     override val adUnit: AdUnit,
     val context: Context,

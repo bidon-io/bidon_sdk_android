@@ -2,24 +2,27 @@ import ext.ADAPTER_VERSION
 import ext.Versions
 
 plugins {
-    id("common")
+    id("adapter")
 }
+
+val adapterSdkVersion = "5.4.0"
+val adapterMinor = 0
+val adapterSemantic = Versions.semanticVersion
+
+val adapterMainVersion = "$adapterSdkVersion.$adapterMinor$adapterSemantic"
 
 publishAdapter {
     artifactId = "bigoads-adapter"
-    versionName = Versions.Adapters.BigoAds
+    versionName = adapterMainVersion
 }
 
 android {
     namespace = "org.bidon.bigoads"
     defaultConfig {
-        ADAPTER_VERSION = Versions.Adapters.BigoAds
+        ADAPTER_VERSION = adapterMainVersion
     }
 }
 
 dependencies {
-    compileOnly(projects.bidon)
-    testImplementation(projects.bidon)
-
-    implementation("com.bigossp:bigo-ads:5.4.0")
+    implementation("com.bigossp:bigo-ads:$adapterSdkVersion")
 }

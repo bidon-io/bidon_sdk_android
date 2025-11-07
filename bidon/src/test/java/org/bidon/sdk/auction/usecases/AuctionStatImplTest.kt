@@ -10,7 +10,6 @@ import org.bidon.sdk.adapter.AdSource
 import org.bidon.sdk.adapter.DemandAd
 import org.bidon.sdk.adapter.DemandId
 import org.bidon.sdk.ads.AdType
-import org.bidon.sdk.ads.BidsInfo
 import org.bidon.sdk.ads.banner.helper.DeviceInfo
 import org.bidon.sdk.auction.AdTypeParam
 import org.bidon.sdk.auction.impl.MaxPriceAuctionResolver
@@ -128,8 +127,10 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                             },
                             roundStatus = RoundStatus.Successful
                         ),
-                        AuctionResult.UnknownAdapter(
-                            adUnit = getUnknowAdapterAdUnit(demandId = "demId7")
+                        AuctionResult.AuctionFailed(
+                            adUnit = getUnknowAdapterAdUnit(demandId = "demId7"),
+                            tokenInfo = null,
+                            roundStatus = RoundStatus.UnknownAdapter
                         ),
                     )
                 ),
@@ -191,29 +192,35 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         },
                         roundStatus = RoundStatus.NoFill,
                     ),
-                    AuctionResult.UnknownAdapter(
-                        adUnit = getUnknowAdapterAdUnit(demandId = "dem4")
+                    AuctionResult.AuctionFailed(
+                        adUnit = getUnknowAdapterAdUnit(demandId = "dem4"),
+                        tokenInfo = null,
+                        roundStatus = RoundStatus.UnknownAdapter
                     ),
-                    AuctionResult.UnknownAdapter(
-                        adUnit = getUnknowAdapterAdUnit(demandId = "dem3")
+                    AuctionResult.AuctionFailed(
+                        adUnit = getUnknowAdapterAdUnit(demandId = "dem3"),
+                        tokenInfo = null,
+                        roundStatus = RoundStatus.UnknownAdapter
                     ),
                 ),
                 noBidsInfo = listOf(
-                    BidsInfo(
-                        bidType = BidType.RTB.code,
+                    AdUnit(
+                        bidType = BidType.RTB,
                         demandId = "dem5",
                         label = "dem5_label",
-                        price = 0.2,
+                        pricefloor = 0.2,
                         uid = "12365",
-                        ext = JSONObject()
+                        timeout = 5000,
+                        ext = JSONObject().toString()
                     ),
-                    BidsInfo(
-                        bidType = BidType.RTB.code,
+                    AdUnit(
+                        bidType = BidType.RTB,
                         demandId = "dem6",
                         label = "dem6_label",
-                        price = 0.02,
+                        pricefloor = 0.02,
                         uid = "12356",
-                        ext = JSONObject()
+                        timeout = 5000,
+                        ext = JSONObject().toString()
                     )
                 ),
                 pricefloor = 1.1
@@ -235,7 +242,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     fillFinishTs = 987,
                     adUnitUid = "123",
                     adUnitLabel = "dem1_label",
-                    ext = JSONObject()
+                    ext = null,
+                    timeout = 5000
                 ),
                 StatsAdUnit(
                     demandId = "vungle",
@@ -248,7 +256,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     fillFinishTs = 917,
                     adUnitLabel = "vungle_bidding_android_inter",
                     adUnitUid = "1687107176709095424",
-                    ext = JSONObject()
+                    ext = JSONObject("{\"payload\":\"payload123\"}"),
+                    timeout = 5000
                 ),
                 StatsAdUnit(
                     demandId = "bidmachine",
@@ -261,35 +270,65 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     fillFinishTs = 987,
                     adUnitLabel = "dem1_label",
                     adUnitUid = "123",
-                    ext = JSONObject()
+                    ext = null,
+                    timeout = 5000
                 ),
-                getDemandStatAdapter(demandId = "dem3", status = RoundStatus.UnknownAdapter),
                 getDemandStatAdapter(demandId = "dem4", status = RoundStatus.UnknownAdapter),
-                getDemandStatAdapter(demandId = "bid3", status = RoundStatus.UnknownAdapter),
+                getDemandStatAdapter(demandId = "dem3", status = RoundStatus.UnknownAdapter),
+                getDemandStatAdapter(demandId = "demId7", status = RoundStatus.UnknownAdapter),
             ),
             winnerPrice = 1.24,
             noBids = listOf(
-                BidsInfo(
-                    bidType = BidType.RTB.code,
+                AdUnit(
+                    bidType = BidType.RTB,
                     demandId = "dem5",
                     label = "dem5_label",
-                    price = 0.2,
+                    pricefloor = 0.2,
                     uid = "12365",
-                    ext = JSONObject()
+                    timeout = 5000,
+                    ext = JSONObject().toString()
                 ),
-                BidsInfo(
-                    bidType = BidType.RTB.code,
+                AdUnit(
+                    bidType = BidType.RTB,
                     demandId = "dem6",
                     label = "dem6_label",
-                    price = 0.02,
+                    pricefloor = 0.02,
                     uid = "12356",
-                    ext = JSONObject()
+                    timeout = 5000,
+                    ext = JSONObject().toString()
                 )
             ),
             winnerDemandId = DemandId("vungle"),
         )
 
-        assertThat(actual).isEqualTo(expected)
+        // Compare each field separately to handle JSONObject comparison issues
+        assertThat(actual.auctionId).isEqualTo(expected.auctionId)
+        assertThat(actual.pricefloor).isEqualTo(expected.pricefloor)
+        assertThat(actual.noBids).isEqualTo(expected.noBids)
+        assertThat(actual.winnerDemandId).isEqualTo(expected.winnerDemandId)
+        assertThat(actual.winnerPrice).isEqualTo(expected.winnerPrice)
+        assertThat(actual.demands.size).isEqualTo(expected.demands.size)
+
+        actual.demands.forEachIndexed { index, actualDemand ->
+            val expectedDemand = expected.demands[index]
+            assertThat(actualDemand.demandId).isEqualTo(expectedDemand.demandId)
+            assertThat(actualDemand.status).isEqualTo(expectedDemand.status)
+            assertThat(actualDemand.price).isEqualTo(expectedDemand.price)
+            assertThat(actualDemand.tokenStartTs).isEqualTo(expectedDemand.tokenStartTs)
+            assertThat(actualDemand.tokenFinishTs).isEqualTo(expectedDemand.tokenFinishTs)
+            assertThat(actualDemand.bidType).isEqualTo(expectedDemand.bidType)
+            assertThat(actualDemand.fillStartTs).isEqualTo(expectedDemand.fillStartTs)
+            assertThat(actualDemand.fillFinishTs).isEqualTo(expectedDemand.fillFinishTs)
+            assertThat(actualDemand.adUnitUid).isEqualTo(expectedDemand.adUnitUid)
+            assertThat(actualDemand.adUnitLabel).isEqualTo(expectedDemand.adUnitLabel)
+            assertThat(actualDemand.errorMessage).isEqualTo(expectedDemand.errorMessage)
+            assertThat(actualDemand.timeout).isEqualTo(expectedDemand.timeout)
+
+            // Compare JSONObject by normalized string representation
+            val actualExtStr = normalizeJsonString(actualDemand.ext?.toString())
+            val expectedExtStr = normalizeJsonString(expectedDemand.ext?.toString())
+            assertThat(actualExtStr).isEqualTo(expectedExtStr)
+        }
     }
 
     @Test
@@ -418,29 +457,35 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                         },
                         roundStatus = RoundStatus.NoFill,
                     ),
-                    AuctionResult.UnknownAdapter(
-                        adUnit = getUnknowAdapterAdUnit(demandId = "dem3")
+                    AuctionResult.AuctionFailed(
+                        adUnit = getUnknowAdapterAdUnit(demandId = "dem3"),
+                        tokenInfo = null,
+                        roundStatus = RoundStatus.UnknownAdapter
                     ),
-                    AuctionResult.UnknownAdapter(
-                        adUnit = getUnknowAdapterAdUnit(demandId = "dem4")
+                    AuctionResult.AuctionFailed(
+                        adUnit = getUnknowAdapterAdUnit(demandId = "dem4"),
+                        tokenInfo = null,
+                        roundStatus = RoundStatus.UnknownAdapter
                     )
                 ),
                 noBidsInfo = listOf(
-                    BidsInfo(
-                        bidType = BidType.RTB.code,
+                    AdUnit(
+                        bidType = BidType.RTB,
                         demandId = "dem5",
                         label = "dem5_label",
-                        price = 0.2,
+                        pricefloor = 0.2,
                         uid = "12365",
-                        ext = JSONObject()
+                        timeout = 5000,
+                        ext = null
                     ),
-                    BidsInfo(
-                        bidType = BidType.RTB.code,
+                    AdUnit(
+                        bidType = BidType.RTB,
                         demandId = "dem6",
                         label = "dem6_label",
-                        price = 0.02,
+                        pricefloor = 0.02,
                         uid = "12356",
-                        ext = JSONObject()
+                        timeout = 5000,
+                        ext = null
                     )
                 ),
                 pricefloor = 1.1
@@ -461,7 +506,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     fillFinishTs = 987,
                     adUnitUid = "123",
                     adUnitLabel = "dem2_label",
-                    ext = JSONObject()
+                    ext = null,
+                    timeout = 5000
                 ),
                 StatsAdUnit(
                     demandId = "bidmachine",
@@ -474,7 +520,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     bidType = BidType.RTB.code,
                     adUnitUid = "1234",
                     adUnitLabel = "bidmachine_label",
-                    ext = JSONObject()
+                    ext = null,
+                    timeout = 5000
                 ),
                 StatsAdUnit(
                     demandId = "dem1",
@@ -487,7 +534,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     fillFinishTs = 987,
                     adUnitUid = "123",
                     adUnitLabel = "dem1_label",
-                    ext = JSONObject()
+                    ext = null,
+                    timeout = 5000
                 ),
                 getDemandStatAdapter(demandId = "dem3", status = RoundStatus.UnknownAdapter),
                 getDemandStatAdapter(demandId = "dem4", status = RoundStatus.UnknownAdapter),
@@ -495,25 +543,54 @@ internal class AuctionStatImplTest : ConcurrentTest() {
             winnerPrice = 1.5,
             winnerDemandId = DemandId("bidmachine"),
             noBids = listOf(
-                BidsInfo(
-                    bidType = BidType.RTB.code,
+                AdUnit(
+                    bidType = BidType.RTB,
                     demandId = "dem5",
                     label = "dem5_label",
-                    price = 0.2,
+                    pricefloor = 0.2,
                     uid = "12365",
-                    ext = JSONObject()
+                    timeout = 5000,
+                    ext = null
                 ),
-                BidsInfo(
-                    bidType = BidType.RTB.code,
+                AdUnit(
+                    bidType = BidType.RTB,
                     demandId = "dem6",
                     label = "dem6_label",
-                    price = 0.02,
+                    pricefloor = 0.02,
                     uid = "12356",
-                    ext = JSONObject()
+                    timeout = 5000,
+                    ext = null
                 )
             )
         )
-        assertThat(actual).isEqualTo(expected)
+        // Compare each field separately to handle JSONObject comparison issues
+        assertThat(actual.auctionId).isEqualTo(expected.auctionId)
+        assertThat(actual.pricefloor).isEqualTo(expected.pricefloor)
+        assertThat(actual.noBids).isEqualTo(expected.noBids)
+        assertThat(actual.winnerDemandId).isEqualTo(expected.winnerDemandId)
+        assertThat(actual.winnerPrice).isEqualTo(expected.winnerPrice)
+        assertThat(actual.demands.size).isEqualTo(expected.demands.size)
+
+        actual.demands.forEachIndexed { index, actualDemand ->
+            val expectedDemand = expected.demands[index]
+            assertThat(actualDemand.demandId).isEqualTo(expectedDemand.demandId)
+            assertThat(actualDemand.status).isEqualTo(expectedDemand.status)
+            assertThat(actualDemand.price).isEqualTo(expectedDemand.price)
+            assertThat(actualDemand.tokenStartTs).isEqualTo(expectedDemand.tokenStartTs)
+            assertThat(actualDemand.tokenFinishTs).isEqualTo(expectedDemand.tokenFinishTs)
+            assertThat(actualDemand.bidType).isEqualTo(expectedDemand.bidType)
+            assertThat(actualDemand.fillStartTs).isEqualTo(expectedDemand.fillStartTs)
+            assertThat(actualDemand.fillFinishTs).isEqualTo(expectedDemand.fillFinishTs)
+            assertThat(actualDemand.adUnitUid).isEqualTo(expectedDemand.adUnitUid)
+            assertThat(actualDemand.adUnitLabel).isEqualTo(expectedDemand.adUnitLabel)
+            assertThat(actualDemand.errorMessage).isEqualTo(expectedDemand.errorMessage)
+            assertThat(actualDemand.timeout).isEqualTo(expectedDemand.timeout)
+
+            // Compare JSONObject by normalized string representation
+            val actualExtStr = normalizeJsonString(actualDemand.ext?.toString())
+            val expectedExtStr = normalizeJsonString(expectedDemand.ext?.toString())
+            assertThat(actualExtStr).isEqualTo(expectedExtStr)
+        }
     }
 
     @Test
@@ -527,7 +604,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                 pricefloor = 0.2,
                 timeout = 5000L,
                 uid = "12365",
-                ext = ""
+                ext = null
             ),
             AdUnit(
                 bidType = BidType.RTB,
@@ -536,7 +613,7 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                 pricefloor = 0.02,
                 uid = "12356",
                 timeout = 5000L,
-                ext = ""
+                ext = null
             )
         )
         val auctionData = AuctionResponse(
@@ -686,21 +763,23 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     )
                 ),
                 noBidsInfo = listOf(
-                    BidsInfo(
-                        bidType = BidType.RTB.code,
+                    AdUnit(
+                        bidType = BidType.RTB,
                         demandId = "dem5",
                         label = "dem5_label",
-                        price = 0.2,
+                        pricefloor = 0.2,
                         uid = "12365",
-                        ext = JSONObject()
+                        timeout = 5000,
+                        ext = null
                     ),
-                    BidsInfo(
-                        bidType = BidType.RTB.code,
+                    AdUnit(
+                        bidType = BidType.RTB,
                         demandId = "dem6",
                         label = "dem6_label",
-                        price = 0.02,
+                        pricefloor = 0.02,
                         uid = "12356",
-                        ext = JSONObject()
+                        timeout = 5000,
+                        ext = null
                     )
                 ),
                 pricefloor = 1.1
@@ -729,7 +808,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     fillFinishTs = 987,
                     adUnitUid = "123",
                     adUnitLabel = "dem2_label",
-                    ext = JSONObject()
+                    ext = null,
+                    timeout = 5000
                 ),
                 StatsAdUnit(
                     demandId = "bidmachine",
@@ -742,7 +822,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     fillFinishTs = 917,
                     adUnitUid = "1234",
                     adUnitLabel = "bidmachine_label",
-                    ext = JSONObject()
+                    ext = null,
+                    timeout = 5000
                 ),
                 StatsAdUnit(
                     demandId = "dem1",
@@ -755,7 +836,8 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                     fillFinishTs = 987,
                     adUnitUid = "123",
                     adUnitLabel = "dem1_label",
-                    ext = JSONObject()
+                    ext = null,
+                    timeout = 5000
                 )
             ),
             result = ResultBody(
@@ -772,21 +854,62 @@ internal class AuctionStatImplTest : ConcurrentTest() {
                 rewarded = null,
             ),
         )
-        assertThat(actual).isEqualTo(expected)
+        // Compare each field separately to handle JSONObject comparison issues
+        assertThat(actual).isNotNull()
+        assertThat(actual!!.auctionId).isEqualTo(expected.auctionId)
+        assertThat(actual.auctionConfigurationId).isEqualTo(expected.auctionConfigurationId)
+        assertThat(actual.auctionConfigurationUid).isEqualTo(expected.auctionConfigurationUid)
+        assertThat(actual.auctionPricefloor).isEqualTo(expected.auctionPricefloor)
+        assertThat(actual.result.winnerDemandId).isEqualTo(expected.result.winnerDemandId)
+        assertThat(actual.result.price).isEqualTo(expected.result.price)
+        assertThat(actual.result.bidType).isEqualTo(expected.result.bidType)
+        assertThat(actual.result.status).isEqualTo(expected.result.status)
+        assertThat(actual.result.winnerAdUnitUid).isEqualTo(expected.result.winnerAdUnitUid)
+        assertThat(actual.result.winnerAdUnitLabel).isEqualTo(expected.result.winnerAdUnitLabel)
+        assertThat(actual.result.auctionStartTs).isEqualTo(expected.result.auctionStartTs)
+        assertThat(actual.result.auctionFinishTs).isEqualTo(expected.result.auctionFinishTs)
+        assertThat(actual.result.banner).isEqualTo(expected.result.banner)
+        assertThat(actual.result.interstitial).isEqualTo(expected.result.interstitial)
+        assertThat(actual.result.rewarded).isEqualTo(expected.result.rewarded)
+        assertThat(actual.adUnits.size).isEqualTo(expected.adUnits.size)
+
+        actual.adUnits.forEachIndexed { index, actualDemand ->
+            val expectedDemand = expected.adUnits[index]
+            assertThat(actualDemand).isNotNull()
+            assertThat(expectedDemand).isNotNull()
+            assertThat(actualDemand!!.demandId).isEqualTo(expectedDemand!!.demandId)
+            assertThat(actualDemand.status).isEqualTo(expectedDemand.status)
+            assertThat(actualDemand.price).isEqualTo(expectedDemand.price)
+            assertThat(actualDemand.tokenStartTs).isEqualTo(expectedDemand.tokenStartTs)
+            assertThat(actualDemand.tokenFinishTs).isEqualTo(expectedDemand.tokenFinishTs)
+            assertThat(actualDemand.bidType).isEqualTo(expectedDemand.bidType)
+            assertThat(actualDemand.fillStartTs).isEqualTo(expectedDemand.fillStartTs)
+            assertThat(actualDemand.fillFinishTs).isEqualTo(expectedDemand.fillFinishTs)
+            assertThat(actualDemand.adUnitUid).isEqualTo(expectedDemand.adUnitUid)
+            assertThat(actualDemand.adUnitLabel).isEqualTo(expectedDemand.adUnitLabel)
+            assertThat(actualDemand.errorMessage).isEqualTo(expectedDemand.errorMessage)
+            assertThat(actualDemand.timeout).isEqualTo(expectedDemand.timeout)
+
+            // Compare JSONObject by normalized string representation
+            val actualExtStr = normalizeJsonString(actualDemand.ext?.toString())
+            val expectedExtStr = normalizeJsonString(expectedDemand.ext?.toString())
+            assertThat(actualExtStr).isEqualTo(expectedExtStr)
+        }
     }
 
     private fun getDemandStatAdapter(demandId: String, status: RoundStatus) = StatsAdUnit(
         demandId = demandId,
         status = status.code,
-        price = null,
-        bidType = null,
+        price = 0.021,
+        bidType = BidType.RTB.code,
         tokenStartTs = null,
         tokenFinishTs = null,
         fillStartTs = null,
         fillFinishTs = null,
-        adUnitUid = null,
-        adUnitLabel = null,
-        ext = JSONObject()
+        adUnitUid = "123567",
+        adUnitLabel = "dem7_label",
+        ext = JSONObject("{}"),
+        timeout = 5000
     )
 
     private fun getUnknowAdapterAdUnit(demandId: String) =
@@ -797,6 +920,21 @@ internal class AuctionStatImplTest : ConcurrentTest() {
             pricefloor = 0.021,
             uid = "123567",
             timeout = 5000L,
-            ext = ""
+            ext = "{}"
         )
+
+    private fun normalizeJsonString(jsonStr: String?): String? {
+        return when {
+            jsonStr == null -> null
+            jsonStr.trim() == "{}" -> "{}"
+            else -> {
+                try {
+                    // Parse and re-stringify to normalize formatting
+                    JSONObject(jsonStr).toString()
+                } catch (e: Exception) {
+                    jsonStr
+                }
+            }
+        }
+    }
 }

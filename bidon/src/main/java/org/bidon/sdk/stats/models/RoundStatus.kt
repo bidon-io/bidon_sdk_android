@@ -5,27 +5,27 @@ import org.bidon.sdk.config.BidonError
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-sealed class RoundStatus(val code: String) {
-    object Win : RoundStatus("WIN")
-    object Lose : RoundStatus("LOSE")
-    object NoBid : RoundStatus("NO_BID")
-    object NoFill : RoundStatus("NO_FILL") // for Admob only NoBid possible
-    object UnknownAdapter : RoundStatus("UNKNOWN_ADAPTER")
-    object AdapterNotInitialized : RoundStatus("ADAPTER_NOT_INITIALIZED")
-    object BidTimeoutReached : RoundStatus("BID_TIMEOUT_REACHED")
-    object FillTimeoutReached : RoundStatus("FILL_TIMEOUT_REACHED")
-    object NetworkError : RoundStatus("NETWORK_ERROR")
-    class IncorrectAdUnit(val errorMessage: String?) : RoundStatus("INCORRECT_AD_UNIT")
-    object NoAppropriateAdUnitId : RoundStatus("NO_APPROPRIATE_AD_UNIT_ID")
-    object AuctionCancelled : RoundStatus("AUCTION_CANCELLED")
-    object AdFormatNotSupported : RoundStatus("AD_FORMAT_NOT_SUPPORTED")
-    class UnspecifiedException(val errorMessage: String?) : RoundStatus("UNSPECIFIED_EXCEPTION")
-    object BelowPricefloor : RoundStatus("BELOW_PRICEFLOOR")
+public sealed class RoundStatus(public val code: String) {
+    public object Win : RoundStatus("WIN")
+    public object Lose : RoundStatus("LOSE")
+    public object NoBid : RoundStatus("NO_BID")
+    public object NoFill : RoundStatus("NO_FILL") // for Admob only NoBid possible
+    public object UnknownAdapter : RoundStatus("UNKNOWN_ADAPTER")
+    public object AdapterNotInitialized : RoundStatus("ADAPTER_NOT_INITIALIZED")
+    public object BidTimeoutReached : RoundStatus("BID_TIMEOUT_REACHED")
+    public object FillTimeoutReached : RoundStatus("FILL_TIMEOUT_REACHED")
+    public object NetworkError : RoundStatus("NETWORK_ERROR")
+    public class IncorrectAdUnit(public val errorMessage: String?) : RoundStatus("INCORRECT_AD_UNIT")
+    public object NoAppropriateAdUnitId : RoundStatus("NO_APPROPRIATE_AD_UNIT_ID")
+    public object AuctionCancelled : RoundStatus("AUCTION_CANCELLED")
+    public object AdFormatNotSupported : RoundStatus("AD_FORMAT_NOT_SUPPORTED")
+    public class UnspecifiedException(public val errorMessage: String?) : RoundStatus("UNSPECIFIED_EXCEPTION")
+    public object BelowPricefloor : RoundStatus("BELOW_PRICEFLOOR")
 
-    object Successful : RoundStatus("INTERNAL_STATUS") // Internal status, its code should not be used
+    public object Successful : RoundStatus("INTERNAL_STATUS") // Internal status, its code should not be used
 }
 
-fun Throwable.asRoundStatus() = when (this as? BidonError) {
+internal fun Throwable.asRoundStatus(): RoundStatus = when (this as? BidonError) {
     is BidonError.AdFormatIsNotSupported -> RoundStatus.AdFormatNotSupported
     is BidonError.BidTimedOut -> RoundStatus.BidTimeoutReached
     is BidonError.FillTimedOut -> RoundStatus.FillTimeoutReached
