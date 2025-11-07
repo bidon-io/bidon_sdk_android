@@ -41,6 +41,10 @@ gradlePlugin {
             id = "common"
             implementationClass = "CommonGradlePlugin"
         }
+        register("adapterGradle") {
+            id = "adapter"
+            implementationClass = "AdapterGradlePlugin"
+        }
         register("publishAdapterGradle") {
             id = "publish-adapter"
             implementationClass = "PublishAdapterPlugin"

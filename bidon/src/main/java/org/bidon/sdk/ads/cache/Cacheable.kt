@@ -6,7 +6,7 @@ import androidx.annotation.Keep
  * Created by Aleksei Cherniaev on 28/09/2023.
  */
 @Keep
-interface Cacheable {
+internal interface Cacheable {
     fun withSettings(settings: Settings)
 
     @Keep

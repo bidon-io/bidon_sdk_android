@@ -5,6 +5,6 @@ package org.bidon.sdk.adapter
  *
  * Shows if an adapter supports test mode.
  */
-interface SupportsTestMode {
-    var isTestMode: Boolean
+public interface SupportsTestMode {
+    public var isTestMode: Boolean
 }

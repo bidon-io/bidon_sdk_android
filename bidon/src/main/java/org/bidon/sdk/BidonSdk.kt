@@ -15,10 +15,10 @@ import org.bidon.sdk.utils.networking.NetworkSettings
 /**
  * Created by Aleksei Cherniaev on 07/02/2023.
  */
-object BidonSdk {
+public object BidonSdk {
 
-    const val DefaultPricefloor = 0.0
-    const val SdkVersion = BuildConfig.ADAPTER_VERSION
+    public const val DefaultPricefloor: Double = 0.0
+    public const val SdkVersion: String = BuildConfig.BIDON_SDK_VERSION
 
     internal val bidon by lazy { Bidon() }
 
@@ -26,30 +26,30 @@ object BidonSdk {
      * Represents User's [Segment]
      */
     @JvmStatic
-    val segment: Segment
+    public val segment: Segment
         get() = bidon.segment
 
     @JvmStatic
-    val loggerLevel: Logger.Level
+    public val loggerLevel: Logger.Level
         get() = bidon.loggerLevel
 
     @JvmStatic
-    val regulation: Regulation
+    public val regulation: Regulation
         get() = bidon.regulation
 
     @JvmStatic
-    val baseUrl: String
+    public val baseUrl: String
         get() = bidon.baseUrl
 
     @JvmStatic
-    val isTestMode: Boolean
+    public val isTestMode: Boolean
         get() = bidon.isTestMode
 
     @JvmStatic
-    fun isInitialized(): Boolean = bidon.isInitialized
+    public fun isInitialized(): Boolean = bidon.isInitialized
 
     @JvmStatic
-    fun setLoggerLevel(logLevel: Logger.Level): BidonSdk {
+    public fun setLoggerLevel(logLevel: Logger.Level): BidonSdk {
         bidon.setLogLevel(logLevel)
         return this
     }
@@ -58,7 +58,7 @@ object BidonSdk {
      * Default adapters is in [DefaultAdapters]
      */
     @JvmStatic
-    fun registerDefaultAdapters(): BidonSdk {
+    public fun registerDefaultAdapters(): BidonSdk {
         bidon.registerDefaultAdapters()
         return this
     }
@@ -67,7 +67,7 @@ object BidonSdk {
      * Registering custom Adapters
      */
     @JvmStatic
-    fun registerAdapters(vararg adapters: Adapter): BidonSdk {
+    public fun registerAdapters(vararg adapters: Adapter): BidonSdk {
         bidon.registerAdapters(*adapters)
         return this
     }
@@ -76,7 +76,7 @@ object BidonSdk {
      * Registering custom Adapters by full class name
      */
     @JvmStatic
-    fun registerAdapter(adaptersClassName: String): BidonSdk {
+    public fun registerAdapter(adaptersClassName: String): BidonSdk {
         bidon.registerAdapter(adaptersClassName)
         return this
     }
@@ -86,7 +86,7 @@ object BidonSdk {
      * If error occurs, it will be logged.
      */
     @JvmStatic
-    fun setInitializationCallback(initializationCallback: InitializationCallback): BidonSdk {
+    public fun setInitializationCallback(initializationCallback: InitializationCallback): BidonSdk {
         bidon.setInitializationCallback(initializationCallback)
         return this
     }
@@ -95,13 +95,13 @@ object BidonSdk {
      * Redefine BaseUrl for /action-requests. Default base url [NetworkSettings.BidonBaseUrl]
      */
     @JvmStatic
-    fun setBaseUrl(host: String): BidonSdk {
+    public fun setBaseUrl(host: String): BidonSdk {
         bidon.setBaseUrl(host)
         return this
     }
 
     @JvmStatic
-    fun initialize(context: Context, appKey: String) =
+    public fun initialize(context: Context, appKey: String): Unit =
         bidon.initialize(context.applicationContext, appKey)
 
     /**
@@ -111,7 +111,7 @@ object BidonSdk {
      *              Possible types are String, Int, Long, Double, Float, Boolean, Char
      */
     @JvmStatic
-    fun addExtra(key: String, value: Any?): BidonSdk {
+    public fun addExtra(key: String, value: Any?): BidonSdk {
         bidon.addExtra(key, value)
         return this
     }
@@ -120,7 +120,7 @@ object BidonSdk {
      * Obtaining SDK-level [Extras]
      */
     @JvmStatic
-    fun getExtras(): Map<String, Any> = bidon.getExtras()
+    public fun getExtras(): Map<String, Any> = bidon.getExtras()
 
     /**
      * Enabling test mode.
@@ -129,7 +129,7 @@ object BidonSdk {
      * @param isTestMode true to enable test mode. False by default.
      */
     @JvmStatic
-    fun setTestMode(isTestMode: Boolean): BidonSdk {
+    public fun setTestMode(isTestMode: Boolean): BidonSdk {
         bidon.isTestMode = isTestMode
         return this
     }
@@ -138,7 +138,7 @@ object BidonSdk {
      * Unity uses only
      */
     @JvmStatic
-    fun setFramework(framework: String): BidonSdk {
+    public fun setFramework(framework: String): BidonSdk {
         UnitySpecificInfo.frameworkName = framework
         return this
     }
@@ -147,7 +147,7 @@ object BidonSdk {
      * Unity uses only
      */
     @JvmStatic
-    fun setFrameworkVersion(version: String): BidonSdk {
+    public fun setFrameworkVersion(version: String): BidonSdk {
         UnitySpecificInfo.frameworkVersion = version
         return this
     }
@@ -156,7 +156,7 @@ object BidonSdk {
      * Unity uses only
      */
     @JvmStatic
-    fun setPluginVersion(version: String): BidonSdk {
+    public fun setPluginVersion(version: String): BidonSdk {
         UnitySpecificInfo.pluginVersion = version
         return this
     }

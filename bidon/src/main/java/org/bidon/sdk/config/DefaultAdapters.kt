@@ -6,7 +6,7 @@ package org.bidon.sdk.config
  * Define adapters classes. Don't forget to add rules to proguard-files.
  */
 @Suppress("unused")
-enum class DefaultAdapters(val classPath: String) {
+public enum class DefaultAdapters(public val classPath: String) {
     AdmobAdapter(classPath = "org.bidon.admob.AdmobAdapter"),
     AmazonAdapter(classPath = "org.bidon.amazon.AmazonAdapter"),
     ApplovinAdapter(classPath = "org.bidon.applovin.ApplovinAdapter"),
@@ -21,6 +21,8 @@ enum class DefaultAdapters(val classPath: String) {
     MintegralAdapter(classPath = "org.bidon.mintegral.MintegralAdapter"),
     MobilefuseAdapter(classPath = "org.bidon.mobilefuse.MobileFuseAdapter"),
     MolocoAdapter(classPath = "org.bidon.moloco.MolocoAdapter"),
+    TaurusXAdapter(classPath = "org.bidon.taurusx.TaurusXAdapter"),
+    StartIoAdapter(classPath = "org.bidon.startio.StartIoAdapter"),
     UnityAdsAdapter(classPath = "org.bidon.unityads.UnityAdsAdapter"),
     VkAdsAdapter(classPath = "org.bidon.vkads.VkAdsAdapter"),
     VungleAdapter(classPath = "org.bidon.vungle.VungleAdapter"),

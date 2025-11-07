@@ -8,6 +8,7 @@ import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.exclude
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 class CommonGradlePlugin : Plugin<Project> {
@@ -63,6 +64,9 @@ class CommonGradlePlugin : Plugin<Project> {
                     dimension = "server"
                 }
             }
+            extensions.configure<KotlinAndroidProjectExtension> {
+                explicitApi()
+            }
         }
 
         project.tasks.withType(KotlinJvmCompile::class.java).configureEach {
@@ -80,11 +84,9 @@ class CommonGradlePlugin : Plugin<Project> {
 
         dependencies {
             add("implementation", platform(Dependencies.Kotlin.bom))
-            add("implementation", Dependencies.Kotlin.reflect)
             add("implementation", platform(Dependencies.Kotlin.Coroutines.bom))
             add("implementation", Dependencies.Kotlin.Coroutines.KotlinxCoroutinesCore)
             add("implementation", Dependencies.Kotlin.Coroutines.KotlinxCoroutinesAndroid)
-            add("implementation", Dependencies.Android.CoreKtx)
             add("implementation", Dependencies.Android.Annotation)
 
             /**
@@ -99,8 +101,6 @@ class CommonGradlePlugin : Plugin<Project> {
             })
             add("testImplementation", "com.google.truth:truth:1.1.4")
             add("testImplementation", "org.json:json:20210307")
-            add("androidTestImplementation", "androidx.test.ext:junit:1.1.5")
-            add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.5.1")
         }
     }
 }

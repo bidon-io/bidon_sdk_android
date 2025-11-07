@@ -5,7 +5,7 @@ import org.bidon.amazon.SlotType
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.auction.models.AdUnit
 
-data class FullscreenAuctionParams(
+internal data class FullscreenAuctionParams(
     val activity: Activity,
     override val adUnit: AdUnit,
 ) : AdAuctionParams {

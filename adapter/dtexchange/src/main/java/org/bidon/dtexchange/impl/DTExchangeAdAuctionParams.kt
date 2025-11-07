@@ -8,14 +8,14 @@ import org.bidon.sdk.auction.models.AdUnit
 /**
  * Created by Bidon Team on 28/02/2023.
  */
-data class DTExchangeAdAuctionParams(
+internal data class DTExchangeAdAuctionParams(
     override val adUnit: AdUnit
 ) : AdAuctionParams {
     val spotId: String? = adUnit.extra?.optString("spot_id")
     override val price: Double = adUnit.pricefloor
 }
 
-class DTExchangeBannerAuctionParams(
+internal class DTExchangeBannerAuctionParams(
     val activity: Activity,
     val bannerFormat: BannerFormat,
     override val adUnit: AdUnit

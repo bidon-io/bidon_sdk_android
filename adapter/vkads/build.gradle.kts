@@ -2,25 +2,28 @@ import ext.ADAPTER_VERSION
 import ext.Versions
 
 plugins {
-    id("common")
+    id("adapter")
 }
+
+val adapterSdkVersion = "5.27.2"
+val adapterMinor = 0
+val adapterSemantic = Versions.semanticVersion
+
+val adapterMainVersion = "$adapterSdkVersion.$adapterMinor$adapterSemantic"
 
 publishAdapter {
     artifactId = "vkads-adapter"
-    versionName = Versions.Adapters.VkAds
+    versionName = adapterMainVersion
 }
 
 android {
     namespace = "org.bidon.vkads"
 
     defaultConfig {
-        ADAPTER_VERSION = Versions.Adapters.VkAds
+        ADAPTER_VERSION = adapterMainVersion
     }
 }
 
 dependencies {
-    compileOnly(projects.bidon)
-    testImplementation(projects.bidon)
-
-    implementation("com.my.target:mytarget-sdk:5.27.2")
+    implementation("com.my.target:mytarget-sdk:$adapterSdkVersion")
 }

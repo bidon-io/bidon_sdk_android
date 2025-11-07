@@ -67,14 +67,7 @@ internal class MolocoBannerImpl :
 
             override fun onAdShowFailed(molocoAdError: MolocoAdError) {
                 logInfo(TAG, "Banner ad show failed: ${molocoAdError.description}")
-                emitEvent(
-                    AdEvent.ShowFailed(
-                        BidonError.Unspecified(
-                            demandId,
-                            molocoAdError.toBidonShowError()
-                        )
-                    )
-                )
+                emitEvent(AdEvent.ShowFailed(molocoAdError.toBidonShowError()))
             }
 
             override fun onAdHidden(molocoAd: MolocoAd) {

@@ -8,14 +8,14 @@ import org.bidon.sdk.auction.models.AdUnit
 /**
  * Created by Aleksei Cherniaev on 02/03/2023.
  */
-data class UnityAdsFullscreenAuctionParams(
+internal data class UnityAdsFullscreenAuctionParams(
     override val adUnit: AdUnit,
 ) : AdAuctionParams {
     override val price: Double = adUnit.pricefloor
     val placementId: String? = adUnit.extra?.getString("placement_id")
 }
 
-class UnityAdsBannerAuctionParams(
+internal class UnityAdsBannerAuctionParams(
     val activity: Activity,
     val bannerFormat: BannerFormat,
     override val adUnit: AdUnit,

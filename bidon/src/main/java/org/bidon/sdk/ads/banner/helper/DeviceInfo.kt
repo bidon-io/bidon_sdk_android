@@ -12,17 +12,17 @@ import kotlin.math.sqrt
 /**
  * Created by Aleksei Cherniaev on 07/05/2023.
  */
-object DeviceInfo {
+public object DeviceInfo {
 
     private var applicationContext: Context? = null
 
-    var isTablet: Boolean = false
+    public var isTablet: Boolean = false
         private set
 
-    val isLandscapeConfiguration: Boolean
+    public val isLandscapeConfiguration: Boolean
         get() = applicationContext?.resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    val screenWidthDp: Int
+    public val screenWidthDp: Int
         get() {
             return runCatching {
                 val displayMetrics = applicationContext?.resources?.displayMetrics ?: return 0
@@ -31,7 +31,7 @@ object DeviceInfo {
             }.getOrNull() ?: 0
         }
 
-    val screenHeightDp: Int
+    public val screenHeightDp: Int
         get() {
             return runCatching {
                 val displayMetrics = applicationContext?.resources?.displayMetrics ?: return 0
@@ -45,7 +45,7 @@ object DeviceInfo {
      * or ones created with Context#createDisplayContext are associated with displays.
      */
     @Suppress("DEPRECATION")
-    fun init(context: Context) {
+    public fun init(context: Context) {
         applicationContext = context.applicationContext
         val display: Display = getDisplay(context) ?: return
         val metrics = DisplayMetrics()

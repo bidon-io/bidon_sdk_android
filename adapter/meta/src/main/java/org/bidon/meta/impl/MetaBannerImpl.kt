@@ -23,7 +23,7 @@ import org.bidon.sdk.stats.models.BidType
 /**
  * Created by Aleksei Cherniaev on 08/08/2023.
  */
-class MetaBannerImpl :
+internal class MetaBannerImpl :
     AdSource.Banner<MetaBannerAuctionParams>,
     AdEventFlow by AdEventFlowImpl(),
     StatisticsCollector by StatisticsCollectorImpl() {

@@ -30,7 +30,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import com.moloco.sdk.BuildConfig as MolocoSdkBuildConfig
-import org.bidon.sdk.BuildConfig as BidonBuildConfig
+import org.bidon.moloco.BuildConfig as MolocoAdapterBuildConfig
 
 private const val TAG = "MolocoAdapter"
 internal val MolocoDemandId = DemandId("moloco")
@@ -49,7 +49,7 @@ internal class MolocoAdapter :
     override val demandId: DemandId = MolocoDemandId
 
     override val adapterInfo: AdapterInfo = AdapterInfo(
-        adapterVersion = BidonBuildConfig.ADAPTER_VERSION,
+        adapterVersion = MolocoAdapterBuildConfig.ADAPTER_VERSION,
         sdkVersion = MolocoSdkBuildConfig.SDK_VERSION_NAME
     )
 

@@ -18,7 +18,7 @@ import org.junit.Test
 class ApplovinBannerImplTest {
     private val activity = mockk<Activity>()
     private val testee by lazy {
-        ApplovinBannerImpl(mockk()).apply {
+        ApplovinBannerImpl().apply {
             addDemandId(ApplovinDemandId)
         }
     }

@@ -3,7 +3,7 @@ package org.bidon.sdk.stats.models
 /**
  * Created by Aleksei Cherniaev on 11/09/2023.
  */
-enum class BidType(val code: String) {
+public enum class BidType(public val code: String) {
     /**
      * Real time bidding
      */

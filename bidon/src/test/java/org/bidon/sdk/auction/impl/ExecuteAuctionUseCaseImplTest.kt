@@ -27,12 +27,9 @@ import org.bidon.sdk.utils.di.DI
 import org.bidon.sdk.utils.json.jsonObject
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
-
 /**
  * Created by Aleksei Cherniaev on 26/06/2023.
  */
-@Ignore
 internal class ExecuteAuctionUseCaseImplTest : ConcurrentTest() {
 
     private val auctionConfig = AuctionResponse(

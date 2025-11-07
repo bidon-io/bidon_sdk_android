@@ -7,12 +7,12 @@ package org.bidon.sdk.logs.analytic
 /**
  * Ad revenue info
  */
-data class AdValue(
+public data class AdValue(
     val adRevenue: Double,
     val currency: String = USD,
     val precision: Precision
 ) {
-    companion object {
-        const val USD = "USD"
+    public companion object {
+        public const val USD: String = "USD"
     }
 }

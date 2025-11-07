@@ -8,7 +8,7 @@ import org.bidon.sdk.config.usecases.GetConfigRequestUseCase
 /**
  * Created by Bidon Team on 06/03/2023.
  */
-object FlavoredDI {
+internal object FlavoredDI {
     fun init() {
         module {
             factory<GetAuctionRequestUseCase> {

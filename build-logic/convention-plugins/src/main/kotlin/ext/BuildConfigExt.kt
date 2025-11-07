@@ -43,6 +43,19 @@ private fun VariantDimension.addBuildConfigField(
 }
 
 /**
+ * SDK version property only for Bidon Core
+ */
+var LibraryDefaultConfig.BIDON_SDK_VERSION: String
+    get() = error("Property versionName couldn't be get")
+    set(value) {
+        addBuildConfigField(
+            type = BuildConfigFieldType.String,
+            name = "BIDON_SDK_VERSION",
+            value = value
+        )
+    }
+
+/**
  * Version property only for services and networks adapters
  */
 var LibraryDefaultConfig.ADAPTER_VERSION: String
@@ -51,19 +64,6 @@ var LibraryDefaultConfig.ADAPTER_VERSION: String
         addBuildConfigField(
             type = BuildConfigFieldType.String,
             name = "ADAPTER_VERSION",
-            value = value
-        )
-    }
-
-/**
- * SDK version property only for services and networks adapters
- */
-var LibraryDefaultConfig.ADAPTER_SDK_VERSION: String
-    get() = error("Property versionName couldn't be get")
-    set(value) {
-        addBuildConfigField(
-            type = BuildConfigFieldType.String,
-            name = "ADAPTER_SDK_VERSION",
             value = value
         )
     }

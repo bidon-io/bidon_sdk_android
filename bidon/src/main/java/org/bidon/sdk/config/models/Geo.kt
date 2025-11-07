@@ -6,7 +6,7 @@ import org.bidon.sdk.utils.serializer.Serializable
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-data class Geo(
+internal data class Geo(
     @field:JsonName("lat")
     val lat: Double?,
     @field:JsonName("lon")

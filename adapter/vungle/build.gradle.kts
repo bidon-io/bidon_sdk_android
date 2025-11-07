@@ -2,25 +2,28 @@ import ext.ADAPTER_VERSION
 import ext.Versions
 
 plugins {
-    id("common")
+    id("adapter")
 }
+
+val adapterSdkVersion = "7.5.0"
+val adapterMinor = 0
+val adapterSemantic = Versions.semanticVersion
+
+val adapterMainVersion = "$adapterSdkVersion.$adapterMinor$adapterSemantic"
 
 publishAdapter {
     artifactId = "vungle-adapter"
-    versionName = Versions.Adapters.Vungle
+    versionName = adapterMainVersion
 }
 
 android {
     namespace = "org.bidon.vungle"
 
     defaultConfig {
-        ADAPTER_VERSION = Versions.Adapters.Vungle
+        ADAPTER_VERSION = adapterMainVersion
     }
 }
 
 dependencies {
-    compileOnly(projects.bidon)
-    testImplementation(projects.bidon)
-
-    implementation("com.vungle:vungle-ads:7.5.0")
+    implementation("com.vungle:vungle-ads:$adapterSdkVersion")
 }

@@ -144,7 +144,7 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                      */
                     adaptersSource.add(adapter)
                 }.onFailure { cause ->
-                    logError(TAG, "Adapter not initialized: ${adapter.demandId.demandId}: ${cause.message}", cause)
+                    logError(TAG, "Adapter not initialized: ${adapter.demandId.demandId} v${adapter.adapterInfo.adapterVersion}: ${cause.message}", cause)
                 }
             }
         }
@@ -166,7 +166,7 @@ internal class InitAndRegisterAdaptersUseCaseImpl(
                     parseAdapterParameters(configResponse, initializable).getOrThrow()
                 adapter.init(context, adapterParameters)
             }
-            logInfo(TAG, "Adapter ${adapter.demandId.demandId} initialized in $measuredTime ms.")
+            logInfo(TAG, "Adapter ${adapter.demandId.demandId} v${adapter.adapterInfo.adapterVersion} initialized in $measuredTime ms.")
         }
     }
 

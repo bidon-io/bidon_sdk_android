@@ -11,7 +11,7 @@ import org.bidon.sdk.utils.ext.TAG
 /**
  * Created by Aleksei Cherniaev on 25/07/2023.
  */
-class AdEventFlowImpl : AdEventFlow {
+public class AdEventFlowImpl : AdEventFlow {
     /**
      * [PastEvent] for details
      */
@@ -29,7 +29,7 @@ class AdEventFlowImpl : AdEventFlow {
         )
     )
 
-    override val adEvent by lazy {
+    override val adEvent: MutableSharedFlow<AdEvent> by lazy {
         MutableSharedFlow<AdEvent>(
             extraBufferCapacity = Int.MAX_VALUE,
             replay = 0,

@@ -10,22 +10,22 @@ import org.bidon.sdk.utils.ext.mapFailure
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-interface AdAuctionParams {
-    val adUnit: AdUnit
+public interface AdAuctionParams {
+    public val adUnit: AdUnit
 
     /**
      * DSP line item eCPM or Bidding bid price
      */
-    val price: Double
+    public val price: Double
 }
 
-class AdAuctionParamSource(
-    val activity: Activity,
+public class AdAuctionParamSource(
+    public val activity: Activity,
     /**
      * DSP pricefloor or Bidding bid price
      */
-    val pricefloor: Double,
-    val adUnit: AdUnit,
+    public val pricefloor: Double,
+    public val adUnit: AdUnit,
 
     /**
      * Banner specific params
@@ -33,10 +33,10 @@ class AdAuctionParamSource(
     private val optBannerFormat: BannerFormat?,
     private val optContainerWidth: Float?,
 ) {
-    val bannerFormat: BannerFormat get() = requireNotNull(optBannerFormat)
-    val containerWidth: Float get() = requireNotNull(optContainerWidth)
+    public val bannerFormat: BannerFormat get() = requireNotNull(optBannerFormat)
+    public val containerWidth: Float get() = requireNotNull(optContainerWidth)
 
-    operator fun <T> invoke(data: AdAuctionParamSource.() -> T): Result<T> = runCatching {
+    public operator fun <T> invoke(data: AdAuctionParamSource.() -> T): Result<T> = runCatching {
         data.invoke(this)
     }.mapFailure {
         logError("AdAuctionParamSource", "${it?.message}", it)

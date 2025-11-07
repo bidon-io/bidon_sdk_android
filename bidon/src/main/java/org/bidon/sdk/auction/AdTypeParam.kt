@@ -6,26 +6,26 @@ import org.bidon.sdk.ads.banner.BannerFormat
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-sealed interface AdTypeParam {
-    val activity: Activity
-    val pricefloor: Double
-    val auctionKey: String?
+public sealed interface AdTypeParam {
+    public val activity: Activity
+    public val pricefloor: Double
+    public val auctionKey: String?
 
-    class Banner(
+    public class Banner(
         override val activity: Activity,
         override val pricefloor: Double,
         override val auctionKey: String?,
-        val bannerFormat: BannerFormat,
-        val containerWidth: Float,
+        public val bannerFormat: BannerFormat,
+        public val containerWidth: Float,
     ) : AdTypeParam
 
-    class Interstitial(
+    public class Interstitial(
         override val activity: Activity,
         override val pricefloor: Double,
         override val auctionKey: String?,
     ) : AdTypeParam
 
-    class Rewarded(
+    public class Rewarded(
         override val activity: Activity,
         override val pricefloor: Double,
         override val auctionKey: String?,

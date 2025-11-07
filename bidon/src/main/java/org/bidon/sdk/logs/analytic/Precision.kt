@@ -10,7 +10,7 @@ import org.bidon.sdk.auction.models.AdUnit
 /**
  * Ad revenue precision variants
  */
-enum class Precision {
+public enum class Precision {
     /**
      * Accurate ad revenue provided by the [Adapter] (AdNetwork)
      */

@@ -3,16 +3,16 @@ package org.bidon.sdk.adapter
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-sealed interface AdProvider {
-    interface Interstitial<T : AdAuctionParams> : AdProvider {
-        fun interstitial(): AdSource.Interstitial<T>
+public sealed interface AdProvider {
+    public interface Interstitial<T : AdAuctionParams> : AdProvider {
+        public fun interstitial(): AdSource.Interstitial<T>
     }
 
-    interface Banner<T : AdAuctionParams> : AdProvider {
-        fun banner(): AdSource.Banner<T>
+    public interface Banner<T : AdAuctionParams> : AdProvider {
+        public fun banner(): AdSource.Banner<T>
     }
 
-    interface Rewarded<T : AdAuctionParams> : AdProvider {
-        fun rewarded(): AdSource.Rewarded<T>
+    public interface Rewarded<T : AdAuctionParams> : AdProvider {
+        public fun rewarded(): AdSource.Rewarded<T>
     }
 }

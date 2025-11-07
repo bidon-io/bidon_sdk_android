@@ -1,0 +1,305 @@
+name: Adapter Quality Checks
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    paths:
+      - 'adapter/**'
+  push:
+    branches:
+      - develop
+    paths:
+      - 'adapter/**'
+  workflow_dispatch:
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      adapters: ${{ steps.matrix.outputs.adapters }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Discover available adapters
+        id: discover
+        run: |
+          echo "🔍 Discovering available adapters..."
+
+          # Find all adapter directories (excluding build directories)
+          available_adapters=""
+          for dir in adapter/*/; do
+            if [[ -d "$dir" ]]; then
+              adapter_name=$(basename "$dir")
+              # Skip build and other non-adapter directories
+              if [[ "$adapter_name" != "build" ]] && [[ -f "$dir/build.gradle.kts" ]]; then
+                if [[ -n "$available_adapters" ]]; then
+                  available_adapters="$available_adapters $adapter_name"
+                else
+                  available_adapters="$adapter_name"
+                fi
+              fi
+            fi
+          done
+
+          # Sort adapters for consistent output
+          sorted_adapters=$(echo "$available_adapters" | tr ' ' '\n' | sort | tr '\n' ' ' | sed 's/ $//')
+
+          # Count adapters
+          adapter_count=$(echo "$sorted_adapters" | wc -w)
+          echo "📦 Found $adapter_count adapters: $sorted_adapters"
+
+          # Create JSON array for available adapters
+          # Convert space-separated string to proper JSON array
+          echo "$sorted_adapters" | tr ' ' '\n' > /tmp/adapters_list.txt
+          json_array=$(jq -R -s -c 'split("\n")[:-1]' /tmp/adapters_list.txt)
+          rm -f /tmp/adapters_list.txt
+
+          echo "available_adapters=$json_array" >> $GITHUB_OUTPUT
+
+      - name: Detect changed adapters
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          list-files: json
+          filters: |
+            any_adapter:
+              - 'adapter/**'
+
+      - name: Generate adapter matrix
+        id: matrix
+        run: |
+          echo "🔍 Detecting changed adapters dynamically..."
+
+          # Check if any adapter files changed
+          if [[ "${{ steps.changes.outputs.any_adapter }}" != "true" ]]; then
+            echo "📭 No adapter files changed"
+            echo "adapters=[]" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Get list of available adapters
+          available_adapters='${{ steps.discover.outputs.available_adapters }}'
+          echo "📋 Available adapters: $available_adapters"
+
+          # Get list of changed files
+          changed_files='${{ steps.changes.outputs.any_adapter_files }}'
+          echo "📝 Changed files: $changed_files"
+
+          # Find which adapters have changes
+          changed_adapters=""
+          echo "$available_adapters" | jq -r '.[]' | while read -r adapter; do
+            # Check if any changed file belongs to this adapter
+            if echo "$changed_files" | jq -r '.[]' | grep -q "^adapter/$adapter/"; then
+              echo "✅ Adapter '$adapter' has changes"
+              echo "$adapter" >> /tmp/changed_adapters.txt
+            fi
+          done
+
+          # Read changed adapters from temp file (to handle subshell issue)
+          if [[ -f /tmp/changed_adapters.txt ]]; then
+            changed_adapters=$(cat /tmp/changed_adapters.txt | tr '\n' ' ' | sed 's/ $//')
+            rm -f /tmp/changed_adapters.txt
+          fi
+
+          if [[ -z "$changed_adapters" ]]; then
+            echo "📭 No specific adapters changed (possibly only shared files)"
+            echo "adapters=[]" >> $GITHUB_OUTPUT
+          else
+            # Sort adapters for consistent output
+            sorted_changed=$(echo "$changed_adapters" | tr ' ' '\n' | sort | tr '\n' ' ' | sed 's/ $//')
+
+            # Count changed adapters
+            adapter_count=$(echo "$sorted_changed" | wc -w)
+
+            # Create JSON array
+            # Convert space-separated string to proper JSON array
+            echo "$sorted_changed" | tr ' ' '\n' > /tmp/changed_adapters_list.txt
+            json_array=$(jq -R -s -c 'split("\n")[:-1]' /tmp/changed_adapters_list.txt)
+            rm -f /tmp/changed_adapters_list.txt
+
+            echo "adapters=$json_array" >> $GITHUB_OUTPUT
+            echo "📦 Changed adapters ($adapter_count): $sorted_changed"
+          fi
+
+  adapter-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: detect-changes
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      needs.detect-changes.outputs.adapters != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        adapter: ${{ fromJson(needs.detect-changes.outputs.adapters) }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Create local.properties
+        run: touch local.properties
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Gradle and Wrapper
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Clean Build Directories
+        run: rm -rf */build build-logic/build build-logic/convention-plugins/build
+
+      - name: Build adapter
+        id: build
+        timeout-minutes: 10
+        continue-on-error: true
+        run: |
+          echo "📦 Building adapter: ${{ matrix.adapter }}"
+          ./gradlew :adapter:${{ matrix.adapter }}:assembleProductionRelease --build-cache --no-daemon --stacktrace > build_output.log 2>&1
+          BUILD_EXIT_CODE=$?
+
+          if [ $BUILD_EXIT_CODE -eq 0 ]; then
+            echo "✅ Build successful"
+            echo "build_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Build failed"
+            cat build_output.log
+            echo "build_status=failure" >> $GITHUB_OUTPUT
+            exit $BUILD_EXIT_CODE
+          fi
+
+      - name: Check for deprecated warnings
+        id: deprecated
+        if: always()
+        continue-on-error: true
+        run: |
+          echo "🔍 Checking for deprecated warnings in adapter: ${{ matrix.adapter }}"
+
+          if [ ! -f build_output.log ]; then
+            echo "⚠️ Build output not found, skipping deprecated check"
+            echo "deprecated_status=skipped" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          ADAPTER_DEPRECATED=$(grep "is deprecated" build_output.log | grep "adapter/${{ matrix.adapter }}/" || true)
+
+          if [ -n "$ADAPTER_DEPRECATED" ]; then
+            echo "❌ Found deprecated code warnings in adapter ${{ matrix.adapter }}:"
+            echo ""
+
+            echo "$ADAPTER_DEPRECATED" | sed 's/^w: //' | while IFS= read -r line; do
+              echo "  🚨 $line"
+            done
+
+            echo ""
+            echo "🚫 Deprecated code is not allowed in adapters."
+            echo "Please remove or replace all deprecated code before merging."
+            echo ""
+            echo "💡 To fix this:"
+            echo "   1. Find the deprecated code in the files listed above"
+            echo "   2. Replace it with non-deprecated alternatives"
+            echo "   3. Remove any @Deprecated annotations from adapter code"
+            echo "deprecated_status=failure" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            if grep -q "is deprecated" build_output.log; then
+              echo "ℹ️ Found deprecated warnings in dependencies, but none in adapter ${{ matrix.adapter }} itself"
+            fi
+            echo "✅ No deprecated code warnings found in adapter"
+            echo "deprecated_status=success" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run unit tests
+        id: tests
+        if: always()
+        timeout-minutes: 10
+        continue-on-error: true
+        run: |
+          echo "🧪 Running unit tests for adapter: ${{ matrix.adapter }}"
+          ./gradlew :adapter:${{ matrix.adapter }}:testProductionReleaseUnitTest --build-cache --no-daemon --stacktrace
+          TEST_EXIT_CODE=$?
+
+          if [ $TEST_EXIT_CODE -eq 0 ]; then
+            echo "✅ Tests passed"
+            echo "test_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Tests failed"
+            echo "test_status=failure" >> $GITHUB_OUTPUT
+            exit $TEST_EXIT_CODE
+          fi
+
+      - name: Report step results
+        if: always()
+        run: |
+          echo "📊 Summary for adapter ${{ matrix.adapter }}:"
+          echo "  📦 Build: ${{ steps.build.outputs.build_status || 'unknown' }}"
+          echo "  🔍 Deprecated check: ${{ steps.deprecated.outputs.deprecated_status || 'unknown' }}"
+          echo "  🧪 Tests: ${{ steps.tests.outputs.test_status || 'unknown' }}"
+
+          BUILD_STATUS="${{ steps.build.outputs.build_status || 'unknown' }}"
+          DEPRECATED_STATUS="${{ steps.deprecated.outputs.deprecated_status || 'unknown' }}"
+          TEST_STATUS="${{ steps.tests.outputs.test_status || 'unknown' }}"
+
+          if [[ "$BUILD_STATUS" == "failure" ]] || [[ "$DEPRECATED_STATUS" == "failure" ]] || [[ "$TEST_STATUS" == "failure" ]]; then
+            echo ""
+            echo "❌ One or more steps failed for adapter ${{ matrix.adapter }}"
+            echo "Please check the logs above and fix the issues before merging."
+            exit 1
+          else
+            echo ""
+            echo "✅ All steps completed successfully for adapter ${{ matrix.adapter }}"
+          fi
+
+  adapter-checks-summary:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, adapter-checks]
+    if: always()
+
+    steps:
+      - name: Analyze adapter check results
+        run: |
+          if [[ "${{ needs.detect-changes.outputs.adapters }}" == "[]" ]]; then
+            echo "📭 No adapters were changed - skipping checks"
+            exit 0
+          fi
+
+          echo "📊 Adapter Checks Summary"
+          echo "========================"
+
+          OVERALL_RESULT="${{ needs.adapter-checks.result }}"
+          echo "Overall job result: $OVERALL_RESULT"
+
+          if [[ "$OVERALL_RESULT" == "success" ]]; then
+            echo "✅ All adapter checks completed successfully!"
+            echo ""
+            echo "All steps (build, deprecated check, tests) passed for all changed adapters."
+          elif [[ "$OVERALL_RESULT" == "skipped" ]]; then
+            echo "⏭️ Adapter checks were skipped (no changes detected)"
+          else
+            echo "⚠️ Some adapter checks encountered issues."
+            echo ""
+            echo "📋 What happened:"
+            echo "• All steps were executed independently using continue-on-error"
+            echo "• Each step reported its individual status"
+            echo "• Check the individual step logs above for detailed results"
+            echo ""
+            echo "🔍 To investigate:"
+            echo "1. Look for step-specific status messages in the logs above"
+            echo "2. Each adapter shows a summary with: Build, Deprecated check, Tests status"
+            echo "3. Fix any failing steps and re-run the workflow"
+            echo ""
+            echo "Note: This workflow is designed to run all steps even if some fail,"
+            echo "providing a complete picture of the adapter's health."
+          fi

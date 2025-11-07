@@ -2,7 +2,7 @@ package org.bidon.sdk.utils.ext
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-fun ByteArray.toHexString(): String {
+internal fun ByteArray.toHexString(): String {
     val hexArray = "0123456789abcdef".toCharArray()
     val hexChars = CharArray(this.size * 2)
     for (i in this.indices) {

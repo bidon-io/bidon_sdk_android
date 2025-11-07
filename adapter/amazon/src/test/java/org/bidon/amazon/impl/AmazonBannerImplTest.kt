@@ -3,6 +3,7 @@ package org.bidon.amazon.impl
 import android.app.Activity
 import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
+import org.bidon.amazon.AmazonBidManager
 import org.bidon.amazon.AmazonDemandId
 import org.bidon.amazon.SlotType
 import org.bidon.sdk.adapter.AdAuctionParamSource
@@ -17,8 +18,9 @@ import org.junit.Test
  */
 class AmazonBannerImplTest {
     private val activity = mockk<Activity>()
+    private val bidManager = mockk<AmazonBidManager>()
     private val testee by lazy {
-        AmazonBannerImpl(listOf()).apply {
+        AmazonBannerImpl(bidManager).apply {
             addDemandId(AmazonDemandId)
         }
     }

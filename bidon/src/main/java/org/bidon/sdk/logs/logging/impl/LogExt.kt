@@ -10,13 +10,13 @@ import org.bidon.sdk.logs.logging.Logger.Level
  *
  * Set log level with [Logger]
  */
-fun logInfo(tag: String, message: String) {
+public fun logInfo(tag: String, message: String) {
     if (BidonSdk.loggerLevel == Level.Verbose) {
         Log.d(DefaultTag, "[$tag] $message")
     }
 }
 
-fun logError(tag: String, message: String, error: Throwable?) {
+public fun logError(tag: String, message: String, error: Throwable?) {
     if (BidonSdk.loggerLevel in arrayOf(Level.Error, Level.Verbose)) {
         Log.e(DefaultTag, "[$tag] $message", error)
     }

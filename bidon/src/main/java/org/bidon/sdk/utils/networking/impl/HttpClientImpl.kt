@@ -2,7 +2,7 @@ package org.bidon.sdk.utils.networking.impl
 
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.delay
-import org.bidon.sdk.BuildConfig
+import org.bidon.sdk.BidonSdk
 import org.bidon.sdk.logs.logging.impl.logError
 import org.bidon.sdk.logs.logging.impl.logInfo
 import org.bidon.sdk.utils.networking.HttpClient
@@ -17,7 +17,7 @@ internal val jsonZipHttpClient by lazy {
     HttpClientImpl(
         headers = buildMap {
             this["Content-Type"] = listOf("application/json; charset=UTF-8")
-            this["X-Bidon-Version"] = listOf(BidonSdkVersion)
+            this["X-Bidon-Version"] = listOf(BidonSdk.SdkVersion)
             NetworkSettings.basicAuthHeader?.let {
                 this["Authorization"] = listOf("Basic $it")
             }
@@ -95,6 +95,5 @@ internal class HttpClientImpl(
     }
 }
 
-private val BidonSdkVersion by lazy { BuildConfig.ADAPTER_VERSION }
 private const val RetryAfter = "Retry-After"
 private const val TAG = "HttpClient"

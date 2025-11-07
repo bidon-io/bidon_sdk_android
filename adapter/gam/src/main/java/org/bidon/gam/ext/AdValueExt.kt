@@ -3,7 +3,7 @@ package org.bidon.gam.ext
 import org.bidon.sdk.logs.analytic.AdValue
 import org.bidon.sdk.logs.analytic.Precision
 
-typealias GoogleAdValue = com.google.android.gms.ads.AdValue
+internal typealias GoogleAdValue = com.google.android.gms.ads.AdValue
 
 internal fun GoogleAdValue.asBidonAdValue(): AdValue {
     return AdValue(

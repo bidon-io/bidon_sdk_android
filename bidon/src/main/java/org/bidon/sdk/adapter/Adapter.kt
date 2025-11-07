@@ -5,13 +5,13 @@ import org.bidon.sdk.auction.AdTypeParam
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-sealed interface Adapter {
-    val demandId: DemandId
-    val adapterInfo: AdapterInfo
+public sealed interface Adapter {
+    public val demandId: DemandId
+    public val adapterInfo: AdapterInfo
 
-    interface Bidding : Adapter {
-        suspend fun getToken(adTypeParam: AdTypeParam): String?
+    public interface Bidding : Adapter {
+        public suspend fun getToken(adTypeParam: AdTypeParam): String?
     }
 
-    interface Network : Adapter
+    public interface Network : Adapter
 }

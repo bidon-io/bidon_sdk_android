@@ -1,23 +1,23 @@
 package org.bidon.sdk.ads
 
-class AuctionInfo(
-    val auctionId: String,
-    val auctionConfigurationId: Long?,
-    val auctionConfigurationUid: String?,
-    val auctionTimeout: Long,
-    val auctionPricefloor: Double,
-    val noBids: List<AdUnitInfo>?,
-    val adUnits: List<AdUnitInfo>?,
+public class AuctionInfo(
+    public val auctionId: String,
+    public val auctionConfigurationId: Long?,
+    public val auctionConfigurationUid: String?,
+    public val auctionTimeout: Long,
+    public val auctionPricefloor: Double,
+    public val noBids: List<AdUnitInfo>?,
+    public val adUnits: List<AdUnitInfo>?,
 )
 
-class AdUnitInfo(
-    val demandId: String,
-    val label: String?,
-    val price: Double?,
-    val uid: String?,
-    val bidType: String?,
-    val fillStartTs: Long?,
-    val fillFinishTs: Long?,
-    val status: String?,
-    val ext: String?,
+public class AdUnitInfo(
+    public val demandId: String,
+    public val label: String?,
+    public val price: Double?,
+    public val uid: String?,
+    public val bidType: String?,
+    public val fillStartTs: Long?,
+    public val fillFinishTs: Long?,
+    public val status: String?,
+    public val ext: String?,
 )

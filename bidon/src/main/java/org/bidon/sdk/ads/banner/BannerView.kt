@@ -52,18 +52,18 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Created by Aleksei Cherniaev on 06/02/2023.
  */
-class BannerView @JvmOverloads constructor(
+public class BannerView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     @AttrRes defStyleAtt: Int = 0,
-    val auctionKey: String? = null,
+    public val auctionKey: String? = null,
     private val demandAd: DemandAd = DemandAd(AdType.Banner),
 ) : FrameLayout(context, attrs, defStyleAtt),
     InitAwaiter by InitAwaiterImpl(),
     BannerAd,
     Extras by demandAd {
 
-    var format: BannerFormat = BannerFormat.Banner
+    public var format: BannerFormat = BannerFormat.Banner
         private set
 
     private var pricefloor: Double = BidonSdk.DefaultPricefloor
@@ -393,4 +393,4 @@ class BannerView @JvmOverloads constructor(
 }
 
 private const val TAG = "BannerView"
-const val DefaultAutoRefreshTimeoutMs = 10_000L
+internal const val DefaultAutoRefreshTimeoutMs: Long = 10_000L

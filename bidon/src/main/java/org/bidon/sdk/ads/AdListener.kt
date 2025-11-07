@@ -5,21 +5,21 @@ import org.bidon.sdk.config.BidonError
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-interface AdListener {
+public interface AdListener {
 
     /**
      * Callback invokes after auction completed and winner is selected.
      */
-    fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo)
+    public fun onAdLoaded(ad: Ad, auctionInfo: AuctionInfo)
 
     /**
      * Callback invokes after auction completed, but no winner found.
      */
-    fun onAdLoadFailed(auctionInfo: AuctionInfo?, cause: BidonError)
+    public fun onAdLoadFailed(auctionInfo: AuctionInfo?, cause: BidonError)
 
-    fun onAdShown(ad: Ad) // equals onAdImpression()
-    fun onAdShowFailed(cause: BidonError) {}
+    public fun onAdShown(ad: Ad) // equals onAdImpression()
+    public fun onAdShowFailed(cause: BidonError) {}
 
-    fun onAdClicked(ad: Ad) {}
-    fun onAdExpired(ad: Ad) {}
+    public fun onAdClicked(ad: Ad) {}
+    public fun onAdExpired(ad: Ad) {}
 }

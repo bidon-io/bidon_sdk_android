@@ -8,14 +8,14 @@ import org.bidon.sdk.logs.analytic.AdValue
 /**
  * Created by Bidon Team on 06/02/2023.
  */
-sealed interface AdEvent {
-    class Expired(val ad: Ad) : AdEvent
-    class LoadFailed(val cause: BidonError) : AdEvent
-    class Fill(val ad: Ad) : AdEvent
-    class Clicked(val ad: Ad) : AdEvent
-    class Closed(val ad: Ad) : AdEvent
-    class Shown(val ad: Ad) : AdEvent
-    class PaidRevenue(val ad: Ad, val adValue: AdValue) : AdEvent
-    class OnReward(val ad: Ad, val reward: Reward?) : AdEvent
-    class ShowFailed(val cause: BidonError) : AdEvent
+public sealed interface AdEvent {
+    public class Expired(public val ad: Ad) : AdEvent
+    public class LoadFailed(public val cause: BidonError) : AdEvent
+    public class Fill(public val ad: Ad) : AdEvent
+    public class Clicked(public val ad: Ad) : AdEvent
+    public class Closed(public val ad: Ad) : AdEvent
+    public class Shown(public val ad: Ad) : AdEvent
+    public class PaidRevenue(public val ad: Ad, public val adValue: AdValue) : AdEvent
+    public class OnReward(public val ad: Ad, public val reward: Reward?) : AdEvent
+    public class ShowFailed(public val cause: BidonError) : AdEvent
 }

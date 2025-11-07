@@ -1,6 +1,6 @@
 package org.bidon.sdk.stats
 
-interface WinLossNotifier {
-    fun notifyLoss(winnerDemandId: String, winnerPrice: Double)
-    fun notifyWin()
+public interface WinLossNotifier {
+    public fun notifyLoss(winnerDemandId: String, winnerPrice: Double)
+    public fun notifyWin()
 }

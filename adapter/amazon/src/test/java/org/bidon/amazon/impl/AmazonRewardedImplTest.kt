@@ -3,6 +3,7 @@ package org.bidon.amazon.impl
 import android.app.Activity
 import com.google.common.truth.Truth
 import io.mockk.mockk
+import org.bidon.amazon.AmazonBidManager
 import org.bidon.amazon.SlotType
 import org.bidon.sdk.adapter.AdAuctionParamSource
 import org.bidon.sdk.auction.models.AdUnit
@@ -15,7 +16,8 @@ import org.junit.Test
  */
 class AmazonRewardedImplTest {
     private val activity = mockk<Activity>()
-    private val testee by lazy { AmazonRewardedImpl(listOf()) }
+    private val bidManager = mockk<AmazonBidManager>()
+    private val testee by lazy { AmazonRewardedImpl(bidManager) }
 
     @Test
     fun `parse banner AdUnit RTB`() {

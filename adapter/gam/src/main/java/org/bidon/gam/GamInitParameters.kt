@@ -13,7 +13,7 @@ internal class GamInitParameters(
     val queryInfoType: String?
 ) : AdapterParameters
 
-sealed interface GamBannerAuctionParams : AdAuctionParams {
+internal sealed interface GamBannerAuctionParams : AdAuctionParams {
     val activity: Activity
     val bannerFormat: BannerFormat
     val containerWidth: Float
@@ -34,7 +34,7 @@ sealed interface GamBannerAuctionParams : AdAuctionParams {
     }
 }
 
-sealed interface GamFullscreenAdAuctionParams : AdAuctionParams {
+internal sealed interface GamFullscreenAdAuctionParams : AdAuctionParams {
     val activity: Activity
 
     class Network(

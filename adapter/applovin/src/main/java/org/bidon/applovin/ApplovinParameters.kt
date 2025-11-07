@@ -10,6 +10,8 @@ import org.bidon.sdk.auction.models.AdUnit
 
 internal class ApplovinParameters(
     val key: String,
+    val mediator: String? = null,
+    val adUnitIds: List<String>? = null,
 ) : AdapterParameters
 
 internal class ApplovinBannerAuctionParams(

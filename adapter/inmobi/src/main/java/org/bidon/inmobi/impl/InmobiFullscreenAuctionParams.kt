@@ -4,7 +4,7 @@ import android.content.Context
 import org.bidon.sdk.adapter.AdAuctionParams
 import org.bidon.sdk.auction.models.AdUnit
 
-class InmobiFullscreenAuctionParams(
+internal class InmobiFullscreenAuctionParams(
     val context: Context,
     override val adUnit: AdUnit
 ) : AdAuctionParams {

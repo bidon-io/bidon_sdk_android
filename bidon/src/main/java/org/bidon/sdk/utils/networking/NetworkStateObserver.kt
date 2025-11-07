@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.StateFlow
  *
  */
 
-interface NetworkStateObserver {
+internal interface NetworkStateObserver {
     val networkStateFlow: StateFlow<NetworkState>
 
     fun isConnected(): Boolean

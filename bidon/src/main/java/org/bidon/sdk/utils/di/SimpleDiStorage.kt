@@ -47,7 +47,7 @@ internal object SimpleDiScope {
     }
 }
 
-sealed interface InstanceType<T> {
+internal sealed interface InstanceType<T> {
     fun interface Factory<T> : InstanceType<T> {
         fun build(): T
     }
@@ -83,7 +83,7 @@ internal object SimpleDiStorage {
         instances[T::class] = factory
     }
 
-    inline fun <reified T : Any> getInstance(noinline parameters: (Params.() -> Unit)? = null): T {
+    internal inline fun <reified T : Any> getInstance(noinline parameters: (Params.() -> Unit)? = null): T {
         return when (val factory = instances[T::class]) {
             is InstanceType.Singleton -> factory.instance as T
             is InstanceType.Factory -> factory.build() as T
